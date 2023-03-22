@@ -18,6 +18,7 @@ class CreateSpecialApprovalRequestAdminsTable extends Migration
             $table->integer('special_request_id')->index();
             $table->integer('admin_id')->index();
             $table->integer('approved_status')->default(1);
+            $table->string('reason','455')->nullable();
             $table->dateTime('approved_date')->nullable();
             $table->timestamps();
         });

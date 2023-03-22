@@ -205,7 +205,7 @@
                                                         <h5 class="mb-0">{{$insurance}}</h5>
                                                 </td>
                                             </tr>
-                                            @if((session('role_id') == 1 || in_array(session('id'),$special_request_agent)) && !empty($special_request))
+                                            @if((session('role_id') == 1 ||  in_array(session('id'),$special_request_agent)) && !empty($special_request))
                                                {{-- <tr>
                                                     <th scope="row">Special Request </th>
                                                     <td class="name">
@@ -332,7 +332,7 @@
                                                 </div>
                                             @endif
                                             @if ($crm_details['case_nature_id'] == 4)
-                                                @if (session('role_id') == 1 || in_array(523, session('permissions')))
+                                                @if (session('role_id') == 1 || in_array(523, session('permissions')) || in_array(session('id'),$special_request_agent))
                                                     <button id="special_request" class="btn btn-primary ml-1"><span class="d-none d-lg-block">Special Request</span></button>
                                                 @endif
                                             @endif
@@ -1242,7 +1242,7 @@
                         <div class="row justify-content-center">
                             <div class="col-12 text-left">
                                 <fieldset class="form-group">
-                                    <select name="admin[]" id="admin" class="form-control select2" data-rule-required="true" data-msg-required="Admin Required*" multiple>
+                                    <select name="admin[]" id="admin" {{ $special_request_editable ? '' : 'disabled' }} class="form-control select2" data-rule-required="true" data-msg-required="Admin Required*" multiple>
                                         @foreach ($special_request_admins as $special_admin)
                                             <option value="{{$special_admin->id}}"> {{$special_admin->name}}</option>
                                         @endforeach
@@ -1254,9 +1254,9 @@
                         <div class="row justify-content-center">
                             <div class="col-12 text-left">
                                 <fieldset class="form-group">
-                                    <select name="special_request_reason" id="special_request_reason" class="form-control select2" data-rule-required="true" data-msg-required="Reason Required*">
+                                    <select name="special_request_reason" {{ $special_request_editable ? '' : 'disabled' }} id="special_request_reason" class="form-control select2" data-rule-required="true" data-msg-required="Reason Required*">
                                         @foreach ($special_request_reasons as $special_request_reason)
-                                            <option value="{{$special_request_reason->id}}" {{!empty($special_request) ? ($special_request->special_request_reason_id == $special_request_reason->id) ? 'selected' : '' : ''}}> {{$special_request_reason->name}} {{$special_request->special_request_reason_id}}</option>
+                                            <option value="{{$special_request_reason->id}}"> {{$special_request_reason->name}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -1266,9 +1266,9 @@
                         <div class="row justify-content-center">
                             <div class="col-12 text-left">
                                 <fieldset class="form-group">
-                                    <select name="special_request_reason_option[]" id="special_request_reason_option" class="form-control select2" data-rule-required="true" data-msg-required="Option Required*" multiple>
+                                    <select name="special_request_reason_option[]" {{ $special_request_editable ? '' : 'disabled' }} id="special_request_reason_option" class="form-control select2" data-rule-required="true" data-msg-required="Option Required*" multiple>
                                         @foreach ($special_request_reason_options as $special_request_reason_option)
-                                            <option value="{{$special_request_reason_option->id}}"> {{$special_request_reason_option->name}}</option>
+                                            <option value="{{$special_request_reason_option->id}}"> {{$special_request_reason_option->name}} </option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -1278,19 +1278,20 @@
                         <div class="row justify-content-center">
                                 <div class="col-12 text-left">
                                 <fieldset class="form-group">
-                                    <input type="text" value="{{!empty($special_request) ? $special_request->percentage  : '' }}"  readonly id="adjustment_amount_percentage" placeholder="Adjustment amount percentage" name="adjustment_amount_percentage" class="form-control text-left" data-rule-required="true" data-msg-required="Amount in % is Required*" min="1" max="100">
+                                    <input type="text" {{ $special_request_editable ? '' : 'disabled' }} value="{{!empty($special_request) ? $special_request->percentage  : '' }}"  id="adjustment_amount_percentage" placeholder="Adjustment amount percentage" name="adjustment_amount_percentage" class="form-control text-left" data-rule-required="true" data-msg-required="Amount in % is Required*" min="1" max="100">
                                 </fieldset>
                             </div>
                         </div>
-
-                        <div class="row justify-content-center mt-2 ml-2">
-                            <div class="col-4">
-                                <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                        @if($special_request_editable)
+                            <div class="row justify-content-center mt-2 ml-2">
+                                <div class="col-4">
+                                    <button id="special_request_btn" type="submit" class="btn btn-primary btn-block">Request</button>
+                                </div>
                             </div>
-                        </div>
+                        @endif
                     </form>
 
-                    @if (in_array(session('id'),$special_request_agent))
+                    @if(session('role_id') == 1 || in_array(session('id'),$special_request_agent))
                         <hr>
                         <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
                             @csrf
@@ -1298,11 +1299,20 @@
                             <input type="hidden" name="crm_request_id" value="{{$crm_details->id}}">
 
                             <div class="row justify-content-center mt-2 ml-2">
+                                <div class="col-12 text-left">
+                                    <label class="font-weight-bold">Reason*</label>
+                                    {{-- <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control"> --}}
+                                </div>
+                                <div class="col-12 text-left">
+                                    <textarea name="special_approve_reject_reason" id="special_approve_reject_reason" cols="92" rows="5"> {{isset($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center mt-2 ml-2">
                                 <div class="col-4">
-                                    <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control">
+                                    <button id="special_request_approve_btn" type="submit" value="2" name="approve" class="btn btn-success btn-block">Approve</button>
                                 </div>
                                 <div class="col-4">
-                                    <button id="special_request_approve_btn" type="submit" class="btn btn-primary btn-block">Approve</button>
+                                    <button id="special_request_approve_btn" type="submit" value="3" name="reject" class="btn btn-danger btn-block">Reject</button>
                                 </div>
                             </div>
                         </form>
@@ -1473,18 +1483,6 @@
                 'min': 0.00,
                 'max': 100.00
             });
-
-            @if(count($special_request_agent) > 0)
-                var ids = @json($special_request_agent);
-                console.log(ids);
-                $('#admin').val(ids).trigger('change');
-            @endif
-
-            @if(count($special_request_approval_options) > 0)
-                var ids = @json($special_request_approval_options);
-                console.log(ids);
-                $('#special_request_reason_option').val(ids).trigger('change');
-            @endif
             
             
             {{--$('#valid').on('click', function (e) {--}}
@@ -1608,17 +1606,32 @@
                 dropdownParent: $('#special_request_modal')
             });
 
+            @if(count($special_request_agent) > 0)
+                var ids = @json($special_request_agent);
+                $('#admin').val(ids).trigger('change');
+            @endif
+
             $("#special_request_reason").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Reason",
                 width: '100%',
                 dropdownParent: $('#special_request_modal')
             });
 
+            @if(!empty($special_request))
+                $('#special_request_reason').val({{$special_request->special_request_reason_id}}).trigger('change');
+            @endif
+
             $("#special_request_reason_option").select2({
                 placeholder: "Select Options",
                 width: '100%',
                 dropdownParent: $('#special_request_modal')
             });
+
+            
+            @if(count($special_request_approval_options) > 0)
+                var ids = @json($special_request_approval_options);
+                $('#special_request_reason_option').val(ids).trigger('change');
+            @endif
 
             $('#adjustment_amount_percentage').inputmask({
 				'alias': 'decimal',

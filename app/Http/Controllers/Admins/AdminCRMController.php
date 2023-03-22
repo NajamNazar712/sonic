@@ -739,26 +739,43 @@ class AdminCRMController extends Controller
             $special_request_reasons = SpecialRequestReason::all();
             $special_request_reason_options = SpecialRequestReasonOption::all();
 
-            // $approvers = array();
             $special_request_agent = [];
             $special_request_approval_options = [];
-            // $special_request_admins = Admin::whereIn('id',[32,372,169])->where('status',1)->get();
-            
-           
+            $special_request_editable = true;
+            $special_request_agent_data = [];
             
             $special_request = SpecialApprovalRequest::where('crm_request_id',$id)
                 ->where('status',1)
-                ->select('id', 'special_request_reason_id', 'approved_status', 'adjusted_percentage as percentage');
+                ->select('id', 'special_request_reason_id', 'requested_by', 'approved_status', 'adjusted_percentage as percentage');
 
             if($special_request->exists())
             {
                 $special_request = $special_request->first();
-                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
+                $special_request_agent_data = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->where('admin_id',Auth::id())->first();
+                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->get();
+                
                 $special_request_approval_options = SpecialRequestOption::where('special_request_id',$special_request->id)->pluck('reason_option_id')->toArray();
+
+                if(Auth::id() != $special_request->requested_by)
+                {
+                    $special_request_editable = false;
+                }
+                foreach ($special_request_agent as $key => $value) {
+                      
+                    if($value->approved_status != 1)
+                    {
+                        $special_request_editable = false;
+                        break;
+                    }
+                }
+                
+                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
             }
             else{
                 $special_request = [];
             }
+
+            // dd($special_request);
 
             $ratings = CrmRequestRating::all();
             $crm_sms_history = CrmSmsLog::where('crm_request_id',$crm_request->id)->get();
@@ -810,6 +827,8 @@ class AdminCRMController extends Controller
                 'special_request_admins' => $special_request_admins,
                 'special_request_reason_options' => $special_request_reason_options,
                 'special_request_approval_options' => $special_request_approval_options,
+                'special_request_editable' => $special_request_editable,
+                'special_request_agent_data' => $special_request_agent_data,
                 ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
@@ -5273,18 +5292,17 @@ TRAX-Customer Experience';
 
     public function special_request_appvove(Request $request){
 
-     $request_id = $request->request_id;
-     $admin_id = $request->admin;
-     $special_request_reason = $request->special_request_reason;
-     $special_request_reason_option = $request->special_request_reason_option;
-     $adjusted_percentage = $request->adjustment_amount_percentage;
+    $request_id = $request->request_id;
+    $admin_id = $request->admin;
+    $special_request_reason = $request->special_request_reason;
+    $special_request_reason_option = $request->special_request_reason_option;
+        $adjusted_percentage = $request->adjustment_amount_percentage;
 
-     if($admin_id){
+        if($admin_id){
         $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
-         
+            
         $approval_request =  new SpecialApprovalRequest();
         $approval_request->crm_request_id = $request_id;
-        // $approval_request->admin_id = $admin;
         $approval_request->status = 1;
         $approval_request->adjusted_percentage = $adjusted_percentage;
         $approval_request->special_request_reason_id = $special_request_reason;
@@ -5298,10 +5316,12 @@ TRAX-Customer Experience';
             $special_approval_request_admin = new SpecialApprovalRequestAdmin();
             $special_approval_request_admin->special_request_id = $approval_request->id;
             $special_approval_request_admin->admin_id = $admin;
+            $special_approval_request_admin->approved_status = 1; //set default status 1 means pending.
             $special_approval_request_admin->save();
         }
 
         foreach ($special_request_reason_option as $key => $option) {
+            
             $special_request_option = new SpecialRequestOption();
             $special_request_option->special_request_id = $approval_request->id;
             $special_request_option->reason_option_id = $option;
@@ -5309,10 +5329,10 @@ TRAX-Customer Experience';
         }
 
         return redirect()->back()->with(['success'=> "Request Submitted"]);
-     }
-     else{
-         return redirect()->back()->with(['error'=> "Select One Admin At-least"]);
-     }
+        }
+        else{
+            return redirect()->back()->with(['error'=> "Select One Admin At-least"]);
+        }
 
     }
 
@@ -5320,10 +5340,23 @@ TRAX-Customer Experience';
         // dd($request->all());
         $crm_id = $request->crm_request_id;
         $admin_id = $request->special_request_agent_id;
-        $adjusted_percentage = $request->adjusted_persentage;
+        $special_approve_reject_reason = $request->special_approve_reject_reason;
         $approved_date = Carbon::today();
-        SpecialApprovalRequest::where(['crm_request_id' => $crm_id, 'admin_id' => $admin_id,'status' => 1])->update(['adjusted_percentage' => $adjusted_percentage,'approved_date' => $approved_date]);
-        return redirect()->back()->with(['success'=> "Request Approved"]);
+
+        $special_approval_request_id = SpecialApprovalRequest::where('crm_request_id',$crm_id)->where('status',1)->pluck('id')->first();
+
+       
+        if(isset($request->approve))
+        {
+            SpecialApprovalRequestAdmin::where(['special_request_id' => $special_approval_request_id, 'admin_id' => $admin_id])->update(['reason' => $special_approve_reject_reason,'approved_date' => $approved_date,'approved_status' => $request->approve]); // status 3 is for approve
+            return redirect()->back()->with(['success'=> "Request Approved"]);
+        }
+        else if(isset($request->reject))
+        {
+            $res = SpecialApprovalRequestAdmin::where(['special_request_id' => $special_approval_request_id, 'admin_id' => $admin_id])->update(['reason' => $special_approve_reject_reason,'approved_date' => $approved_date,'approved_status' => $request->reject]); // status 2 is for reject
+            return redirect()->back()->with(['success'=> "Request Rejected"]);  
+        }
+        
 
     }
 
