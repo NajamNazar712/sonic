@@ -202,7 +202,7 @@ class ShipperShipmentBookController extends Controller
         if ($return_address_id) {
             $shipment->return_address_id = $return_address_id;
         }
-        $shipment->parcel_value = $parcel_value;
+        $shipment->parcel_value = $amount > 0 ? 0 : $parcel_value;
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -2627,6 +2627,34 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
+        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+            $data = $validator->getData();
+            $shipping_mode_id = $data['shipping_mode_id'];
+            $service_type_id = $data['service_type_id'];
+            if ($value) {
+                if ($service_type_id == 5) {
+                    return true;
+                }
+                $result = self::check_origin($value, $shipping_mode_id, $user_id);
+                if ($result) {
+                    return TRUE;
+                } else {
+                    return FALSE;
+                }
+            }
+        });
+
+//        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
+//            $data = $validator->getData();
+//            $amount = $data['amount'];
+//            $parcel_value = $data['parcel_value'];
+//            if ($amount == 0) {
+//                return false;
+//            } else {
+//                return true;
+//            }
+//        });
+
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -2721,6 +2749,8 @@ class ShipperShipmentBookController extends Controller
             'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'phone_number' => ':attribute format is Invalid, required Format is: (03000000000, +92-300-0000000, 300-0000000, 0300-0000000).',
             'origin_check' => 'Origin city not allowed, please contact your sales person!',
+            'check_parcel_value' => ':attribute is required',
+            'check_parcel_min_value' => ':attribute is required at least 1',
             'destination_check' => 'Destination city not allowed, please contact your sales person!',
         ];
 
@@ -2787,7 +2817,12 @@ class ShipperShipmentBookController extends Controller
             })],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'parcel_value' => ['required_if:amount,0', 'nullable', 'integer', 'digits_between:1,20', 'min:1'],
+//            'parcel_value' => [
+//                'required_if:amount,0',
+//                'integer',
+//                'digits_between:1,20' ,
+//                //'check_parcel_value',
+//            'min:1'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [2]);
@@ -2808,6 +2843,8 @@ class ShipperShipmentBookController extends Controller
             })->where('hidden', 0)],
 
         ];
+
+//        dd($request->all());
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
             $ccd_booking = $ccd_booking->first();
@@ -2822,12 +2859,14 @@ class ShipperShipmentBookController extends Controller
                 })];
             }
         }
+
         if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
+
             $excel_type = $request->excel_type;
 
             $column_count = null;
@@ -2842,6 +2881,7 @@ class ShipperShipmentBookController extends Controller
                 })];
                 $service_type_check_id = null;
             } elseif ($excel_type == 2) {
+//                dd('p');
                 $column_count = 31;
 
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'amount', 21 => 'payment_mode_id', 22 => 'charges_mode_id', 23 => 'pieces_quantity', 24 => 'shipper_reference_number_1', 25 => 'shipper_reference_number_2', 26 => 'shipper_reference_number_3', 27 => 'shipper_reference_number_4', 28 => 'shipper_reference_number_5', 29 => 'open_shipment',30 => 'parcel_value'];
@@ -2983,6 +3023,15 @@ class ShipperShipmentBookController extends Controller
 
                 $rows[$key]['return_address_id'] = $row['return_address_id'];
 
+                if (array_key_exists("amount", $row))
+                {
+                    if ($row['amount'] == 0) {
+                        $rules['parcel_value'] = [
+                            'integer',
+                            'digits_between:1,20',
+                            'min:1'];
+                    }
+                }
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -3223,7 +3272,6 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
-//            dd($service_type_check_id);
             if (empty($errors)) {
                 if (empty($nsa_error)) {
                     if (empty($bdmk_error)) {
@@ -3310,7 +3358,6 @@ class ShipperShipmentBookController extends Controller
                 foreach ($cities as $city) {
                     $city_name[$city->name] = $city->name;
                 }
-
                 return view('client.shipment.book.errors')->with(['data' => $rows, 'errors' => $errors, 'cities' => $city_name, 'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'user_shipping_modes' => $user_shipping_modes, 'charges_modes' => $charges_modes, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
             }
         } else {
@@ -3343,7 +3390,6 @@ class ShipperShipmentBookController extends Controller
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->amount = $amount;
-        $shipment->amount = $parcel_value;
 
         if ($payment_mode_id == 2) {
             $settings = GlobalSettings::where('type', 'ccd_booking')->first();
@@ -3372,6 +3418,8 @@ class ShipperShipmentBookController extends Controller
         if ($return_address_id) {
             $shipment->return_address_id = $return_address_id;
         }
+        $shipment->parcel_value =  $amount > 0 ? 0 : $parcel_value;
+
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -4752,7 +4800,7 @@ class ShipperShipmentBookController extends Controller
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            'parcel_value' => ['required_if:amount,0', 'nullable', 'integer', 'digits_between:1,20', 'min:1'],
+            // 'parcel_value' => ['required_if:amount,0', 'nullable', 'integer', 'digits_between:1,20', 'min:1'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -4966,6 +5014,18 @@ class ShipperShipmentBookController extends Controller
                 }
 
                 $rows[$key]['return_address_id'] = $row['return_address_id'];
+
+
+                if (array_key_exists("amount", $row))
+                {
+                    if ($row['amount'] == 0) {
+
+                        $rules['parcel_value'] = [
+                            'integer',
+                            'digits_between:1,20',
+                            'min:1'];
+                    }
+                }
 
                 $validate = Validator::make($row, $rules, $messages);
 

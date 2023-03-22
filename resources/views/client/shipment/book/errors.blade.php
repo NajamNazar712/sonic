@@ -96,6 +96,7 @@
                                 <th>Shipper Reference 4</th>
                                 <th>Shipper Reference 5</th>
                                 <th>Open Shipment</th>
+                                <th>Parcel Value</th>
                                 @if(($service_type_check_id == 1 || $service_type_check_id == null) && $omni == 1)
                                     <th>Return Address ID</th>
                                 @endif
@@ -449,7 +450,7 @@
                                 @endif
                                     @if($service_type_check_id == 1 || $service_type_check_id == 2 || $service_type_check_id == null)
                                         @if(isset($errors[$no]['parcel_value']))
-                                            <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['amount']}}</font></td>
+                                            <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['parcel_value']}}</font></td>
                                         @else
                                             <td>{!! Form::text('form[' . $no . '][parcel_value]', $ro['parcel_value'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                         @endif
