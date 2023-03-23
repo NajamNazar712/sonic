@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\CityArea;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
@@ -12,6 +13,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -10097,6 +10099,18 @@ class AdminDashboardController extends Controller
                         }
                     }
 
+                    if (session('role_id') == 1 || in_array(91, session('permissions'))) {
+                        if ($result->isHub == 1) {
+                            $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-plus-circle"></i></div>
+                                    <div class="col-9 offset-1">Add Area</div>
+                                </div>                          
+                            </a>';
+                        }
+                    }
+
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -12767,6 +12781,58 @@ class AdminDashboardController extends Controller
         } else {
             return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
         }
+    }
+
+    public function add_city_sub_area($city_id){
+
+        $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
+        $reporting_locations = ReportingLocation::where('status', 1);
+        return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
+    }
+
+    public function add_city_sub_area_ajax(Request $request){
+        $city_area = CityArea::where('city_areas.city_id',$request->city_id)
+            ->join('cities as c', 'c.id', '=', 'city_areas.city_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'city_areas.updated_by')
+            ->leftjoin('reporting_locations as rl', 'rl.id', '=', 'city_areas.report_location_id')
+            ->select('city_areas.*','c.location_latitude','c.location_longitude','c.name as city_name','a.name as admin_name','rl.name as relocation_name');
+
+        return Datatables::of($city_area)
+            ->addColumn('location', function ($result) {
+                $location = '<div class="text-center">';
+                if ($result->location_latitude != null && $result->location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                } else {
+                    return '-';
+                }
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+                    if (session('role_id') == 1 || in_array(90, session('permissions'))) {
+                        if ($result->id == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+
     }
 }
 

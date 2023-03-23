@@ -833,6 +833,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
         Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
+        Route::get('/city/{id}/add_city_sub_area', 'Admins\AdminDashboardController@add_city_sub_area')->name('add_city_sub_area');
+        Route::post('/city/add_city_sub_area_ajax', 'Admins\AdminDashboardController@add_city_sub_area_ajax')->name('add_city_sub_area_ajax');
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route
