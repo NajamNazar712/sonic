@@ -1291,7 +1291,7 @@
                         @endif
                     </form>
 
-                    @if(session('role_id') == 1 || in_array(session('id'),$special_request_agent))
+                    @if(in_array(session('id'),$special_request_agent))
                         <hr>
                         <form class="mb-2" action="{{route('admin.crm.request.special_request_adjusted')}}" method="post">
                             @csrf
@@ -1304,7 +1304,7 @@
                                     {{-- <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control"> --}}
                                 </div>
                                 <div class="col-12 text-left">
-                                    <textarea name="special_approve_reject_reason" id="special_approve_reject_reason" cols="92" rows="5"> {{isset($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
+                                    <textarea name="special_approve_reject_reason" id="special_approve_reject_reason" cols="92" rows="5"> {{!empty($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
                                 </div>
                             </div>
                             <div class="row justify-content-center mt-2 ml-2">
