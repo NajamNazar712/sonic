@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\CityArea;
 use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -1261,6 +1262,7 @@ class AdminHumanResourseController extends Controller
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
+        $areas_list = CityArea::where('city_id',$employee->city_id)->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
@@ -1268,7 +1270,7 @@ class AdminHumanResourseController extends Controller
             ->where('trax_id', '!=', $employee->trax_id)
             ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])
             ->get();
-        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers'));
+        return view('admin.human_resource.employee_directory.update', compact('employments', 'blood_groups', 'attachments', 'educations', 'reference', 'bank_info', 'banks', 'medical_infos', 'employee', 'religions', 'nationalities', 'domiciles', 'maritial_statuses', 'designations', 'departments', 'zones', 'relationships', 'place_of_birth_cities', 'cities', 'shifts', 'staff_categories', 'genders', 'rider_types', 'main_categories', 'sub_categories', 'rider_functional_category', 'functional_categories', 'rider_route_id', 'rider_routes', 'replacement_info', 'employee_natures', 'replacement_employees', 'line_managers','areas_list'));
     }
 
     public function employee_directory_profile_update(Employee $employee, Request $request)

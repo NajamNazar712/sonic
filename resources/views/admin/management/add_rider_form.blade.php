@@ -73,6 +73,15 @@
             </fieldset>
         </div>
     </div>
+     <div class="row mb-2">
+        <div class="col">
+              <fieldset class="form-group">
+                <select name="area" id="area_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                   <option value="" selected>Select an Area</option>
+                </select>
+            </fieldset>
+        </div>
+    </div>
     <div class="row">
         <div class="col">
             <fieldset class="form-group">
@@ -185,6 +194,10 @@
             placeholder:'Select a route',
             dropdownParent: $("#addRiderForm")
         });
+         $('#area_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select an Area',
+            dropdownParent: $("#addRiderForm")
+        });
         $('#operation_rider_id').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select Functional Category',
             dropdownParent: $("#addRiderForm")
@@ -236,6 +249,7 @@
 
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
+            var area_list = $('#area_list');
             var id = $('#city_list').val();
             if($(this).val() != ''){
                 $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').removeAttr('disabled');
@@ -255,11 +269,28 @@
                     //     routelist.append(option);
                     // }
                     //routelist.append('<option value="other">Other</option>').trigger('change');
-                    $.each(data, function (key, value) {
+                    $.each(data.route, function (key, value) {
                         var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
                         routelist.append(newOption);
                     });
-                   routelist.val('').trigger('change');
+
+                     routelist.val('').trigger('change');
+
+                    area_list.empty();
+                    if(data.areas.length > 0){ 
+                        area_list.attr("disabled", false);
+                        $.each(data.areas, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            area_list.append(newOption);
+                        });
+                        area_list.val('').trigger('change');
+                    }
+                    else{
+                        area_list.attr("disabled", true);
+                        area_list.attr("data-rule-required", false);
+                        ('#area_list-error').hide();
+                    }
+                  
                 }
             });
         });

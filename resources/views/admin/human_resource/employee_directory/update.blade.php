@@ -197,6 +197,16 @@
                                                 </select>
                                             </div>
                                         </div>
+                                         <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Area<span class="text-danger">*</span></label>
+                                                <select name="area" id="area_list" class="select2 form-control " data-rule-required="true"  data-msg-required="Area is required" style="width: 100%">
+                                                    @foreach($areas_list as $area)
+                                                        <option value="{{$area->id}}">{{$area->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                         @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -2811,6 +2821,12 @@
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
                 }
             });
+
+             $('#area_list').select2({
+            width:'100%',
+            placeholder:"Select An Area",
+
+        });
 
         });
     </script>
