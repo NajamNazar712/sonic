@@ -43,7 +43,7 @@ class RevenueReportDailyBasis extends Command
         $response = AdminRevenueReportsController::revenue_report(4);
         if($response)
         {
-//            NotificationsController::send(130,$response);
+            NotificationsController::send(214,$response);
         }
     }
 }

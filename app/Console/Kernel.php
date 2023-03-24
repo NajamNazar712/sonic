@@ -366,6 +366,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
         $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();

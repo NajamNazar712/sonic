@@ -236,11 +236,14 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
+
         $notification = Notification::find($id);
-    
+
 
         if ($notification) {
+
             if ($notification->status) {
+
                 if ($notification->type_id == 1) {
                     $subject = $notification->subject;
                 }
@@ -10222,6 +10225,31 @@ else if ($id == 178) {
                     }
 
                     self::email($subject,$body,$reference_1_id);
+                }
+                else if ($id == 214) {
+                    dd('notification hits !');
+                    $file_path = $reference_1_id['file_path'];
+
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Daily Report By Arrival Date  | ';
+
+                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+
+                    $file = Storage::disk('public')->url($file_path);
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+//                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
+                    $to = ['rayyanchishti0@gmail.com'];
+
+//                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+                    $cc = ["rayyanchishti0@gmail.com"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }       
