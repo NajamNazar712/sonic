@@ -10243,11 +10243,11 @@ else if ($id == 178) {
                         $body = str_replace('[link]', $link, $body);
                     }
 
-//                    $to = ['shafay.tariq@trax.pk', 'adnan.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'hammad.majid@trax.pk'];
-                    $to = ['rayyanchishti0@gmail.com'];
+                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk','shafay.tariq@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk'];
+//                    $to = ['rayyanchishti0@gmail.com'];
 
-//                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
-                    $cc = ["rayyanchishti0@gmail.com"];
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+//                    $cc = ["rayyanchishti0@gmail.com"];
 
                     self::email($subject, $body, $to, $cc);
                 }
