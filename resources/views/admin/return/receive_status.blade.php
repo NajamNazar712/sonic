@@ -229,24 +229,25 @@
                         className: 'btn btn-primary returned',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                           
                             if(selected_rows !== '') {
-                               
-                                table.rows().nodes().each(function(index) {
+                               table.rows().nodes().each(function(index) {
                                     var row = table.row(index);
-                                    
                                     if ($(row.node()).hasClass('selected')) {
                                         var id = parseInt(row.id());
                                         var status = $(row.node()).find('select.statusDrop').val();
                                        var remarks = $(row.node()).find('input.return_remarks');
-                                        if (status == 60 && remarks.val() == '') {
+                                        
+                                       if (status == 60 && remarks.val() == '') 
+                                       {
                                         remarks.attr('data-rule-required', 'true');
                                         remarks.attr('data-msg-required', 'Remarks is required');
                                         flag = true;
-                                    } else {
-                                        
-                                        remarks.attr('data-rule-required', 'false');
-                                        flag = false;
+                                        }
+                                        else 
+                                        {
+                                            remarks.attr('data-rule-required', 'false');
+                                            remarks.removeAttr('data-msg-required');
+                                            flag = false;
                                         }
 
                                     }
@@ -390,16 +391,19 @@
                                         var status = $(row.node()).find('select.statusDrop').val();
                                         var remarks = $(row.node()).find('input.return_remarks');
                                         console.log(remarks.val());
-                                        if (status == 60 && remarks.val() == '') {
+                                        if (status == 60 && remarks.val() == '') 
+                                        {
                                         
-                                        remarks.attr('data-rule-required', 'true');
-                                        remarks.attr('data-msg-required', 'Remarks is required');
-                                        var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
-                                        remarks.after(errorMsg);
-                                        flag = true;
-                                    } else {
-                                        remarks.attr('data-rule-required', 'false');
-                                        flag = false;
+                                            remarks.attr('data-rule-required', 'true');
+                                            remarks.attr('data-msg-required', 'Remarks is required');
+                                            // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
+                                            // remarks.after(errorMsg);
+                                            flag = true;
+                                        } else 
+                                        {
+                                            remarks.attr('data-rule-required', 'false');
+                                            remarks.removeAttr('data-msg-required');
+                                            flag = false;
                                         }
 
                                     }
@@ -587,49 +591,51 @@
 
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
                 // alert("asd");
+
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-                var remarks = $(this).closest('tr').find('input.return_remarks');
-                var errorMsg = $(this).closest('tr').find('.error-msg');
-                remarks.attr('data-rule-required', 'false');
-                remarks.remove('data-msg-required', '');
-                flag = false;
-                // var errorMsg = $(this).closest('tr').find('.error-msg');
-                // alert(errorMsg);
+               
+                // remarks.removeAttr('data-msg-required');
                 // errorMsg.remove();
+                console.log("data-msg-required: ", remarks.attr('data-msg-required'));
+                if (!remarks.attr('data-msg-required')) {
+                   
+                    errorMsg.remove();
+                }
                 
-                if (status == 60 && remarks.val() == '') 
-                {
+                if (status != 60) {
+                    remarks.removeAttr('data-rule-required');
+                    remarks.removeAttr('data-msg-required');
+                    errorMsg.remove();
+                }
+                else if (remarks.val() == '') {
                     remarks.attr('data-rule-required', 'true');
                     remarks.attr('data-msg-required', 'Remarks is required');
-                    
-                    // flag = true;
-                    flag = true;
-                    if (errorMsg.length == 0) {
-                        errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
-                        remarks.after(errorMsg);
-                    } else {
-                        errorMsg.show();
-                    }
-                    // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
-                    // remarks.after(errorMsg);
-                    // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
-                    // remarks.after(errorMsg);
-                } 
-                else 
-                {
-                    remarks.attr('data-rule-required', 'false');
-                    remarks.attr('data-msg-required', '');
-                    flag = false;
-                    // var errorMsg = $(this).closest('tr').find('.error-msg');
-                    errorMsg.remove();
-                    flag = false;
-                    if (errorMsg.length > 0) {
-                        errorMsg.hide();
-                    }
-                } 
+                    errorMsg.show();
+                }
+                // if (status == 60 && remarks.val() == '') 
+                // {
+                //     remarks.attr('data-rule-required', 'true');
+                //     remarks.attr('data-msg-required', 'Remarks is required');
+                //     flag = true;
+                // } 
+                // else {
+                //     remarks.removeAttr('data-rule-required');
+                //     flag = false;
+                // }
+                // else 
+                // {   
+                //     console.log(remarks.val(),status);
+                //     remarks.attr('data-rule-required', 'false');
+                //     remarks.removeAttr('data-msg-required');
+                //     flag = false;
+                //     console.log("else");
+                // } 
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
                     type:'POST',
@@ -655,9 +661,18 @@
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+
                 status.val('').trigger("change");
                 reason.val('').trigger("change");
+                reason.val('').trigger("change");
+                if(status.val('').trigger("change") && !remarks.attr('data-msg-required'))
+                {
+                    errorMsg.remove();
+                }
                 $('.remarks input').val('');
+                
             });
 
             $('body').on('click', 'input.open_box', function(){
@@ -731,7 +746,7 @@
                 {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to change shipment\'s status!43',
+                        text: 'Select Yes to change shipment\'s status!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -762,13 +777,13 @@
                                 shipments.push(id);
                             }
                             
-                            if (remarks.length && remarks[0].checkValidity()) {
-                                remarks.removeClass('error');
-                                remarks.next('.error-msg').html('');
-                            } else {
-                                remarks.addClass('error');
-                                remarks.next('.error-msg').html('This field is required.');
-                            }
+                            // if (remarks.length && remarks[0].checkValidity()) {
+                            //     remarks.removeClass('error');
+                            //     remarks.next('.error-msg').html('');
+                            // } else {
+                            //     remarks.addClass('error');
+                            //     remarks.next('.error-msg').html('This field is required.');
+                            // }
                             var open_box_input = $('#open_box_ids');
                             open_box_input.val(open_box_ids);
                             shipment.val(shipments);
