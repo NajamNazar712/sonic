@@ -13888,7 +13888,7 @@ class RiderAPIController extends Controller
         $special_instructions = NULL;
 
 
-        $retail_type = RetailTraxCenter::where('pickup_address_id',$request->trax_center)->first();
+        $retail_type = RetailTraxCenter::where('pickup_address_id',$pickup_address_id)->first();
         $discount = $retail_type->discount;
         $insurance = $retail_type->insurance;
 
