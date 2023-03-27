@@ -13935,6 +13935,8 @@ class RiderAPIController extends Controller
 
         $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
 
+        $charges = $rates["total_charges"];
+
         if ($shipping_mode_check == 3) {
             $amount = str_replace(',', '', $request->input('cod_amount'));
             $r_amount = 0;
