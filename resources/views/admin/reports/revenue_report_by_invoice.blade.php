@@ -83,7 +83,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(14)->toDateString() }}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Invoicing Date (From)" data-value="{{ \Carbon\Carbon::today()->subDays(30)->toDateString() }}">
                         </div>
                     </div>
                     <div class="col-5 ">
@@ -267,7 +267,7 @@
                         to_date.pickadate('picker').clear();
 
 
-                        var afterDate = currentDate.add(14, 'days');
+                        var afterDate = currentDate.add(30, 'days');
                         to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
                         to_date.pickadate('picker').set('select', afterDate.toDate(),{muted:true});
 
@@ -294,7 +294,7 @@
                             from_date.pickadate('picker').clear();
                         }
 
-                        var beforeDate = currentDate.subtract(14, 'days');
+                        var beforeDate = currentDate.subtract(30, 'days');
                         from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
                     }
                 }
