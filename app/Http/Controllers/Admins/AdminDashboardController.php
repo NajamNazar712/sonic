@@ -12787,7 +12787,7 @@ class AdminDashboardController extends Controller
     }
 
     public function add_city_sub_area($city_id){
-        $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
+        $cities = City::where('id',$city_id)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
     }
@@ -12821,14 +12821,27 @@ class AdminDashboardController extends Controller
                 if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
                     if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                        if ($result->id == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
-                        }
+                            $dropdown .= '<button type="button" class="dropdown-item" 
+                             data-target-id=' . $result->id . ' 
+                             data-target-city_id='.$result->city_id .' 
+                             data-target-report_location_id=' . $result->report_location_id . ' 
+                             data-target-name=' . $result->name . ' 
+                             rel="editcityarea" data-toggle="modal" data-target="#city_area_edit_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Area</div></button>';
                     }
+
+                    if (session('role_id') == 1 || in_array(90, session('permissions'))) {
+                            if($result->status == 0) {
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Active</div></button>';
+                            }else{
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="0"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
+                            }
+                    }
+
+
 
                     $dropdown .= '
                     </div>
@@ -12844,10 +12857,11 @@ class AdminDashboardController extends Controller
 
     }
 
-    public function add_city_sub_area_post(Request $request){
+    public function city_sub_area_post(Request $request){
 
 
         $names = [
+            'id' => 'ID',
             'name' => 'Name',
             'city_id' => 'City ID',
             'report_location_id' => 'Reporting ID',
@@ -12867,9 +12881,11 @@ class AdminDashboardController extends Controller
             'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
             'in' => ':attribute must be No or Yes.',
             'check_name' => ':attribute is already exists.',
+            'check_id' => ':attribute with same area and city already exist.',
             ];
 
         $rules = [
+            'id' => 'nullable',
             'name' => 'required|string|max:255|check_name',
             'city_id' => 'required|string|max:255',
             'report_location_id' => 'required|string|max:255',
@@ -12880,11 +12896,21 @@ class AdminDashboardController extends Controller
             $data = $validator->getData();
             $name = $data['name'];
             $city_id = $data['city_id'];
-            $city_area = CityArea::where('city_id',$city_id)->where('name',$name);
-            if($city_area->exists()){
-                return false;
+            if(!isset($data['id'])) {
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
             }else{
-                return true;
+                $id = $data['id'];
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name)->where('id','!=',$id);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
             }
 
         });
@@ -12894,7 +12920,8 @@ class AdminDashboardController extends Controller
 
         if ($validate->passes()) {
 
-            $city_area = new CityArea();
+
+            $city_area = !isset($request->id) ?  new CityArea() : CityArea::find($request->id);
             $city_area->city_id  = $request->city_id;
             $city_area->report_location_id  = $request->report_location_id;
             $city_area->name  = $request->name;
@@ -12916,6 +12943,18 @@ class AdminDashboardController extends Controller
         return $data;
 
 
+    }
+
+    public function city_area_status(Request $request){
+        if(isset($request->id)){
+            $city_area = CityArea::where('id',$request->id)->update(['status'=>$request->status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
     }
 }
 
