@@ -3986,7 +3986,7 @@ class AdminHumanResourseController extends Controller
         ->leftjoin('penalty_statuses as ps','ps.id','employee_penalties.status')
         ->leftjoin('employee_attendances as ea','ea.employee_id','employee_penalties.employee_id')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
-        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id','employee_penalties.no_of_late as no_of_late')
+        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id','employee_penalties.no_of_late as no_of_late', 'employee_penalties.is_current_record as is_current_record')
         ->whereNotNull('ea.clock_in_datetime')
         ->where(function($q){
             if (session('department_id') != 10) {
@@ -3995,6 +3995,7 @@ class AdminHumanResourseController extends Controller
                 // $q->where('a.line_manager_id', Auth::user()->employee_id);
             }
         })
+        ->orderBy('employee_penalties.date', 'desc')
         ->groupBy(['employee_penalties.date']);
         // dd($employee_leaves);
         // dd($employee_leaves);
@@ -4012,7 +4013,7 @@ class AdminHumanResourseController extends Controller
         ->addColumn("no_of_late", function ($employee_leaves) {
             $late = $employee_leaves->no_of_late;
             // $employee_penalty = EmployeePenalty::find($employee_leaves->id);
-            return  '<button data-user_id='.$employee_leaves->id.' data-penlaty_id='.$employee_leaves->id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $employee_leaves->no_of_late . '</button>';  
+            return  '<button data-user_id='.$employee_leaves->employee_id.' data-penlaty_id='.$employee_leaves->id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $employee_leaves->no_of_late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
             $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
@@ -4095,7 +4096,7 @@ class AdminHumanResourseController extends Controller
         })
         ->addColumn("action", function ($employee_leaves) {
             
-            if ($employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
+            if ($employee_leaves['line_manager_id'] == Auth::user()->employee_id && $employee_leaves['is_current_record'] == 1 ) {
                 
                 $dropdown = '
             <div class="btn-group">
@@ -4104,13 +4105,16 @@ class AdminHumanResourseController extends Controller
         ';
                 if ($employee_leaves->penalties_status == 1) {
                     if ($employee_leaves['line_manager_id'] == Auth::user()->employee_id) {
-                        $dropdown .= '<button type="button" class="dropdown-item reject_lm" data-target-id=' . $employee_leaves->id . '  data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item reject_lm" data-target-id=' . $employee_leaves->employee_id . '  
+                        data-penalty-id=' . $employee_leaves->id . '  data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                     }
                 }
                 
                 if ($employee_leaves->penalties_status == 1) {
                     if ($employee_leaves->status_id != 2 && (session('role_id') == 1 || $employee_leaves['line_manager_id'] == Auth::user()->employee_id)) {
-                        $dropdown .= '<button type="button" class="dropdown-item deduction_modal" data-target-id=' . $employee_leaves->employee_id . ' data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Deduct</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item deduction_modal" data-target-id=' . $employee_leaves->employee_id . ' 
+                        data-penalty-id=' . $employee_leaves->id . '
+                        data-target-line-manger='. $employee_leaves->line_manager .'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Deduct</div></button>';
                     }
                 }
                 
@@ -4148,8 +4152,8 @@ class AdminHumanResourseController extends Controller
     }
     public function employee_penalty_duplicate(Request $request)
     {
-        
-        $penalty_id = $request->employee_id;
+        $employee_id = $request->employee_id;
+        $penalty_id = $request->penalty_id;
 
         $employee_penalty = EmployeePenalty::find($penalty_id);
 
@@ -4157,7 +4161,7 @@ class AdminHumanResourseController extends Controller
         $startMonth = Carbon::parse($penalty_date)->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
         $endMonth = Carbon::parse($penalty_date)->startOfMonth()->addDays(19)->format('Y-m-d');
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-        ->where('ea.employee_id',$employee_penalty->employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+        ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
         ->select('ea.attendance_date','ea.clock_in_datetime')->get(); 
         $data = $duplicate;
         return response()->json(['status' => 1, 'info' => $data]);
@@ -4181,8 +4185,14 @@ class AdminHumanResourseController extends Controller
     }
     public function employee_penalty_deduction_list(Request $request)
     {
-        $employee_id = $request->employee_id;
-        $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count','employees.line_manager_id as line_manager_id','employees.leave_count as leave_count')->first();
+        $penalty_id = $request->penalty_id;
+        $employee_penalty = EmployeePenalty::find($penalty_id);
+        $employee_id = $employee_penalty->employee_id;
+        $penalty_date = $employee_penalty->created_at;
+        $startMonth = Carbon::parse($penalty_date)->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $endMonth = Carbon::parse($penalty_date)->startOfMonth()->addDays(19)->format('Y-m-d');
+        $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count','employees.line_manager_id as line_manager_id','employees.leave_count as leave_count')
+        ->whereBetween('ep.date',[$startMonth, $endMonth])->first();
         $availble_qouate = $available_qouates->leave_count;
         if($available_qouates->line_manager_id == Auth::user()->employee_id)
         {
@@ -4207,19 +4217,22 @@ class AdminHumanResourseController extends Controller
     }
     public function employee_penalty_deduction_store(Request $request)
     {
-        
+        // dd($request->all());
         if($request->select_deduction != null)
         {   
-        $employee = Employee::find($request->employee_id);
+            $employee = Employee::find($request->employee_id);
+            // dd($employee->line_manager_id);
             if(isset($employee->line_manager_id))
             {  //Line_manger condition need to ask
+                
                 if($request->select_deduction == 'deduction_quota')
                 {
+                    // dd($employee);
                     $employee_leave_count = $employee->leave_count - $request->deduction_count;
                     $employee->leave_count = $employee_leave_count;
                     $employee->update();
 
-                    $employee_penalty = EmployeePenalty::where('employee_id',$request->employee_id)->first();
+                    $employee_penalty = EmployeePenalty::find($request->penalty_id);
                 
                     if($employee_penalty){
                         if($request->approve_by == 'lm')
@@ -4237,7 +4250,7 @@ class AdminHumanResourseController extends Controller
                 else if($request->select_deduction == 'deduction_salary')
                 {
                     
-                    $employee_penalty = EmployeePenalty::where('employee_id',$request->employee_id)->first();
+                    $employee_penalty = EmployeePenalty::find($request->penalty_id);
                     if($employee_penalty)
                     {
                         if($request->approve_by == 'lm')
@@ -4251,6 +4264,8 @@ class AdminHumanResourseController extends Controller
                         return redirect()->back()->with('success', 'Employee Leave deducted from Quota successfully');
                     }
                 }
+            } else {
+                return redirect()->back()->with('error', 'Employee Leave can be deduct by Line Manager only');
             }
         }
     }

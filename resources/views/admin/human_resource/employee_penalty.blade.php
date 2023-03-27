@@ -157,6 +157,7 @@
                         <input type="hidden" name="salary_deduction_count" id="salary_deduction_count">
                         <input type="hidden" name="employee_id" id="employee_id">
                         <input type="hidden" name="line_manager_id" id="line_manager_id">
+                        <input type="hidden" name="penalty_id" id="penalty_id">
 
                         <div class="row mb-2 justify-content-center">
                             <div class="col-12">
@@ -562,7 +563,9 @@
             });
           
             $('body').on('click', '.deduction_modal', function (e) {
-                var id = $(this).data('target-id');
+                var employee_id = $(this).data('target-id');
+                var penalty_id = $(this).data('penalty-id');
+                var line_manager_id = $(this).data('target-line-manger');
                 // $('#approve_confirmation_id').val(id);
                 // $('#approve_by').val('hod');
                 
@@ -571,6 +574,8 @@
             $('body').on('click', 'button.deduction_modal',  function(){
             var id = $(this).parents('tr').attr('id');
             employee_id = $(this).attr("data-target-id");
+            var penalty_id = $(this).data('penalty-id');
+            var line_manager_id = $(this).data('target-line-manger');
             console.log(employee_id);
 
             let no_of_late = $(this).closest('tr').children('.no_late').text();
@@ -583,7 +588,7 @@
             if(id){
                 $.ajax({
                     url: '{!! route('admin.human_resource.employee_penalty.deduction') !!}',
-                    data: {employee_id}
+                    data: {employee_id,penalty_id,line_manager_id}
                 })
                
                 .done(function(data) {
@@ -661,7 +666,7 @@
 
                 // late_count , deduction_count, available_leave_quota Initialize globaly 
                 line_manager_id = $('.deduction_modal').attr('data-target-line-manger');
-                
+                var penalty_id = $('.deduction_modal').attr('data-penalty-id');
                 if(late_count != null && deduction_count != null)
                 {
                     var deduction_select = $('#select_deduction').val();
@@ -669,6 +674,7 @@
                     {
                         $("#employee_id").val(employee_id);
                         $("#line_manager_id").val(line_manager_id);
+                        $("#penalty_id").val(penalty_id);
                         if(deduction_count > available_leave_quota)
                         {
                             var exceed_count = deduction_count - available_leave_quota;
@@ -753,11 +759,12 @@
             $('body').on('click', 'button.duplicate_modal',  function(){
             var id = $(this).parents('tr').attr('id');
             var employee_id = $(this).attr("data-user_id");
+            var penalty_id = $(this).attr("data-penlaty_id");
            
             if(employee_id){
                 $.ajax({
                     url: '{!! route('admin.human_resource.employee_penalty.duplicate') !!}',
-                    data: {employee_id}
+                    data: {employee_id,penalty_id}
                 })
                 .done(function(data) {
                    $('#duplicate_modal').modal('show');
