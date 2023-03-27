@@ -3972,6 +3972,7 @@ class AdminHumanResourseController extends Controller
          if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 628);
         }
+   
         // dd(Auth::user()->employee_id);
         // dd('in');
         // DB::enableQueryLog();
@@ -3985,7 +3986,7 @@ class AdminHumanResourseController extends Controller
         ->leftjoin('penalty_statuses as ps','ps.id','employee_penalties.status')
         ->leftjoin('employee_attendances as ea','ea.employee_id','employee_penalties.employee_id')
         ->join('employee_lates as ela', 'ela.attendence_id', 'employee_penalties.attendence_id')
-        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id')
+        ->select('employee_penalties.id as id', 'a.trax_id as trax_id', 'employee_penalties.employee_id as employee_id','a.leave_count as available_qouates','a.name as employee_name','ed.name as designation', 'ad.name as department','a.employee_type_id as employee_type','ps.name as status','employee_penalties.status as penalties_status','employee_penalties.created_at as requested_date', 'employee_penalties.updated_at as updated_at', 'lm.name as updated_by','employee_penalties.updated_by as updated_by_id','employee_penalties.deduction_count as deduction_count','employee_penalties.reject_reason as reject_reason','employee_penalties.leave_without_pay as leave_without_pay','employee_penalties.leave_deduction as leave_deduction' ,'a.line_manager_id as line_manager_id','employee_penalties.no_of_late as no_of_late')
         ->whereNotNull('ea.clock_in_datetime')
         ->where(function($q){
             if (session('department_id') != 10) {
@@ -4009,15 +4010,21 @@ class AdminHumanResourseController extends Controller
             // return $availed_leaves;    
         })
         ->addColumn("no_of_late", function ($employee_leaves) {
-            $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-            ->where('ea.employee_id',$employee_leaves->employee_id)
-            ->count();
+            // $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+            // $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
+            // $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
+            // ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
+            // ->count();
+            $late = $employee_leaves->no_of_late;
             return  '<button data-user_id='.$employee_leaves->employee_id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
+            $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+            $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
             $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-            ->where('ea.employee_id',$employee_leaves->employee_id)
+            ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
             ->count();
+            $late = $employee_leaves->no_of_late;
             return  $late;  
             })
         ->editColumn('employee_type', function ($employee_leaves) {
@@ -4147,9 +4154,11 @@ class AdminHumanResourseController extends Controller
     {
         
         $employee_id = $request->employee_id;
-        
+        $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
+
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-        ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')
+        ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
         ->select('ea.attendance_date','ea.clock_in_datetime')->get(); 
         $data = $duplicate;
         return response()->json(['status' => 1, 'info' => $data]);

@@ -87,18 +87,28 @@ class LateEmployeePenalty extends Command
                
                 $no_of_late = EmployeeLate::join('employee_attendances as ea','ea.id','=','employee_lates.attendence_id')
                 ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+                ->where('ea.employee_id',$employees_attendance->employee_id)
                 ->count();
                 // dd(DB::getQueryLog());
+                // DB::connection()->enableQueryLog();
+                $employee_penalties = EmployeePenalty::
+                where('employee_penalties.employee_id',$employees_attendance->employee_id)
+                ->where('employee_penalties.is_current_record',1)
+                ->first();
+                // dd(DB::getQueryLog());
 
-                $employee_penalties = EmployeePenalty::where('employee_id',$employees_attendance->employee_id)->first(); 
                 if($employee_penalties != null)
                 {
+                    // if($counter == 3)
+                    // {
+                    //     $employee_penalties->deduction_count += 1;
+                    //     $counter = 0;
+                    // }
 
-                    if($employee_penalties->is_current_record && $counter == 3)
-                    {
-                        $employee_penalties->deduction_count += 1;
-                        $counter = 0;
-                    }
+                    $max_lates = 3;
+                    $deduction_count = floor($no_of_late/$max_lates) ?? 0;
+                    $employee_penalties->deduction_count = $deduction_count;
+                    
                     $employee_penalties->no_of_late = $no_of_late;
                     $employee_penalties->update();
                 }
