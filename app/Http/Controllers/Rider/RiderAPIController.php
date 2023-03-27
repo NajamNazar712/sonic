@@ -13868,7 +13868,7 @@ class RiderAPIController extends Controller
     }
 
     public function retail_shipment_store_v3(Request $request)
-    {   //dd($request->all());
+    {  
         $rider_id = $request->rider_id;
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $user_id = $setting->setting_value;
@@ -13888,7 +13888,7 @@ class RiderAPIController extends Controller
         $special_instructions = NULL;
 
 
-        $retail_type = RetailTraxCenter::find($request->trax_center);
+        $retail_type = RetailTraxCenter::where('pickup_address_id',$request->trax_center)->first();
         $discount = $retail_type->discount;
         $insurance = $retail_type->insurance;
 
