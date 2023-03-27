@@ -229,14 +229,14 @@
                                                     <tr>
                                                         <th scope="row">Special Request Status</th>
                                                         <td class="name">
-                                                                <h5 class="mb-0">Approved</h5>
+                                                                <h5 class="mb-0">Rejected</h5>
                                                         </td>
                                                     </tr>
                                                 @elseif ($special_request->approved_status == 3)
                                                     <tr>
                                                         <th scope="row">Special Request Status</th>
                                                         <td class="name">
-                                                                <h5 class="mb-0">Rejected</h5>
+                                                                <h5 class="mb-0">Approved</h5>
                                                         </td>
                                                     </tr>
                                                 @endif
@@ -1309,10 +1309,10 @@
                             </div>
                             <div class="row justify-content-center mt-2 ml-2">
                                 <div class="col-4">
-                                    <button id="special_request_approve_btn" type="submit" value="2" name="approve" class="btn btn-success btn-block">Approve</button>
+                                    <button id="special_request_approve_btn" type="submit" value="3" name="approve" class="btn btn-success btn-block">Approve</button>
                                 </div>
                                 <div class="col-4">
-                                    <button id="special_request_approve_btn" type="submit" value="3" name="reject" class="btn btn-danger btn-block">Reject</button>
+                                    <button id="special_request_approve_btn" type="submit" value="2" name="reject" class="btn btn-danger btn-block">Reject</button>
                                 </div>
                             </div>
                         </form>

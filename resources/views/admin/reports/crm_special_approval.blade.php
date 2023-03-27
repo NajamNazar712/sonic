@@ -162,6 +162,18 @@
             width: auto !important;
             text-align: left;
         }
+
+        .rejected_requests , .rejected_requests td u a{
+            background-color: rgb(247, 97, 97);
+            /* color: white !important; */
+        }
+        
+        .approved_requests{
+            background-color: rgb(59, 243, 59);
+            /* color: white !important; */
+        }
+
+
     </style>
 @endsection
 @section('js')
@@ -371,14 +383,11 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
+                    {data: 'id_padded_link', name: 'id_padded_link', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'requested_by', name: 'sarrequestedby.name', class: 'align-middle requested_by'},
                     {data: 'requested_date', name: 'sarrequestedby.created_at', class: 'align-middle requested_date'},
                     {data: 'approved_by', name: 'sarrequestedby.created_at', class: 'align-middle text-center approved_by', orderable: false, searchable: false},
-                    // {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    // {data: 'designation', name: 'ar.name', class: 'align-middle designation'},
-                    // {data: 'approved_at', name: 'sar.approved_date', class: 'align-middle approved_at'},
                     {data: 'adjusted_percentage', name: 'sar.adjusted_percentage', class: 'align-middle adjusted_percentage'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
@@ -412,7 +421,7 @@
 
                                 $.each(data.sar_admins, function(index, admin_data) {
 
-                                    var status = admin_data.approved_status == 1 ? "<td class='font-weight-bold'> Pending </td>" : admin_data.approved_status == 2 ? "<td class='text-success font-weight-bold'> Approved </td>" : admin_data.approved_status == 3 ? "<td class='text-danger font-weight-bold'> Rejected </td>" : "";
+                                    var status = admin_data.approved_status == 1 ? "<td class='font-weight-bold'> Pending </td>" : admin_data.approved_status == 3 ? "<td class='text-success font-weight-bold'> Approved </td>" : admin_data.approved_status == 2 ? "<td class='text-danger font-weight-bold'> Rejected </td>" : "";
                                     var date = admin_data.approved_date ? admin_data.approved_date : '-';
                                     var reason = admin_data.reason ? admin_data.reason : '-';
 

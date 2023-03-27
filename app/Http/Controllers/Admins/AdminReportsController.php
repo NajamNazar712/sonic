@@ -10608,44 +10608,50 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 514);
         }
-        $crm = DB::connection('reports')->table('crm_requests')->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->leftjoin('special_approval_requests as sar', 'sar.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('special_approval_request_admins as sara', 'sara.special_request_id', '=', 'sar.id')
-            // ->leftjoin('admins as sarapproveby', 'sarapproveby.id', '=', 'sar.admin_id')
-            ->leftjoin('admins as sarrequestedby', 'sarrequestedby.id', '=', 'sar.requested_by')
-            // ->leftjoin('admin_roles as ar', 'ar.id', '=', 'sarapproveby.role_id')
-            // ->leftjoin('admin_departments as ad', 'ad.id', '=', 'ar.department_id')
-            ->leftjoin('adjustment_logs as adjustment', function ($join) {
-                $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
-                    ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
-            })
-            ->select('sar.id as id','crm_requests.id as request_number', 's.tracking_number as tracking_number', 's.amount as cod_amount', 'adjustment.adjustment_amount as adjusted_amount',
-             'sarrequestedby.name as requested_by', 'sar.created_at as requested_date', 'sar.adjusted_percentage as adjusted_percentage', 'sar.status as status',
-             DB::raw('count(sara.admin_id) as approved_by'))
+        $crm = DB::connection('reports')->table('crm_requests')->join('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+            ->join('special_approval_requests as sar', 'sar.crm_request_id', '=', 'crm_requests.id')
+            ->join('admins as sarrequestedby', 'sarrequestedby.id', '=', 'sar.requested_by')
+            // ->leftjoin('adjustment_logs as adjustment', function ($join) {
+            //     $join->on('adjustment.shipment_id', '=', 'crm_requests.shipment_id')
+            //         ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = crm_requests.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
+            // })
+            ->select('sar.id as id','crm_requests.id as request_number', 's.tracking_number as tracking_number', 's.amount as cod_amount', /* 'adjustment.adjustment_amount as adjusted_amount', */'sarrequestedby.name as requested_by', 'sar.created_at as requested_date', 'sar.adjusted_percentage as adjusted_percentage', 'sar.status as status' , 'sar.approved_status as approved_status')
             ->where('sar.status', 1);
             
         $datatable = Datatables::of($crm)
+            ->setRowAttr([
+                'class' => function ($crm) {
+                    if ($crm->approved_status == 2) {
+                        return 'rejected_requests';
+                    }
+                    else if ($crm->approved_status == 3) {
+                        return 'approved_requests';
+                    }
+                    else{
+                        return 'pending_requests';
+                    }
+                },
+            ])
             ->editColumn('request_number', function ($crm_request) {
                 return str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('approved_by', function ($crm_request) {
-                $btn = '<button class="btn btn-sm btn-outline-info align-middle approved_by"> ' .$crm_request->approved_by. ' </button>';
+                $admin_count = SpecialApprovalRequestAdmin::where('special_request_id',$crm_request->id)->count();
+                $btn = '<button class="btn btn-sm btn-outline-info align-middle approved_by"> ' .$admin_count. ' </button>';
                 return $btn;
             })
             ->addColumn('id_padded_link', function ($crm_request) {
                 return '<u><a href=' . route('admin.crm.request.details', ['id' => $crm_request->request_number]) . ' target="_blank">' . str_pad($crm_request->request_number, 6, '0', STR_PAD_LEFT) . '</a></u>';
             })
+            ->addColumn('adjusted_amount', function ($crm_request) {
+                $adjusted_amount = floor(($crm_request->cod_amount / 100 ) * $crm_request->adjusted_percentage);
+                return $adjusted_amount;
+            })
             ->addColumn('tracking_number_link', function ($crm_request) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
             });
-            // ->editColumn('approved_by', function ($crm_request) {
-            //     if ($crm_request->adjusted_percentage == null) {
-            //         return '';
-            //     } else {
-            //         return $crm_request->approved_by;
-            //     }
-            // });
+            
         if ($tracking = $request->get('search_tracking_no')) {
             $tracking_numbers = explode(',', $tracking);
             $datatable->whereIn('s.tracking_number', $tracking_numbers);
