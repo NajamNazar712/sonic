@@ -43,11 +43,8 @@ class CreateInvoiceOriginWise extends Command
     public function handle()
     {
         $now = Carbon::now();
-//        $weekStartDate = $now->startOfWeek()->format('Y-m-d H:i');
-//        $weekEndDate = $now->endOfWeek()->format('Y-m-d H:i');
-        $weekStartDate = Carbon::parse('2023-03-26 00:00')->toDateTimeString();
-        $weekEndDate = Carbon::parse('2023-03-26 23:59')->toDateTimeString();
-
+        $weekStartDate = $now->startOfWeek()->format('Y-m-d H:i');
+        $weekEndDate = $now->endOfWeek()->format('Y-m-d H:i');
 
         $invoices = Invoice::whereBetween('created_at', [$weekStartDate, $weekEndDate]);
         if($invoices->exists()){

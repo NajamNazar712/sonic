@@ -468,7 +468,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command('auto:deliverynoteverification')->dailyAt('00:55')->runInBackground();
 
-		$schedule->command('invoice:revenueoriginwise')->weeklyOn(1, '1:00')->runInBackground();
+		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
 
     }
