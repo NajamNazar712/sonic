@@ -9,7 +9,45 @@
         <div class="row">
             <div class="col-12">
                 <div class="card">
+                    @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
 
+                        <form id="add_city_form" class="row p-1 mb-2" method="post" onsubmit="event.preventDefault()">
+                            @csrf
+                            <div class="col-3">
+                                <fieldset class="form-group">
+                                    <select name="city_id" id="city_id" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                                       <option value="">Select City</option>
+                                        @foreach($cities as $city)
+                                            <option value="{{$city->id}}">{{$city->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
+                            <div class="col-3">
+                                <fieldset class="form-group">
+                                    <input type="text" required name="name" id="name" class="form-control name" placeholder="Name">
+                                </fieldset>
+                            </div>
+
+                            <div class="col-3">
+
+                                <fieldset class="form-group">
+                                    <select name="report_location_id" id="report_location_id" class="form-control select2" required  data-rule-required="true" data-msg-required="This field is required">
+                                        <option value="">Select Reporting Location</option>
+                                        @foreach($reporting_locations as $rl)
+                                            <option value="{{$rl->id}}">{{$rl->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
+
+
+                            <div class="col-2">
+                                <button type="submit" id="add_city" class="mr-1 mb-1 btn btn-primary btn-min-width">Add</button>
+                            </div>
+                        </form>
+                    @endif
                     <div class="card-content">
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
@@ -54,6 +92,21 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#city_id').select2({
+                width:'100%',
+                placeholder:"Select City",
+                allowClear:true,
+                dropdownParent:$('#add_city_form')
+            });
+
+            $('#report_location_id').select2({
+                width:'100%',
+                placeholder:"Select Reporting Location",
+                allowClear:true,
+                dropdownParent:$('#add_city_form')
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -146,11 +199,11 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},
-                    {data: 'city_id', name: 'city_id', class: 'align-middle city_id'},
-                    {data: 'relocation_name', name: 'relocation_name', class: 'align-middle relocation_name', orderable: false, searchable: false},
+                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'relocation_name', name: 'rl.name', class: 'align-middle relocation_name'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
-                    {data: 'status', name: 'status', class: 'align-middle status', orderable: false, searchable: false},
-                    {data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'admin_name', name: 'a.name', class: 'align-middle admin_name'},
                     {data: 'updated_at', name: 'ch.created_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
@@ -218,275 +271,47 @@
                 checkboxClass: 'icheckbox_squaret-red',
                 radioClass: 'iradio_square-red'
             });
-        });
-        {{--$('#datatable tbody').on('click', 'tr td.modes button', function() {--}}
-        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
 
-        {{--    $('#modes').modal('show');--}}
+            $("#add_city_form").submit(function(e) {
 
-        {{--    $.ajax({--}}
-        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
-        {{--        method: 'GET',--}}
-        {{--        data: {--}}
-        {{--            '_token': '{{ csrf_token() }}',--}}
-        {{--            'id': id--}}
-        {{--        }--}}
-        {{--    })--}}
-        {{--});--}}
+                var form = $(this).serialize();
+                $.ajax({
+                    url: '{{ route('admin.management.add_city_sub_area_post') }}',
+                    method: 'POST',
+                    data: form,
+                    }).done(function (data) {
+                        if(data.status === 1){
 
+                            table.draw();
+                            swal({
+                                title: 'Success',
+                                text:'Success',
+                                icon: 'success',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
 
-        {{--$('body').on('click','#datatable tbody tr td.modes button',function () {--}}
-        {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
-        {{--    $('#modes .modal-body').html('');--}}
-        {{--    $.ajax({--}}
-        {{--        url: '{!! route('admin.management.shippingModes.ajax') !!}',--}}
-        {{--        method: 'POST',--}}
-        {{--        data: {--}}
-        {{--            '_token': '{{ csrf_token() }}',--}}
-        {{--            'id': id--}}
-        {{--        }--}}
-        {{--    })--}}
-        {{--        .done(function(data) {--}}
-        {{--            if (data.status == 1) {--}}
-        {{--                var modes = '';--}}
-        {{--                console.log(data);--}}
-        {{--                if (data.shipping_mode) {--}}
-        {{--                    $.each(data.shipping_mode, function(index, modes) {--}}
-        {{--                        modes += 'modes<br>';--}}
-        {{--                    });--}}
-        {{--                }--}}
-        {{--                $('#modes.modal-body').html(modes);--}}
-        {{--                $('#modes').modal('show');--}}
-        {{--            }--}}
-        {{--        });--}}
-        {{--});--}}
+                        }else{
+                            var log = "";
+                            $.each(data.errors, function (i,val) {
+                                log += val + '<br>'; // use HTML tag to add line break
+                            });
 
-        $("#addCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
-            var action = $invoker.attr('rel');
+                            content = document.createElement('div');
+                            content.innerHTML = log;
 
-            if(action == 'addcity'){
-                $.get( "/admin/management/city/form", function( data ) {
-                    $("#addCityDiv").html(data);
-                });
-            }
-
-        });
-        $("#addInternationalCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
-            var action = $invoker.attr('rel');
-
-            if(action == 'addinternationalcity'){
-                $.get( "/admin/management/international/city/form", function( data ) {
-                    $("#addInternationalCityDiv").html(data);
-                });
-            }
-
-        });
-        $("#editCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
-            var action = $invoker.attr('rel');
-            var id = $(e.relatedTarget).data('target-id');
-
-
-            if(action == 'editcity'){
-                $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
-                    $("#editCityDiv").html(data);
-                });
-            }
-        });
-        $("#editInternationalCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
-            var action = $invoker.attr('rel');
-            var id = $(e.relatedTarget).data('target-id');
-
-
-            if(action == 'editinternationalcity'){
-                $.get( "/admin/management/international/city/"+id+"/edit/form", function( data ) {
-                    $("#editInternationalCityDiv").html(data);
-                });
-            }
-        });
-        $('body').on('click','#datatable tbody tr td.osa_list button',function () {
-            var id = parseInt($(this).parents('tr').attr('id'));
-            $('#osa_modal .modal-body').html('');
-            $('#osa_modal').modal('show');
-
-            $.ajax({
-                url: '{!! route('admin.management.city.osa_list') !!}',
-                method: 'POST',
-                data: {
-                    '_token': '{{ csrf_token() }}',
-                    'city_id': id
-                }
-            })
-                .done(function(data) {
-                    console.log(data);
-                    if (data) {
-
-                        var html = '<table class="table">';
-                        html += '<thead><tr><th>S.No</th><th>OSA Area</th><th>OSA Charges</th></tr></thead><tbody>';
-                        var counter = 1;
-                        $.each(data.osa_list, function(index, osa) {
-
-
-                            html += '<tr>';
-                            html += '<td>'+ counter +'</td>';
-                            html += '<td>'+osa.osa_name+'</td>';
-                            html += '<td>'+osa.osa_rate+'</td>';
-                            html += '</tr>';
-                            counter++;
-                        });
-                        html += '</tbody></table>';
-                        $('#osa_modal .modal-body').html(html);
-                    }
-                });
-        });
-        $('body').on('click','.deactivate',function (e) {
-            var id = $(this).data('target-id');
-            var rel = $(this).attr('rel');
-            var isHub = $(this).attr('hub');
-            if(rel == 'cityInactive'){
-                var atext = "Select Yes to Deactive this city!";
-            }else{
-                var atext = "Select Yes to active this city!";
-            }
-
-            if(isHub == 0){
-                $('#city_active_form #cid').val(id);
-                $('#city_active_form #cstatus').val(rel);
-                swal({
-                    title: 'Are You Sure?',
-                    text: atext,
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $('#city_active_form').submit();
-                    }
-                });
-                // $('#ConfirmModalCity').modal('show');
-            }else if(isHub == 1){
-                if(rel == 'cityactive'){
-                    $('#city_active_form #cid').val(id);
-                    $('#city_active_form #cstatus').val(rel);
-                    swal({
-                        title: 'Are You Sure?',
-                        text: atext,
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            $('#city_active_form').submit();
+                            swal({
+                                title: 'Error',
+                                content:content, // wrap the content inside a <div> tag
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
                         }
                     });
-                }else{
-                    $.ajax({
-                        url:'/admin/management/city/'+id+'/status/ajax',
-                        type:'GET',
-                        dataType:'json',
-                        success:function (data) {
-                            var name = [];
-                            if(data.length > 0){
-                                var comma = '';
-                                $.each(data, function (index, value) {
-                                    if(data.length != index+1){ comma = ", ";}else{
-                                        comma = '';
-                                    }
-                                    name += value.name+comma;
+                });
 
-                                });
-                                swal({
-                                    title: 'Please remove following cities from hub!',
-                                    text: name,
-                                    icon: 'info',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'Close',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        }
-                                    },
-                                    closeOnClickOutside: true,
-                                    closeOnEsc: true
-                                });
-
-                            }else{
-                                $('#city_active_form #cid').val(id);
-                                $('#city_active_form #cstatus').val(rel);
-                                if(rel == 'cityInactive'){
-                                    var atext = "Select Yes to Deactive this Hub!";
-                                }else{
-                                    var atext = "Select Yes to active this Hub!";
-                                }
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: atext,
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $('#city_active_form').submit();
-                                    }
-                                });
-                            }
-
-                        }
-                    });
-                }
-
-            }
-
-        });
+            });
 
 
 

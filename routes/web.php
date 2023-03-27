@@ -835,6 +835,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
         Route::get('/city/{id}/add_city_sub_area', 'Admins\AdminDashboardController@add_city_sub_area')->name('add_city_sub_area');
         Route::post('/city/add_city_sub_area_ajax', 'Admins\AdminDashboardController@add_city_sub_area_ajax')->name('add_city_sub_area_ajax');
+        Route::post('/city/add_city_sub_area_post', 'Admins\AdminDashboardController@add_city_sub_area_post')->name('add_city_sub_area_post');
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route

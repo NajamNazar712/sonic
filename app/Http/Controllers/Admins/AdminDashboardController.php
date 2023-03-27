@@ -179,6 +179,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
@@ -12784,9 +12785,8 @@ class AdminDashboardController extends Controller
     }
 
     public function add_city_sub_area($city_id){
-
         $cities = City::where('business_category_id', 1)->where('status', 1)->select(['id', 'name'])->get();
-        $reporting_locations = ReportingLocation::where('status', 1);
+        $reporting_locations = ReportingLocation::where('status', 1)->get();
         return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
     }
 
@@ -12807,6 +12807,13 @@ class AdminDashboardController extends Controller
                 } else {
                     return '-';
                 }
+            })
+            ->editColumn('status', function ($result) {
+              if($result->status == 0){
+                  return 'Not Active';
+              }else{
+                  return  'Active';
+              }
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
@@ -12832,6 +12839,80 @@ class AdminDashboardController extends Controller
                 }
             })
             ->make(true);
+
+    }
+
+    public function add_city_sub_area_post(Request $request){
+
+
+        $names = [
+            'name' => 'Name',
+            'city_id' => 'City ID',
+            'report_location_id' => 'Reporting ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'check_name' => ':attribute is already exists.',
+            ];
+
+        $rules = [
+            'name' => 'required|string|max:255|check_name',
+            'city_id' => 'required|string|max:255',
+            'report_location_id' => 'required|string|max:255',
+        ];
+
+
+        Validator::extend('check_name', function ($attribute, $value, $parameters, $validator){
+            $data = $validator->getData();
+            $name = $data['name'];
+            $city_id = $data['city_id'];
+            $city_area = CityArea::where('city_id',$city_id)->where('name',$name);
+            if($city_area->exists()){
+                return false;
+            }else{
+                return true;
+            }
+
+        });
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+
+        if ($validate->passes()) {
+
+            $city_area = new CityArea();
+            $city_area->city_id  = $request->city_id;
+            $city_area->report_location_id  = $request->report_location_id;
+            $city_area->name  = $request->name;
+            $city_area->updated_by  = auth()->user()->id;
+            $city_area->save();
+
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+        }else{
+            $data = response()->json([
+                'status' => 0,
+                'errors' => $validate->errors(),
+                'message' => 'Error',
+            ]);
+        }
+        return $data;
+
 
     }
 }
