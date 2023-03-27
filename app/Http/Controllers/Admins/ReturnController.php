@@ -5724,6 +5724,10 @@ class ReturnController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->addColumn('tracking_number_excel', function ($shipments) {
+                ($shipments->tracking_number);
+                return $shipments->tracking_number;
+            })
             ->addColumn('current_status', function ($datatable) {
                 $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
                 ->where('shipments_journey.shipment_id', $datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
@@ -5767,6 +5771,10 @@ class ReturnController extends Controller
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         })
+        ->addColumn('tracking_number_excel', function ($shipments) {
+            ($shipments->tracking_number);
+            return $shipments->tracking_number;
+        })
         ->addColumn('current_status', function ($datatable) {
             $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
             ->where('shipments_journey.shipment_id', $datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
@@ -5784,6 +5792,9 @@ class ReturnController extends Controller
             else{
                 return '-'; 
             }
+        })
+        ->addColumn('otp_status_text', function ($shipments) {
+            return $shipments->otp_status === null ? 'No' : 'Yes';
         });
         
         return $datatable->make(true);

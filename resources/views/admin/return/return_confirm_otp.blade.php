@@ -244,23 +244,31 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Delivery Note ID');
                             head.push('Tracking Number');
-                            head.push('Delivery Note No.');
+                            head.push('Rider Employee ID');
                             head.push('Rider Name');
-                            head.push('Purpose');
-                            head.push('OTP');
-                            head.push('Date / Time');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Last Status');
+                            head.push('Current Status');
+                            head.push('Status Date');
+                            head.push('OTP Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
                                 row.push(values.delivery_note_id);
+                                row.push(values.tracking_number_excel);
+                                row.push(values.rider_employee_id);
                                 row.push(values.rider_name);
-                                row.push(values.purpose);
-                                row.push(values.otp);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hubname);
+                                row.push(values.last_status);
+                                row.push(values.current_status);
                                 row.push(values.date);
-
+                                row.push(values.otp_status_text);
                                 body.push(row);
                             });
                         },
@@ -312,15 +320,7 @@
                     {data: 'last_status', name: 'last_status', class: 'align-middle last_status'},
                     {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
                     {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
-                    {data: 'otp_status', name: 'rider_deliveries.otp_entered', class: 'align-middle otp_status',
-                        render: function (data, type, row) {
-                            if (data === null) {
-                            return 'No';
-                            } else {
-                            return 'Yes';
-                            }
-                        }
-                    }
+                    {data: 'otp_status_text', name: 'otp_status_text', class: 'align-middle otp_status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -353,49 +353,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-            //Selectize
-            // var select = $('#search_form .tracking_numbers').selectize({
-            //     placeholder: 'Tracking Number(s)',
-            //     delimiter: ',',
-            //     createOnBlur: true,
-            //     persist: false,
-            //     plugins: ['remove_button'],
-            //     onDropdownOpen: function(dropdown) {
-            //         dropdown.remove();
-            //     },
-            //     onType: function(str) {
-            //         var regex = /^[0-9,]+$/;
-
-            //         if (!regex.test(str)) {
-            //             select[0].selectize.setTextboxValue('');
-            //         }
-            //     },
-            //     create: function(input) {
-            //         if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-            //             return {
-            //                 value: input,
-            //                 text: input
-            //             }
-            //         }
-            //         else {
-            //             return false;
-            //         }
-            //     },
-            //     onChange: function (value) {
-            //         console.log(value)
-            //         if(value.length == 0){
-            //             $('#from_date').rules( "add", { required: true });
-            //             $('#to_date').rules( "add", { required: true });
-            //         }else{
-            //             $('#from_date').rules( "remove");
-            //             $('#to_date').rules( "remove");
-            //         }
-
-            //     },
-            // });
-
-           
         });
 
     </script>
