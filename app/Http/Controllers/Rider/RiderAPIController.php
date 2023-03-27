@@ -14036,7 +14036,7 @@ class RiderAPIController extends Controller
         $retail_shipment->shipper_cnic = $request->shipper_cnic;
         $retail_shipment->shipper_address = $request->shipper_address;
         $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
-        $retail_shipment->total_charges = $amount;
+        $retail_shipment->total_charges = $charges;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
         $retail_shipment->length = $length;
