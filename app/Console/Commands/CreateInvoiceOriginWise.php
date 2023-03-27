@@ -48,8 +48,8 @@ class CreateInvoiceOriginWise extends Command
         $weekStartDate = Carbon::parse('2023-03-26 00:00')->toDateTimeString();
         $weekEndDate = Carbon::parse('2023-03-26 23:59')->toDateTimeString();
 
-        
-        $invoices = Invoice::whereBetween('create_at', [$weekStartDate, $weekEndDate]);
+
+        $invoices = Invoice::whereBetween('created_at', [$weekStartDate, $weekEndDate]);
         if($invoices->exists()){
             $invoices = $invoices->get();
             if(count($invoices) > 0){
@@ -59,7 +59,7 @@ class CreateInvoiceOriginWise extends Command
             }
         }
 
-        $reim_invoice = InvoiceForReimbursement::whereBetween('create_at', [$weekStartDate, $weekEndDate]);
+        $reim_invoice = InvoiceForReimbursement::whereBetween('created_at', [$weekStartDate, $weekEndDate]);
         if($reim_invoice->exists()){
             $reim_invoice = $reim_invoice->get();
             if(count($reim_invoice) > 0){
