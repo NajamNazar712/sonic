@@ -10897,7 +10897,9 @@ class AdminDashboardController extends Controller
 
         $route = $route->get();
 
-        return response()->json($route);
+        $city_areas = CityArea::where('city_id',$city_id)->get();
+        
+        return response()->json(['route' => $route, 'areas' => $city_areas]);
     }
 
     public function addRiderDetails(Request $request)
