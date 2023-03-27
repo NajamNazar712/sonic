@@ -5686,20 +5686,81 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
+        if($request->get('rider') || $request->get('hub'))
+        {
+            $rider = $request->input('rider',null);
+            $hub = $request->input('hub',null);
+            $search_date_from = $request->input('search_date_from',null);
+            $search_date_to = $request->input('search_date_to',null);
+
+            $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
+            ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+            ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
+            ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
+            ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
+            ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
+            ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
+            ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
+
+            ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
+                'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
+                'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
+                'destinationcity.name as destination','shipments_journey.updated_at as date','rider_deliveries.otp_entered as otp_status','hub.name as hubname')
+                ->where('rider_deliveries.rider_status_id',12)
+                ->where(function($querry) use($rider,$hub,$search_date_from,$search_date_to){
+                    if(!empty($rider))
+                        $querry  ->whereIn('riders.id',$rider);
+                    if(!empty($hub))
+                        $querry  ->whereIn('hub.id',$hub);
+                    if(!empty($rider))
+                        $querry  ->whereBetween('rider_deliveries.created_at',[$search_date_from, $search_date_to]);
+                })
+                
+                ->groupBy('delivery_note_id');
+               
+            
+            $datatable = Datatables::of($data)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('current_status', function ($datatable) {
+                $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
+                ->where('shipments_journey.shipment_id', $datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
+                return $res->name  ; //$datatable->
+            })
+            ->addColumn('last_status', function ($datatable) {
+                $journey_ids =  ShipmentsJourney::where('shipment_id',$datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->get();
+                $journey_ids_length = sizeOf($journey_ids);
+                if($journey_ids_length > 1)
+                {
+                    $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
+                    ->where('shipments_journey.id', $journey_ids[1]->id)->first();
+                    return $res->name  ; //$datatable->
+                }
+            else{
+                return '-'; 
+            }
+        });
+        return $datatable->make(true);
+            
+        }
+
         $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
         ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
         ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
         ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
         ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
+        ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
         ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
 
         ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
             'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
             'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-            'destinationcity.name as destination','shipments_journey.updated_at as date','rider_deliveries.otp_entered as otp_status')
-            ->where('rider_deliveries.rider_status_id',12);
-      
+            'destinationcity.name as destination','shipments_journey.updated_at as date','rider_deliveries.otp_entered as otp_status','hub.name as hubname')
+            ->where('rider_deliveries.rider_status_id',12)
+            ->groupBy('delivery_note_id');
             
         $datatable = Datatables::of($data)
         ->editColumn('tracking_number', function ($shipments) {

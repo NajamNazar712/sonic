@@ -17,7 +17,7 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <select name="search_rider[]" id="search_rider" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="search_rider" id="search_rider" class="form-control select2" multiple="multiple">
                                         @foreach($rider_name as $admin)
                                             <option value="{{$admin->id}}">{{$admin->name}}</option>
                                         @endforeach
@@ -26,7 +26,7 @@
                             </div>
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <select name="search_hub[]" id="search_hub" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
+                                    <select name="search_hub[]" id="search_hub" class="form-control select2" multiple="multiple">
                                         @foreach($hub_name as $hub)
                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
                                         @endforeach
@@ -197,6 +197,19 @@
                 }
             });
 
+            $('#search_rider').select2({
+                width:'100%',
+                placeholder:"Select Rider",
+                allowClear:true,
+                dropdownParent:$('#search_form')
+            });
+            $('#search_hub').select2({
+                width:'100%',
+                placeholder:"Select Hub",
+                allowClear:true,
+                dropdownParent:$('#search_form')
+            });
+
 
             $('#search_form').validate({
                 errorClass: 'danger',
@@ -280,7 +293,8 @@
                 ajax:{
                     url: '{{ route('admin.return.return_confirm_otp.list') }}',
                     data: function (d) {
-                        d.rider = $('#search_form search_rider').val();
+                        d.rider = $('#search_rider').val();
+                        d.hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -294,7 +308,7 @@
                     {data: 'rider_name', name: 'riders.rider_name', class: 'align-middle delivery_note_id'},
                     {data: 'origin', name: 'cities.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'destinationcity.name', class: 'align-middle destination'},
-                    {data: 'origin', name: 'cities.name', class: 'align-middle hub'},
+                    {data: 'hubname', name: 'hub.name', class: 'align-middle hub'},
                     {data: 'last_status', name: 'last_status', class: 'align-middle last_status'},
                     {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
                     {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
@@ -381,18 +395,7 @@
             //     },
             // });
 
-            $('#search_rider').select2({
-                width:'100%',
-                placeholder:"Select Rider",
-                allowClear:true,
-                dropdownParent:$('#search_form')
-            });
-            $('#search_hub').select2({
-                width:'100%',
-                placeholder:"Select Hub",
-                allowClear:true,
-                dropdownParent:$('#search_form')
-            });
+           
         });
 
     </script>
