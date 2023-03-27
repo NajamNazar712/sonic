@@ -4596,14 +4596,14 @@ class AdminHumanResourseController extends Controller
                                     $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
                                     $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
                                 } else {
-                                    return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                    return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                                 }
                             } else {
                                 return response()->json(['status' => 1, 'message' => $response['msg']]);
                             }
                         } else if($admin_profile->confirmation_status == 2) { // For Probation
                             if ($admin_profile->leave_count < $diffDays) {
-                                return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                             } else {
                                 $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
                                 $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
@@ -4954,14 +4954,14 @@ class AdminHumanResourseController extends Controller
                                         $admin_profile->leave_count = $leave_counts - $diffDays;
                                         $admin_profile->fiscal_leave_count = $fiscal_leave_counts - $diffDays;
                                     } else {
-                                        return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                        return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                                     }
                                 } else {
                                     return response()->json(['status' => 1, 'message' => $response['msg']]);
                                 }
                             } else if($admin_profile->confirmation_status == 2) { // For Probation
                                 if ($admin_profile->leave_count < $diffDays) {
-                                    return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                    return redirect()->back()->with('error', 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.');
                                 } else {
                                     $leave_counts = $admin_profile->leave_count;
                                     $fiscal_leave_counts = $admin_profile->fiscal_leave_count;
