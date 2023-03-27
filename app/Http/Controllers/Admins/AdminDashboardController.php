@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\CityArea;
+use App\Http\Models\CityArea;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;

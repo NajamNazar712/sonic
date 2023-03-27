@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\CityArea;
+use App\Http\Models\CityArea;
 use App\Http\Controllers\AdminAPIController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
