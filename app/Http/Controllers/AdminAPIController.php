@@ -3199,6 +3199,10 @@ class AdminAPIController extends Controller
             $retail_shipment->length = $length;
             $retail_shipment->breadth = $breadth;
             $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $charges;
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
             $retail_shipment->admin_id = $admin_id;
             $retail_shipment->save();
 
@@ -3408,12 +3412,18 @@ class AdminAPIController extends Controller
             $retail_shipment->shipper_cnic = $request->shipper_cnic;
             $retail_shipment->shipper_address = $request->shipper_address;
             $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
-            $retail_shipment->total_charges = $amount;
+            $retail_shipment->total_charges = $charges;
             $retail_shipment->shipper_account_no = $shipper_info->id;
             $retail_shipment->weight = $estimated_weight;
             $retail_shipment->length = $length;
             $retail_shipment->breadth = $breadth;
             $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
+            $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
+            $retail_shipment->gst = $rates['gst_charges'];
             $retail_shipment->admin_id = $admin_id;
             $retail_shipment->save();
 
