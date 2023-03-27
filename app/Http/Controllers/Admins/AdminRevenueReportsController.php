@@ -377,7 +377,6 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-
         if($report_type == 1){
             $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
         }

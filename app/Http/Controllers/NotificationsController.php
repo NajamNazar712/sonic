@@ -10227,7 +10227,7 @@ else if ($id == 178) {
                     self::email($subject,$body,$reference_1_id);
                 }
                 else if ($id == 214) {
-                    dd('notification hits !');
+
                     $file_path = $reference_1_id['file_path'];
 
                     $from = $reference_1_id['from'];
@@ -10237,6 +10237,7 @@ else if ($id == 178) {
                     $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
 
                     $file = Storage::disk('public')->url($file_path);
+
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
 
                     if (strpos($body, '[link]') !== FALSE) {
@@ -10244,10 +10245,8 @@ else if ($id == 178) {
                     }
 
                     $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk','shafay.tariq@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk'];
-//                    $to = ['rayyanchishti0@gmail.com'];
 
                     $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
-//                    $cc = ["rayyanchishti0@gmail.com"];
 
                     self::email($subject, $body, $to, $cc);
                 }
