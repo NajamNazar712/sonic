@@ -344,7 +344,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal" aria-hidden="true">
+
+    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
@@ -364,13 +366,13 @@
                             </div>
                             <hr>
                             <input type="hidden" name="tracking_number" id="fake_status_tracking_number">
-                            <div class="row justify-content-center">
-                                <div class="col-12">
-                                    <fieldset class="form-group">
-                                        <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
-                                    </fieldset>
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                        </fieldset>
+                                    </div>
                                 </div>
-                            </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button type="submit" class="btn btn-primary btn-block">Submit</button>
@@ -382,6 +384,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -1662,6 +1665,7 @@
 
             });
 
+
             $('#tracking').on('click','.mark_fake_status', function () {
                 var tracking = $(this).attr('data-tracking');
                 var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la"></i><b> '+ tracking +'</b></span></div>';
@@ -2517,6 +2521,14 @@
                 $('#return_reason_select').val('').trigger('change');
                 $('#return_reason_shipment_remarks').val('');
             });
+
+        $("#mark_fake_status_form").validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+        });
+
         $( "#reattempt_request_form" ).validate({
             errorClass:"danger",
             errorPlacement: function(error, element) {
