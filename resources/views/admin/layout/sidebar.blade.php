@@ -2670,7 +2670,7 @@
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human
                         Resource</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 829, 831], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 829, 831,845], session('permissions'))) !== 0)
 
                         <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs') }}">Download
                                 Docs</a></li>
@@ -2746,7 +2746,7 @@
                         <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(831, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(845, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.human_resource.employee_areas.index')}}">Assign Employee Area</a></li>
                     @endif
                     

@@ -5729,7 +5729,8 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_hubs(){
-    
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(),644);
         $hubs = City::where('status', 1)->where('business_category_id', 1)->where('hub',1)->get();
         $areas = CityArea::with('hubs')->get();
         return view('admin.human_resource.employee_hubs.index')->with(["hubs" => $hubs,'areas' => $areas]);
