@@ -12787,12 +12787,19 @@ class AdminDashboardController extends Controller
     }
 
     public function add_city_sub_area($city_id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 642);
+
         $cities = City::where('id',$city_id)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
     }
 
     public function add_city_sub_area_ajax(Request $request){
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 643);
+        }
+
         $city_area = CityArea::where('city_areas.city_id',$request->city_id)
             ->join('cities as c', 'c.id', '=', 'city_areas.city_id')
             ->leftjoin('admins as a', 'a.id', '=', 'city_areas.updated_by')
@@ -12817,6 +12824,13 @@ class AdminDashboardController extends Controller
                   return  'Active';
               }
             })
+            ->editColumn('default', function ($result) {
+              if($result->default == 1){
+                  return 'Yes';
+              }else{
+                  return  'No';
+              }
+            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -12824,7 +12838,7 @@ class AdminDashboardController extends Controller
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
-                    if (session('role_id') == 1 || in_array(90, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(843, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item" 
                              data-target-id=' . $result->id . ' 
                              data-target-city_id='.$result->city_id .' 
@@ -12833,12 +12847,18 @@ class AdminDashboardController extends Controller
                              rel="editcityarea" data-toggle="modal" data-target="#city_area_edit_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Area</div></button>';
                     }
 
-                    if (session('role_id') == 1 || in_array(90, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
                             if($result->status == 0) {
                                 $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Active</div></button>';
                             }else{
                                 $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="0"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
                             }
+                    }
+
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
+                        if($result->detault == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center mark_default" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Mark Default</div></button>';
+                        }
                     }
 
 
@@ -12948,6 +12968,18 @@ class AdminDashboardController extends Controller
     public function city_area_status(Request $request){
         if(isset($request->id)){
             $city_area = CityArea::where('id',$request->id)->update(['status'=>$request->status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
+    }
+    public function city_area_default(Request $request){
+        if(isset($request->id)){
+            CityArea::where('id','!=' ,$request->id)->where('city_id',$request->city_id)->update(['default'=>0]);
+            CityArea::where('id',$request->id)->update(['default'=>$request->default_status]);
             $data = response()->json([
                 'status' => 1,
                 'message' => 'Success',

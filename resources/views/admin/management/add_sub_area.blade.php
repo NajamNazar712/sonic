@@ -3,13 +3,13 @@
 @section('title', 'City Sub Area')
 
 @section('content')
-    <h1>City Sub Area</h1>
+    <h1>Add Sub Area in Hub</h1>
 
     <section>
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    @if (session('role_id') == 1 || count(array_intersect([276, 321], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || in_array(842, session('permissions')))
 
                         <form id="add_city_form" class="row p-1 mb-2" method="post" onsubmit="event.preventDefault()">
                             @csrf
@@ -59,6 +59,7 @@
                                     <th class="border-primary border-darken-1" >Reporting Location</th>
                                     <th class="border-primary border-darken-1" >Map</th>
                                     <th class="border-primary border-darken-1" >Status</th>
+                                    <th class="border-primary border-darken-1" >Default</th>
                                     <th class="border-primary border-darken-1" >Updated By</th>
                                     <th class="border-primary border-darken-1" >Created At</th>
                                     <th class="border-primary border-darken-1" >Action</th>
@@ -176,45 +177,30 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.management.city.ajax') }}',
+                        url: '{{ route('admin.management.add_city_sub_area_ajax') }}',
+                            method:'post',
+                            headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('City Name');
-                            head.push('City Code');
-                            head.push('City ID');
-                            head.push('Hub Name');
-                            head.push('Hub Code');
-                            head.push('Iata Code');
-                            head.push('Zone');
-                            head.push('Business Category');
-                            head.push('GC Area');
-                            head.push('Attempt Tat');
+                            head.push('Name');
+                            head.push('City');
+                            head.push('Relocation Name');
                             head.push('Status');
-                            head.push('Updated By');
-                            head.push('Updated At');
-                            head.push('Address');
-
-
+                            head.push('Default');
+                            console.log(result.data);
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
                                 row.push(values.name);
-                                row.push(values.city_code);
-                                row.push(values.city_id);
-                                row.push(values.hub);
-                                row.push(values.hub_id);
-                                row.push(values.iata_code);
-                                row.push(values.zone);
-                                row.push(values.business_category);
-                                row.push(values.gc_area);
-                                row.push(values.attempt_tat);
+                                row.push(values.city_name);
+                                row.push(values.relocation_name);
                                 row.push(values.status);
-                                row.push(values.updated_by);
-                                row.push(values.updated_at);
-                                row.push(values.address);
+                                row.push(values.default);
 
                                 body.push(row);
                             });
@@ -227,11 +213,11 @@
             } );
             var table =  $('.datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || in_array(89, session('permissions')))
+                @if (session('role_id') == 1 || in_array(841, session('permissions')))
                 buttons: [
                 {
                     extend: 'excel',
-                    title: 'City Management',
+                    title: 'City Area',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -256,7 +242,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},
@@ -264,6 +250,7 @@
                     {data: 'relocation_name', name: 'rl.name', class: 'align-middle relocation_name'},
                     {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'default', name: 'default', class: 'align-middle default'},
                     {data: 'admin_name', name: 'a.name', class: 'align-middle admin_name'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
@@ -284,6 +271,10 @@
                         '<option value="0">Inactive</option>' +
                         '<option value="1">Active</option>' +
                         '</select>';
+                    var default_select = '<select name="default_select" id="default_select" class="select2 form-control">' +
+                        '<option value="0">No</option>' +
+                        '<option value="1">Yes</option>' +
+                        '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -293,6 +284,11 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.default')){
+                            $(default_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -306,12 +302,23 @@
                             }
                         }
                     });
+
+                    $("#default_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+
+
                     // $("#shipping_mode_type").prepend('<option value="" selected></option>').select2({
                     //     placeholder: "Select Shipping Mode Type",
                     //     width:'100%',
@@ -455,6 +462,62 @@
                                 url: '{!!  route('admin.management.city_area_status')!!}',
                                 method: 'POST',
                                 data: {'status':status,'id':id},
+                            })
+                                .done(function (data) {
+                                    if(data.status === 1) {
+                                        table.draw();
+                                        swal({
+                                            title: 'Success',
+                                            text: 'Success',
+                                            icon: 'success',
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false
+                                        });
+
+                                    }
+                                });
+
+                        }
+                    });
+            });
+              $('body').on('click','.mark_default',function () {
+                var id = $(this).parents('tr').attr('id');
+                var default_status = $(this).attr('rel');
+                swal({
+                    title: 'Are You Sure?',
+                    text: `Select Yes to Mark Default this Area!'`,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                })
+                    .then(function (confirm) {
+                        if (confirm) {
+
+                            $.ajaxSetup({
+                                headers: {
+                                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                                }
+                            });
+
+                            $.ajax({
+                                url: '{!!  route('admin.management.city_area_default')!!}',
+                                method: 'POST',
+                                data: {'default_status':default_status,'id':id,'city_id':'{{$city_id}}'},
                             })
                                 .done(function (data) {
                                     if(data.status === 1) {

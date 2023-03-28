@@ -20,6 +20,7 @@ class CreateCityAreasTable extends Migration
             $table->integer('report_location_id')->index();
             $table->integer('updated_by')->index();
             $table->integer('status')->default(0);
+            $table->integer('default')->default(0);
             $table->timestamps();
         });
     }

@@ -837,6 +837,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/city/add_city_sub_area_ajax', 'Admins\AdminDashboardController@add_city_sub_area_ajax')->name('add_city_sub_area_ajax');
         Route::post('/city/city_sub_area_post', 'Admins\AdminDashboardController@city_sub_area_post')->name('city_sub_area_post');
         Route::post('city/city_area_status', 'Admins\AdminDashboardController@city_area_status')->name('city_area_status');
+        Route::post('city/city_area_default', 'Admins\AdminDashboardController@city_area_default')->name('city_area_default');
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route
@@ -3442,6 +3443,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@delivery_area_keyword_store')->name('store');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@delivery_area_keyword_enable_disable')->name('enable_disable');
             Route::post('update', 'Admins\GlobalSettingsController@delivery_area_keyword_update')->name('update');
+            Route::get('get_city_area', 'Admins\GlobalSettingsController@get_city_area')->name('get_city_area');
         });
 
         Route::prefix('booking_destination_keyword')->name('booking_destination_keyword.')->group(function () {
