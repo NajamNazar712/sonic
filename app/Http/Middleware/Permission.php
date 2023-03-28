@@ -1152,6 +1152,8 @@ class Permission
             'human_resource.fuel_allocation.index' => 831,
             'human_resource.fuel_allocation.list' => 831,
 
+            'human_resource.employee_areas.index' => 845,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
