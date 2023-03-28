@@ -1290,9 +1290,7 @@ class AdminReportsEmailController extends Controller
     }
 
 	static public function done_payment($date){
-        $from = Carbon::today()->subDays(2)->toDateTimeString();
-        $to = Carbon::yesterday()->endOfDay()->toDateTimeString();
-        $done_payments = DonePaymentCalculation::whereBetween('created_at', [$from, $to]);
+        $done_payments = DonePaymentCalculation::whereDate('created_at', $date);
         DonePaymentsReport::truncate();
         if($done_payments->exists()){
             $total_amount = 0;
