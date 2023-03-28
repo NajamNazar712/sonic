@@ -389,7 +389,9 @@ class AdminCargoManifestController extends Controller
                     ->whereIn('crm.status_id', [2, 3, 5])
                     ->where('crm.case_nature_id', 1);
             })
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub','shipments.consignee_address','dc.id as destination_city_id')->whereNotIn('shipments.id', $on_hold_shipments);
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc', 'csj.created_at as current_status', 'olddc.name as old_destination', 'olddci.name as old_destination_intercept', 'crm.id as complaint', 'shipments.return_address_id', 'rc.name as return_city_name', 'ohc.name as origin_hub', 'dhc.name as destination_hub', 'olddhci.name as old_destination_intercept_hub', 'olddhc.name as old_destination_hub','shipments.consignee_address','dc.id as destination_city_id','sts.status as star_status')
+            ->whereNotIn('shipments.id', $on_hold_shipments);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -430,7 +432,14 @@ class AdminCargoManifestController extends Controller
             ])
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                if ($shipments->star_status)
+                {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
+                }
+                else
+                {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                }
             })
             ->editColumn('origin', function ($shipments) {
                 if (in_array($shipments->shipper_status_id, [20, 30, 37])) {
@@ -626,6 +635,11 @@ class AdminCargoManifestController extends Controller
         }
         if ($mode = $request->get('search_shipping_mode')) {
             $datatables->where('sm.id', '=', $mode);
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $datatables->where('sts.status',1);
         }
 
         return $datatables->make(true);

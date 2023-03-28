@@ -54,6 +54,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\StarShipper;
 use App\Http\Models\WMS\WmsUserInformation;
 use Auth;
 use Carbon\Carbon;
@@ -825,10 +826,25 @@ class AdminTrackingController extends Controller
         $tracking = array();
 
         foreach ($tracking_numbers as $tracking_number) {
-
+            $details = array();
             $shipment = Shipment::where('tracking_number', $tracking_number);
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+
+                $star_user_id = $shipment->user_id;
+
+                $is_user_star = StarShipper::where('user_id',$star_user_id)
+                    ->where('status',1);
+                if($is_user_star->exists())
+                {
+                    $details['star_shipper'] = 1;
+                }
+                else
+                {
+                    $details['star_shipper'] = 0;
+                }
+
+
 
                 if ($shipment->user->blacklist == 0) {
                     $check = false;
@@ -843,7 +859,7 @@ class AdminTrackingController extends Controller
                     ShipmentScanningJourneyController::add($shipment->id, 9, 1, Auth::id(), null, null);
 
                     if ($shipment->booking_type_id == 4 || (session('department_id') == 7 && $check == true) || (session('department_id') != 7 && $check == false) || (session('department_id') == 7 && in_array(session('id'), session('sale_users_bypass')))) {
-                        $details = array();
+
 
                         if ($shipment->business_category_id == 2) {
                             $international_shipment = InternationalShipment::where('shipment_id', $shipment->id)->whereNotNull('international_tracking_number');

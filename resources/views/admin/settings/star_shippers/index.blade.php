@@ -21,10 +21,9 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Sales Person</th>
-                                    <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Territory</th>
+                                    <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -47,7 +46,7 @@
                         <div class="modal-body">
                             <div class="form-group" id="select_shipper">
                                 <select name="star_shipper_id" id="star_shipper_id" class="form-control select2"
-                                        data-rule-required="true" data-msg-required="City is required">--}}
+                                        data-rule-required="true" data-msg-required="Shipper is required">
                                     @foreach($shippers as $shipper)
                                         <option value="{{ $shipper->id }}"> {{ $shipper->name }} </option>
                                     @endforeach
@@ -123,7 +122,7 @@
                 language: {
                     processing: data_table_loader
                 },
-                ajax: '{{ route('admin.settings.auto_tag_territories.list') }}',
+                ajax: '{{ route('admin.settings.star_shippers.list') }}',
                 rowId: 'id',
                 order: [[3, 'desc']],
                 columns: [
@@ -138,10 +137,9 @@
                             return '';
                         }
                     },
-                    {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
-                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
-                    {data: 'territory_name', name: 't.name', class: 'align-middle territory_name'},
-                    {data: 'status', name: 'auto_tag_territories.status', class: 'align-middle status'},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
+                    {data: 'status', name: 'star_shippers.status', class: 'align-middle status'},
+                    {data: 'created_at', name: 'star_shippers.created_at', class: 'align-middle created_at'},
                     {
                         data: 'action',
                         name: 'action',
@@ -207,74 +205,38 @@
                 }
             });
 
-            $('#star_shipper_add').on('submit', function (e) {
-                e.preventDefault();
-                var formData = $(this).serialize();
-                $.ajax({
-                    url: $(this).attr('action'),
-                    type: 'POST',
-                    data: formData,
-                }).done(function (res) {
+            $( "#star_shipper_add" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+            });
 
-                    if (res.status === '1')
-                    {
-                        toastr.success(res.success, 'Success!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    else
-                    {
-                        toastr.error(res.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
-                    table.draw();
-                });
-
-                $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function () {
-                    var id = parseInt($(this).parents('tr').attr('id'));
-                    swal({
-                        text: 'Are you sure, you want to Delete?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.delete', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                swal({
+                    text: 'Are you sure, you want to Delete?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
                         },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        $.ajax({
-                            url: '{!! route("admin.settings.auto_tagging.delete") !!}',
-                            method: 'POST',
-                            data: {
-                                'id': id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                            table.draw();
-                        });
-                    });
-
-
-                });
-                $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function () {
-                    var id = parseInt($(this).parents('tr').attr('id'));
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
                     $.ajax({
-                        url: '{!! route("admin.settings.auto_tag_territories.enable_disable") !!}',
+                        url: '{!! route("admin.settings.auto_tagging.delete") !!}',
                         method: 'POST',
                         data: {
                             'id': id,
@@ -287,10 +249,26 @@
                         });
                         table.draw();
                     });
-
-
                 });
 
+
+            });
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.enable_disable', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $.ajax({
+                    url: '{!! route("admin.settings.star_shippers.enable_disable") !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    table.draw();
+                });
             });
         });
     </script>

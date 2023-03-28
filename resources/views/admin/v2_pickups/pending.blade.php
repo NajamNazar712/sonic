@@ -28,7 +28,6 @@
 
                                             <option value="10">Pickup Request Before Cut Off Time</option>
                                             <option value="0">All</option>
-                                            <option value="1">Star Shippers</option>
                                         </select>
                                     </div>
                                     <div class="col">
@@ -399,12 +398,6 @@
 
         .legends{
             cursor:pointer;
-        }
-
-        .star_sippers
-        {
-            color: white;
-            background-color: #0EDB8B;
         }
         
 @foreach($legends as $legend)
@@ -1199,11 +1192,7 @@
                table.draw(true);
             });
 
-            $('#star_shippers_filter').on('click',function () {
-                $('#star_shippers_filter').val(1);
-               table.draw(true);
-                $('#star_shippers_filter').val(0);
-            });
+
 
             $('#datatable tbody').on('click', 'tr td.all_remarks button.all_remarks_btn', function() {
                 var pickup_req_id = parseInt($(this).attr('rel'));
@@ -1243,6 +1232,12 @@
                     }
                 });
                 /* print(pickup_note_id); */
+            });
+
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+                table.draw(true);
+                $('#star_shippers_filter').val(0);
             });
         });
     </script>

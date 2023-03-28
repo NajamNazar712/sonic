@@ -30,15 +30,13 @@
                                 </button>
                             </div>
                         </div>
-
                     </form>
-
-
                 </div>
 
                     <input type="hidden" name="delivery_note_ids" id="delivery_note_ids">
 
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+
+            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 

@@ -133,7 +133,7 @@ class V2AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v2_pickup_requests.id)'));
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
-            ->leftjoin('star_shippers as ss','ss.shipper_id','=','u.id')
+            ->leftjoin('star_shippers as ss','ss.user_id','=','u.id')
             ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks', 't.name as territory','ss.status as star_status')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
@@ -185,13 +185,30 @@ class V2AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                 if($pickup_requests->reminder == 1)
                 {
+                    if ($pickup_requests->star_status == 1)
+                    {
+                        $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+                        $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;"><i class="star_shippers_icon"></i>'.$test.'</b></td>';
+                        return $test1;
+                    }
+                    else
+                    {
+                        $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+                        $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;">'.$test.'</b></td>';
+                        return $test1;
+                    }
+                }
+                if ($pickup_requests->star_status == 1)
+                {
                     $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                    $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;">'.$test.'</b></td>';
+                    $test1 ='<td class="align-middle" ><i class="star_shippers_icon"></i>'.$test.'</b></td>';
                     return $test1;
-
+                }
+                else
+                {
+                    return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
                 }
 
-                return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('bookings_link', function ($pickup_request) {
                 if ($pickup_request->booked != 0) {
@@ -393,7 +410,6 @@ class V2AdminPickupsController extends Controller
         {
             $datatables->where('ss.status',1);
         }
-//        dd('pickups !',$pickup_requests->get());
                     return $datatables->make(true);
     }
 
