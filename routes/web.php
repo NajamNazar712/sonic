@@ -4079,6 +4079,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('allocate', 'Admins\AdminHumanResourseController@rider_fuel_allocation_allocate')->name('allocate');
             Route::post('delivery_notes', 'Admins\AdminHumanResourseController@rider_fuel_allocation_delivery_notes')->name('delivery_notes');
         });
+
+         Route::prefix('employee_areas')->name('employee_areas.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_hubs')->name('index');
+            Route::post('assign', 'Admins\AdminHumanResourseController@assign_employee_areas')->name('assign');
+        });
     });
 
     Route::prefix('attendance')->name('attendance.')->group(function () {

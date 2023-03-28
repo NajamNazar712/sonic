@@ -2745,6 +2745,10 @@
                     @if (Auth::user()->trax_id != NULL)
                         <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(831, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_areas.index')}}">Assign Employee Area</a></li>
+                    @endif
                     
 
                 </ul>

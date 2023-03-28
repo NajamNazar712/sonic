@@ -5725,5 +5725,159 @@ class AdminHumanResourseController extends Controller
         }
 
         return response()->json(['details' => $details]);
+    
+    }
+
+    public function employee_hubs(){
+    
+        $hubs = City::where('status', 1)->where('business_category_id', 1)->where('hub',1)->get();
+        $areas = CityArea::with('hubs')->get();
+        return view('admin.human_resource.employee_hubs.index')->with(["hubs" => $hubs,'areas' => $areas]);
+    }
+
+    public function assign_employee_areas(Request $request){
+        $hub_id = $request->hub_id;
+          $names = [
+            'trax_id' => 'TRAX ID',
+            'area_id' => 'DEFAULT AREA ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'string' => ':attribute must be a String.',
+        ];
+        $rules = [
+            'trax_id' => ['required', 'string', Rule::exists('employees', 'trax_id')->where(function ($query) { $query->where('department_id', 6);})],
+            'area_id' => ['required', 'integer', Rule::exists('city_areas', 'id')->where(function ($query) use ($hub_id) { $query->where('city_id', $hub_id) ;})],
+        ];
+        $fields = [0 => 'trax_id', 1 => 'area_id'];
+
+        if ($file = $request->file('upload_excel')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['TRAX ID', 'DEFAULT AREA ID'];
+
+            if (isset($spreadsheet)) {
+                $header_correct = TRUE;
+                foreach ($spreadsheet[0] as $index => $header_value) {
+
+                    if ($index == 1) {
+                    } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                        $header_correct = FALSE;
+
+                        break;
+                    }
+                }
+
+                if (!$header_correct) {
+                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                } else {
+                    unset($spreadsheet[0]);
+                }
+            }
+
+            if (!empty($spreadsheet) || !isset($spreadsheet)) {
+                $rows = array();
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+                $errors = array();
+                $trax_ids = array();
+                $trax_id_row = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+
+                    $validate = Validator::make($row, $rules, $messages);
+
+                    $validate->setAttributeNames($names);
+
+                    if ($validate->fails()) {
+                        $errors['Row #' . $row_id] = $validate->errors()->all();
+                    }
+                    if (empty($errors['Row #' . $row_id])) {
+                        if (!empty(trim($row['trax_id'])) || !empty(trim($row['area_id']))) {
+                            if (empty($trax_ids)) {
+
+                                $trax_ids[] = $row['trax_id'];
+                                $trax_id_row[$row['trax_id']] = $row_id;
+                            } else {
+                                if (in_array($row['trax_id'], $trax_ids)) {
+                                    $errors['Row #' . $row_id][] = 'Same Trax ID as of Row #' . $trax_id_row[$row['trax_id']];
+                                } else {
+                                    $trax_ids[] = $row['trax_id'];
+                                    $trax_id_row[$row['trax_id']] = $row_id;
+                                }
+                            }
+                        }
+
+                        if (count($trax_ids) > 0) {
+                            if (!Employee::with('city')->where('trax_id', $row['trax_id'])->whereHas('city', function($q) use ($hub_id){ $q->where('hub_id', $hub_id); })->exists()) {
+                                $errors['Row #' . $row_id][] = 'Employee with Trax Id #' . $row['trax_id'] . ' can\'t be assigned area id' . $row['area'] . ' because hub is different';
+                            }
+                        } else {
+                            $errors['Row #' . $row_id][] = 'Invalid Trax ID Entered' . $row['trax_id'];
+                        }
+                    }
+                }
+
+                if (empty($errors)) {
+                    $tracking_numbers = array();
+                    foreach ($rows as $key => $row) {
+                        $row_id = $key + 2;
+                        $trax_id = trim($row['trax_id']);
+                        $area_id = trim($row['area_id']);
+
+
+                       $employee = Employee::where('trax_id',$trax_id)->first();
+                            if($employee){
+                                $employee->area_id = $area_id;
+                                $employee->save();
+
+                                if($employee->employee_type_id == 1){
+                                    $admin = Admin::where('trax_id',$trax_id)->first();
+                                    if($admin){
+                                        $admin->area_id = $area_id;
+                                        $admin->save();
+                                    }
+                                }
+                                else{
+                                    $rider = Rider::where('trax_id',$trax_id)->first();
+                                    if($rider){
+                                        $rider->area_id = $area_id;
+                                        $rider->save();
+                                    }
+                                }
+                            }    
+                        $employee_trax_ids['Row #' . $row_id] = $trax_id;
+                    }
+                    $employee_trax_ids = implode(' | ', array_map(function ($row, $trax_id) {
+                        return $row . ': ' . $trax_id;
+                    }, array_keys($employee_trax_ids), $employee_trax_ids));
+
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Area(s) Assigned to Employees' . PHP_EOL . $employee_trax_ids]);
+                } else {
+                    $errors = array_map(function ($row, $errors) {
+                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                    }, array_keys($errors), $errors);
+
+                    return redirect()->back()->withErrors($errors);
+                }
+            } else {
+                return redirect()->back()->with('error', 'No Trax ID(s) in File');
+            }
+        }
+               
     }
 }
+
