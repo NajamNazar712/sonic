@@ -2,6 +2,7 @@
 @section('title','Receive Return Deliveries')
 
 @section('content')
+
     <h1 class="mb-1">
         Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
@@ -162,7 +163,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -172,7 +173,7 @@
 
     <script type="text/javascript">
 
-    var flag = false;
+        var flag = false;
         $(document).ready(function () {
 
             var date = $('#actual_date').pickadate({
@@ -219,7 +220,9 @@
             var statusSelection = $('#status_update_form').find('status_drop');
             var status = statusSelection.val();
             
-            var remarks = $('#status_update_form').closest('tr').find('.return_remarks');
+            var remarks = $('#status_update_form').closest('tr').find('input.return_remarks');
+            var errorMsg = $('#status_update_form').closest('tr').find('.error-msg');
+            var errorLabel = $('#status_update_form').closest('tr').find('label[for="' + remarks.attr('id') + '"]');
             
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(50, session('permissions')))
@@ -235,25 +238,36 @@
                                     if ($(row.node()).hasClass('selected')) {
                                         var id = parseInt(row.id());
                                         var status = $(row.node()).find('select.statusDrop').val();
-                                       var remarks = $(row.node()).find('input.return_remarks');
-                                        
-                                       if (status == 60 && remarks.val() == '') 
-                                       {
-                                        remarks.attr('data-rule-required', 'true');
-                                        remarks.attr('data-msg-required', 'Remarks is required');
-                                        flag = true;
-                                        }
-                                        else 
-                                        {
-                                            remarks.attr('data-rule-required', 'false');
-                                            remarks.removeAttr('data-msg-required');
-                                            flag = false;
-                                        }
+                                        var remarks = $(row.node()).find('input.return_remarks');
+                                        // if (status != 60) {
+                                        //     remarks.removeClass('error');
+                                        //     remarks.removeAttr('data-rule-required');
+                                        //     remarks.removeAttr('data-msg-required');
+                                        //     errorMsg.hide();
+                                        //     errorLabel.remove();
+                                        //     flag = false;
+                                            
+                                        // } else if (remarks.val() == '') {
+                                        //     remarks.addClass('error');
+                                        //     remarks.attr('data-rule-required', 'data-rule-required');
+                                        //     remarks.attr('data-msg-required', 'Remarks is required');
+                                        //     errorMsg.show();
+                                        //     errorLabel.show();
+                                        //     flag = true;
 
+                                        // } else {
+                                        //     remarks.removeClass('error');
+                                        //     remarks.removeAttr('data-rule-required');
+                                        //     remarks.removeAttr('data-msg-required');
+                                        //     errorMsg.hide();
+                                        //     errorLabel.remove();
+                                        //     flag = false;
+                                        // }
+                                
                                     }
                                 });
-                                if(!flag)
-                                {
+                                // if(!flag)
+                                // {
                                     swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to change this shipment\'s status! Please make sure you have collected the charges!',
@@ -380,39 +394,37 @@
                                         }
                                     }
                                     });
-                                }
-                                else
-                                {
+                                // }
+                                // else
+                                // {
 
-                                    table.rows().nodes().each(function(index) {
-                                    var row = table.row(index);
-                                    if ($(row.node()).hasClass('selected')) {
-                                        var id = parseInt(row.id());
-                                        var status = $(row.node()).find('select.statusDrop').val();
-                                        var remarks = $(row.node()).find('input.return_remarks');
-                                        console.log(remarks.val());
-                                        if (status == 60 && remarks.val() == '') 
-                                        {
-                                        
-                                            remarks.attr('data-rule-required', 'true');
-                                            remarks.attr('data-msg-required', 'Remarks is required');
-                                            // var errorMsg = $('<span class="error-msg text-danger">Remarks is required</span>');
-                                            // remarks.after(errorMsg);
-                                            flag = true;
-                                        } else 
-                                        {
-                                            remarks.attr('data-rule-required', 'false');
-                                            remarks.removeAttr('data-msg-required');
-                                            flag = false;
-                                        }
+                                //     table.rows().nodes().each(function(index) {
+                                //     var row = table.row(index);
+                                //     if ($(row.node()).hasClass('selected')) {
+                                //         var id = parseInt(row.id());
+                                //         var status = $(row.node()).find('select.statusDrop').val();
+                                //         var remarks = $(row.node()).find('input.return_remarks');
+                                //         // console.log(remarks.val());
+                                //         if (status == 60 && remarks.val() == '') 
+                                //         {
+                                //             remarks.attr('data-rule-required', 'true');
+                                //             remarks.attr('data-msg-required', 'Remarks is required');
+                                //             flag = true;
+                                //         } 
+                                //         else 
+                                //         {
+                                //             remarks.attr('data-rule-required', 'false');
+                                //             remarks.removeAttr('data-msg-required');
+                                //             flag = false;
+                                //         }
 
-                                    }
-                                });
+                                //     }
+                                // });
 
-                                    remarks.attr('data-rule-required', 'true');
-                                    remarks.attr('data-msg-required', 'Remarks is required');
-                                    flag = true;
-                                }
+                                //     remarks.attr('data-rule-required', 'true');
+                                //     remarks.attr('data-msg-required', 'Remarks is required');
+                                //     flag = true;
+                                // }
                             }
                             else{
                                 var error = "Something went wrong please refresh page and try again!";
@@ -529,7 +541,7 @@
                     }
                 },
                 drawCallback: function (settings) {
-                    $(".reasonDrop").prepend('<option value="" ></option>').select2({
+                    $(".reasonDrop").select2({
                         placeholder: "Select a Reason",
                         width:'100%'
                     });
@@ -588,54 +600,35 @@
                     $('#submit_selected_status').attr('disabled', true);
                 }
             });
-
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
-                // alert("asd");
-
-                var remarks = $(this).closest('tr').find('input.return_remarks');
-                var errorMsg = $(this).closest('tr').find('.error-msg');
-
-                $('#statusSubmit').removeAttr('disabled');
+               $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-               
-                // remarks.removeAttr('data-msg-required');
-                // errorMsg.remove();
-                console.log("data-msg-required: ", remarks.attr('data-msg-required'));
-                if (!remarks.attr('data-msg-required')) {
-                   
-                    errorMsg.remove();
-                }
-                
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+                var errorLabel = $(this).closest('tr').find('label[for="' + remarks.attr('id') + '"]');
                 if (status != 60) {
-                    remarks.removeAttr('data-rule-required');
+                    remarks.removeClass('error');
+                    remarks.removeAttr('required');
                     remarks.removeAttr('data-msg-required');
-                    errorMsg.remove();
-                }
-                else if (remarks.val() == '') {
-                    remarks.attr('data-rule-required', 'true');
+                    errorMsg.hide();
+                    errorLabel.remove();
+                    
+                } else if (remarks.val() == '') {
+                    remarks.addClass('error');
+                    remarks.attr('required', 'required');
                     remarks.attr('data-msg-required', 'Remarks is required');
                     errorMsg.show();
+                    errorLabel.show();
+                    
+                } else {
+                    remarks.removeClass('error');
+                    remarks.removeAttr('required');
+                    remarks.removeAttr('data-msg-required');
+                    errorMsg.hide();
+                    errorLabel.remove();
                 }
-                // if (status == 60 && remarks.val() == '') 
-                // {
-                //     remarks.attr('data-rule-required', 'true');
-                //     remarks.attr('data-msg-required', 'Remarks is required');
-                //     flag = true;
-                // } 
-                // else {
-                //     remarks.removeAttr('data-rule-required');
-                //     flag = false;
-                // }
-                // else 
-                // {   
-                //     console.log(remarks.val(),status);
-                //     remarks.attr('data-rule-required', 'false');
-                //     remarks.removeAttr('data-msg-required');
-                //     flag = false;
-                //     console.log("else");
-                // } 
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
                     type:'POST',
@@ -651,13 +644,13 @@
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
                         });
-                        reason.val('').trigger('change');
                     }else{
                         reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
             });
+           
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
@@ -687,17 +680,17 @@
                 }
             });
 
-            $('#status_update_form').on('keypress',function (e) {
-                if(e.which == 13) {
-                    e.preventDefault();
-                }
-            });
+            // $('#status_update_form').on('keypress',function (e) {
+            //     if(e.which == 13) {
+            //         e.preventDefault();
+            //     }
+            // });
 
             $('body').on('select2:select','#select_all_status',function (e) {
 
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
-                console.log(statusSelection,status);
+                // console.log(statusSelection,status);
                 var all_reason = $('#select_all_reason');
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
@@ -731,6 +724,14 @@
                 errorClass: "danger",
                 errorPlacement: function (error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    // console.log('error: ',error);
+                    // console.log(element);
+                    // error.addClass('w-100').appendTo(element.parent());
+                },
+                success: function(label, element) {
+                    console.log(label);
+                    label.remove();
+                    // label.removeClass('danger');
                 },
                 submitHandler: function (form) {
 
@@ -738,7 +739,7 @@
                 event.preventDefault();
                 var this_form = this;
                 var statusSelection = $(form).find('status_drop');
-                console.log(statusSelection);
+                // console.log(statusSelection);
                 var status = statusSelection.val();
                 var remarks = $(form).closest('tr').find('.return_remarks');
 
