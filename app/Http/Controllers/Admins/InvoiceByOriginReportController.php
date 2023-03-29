@@ -127,7 +127,7 @@ class InvoiceByOriginReportController extends Controller
                     $revenue_by_invoice->weight_charges = $total_weight_charges[$origin];
                     $revenue_by_invoice->cash_handling_charges = $total_cash_handling_charges[$origin];
                     $revenue_by_invoice->insurance_charges = $total_insurance_charges[$origin];
-                    $revenue_by_invoice->packaging_charges = $total_packaging_charges[$origin];
+                    $revenue_by_invoice->packaging_charges = $total_packaging_material_charges[$origin];
                     $revenue_by_invoice->fuel_surcharge = $total_fuel_surcharge[$origin];
                     $revenue_by_invoice->return_charges = $total_return_charges[$origin];
                     $revenue_by_invoice->replacement_charges = $total_replacement_charges[$origin];
