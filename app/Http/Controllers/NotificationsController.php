@@ -10234,7 +10234,7 @@ else if ($id == 178) {
                     $to = $reference_1_id['to'];
                     $subject = 'Revenue Daily Report By Arrival Date  | ';
 
-                    $subject .= 'From ( ' . $from . ' - ' . $to . ' )';
+                    $subject .= 'From ( ' . $from . ' )';
 
                     $file = Storage::disk('public')->url($file_path);
 
