@@ -402,7 +402,7 @@ class AdminHumanResourseController extends Controller
         $staff_categories = StaffCategory::all();
         $employee_zones = Zone::where('status', 1)->where('business_category_id', 1)->get(['id', 'name']);
         $employee_natures = EmployeeNature::select('id', 'name')->get();
-        $areas = CityArea::select('id', 'name')->get();
+        $areas = CityArea::with('hubs')->where('status',1)->get();
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')->leftjoin('cities as h', 'h.id', 'c.hub_id')->where('is_line_manager', 1)->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub'])->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', 1)->whereNotNull('trax_id')->get();
         return view('admin.human_resource.employee_directory.index')->with(['cities' => $city, 'employee_types' => $employee_types, 'rider_categories' => $rider_categories, 'rider_types' => $rider_type, 'routes' => $route, 'operation_rider_category' => $operation_rider_category, 'route_types' => $route_types, 'employee_statuses' => $employee_statuses, 'employee_department' => $employee_department, 'rider_main_categories' => $rider_main_categories, 'employee_shifts' => $employee_shifts, 'staff_categories' => $staff_categories, 'employee_zones' => $employee_zones, 'employee_natures' => $employee_natures, 'replacement_employees' => $replacement_employees, 'line_managers' => $line_managers,'areas' => $areas]);
@@ -449,6 +449,10 @@ class AdminHumanResourseController extends Controller
 
         if ($line_manager = $request->get('search_line_manager')) {
             $employees = $employees->where('employees.line_manager_id', $line_manager);
+        }
+
+        if ($area = $request->get('area')) {
+            $employees = $employees->where('employees.area_id', $area);
         }
         if ($filter_line_manager = $request->get('filter_line_manager')) {
             if ($filter_line_manager == 1) {
@@ -1264,7 +1268,7 @@ class AdminHumanResourseController extends Controller
         $rider_route_id = $employee->rider->route_id ?? null;
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
-        $areas_list = CityArea::where('city_id',$employee->city_id)->get();
+        $areas_list = CityArea::where('city_id',$employee->city_id)->where('status',1)->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
         $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
@@ -2856,7 +2860,7 @@ class AdminHumanResourseController extends Controller
             $routes = Route::where('city_id', $request->city_id)->where('status', 1);
             if ($routes->exists()) {
                 $routes = $routes->get();
-                $areas = CityArea::where('city_id', $request->city_id)->select('id','name')->get();
+                $areas = CityArea::where('city_id', $request->city_id)->select('id','name')->where('status',1)->get();
                 return response()->json(['status' => 1, 'routes' => $routes, 'areas' => $areas]);
             }
             return response()->json(['status' => 1]);
@@ -5736,7 +5740,7 @@ class AdminHumanResourseController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(),644);
         $hubs = City::where('status', 1)->where('business_category_id', 1)->where('hub',1)->get();
-        $areas = CityArea::with('hubs')->get();
+        $areas = CityArea::with('hubs')->where('status',1)->get();
         return view('admin.human_resource.employee_hubs.index')->with(["hubs" => $hubs,'areas' => $areas]);
     }
 
