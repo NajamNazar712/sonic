@@ -1338,6 +1338,8 @@ class Permission
 
 			'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
+
+            'return.return_confirm_otp.index' => 840
         ],
 
         'shipper' => [

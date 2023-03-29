@@ -1548,6 +1548,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
         });
     });
+    
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
         Route::prefix('supervisor')->name('supervisor.')->group(function () {
             Route::get('', 'Admins\LastMileDebriefingController@supervisor_view')->name('index');

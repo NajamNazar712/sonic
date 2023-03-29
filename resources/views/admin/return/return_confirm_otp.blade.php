@@ -255,21 +255,22 @@
                             head.push('Current Status');
                             head.push('Status Date');
                             head.push('OTP Status');
+
                             $.each(result.data, function(index, values) {
-                                row = [];
-                                row.push(index + 1);
-                                row.push(values.delivery_note_id);
-                                row.push(values.tracking_number_excel);
-                                row.push(values.rider_employee_id);
-                                row.push(values.rider_name);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.hubname);
-                                row.push(values.last_status);
-                                row.push(values.current_status);
-                                row.push(values.date);
-                                row.push(values.otp_status_text);
-                                body.push(row);
+                            row = [];
+                            row.push(index + 1);
+                            row.push(values.delivery_note_id);
+                            row.push(values.tracking_number_excel);
+                            row.push(values.rider_employee_id);
+                            row.push(values.rider_name);
+                            row.push(values.origin);
+                            row.push(values.destination);
+                            row.push(values.hubname);
+                            row.push(values.last_status);
+                            row.push(values.current_status);
+                            row.push(values.date);
+                            row.push(values.otp_status_text);
+                            body.push(row);
                             });
                         },
                         async: false
