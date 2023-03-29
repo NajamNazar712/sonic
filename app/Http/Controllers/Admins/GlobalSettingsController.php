@@ -7612,7 +7612,7 @@ class GlobalSettingsController extends Controller
         $shipper_id = $request->star_shipper_id;
         if (!empty($shipper_id))
         {
-            $shipper_exist = StarShipper::where('shipper_id',$shipper_id);
+            $shipper_exist = StarShipper::where('user_id',$shipper_id);
             if ($shipper_exist->exists())
             {
                 return redirect()->back()->with('error', 'Already Exist !');
@@ -7620,7 +7620,7 @@ class GlobalSettingsController extends Controller
             else
             {
                 $new_shipper = new StarShipper();
-                $new_shipper->shipper_id = $shipper_id;
+                $new_shipper->user_id = $shipper_id;
                 $new_shipper->add_by = $shipper_id;
                 $new_shipper->save();
 
