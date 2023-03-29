@@ -83,6 +83,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Area</th>
 										<th class="border-primary border-darken-1">Type</th>
 										<th class="border-primary border-darken-1">Updated At</th>
 										<th class="border-primary border-darken-1">Start Location Latitude</th>
@@ -249,6 +250,7 @@
 							head.push('Shipper');
 							head.push('Address');
 							head.push('City');
+							head.push('Area');
 							head.push('Type');
 							head.push('Updated At');
 							head.push('Start Location Latitude');
@@ -277,6 +279,7 @@
 								row.push(values.shipper);
 								row.push(values.pickup_address);
 								row.push(values.city);
+								row.push(values.city_area_name);
 								row.push(values.pickup_type);
 								row.push(values.created_at);
 								row.push(values.start_location_latitude);
@@ -332,13 +335,14 @@
 				}
 			},
 			rowId: 'id',
-			order: [[6, 'desc']],
+			order: [[7, 'desc']],
 			columns: [
 				{data: 'added_at', name: 'v2_rider_pickups.added_at', class: 'align-middle added_at'},
 				{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 				{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 				{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 				{data: 'city', name: 'c.name', class: 'align-middle city'},
+				{data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
 				{data: 'pickup_type', name: 'v2_rider_pickups.pickup_type', class: 'align-middle pickup_type'},
 				{data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'align-middle created_at'},
 				{data: 'start_location_latitude', name: 'v2_rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},

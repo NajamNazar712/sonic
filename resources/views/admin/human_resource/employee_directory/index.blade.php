@@ -17,7 +17,7 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group input-group ">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -29,7 +29,7 @@
                                                        id="search_date_from" placeholder="Select From Date">
                                             </div>
                                         </div>
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,7 +41,7 @@
                                                        id="search_date_to" placeholder="Select To Date">
                                             </div>
                                         </div>
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group">
                                                 <select name="search_line_manager" id="search_line_manager" class="select2 form-control " style="width: 100%">
                                                     @foreach($line_managers as $line_manager)
@@ -50,6 +50,18 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        
+                                        @if($employee->department_id == 6)
+                                         <div class="col-3 mt-1">
+                                            <div class="form-group">
+                                                <select name="area" id="select_area" class="select2 form-control " style="width: 100%">
+                                                    @foreach($areas as $area)
+                                                        <option value="{{$area->id}}">{{$area->name}} - {{$area->hubs->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
 
                                         <input type="hidden" id="filter_line_manager" value="0">
                                         <div class="col-4 mt-1">
@@ -1110,6 +1122,12 @@
                 allowClear: true,
                 width: '100%',
             });
+           
+            $("#select_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                allowClear: true,
+                width: '100%',
+            });
 
             $("#updateLineManagerForm #line_manager_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Line Manager",
@@ -1474,6 +1492,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_line_manager = $('#search_line_manager').val();
                         d.filter_line_manager = $('#filter_line_manager').val();
+                        d.area = $('#select_area').val();
                     }
                 },
                 order: [[22, 'desc']],
