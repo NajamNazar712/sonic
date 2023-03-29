@@ -107,6 +107,7 @@
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Email</th>
@@ -254,6 +255,18 @@
                                     <textarea name="address" class="form-control" placeholder="Address" id="address"
                                               cols="30" rows="5" required data-rule-required="true"
                                               data-msg-required="This field is required"></textarea>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="area" id="area_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($areas as $area)
+                                            <option value="{{$area->id}}">{{$area->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </fieldset>
                             </div>
                         </div>
@@ -1165,6 +1178,7 @@
                             head.push('Gender');
                             head.push('Hub');
                             head.push('City');
+                            head.push('Area');
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Official Email');
@@ -1194,6 +1208,7 @@
                                 row.push(values.gender);
                                 row.push(values.employee_hub);
                                 row.push(values.city);
+                                row.push(values.area);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
                                 row.push(values.official_email);
@@ -1473,6 +1488,7 @@
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},
@@ -1953,12 +1969,14 @@
                 var address = table.row($(elm).parents('tr')).data().address;
                 var city_id = table.row($(elm).parents('tr')).data().city_id;
                 var shift_id = table.row($(elm).parents('tr')).data().shift_id;
+                var area_id = table.row($(elm).parents('tr')).data().area_id;
                 var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
                 var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
                 var main_category = table.row($(elm).parents('tr')).data().rider_main_category_id;
                 var rider_type = table.row($(elm).parents('tr')).data().rider_type_id;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
+                $('#area_list').val(area_id).trigger('change');
                 if(check_bit != null)
                 {
                     // var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;
