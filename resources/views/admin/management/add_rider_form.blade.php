@@ -288,7 +288,7 @@
                     else{
                         area_list.attr("disabled", true);
                         area_list.attr("data-rule-required", false);
-                        ('#area_list-error').hide();
+                        $('#area_list-error').remove();
                     }
                   
                 }

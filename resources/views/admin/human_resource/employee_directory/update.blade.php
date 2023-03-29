@@ -201,9 +201,7 @@
                                             <div class="form-group">
                                                 <label>Area<span class="text-danger">*</span></label>
                                                 <select name="area" id="area_list" class="select2 form-control " data-rule-required="true"  data-msg-required="Area is required" style="width: 100%">
-                                                    @foreach($areas_list as $area)
-                                                        <option value="{{$area->id}}">{{$area->name}}</option>
-                                                    @endforeach
+                                                    <option value="" selected>Select an Area</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -2376,6 +2374,7 @@
                 placeholder: "Select City",
                 width:'100%',
             }).bind("change",function(){
+                var area_list = $('#area_list');
                 @if($employee->employee_type_id == 2)
                 let id = $(this).val();
                 if(id) {
@@ -2400,6 +2399,25 @@
                                     containerId: 'toast-top-center'
                                 });
                             }
+                            
+                            @if($employee->department_id == 6)
+                            area_list.empty();
+                            if(data.areas.length > 0){ 
+                                area_list.attr("disabled", false);
+                                $.each(data.areas, function (key, value) {
+                                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                    area_list.append(newOption);
+                                });
+                                area_list.val('').trigger('change');
+                            }
+                            else{
+                                console.log('aya re aya');
+                                area_list.attr("disabled", true);
+                                area_list.attr("data-rule-required", false);
+                                $('#area_list-error').remove();
+                            }
+                            @endif
+
                         });
                 }
                 @endif
@@ -2822,11 +2840,27 @@
                 }
             });
 
-             $('#area_list').select2({
-            width:'100%',
-            placeholder:"Select An Area",
+            $('#area_list').select2({
+                width:'100%',
+                placeholder:"Select An Area",
+            });
 
-        });
+             var area_list = $('#area_list');
+            area_list.empty();
+            @if(count($areas_list) > 0)
+                var areas = @json($areas_list);
+                area_list.attr("disabled", false);
+                $.each(areas, function (key, value) {
+                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                    area_list.append(newOption);
+                });
+                area_list.val({!! $employee->area_id !!}).trigger('change');
+            
+            @else{
+                area_list.attr("disabled", true);
+                area_list.attr("data-rule-required", false);
+                ('#area_list-error').hide();
+            @endif
 
         });
     </script>
