@@ -4016,12 +4016,12 @@ class AdminHumanResourseController extends Controller
             return  '<button data-user_id='.$employee_leaves->employee_id.' data-penlaty_id='.$employee_leaves->id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $employee_leaves->no_of_late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
-            $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
-            $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
-            $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
-            ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
-            ->count();
-            // $late = $employee_leaves->no_of_late;
+            // $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+            // $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
+            // $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
+            // ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
+            // ->count();
+            $late = $employee_leaves->no_of_late;
             return  $late;  
             })
         ->editColumn('employee_type', function ($employee_leaves) {
