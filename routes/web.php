@@ -3471,8 +3471,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
-
-
 	});
 
     Route::prefix('shipment')->name('shipment.')->group(function () {

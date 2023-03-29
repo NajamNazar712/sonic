@@ -7583,6 +7583,7 @@ class GlobalSettingsController extends Controller
             })
             ->addColumn('action', function ($star_shippers) {
                 if (session('role_id') == 1) {
+
                     $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
@@ -7590,7 +7591,8 @@ class GlobalSettingsController extends Controller
                     if ($star_shippers->status == 1) {
 
                         $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                    } else {
+                    }
+                    else {
 
                         $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
                     }
@@ -7598,9 +7600,9 @@ class GlobalSettingsController extends Controller
                     $dropdown .= '</div>
                   </div>
           ';
-
                     return $dropdown;
-                } else {
+                }
+                else {
                     return '';
                 }
             });
