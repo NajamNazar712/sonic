@@ -52,6 +52,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Team Member Name</th>
+                                        <th class="border-primary border-darken-1"> areas name</th>
                                         <th class="border-primary border-darken-1">Designation</th>
                                         <th class="border-primary border-darken-1">Screen Name</th>
                                         <th class="border-primary border-darken-1">Action Performed</th>
@@ -142,6 +143,7 @@
 
                             head.push('S. No');
                             head.push('Team Member Name');
+                            head.push('Area');
                             head.push('Designation');
                             head.push('Screen Name');
                             head.push('Action Performed');
@@ -153,6 +155,7 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.name);
+                                row.push(values.city_area);
                                 row.push(values.designation);
                                 row.push(values.screen_name);
                                 row.push(values.action);
@@ -206,6 +209,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'a.name', class: 'align-middle name'},
+                    {data: 'city_area', name: 'ca.name', class: 'align-middle city_area'},
                     {data: 'designation', name: 'ed.name', class: 'align-middle designation'},
                     {data: 'screen_name', name: 'ata.screen_name', class: 'align-middle screen'},
                     {data: 'action', name: 'ata.action', class: 'align-middle action'},
