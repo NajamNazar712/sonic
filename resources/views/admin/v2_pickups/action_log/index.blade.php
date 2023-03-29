@@ -61,6 +61,16 @@
 			                            </select>
 			                        </fieldset>
 			                    </div>
+
+								<div class="col-4">
+									<fieldset class="form-group">
+										<select name="search_city_area" id="search_city_area" class="form-control select2">
+											@foreach($cities_areas as $city_a)
+												<option value="{{$city_a->id}}">{{$city_a->name}}</option>
+											@endforeach
+										</select>
+									</fieldset>
+								</div>
 			                   
 		                        <div class="col-4 ">
 
@@ -98,6 +108,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Area</th>
 										<th class="border-primary border-darken-1">Action Type</th>
 										<th class="border-primary border-darken-1">Pickup Note ID</th>
 										<th class="border-primary border-darken-1">Pickup Request ID</th>
@@ -150,6 +161,11 @@
                 width:'100%',
                 allowClear:true
             });
+			$('#search_city_area').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search City Area',
+                width:'100%',
+                allowClear:true
+            });
 
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
@@ -196,6 +212,7 @@
 							head.push('Shipper');
 							head.push('Address');
 							head.push('City');
+							head.push('Area');
 							head.push('Action Type');
 							head.push('Pickup Note ID');
 							head.push('Pickup Request ID');
@@ -209,6 +226,7 @@
 								row.push(values.shipper);
 								row.push(values.pickup_address);
 								row.push(values.city);
+								row.push(values.city_area_name);
 								row.push(values.type);
 								row.push(values.pickup_note_id);
 								row.push(values.pickup_request_id);
@@ -248,6 +266,7 @@
                         d.search_rider = $('#search_rider').val();
                         d.search_assigned_by = $('#search_assigned_by').val();
                         d.search_city = $('#search_city').val();
+                        d.search_city_area = $('#search_city_area').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
@@ -259,6 +278,7 @@
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
+					{data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
 					{data: 'type', name: 'v2_rider_pickup_action_logs.type_id', class: 'align-middle type'},
 					 {data: 'pickup_note_id', name: 'pn.id', class: 'align-middle pickup_note_id'},
 					{data: 'pickup_request_id', name: 'v2_rider_pickup_action_logs.pickup_request_id', class: 'align-middle pickup_request_id'}
