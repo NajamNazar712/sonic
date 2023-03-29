@@ -67,11 +67,12 @@ class LateEmployeePenalty extends Command
             ->where('employees.id', 1933)
             ->orderBy('ea.employee_id')
             ->get();
-            dd($employees_attendances);
             foreach($employees_attendances as $employees_attendance)
             {
                 $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date.$employees_attendance->start_time)->addMinutes((int)$employees_attendance->extension_minutes);
                 $clock_in = Carbon::parse($employees_attendance->clock_in_datetime);
+                dd($expected_clockin, $clock_in);
+
                 $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
                 if($time_diff > 0)
                 {
