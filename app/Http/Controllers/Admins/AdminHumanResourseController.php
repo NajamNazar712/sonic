@@ -4016,7 +4016,7 @@ class AdminHumanResourseController extends Controller
             return  '<button data-user_id='.$employee_leaves->employee_id.' data-penlaty_id='.$employee_leaves->id.' class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $employee_leaves->no_of_late . '</button>';  
         })
         ->addColumn("no_of_late_excel", function ($employee_leaves) {
-            // $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+            // $startMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
             // $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
             // $late = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
             // ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])->where('ea.employee_id',$employee_leaves->employee_id)
@@ -4158,7 +4158,7 @@ class AdminHumanResourseController extends Controller
         $employee_penalty = EmployeePenalty::find($penalty_id);
 
         $penalty_date = $employee_penalty->created_at;
-        $startMonth = Carbon::parse($penalty_date)->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $startMonth = Carbon::parse($penalty_date)->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
         $endMonth = Carbon::parse($penalty_date)->startOfMonth()->addDays(19)->format('Y-m-d');
         $duplicate = EmployeeLate::join('employee_attendances as ea','ea.id','employee_lates.attendence_id')
         ->where('ea.employee_id',$employee_id)->whereNotNull('ea.clock_in_datetime')->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
@@ -4189,7 +4189,7 @@ class AdminHumanResourseController extends Controller
         $employee_penalty = EmployeePenalty::find($penalty_id);
         $employee_id = $employee_penalty->employee_id;
         $penalty_date = $employee_penalty->created_at;
-        $startMonth = Carbon::parse($penalty_date)->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $startMonth = Carbon::parse($penalty_date)->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
         $endMonth = Carbon::parse($penalty_date)->startOfMonth()->addDays(19)->format('Y-m-d');
         $available_qouates = Employee::leftjoin('employee_penalties as ep','ep.employee_id','employees.id')->where('employees.id',$employee_id)->select('ep.deduction_count as deduction_count','employees.line_manager_id as line_manager_id','employees.leave_count as leave_count')
         ->whereBetween('ep.date',[$startMonth, $endMonth])->first();

@@ -43,9 +43,9 @@ class LateEmployeePenalty extends Command
      */
     public function handle()
     {
-        $startMonth = Carbon::now()->subMonth()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $startMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
         $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
-        $lastSixMonth = Carbon::now()->subMonths(6)->startOfMonth()->addDays(20)->format('Y-m-d');
+        $lastSixMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
         EmployeePenalty::whereDate('date', '<', $startMonth)->update(['is_current_record' => 0]);
         EmployeePenalty::whereDate('date', '<', $lastSixMonth)
         ->each(function ($oldRecord) {
@@ -57,7 +57,6 @@ class LateEmployeePenalty extends Command
             
         $counter = 0;
         $existing_late_ids = EmployeeLate::whereBetween('attendence_date',[$startMonth, $endMonth])->pluck('attendence_id')->toArray();
-        DB::enableQueryLog();
         $employees_attendances = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')
             ->join('employee_shifts as es','es.id','=','employees.shift_id')
             ->select('ea.id as attendence_id','ea.employee_id as employee_id','ea.attendance_date','es.start_time','es.extension_minutes','ea.clock_in_datetime')
@@ -66,7 +65,7 @@ class LateEmployeePenalty extends Command
             ->whereNotNull('ea.clock_in_datetime')
             ->orderBy('ea.employee_id')
             ->get();
-            dd(DB::getQueryLog());
+            
             foreach($employees_attendances as $employees_attendance)
             {
                 $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date.$employees_attendance->start_time)->addMinutes((int)$employees_attendance->extension_minutes);
