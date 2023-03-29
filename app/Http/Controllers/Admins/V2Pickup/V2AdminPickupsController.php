@@ -2,63 +2,64 @@
 
 namespace App\Http\Controllers\Admins\V2Pickup;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\EmployeeAttendanceController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\ShipmentsPickupJourneyController;
-use App\Http\Controllers\Webhook\InitialChargesWebhookController;
-use App\Http\Models\Admin\BookingSmsForShippers;
-use App\Http\Models\Admin\ByPassWeightShippers;
-use App\Http\Models\Admin\CancelledShipmentArrival;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\RetailPickupNote;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\ShipmentsEstimatedWeight;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
-use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
-use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use Carbon\Carbon;
 use App\Http\Models\City;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\InternationalShipment;
-use App\Http\Models\PickupAction;
-use App\Http\Models\ProjectArrivalShipper;
-use App\Http\Models\ReceivingSheetReceived;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
-use App\Http\Models\SelfCollectionCities;
-use App\Http\Models\SelfCollectionShipment;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentPiecesRequest;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
-use App\Http\Models\V2Pickup\V2PickupRequestLegend;
-use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
-use App\Http\Models\V2Pickup\V2PickupRequestRiderStatus;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2PickupRequestStatus;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
-use App\Http\Models\Zone;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
+use App\Http\Models\CityArea;
+use App\Http\Models\Shipment;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\PickupAction;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShipmentPiece;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\ShipmentsJourney;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\SelfCollectionCities;
+use App\Http\Models\InternationalShipment;
+use App\Http\Models\ProjectArrivalShipper;
+use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\ReceivingSheetReceived;
+use App\Http\Models\SelfCollectionShipment;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\Admin\ByPassWeightShippers;
+use App\Http\Models\Admin\BookingSmsForShippers;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\Admin\CancelledShipmentArrival;
+use App\Http\Models\Admin\ShipmentsEstimatedWeight;
+use App\Http\Models\V2Pickup\V2PickupRequestLegend;
+use App\Http\Models\V2Pickup\V2PickupRequestStatus;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Http\Models\V2Pickup\V2PickupReceivedShipment;
+use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\V2Pickup\V2PickupRequestRiderStatus;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\ShipmentsPickupJourneyController;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
+use App\Http\Controllers\Webhook\InitialChargesWebhookController;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
+use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
 
 class V2AdminPickupsController extends Controller
 {
@@ -2906,10 +2907,11 @@ class V2AdminPickupsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 9);
         $pickup_actions = PickupAction::all();
+        $areas = CityArea::with('hubs')->where('status',1)->get();
         $default_date = Carbon::now();
         $riders = Rider::select('id', 'name')->where('status', 1)->get();
         $cities = City::select('id', 'name')->get();
-        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders, 'cities' => $cities, 'pickup_actions' => $pickup_actions, 'default_date' => $default_date]);
+        return view('admin.v2_pickups.receiving_sheet')->with(['riders' => $riders, 'cities' => $cities, 'pickup_actions' => $pickup_actions, 'default_date' => $default_date, 'areas'=>$areas]);
     }
 
     public function rider_receiving_check_pickup(Request $request)
@@ -3183,7 +3185,7 @@ class V2AdminPickupsController extends Controller
                     ->where('total_s.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
-            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from . '" and "' . $to . '") as total_arrived_count'), DB::raw('count(total_s.id) as rider_picked'))
+            ->select('v2_pickup_notes.id as note_id', 'v2_pickup_notes.id as id', 'v2_pickup_notes.created_at as date', 'r.name as rider', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipment_count'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from . '" and "' . $to . '") as total_arrived_count'), DB::raw('count(total_s.id) as rider_picked'),'r.area_id as area_id')
             ->whereBetween('v2_pickup_notes.created_at', [$from, $to])
             ->groupBy('v2_pickup_notes.id');
 
@@ -3195,6 +3197,10 @@ class V2AdminPickupsController extends Controller
 
         if ($search_rider = $request->get('search_rider')) {
             $rider = $rider->where('r.id', '=', $search_rider);
+        }
+
+        if ($search_area = $request->get('search_area')) {
+            $rider = $rider->where('r.area_id', '=', $search_area);
         }
 
         $datatable = Datatables::of($rider)

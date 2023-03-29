@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\App\Http\Models\ConsigneeAddressArea;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\ConsigneeInformationController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
@@ -15,6 +16,7 @@ use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\CityArea;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -241,6 +243,8 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->current_location_id = NULL;
             $shipment_coordinates->save();
         }
+        self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+
         //Existing Coordinates
 //        if($pieces > 1){
 //            $user = User::where('id', $user_id)->where('multipiece_status', 0);
@@ -7303,6 +7307,56 @@ class ShipperShipmentBookController extends Controller
 
         }
         return response()->json(['status'=>'true']);
+
+    }
+
+    static function consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address){
+
+        if(isset($consignee_city_id)){
+
+            $check_dlmk =  DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword')
+                ->where('dlm.city_id',$consignee_city_id)
+                ->pluck('keyword')
+                ->toArray();
+
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
+            $found_keyword = array();
+            $result = array();
+            foreach ($check_dlmk as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword,$arr_value);
+                    }
+                }
+            }
+            if($found_keyword) {
+                $data_found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
+                    ->leftjoin('city_areas as ca','ca.id','=','dlm.city_area_id')
+                    ->select('dlm.area_name as area_name','dlm.id','ca.id as city_area_id')
+                    ->whereIn('delivery_location_mapping_keywords.keyword',$found_keyword)
+                    ->where('dlm.city_id',$consignee_city_id)
+                    ->orderby('dlm.id','desc');
+                if ($data_found->exists()) {
+                    $data_found = $data_found->pluck('city_area_id')->toArray();
+                    $city_area = CityArea::whereIn('id',$data_found)->orderby('id','desc');
+                    if($city_area->exists()) {
+                        $city_area = $city_area->first();
+                        $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
+                        if (!$consignee_address_area->exists()) {
+                            $consignee_address_area = new ConsigneeAddressArea();
+                            $consignee_address_area->shipment_id = $shipment_id;
+                            $consignee_address_area->city_area_id = $city_area->id;
+                            $consignee_address_area->save();
+                        }
+                    }
+
+                }
+            }
+            return true;
+        }
 
     }
 
