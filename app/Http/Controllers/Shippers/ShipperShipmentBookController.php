@@ -147,6 +147,8 @@ class ShipperShipmentBookController extends Controller
 
         $user_shipping_info->save();
 
+        self::shipper_address_area($city_id,$address,$user_shipping_info->id);
+
         return $user_shipping_info->id;
     }
 
@@ -7360,5 +7362,31 @@ class ShipperShipmentBookController extends Controller
 
     }
 
+    static function shipper_address_area($city_id,$address,$pickup_address_id){
+        if(isset($city_id)) {
 
+            $check_ca = CityArea::where('city_id', $city_id)
+                ->pluck('name')
+                ->toArray();
+            $str_arr = null;
+            $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $address);
+            $found_keyword = array();
+            $result = array();
+            foreach ($check_ca as $nsa) {
+                foreach ($str_arr as $arr_value) {
+                    $arr_value = trim($arr_value);
+                    if (strtolower($nsa) == strtolower($arr_value)) {
+                        array_push($found_keyword, $arr_value);
+                    }
+                }
+            }
+            $find = CityArea::whereIn('name',$found_keyword)->orderby('id','desc');
+            if($find->exists()){
+                $find = $find->first();
+                $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+                $user_shipping_info->city_area_id = $find->id;
+                $user_shipping_info->save();
+            }
+        }
+    }
 }

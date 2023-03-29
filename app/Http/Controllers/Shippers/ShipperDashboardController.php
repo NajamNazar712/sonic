@@ -941,8 +941,9 @@ class ShipperDashboardController extends Controller
 
         if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
         {
-            UserShippingInfo::create(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'pickup_brand_name'=>$pickup_brand_name,'poc'=>$poc,
-                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor]);
+          $usi =  UserShippingInfo::insertGetId(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'pickup_brand_name'=>$pickup_brand_name,'poc'=>$poc,
+                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor,'created_at'=>Carbon::now()]);
+            ShipperShipmentBookController::shipper_address_area($city_id,$pickup_address,$usi);
             return redirect()->back()->with('success','Pickup Address added successfully!');
 
         }else{

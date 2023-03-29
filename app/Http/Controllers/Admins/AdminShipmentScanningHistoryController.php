@@ -64,6 +64,7 @@ class AdminShipmentScanningHistoryController extends Controller
                             $account_type = '-';
                             $scanned_by = '-';
                             $city = '-';
+                            $area = '-';
                         }
                         else {
                             if ($scanning_history->user_type == 1) {
@@ -72,39 +73,47 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $c = City::find($admin->default_hub_id);
                                 ($c) ? $city = $c['name'] : $city = '-';
                                 $scanned_by = $admin->name;
+                                $area = $admin->area->name;
                             } elseif ($scanning_history->user_type == 2) {
                                 $account_type = 'Shipper';
                                 $user = User::find($scanning_history->user_id);
                                 $scanned_by = $user->name;
                                 $city = '-';
+                                $area = '-';
+
 
                             } elseif ($scanning_history->user_type == 3) {
                                 $account_type = 'Substitute Shipper';
                                 $sub_user = SubstituteUser::find($scanning_history->substitute_user_id);
                                 $scanned_by = $sub_user->name;
                                 $city = '-';
+                                $area = '-';
                             } else if ($scanning_history->user_type == 4) {
                                 $account_type = 'Retail User';
                                 $retail_admin = RetailUser::find($scanning_history->admin_id);
                                 $c = City::find($retail_admin->city_id);
                                 ($c) ? $city = $c['name'] : $city = '-';
                                 $scanned_by = $retail_admin->name;
+                                $area = '-';
                             } else if ($scanning_history->user_type == 5) {
                                 $account_type = 'Rider';
                                 $rider = Rider::find($scanning_history->admin_id);
                                 $c = City::find($rider->city_id);
                                 ($c) ? $city = $c['name'] : $city = '-';
                                 $scanned_by = $rider->name;
+                                $area = $rider->area->name;
                             } else {
                                 $account_type = '-';
                                 $scanned_by = '-';
                                 $city = '-';
+                                $area = '-';
                             }
                         }
                         $details[$index]['screen_location'] = $screen_location->name;
                         $details[$index]['account_type'] = $account_type;
                         $details[$index]['scanned_by'] = $scanned_by;
                         $details[$index]['city'] = $city;
+                        $details[$index]['area'] = $area;
                         $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
 
                         $details[$index]['ip_address'] = $scanning_history->ip_address;
@@ -141,6 +150,7 @@ class AdminShipmentScanningHistoryController extends Controller
                             $account_type = '-';
                             $scanned_by = '-';
                             $city = '-';
+                            $area = '-';
                         }
                         else {
                             $account_type = 'Admin';
@@ -148,11 +158,13 @@ class AdminShipmentScanningHistoryController extends Controller
                             $c = City::find($admin->default_hub_id);
                             ($c) ? $city = $c['name'] : $city = '-';
                             $scanned_by = $admin->name;
+                            $area = $admin->area->name;
                         }
                         $details[$index]['screen_location'] = $screen_location->name;
                         $details[$index]['account_type'] = $account_type;
                         $details[$index]['scanned_by'] = $scanned_by;
                         $details[$index]['city'] = $city;
+                        $details[$index]['area'] = $area;
                         $details[$index]['scanned_at'] = Carbon::parse($scanning_history->created_at)->format('Y-m-d H:i:s');
 
                         $details[$index]['ip_address'] = $scanning_history->ip_address;

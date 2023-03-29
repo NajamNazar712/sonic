@@ -28,4 +28,9 @@ class Rider extends Model
     public function employee(){
         return $this->belongsTo(Employee::class,'trax_id','trax_id');
     }
+
+    public function area()
+    {
+        return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
+    }
 }
