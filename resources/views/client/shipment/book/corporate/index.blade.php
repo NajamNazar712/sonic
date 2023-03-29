@@ -700,22 +700,17 @@
             //todo: for parcel value
             $('#parcel_value').prop('disabled', true);
             $( "#amount" ).keyup(function() {
-                console.log( "Amount Field Hits" );
                 var amt = $('#amount').val();
-                console.log('Amount',amt)
                 if (amt == 0 )
                 {
-                    $("#parcel_value").css("background-color", "yellow");
                     $('#parcel_value').prop('disabled', false);
                 }
-                else if((amt !== 0) || (amt == null) || (isEmpty(amt)))
+                else
                 {
-                    $("#parcel_value").css("background-color", "lightgray");
                     $('#parcel_value').prop('disabled', true);
                     $('#parcel_value').val('');
                 }
             });
-
             //todo: for parcel value end
 
 
