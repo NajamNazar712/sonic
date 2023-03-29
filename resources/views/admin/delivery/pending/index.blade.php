@@ -26,6 +26,15 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-3 mt-1">
+                        <div class="form-group">
+                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
+                                @foreach($areas as $area)
+                                    <option value="{{$area->id}}">{{$area->name}} - {{$area->hubs->name}} </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
 
@@ -39,6 +48,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
@@ -156,6 +166,13 @@
         }).bind('change', function() {
             table.draw();
         });
+        $("#search_area").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Area",
+            allowClear: true,
+            width: '100%',
+        }).bind('change', function() {
+            table.draw();
+        });;
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -175,6 +192,7 @@
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
+                        head.push('Area');
                         head.push('Consignee Name');
                         head.push('Consignee Phone');
                         head.push('Reattempt By');
@@ -201,6 +219,7 @@
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            row.push(values.area);
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);
                             row.push(values.agent);
@@ -254,6 +273,8 @@
                 data: function (d) {
                     d.search_shipping_mode = $('#search_shipping_mode').val();
                     d.search_hub = $('#search_hub').val();
+                    d.search_area = $('#search_area').val();
+
                 }
             },
             rowId: 'shId',
@@ -265,6 +286,7 @@
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                {data: 'area', name: 'ca.name', class: 'align-middle area'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
