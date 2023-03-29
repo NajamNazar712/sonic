@@ -700,7 +700,7 @@
         }
 
 		$(document).ready(function() {
-
+sta
             $('#open_shipment').checkboxpicker();
 
 			

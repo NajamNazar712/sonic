@@ -15,6 +15,7 @@ class CreateStarShippersTable extends Migration
     {
         Schema::create('star_shippers', function (Blueprint $table) {
             $table->increments('id');
+            
             $table->integer('user_id')->index();
             $table->integer('status')->default(1);
             $table->integer('add_by')->nullable()->index();
