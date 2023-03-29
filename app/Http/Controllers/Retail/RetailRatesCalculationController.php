@@ -218,6 +218,9 @@ class RetailRatesCalculationController extends Controller
 
         $rates['charges'] = $charges_without_gst;
         $rates['discount_amount'] = $discount_amount;
+        $rates['charges_without_gst'] = $charges_without_gst;
+        $rates['insurance_amount'] = $insurance_amount;
+        $rates['packaging_charges'] = $packaging;
         $rates['charges_with_discount'] = $charges_without_gst - $discount_amount;
         $rates['gst_charges'] = $gst_amount;
         $rates['packaging_and_insurance_charges'] = $packaging_and_insurance_charges;
