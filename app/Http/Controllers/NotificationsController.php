@@ -10227,18 +10227,23 @@ else if ($id == 178) {
                     self::email($subject,$body,$reference_1_id);
                 }
                 else if ($id == 214) {
-
+//                    $subject = $notification->subject;
                     $file_path = $reference_1_id['file_path'];
 
                     $from = $reference_1_id['from'];
                     $to = $reference_1_id['to'];
                     $subject = 'Revenue Daily Report By Arrival Date  | ';
 
-                    $subject .= 'From ( ' . $from . ' )';
+                    $subject .= $from;
 
                     $file = Storage::disk('public')->url($file_path);
 
                     $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+//                    $date = $from;
+//                    if (strpos($subject, '[date]') !== FALSE) {
+//                        $subject = str_replace('[date]', $date, $subject);
+//                    }
 
                     if (strpos($body, '[link]') !== FALSE) {
                         $body = str_replace('[link]', $link, $body);
