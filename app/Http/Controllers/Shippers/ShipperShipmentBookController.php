@@ -501,7 +501,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-        dd($request->all());
+//        dd($request->all());
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
