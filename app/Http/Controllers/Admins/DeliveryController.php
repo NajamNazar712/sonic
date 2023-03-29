@@ -7292,11 +7292,18 @@ class DeliveryController extends Controller
             ->where('shipments.shipper_status_id', 54)
             ->groupBy('shipments.id');
 
-//            dd($shipments);
+
+            
+
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('sj.created_at', [$from, $to]);
+        }
         return Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
