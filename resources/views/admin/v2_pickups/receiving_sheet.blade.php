@@ -39,6 +39,16 @@
                                     </div>
 
                                     <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_area" id="search_area" class="form-control select2">
+                                                @foreach($areas as $area)
+                                                    <option value="{{$area->id}}">{{$area->name}} - {{ $area->hubs->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -154,6 +164,11 @@
                 width: '100%',
                 allowClear: true
             });
+            $("#search_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                allowClear: true,
+                width: '100%',
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -254,6 +269,8 @@
                     data: function (d) {
                         d.search_rider = $('select[name="search_rider"]').val();
                         d.search_city = $('select[name="search_city"]').val();
+                        d.search_area = $('select[name="search_area"]').val();
+
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
