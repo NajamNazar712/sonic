@@ -755,6 +755,7 @@ class RetailAPIController extends Controller
         $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
         $retail_shipment->insurance_charges = $rates['insurance_amount'];
         $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
+        $retail_shipment->weight_charges = $rates['charges_without_gst'];
         $retail_shipment->gst = $rates['gst_charges'];
         $retail_shipment->retail_user_id = $retail_user_id;
         $retail_shipment->save();
