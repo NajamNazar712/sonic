@@ -4588,7 +4588,6 @@ class ShipperShipmentBookController extends Controller
 
     public function corporate_excel_store(Request $request)
     {
-
         $user_id = session('user_id');
         if (!$request->has('omni')) {
             $omni = 0;
@@ -5033,6 +5032,7 @@ class ShipperShipmentBookController extends Controller
                 $validate->setAttributeNames($names);
 
                 if ($validate->fails()) {
+
                     foreach ($validate->errors()->toArray() as $key => $error_array) {
                         foreach ($error_array as $error) {
                             if (!isset($errors[$row_id][$key])) {
@@ -5332,7 +5332,8 @@ class ShipperShipmentBookController extends Controller
                 } else {
                     return view('client.shipment.book.corporate.nsa')->with(['data' => $rows, 'nsa_error' => $nsa_error, 'service_type_check_id' => $service_type_check_id, 'omni' => $omni]);
                 }
-            } else {
+            }
+            else {
                 if (in_array($user_id, [5982, 3324, 10104, 14110, 16292])) {
                     $cities = City::where('status', 1)->where('business_category_id', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                 } else {
