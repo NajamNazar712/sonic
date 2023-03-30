@@ -385,6 +385,10 @@
 											<td>Collection Amount</td>
 											<td class="text-center">1000000</td>
 										</tr>
+										<tr role="row">
+											<td>Parcel Value</td>
+											<td class="text-center">1000000</td>
+										</tr>
 										</tbody>
 									</table>
 
