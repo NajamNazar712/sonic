@@ -151,7 +151,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-//        dd('got yeah 1',\request()->all());
+
 
         $shipment = new Shipment();
 
@@ -422,7 +422,7 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
-        // dd(1);
+
         return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
     }
 
@@ -501,7 +501,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function store(Request $request) {
-//        dd($request->all());
+
         $rules = [
             'replacement_parcel_img' => ['nullable', 'mimes:png,jpeg,jpg'],
         ];
@@ -2843,7 +2843,7 @@ class ShipperShipmentBookController extends Controller
 
         ];
 
-//        dd($request->all());
+
         $ccd_booking = GlobalSettings::where('type', 'ccd_booking');
         if ($ccd_booking->exists()) {
             $ccd_booking = $ccd_booking->first();
@@ -2880,7 +2880,7 @@ class ShipperShipmentBookController extends Controller
                 })];
                 $service_type_check_id = null;
             } elseif ($excel_type == 2) {
-//                dd('p');
+
                 $column_count = 31;
 
                 $fields = [0 => 'pickup_address_id', 1 => 'information_display', 2 => 'consignee_city_name', 3 => 'consignee_name', 4 => 'consignee_address', 5 => 'consignee_phone_number_1', 6 => 'consignee_phone_number_2', 7 => 'consignee_email_address', 8 => 'self_collection', 9 => 'order_id', 10 => 'order_date', 11 => 'item_product_type_id', 12 => 'item_description', 13 => 'item_quantity', 14 => 'item_insurance', 15 => 'item_price', 16 => 'special_instructions', 17 => 'estimated_weight', 18 => 'shipping_mode_id', 19 => 'same_day_timing_id', 20 => 'amount', 21 => 'payment_mode_id', 22 => 'charges_mode_id', 23 => 'pieces_quantity', 24 => 'shipper_reference_number_1', 25 => 'shipper_reference_number_2', 26 => 'shipper_reference_number_3', 27 => 'shipper_reference_number_4', 28 => 'shipper_reference_number_5', 29 => 'open_shipment',30 => 'parcel_value'];
@@ -4914,7 +4914,7 @@ class ShipperShipmentBookController extends Controller
                     }
 
                     $rows[] = $row;
-                    // dd($rows);
+
                 }
 
                 unset($spreadsheet);
@@ -6463,9 +6463,8 @@ class ShipperShipmentBookController extends Controller
 
     public function international_excel_store(Request $request)
     {
-//        return $request;
+
         $user_id = session('user_id');
-//        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
