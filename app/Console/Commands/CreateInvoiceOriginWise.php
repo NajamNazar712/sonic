@@ -42,7 +42,7 @@ class CreateInvoiceOriginWise extends Command
      */
     public function handle()
     {
-        $now = Carbon::now();
+        /*$now = Carbon::now();
         $weekStartDate = $now->startOfWeek()->format('Y-m-d H:i');
         $weekEndDate = $now->endOfWeek()->format('Y-m-d H:i');
 
@@ -64,6 +64,7 @@ class CreateInvoiceOriginWise extends Command
                     InvoiceByOriginReportController::create_invoice($invoice);
                 }
             }
-        }
+        }*/
+        InvoiceByOriginReportController::update_invoices();
     }
 }

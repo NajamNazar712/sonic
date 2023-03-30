@@ -15,7 +15,7 @@ class UpdateRevenueInvoiceReportPackagingChargesSeeder extends Seeder
      */
     public function run()
     {
-        $revenue_invoices = DB::table('revenue_by_invoice_reports')->get();
+        $revenue_invoices = DB::table('revenue_by_invoice_reports')->where('id', '>', 1608)->get();
 
         foreach ($revenue_invoices as $ri){
                 $revenue_by_invoice_id = $ri->id;
@@ -58,7 +58,7 @@ class UpdateRevenueInvoiceReportPackagingChargesSeeder extends Seeder
                 else{
                     $reim_invoice = InvoiceForReimbursement::where('user_id', $user_id)->where('invoice_number', $invoice_number)->first();
                     if($reim_invoice){
-                        $invoice_shipment_ids = $invoice->invoice_shipments->pluck('shipment_id')->toArray();
+                        $invoice_shipment_ids = $reim_invoice->invoice_shipments->pluck('shipment_id')->toArray();
                         $shipments = Shipment::whereIn('id', $invoice_shipment_ids)->where('business_category_id', $business_category_id)->select('id','pickup_address_id','packaging_material_charges', 'packaging_material_request')->get();
 
                         $total_packaging_material_charges = 0;
@@ -70,7 +70,7 @@ class UpdateRevenueInvoiceReportPackagingChargesSeeder extends Seeder
                                 continue;
                             }
 
-                            $invoice_shipment = $invoice->invoice_shipments->where('shipment_id', $shipment->id)->where('type', '!=', 2)->first();
+                            $invoice_shipment = $reim_invoice->invoice_shipments->where('shipment_id', $shipment->id)->where('type', '!=', 2)->first();
 
                             if ($invoice_shipment) {
                                 if ($shipment->packaging_material_request) {
