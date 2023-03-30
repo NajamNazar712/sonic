@@ -927,9 +927,10 @@
                         var count = 1;
                         not_picked_tracking_numbers.forEach(item => {
                         const tr = tbody.insertRow();
+                        console.log(item.rider);
                         tr.style.textAlign = 'center'; // center the row content
                         tr.insertCell(0).innerText = count;
-                        tr.insertCell(1).innerText = (item.rider !== '' || item.rider !== null) ? item.rider : 'Not Assigned';
+                        tr.insertCell(1).innerText = (item.rider !== '' && item.rider !== null) ? item.rider : 'Not Assigned';
                         tr.insertCell(2).innerText = item.tracking_number;
                         count++;
                         });
