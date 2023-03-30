@@ -96,11 +96,11 @@
                                 <th>Shipper Reference 4</th>
                                 <th>Shipper Reference 5</th>
                                 <th>Open Shipment</th>
-                                <th>Parcel Value</th>
+
                                 @if(($service_type_check_id == 1 || $service_type_check_id == null) && $omni == 1)
                                     <th>Return Address ID</th>
                                 @endif
-                            
+                                <th>Parcel Value</th>
                                 <th></th>
                             </tr>
                             </thead>
