@@ -8754,6 +8754,7 @@ class DeliveryController extends Controller
     }
 
     public function closed(Request $request){
+        
         $station_deposit_note = StationDepositNote::find($request->sdn_id);
 
         if ($station_deposit_note) {
@@ -8761,6 +8762,8 @@ class DeliveryController extends Controller
                 $station_deposit_note->status = 3;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
+                //StationDepositNoteLog   
+                self::add_sdn_logs($request->sdn_id, 3, Auth::id());
                 return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
@@ -8778,6 +8781,8 @@ class DeliveryController extends Controller
                 $station_deposit_note->status = 2;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
+                //StationDepositNoteLog
+                self::add_sdn_logs($request->sdn_id, 2, Auth::id());
                 return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Resolved']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
@@ -8799,7 +8804,9 @@ class DeliveryController extends Controller
                         $station_deposit_note->status = 3;
                         $station_deposit_note->closed_at = Carbon::now();
                         $station_deposit_note->save();
-                        return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+                       //StationDepositNoteLog
+                       self::add_sdn_logs($station_deposit_note->id, 3, Auth::id());
+                    return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
                     }else{
                         return response()->json(['status'=> 0,'error'=>"Status Should Be Deposited First"]);
                     }
@@ -8822,6 +8829,9 @@ class DeliveryController extends Controller
                     $station_deposit_note->status = 2;
                     $station_deposit_note->closed_at = Carbon::now();
                     $station_deposit_note->save();
+
+                    //StationDepositNoteLog
+                    self::add_sdn_logs($station_deposit_note->id, 2, Auth::id());
                 }else{
                     $return_id.=  "ID = ".$station_deposit_note->id.", ";
                 }
