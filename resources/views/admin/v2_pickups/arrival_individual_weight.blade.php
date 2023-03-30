@@ -929,7 +929,7 @@
                         const tr = tbody.insertRow();
                         tr.style.textAlign = 'center'; // center the row content
                         tr.insertCell(0).innerText = count;
-                        tr.insertCell(1).innerText = item.rider;
+                        tr.insertCell(1).innerText = (item.rider !== '' || item.rider !== null) ? item.rider : 'Not Assigned';
                         tr.insertCell(2).innerText = item.tracking_number;
                         count++;
                         });
