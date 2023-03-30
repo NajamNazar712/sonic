@@ -1029,7 +1029,7 @@
                     },
                     success: function (data) {
                         if (data.status == 0) {
-
+                            let columnValue =  table.row(parent).data();
                              let tracking_number = columnValue[1];
                             $.each(not_picked_tracking_numbers, function(index, obj) {
                                 if (obj.tracking_number == tracking_number) {
