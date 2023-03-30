@@ -501,15 +501,22 @@
             });
 
               function check_pickup_requests(tracking_number,rider_name){
-
-                    var flag = true;
+                console.log(rider_name)
+                   var flag = true;
+                   if(rider_name !== ''){
+                    console.log(11);
                     for (not_picked_tracking_number in not_picked_tracking_numbers){
-                    if (not_picked_tracking_number['tracking_number'] === tracking_number){
-                        flag = false; 
-                    
+                        if (not_picked_tracking_number['tracking_number'] === tracking_number){
+                            flag = false; 
+                        
+                        }
                     }
                 }
-                if (flag === true) {
+                else{
+                     console.log(12);
+                         flag = false; 
+                }
+                if (flag) {
                     let array = { 'tracking_number' : tracking_number,'rider':rider_name}
                     not_picked_tracking_numbers.push(array);
                 }
@@ -903,6 +910,7 @@
                 //     $('#RiderModal').modal('show');
                 // }
                 // else{
+                    console.log(not_picked_tracking_numbers.length);
                      if(not_picked_tracking_numbers.length > 0){
 
                         const table = document.createElement('table');
