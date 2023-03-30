@@ -471,9 +471,9 @@
 											<input type="text" name="parcel_value" id="parcel_value"
 												   class="form-control rounded-right parcel_value"
 												   placeholder="Parcel Value*" data-rule-required="true"
-												   data-msg-required="Parcel Value"  oninput="if(this.value==='0') this.value=''">
+												   data-msg-required="Parcel Value is Required"  oninput="if(this.value==='0') this.value=''">
 										</div>
-										{{--Parcle Value End--}}
+										{{-- todo : Parcle Value End--}}
 									</div>
 								</div>
 

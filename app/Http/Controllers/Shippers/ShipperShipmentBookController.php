@@ -3027,6 +3027,7 @@ class ShipperShipmentBookController extends Controller
                 {
                     if ($row['amount'] == 0) {
                         $rules['parcel_value'] = [
+                            'required_if:amount,0',
                             'integer',
                             'digits_between:1,20',
                             'min:1'];
@@ -5021,6 +5022,7 @@ class ShipperShipmentBookController extends Controller
                     if ($row['amount'] == 0) {
 
                         $rules['parcel_value'] = [
+                            'required_if:amount,0',
                             'integer',
                             'digits_between:1,20',
                             'min:1'];
