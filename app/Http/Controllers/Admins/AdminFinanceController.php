@@ -5805,6 +5805,17 @@ class AdminFinanceController extends Controller
                     return 'Unknown';
                 }
             })
+            ->addColumn('paid_reverted_at', function($done_payment) {
+                if ($done_payment->status == 0) {
+                    return '-';
+                } else if ($done_payment->status == 1) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 2) {
+                    return $done_payment->status_updated_at;
+                } else {
+                    return 'Unknown';
+                }
+            })
 //            ->addColumn('aging', function ($done_payment) {
 //
 //                if ($done_payment->status == 0) {
@@ -13545,16 +13556,15 @@ class AdminFinanceController extends Controller
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
-
-
+                                    
                                     $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
                                     $detail = array();
-
+                                    
                                     $detail['name'] = $done_payment->shipper->shipper_name;;
-                                    $detail['phone'] = $done_payment->shipper->shipper_phone_no;
-                                    $detail['updated_at'] = $done_payment->updated_at;
+                                    $detail['phone'] =  $done_payment->shipper->shipper_phone_no;
+                                    $detail['updated_at'] =  $done_payment->updated_at;
                                     $detail['done_payment_id'] = $done_payment_id;
-                                    NotificationsController::send(172, $detail);
+                                    NotificationsController::send(172,$detail);
                                 }
                             }
                         }

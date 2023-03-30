@@ -102,9 +102,9 @@ class RiderDeactivateAutomatically extends Command
                                 ->select('riders.name','riders.id','delivery_notes.created_at as delivery_notes_created_at','pickup_notes.created_at as pickup_notes_created_at','return_notes.created_at as return_notes_created_at')
                                 ->where('riders.id',1)
                                 ->get();
-                                $pickup_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->pickup_notes_created_at);
-                                $delivery_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->delivery_notes_created_at);
-                                $return_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->return_notes_created_at);
+                                $pickup_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->pickup_notes_created_at)->format('Y-m-d');
+                                $delivery_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->delivery_notes_created_at)->format('Y-m-d');
+                                $return_date = Carbon::createFromFormat('Y-m-d H:i:s', $riders->first()->return_notes_created_at)->format('Y-m-d');
                                 $max_date = max($pickup_date,$delivery_date,$return_date);
 
                                 $employee_directory->last_working_date = $max_date;
