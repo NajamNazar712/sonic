@@ -2573,7 +2573,6 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_store(Request $request)
     {
-        //dd($request);
         $user_id = session('user_id');
         if (!$request->has('omni')) {
             $omni = 0;
@@ -3028,7 +3027,7 @@ class ShipperShipmentBookController extends Controller
                     if ($row['amount'] == 0) {
                         $rules['parcel_value'] = [
                             'required_if:amount,0',
-                            'integer',
+                            'numeric',
                             'digits_between:1,20',
                             'min:1'];
                     }
@@ -5023,7 +5022,7 @@ class ShipperShipmentBookController extends Controller
 
                         $rules['parcel_value'] = [
                             'required_if:amount,0',
-                            'integer',
+                            'numeric',
                             'digits_between:1,20',
                             'min:1'];
                     }
