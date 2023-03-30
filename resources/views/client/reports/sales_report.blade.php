@@ -10,7 +10,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
 
                 <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
                     <div class="col-3">
