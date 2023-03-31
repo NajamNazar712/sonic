@@ -1339,7 +1339,7 @@ class Permission
 			'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
 
-            'settings.star_shippers' => 846,
+            'settings.star_shippers.index' => 846,
         ],
 
         'shipper' => [

@@ -101,7 +101,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                        {{--@if (session('role_id') == 1 || in_array(847, session('permissions')))--}}
+                        @if (session('role_id') == 1 || in_array(847, session('permissions')))
                     {
                         text: '<i class="la la-plus"></i> Add',
                         className: 'btn btn-primary tag_agents',
@@ -111,7 +111,7 @@
 
                         }
                     },
-                    {{--@endif--}}
+                    @endif
                         'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

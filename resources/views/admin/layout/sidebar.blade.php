@@ -1674,7 +1674,7 @@
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
 
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
@@ -1797,6 +1797,11 @@
 
                                     @if (session('role_id') == 1 || in_array(826, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.consignee_refused_otp_bypass.index')}}">Consignee Refusal OTP Bypass</a></li>
+                                    @endif
+                                        
+                                    @if (session('role_id') == 1 || in_array(846, session('permissions')))
+                                        <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
                                     @endif
                                 </ul>
 
@@ -2636,10 +2641,7 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(846, session('permissions')))
-                                <li><a class="menu-item"
-                                       href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
-                            @endif
+
                     </ul>
                 </li>
             @endif
