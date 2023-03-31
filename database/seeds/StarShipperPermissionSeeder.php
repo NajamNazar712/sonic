@@ -25,7 +25,7 @@ class StarShipperPermissionSeeder extends Seeder
 
 
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting > Shipment > Star Shipper', 'url'=>'admin.settings.star_shippers.index', 'permission_id' => 846),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Setting > Shippers > Star Shipper', 'url'=>'admin.settings.star_shippers.index', 'permission_id' => 846),
         ));
        
     }
