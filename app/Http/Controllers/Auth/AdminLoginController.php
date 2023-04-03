@@ -143,7 +143,8 @@ class AdminLoginController extends Controller
                     {
                         return redirect()->route('admin.attendance.mark');
                     }
-                }
+                } else 
+                    return redirect()->route('admin.attendance.mark');
             }
 
             return redirect()->intended(route('admin.dashboard.index'));

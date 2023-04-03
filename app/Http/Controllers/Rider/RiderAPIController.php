@@ -10946,8 +10946,10 @@ class RiderAPIController extends Controller
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if($attendance->leave_status == 2){
-                        $datum["status"] = 4;
-                    }else{
+                        $datum["status"] = 4; //adjustment apply
+                    } else if($attendance->leave_status == 1) {
+                        $datum["status"] = 5; //leave apply
+                    } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
                                 $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
@@ -11254,10 +11256,10 @@ class RiderAPIController extends Controller
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
             'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id'],
-            'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
-            'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'start_location_latitude' => ['required'],
+            'start_location_longitude' => ['required'],
+            'actual_location_latitude' => ['required'],
+            'actual_location_longitude' => ['required'],
             'shipment_ids' => ['nullable'],
             'shipments' => ['nullable', 'integer', 'digits_between:1,10'],
             'picture' => ['nullable', 'image']
@@ -12107,6 +12109,10 @@ class RiderAPIController extends Controller
                 $data['approver_email'] = $employee->line_manager->email;
                 $data['approver_name'] = $employee->line_manager->name;
                 $data['user_type'] = 0;
+                $data['total_leaves'] = $employee->leave_count;
+                $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                $data['availed_leaves'] = $availed_leaves;
                 return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
             }
             return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
@@ -12119,7 +12125,7 @@ class RiderAPIController extends Controller
         $rules = [
             'from' => ['required'],
             'to' => ['required'],
-            'reason' => ['required', 'max:500'],
+            'reason' => ['required_if:leave_type,[1,5,6]', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
