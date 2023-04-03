@@ -3420,7 +3420,7 @@ class AdminAPIController extends Controller
             $retail_shipment->height = $height;
             $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
             $retail_shipment->discount = $rates['discount_amount'];
-            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->packaging_charges = $rates['packaging_charges'];
             $retail_shipment->insurance_charges = $rates['insurance_amount'];
             $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
             $retail_shipment->weight_charges = $rates['charges_without_gst'];
