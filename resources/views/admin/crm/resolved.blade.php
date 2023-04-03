@@ -304,6 +304,8 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Responsible Hub');
+                            head.push('Responsible Zone');
                             head.push('Shipment Status');
                             head.push('Arrival Date');
                             head.push('COD Amount');
@@ -340,6 +342,8 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.responsible_hub);
+                                row.push(values.responsible_zone);
                                 row.push(values.status);
                                 row.push(values.arrival);
                                 row.push(values.cod_amount);

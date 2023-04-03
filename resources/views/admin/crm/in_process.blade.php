@@ -342,6 +342,8 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Zone');
+                            head.push('Responsible Hub');
+                            head.push('Responsible Zone');
                             head.push('Shipment Status');
                             head.push('Arrival Date');
                             head.push('Case Nature');
@@ -381,6 +383,8 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.zone);
+                                row.push(values.responsible_hub);
+                                row.push(values.responsible_zone);
                                 row.push(values.status);
                                 row.push(values.arrival);
                                 row.push(values.case_nature);

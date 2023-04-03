@@ -466,6 +466,8 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Zone');
+                            head.push('Reponsible Hub');
+                            head.push('Responsible Zone');
                             head.push('Arrival Date');
                             head.push('Channel');
                             head.push('Agent');
@@ -516,6 +518,8 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.zone);
+                                row.push(values.responsible_hub);
+                                row.push(values.responsible_zone);
                                 row.push(values.arrival_date);
                                 row.push(values.channel);
                                 row.push(values.agent);
