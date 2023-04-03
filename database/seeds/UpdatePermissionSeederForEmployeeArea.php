@@ -14,11 +14,11 @@ class UpdatePermissionSeederForEmployeeArea extends Seeder
         DB::table('module_permissions')->insert(
             
             array(
-                array('id' => 841, 'name' => 'City Sub Area - VIEW', 'module_id' => 12),
                 array('id' => 842, 'name' => 'City Sub Area - Add', 'module_id' => 12),
                 array('id' => 843, 'name' => 'City Sub Area - Edit', 'module_id' => 12),
                 array('id' => 844, 'name' => 'City Sub Area - Status/Default', 'module_id' => 12),
-                array('id' => 845, 'name' => 'Update Area(s) of Hub', 'module_id' => 28)
+                array('id' => 845, 'name' => 'Update Area(s) of Hub', 'module_id' => 28),
+                array('id' => 850, 'name' => 'City Sub Area - VIEW', 'module_id' => 12),
             )
         );
 
