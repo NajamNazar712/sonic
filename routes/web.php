@@ -3489,7 +3489,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 		Route::prefix('auto_delivery_note_verification')->name('auto_delivery_note_verification.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_delivery_note_verification_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@auto_delivery_note_verification_store')->name('store');
-        });		Route::prefix('star_shippers')->name('star_shippers.')->group(function () {
+        });
+		Route::prefix('star_shippers')->name('star_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@star_shippers_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
@@ -4254,6 +4255,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 });
 
+});
+
 Route::prefix('retail')->name('retail.')->group(function () {
     Route::get('/', function () {
         return redirect()->route('retail.login');
@@ -4278,10 +4281,10 @@ Route::prefix('retail')->name('retail.')->group(function () {
             Route::post('/excel_store', 'Retail\RetailShipmentBookController@excel_store')->name('excel_store');
             Route::post('/add_city_req', 'Retail\RetailShipmentBookController@add_city_req')->name('add_city_req');
             Route::post('/consignee_info', 'Retail\RetailShipmentBookController@consignee_info')->name('consignee_info');
-  			Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
+            Route::get('address_verify', 'Retail\RetailShipmentBookController@address_verify')->name('address_verify');
             // address_verify
-            
-            
+
+
         });
         Route::post('/shipper_info', 'Retail\RetailShipmentBookController@shipper_info')->name('shipper_info');
         Route::prefix('tracking_slip')->name('tracking_slip.')->group(function () {
@@ -4354,9 +4357,9 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::get('reattempt_history_list','Retail\RetailReturnController@reattempt_history_list')->name('reattempt_history.list');
         Route::post('pending_reattempt_nsa','Retail\RetailReturnController@pending_reattempt_nsa')->name('pending_reattempt_nsa');
         Route::post('mark_reattempt','Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
-        
+
     });
 
-    
+
 
 });
