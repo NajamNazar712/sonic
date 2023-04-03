@@ -215,12 +215,12 @@
                 errorClass: 'danger',
                 successClass: 'success',
                 rules: {
-                    from_date: {
-                        required: true
-                    },
-                    to_date: {
-                        required: true
-                    }
+                    // from_date: {
+                    //     required: true
+                    // },
+                    // to_date: {
+                    //     required: true
+                    // }
                 },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parents('.form-group'));
@@ -311,21 +311,22 @@
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'delivery_note_id', name: 'shipments.rider_deliveries.delivery_note_id', class: 'align-middle tracking_number_link'},
+                    {data: 'delivery_note_id', name: 'delivery_note_id', class: 'align-middle tracking_number_link'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle purpose'},
                     {data: 'rider_employee_id', name: 'riders.employee_id', class: 'align-middle rider_name'},
-                    {data: 'rider_name', name: 'riders.rider_name', class: 'align-middle delivery_note_id'},
+                    {data: 'rider_name', name: 'riders.name', class: 'align-middle delivery_note_id'},
                     {data: 'origin', name: 'cities.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'destinationcity.name', class: 'align-middle destination'},
                     {data: 'hubname', name: 'hub.name', class: 'align-middle hub'},
-                    {data: 'last_status', name: 'last_status', class: 'align-middle last_status'},
-                    {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
+                    {data: 'last_status', name: 'stts.name', class: 'align-middle last_status'},
+                    {data: 'current_status', name: 'sts.name', class: 'align-middle current_status'},
                     {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
                     {data: 'otp_status_text', name: 'otp_status_text', class: 'align-middle otp_status'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    //console.log(data);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -334,22 +335,21 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
+                    var column = this;
+                    var header = column.header();
 
+                    if ($(header).is('.serial_number') || $(header).is('.otp')) {
+                        $(td).appendTo($(search));
+                    }
+                    else {
+                        var current = $(input).appendTo($(search)).on('change', function() {
+                            column.search($(this).val(), false, false, true).draw();
+                        }).wrap(td).after(icon);
 
-                        if ($(header).is('.serial_number') || $(header).is('.otp')) {
-                            $(td).appendTo($(search));
+                        if (column.search()) {
+                            current.val(column.search());
                         }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
+                    }
                     });
                     this.api().table().columns.adjust();
                 }
