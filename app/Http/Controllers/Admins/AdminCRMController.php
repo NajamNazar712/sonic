@@ -1199,11 +1199,7 @@ class AdminCRMController extends Controller
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey)) {
-                        $temp = $destination_hub;
-                        $destination_hub = $origin_hub;
-                        $origin_hub = $temp;
-                    }elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_hub;
                         $destination_hub = $origin_hub;
                         $origin_hub = $temp;
@@ -1253,19 +1249,16 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
-                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,22])
+                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)) {
-                        $temp = $destination_zone;
-                        $destination_zone = $origin_zone;
-                        $origin_zone = $temp;
-                    }  elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_zone;
                         $destination_zone = $origin_zone;
                         $origin_zone = $temp;
                     }
+
                 }
 
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
@@ -1867,11 +1860,7 @@ class AdminCRMController extends Controller
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey)) {
-                        $temp = $destination_hub;
-                        $destination_hub = $origin_hub;
-                        $origin_hub = $temp;
-                    }elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_hub;
                         $destination_hub = $origin_hub;
                         $origin_hub = $temp;
@@ -1921,19 +1910,16 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
-                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,22])
+                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)) {
-                        $temp = $destination_zone;
-                        $destination_zone = $origin_zone;
-                        $origin_zone = $temp;
-                    }  elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_zone;
                         $destination_zone = $origin_zone;
                         $origin_zone = $temp;
                     }
+
                 }
 
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
@@ -2431,11 +2417,7 @@ class AdminCRMController extends Controller
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey)) {
-                        $temp = $destination_hub;
-                        $destination_hub = $origin_hub;
-                        $origin_hub = $temp;
-                    }elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_hub;
                         $destination_hub = $origin_hub;
                         $origin_hub = $temp;
@@ -2485,19 +2467,16 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
-                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,22])
+                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)) {
-                        $temp = $destination_zone;
-                        $destination_zone = $origin_zone;
-                        $origin_zone = $temp;
-                    }  elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_zone;
                         $destination_zone = $origin_zone;
                         $origin_zone = $temp;
                     }
+
                 }
 
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
@@ -2864,11 +2843,7 @@ class AdminCRMController extends Controller
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey)) {
-                        $temp = $destination_hub;
-                        $destination_hub = $origin_hub;
-                        $origin_hub = $temp;
-                    }elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_hub;
                         $destination_hub = $origin_hub;
                         $origin_hub = $temp;
@@ -2918,19 +2893,16 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
-                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,22])
+                $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
-                    if(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)) {
-                        $temp = $destination_zone;
-                        $destination_zone = $origin_zone;
-                        $origin_zone = $temp;
-                    }  elseif(in_array(12, $shipment_journey) && in_array(20, $shipment_journey) && in_array(22, $shipment_journey)){
+                    if(count(array_intersect([12,20,21,22],$shipment_journey )) !== 0) {
                         $temp = $destination_zone;
                         $destination_zone = $origin_zone;
                         $origin_zone = $temp;
                     }
+
                 }
 
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
