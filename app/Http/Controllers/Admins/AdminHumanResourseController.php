@@ -444,6 +444,13 @@ class AdminHumanResourseController extends Controller
                     ->orWhere('r.blacklist', '=', null);
             });
 
+
+        $environment = config('app.env');
+
+        if ($environment == 'staging') {
+            $employees = $employees->orderBy('employees.trax_id', 'desc');
+        }
+
         if (session('role_id') != 1) {
             $employees = $employees->whereIn('cities.hub_id', session('hubs'));
         }
