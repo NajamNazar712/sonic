@@ -448,7 +448,7 @@ class AdminHumanResourseController extends Controller
         $environment = config('app.env');
 
         if ($environment == 'staging') {
-            $employees = $employees->orderBy('employees.trax_id', 'desc');
+            $employees = $employees->orderBy('employees.updated_at', 'desc');
         }
 
         if (session('role_id') != 1) {
