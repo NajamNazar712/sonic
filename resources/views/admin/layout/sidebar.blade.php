@@ -601,7 +601,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,840], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
@@ -664,7 +664,7 @@
                                                 Return Note Requests</a></li>
                                     @endif
                                     
-                                    @if (session('role_id') == 1 || in_array(840, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(849, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.return_confirm_otp.index') }}">Return Confirm OTP</a></li>
                                     @endif

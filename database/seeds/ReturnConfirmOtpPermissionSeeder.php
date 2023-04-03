@@ -14,7 +14,7 @@ class ReturnConfirmOtpPermissionSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('module_permissions')->insert(array(
-            array('id' => 840, 'name' => 'Return Confirm OTP - View', 'module_id' => 7),
+            array('id' => 849, 'name' => 'Return Confirm OTP - View', 'module_id' => 7),
         ));
 
 
@@ -27,7 +27,7 @@ class ReturnConfirmOtpPermissionSeeder extends Seeder
         DB::table('admins_screen_list')->insert(array(
             array('created_at' => $timestamp, 'updated_at' => $timestamp,
              'name' => 'Last Mile > Return > Return Confirm OTP', 
-             'url'=>'admin.return.return_confirm_otp.index', 'permission_id' => 840),
+             'url'=>'admin.return.return_confirm_otp.index', 'permission_id' => 849),
         ));
     }
 }
