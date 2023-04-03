@@ -1200,9 +1200,9 @@ class AdminCRMController extends Controller
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
                     if(in_array(22,$shipment_journey)) {
-                        $temp = $destination_hub;
-                        $destination_hub = $origin_hub;
-                        $origin_hub = $temp;
+//                        $temp = $destination_hub;
+//                        $destination_hub = $origin_hub;
+//                        $origin_hub = $temp;
                     }
                 }
                 if($status == 1 || $status == 2 || $status == 17 || $status == 22){
@@ -1254,9 +1254,9 @@ class AdminCRMController extends Controller
                 if($shipment_journey->exists()){
                     $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
                     if(in_array(22,$shipment_journey)) {
-                        $temp = $destination_zone;
-                        $destination_zone = $origin_zone;
-                        $origin_zone = $temp;
+//                        $temp = $destination_zone;
+//                        $destination_zone = $origin_zone;
+//                        $origin_zone = $temp;
                     }
                 }
 
