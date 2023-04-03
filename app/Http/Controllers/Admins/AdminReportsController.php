@@ -3168,15 +3168,15 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
         }
         $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-        $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
+        $arrival_to   = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->toDateTimeString();
-        $to = $request->get('search_date_to');
-        $to = Carbon::parse($to)->toDateTimeString();
+        $to   = $request->get('search_date_to');
+        $to   = Carbon::parse($to)->toDateTimeString();
 
         $from = str_replace('00:00:00', $arrival_from, $from);
-        $to = str_replace('00:00:00', $arrival_to, $to);
+        $to   = str_replace('00:00:00', $arrival_to, $to);
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
@@ -3274,7 +3274,7 @@ class AdminReportsController extends Controller
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
             ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment')
+            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number','shipments.fintech_charges as fintech_charges','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
@@ -3315,6 +3315,11 @@ class AdminReportsController extends Controller
             ->editColumn('account_no', function ($shipments) {
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
+
+            ->editColumn('fintech_charges', function ($shipments) { 
+                return number_format($shipments->fintech_charges, 2);
+            })
+
             ->editColumn('insurance_charges', function ($shipment) {
                 return number_format($shipment->insurance_charges, 2);
             })
@@ -3422,7 +3427,7 @@ class AdminReportsController extends Controller
             ->editColumn('p_total_charges', function ($sale) {
                 $total = '';
                 if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges;
+                    $total = $sale->p_total_charges + $sale->fintech_charges;
                 } else if ($sale->d_total_charges != null) {
                     $total = $sale->d_total_charges;
                 }
@@ -5281,7 +5286,7 @@ class AdminReportsController extends Controller
             });
         }
 
-        $sales->select('shipments.tracking_number', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'shipments.intercept_charges', 'bc.name', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'invoices.invoice_number', 'rc.name as return_city')
+        $sales->select('shipments.tracking_number', 'shipments.fintech_charges as fintech_amount' ,'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dnsdn.station_deposit_note_id as sdn_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'shipments.intercept_charges', 'bc.name', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'invoices.invoice_number', 'rc.name as return_city')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358]);
 
@@ -5295,6 +5300,12 @@ class AdminReportsController extends Controller
 
         $datatable = Datatables::of($sales)
             ->setTotalRecords($count)
+
+
+            ->editColumn('fintech_charges', function ($shipment) {
+                return number_format($shipment->fintech_amount, 2);
+            })
+
             ->editColumn('insurance_charges', function ($shipment) {
                 return number_format($shipment->insurance_charges, 2);
             })
@@ -5417,7 +5428,7 @@ class AdminReportsController extends Controller
             ->editColumn('p_total_charges', function ($sale) {
                 $total = '';
                 if ($sale->p_total_charges != null) {
-                    $total = $sale->p_total_charges;
+                    $total = $sale->p_total_charges + $sale->fintech_amount;
                 } else if ($sale->d_total_charges != null) {
                     $total = $sale->d_total_charges;
                 }
@@ -5431,7 +5442,7 @@ class AdminReportsController extends Controller
             ->editColumn('p_net_payable', function ($sale) {
                 $payable = '';
                 if ($sale->p_net_payable != null) {
-                    $payable = $sale->p_net_payable;
+                    $payable = $sale->p_net_payable ;
                 } else if ($sale->d_net_payable != null) {
                     $payable = $sale->d_net_payable;
                 }

@@ -2,8 +2,8 @@
 @section('title','Delivery Note History')
 @section('content')
     <h1 class="mb-1">
-        Delivery Note History
-    </h1>
+        Delivery Note History 
+    </h1> 
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
@@ -65,6 +65,9 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
+
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
+
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
@@ -100,6 +103,39 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+
+
+    <div class="modal fade" id="fintech_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Fintech Charges(s)</h4>
+    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+    
+                    <table>
+                        <tr>
+                          <th>Tracking #</th>
+                          <th>Fintech Charges</th>
+                          <th>Created Date</th>
+                        </tr>
+                        <tbody id="shipment_table">
+                        <tbody>
+                      </table>
+                         </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!--Delivered Shipments popup -->
     <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
@@ -414,6 +450,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges'},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -780,5 +817,32 @@
 
 
         });
+
+
+        function fintechshipmentsshow(event,id){
+    $("#shipment_table").html('');
+    $.ajax({
+        type : 'get',
+        url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
+        data : {id:id},
+        success:function(res){
+            $("#fintech_modal").modal('show');
+            for(let x of res.data){
+                $("#shipment_table").append(`
+                    <tr>
+                    <td>${x.trackingNo}</td>
+                    <td>${x.fintech_charges}</td>
+                    <td>${x.Date}</td>
+                    </tr>
+                `);
+            }
+            
+        }
+        
+    });
+}
+
+
+
     </script>
 @endsection

@@ -181,6 +181,9 @@ use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
+use App\Jobs\CountFintechCharges;
+
+use App\Http\Models\Admin\UserFintectCharges;
 use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
@@ -497,6 +500,60 @@ class AdminDashboardController extends Controller
         return view('admin.simple_dashboard');
     }
 
+
+
+
+//Added by Murad
+
+public function add_fintech_charges(Request $req){  
+   $UserFintectCharges = new UserFintectCharges();
+   $values =  $UserFintectCharges::where('user_id',$req->userID)->first();
+
+   if(empty($req->fintechCharges)){
+
+    if(!empty($values)){
+        return response()->json([
+            'status' => '200',
+            'data' => $values
+        ]);
+    } 
+    else{
+        return response()->json([
+            'status' => '404',
+        ]);
+    }
+       
+   }
+   else{
+    try{
+        if(!empty($values->user_id)){
+            $UserFintectCharges::where('user_id',$req->userID)->update([
+                'fintech_charges'  => $req->fintechCharges,
+                'updated_by'       => Auth::id()   
+            ]); 
+        }
+        else{
+            $UserFintectCharges->user_id            = $req->userID;
+            $UserFintectCharges->fintech_charges    = $req->fintechCharges;
+            $UserFintectCharges->added_by           = Auth::id();
+            $UserFintectCharges->updated_by         = Auth::id();
+            $UserFintectCharges->save();
+        }
+
+        return response()->json([
+            'status'  => '201',
+            'message' => 'Charges Set Successfully',
+        ]);
+   }
+    catch(exception $e){
+        return response()->json([
+            'message' => 'Charges Not Set',
+        ]); 
+        } 
+    }
+}
+
+//End
     public function statistics_search(Request $request)
     {
 //        return $request;
@@ -9426,6 +9483,11 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
                     }
 
+                    
+                if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
+                }
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -9755,6 +9817,11 @@ class AdminDashboardController extends Controller
 
                 if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
+                }
+
+
+                if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
                 $dropdown .= '

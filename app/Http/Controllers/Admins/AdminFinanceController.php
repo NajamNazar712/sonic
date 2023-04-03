@@ -50,6 +50,9 @@ use App\Http\Models\RetailDonePaymentShipment;
 use App\Http\Models\RetailPendingPayment;
 use App\Http\Models\RetailPendingPaymentCalculation;
 use App\Http\Models\RetailPendingPaymentShipment;
+
+use App\Http\Models\Admin\shipmentFintechCharges;
+
 use App\Http\Models\RevertStatusRequestLog;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentItem;
@@ -454,6 +457,8 @@ class AdminFinanceController extends Controller
 
 
             foreach ($filtered_shipments as $shipment) {
+
+                
                 $total_shipments++;
 //                    $shipment = Shipment::find($parcel->shipment_id);
 
@@ -4541,6 +4546,8 @@ class AdminFinanceController extends Controller
 
     public function make_payments_list(Request $request)
     {
+
+      
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 89);
         }
@@ -4559,9 +4566,10 @@ class AdminFinanceController extends Controller
             ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'))
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'))
             ->groupBy('pending_payments.id');
 
+            // dd($pending_payments);
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
                 $pending_payments = $pending_payments->where(function ($query) {
@@ -4576,6 +4584,13 @@ class AdminFinanceController extends Controller
             ->addColumn('total_deductable', function ($pending_payments) {
                 return number_format(($pending_payments->total_charges + $pending_payments->total_gst), 2);
 
+            })
+            ->editColumn('fintech_charges', function ($shipment) {
+
+                $req = 'pending_payments';
+                
+                $fn_charges = $this->calculate_fintech_charges_bulk($shipment,$req);
+                return $fn_charges;
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -4828,7 +4843,7 @@ class AdminFinanceController extends Controller
 
         foreach ($pending_payment_shipments as $pending_payment_shipment) {
             $shipment = $pending_payment_shipment->shipment;
-
+            $fn_charges = $this->calculate_fintech_charges($shipment->id);   
             $detail = array();
             if ($request->has('pickup_address_id')) {
                 if ($request->pickup_address_id == $shipment->pickup_address_id) {
@@ -4845,8 +4860,9 @@ class AdminFinanceController extends Controller
                     $detail['amount'] = number_format($pending_payment_shipment->amount);
                     $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
                     $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
-                    $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
-                    $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
+                    $detail['fintech_charges'] = number_format($fn_charges, 2);
+                    $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst), 2);
+                    $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
 
                     $details[] = $detail;
                 }
@@ -4865,15 +4881,68 @@ class AdminFinanceController extends Controller
                 $detail['amount'] = number_format($pending_payment_shipment->amount);
                 $detail['charges'] = number_format($pending_payment_shipment->charges, 2);
                 $detail['gst'] = number_format($pending_payment_shipment->gst, 2);
-                $detail['deductable'] = number_format(($pending_payment_shipment->charges + $pending_payment_shipment->gst), 2);
-                $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
+                $detail['fintech_charges'] = number_format($fn_charges, 2);
+                $detail['deductable'] = number_format(($pending_payment_shipment->charges + $fn_charges +$pending_payment_shipment->gst), 2);
+                $detail['payable'] = number_format($pending_payment_shipment->payable - $fn_charges, 2);
 
                 $details[] = $detail;
             }
 
         }
-
+        
         return $details;
+    }
+
+    function calculate_fintech_charges($fn_charges)
+    {
+      
+        $fintechCharges = shipmentFintechCharges::where('shipment_id',$fn_charges);
+        $fn_charges = 0;
+        if($fintechCharges->exists()){
+            $fintechCharges = $fintechCharges->first();
+            if($fintechCharges->applied_to == '1'){
+                $fn_charges = $fintechCharges->fintech_charges;
+            }
+           
+        }
+        // dd($fn_charges);
+        return number_format($fn_charges, 2);
+    }
+
+    function calculate_fintech_charges_bulk($shipments,$req){
+
+       
+
+        if($req == 'pending_payments'){
+            $fintech = PendingPaymentShipment::where('pending_payment_id', $shipments->id)->where('type', 1)->get(); 
+        }
+        if($req == 'retail_pending_payments'){
+            $fintech = RetailPendingPaymentShipment::where('retail_pending_payment_id', $shipments->id)->where('type', 1)->get(); 
+        }
+
+        if($req == 'retail_payment_done'){
+
+           
+            $fintech = RetailDonePaymentShipment::where('retail_done_payment_id', $shipments->id)->where('type', 2)->get(); 
+        }
+
+        else{
+            $fintech = DonePaymentShipment::where('done_payment_id', $shipments->id)->where('type', 0)->get(); 
+        }
+
+      
+        $fintechCharges = [];
+        foreach($fintech as $rows){
+         $values = shipmentFintechCharges::where('shipment_id',$rows->shipment_id)->first();
+         if(!empty($values)){
+             if($values->applied_to == '1'){
+                 $fintechCharges[] = $values->fintech_charges;
+             }
+         }
+         
+        }
+        $totalFintechCharges = array_sum($fintechCharges);
+     return  number_format($totalFintechCharges,2);
     }
 
     public function make_payments_shipment_list(Request $request)
@@ -4893,7 +4962,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
+            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -4903,6 +4972,7 @@ class AdminFinanceController extends Controller
         if ($request->has('pickup_address_id')) {
             $pending_payment_shipments->where('s.pickup_address_id', $request->pickup_address_id);
         }
+
 
         $datatables = Datatables::of($pending_payment_shipments)
             ->setRowAttr([
@@ -4920,8 +4990,15 @@ class AdminFinanceController extends Controller
                     return $deliveries->account_type_id;
                 }
             ])
+
+            ->addColumn('fintech_charges', function ($pending_payment_shipments) {
+                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+                return $fn_charges;
+                
+            })
             ->addColumn('deductable', function ($pending_payment_shipments) {
-                return number_format(($pending_payment_shipments->charges + $pending_payment_shipments->gst), 2);
+                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+                return number_format($pending_payment_shipments->charges + $fn_charges + $pending_payment_shipments->gst, 2);
             })
             ->addColumn('aging', function ($pending_payment_shipments) {
                 $now = Carbon::now()->startOfDay();
@@ -4931,7 +5008,8 @@ class AdminFinanceController extends Controller
                 return $created_at->diffInDays($now) . 'd';
             })
             ->editColumn('amount', function ($pending_payment_shipment) {
-                return number_format($pending_payment_shipment->amount);
+                
+                return number_format($pending_payment_shipment->amount  , 2) ;
             })
             ->editColumn('charges', function ($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->charges, 2);
@@ -4943,7 +5021,8 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment_shipment->wht, 2);
             })
             ->editColumn('payable', function ($pending_payment_shipment) {
-                return number_format($pending_payment_shipment->payable, 2);
+                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipment->ShipmentID);
+                return number_format($pending_payment_shipment->payable - $fn_charges, 2);
             })
             ->editColumn('type', function ($pending_payment_shipment) {
                 if ($pending_payment_shipment->type == 0) {
@@ -5726,7 +5805,7 @@ class AdminFinanceController extends Controller
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
-
+           
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
             ->addColumn('id_padded', function ($done_payment) {
@@ -5741,16 +5820,29 @@ class AdminFinanceController extends Controller
             ->editColumn('payment_id', function ($done_payment) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
+
+             ->editColumn('done_fintech_charges', function ($shipment) {
+                $req = 'done_payments';
+                $fntech_charges = $this->calculate_fintech_charges_bulk($shipment,$req);
+                return $fntech_charges;
+            })
+
+
+
             ->addColumn('total_deductable', function ($done_payment) {
                 return number_format(($done_payment->total_charges + $done_payment->total_gst + $done_payment->ibft_charges - $done_payment->total_wht), 2);
             })
             ->editColumn('delivered_shipments', function ($done_payment) {
+
+                
                 if ($done_payment->delivered_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
                 } else {
                     return 0;
                 }
             })
+
+            
             ->editColumn('returned_shipments', function ($done_payment) {
                 if ($done_payment->returned_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->returned_shipments . '</button>';
@@ -6462,7 +6554,12 @@ class AdminFinanceController extends Controller
         $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
+        $total_fintech_charges = 0;
+        $calculate_total_fintech_charges = [];
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+         
+            $done_fintech_charges = $this->calculate_fintech_charges($done_payment_shipment->shipment_id);
+            $calculate_total_fintech_charges[] = $done_fintech_charges;
             $shipment = $done_payment_shipment->shipment;
 
             $shipment_weight = $shipment->actual_weight;
@@ -6511,6 +6608,8 @@ class AdminFinanceController extends Controller
                               <td>' . (($done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' . $done_fintech_charges . '</td>
+                             
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
@@ -6576,6 +6675,7 @@ class AdminFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format(array_sum($calculate_total_fintech_charges), 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
@@ -6619,6 +6719,7 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
+                              <td class="color primary"><strong>Fintech Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Total Charges (PKR)</strong></td>
                               <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>WHT</strong></td>
@@ -6686,6 +6787,11 @@ class AdminFinanceController extends Controller
                                     </tr>
                                    
                                     <tr>
+                                    <td class="color secondary"><strong>Total Fintech</strong></td>
+                                    <td class="color secondary">' .  number_format(array_sum($calculate_total_fintech_charges), 2) . '</td>
+                                    </tr>
+
+                                    <tr>
                                         <td class="color secondary"><strong>Total WHT (Deductable)</strong></td>
                                         <td class="color secondary">' . number_format($total_wht, 2) . '</td>
                                     </tr>
@@ -6707,7 +6813,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_charges + $total_gst - array_sum($calculate_total_fintech_charges) - $total_adjustments + $done_payment->ibft_charges - $total_wht), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
@@ -12514,6 +12620,13 @@ class AdminFinanceController extends Controller
                     return 0;
                 }
             })
+
+            ->editColumn('retail_fintech_charges', function ($pending_payment) {
+                $req = 'retail_pending_payments';
+                $retail_fintech_charges = $this->calculate_fintech_charges_bulk($pending_payment,$req);
+                return $retail_fintech_charges;
+            })
+
             ->editColumn('total_amount', function ($pending_payment) {
                 return number_format($pending_payment->total_amount, 2);
             })
@@ -12626,8 +12739,10 @@ class AdminFinanceController extends Controller
         $pending_payment_shipments = RetailPendingPaymentShipment::where('retail_pending_payment_id', $request->id)->get();
 
         foreach ($pending_payment_shipments as $pending_payment_shipment) {
-            $shipment = $pending_payment_shipment->shipment;
 
+         
+            $shipment = $pending_payment_shipment->shipment;
+           
             $detail = array();
             if ($request->has('pickup_address_id')) {
                 if ($request->pickup_address_id == $shipment->pickup_address_id) {
@@ -12638,7 +12753,8 @@ class AdminFinanceController extends Controller
                     } else {
                         $detail['type'] = 'Adjusted';
                     }
-
+                    $fn_charges = $this->calculate_fintech_charges($shipment->id);   
+                    $detail['fintech_charges'] = number_format($fn_charges, 2);
                     $detail['amount'] = number_format($pending_payment_shipment->amount);
                     $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
 
@@ -12653,7 +12769,8 @@ class AdminFinanceController extends Controller
                 } else {
                     $detail['type'] = 'Adjusted';
                 }
-
+                $fn_charges = $this->calculate_fintech_charges($shipment->id);   
+                $detail['fintech_charges'] = number_format($fn_charges, 2);
                 $detail['amount'] = number_format($pending_payment_shipment->amount);
                 $detail['payable'] = number_format($pending_payment_shipment->payable, 2);
 
@@ -12678,7 +12795,7 @@ class AdminFinanceController extends Controller
                     ->where('consolidations.consolidation_id', '=',
                         DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = s.id)'));
             })
-            ->select('retail_pending_payment_shipments.id', 'rsi.shipper_name as shipper', 's.tracking_number as shipment', 'retail_pending_payment_shipments.type', 'ss.name as status', 'retail_pending_payment_shipments.created_at', 'retail_pending_payment_shipments.amount', 'retail_pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 's.pickup_address_id');
+            ->select('retail_pending_payment_shipments.id', 'retail_pending_payment_shipments.shipment_id as shipment_id', 'rsi.shipper_name as shipper', 's.tracking_number as shipment', 'retail_pending_payment_shipments.type', 'ss.name as status', 'retail_pending_payment_shipments.created_at', 'retail_pending_payment_shipments.amount', 'retail_pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 's.pickup_address_id');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('retail_pending_payment_shipments.retail_pending_payment_id', $request->ids);
@@ -12712,7 +12829,20 @@ class AdminFinanceController extends Controller
             ->editColumn('amount', function ($pending_payment_shipment) {
                 return number_format($pending_payment_shipment->amount);
             })
+
+
+
+            ->editColumn('fintech_pending_payments', function ($pending_payment_shipment) {
+               $valuer[] = $pending_payment_shipment->shipment_id;
+                $retail_pending_charges = $this->calculate_fintech_charges($pending_payment_shipment->shipment_id); 
+                return $retail_pending_charges;
+            })
+
+
             ->editColumn('payable', function ($pending_payment_shipment) {
+
+                   
+                
                 return number_format($pending_payment_shipment->payable, 2);
             })
             ->editColumn('type', function ($pending_payment_shipment) {
@@ -13200,7 +13330,7 @@ class AdminFinanceController extends Controller
             ->leftjoin('retail_done_payment_calculations as dpc', 'dpc.retail_done_payment_id', '=', 'retail_done_payments.id')
             ->leftJoin('banks_lists as ubi', 'ubi.id', '=', 'rsi.bank_id')
             ->leftjoin('banks_lists as b', 'retail_done_payments.company_bank_id', '=', 'b.id')
-            ->select('retail_done_payments.id as id', 'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at');
+            ->select('retail_done_payments.id as id', 'dpc.retail_done_payment_id as payment_done_id' ,'retail_done_payments.id as payment_id', 'rsi.shipper_name as shipper', 'c.name as city', 'rsi.shipper_phone_no as shipper_phone', 'rsi.shipper_address', 'retail_done_payments.total_shipments', 'retail_done_payments.delivered_shipments', 'retail_done_payments.delivered_shipments as delivered_shipments_count', 'retail_done_payments.adjusted_shipments', 'retail_done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.payable as total_payable', 'ubi.name as bank', 'retail_done_payments.reference_number', 'retail_done_payments.created_at as done_at', 'b.name as company_bank', 'retail_done_payments.status', 'retail_done_payments.ibft_charges', 'dpc.adjustment as adjustment_charges', 'retail_done_payments.status_updated_at as status_updated_at');
 
         if (session('role_id') != 1) {
             $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
@@ -13219,6 +13349,17 @@ class AdminFinanceController extends Controller
             ->addColumn('total_deductable', function ($done_payment) {
                 return number_format($done_payment->ibft_charges, 2);
             })
+
+
+            ->addColumn('fintech_charges', function ($done_payment) {
+                $req = 'retail_payment_done';
+                $fn_charges = $this->calculate_fintech_charges_bulk($done_payment,$req);
+                return $fn_charges;
+
+
+
+            })
+
             ->editColumn('delivered_shipments', function ($done_payment) {
                 if ($done_payment->delivered_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
@@ -13638,6 +13779,7 @@ class AdminFinanceController extends Controller
 
     public function retail_done_payments_details_print(Request $request)
     {
+       // dd($request->all());
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $done_payment = RetailDonePayment::find($request->id);
@@ -13762,8 +13904,13 @@ class AdminFinanceController extends Controller
         $total_collection_amount = 0;
         $total_adjustments = 0;
         $total_payable = 0;
+        $total_fintech_charges = 0;
+        $calculate_total_fintech_charges = [];
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+
+            $done_fintech_charges = $this->calculate_fintech_charges($shipment->shipment_id);
+            $calculate_total_fintech_charges[] = $done_fintech_charges;
 
             $shipment_weight = $shipment->actual_weight;
 
@@ -13798,7 +13945,9 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->consignee_city->name . '</td>
                               <td>' . $shipment->retail->shipping_modes->name . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                            
                               <td>' . $shipment_weight . '</td>
+                              <td>' .  $done_fintech_charges . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
                             </tr>
@@ -13841,6 +13990,7 @@ class AdminFinanceController extends Controller
                             <tr>
                                 <td colspan=7></td>
                                 <td class="color primary"><strong>Total</strong></td>
+                                <td class="color secondary"><strong>' .number_format( array_sum($calculate_total_fintech_charges) ). '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
                             </tr>
@@ -13868,7 +14018,9 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Shipping Mode</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
+                             
                               <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Fintech Charges</strong></td>
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
                             </tr>
@@ -13895,9 +14047,14 @@ class AdminFinanceController extends Controller
                                         <td class="color secondary"><strong>IBFT Charges</strong></td>
                                         <td>' . number_format($done_payment->ibft_charges, 2) . '</td>
                                     </tr>
+
+                                    <tr>
+                                        <td class="color secondary"><strong>Fintech Charges</strong></td>
+                                        <td>' . number_format( array_sum($calculate_total_fintech_charges)) . '</td>
+                                    </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format(($total_adjustments + $done_payment->ibft_charges), 2) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format(($total_adjustments + $done_payment->ibft_charges + array_sum( $calculate_total_fintech_charges)), 2) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>

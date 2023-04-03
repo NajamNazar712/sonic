@@ -122,6 +122,11 @@ use App\Http\Models\Admin\BookingDestinationMapping;
 use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\LeadTaggingService;
 use App\Http\Models\ServiceList;
+//Add by Murad
+use App\FintechSetup;
+use App\FintechSetupValues;
+use App\Http\Models\Admin\standard_fintech_charges;
+//End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -132,7 +137,6 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
-
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -3588,6 +3592,183 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.one_link_charges')->with(['one_linke_payment_charges_ranges' => $one_linke_payment_charges_ranges]);
     }
 
+
+    //Add By Murad
+    public function setup_fintech_charges_index(){
+        $fintechSetup =  new FintechSetup();
+        return view('admin.settings.fintech.setup_fintech_charges');
+    }
+
+
+    public function setup_fintech_charges_show(){
+        return view('admin.settings.fintech.form');
+    }
+
+    public function setup_fintech_charges_list(){
+        $fintechSetup =  new FintechSetup();
+
+
+        $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_setups.added_by')
+        ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_setups.updated_by')
+        ->select(['fintech_setups.*','created_by.name as admin1','updated_by.name as admin2'])
+        ->get();
+
+
+
+
+        $datatable = Datatables::of($FintechValues)
+        ->editColumn('status', function ($data) {
+            if ($data->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })
+        ->addColumn('action', function ($data) {
+            $edit = '<a href="' .route('admin.settings.setup_fintech_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
+           
+            $dropdown = '
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">';
+
+                $dropdown .= $edit;
+            
+        
+            return $dropdown;
+        });
+    return $datatable->make(true);
+    }
+
+    public function setup_fintech_charges_save(Request $req){
+        if(!empty($req->fintech_range_up)){
+            DB::beginTransaction();
+            try{
+                $FintechSetup =  new FintechSetup();
+                $FintechSetup->company_name  = $req->company_name;
+                $FintechSetup->added_by      = Auth::id();
+                $FintechSetup->updated_by    = Auth::id();
+                $FintechSetup->save();
+                    for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                            $FintechSetupValues =  new FintechSetupValues();
+                            $FintechSetupValues->company_Id          = $FintechSetup->id;
+                            $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges             = $req->charges[$i];
+                            $FintechSetupValues->additional_charges  = $req->additional_charges[$i];
+                            $FintechSetupValues->fed_tax             = $req->fed_tax[$i];
+                            $FintechSetupValues->save(); 
+                        }
+                    }
+            DB::commit();
+                return redirect()->back()->with('success', 'Added Successfully');
+            } 
+            catch(exception $e){
+                DB::rollback();
+                return redirect()->back()->with('error', 'error in update');
+            }   
+            // finally{
+            //      return redirect()->back()->with('success', 'Added Successfully');
+            // }
+        } 
+    }
+
+    public function setup_fintech_charges_edit($id){
+        $fintechsetupValues =  new FintechSetupValues();
+        $fintechvalues = $fintechsetupValues::where('company_Id',$id)->get();
+        return view('admin.settings.fintech.form',compact('fintechvalues'));
+    }
+
+    public function setup_fintech_charges_edit_save(Request $req){
+           DB::beginTransaction();
+           try{ 
+                if(!empty($req->fintech_range_up)){
+                    for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                            $FintechSetupValues =  new FintechSetupValues();
+                            $FintechSetupValues->company_Id          = $req->company_id;
+                            $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges             = $req->charges[$i];
+                            $FintechSetupValues->additional_charges  = $req->additional_charges[$i];
+                            $FintechSetupValues->fed_tax             = $req->fed_tax[$i];
+                            $FintechSetupValues->save(); 
+                        }
+                    }
+                }
+                for($j = 0; $j < count($req->IndexID); $j++){
+                        $FintechSetupValues =  new FintechSetupValues();
+                        $FintechSetupValues::where('id',$req->IndexID[$j])->update([
+                            'range_up'            => $req->fintech_range_up_edit[$j],
+                            'range_down'          => $req->fintech_range_down_edit[$j],
+                            'charges'             => $req->charges_edit[$j],
+                            'additional_charges'  => $req->additional_charges_edit[$j],
+                            'fed_tax'             => $req->fed_tax_edit[$j],
+                        ]);
+                }
+                $FintechSetup =  new FintechSetup();
+                $FintechSetup::where('id',$req->company_id)->update([
+                    'updated_by' =>  Auth::id(),
+                ]);
+
+            DB::commit();
+            }
+            catch(exception $e){
+                DB::rollback();
+            }   
+            finally{
+                return redirect()->back()->with('success', 'Update Charges Successfully'); 
+            }
+           
+        }
+
+        public function standard_fintech_charges_index(){
+            $StandardFintectCharges = new standard_fintech_charges();
+            $value =  $StandardFintectCharges::first();
+            return view('admin.settings.fintech.standard_fintech_charges',compact('value'));
+        }
+
+        public function standard_fintech_charges_store(Request $req){
+        $StandardFintectCharges = new standard_fintech_charges();
+
+            $validator = Validator::make($req->all(), [
+                'standard_fintech_charges'  => 'required',
+                'standard_FED_Charges'      => 'required',
+            ]);
+    
+            if($validator->fails()){
+                return redirect()->back()->with('error', 'Please Fill out all Fields'); 
+            }
+
+            else{
+                try{
+                    $values = $StandardFintectCharges::where('id','1')->first();
+                    if(!empty($values)){
+                        $StandardFintectCharges->where('id','1')->update([
+                            'standard_fintech_charges'  =>  $req->standard_fintech_charges,
+                            'standard_fed_charges'      =>  $req->standard_FED_Charges,
+                            'updated_by' => Auth::id(),
+                        ]);
+                    }
+                    else{
+                        $StandardFintectCharges->standard_fintech_charges   = $req->standard_fintech_charges;
+                        $StandardFintectCharges->standard_fed_charges       = $req->standard_FED_Charges;
+                        $StandardFintectCharges->created_by = Auth::id();
+                        $StandardFintectCharges->updated_by = Auth::id();
+                        $StandardFintectCharges->save();
+                    }
+                    
+                    return redirect()->back()->with('success', 'Standard Charges Set Successfully'); 
+                }
+                
+                catch(Exception $e){
+                    return redirect()->back()->with('eroor', 'Failed to Save Standard Charges');
+                }
+            }
+        }
+
+    //End
     public function onelink_payment_charges_submit(Request $request)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 622);

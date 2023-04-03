@@ -2202,6 +2202,20 @@
                                                 href="{{ route('admin.settings.onelink_payment_charges.index') }}">1Link
                                                 Payment Charges</a></li>
                                     @endif
+
+
+                                    @if (session('role_id') == 1 || in_array(825, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.setup_fintech_charges.index') }}">Add Fintech Charges</a></li>
+                                    @endif  
+
+
+                                    @if (session('role_id') == 1 || in_array(825, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.standard_fintech_charges.index') }}">Add Standard Fintech Charges</a></li>
+                                    @endif  
+
+
                                 </ul>
                             </li>
                         @endif

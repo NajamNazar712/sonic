@@ -592,6 +592,49 @@
             </div>
         </div>
     </div>
+
+
+
+
+
+{{-- Add Fintech Charges Modal --}}
+
+
+<div class="modal fade text-left" id="AddFintechChargesModal" data-backdrop="static" role="dialog" aria-labelledby=""
+    aria-hidden="true">
+   <div class="modal-dialog modal-md" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h4 class="modal-title">Set User Fintech Charges</h4>
+           </div>
+               <div class="modal-body">
+                   <div class="col text-center">
+                       <label class="font-medium-2 font-weight-bold block">Is Shipper Pay Fintech Charges ?</label>
+                       <div class="form-group">
+                           <input type="hidden" id="userID">
+                           <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                           <input type="checkbox" onchange="checkboxStatus()" id="user_fintech_charges_checkbox" class="switchery restrict_order_id_checkbox" data-size="sm" data-switchery="true">
+                           <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                       </div>
+
+                       <div class="row justify-content-center UserFintechCharges"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button " class="btn btn-success"  onclick="save_fintech_charges()" >Submit</button>
+                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    </div>
+                   </div>
+               </div>
+               
+          
+       </div>
+   </div>
+</div>
+
+{{-- End Add Fintech Charges Modal --}}
+
+
+
 @endsection
 
 @section('css')
@@ -614,6 +657,41 @@
 
 
     <script type="text/javascript">
+
+function checkboxStatus(){
+    if (document.getElementById('user_fintech_charges_checkbox').checked) {
+        $(".UserFintechCharges").html(''); 
+              $(".UserFintechCharges").append(`
+            <div class="form-group text-left">
+                <label>Add Fintech</label>
+                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="" aria-invalid="false">
+            </div>`);
+        } 
+        else{
+                $(".UserFintechCharges").html('');     
+        } 
+}
+
+function save_fintech_charges(){
+        if (document.getElementById('user_fintech_charges_checkbox').checked) {
+               var fintechCharges = $("#user_fintech_charges_txtbox").val();
+               var userID = $("#userID").val();
+               $.ajax({
+                type : 'POST',
+                url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
+                data : {fintechCharges:fintechCharges,userID:userID,'_token': '{{ csrf_token() }}'},
+                success:function(res){
+                    if(res.status == '201'){
+                        $('#AddFintechChargesModal').modal('hide');
+                    }
+                }
+            });
+
+        } 
+        else{
+            $("#user_fintech_charges_txtbox").val('');
+        }
+    }
     $(document).ready(function() {
 
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
@@ -2083,6 +2161,45 @@
                 });
             }
         });
+
+
+        $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+            //modalll
+            var id = $(this).parents('tr').attr('id');
+            
+            if($(this).hasClass('add_fintech_charges')){
+                if(id){
+                    $("#userID").val(id);
+                    var userID = id;
+                    $.ajax({
+                    type : 'POST',
+                    url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
+                    data : {userID:userID,'_token': '{{ csrf_token() }}'},
+                    success:function(res){
+                        if(res.status == '200'){
+                          
+                            $('#user_fintech_charges_checkbox').click();
+                            $('#user_fintech_charges_checkbox').prop('checked',true);
+                            $(".UserFintechCharges").html('');
+                            $(".UserFintechCharges").append(`
+                        <div class="form-group text-left">
+                            <label>Add Fintech</label>
+                            <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="" aria-invalid="false">
+                        </div>`);
+                        }
+                        else{
+                            $('#user_fintech_charges_checkbox').click();
+                            $('#user_fintech_charges_checkbox').prop('checked',false );
+                            $(".UserFintechCharges").html('');
+                        }
+                    }
+                });
+                   
+                    $('#AddFintechChargesModal').modal('show');
+                }
+            }
+        });
+
 
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 

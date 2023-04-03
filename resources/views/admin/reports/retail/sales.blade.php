@@ -135,6 +135,7 @@
                         <th class="border-primary border-darken-1">Discount Amount</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
+                        
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered Date</th>
@@ -454,6 +455,7 @@
                     { data:'discount_amount' ,name: 'rs.charges_with_discount', class: 'align-middle discount_amount'},
                     { data:'packaging_charges' ,name: 'rs.packaging_charges', class: 'align-middle packaging_charges'},
                     { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
+                   
                     { data:'total_charges' ,name: 'rs.total_charges', class: 'align-middle total_charges'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'},

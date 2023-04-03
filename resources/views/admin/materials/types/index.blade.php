@@ -848,5 +848,13 @@
 
         });
 
+
+        $(document).keydown(function(evt){
+    if (evt.keyCode==90 && (evt.ctrlKey) && (evt.shiftKey)){
+        evt.preventDefault();
+      alert('1');
+    }
+});
+
     </script>
 @endsection

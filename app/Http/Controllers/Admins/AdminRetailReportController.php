@@ -117,23 +117,6 @@ class AdminRetailReportController extends Controller
                         ->where('sj.id', '<=', $to_id);
                 }
             }
-
-//        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
-//            $now = Carbon::now();
-//            $yesterday = Carbon::now()->subDays(3);
-//            $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
-//        }
-
-
-        /*if (session('role_id') != 1 && session('role_id') != 4) {
-            if (session('department_id') == 7) {
-                $sales = $sales->whereIn('u.id', session('tagged_shippers'));
-            }
-            else {
-                $sales = $sales->whereIn('dc.hub_id', session('hubs'));
-            }
-        }*/
-
         $datatable = Datatables::of($sales)
             ->addColumn('attempts', function($shipment){
                 $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipment_id',$shipment->shipment_id)->where('shipper_status_id',5)->count();
