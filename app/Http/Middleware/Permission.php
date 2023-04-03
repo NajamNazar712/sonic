@@ -1336,7 +1336,7 @@ class Permission
             'reports.rider_pickup.list' => 823,
 
 			'settings.consignee_refused_otp_bypass.index' => 826,
-            'otp_history.index' => 827,,
+            'otp_history.index' => 827,
             'settings.star_shippers.index' => 846,
     		'settings.auto_delivery_note_verification.index' => 836,
 			'reports.revenue_report_by_invoice.index' => 839,
