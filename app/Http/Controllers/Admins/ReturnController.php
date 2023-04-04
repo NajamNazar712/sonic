@@ -5686,9 +5686,7 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
-
-
-        if($request->get('rider') || $request->get('hub'))
+        if($request->get('rider') || $request->get('hub') || $request->get('search_date_from') || $request->get('search_date_to'))
         {
             $rider = $request->input('rider',null);
             $hub = $request->input('hub',null);
@@ -5697,7 +5695,9 @@ class ReturnController extends Controller
 
             $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
             ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
-            ->leftJoin('shipments_journey', 'shipments_journey.shipment_id', 'shipments.id')
+            ->leftJoin('shipments_journey as sjj', 'sjj.shipment_id', 'shipments.id')
+            ->leftJoin('shipment_status as sts', 'sts.id','=','sjj.shipper_status_id')
+            ->leftJoin('shipment_status as stts', 'stts.id','=','sjj.shipper_status_id')
             ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
             ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
             ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
@@ -5707,19 +5707,18 @@ class ReturnController extends Controller
             ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
                 'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
                 'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-                'destinationcity.name as destination','shipments_journey.updated_at as date',
-                'rider_deliveries.otp_entered as otp_status','hub.name as hubname')
+                'destinationcity.name as destination','sjj.updated_at as date',
+                'rider_deliveries.otp_entered as otp_status','hub.name as hubname','sts.name as current_status','stts.name as last_status')
                 ->where('rider_deliveries.rider_status_id',12)
                 ->where(function($querry) use($rider,$hub,$search_date_from,$search_date_to){
                     if(!empty($rider))
                         $querry  ->whereIn('riders.id',$rider);
                     if(!empty($hub))
                         $querry  ->whereIn('hub.id',$hub);
-                    if(!empty($rider))
+                    if (!empty($search_date_from))
                         $querry  ->whereBetween('rider_deliveries.created_at',[$search_date_from, $search_date_to]);
                 }) 
             ->groupBy('delivery_note_id');
-               
             
             $datatable = Datatables::of($data)
             ->editColumn('tracking_number', function ($shipments) {
@@ -5730,13 +5729,14 @@ class ReturnController extends Controller
                 ($shipments->tracking_number);
                 return $shipments->tracking_number;
             })
-            ->addColumn('current_status', function ($datatable) {
+            ->addColumn('current_status', function ($shipments) {
                 $res = ShipmentsJourney::join('shipment_status as ss','ss.id','shipments_journey.shipper_status_id')
-                ->where('shipments_journey.shipment_id', $datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
+                ->where('shipments_journey.shipment_id', $shipments->shipment_id)->orderBy('shipments_journey.id', 'desc')->limit(1)->first();
                 return $res->name  ; //$datatable->
             })
-            ->addColumn('last_status', function ($datatable) {
-                $journey_ids =  ShipmentsJourney::where('shipment_id',$datatable->shipment_id)->orderBy('shipments_journey.id', 'desc')->get();
+            ->addColumn('last_status', function ($shipments) {
+                $journey_ids =  ShipmentsJourney::where('shipment_id',$shipments->shipment_id)
+                ->orderBy('shipments_journey.id', 'desc')->get();
                 $journey_ids_length = sizeOf($journey_ids);
                 if($journey_ids_length > 1)
                 {
@@ -5746,9 +5746,23 @@ class ReturnController extends Controller
                 }
                 else
                 {
-                    return '-'; 
+                 return '-'; 
                 }
-            });
+            })
+            ->addColumn('otp_entered', function ($shipments) {
+                return $shipments->otp_status == null ? 'No' : 'Yes';
+            })
+            ->filterColumn('otp_entered' , function ($query, $keyword) {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        if($keyword == 1){
+                             $sub_query->where('rider_deliveries.otp_entered', '>', 0);
+                        }else{
+                            $sub_query->WhereNull('rider_deliveries.otp_entered');
+                        }
+    
+                    });
+                });
+            
             return $datatable->make(true);
             
         }
@@ -5813,8 +5827,6 @@ class ReturnController extends Controller
                     }
 
                 });
-                
-                
             });
         
         return $datatable->make(true);
