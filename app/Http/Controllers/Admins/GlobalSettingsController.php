@@ -2037,9 +2037,8 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_submit(Request $request)
     {
-        //dd($request->all());
         $start_date = $request->search_date_from_formatted;
-        $end_date = Carbon::parse($start_date)->addDays(30)->toDateTimeString();
+        $end_date = Carbon::parse($start_date)->endOfMonth()->toDateTimeString();
         if ($start_date == null || $end_date == null) {
             return redirect()->back()->with('error', 'Date not selected!');
         }
