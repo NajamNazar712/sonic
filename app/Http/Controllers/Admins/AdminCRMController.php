@@ -742,38 +742,61 @@ class AdminCRMController extends Controller
             $special_request_agent = [];
             $special_request_approval_options = [];
             $special_request_editable = true;
+            $special_request_percentage_exceed = false;
             $special_request_agent_data = [];
-            
-            $special_request = SpecialApprovalRequest::where('crm_request_id',$id)
+
+            $special_request_percent = SpecialApprovalRequest::where('crm_request_id',$id)
                 ->where('status',1)
+                ->where('approved_status',3)
+                ->pluck('adjusted_percentage')->toArray();
+
+            $percentage = 0;
+
+            foreach ($special_request_percent as $sp_key => $sp_value) {
+                $percentage += $sp_value;
+            }
+            
+            if($percentage < 100)
+            {
+
+                $special_request = SpecialApprovalRequest::where('crm_request_id',$id)
+                ->where('status',1)
+                ->where('approved_status',1)
                 ->select('id', 'special_request_reason_id', 'requested_by', 'approved_status', 'adjusted_percentage as percentage');
 
-            if($special_request->exists())
-            {
-                $special_request = $special_request->first();
-                $special_request_agent_data = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->where('admin_id',Auth::id())->first();
-                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->get();
-                
-                $special_request_approval_options = SpecialRequestOption::where('special_request_id',$special_request->id)->pluck('reason_option_id')->toArray();
-
-                if(Auth::id() != $special_request->requested_by)
+                if($special_request->exists())
                 {
-                    $special_request_editable = false;
-                }
-                foreach ($special_request_agent as $key => $value) {
-                      
-                    if($value->approved_status != 1)
+                    $special_request = $special_request->first();
+                    $special_request_agent_data = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->where('admin_id',Auth::id())->first();
+                    $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->get();
+                    
+                    $special_request_approval_options = SpecialRequestOption::where('special_request_id',$special_request->id)->pluck('reason_option_id')->toArray();
+
+                    if(Auth::id() != $special_request->requested_by)
                     {
                         $special_request_editable = false;
-                        break;
                     }
+                    foreach ($special_request_agent as $key => $value) {
+                        
+                        if($value->approved_status != 1)
+                        {
+                            $special_request_editable = false;
+                            break;
+                        }
+                    }
+                    
+                    $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
                 }
-                
-                $special_request_agent = SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->pluck('admin_id')->toArray();
+                else{
+                    $special_request = [];
+                }
             }
             else{
+                $special_request_percentage_exceed = true;
                 $special_request = [];
             }
+            
+            
 
             // dd($special_request);
 
@@ -829,6 +852,7 @@ class AdminCRMController extends Controller
                 'special_request_approval_options' => $special_request_approval_options,
                 'special_request_editable' => $special_request_editable,
                 'special_request_agent_data' => $special_request_agent_data,
+                'special_request_percentage_exceed' => $special_request_percentage_exceed,
                 ]);
         }else{
             return redirect()->back()->with('danger', 'CRM Request Not found!');
@@ -5299,36 +5323,66 @@ TRAX-Customer Experience';
         $adjusted_percentage = $request->adjustment_amount_percentage;
 
         if($admin_id){
-            $approval = SpecialApprovalRequest::where('crm_request_id',$request_id)->update(['status' => 0]);
-                
-            $approval_request =  new SpecialApprovalRequest();
-            $approval_request->crm_request_id = $request_id;
-            $approval_request->status = 1;
-            $approval_request->adjusted_percentage = $adjusted_percentage;
-            $approval_request->special_request_reason_id = $special_request_reason;
-            $approval_request->requested_by = Auth::id();
-            $approval_request->save();
 
-            foreach ($admin_id as $key => $admin) {
+            $special_request_percent = SpecialApprovalRequest::where('crm_request_id',$request_id)
+                ->where('status',1)
+                ->where('approved_status',3)
+                ->pluck('adjusted_percentage')->toArray();
 
-                NotificationsController::send(131,$request_id,$admin);
-                
-                $special_approval_request_admin = new SpecialApprovalRequestAdmin();
-                $special_approval_request_admin->special_request_id = $approval_request->id;
-                $special_approval_request_admin->admin_id = $admin;
-                $special_approval_request_admin->approved_status = 1; //set default status 1 means pending.
-                $special_approval_request_admin->save();
+            $percentage = 0;
+
+            foreach ($special_request_percent as $sp_key => $sp_value) {
+                $percentage += $sp_value;
             }
 
-            foreach ($special_request_reason_option as $key => $option) {
-                
-                $special_request_option = new SpecialRequestOption();
-                $special_request_option->special_request_id = $approval_request->id;
-                $special_request_option->reason_option_id = $option;
-                $special_request_option->save();
-            }
+            $remaining_percent = (100 - $percentage ); 
+            if($remaining_percent >= $adjusted_percentage)
+            {
 
-            return redirect()->back()->with(['success'=> "Request Submitted"]);
+                $special_request = SpecialApprovalRequest::where('crm_request_id',$request_id)->where('status',1)->where('approved_status',1);
+                if($special_request->exists())
+                {
+                    $special_request = $special_request->first();
+                    SpecialApprovalRequest::where('id',$special_request->id)->update(['adjusted_percentage' => $adjusted_percentage , 'special_request_reason_id' => $special_request_reason]);
+                    SpecialApprovalRequestAdmin::where('special_request_id',$special_request->id)->delete();
+                    SpecialRequestOption::where('special_request_id',$special_request->id)->delete();
+                }
+                else{
+                    $approval_request =  new SpecialApprovalRequest();
+                    $approval_request->crm_request_id = $request_id;
+                    $approval_request->status = 1;
+                    $approval_request->adjusted_percentage = $adjusted_percentage;
+                    $approval_request->special_request_reason_id = $special_request_reason;
+                    $approval_request->requested_by = Auth::id();
+                    $approval_request->save();
+                }
+
+                
+
+                foreach ($admin_id as $key => $admin) {
+
+                    NotificationsController::send(131,$request_id,$admin);
+                    
+                    $special_approval_request_admin = new SpecialApprovalRequestAdmin();
+                    $special_approval_request_admin->special_request_id = $special_request->id ?? $approval_request->id;
+                    $special_approval_request_admin->admin_id = $admin;
+                    $special_approval_request_admin->approved_status = 1; //set default status 1 means pending.
+                    $special_approval_request_admin->save();
+                }
+
+                foreach ($special_request_reason_option as $key => $option) {
+                    
+                    $special_request_option = new SpecialRequestOption();
+                    $special_request_option->special_request_id = $special_request->id ?? $approval_request->id;
+                    $special_request_option->reason_option_id = $option;
+                    $special_request_option->save();
+                }
+
+                return redirect()->back()->with(['success'=> "Request Submitted"]);
+            }
+            else{
+                return redirect()->back()->with(['error'=> "You are Not allowed to exceed 100%, Total ".$percentage ."% is already approved"]);
+            }
         }
         else{
             return redirect()->back()->with(['error'=> "Select One Admin At-least"]);
