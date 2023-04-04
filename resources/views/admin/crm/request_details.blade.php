@@ -2767,7 +2767,40 @@
             });
 
             $('#special_request').on('click',function () {
+
+                $('#admin').val('').trigger('change');
+                $('#special_request_reason').val('').trigger('change');
+                $('#special_request_reason_option').val('').trigger('change');
+                $('#adjustment_amount_percentage').val('');
+
+                $('#special_request_modal').modal('show');
+
+                @if(count($special_request_agent) > 0)
+                    var ids = @json($special_request_agent);
+                    $('#admin').val(ids).trigger('change');
+                @endif
+                
+                @if(!empty($special_request))
+                    $('#special_request_reason').val({{$special_request->special_request_reason_id}}).trigger('change');
+                @endif
+
+                @if(count($special_request_approval_options) > 0)
+                    var ids = @json($special_request_approval_options);
+                    $('#special_request_reason_option').val(ids).trigger('change');
+                @endif
+
+
+
+                @if(!empty($special_request))
+                    var percentage = {{$special_request->percentage}};
+                    $('#adjustment_amount_percentage').val(percentage);
+                @endif
+                
+                
+
+
               $('#special_request_modal').modal('show');
+
             });
 
             $('#special_request_modal').on('hide.bs.modal', function (e) {
