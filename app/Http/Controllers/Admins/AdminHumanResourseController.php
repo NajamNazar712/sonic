@@ -464,6 +464,7 @@ class AdminHumanResourseController extends Controller
             }
         }
 
+
         $datatable = Datatables::of($employees)
             ->setRowAttr([
                 'class' => function ($employee) {
