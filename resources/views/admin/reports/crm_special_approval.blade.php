@@ -68,18 +68,19 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Special Request ID.</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Requested Date</th>
                         <th class="border-primary border-darken-1">Approved By</th>
-                        {{-- <th class="border-primary border-darken-1">Department</th>
-                        <th class="border-primary border-darken-1">Designation</th>
-                        <th class="border-primary border-darken-1">Approval Date</th> --}}
+                        <th class="border-primary border-darken-1">Status</th>
+                        {{--<th class="border-primary border-darken-1">Approval Date</th> --}}
                         <th class="border-primary border-darken-1">Adjusted Percentage</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
+                        <th class="border-primary border-darken-1">Remaining Amount</th>
                     </tr>
                     </thead>
                 </table>
@@ -305,35 +306,35 @@
                             head = [];
                             
                             head.push('S.No');  
+                            head.push('Shipper Name');
                             head.push('Special Request ID');
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Requested By');
                             head.push('Requested Date');
-                            head.push('Approval By');
-                            head.push('Department');
-                            head.push('Designation');
-                            head.push('Approval Date');
+                            // head.push('Approval By');
+                            head.push('Status');
                             head.push('Adjusted Percentage');
                             head.push('COD Amount');
                             head.push('Adjusted Amount');
+                            head.push('Remaining Amount');
                             
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.shipper_name);
                                 row.push(values.id);
                                 row.push(values.request_number);
                                 row.push(values.tracking_number);
                                 row.push(values.requested_by);
                                 row.push(values.requested_date);
-                                // row.push(values.approved_by);
-                                // row.push(values.department);
-                                // row.push(values.designation);
-                                // row.push(values.approved_at);
+                                // row.push(values.approved_by_excel);
+                                row.push(values.approved_status);
                                 row.push(values.adjusted_percentage);
                                 row.push(values.cod_amount);
                                 row.push(values.adjusted_amount);
+                                row.push(values.remaining_amount);
 
                                 body.push(row);
                             });
@@ -352,7 +353,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'CRM Report',
+                        title: 'CRM Special Approval Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -386,15 +387,18 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shipper_name', name: 'shipper.name', class: 'align-middle shipper_name'},
                     {data: 'id', name: 'sar.id', class: 'align-middle id'},
                     {data: 'id_padded_link', name: 'id_padded_link', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'requested_by', name: 'sarrequestedby.name', class: 'align-middle requested_by'},
                     {data: 'requested_date', name: 'sarrequestedby.created_at', class: 'align-middle requested_date'},
                     {data: 'approved_by', name: 'sarrequestedby.created_at', class: 'align-middle text-center approved_by', orderable: false, searchable: false},
+                    {data: 'approved_status', name: 'approved_status', class: 'align-middle text-center approved_status'},
                     {data: 'adjusted_percentage', name: 'sar.adjusted_percentage', class: 'align-middle adjusted_percentage'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
+                    {data: 'remaining_amount', name: 'remaining_amount', class: 'align-middle remaining_amount'},
                     
                 ],
                 rowCallback: function(row, data, index) {
