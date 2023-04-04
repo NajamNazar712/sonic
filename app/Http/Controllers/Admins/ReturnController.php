@@ -2538,7 +2538,8 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)) {
                     return $deliveries->remarks;
                 }else{
-                    $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
+                //    $reason = '<textarea class="form-control form-control-sm return_remarks" name="remarks['.$deliveries->shId.']" id="remarks_'.$deliveries->shId.'" placeholder="Enter Remarks" data-msg-required="Remarks is required"></textarea><span class="error-msg"></span>';
+                    $reason = '<input class="form-control form-control-sm return_remarks"  name="remarks['.$deliveries->shId.']" id="remarks['.$deliveries->shId.']"  placeholder="Enter Remarks" data-msg-required="Remarks is required"><span class="error-msg"></span>';
                     return $reason;
                 }
 
@@ -5371,7 +5372,7 @@ class ReturnController extends Controller
             if ($shipments_count != 0) {
                 $valid_shipments = $valid_shipments->toArray();
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
-                Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+//                Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 23, 'consignee_status_id' => 23]);
                 // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                 //     $query->where('booking_type_id', '!=', 4)
                 //         ->orWhere(function ($sub_query) {
@@ -5415,6 +5416,7 @@ class ReturnController extends Controller
                     }
 
                     foreach ($valid_shipments as $shipment) {
+                        $shipment_data = Shipment::find($shipment);
                         if (in_array($shipment, $open_box_ids)) {
                             $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
                             if ($shipment_detail) {
@@ -5422,7 +5424,6 @@ class ReturnController extends Controller
                                 $shipment_detail->save();
                             }
 
-                            $shipment_data = Shipment::find($shipment);
                             $shipment_data->open_box = 1;
                             $shipment_data->save();
 
@@ -5442,7 +5443,24 @@ class ReturnController extends Controller
                             }
                         }
 
-                        ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
+                        $shipper_status_id = 23;
+                        $consignee_status_id = 23;
+
+                        if($shipment->booking_type_id == 2){
+                            $shipper_status_id = 28;
+                            $consignee_status_id = 28;
+                        }
+
+                        if($shipment->booking_type_id == 3){
+                            $shipper_status_id = 34;
+                            $consignee_status_id = 34;
+                        }
+
+                        $shipment_data->shipper_status_id = $shipper_status_id;
+                        $shipment_data->consignee_status_id = $consignee_status_id;
+                        $shipment_data->save();
+
+                        ShipmentsJourneyController::add($shipment, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
 
                         $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                         if ($handover_shipments->exists()) {

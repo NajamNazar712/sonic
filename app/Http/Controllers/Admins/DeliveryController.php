@@ -70,6 +70,7 @@ use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RestrictParcelsAttempt;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
 use App\Http\Models\Rider;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
 use App\Http\Models\RiderCategory;
@@ -96,7 +97,6 @@ use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
-use App\ReturnConfirmationPendingSmsAttempt;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -409,6 +409,7 @@ class DeliveryController extends Controller
         else{
             $delivery_note = DeliveryNote::join('riders as r','r.id','=','delivery_notes.rider_id')
                 ->where('r.id' ,$request->rider_id)
+                ->whereNotIn('delivery_notes.cash_collection_status',[2, 3])
                 ->where('delivery_notes.dncc_status',0)
                 ->where('delivery_notes.total_cod_amount', '>', 0)
                 ->where('delivery_notes.status', '!=', 4)
@@ -4763,21 +4764,40 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('action', function ($deliveries) {
-                if (session('role_id') == 1 || in_array(106, session('permissions'))) {
-                    $dropdown = '
-                          <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a></div></div>';
-
-                    return $dropdown;
-                }
-                return '';
-            })
             ->addColumn('ccd_image', function ($deliveries) {
                 $image = '<div class="text-center"><button type="button" class="btn btn-primary btn-sm ccd_slip_list"><i class="la la-image"></i> CCD Receipts</button></div>';
                 return $image;
+            })
+            ->addColumn('action', function ($deliveries) {
+
+                $dropdown = "
+                        <div class='btn-group'>
+                           <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
+
+                $note_id_padded = str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+                $cash_collection = '<a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>';
+                $snatch = '<a href="javascript:void(0);" class="dropdown-item snatch" data-note="'. $note_id_padded .'"><i class="la la-optin-monster primary"></i> Snatch</a>';
+                $deduction = '<a href="javascript:void(0);" class="dropdown-item deduction" data-note="'. $note_id_padded .'"><i class="la la-minus-square primary"></i> Deduction</a>';
+                if (session('role_id') == 1 || count(array_intersect([106, 837], session('permissions'))) !== 0) {
+                    if (session('role_id') == 1 || in_array(106, session('permissions'))) {
+                        $dropdown .= $cash_collection;
+                    }
+
+                    if (session('role_id') == 1 || in_array(837, session('permissions'))) {
+                        $dropdown .= $snatch;
+                    }
+                    if (session('role_id') == 1 || in_array(838, session('permissions'))) {
+                        $dropdown .= $deduction;
+                    }
+
+
+                    $dropdown .= '</div></div';
+                    return $dropdown;
+                }
+                else{
+                    return '-';
+                }
             });
         if ($tracking_number = $request->get('tracking_numbers')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -4879,9 +4899,10 @@ class DeliveryController extends Controller
             ->leftjoin('rider_types as rt','rt.id','=','riders.rider_type_id')
             ->leftjoin('cities as c','c.id','=','riders.city_id')
             ->leftjoin('zones as zn','zn.id','=','c.zone_id')
+            ->leftjoin('delivery_cash_collections as dcc','dcc.delivery_note_id','=','delivery_notes.id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count'])
-            ->where('delivery_notes.cash_collection_status', 1)
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status','rt.name as rider_type','zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 'delivery_notes.cash_collection_status', 'dcc.amount as deposit_amount', 'dcc.remarks', 'dcc.deposit_slip'])
+            ->whereIn('delivery_notes.cash_collection_status', [1,2,3])
             ->where('delivery_notes.dncc_status', 0);
 
         if (session('role_id') != 1) {
@@ -4904,6 +4925,13 @@ class DeliveryController extends Controller
             ->setRowAttr([
                 'data-hub' => function ($deliveries) {
                     return $deliveries->hub_id;
+                },
+                'class' => function ($deliveries) {
+                    if (in_array($deliveries->cash_collection_status, [2,3])) {
+                        return 'pcc_snatch_deduction';
+                    } else {
+                        return '';
+                    }
                 },
             ])
             ->editColumn('shipments_count_link', function ($deliveries) {
@@ -4954,6 +4982,24 @@ class DeliveryController extends Controller
                     return number_format($shipment->amount);
                 }
             })
+            ->editColumn('deposit_amount', function ($deliveries) {
+                if($deliveries->deposit_amount != null){
+                    return number_format($deliveries->deposit_amount);
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('deposit_slip_view', function ($deliveries) {
+                if ($deliveries->deposit_slip != null && in_array($deliveries->cash_collection_status, [2 ,3])) {
+                    $path = Storage::disk('public')->url('cash_collection_slips/' . $deliveries->deposit_slip);
+                    return '<a class="btn btn-sm btn-outline-info align-middle deposit_slip_view" href="' . asset($path). '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
+
+                } else {
+                    return '-';
+                }
+
+            })
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -4975,6 +5021,9 @@ class DeliveryController extends Controller
         }
         if ($dncc = $request->get('dncc')) {
             $datatable->whereIn('delivery_notes.id', explode(',', $dncc));
+        }
+        if ($legend_id = $request->get('legend_filter')) {
+            $datatable->whereIn('delivery_notes.cash_collection_status', [2,3]);
         }
 
         return $datatable->make(true);

@@ -142,6 +142,7 @@ use App\Models\Admin\Lead\LeadReason;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Traits\CommonTrait;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -158,7 +159,7 @@ use Password;
 
 class AdminAPIController extends Controller
 {
-    use SendsPasswordResetEmails;
+    use SendsPasswordResetEmails, CommonTrait;
 
     public function broker()
     {
@@ -2806,7 +2807,17 @@ class AdminAPIController extends Controller
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
+             $insurance =  intval($pickup_address->insurance);
+        
+            $packaging = ($request->packaging_amount != null) ? intval($request->packaging_amount) : 0;
+
+            $insurance_amount = ($request->insurance_amount != null) ? intval($request->insurance_amount) : 0;
+    
+            if ($insurance_amount > 0) {
+                $insurance_amount = round($insurance_amount * $insurance / 100, 2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
@@ -3188,6 +3199,10 @@ class AdminAPIController extends Controller
             $retail_shipment->length = $length;
             $retail_shipment->breadth = $breadth;
             $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $charges;
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
             $retail_shipment->admin_id = $admin_id;
             $retail_shipment->save();
 
@@ -3225,6 +3240,229 @@ class AdminAPIController extends Controller
         }
         return response()->json(['status' => 1, 'message' => 'Invalid Pickup Address']);
     }
+
+
+    public function retail_shipment_store_v3(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $user_id = $setting->setting_value;
+        $pickup_address_id = $request->pickup_address_id;
+        $pickup_address = RetailTraxCenter::where('pickup_address_id', $pickup_address_id);
+        if ($pickup_address->exists()) {
+            $pickup_address = $pickup_address->first();
+            $pickup_city_id = $pickup_address->pickup_address->city_id;
+            $discount = $pickup_address->discount;
+            $insurance = intval($pickup_address->insurance);
+            $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+            $information_display = TRUE;
+
+            $consignee_name = $request->input('consignee_name');
+            $consignee_address = $request->input('consignee_address');
+            $consignee_phone_number_1 = $request->input('consignee_cell_no');
+            $consignee_phone_number_2 = NULL;
+            $consignee_email_address = NULL;
+            $order_id = $request->input('order_id');
+            $package_type = FALSE;
+            $special_instructions = NULL;
+            $charges_mode_id = ($request->has('charges_mode')) ? $request->input('charges_mode') : 1;
+
+            $shipping_mode_check = $request->input('shipping_mode_id');
+            $consignee_city_id = $request->input('city_id');
+            if ($shipping_mode_check == 1) {
+                $shipping_mode_id = 2;
+            } elseif ($shipping_mode_check == 4) {
+                $shipping_mode_id = 3;
+            } else {
+                $shipping_mode_id = 1;
+            }
+            $same_day_timing_id = NULL;
+
+            if ($request->volumetric_weight == 1) {
+                $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+                $length = $request->length;
+                $breadth = $request->breadth;
+                $height = $request->height;
+            } else {
+                $estimated_weight = $request->input('weight');
+                $length = null;
+                $breadth = null;
+                $height = null;
+            }
+
+            $packaging = ($request->packaging_amount != null) ? intval($request->packaging_amount) : 0;
+
+            $insurance_amount = ($request->insurance_amount != null) ? str_replace(',', '', $request->insurance_amount) : 0;
+            if ($insurance_amount > 0) {
+                $insurance_amount = round(intval($insurance_amount) * $insurance / 100, 2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
+           
+            $charges = $rates["total_charges"];
+            if ($shipping_mode_check == 3) {
+                $amount = str_replace(',', '', $request->input('cod_amount'));
+                $r_amount = 0;
+                if ($charges_mode_id == 2) {
+                    $amount = $amount + $charges;
+                }
+            } else {
+                $amount = 0;
+                if ($charges_mode_id == 2) {
+                    $amount = $charges;
+                }
+                $r_amount = 0;
+            }
+            $payment_mode_id = 1;
+            $try_and_buy_charges = NULL;
+
+            $pieces_quantity = $request->input('pieces');
+            $business_category_id = $request->input('business_category_id');
+
+
+            $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+            if ($business_category_id == 2) {
+                $international_shipment_booking = new InternationalShipment();
+                $international_shipment_booking->shipment_id = $shipment_id;
+                $international_shipment_booking->postal_code = 00000;
+                $international_shipment_booking->save();
+            }
+
+
+            $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+            $product_type_id = $request->product_id;
+
+            $item_description = NULL;
+
+            $item_quantity = 1;
+
+            if ($request->input('insurance') == 1) {
+                $price = str_replace(',', '', $request->input('insurance_amount'));
+                $insurance = TRUE;
+            } else {
+                $price = NULL;
+                $insurance = FALSE;
+            }
+
+            $type = 0;
+
+            RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+            if ($pieces_quantity > 1) {
+                RetailShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+            }
+            $destination = $request->city_id;
+
+            $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_cell_no);
+            if ($shipper_info->exists()) {
+                $shipper_info = $shipper_info->first();
+                $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+                $shipper_info->shipper_name = $request->shipper_name;
+                $shipper_info->shipper_cnic = $request->shipper_cnic;
+                $shipper_info->shipper_address = $request->shipper_address;
+                $shipper_info->city_id = $pickup_city_id;
+
+
+                if ($request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                    $shipper_info->bank_id = $request->bank_id;
+                    $shipper_info->iban = $request->iban_no;
+                    $shipper_info->account_number = $request->account_no;
+                    if ($request->hasFile('cheque')) {
+                        $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                        $file = $request->file('cheque');
+                        Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                        $shipper_info->cheque_image = $filename;
+                        $shipper_info->completed_status = 1;
+                    }
+                }
+                $shipper_info->save();
+            } else {
+                $shipper_info = new RetailShipperInfo();
+                $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+                $shipper_info->shipper_name = $request->shipper_name;
+                $shipper_info->shipper_cnic = $request->shipper_cnic;
+                $shipper_info->shipper_address = $request->shipper_address;
+                $shipper_info->city_id = $pickup_city_id;
+                $shipper_info->save();
+                if ($request->hasFile('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                    $shipper_info->bank_id = $request->bank_id;
+                    $shipper_info->iban = $request->iban_no;
+                    $shipper_info->account_number = $request->account_no;
+                    if ($request->hasFile('cheque')) {
+                        $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                        $file = $request->file('cheque');
+                        Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                        $shipper_info->cheque_image = $filename;
+                        $shipper_info->completed_status = 1;
+                    }
+                }
+                $shipper_info->save();
+            }
+            $retail_shipment = new RetailShipment();
+            $retail_shipment->shipment_id = $shipment_id;
+            $retail_shipment->product_type_id = $request->product_id;
+            $retail_shipment->shipping_mode = $request->shipping_mode_id;
+            $retail_shipment->destination = $destination;
+            $retail_shipment->payment_mode_id = $request->payment_mode_id;
+            $retail_shipment->shipper_phone_no = $request->shipper_cell_no;
+            $retail_shipment->shipper_name = $request->shipper_name;
+            $retail_shipment->shipper_cnic = $request->shipper_cnic;
+            $retail_shipment->shipper_address = $request->shipper_address;
+            $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+            $retail_shipment->total_charges = $charges;
+            $retail_shipment->shipper_account_no = $shipper_info->id;
+            $retail_shipment->weight = $estimated_weight;
+            $retail_shipment->length = $length;
+            $retail_shipment->breadth = $breadth;
+            $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
+            $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
+            $retail_shipment->weight_charges = $rates['charges_without_gst'];
+            $retail_shipment->gst = $rates['gst_charges'];
+            $retail_shipment->admin_id = $admin_id;
+            $retail_shipment->save();
+
+
+            $date = Carbon::today()->toDateString();
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
+            if ($cash_deposit->exists()) {
+                $cash_deposit = $cash_deposit->first();
+                $total_shipments = $cash_deposit->total_cn + 1;
+                $total_cash = $cash_deposit->total_cash + $amount;
+                $cash_deposit->total_cn = $total_shipments;
+                $cash_deposit->total_cash = $total_cash;
+                $cash_deposit->save();
+            } else {
+                $cash_deposit = new RetailCashDeposit();
+                $cash_deposit->category = 3;
+                $cash_deposit->admin_id = $admin_id;
+                $cash_deposit->total_cn = 1;
+                $cash_deposit->total_cash = $amount;
+                $cash_deposit->save();
+
+            }
+
+            $cash_deposit_shipment = new RetailCashDepositShipment();
+            $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+            $cash_deposit_shipment->shipment_id = $shipment_id;
+            $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode_id;
+            $cash_deposit_shipment->save();
+
+
+            AdminPickupsController::generate($shipment_id);
+            NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+            return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+        }
+        return response()->json(['status' => 1, 'message' => 'Invalid Pickup Address']);
+    }
+
 
     public function notification_history(Request $request)
     {
@@ -3715,10 +3953,7 @@ class AdminAPIController extends Controller
                     }
 
                 }
-            }
-            $response["status"] = 0;
-            if ($admin_shift->exists()) {
-                $admin_shift = $admin_shift->first();
+                $response["status"] = 0;
                 $response["shift_name"] = $admin_shift->name;
                 $response["start_time"] = $admin_shift->start_time;
                 $response["end_time"] = $admin_shift->end_time;
@@ -5008,10 +5243,10 @@ class AdminAPIController extends Controller
                 $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
-                    if ($employee_leaves->status == 2) {
+                    if ($employee_leaves->status == 6 && in_array($employee_leaves->leave_type, [5,6])) {
                         $employee_leaves->status = 5;
                     } elseif ($employee_leaves->status == 1) {
-                        $employee_leaves->status = 3;
+                        $employee_leaves->status = 7;
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
@@ -5731,7 +5966,9 @@ class AdminAPIController extends Controller
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if ($attendance->leave_status == 2) {
-                        $datum["status"] = 4;
+                        $datum["status"] = 4; //adjustment apply
+                    } else if($attendance->leave_status == 1) {
+                        $datum["status"] = 5; //leave apply
                     } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
@@ -6983,6 +7220,7 @@ class AdminAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
+        $today_date = Carbon::now()->format('Y-m-d');
         $admin_id = $request->admin_id;
         $admin = Admin::find($admin_id);
         if ($admin) {
@@ -7004,6 +7242,12 @@ class AdminAPIController extends Controller
             $permissions['return_note_receive'] = (in_array(50, $user_permissions)) ? 1 : 0;
             $permissions['delivery_note_create'] = (in_array(35, $user_permissions)) ? 1 : 0;
             $permissions['crm'] = ($user_department != 6) ? 1 : 0;
+
+            $attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)
+            ->whereDate('attendance_date', $today_date)
+            ->exists();
+            $permissions['attendance_status'] = $attendance ? 1 : 0;
+
             $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
             if ($global_settings->exists()) {
                 $global_settings = $global_settings->first();
@@ -7275,6 +7519,7 @@ class AdminAPIController extends Controller
                 $last_action_log = $last_action_log->first();
                 if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
                     $attendance_date = $attendance_date->addDays(1);
+//                    return response()->json($attendance_date);
                 }
             }
             $admin_attendance = EmployeeAttendance::where('employee_id', $employee_id)
@@ -7462,6 +7707,7 @@ class AdminAPIController extends Controller
                             $notify = true;
                         }
                     }
+                    NotificationsController::send(212, $employee_id);
                     NotificationsController::app_notification(17, $admin_id, 1, $leave_request->id);
                     if ($notify) {
                         NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
@@ -7961,6 +8207,13 @@ class AdminAPIController extends Controller
                         $data['approver_email'] = $employee->line_manager->email;
                         $data['approver_name'] = $employee->line_manager->name;
                         $data['user_type'] = 0;
+                        $data['total_leaves'] = $employee->leave_count;
+                        $availed_leaves = $this->getAvailedLeaves($employee->id);
+                        // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                        // ->where('employee_id', $employee->id)
+                        // ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                        $data['availed_leaves'] = $availed_leaves;
+
                         if ($employee->is_line_manager) {
                             $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                         }
@@ -7997,6 +8250,12 @@ class AdminAPIController extends Controller
                     $data['approver_email'] = $employee->line_manager->email;
                     $data['approver_name'] = $employee->line_manager->name;
                     $data['user_type'] = 0;
+                    $data['total_leaves'] = $employee->leave_count;
+                    $availed_leaves = $this->getAvailedLeaves($employee->id);
+                    // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                    // ->where('employee_id', $employee->id)
+                    // ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                    $data['availed_leaves'] = $availed_leaves;
                     if ($employee->is_line_manager) {
                         $data['user_type'] = ($employee->designation_id == 68) ? 2 : 1;
                     }
@@ -8013,7 +8272,7 @@ class AdminAPIController extends Controller
         $rules = [
             'from' => ['required'],
             'to' => ['required'],
-            'reason' => ['required', 'max:500'],
+            'reason' => ['required_if:leave_type,[1,5,6]', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
@@ -8049,12 +8308,34 @@ class AdminAPIController extends Controller
                     $diffDays = $from_date->diffInWeekdays($to_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                 }
                 $diffDays++;
+                // dd($to_date);
+
                 if ($diffDays <= 56) {
                     if ($request->leave_type == 1) {
-                        if ($employee->leave_count < $diffDays) {
-                            return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
-                        } else {
-                            $employee->leave_count = $employee->leave_count - $diffDays;
+                        // For Permanent employees
+                        if($employee->confirmation_status == 1){
+                            $response = $this->calculateToDateLeaves($employee, $to_date);
+                            if($response['status'] == 1){
+                                $calcDays = $diffDays;
+                                if($employee->leave_count < 0) {
+                                    $calcDays = $diffDays - ($employee->leave_count);
+                                }
+                                if($calcDays <= $response['data']){
+                                    $employee->leave_count = $employee->leave_count - $diffDays;
+                                    $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                                }
+                            } else {
+                                return response()->json(['status' => 1, 'message' => $response['msg']]);
+                            }
+                        } else if($employee->confirmation_status == 2) { // For Probation
+                            if ($employee->leave_count < $diffDays) {
+                                return response()->json(['status' => 1, 'message' => 'Exceed Quota: Dear user, Your limit for applying leaves is greater than your available Annual Quota.']);
+                            } else {
+                                $employee->leave_count = $employee->leave_count - $diffDays;
+                                $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
+                            }
                         }
                     }
                     if ($request->leave_type == 2) {
@@ -8100,6 +8381,8 @@ class AdminAPIController extends Controller
                             $leave_request->to = $request->to;
                             $leave_request->applied_reason = $request->reason;
                             $leave_request->leave_type = $request->leave_type;
+                            // if rejected by line manager and user re apply leave
+                            $leave_request->status = ($leave_request->status == 7) ? 1 : $leave_request->status;
                             $leave_request->save();
                             $message = "Leave Request edited successfully";
                         } else {
@@ -8192,7 +8475,22 @@ class AdminAPIController extends Controller
             if (!$employee) {
                 return response()->json(['status' => 1, 'message' => "Employee profile not found!"]);
             }
-            if (in_array($admin_id, $department_head_ids)) {
+            // if (in_array($admin_id, $department_head_ids)) {
+            //     $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            //         ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
+            //         ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+            //         ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            //         ->where(function ($query) use ($admin_id) {
+            //             $query->where('employee_leaves.reporter_id', $admin_id);
+            //         })
+            //         ->orwhere(function ($query) use ($employee) {
+            //             $query->where('employee_leaves.status', 6)
+            //                 ->where('employee_leaves.leave_type', '<>', 1)
+            //                 ->where('emp.department_id', $employee->department_id);
+            //         });
+            //     $is_hod = true;
+            // } else
+            if (in_array($admin_role, [63, 69, 70])) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('employees as emp', 'employee_leaves.employee_id', '=', 'emp.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
@@ -8202,23 +8500,25 @@ class AdminAPIController extends Controller
                     })
                     ->orwhere(function ($query) use ($employee) {
                         $query->where('employee_leaves.status', 6)
-                            ->where('employee_leaves.leave_type', '<>', 1)
-                            ->where('emp.department_id', $employee->department_id);
+                            ->whereIn('employee_leaves.leave_type', [5,6]);
                     });
-                $is_hod = true;
-            } elseif ($admin->employee->is_line_manager) {
+                    $is_hr = true;
+            } else
+            if ($admin->employee->is_line_manager) {
                 $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
                     ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
                     ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
                     ->where('employee_leaves.reporter_id', $admin_id);
                 $is_line_manger = true;
-            } elseif (in_array($admin_role, [63, 69, 70])) {
-                $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
-                    ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
-                    ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
-                    ->where('employee_leaves.status', 2);
-                $is_hr = true;
-            } else {
+            } 
+            // elseif (in_array($admin_role, [63, 69, 70])) {
+            //     $employee_leaves = EmployeeLeave::join('leave_statuses as ls', 'employee_leaves.status', '=', 'ls.id')
+            //         ->join('leave_types as lt', 'employee_leaves.leave_type', '=', 'lt.id')
+            //         ->select('employee_leaves.id as id', 'employee_leaves.from as from', 'employee_leaves.to as to', 'employee_leaves.applied_reason as applied_reason', 'employee_leaves.status as status_id', 'ls.name as status', 'employee_leaves.employee_id as employee_id', 'employee_leaves.employee_type_id as type_id', 'employee_leaves.rejected_reason as rejected_reason', 'lt.name as leave_type', 'lt.id as leave_type_id')
+            //         ->where('employee_leaves.status', 6);
+            //     $is_hr = true;
+            // } 
+            else {
                 return response()->json(['status' => 1, 'message' => "Invalid Role"]);
             }
             if ($employee_leaves->exists()) {
@@ -8282,8 +8582,8 @@ class AdminAPIController extends Controller
             $employee_leaves = EmployeeLeave::where('id', $request->leave_id);
             if ($employee_leaves->exists()) {
                 $employee_leaves = $employee_leaves->first();
-                if (in_array($employee_leaves->status, [1, 2, 3])) {
-                    if ($admin->employee->is_line_manager) {
+                if (in_array($employee_leaves->status, [1, 2, 3, 6, 7])) {
+                    if ($admin->employee->is_line_manager && $employee_leaves->status != 6) {
                         $employee_leaves->status = 6;
                         if(in_array($employee_leaves->leave_type, [5, 6])){
                             $employee_leaves->updated_by = $admin_id;
@@ -8476,7 +8776,7 @@ class AdminAPIController extends Controller
                 if ($employee_leaves->exists()) {
                     $employee_leaves = $employee_leaves->first();
                     $admin_profile = $employee_leaves->employee;
-                    if ($employee_leaves->status == 2) {
+                    if ($employee_leaves->status == 6) {
                         $employee_leaves->status = 5;
                     } elseif ($employee_leaves->status == 1) {
                         if ($employee_leaves->leave_type == 1) {
@@ -8495,8 +8795,6 @@ class AdminAPIController extends Controller
                             $admin_profile->save();
                         }
                         $employee_leaves->status = 7;
-                    } else if (in_array($employee_leaves->status == 6)) {
-                        $employee_leaves->status = 3;
                     } else {
                         return response()->json(['status' => 1, 'message' => "Invalid Role"]);
                     }
@@ -8777,7 +9075,7 @@ class AdminAPIController extends Controller
                                     return ['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1];
                                 }
                             }
-                            return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
+                            return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->user->name, 'phone' => $shipment->pickup_address->phone, 'address' => $shipment->pickup_address->pickup_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
 
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
@@ -11218,6 +11516,13 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if($request->has('alternate_phone')){
+                if($request->alternate_phone){
+                    $alternate_phone = $request->alternate_phone;
+                }else{
+                    $alternate_phone = null;
+                }
+            }
             $shipment = Shipment::where('tracking_number', $request->tracking_no);
             $shipment_info = array();
             if ($shipment->exists()) {
@@ -11284,6 +11589,12 @@ class AdminAPIController extends Controller
                                 } else {
                                     CRMController::add($nature_id, $case_nature_type_id, $channel_id, 1, $admin_id, $launched_by, $shipment_id, $shipper_id, NULL, $description);
                                 }
+                            }
+                        }
+                        if($nature_id == 2){
+                            if($case_nature_type_id == 13){
+                                $shipment->consignee_phone_number_2 = $alternate_phone;
+                                $shipment->save();
                             }
                         }
                     }
