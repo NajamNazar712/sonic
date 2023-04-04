@@ -337,7 +337,7 @@
                     }},
                     {data: 'delivery_note_id', name: 'delivery_note_id', class: 'align-middle delivery_note_id'},
                     {data: 'tracking_number',name: 'shipments.tracking_number',class: 'align-middle tracking_number'},
-                    {data: 'rider_employee_id', name: 'riders.employee_id',class: 'align-middle rider_employee_id'},
+                    {data: 'rider_employee_id', name: 'emp.trax_id',class: 'align-middle rider_employee_id'},
                     {data: 'rider_name',name: 'riders.name',class: 'align-middle delivery_note_id'},
                     {data: 'origin',name: 'cities.name',class: 'align-middle origin'},
                     {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
