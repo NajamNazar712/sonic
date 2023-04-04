@@ -293,7 +293,12 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
+
                         url: '{{ route('admin.crm.resolved.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
