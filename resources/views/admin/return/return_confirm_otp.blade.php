@@ -1,6 +1,5 @@
-
 @extends('admin.layout.master')
-@section('title','Return Confirm OTP')
+@section('title', 'Return Confirm OTP')
 
 @section('content')
     <h1 class="mb-1">
@@ -17,18 +16,20 @@
                         <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <select name="search_rider" id="search_rider" class="form-control select2" multiple="multiple">
-                                        @foreach($rider_name as $admin)
-                                            <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                    <select name="search_rider" id="search_rider" class="form-control select2"
+                                        multiple="multiple">
+                                        @foreach ($rider_name as $admin)
+                                            <option value="{{ $admin->id }}">{{ $admin->name }}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             </div>
                             <div class="col-4">
                                 <fieldset class="form-group">
-                                    <select name="search_hub[]" id="search_hub" class="form-control select2" multiple="multiple">
-                                        @foreach($hub_name as $hub)
-                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    <select name="search_hub[]" id="search_hub" class="form-control select2"
+                                        multiple="multiple">
+                                        @foreach ($hub_name as $hub)
+                                            <option value="{{ $hub->id }}">{{ $hub->name }}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -36,27 +37,34 @@
                             <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                                        <span
+                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date(From)">
+                                    <input type="text" name="from_date"
+                                        class="form-control bg-primary border-primary white rounded-right" id="from_date"
+                                        placeholder="Date(From)">
                                 </div>
                             </div>
                             <div class="col-4">
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                                        <span
+                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date(To)">
+                                    <input type="text" name="to_date"
+                                        class="form-control bg-primary border-primary white rounded-right" id="to_date"
+                                        placeholder="Date(To)">
                                 </div>
                             </div>
 
                             <div class="col-2 mt-2">
                                 <div class="form-group">
-                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i class="la la-search"></i> Search</button>
+                                    <button type="submit" class="btn btn-outline-info btn-min-width"><i
+                                            class="la la-search"></i> Search</button>
                                 </div>
                             </div>
                         </form>
@@ -65,20 +73,20 @@
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note ID</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Rider Employee ID</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Last Status</th>
-                        <th class="border-primary border-darken-1">Current Status</th>
-                        <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">OTP Status</th>
-                    </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Delivery Note ID</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Rider Employee ID</th>
+                            <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Hub</th>
+                            <th class="border-primary border-darken-1">Last Status</th>
+                            <th class="border-primary border-darken-1">Current Status</th>
+                            <th class="border-primary border-darken-1">Status Date</th>
+                            <th class="border-primary border-darken-1">OTP Status</th>
+                        </tr>
                     </thead>
                 </table>
             </div>
@@ -89,11 +97,12 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/pickers/pickadate/pickadate.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/pickers/daterange/daterange.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
 
 
     <style>
@@ -142,6 +151,7 @@
             width: auto !important;
             text-align: left;
         }
+
         .selectize-control {
             width: 100%;
         }
@@ -157,19 +167,20 @@
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/picker.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/picker.date.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/legacy.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/tags/tagging.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
-        $(document).ready(function(){
-            var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';    
+        $(document).ready(function() {
+            var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';
             $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -179,7 +190,8 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                        $('#search_form #to_date').pickadate('picker').set('min', $(
+                            '#search_form #from_date').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -192,22 +204,23 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                        $('#search_form #from_date').pickadate('picker').set('max', $(
+                            '#search_form #to_date').pickadate('picker').get('select'));
                     }
                 }
             });
 
             $('#search_rider').select2({
-                width:'100%',
-                placeholder:"Select Rider",
-                allowClear:true,
-                dropdownParent:$('#search_form')
+                width: '100%',
+                placeholder: "Select Rider",
+                allowClear: true,
+                dropdownParent: $('#search_form')
             });
             $('#search_hub').select2({
-                width:'100%',
-                placeholder:"Select Hub",
-                allowClear:true,
-                dropdownParent:$('#search_form')
+                width: '100%',
+                placeholder: "Select Hub",
+                allowClear: true,
+                dropdownParent: $('#search_form')
             });
 
 
@@ -230,8 +243,8 @@
                 }
             });
 
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -240,7 +253,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.return.return_confirm_otp.list') }}',
                         data: params,
-                        success: function (result) {
+                        success: function(result) {
                             head = [];
 
                             head.push('S.No');
@@ -257,33 +270,35 @@
                             head.push('OTP Status');
 
                             $.each(result.data, function(index, values) {
-                            row = [];
-                            row.push(index + 1);
-                            row.push(values.delivery_note_id);
-                            row.push(values.tracking_number_excel);
-                            row.push(values.rider_employee_id);
-                            row.push(values.rider_name);
-                            row.push(values.origin);
-                            row.push(values.destination);
-                            row.push(values.hubname);
-                            row.push(values.last_status);
-                            row.push(values.current_status);
-                            row.push(values.date);
-                            row.push(values.otp_status_text);
-                            body.push(row);
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.tracking_number_excel);
+                                row.push(values.rider_employee_id);
+                                row.push(values.rider_name);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hubname);
+                                row.push(values.last_status);
+                                row.push(values.current_status);
+                                row.push(values.date);
+                                row.push(values.otp_status_text);
+                                body.push(row);
                             });
                         },
                         async: false
                     });
 
-                    return {body: body, header: head};
+                    return {
+                        body: body,
+                        header: head
+                    };
                 }
-            } );
+            });
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    {
+                buttons: [{
                         extend: 'excel',
                         title: 'Return Confirm OTP',
                         className: 'btn btn-primary',
@@ -291,37 +306,46 @@
                     },
                     'reset'
                 ],
-                scrollX: true, scrollY: '500px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                scrollX: true,
+                scrollY: '500px',
+                lengthMenu: [
+                    [50, 100, 500, 1000, -1],
+                    [50, 100, 500, 1000, 'All']
+                ],
                 pageLength: 50,
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
-            
+
                 serverSide: true,
-                ajax:{
+                ajax: {
                     url: '{{ route('admin.return.return_confirm_otp.list') }}',
-                    data: function (d) {
+                    data: function(d) {
                         d.rider = $('#search_rider').val();
                         d.hub = $('#search_hub').val();
                         d.search_date_from = $('input[name="from_date_formatted"]').val();
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'desc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'delivery_note_id', name: 'delivery_note_id', class: 'align-middle tracking_number_link'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle purpose'},
-                    {data: 'rider_employee_id', name: 'riders.employee_id', class: 'align-middle rider_name'},
-                    {data: 'rider_name', name: 'riders.name', class: 'align-middle delivery_note_id'},
-                    {data: 'origin', name: 'cities.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'destinationcity.name', class: 'align-middle destination'},
-                    {data: 'hubname', name: 'hub.name', class: 'align-middle hub'},
-                    {data: 'last_status', name: 'stts.name', class: 'align-middle last_status'},
-                    {data: 'current_status', name: 'sts.name', class: 'align-middle current_status'},
-                    {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
-                    {data: 'otp_entered', name: 'otp_entered', class: 'align-middle otp_entered'},
+                order: [
+                    [2, 'desc']
+                ],
+                columns: [{
+                    orderable: false,searchable: false,name: 'serial_number',class: 'align-middle serial_number',targets: 0,
+                    render: function(data, type, row) {
+                        return '';
+                    }},
+                    {data: 'delivery_note_id', name: 'delivery_note_id', class: 'align-middle delivery_note_id'},
+                    {data: 'tracking_number',name: 'shipments.tracking_number',class: 'align-middle tracking_number'},
+                    {data: 'rider_employee_id', name: 'riders.employee_id',class: 'align-middle rider_employee_id'},
+                    {data: 'rider_name',name: 'riders.name',class: 'align-middle delivery_note_id'},
+                    {data: 'origin',name: 'cities.name',class: 'align-middle origin'},
+                    {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
+                    {data: 'hubname',name: 'hub.name',class: 'align-middle hub'},
+                    {data: 'last_status',name: 'stts.name',class: 'align-middle last_status'},
+                    {data: 'current_status',name: 'sts.name',class: 'align-middle current_status'},
+                    {data: 'date',name: 'shipments_journey.updated_at',class: 'align-middle date'},
+                    {data: 'otp_entered',name: 'otp_entered',class: 'align-middle otp_entered'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -329,51 +353,73 @@
                     //console.log(data);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
+                        .appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var td =
+                        '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                        var current_status = '<select name="current_status" id="current_status" class="select2 form-control"></select>';
+                    var otp_entered =
+                        '<select name="otp_entered" id="otp_entered" class="select2 form-control">' +
+                        '<option value="0">No</option>' +
+                        '<option value="1">Yes</option>' +
+                        '</select>';
 
-                    var otp_entered = '<select name="otp_entered" id="otp_entered" class="select2 form-control">'+
-                    '<option value="0">No</option>' +
-                    '<option value="1">Yes</option>' +
-                    '</select>';
 
-
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var input =
+                        '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon =
+                        '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
+                        var column = this;
+                        var header = column.header();
 
-                    if ($(header).is('.serial_number') || $(header).is('.otp')) {
-                        $(td).appendTo($(search));
-                    }
-                    else if($(header).is('.otp_entered')){
+                        if ($(header).is('.serial_number') || $(header).is('.otp')) {
+                            $(td).appendTo($(search));
+                        } else if ($(header).is('.otp_entered')) {
                             $(otp_entered).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
+                                }).wrap(td);
+                        } else if ($(header).is('.current_status')) {
+                            $(current_status).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                        if (column.search()) {
-                            current.val(column.search());
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
                         }
-                    }
                     });
                     $("#otp_entered").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    var data2 = $.map({!! $shipment_status !!}, function(obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $('#current_status').prepend('<option value="" selected></option>').select2({
+                        data: data2,
+                        placeholder: "Select Shipment Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
                     this.api().table().columns.adjust();
                 }
             });
         });
-
     </script>
 @endsection

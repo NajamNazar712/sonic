@@ -5677,8 +5677,9 @@ class ReturnController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(),640);
 
         $rider_name = Rider::all();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $hub_name =City::where('hub',1)->where('status',1)->select('id','name')->get();
-       return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name]);
+       return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name,'shipment_status'=>$shipment_status]);
     }
     public function return_confirm_otp_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
@@ -5753,15 +5754,15 @@ class ReturnController extends Controller
                 return $shipments->otp_status == null ? 'No' : 'Yes';
             })
             ->filterColumn('otp_entered' , function ($query, $keyword) {
-                    $query->where(function ($sub_query) use ($keyword) {
-                        if($keyword == 1){
-                             $sub_query->where('rider_deliveries.otp_entered', '>', 0);
-                        }else{
-                            $sub_query->WhereNull('rider_deliveries.otp_entered');
-                        }
-    
-                    });
+                $query->where(function ($sub_query) use ($keyword) {
+                    if($keyword == 1){
+                            $sub_query->where('rider_deliveries.otp_entered', '>', 0);
+                    }else{
+                        $sub_query->WhereNull('rider_deliveries.otp_entered');
+                    }
+
                 });
+            });
             
             return $datatable->make(true);
             
