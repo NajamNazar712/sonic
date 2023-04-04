@@ -14,13 +14,13 @@ class UpdateShipmentsTableForParcelValueAndFintechCharges extends Migration
     public function up()
     {
         Schema::table('shipments', function (Blueprint $table) {
-            $table->integer('parcel_value')->nullable();
-            $table->integer('fintech_charges')->nullable();
+            $table->integer('parcel_value')->nullable()->default(NULL);
+            $table->integer('fintech_charges')->nullable()->default(NULL);
         });
 
-        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->integer('piece_id')->nullable()->index();
-        });
+//        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
+//            $table->integer('piece_id')->nullable()->index();
+//        });
     }
 
     /**
@@ -35,8 +35,8 @@ class UpdateShipmentsTableForParcelValueAndFintechCharges extends Migration
             $table->dropColumn('fintech_charges');
         });
 
-        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->dropColumn('piece_id');
-        });
+//        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
+//            $table->dropColumn('piece_id');
+//        });
     }
 }
