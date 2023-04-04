@@ -2162,10 +2162,27 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
+            ->leftJoin('sale_person_targets as spt', 'spt.sales_person_id', '=', 'sale_person_target_logs.sales_person_id')
             ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_target_logs.segment_id')
-            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
+            ->select('spt.id as id','sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
             ->orderBy('sale_person_target_logs.created_at');
-        return Datatables::of($targets)->make(true);
+
+            $datatable = Datatables::of($targets)
+            ->addColumn('segments', function ($data) {
+                $segment_ids = SalePersonAssignedSegment::where('sale_person_target_id',$data->id)->pluck('segment_id')->toArray();
+                $segments = SalePersonTargetSegment::whereIn('id',$segment_ids)->get();
+                $segment_data = '';
+                $count = count($segments);
+                foreach ($segments as $key => $segment) {
+                    $segment_data .= $segment->name;
+                    if ($key != $count - 1) {
+                        $segment_data .= ', ';
+                    }
+                }
+                return $segment_data;
+                });
+
+        return $datatable->make(true);
     }
 
     public function overnight_overland_cargo_report_index()

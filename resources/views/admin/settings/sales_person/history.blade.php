@@ -118,7 +118,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'sales_person', name:'a.name', class: 'align-middle sales_person'},
-                    {data: 'segment', name:'spts.name', class: 'align-middle segment'},
+                    {data: 'segments', name:'segments', class: 'align-middle segments'},
                     {data: 'start_date', name: 'sale_person_target_logs.start_date', class: 'align-middle start_date'},
                     {data: 'end_date', name: 'sale_person_target_logs.end_date', class: 'align-middle end_date'},
                     {data: 'target_days', name: 'sale_person_target_logs.target_days', class: 'align-middle target_days'},
