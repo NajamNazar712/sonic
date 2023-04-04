@@ -14,8 +14,8 @@ class UpdateShipmentsTableForParcelValueAndFintechCharges extends Migration
     public function up()
     {
         Schema::table('shipments', function (Blueprint $table) {
-            $table->integer('parcel_value')->nullable()->default(NULL);
-            $table->integer('fintech_charges')->nullable()->default(NULL);
+            $table->decimal('parcel_value')->nullable()->default(NULL);
+            $table->decimal('fintech_charges')->nullable()->default(NULL);
         });
 
 //        Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
