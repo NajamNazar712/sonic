@@ -5357,8 +5357,6 @@ TRAX-Customer Experience';
                     $approval_request->save();
                 }
 
-                
-
                 foreach ($admin_id as $key => $admin) {
 
                     NotificationsController::send(131,$request_id,$admin);
@@ -5397,7 +5395,7 @@ TRAX-Customer Experience';
         $special_approve_reject_reason = $request->special_approve_reject_reason;
         $approved_date = Carbon::now();
 
-        $special_approval_request_id = SpecialApprovalRequest::where('crm_request_id',$crm_id)->where('status',1)->pluck('id')->first();
+        $special_approval_request_id = SpecialApprovalRequest::where('crm_request_id',$crm_id)->where('approved_status',1)->where('status',1)->pluck('id')->first();
 
         if(isset($request->approve))
         {

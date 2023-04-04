@@ -68,6 +68,7 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Special Request ID.</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Requested By</th>
@@ -304,6 +305,7 @@
                             head = [];
                             
                             head.push('S.No');  
+                            head.push('Special Request ID');
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Requested By');
@@ -320,6 +322,7 @@
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.id);
                                 row.push(values.request_number);
                                 row.push(values.tracking_number);
                                 row.push(values.requested_by);
@@ -383,6 +386,7 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'id', name: 'sar.id', class: 'align-middle id'},
                     {data: 'id_padded_link', name: 'id_padded_link', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'requested_by', name: 'sarrequestedby.name', class: 'align-middle requested_by'},
