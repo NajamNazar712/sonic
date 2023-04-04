@@ -5801,9 +5801,21 @@ class ReturnController extends Controller
              return '-'; 
             }
         })
-        ->addColumn('otp_status_text', function ($shipments) {
-            return $shipments->otp_status === null ? 'No' : 'Yes';
-        });
+        ->addColumn('otp_entered', function ($shipments) {
+            return $shipments->otp_status == null ? 'No' : 'Yes';
+        })
+        ->filterColumn('otp_entered' , function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    if($keyword == 1){
+                         $sub_query->where('rider_deliveries.otp_entered', '>', 0);
+                    }else{
+                        $sub_query->WhereNull('rider_deliveries.otp_entered');
+                    }
+
+                });
+                
+                
+            });
         
         return $datatable->make(true);
     }

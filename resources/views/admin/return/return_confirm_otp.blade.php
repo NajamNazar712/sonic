@@ -321,7 +321,7 @@
                     {data: 'last_status', name: 'stts.name', class: 'align-middle last_status'},
                     {data: 'current_status', name: 'sts.name', class: 'align-middle current_status'},
                     {data: 'date', name: 'shipments_journey.updated_at', class: 'align-middle date'},
-                    {data: 'otp_status_text', name: 'otp_status_text', class: 'align-middle otp_status'},
+                    {data: 'otp_entered', name: 'otp_entered', class: 'align-middle otp_entered'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -332,6 +332,13 @@
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+
+                    var otp_entered = '<select name="otp_entered" id="otp_entered" class="select2 form-control">'+
+                    '<option value="0">No</option>' +
+                    '<option value="1">Yes</option>' +
+                    '</select>';
+
+
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     this.api().columns().every(function(column_id) {
@@ -341,6 +348,12 @@
                     if ($(header).is('.serial_number') || $(header).is('.otp')) {
                         $(td).appendTo($(search));
                     }
+                    else if($(header).is('.otp_entered')){
+                            $(otp_entered).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -350,6 +363,12 @@
                             current.val(column.search());
                         }
                     }
+                    });
+                    $("#otp_entered").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
