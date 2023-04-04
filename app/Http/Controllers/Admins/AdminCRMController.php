@@ -2743,18 +2743,19 @@ class AdminCRMController extends Controller
                         Carbon::SUNDAY,
                     ]);
 
-
+                $current_tat = null;
                 $re_open_count = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,5)->latest('id');
                 if($re_open_count->exists()) {
                     $re_open_count = $re_open_count->first();
 
                     $launched = Carbon::parse($requests->created_at);
-                    $last_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,4)->where('created_at', '>=', $re_open_count->created_at)->first();
+                    $last_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id', 4)->where('created_at', '>=', $re_open_count->created_at)->first();
 
                     $closed = isset($last_closed->created_at) ? $last_closed->created_at : null;
                     $time_format = 'H:i';
-                    $time_from = CrmSettings::where('name','TAT Cut-Off Time From')->first();
-                    $time_to = CrmSettings::where('name','TAT Cut-Off Time To')->first();
+                    $time_from = CrmSettings::where('name', 'TAT Cut-Off Time From')->first();
+                    $time_to = CrmSettings::where('name', 'TAT Cut-Off Time To')->first();
+                    if ($closed) {
 
                         $to_formatted = date($time_format, strtotime($time_to->setting_value));
                         $cut_off_check = $requests->created_at->format($time_format);
@@ -2784,7 +2785,9 @@ class AdminCRMController extends Controller
                                 $current_tat = $after_holidays;
                             }
                         }
+
                     }
+                }
                 else {
                     $launched = Carbon::parse($requests->created_at);
                     $first_closed = CrmRequestStatusHistory::where('crm_request_id', $requests->id)->where('status_id' ,4)->first();
