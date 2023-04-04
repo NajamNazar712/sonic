@@ -40,9 +40,9 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
-                                    <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Responsible Hub</th>
                                     <th class="border-primary border-darken-1">Responsible Zone</th>
+                                    <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -112,9 +112,9 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Shipment Status');
                             head.push('Responsible Hub');
                             head.push('Responsible Zone');
+                            head.push('Shipment Status');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -139,9 +139,9 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.status);
                                 row.push(values.responsible_hub);
                                 row.push(values.responsible_zone);
+                                row.push(values.status);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -315,9 +315,9 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
+                    {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
