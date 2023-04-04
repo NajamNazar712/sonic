@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Admin\SalePersonAssignedSegment;
+use App\Admin\SegmentHistory;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -2035,6 +2037,7 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_submit(Request $request)
     {
+        //dd($request->all());
         $start_date = $request->search_date_from_formatted;
         $end_date = Carbon::parse($start_date)->addDays(30)->toDateTimeString();
         if ($start_date == null || $end_date == null) {
@@ -2055,24 +2058,39 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->target_days = $sales_target->target_days;
                     $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
-                    $sales_person_log->segment_id = $sales_target->segment_id;
+                    $sales_person_log->segment_id = null;
                     $sales_person_log->achieved_shipments = $sales_target->achieved_shipments;
                     $sales_person_log->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
                     $sales_person_log->achieved_revenue = $sales_target->achieved_revenue;
                     $sales_person_log->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                     $sales_person_log->save();
 
+                    foreach($request->segment as $segs){
+                        $segment_history = new SegmentHistory();
+                        $segment_history->sale_person_target_id = $sales_target->id;
+                        $segment_history->segment_id = $segs;
+                        $segment_history->save();
+                    }
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
                     $sales_target->target_days = $request->target_shipment_days;
                     $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
-                    $sales_target->segment_id = $request->segment;
+                    $sales_target->segment_id = null;
                     $sales_target->achieved_shipments = null;
                     $sales_target->achieved_shipments_percentage = null;
                     $sales_target->achieved_revenue = null;
                     $sales_target->achieved_revenue_percentage = null;
                     $sales_target->save();
+                    
+                    SalePersonAssignedSegment::where('sale_person_target_id',$sales_target->id)->delete();
+                    foreach($request->segment as $segs){
+                        $segment_history = new SalePersonAssignedSegment();
+                        $segment_history->sale_person_target_id = $sales_target->id;
+                        $segment_history->segment_id = $segs;
+                        $segment_history->save();
+                    }
+                    
                 } else {
                     $sale_person_target = new SalePersonTarget();
                     $sale_person_target->start_date = $start_date;
@@ -2081,12 +2099,19 @@ class GlobalSettingsController extends Controller
                     $sale_person_target->target_days = $request->target_shipment_days;
                     $sale_person_target->target_month = $request->target_shipment_month;
                     $sale_person_target->average_revenue = $request->average_revenue;
-                    $sale_person_target->segment_id = $request->segment;
+                    $sale_person_target->segment_id =null;
                     $sale_person_target->achieved_shipments = null;
                     $sale_person_target->achieved_shipments_percentage = null;
                     $sale_person_target->achieved_revenue = null;
                     $sale_person_target->achieved_revenue_percentage = null;
                     $sale_person_target->save();
+
+                    foreach($request->segment as $segs){
+                        $segment_history = new SalePersonAssignedSegment();
+                        $segment_history->sale_person_target_id = $sale_person_target->id;
+                        $segment_history->segment_id = $segs;
+                        $segment_history->save();
+                    }
                 }
             }
         }
@@ -2099,13 +2124,32 @@ class GlobalSettingsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
-        $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_targets.segment_id')
-            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'), 'spts.name as segment')->where('a.status', 1);
 
-        $datatable = Datatables::of($targets);
+        $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
+            // ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_targets.segment_id')
+            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 
+            'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', 
+            DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), 
+            DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))
+            ->where('a.status', 1);
+
+        $datatable = Datatables::of($targets)
+            ->addColumn('segments', function ($data) {
+                $segment_ids = SalePersonAssignedSegment::where('sale_person_target_id',$data->id)->pluck('segment_id')->toArray();
+                $segments = SalePersonTargetSegment::whereIn('id',$segment_ids)->get();
+                $segment_data = '';
+                $count = count($segments);
+                foreach ($segments as $key => $segment) {
+                    $segment_data .= $segment->name;
+                    if ($key != $count - 1) {
+                        $segment_data .= ', ';
+                    }
+                }
+                return $segment_data;
+                });
+
         return $datatable->make(true);
-    }
+}
 
     public function sales_person_targets_history()
     {
@@ -7280,7 +7324,6 @@ class GlobalSettingsController extends Controller
                     $sales_target = SalePersonTarget::where('id', $person_id);
                     if ($sales_target->exists()) {
                         $sales_target = $sales_target->first();
-
                         $sale_person_target_del = new SalePersonTargetDelete();
                         $sale_person_target_del->deleted_id = $sales_target->id;
                         $sale_person_target_del->start_date = $sales_target->start_date;
@@ -7297,10 +7340,13 @@ class GlobalSettingsController extends Controller
                         $sale_person_target_del->save();
                     }
                 }
-                SalePersonTarget::whereIn('id', $sales_persons)->delete();
-            }
+                    SalePersonAssignedSegment::whereIn('sale_person_target_id', $sales_persons)->delete();
+                    SalePersonTarget::whereIn('id', $sales_persons)->delete();
+                }
             return response()->json(['status' => 1, 'success' => 'Delete Successfully']);
-        } else {
+            }
+        else 
+        {
             return response()->json(['status' => 0, 'error' => 'No Id Found']);
         }
     }
