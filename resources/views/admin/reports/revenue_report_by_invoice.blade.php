@@ -123,7 +123,6 @@
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
-                        <th class="border-primary border-darken-1">Packing Charges</th>
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">Intercept Charges</th>
@@ -336,7 +335,6 @@
                             head.push('Fuel Surcharge');
                             head.push('Return Charges');
                             head.push('Replacement Charges');
-                            head.push('Packing Charges');
                             head.push('Try & Buy Charges');
                             head.push('NSA/OSA Charges');
                             head.push('Intercept Charges');
@@ -362,7 +360,6 @@
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
-                                row.push(values.packing_charges);
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.intercept_charges);
@@ -436,7 +433,6 @@
                     { data:'fuel_surcharge' ,name: 'rbi.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'return_charges' ,name: 'rbi.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'rbi.replacement_charges', class: 'align-middle replacement_charges'},
-                    { data:'packing_charges' ,name: 'rbi.packing_charges', class: 'align-middle packing_charges'},
                     { data:'try_buy_charges' ,name: 'rbi.try_buy_charges', class: 'align-middle try_buy_charges'},
                     { data:'nsa_osa_charges' ,name: 'rbi.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'intercept_charges' ,name: 'rbi.intercept_charges', class: 'align-middle intercept_charges'},

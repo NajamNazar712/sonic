@@ -65,5 +65,6 @@ class CreateInvoiceOriginWise extends Command
                 }
             }
         }
+//        InvoiceByOriginReportController::update_invoices();
     }
 }
