@@ -3625,17 +3625,17 @@ class GlobalSettingsController extends Controller
             }
         })
         ->addColumn('action', function ($data) {
-            $edit = '<a href="' .route('admin.settings.setup_fintech_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
+         
+            if(session('role_id') == 1 || in_array(853, session('permissions'))){
+                $edit = '<a href="' .route('admin.settings.setup_fintech_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
            
-            $dropdown = '
-                <div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">';
-
-                $dropdown .= $edit;
-            
-        
-            return $dropdown;
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+                    $dropdown .= $edit;
+                return $dropdown;
+            }
         });
     return $datatable->make(true);
     }

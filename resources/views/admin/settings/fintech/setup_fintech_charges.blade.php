@@ -329,15 +329,21 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+
+                
+                buttons: [
+                    @if (session('role_id') == 1 || in_array(852, session('permissions')))   
+                    {
                     text: '<i class="la la-plus"></i> Add Fintech Company',
                             className: 'btn btn-primary add_material',
                             enabled: true,
                             action: function (e, dt, node, config) {
                                 window.location = "{{route('admin.settings.setup_fintech_charges.form')}}";
-                            }
-
+                         }
+                    
                         },
+                    @endif  
+                        
                     
                     {
                     extend: 'excel',

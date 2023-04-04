@@ -74,6 +74,7 @@
                                                         <div class="form-group">
                                                             <input type="text"
                                                                 name="fintech_range_up_edit[]"
+                                                                onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
                                                                 value ="@if(!empty($fintechvalues)) {{$charges->range_up}}  @endif"
                                                                 placeholder="Range Up" required data-rule-required="true"
@@ -85,6 +86,7 @@
                                                         <div class="form-group">
                                                             <input type="text"
                                                                 name="fintech_range_down_edit[]"
+                                                                onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
                                                                 value ="@if(!empty($fintechvalues)) {{$charges->range_down}}  @endif"
                                                                 placeholder="Range Down" required data-rule-required="true"
@@ -96,6 +98,7 @@
                                                             <input type="text" required
                                                                 name="charges_edit[]"
                                                                 class="form-control input-filtered"
+                                                                onkeydown="inputValidate()"
                                                                 placeholder="Charges"
                                                                 value ="@if(!empty($fintechvalues)) {{$charges->charges}}  @endif"
                                                                 data-rule-required="true"
@@ -107,9 +110,10 @@
                                                         <div class="form-group">
                                                             <input type="text" required
                                                                 name="additional_charges_edit[]"
-                                                                class="form-control charges"
+                                                                class="form-control input-filtered"
+                                                                onkeydown="inputValidate()"
                                                                 value ="@if(!empty($fintechvalues)) {{$charges->additional_charges}}  @endif"
-                                                                placeholder="Additional input-filtered"
+                                                                placeholder="Additional "
                                                                 data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>
@@ -119,6 +123,7 @@
                                                         <div class="form-group">
                                                             <input type="text" required
                                                                 name="fed_tax_edit[]"
+                                                                onkeydown="inputValidate()" 
                                                                 value ="@if(!empty($fintechvalues)) {{$charges->fed_tax}}  @endif"
                                                                 class="form-control input-filtered"
                                                                  placeholder="Federal Excise Duty Tax"
@@ -238,9 +243,8 @@
                                                             <input type="text" required
                                                                 name="additional_charges[]"
                                                                 onkeydown="inputValidate()"
-                                                                class="form-control"
-                                                                oninput="this.value = this.value.replace(/[^0-9.%]/g, '').replace(/(\..*)\./g, '$1');"
-                                                                placeholder="Additional input-filtered"
+                                                                class="form-control input-filtered"
+                                                                placeholder="Additional "
                                                                 data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>

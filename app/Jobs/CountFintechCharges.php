@@ -53,14 +53,12 @@ class CountFintechCharges implements ShouldQueue
                 
                 $user_fintech_charges = UserFintectCharges::where('user_id',$user_id->user_id)->first();
                 if(!empty($user_fintech_charges)){
-                    dd('by shipper');
                     $charges        =  $user_fintech_charges->fintech_charges;
                     $percentage     = ($total_cod_amount/100) * $charges;
                     $total_charges  = round($percentage) + $total_cod_amount;
                     $charges_applicable = '1';
                 }  
                 else{
-                    dd('by user');
                     $standart_fintech_charges = standard_fintech_charges::where('id','1')->first();
                     $standard_charges       = ($total_cod_amount/100) * $standart_fintech_charges->standard_fintech_charges;
                     $standard_charges_FED   = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;

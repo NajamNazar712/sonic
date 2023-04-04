@@ -9484,7 +9484,7 @@ public function add_fintech_charges(Request $req){
                     }
 
                     
-                if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(855, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
@@ -9820,7 +9820,7 @@ public function add_fintech_charges(Request $req){
                 }
 
 
-                if (session('role_id') == 1 || in_array(619, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(856, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
