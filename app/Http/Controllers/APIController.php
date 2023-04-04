@@ -1388,6 +1388,11 @@ class APIController extends Controller
             $origin = $shipment->pickup_address->city->name;
             $destination = $shipment->consignee_city->name;
 
+
+
+            $order_date = $shipment->pickup_date;
+            $booking_date = $shipment->created_at;
+
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -1424,7 +1429,7 @@ class APIController extends Controller
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination, 'order_date' => $order_date, 'booking_date' => $booking_date]);
         }
     }
 
@@ -1460,6 +1465,9 @@ class APIController extends Controller
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
+
+            $details['order_date'] = $shipment->pickup_date;
+            $details['booking_date'] = $shipment->created_at;
 
             $shipper = $shipment->user;
 
@@ -2903,6 +2911,9 @@ class APIController extends Controller
 
                     $detail['order_id'] = $shipment->order_id;
 
+                    $details['order_date'] = $shipment->pickup_date;
+                    $details['booking_date'] = $shipment->created_at;
+
                     $shipper = $shipment->user;
 
                     $detail['shipper']['name'] = $shipper->name;
@@ -3084,6 +3095,8 @@ class APIController extends Controller
                     $detail['status'] = $current_status;
                     $detail['reason'] = $reason;
                     $detail['current_status_datetime'] = $current_status_datetime;
+                    $detail['order_date'] = $shipment->pickup_date;
+                    $detail['booking_date'] = $shipment->created_at;
 
                     $details[] = $detail;
                 }
@@ -4096,9 +4109,6 @@ class APIController extends Controller
         }
 
         $rules = [
-            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
             'case_nature_id' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4108,6 +4118,16 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if ($nature_id == 1 || $nature_id == 2 || $nature_id == 4) {
+                $rules = [
+                    'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+            }
 
             if ($nature_id == 1 || $nature_id == 2) {
                 //complaints
@@ -4243,6 +4263,23 @@ class APIController extends Controller
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
+                }
+            } else if($nature_id == 3){
+                $rules = [
+                    'description' => ['required'],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+
+                if ($validate->fails()) {
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                } else {
+
+                    $crm_request = CRMController::add($nature_id, null, 1, 1, $user_id, $launched_by, null, $user_id, null, $description);
+
+                        // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                    return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
