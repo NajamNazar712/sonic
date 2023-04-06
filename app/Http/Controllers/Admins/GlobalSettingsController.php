@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Admin\SalePersonAssignedSegment;
+use App\Admin\SegmentHistory;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
@@ -112,6 +114,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\StarShipper;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
@@ -2036,7 +2039,7 @@ class GlobalSettingsController extends Controller
     public function sales_person_targets_submit(Request $request)
     {
         $start_date = $request->search_date_from_formatted;
-        $end_date = Carbon::parse($start_date)->addDays(30)->toDateTimeString();
+        $end_date = Carbon::parse($start_date)->endOfMonth()->toDateTimeString();
         if ($start_date == null || $end_date == null) {
             return redirect()->back()->with('error', 'Date not selected!');
         }
@@ -2055,24 +2058,43 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->target_days = $sales_target->target_days;
                     $sales_person_log->target_month = $sales_target->target_month;
                     $sales_person_log->average_revenue = $sales_target->average_revenue;
-                    $sales_person_log->segment_id = $sales_target->segment_id;
+                    $sales_person_log->segment_id = null;
                     $sales_person_log->achieved_shipments = $sales_target->achieved_shipments;
                     $sales_person_log->achieved_shipments_percentage = $sales_target->achieved_shipments_percentage;
                     $sales_person_log->achieved_revenue = $sales_target->achieved_revenue;
                     $sales_person_log->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                     $sales_person_log->save();
 
+                    $sales_person_assigned_segments = SalePersonAssignedSegment::where('sale_person_target_id',$sales_target->id)->get();
+
+                    foreach($sales_person_assigned_segments as $segs){
+
+                        $segment_history = new SegmentHistory();
+                        $segment_history->sale_person_target_log_id = $sales_person_log->id;
+                        $segment_history->segment_id = $segs->id;
+                        $segment_history->save();
+                    }
+
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
                     $sales_target->target_days = $request->target_shipment_days;
                     $sales_target->target_month = $request->target_shipment_month;
                     $sales_target->average_revenue = $request->average_revenue;
-                    $sales_target->segment_id = $request->segment;
+                    $sales_target->segment_id = null;
                     $sales_target->achieved_shipments = null;
                     $sales_target->achieved_shipments_percentage = null;
                     $sales_target->achieved_revenue = null;
                     $sales_target->achieved_revenue_percentage = null;
                     $sales_target->save();
+                    
+                    SalePersonAssignedSegment::where('sale_person_target_id',$sales_target->id)->delete();
+                    foreach($request->segment as $segs){
+                        $segment_history = new SalePersonAssignedSegment();
+                        $segment_history->sale_person_target_id = $sales_target->id;
+                        $segment_history->segment_id = $segs;
+                        $segment_history->save();
+                    }
+                    
                 } else {
                     $sale_person_target = new SalePersonTarget();
                     $sale_person_target->start_date = $start_date;
@@ -2081,12 +2103,19 @@ class GlobalSettingsController extends Controller
                     $sale_person_target->target_days = $request->target_shipment_days;
                     $sale_person_target->target_month = $request->target_shipment_month;
                     $sale_person_target->average_revenue = $request->average_revenue;
-                    $sale_person_target->segment_id = $request->segment;
+                    $sale_person_target->segment_id =null;
                     $sale_person_target->achieved_shipments = null;
                     $sale_person_target->achieved_shipments_percentage = null;
                     $sale_person_target->achieved_revenue = null;
                     $sale_person_target->achieved_revenue_percentage = null;
                     $sale_person_target->save();
+
+                    foreach($request->segment as $segs){
+                        $segment_history = new SalePersonAssignedSegment();
+                        $segment_history->sale_person_target_id = $sale_person_target->id;
+                        $segment_history->segment_id = $segs;
+                        $segment_history->save();
+                    }
                 }
             }
         }
@@ -2099,13 +2128,32 @@ class GlobalSettingsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 110);
         }
-        $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
-            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_targets.segment_id')
-            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'), 'spts.name as segment')->where('a.status', 1);
 
-        $datatable = Datatables::of($targets);
+        $targets = SalePersonTarget::leftjoin('admins as a', 'a.id', '=', 'sale_person_targets.sales_person_id')
+            // ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_targets.segment_id')
+            ->select('sale_person_targets.id as id', 'sale_person_targets.id as target_id', 'sale_person_targets.start_date', 'sale_person_targets.end_date', 
+            'a.name as sales_person', 'sale_person_targets.target_days', 'sale_person_targets.target_month', 'sale_person_targets.average_revenue', 
+            DB::raw('(sale_person_targets.target_days*sale_person_targets.average_revenue) as per_day_revenue_target'), 
+            DB::raw('(sale_person_targets.target_month*sale_person_targets.average_revenue) as per_month_revenue_target'))
+            ->where('a.status', 1);
+
+        $datatable = Datatables::of($targets)
+            ->addColumn('segments', function ($data) {
+                $segment_ids = SalePersonAssignedSegment::where('sale_person_target_id',$data->id)->pluck('segment_id')->toArray();
+                $segments = SalePersonTargetSegment::whereIn('id',$segment_ids)->get();
+                $segment_data = '';
+                $count = count($segments);
+                foreach ($segments as $key => $segment) {
+                    $segment_data .= $segment->name;
+                    if ($key != $count - 1) {
+                        $segment_data .= ', ';
+                    }
+                }
+                return $segment_data;
+                });
+
         return $datatable->make(true);
-    }
+}
 
     public function sales_person_targets_history()
     {
@@ -2119,10 +2167,26 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_target_logs.segment_id')
-            ->select('sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
+            ->select('sale_person_target_logs.id as id','sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');
-        return Datatables::of($targets)->make(true);
+
+            $datatable = Datatables::of($targets)
+            ->addColumn('segments', function ($data) {
+                $segments = SegmentHistory::join('sale_person_target_segments as spts','spts.id' , 'segment_histories.segment_id')
+                ->select('spts.name')->where('sale_person_target_log_id',$data->id)->get();
+                // dd($data->id,$segments);
+                $segment_data = '';
+                $count = count($segments);
+                foreach ($segments as $key => $segment) {
+                    $segment_data .= $segment->name;
+                    if ($key != $count - 1) {
+                        $segment_data .= ', ';
+                    }
+                }
+                return $segment_data;
+                });
+
+        return $datatable->make(true);
     }
 
     public function overnight_overland_cargo_report_index()
@@ -3534,7 +3598,8 @@ class GlobalSettingsController extends Controller
         BookingSmsForShippers::truncate();
         if ($shippers != null) {
             if (count($shippers) > 0) {
-                foreach ($shippers as $shipper) {;
+                foreach ($shippers as $shipper) {
+                    ;
                     $business_shipment = new BookingSmsForShippers();
                     $business_shipment->user_id = $shipper;
                     $business_shipment->save();
@@ -3584,7 +3649,7 @@ class GlobalSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 621);
 
-        $one_linke_payment_charges_ranges =  OneLinkPaymentChargesRange::all();
+        $one_linke_payment_charges_ranges = OneLinkPaymentChargesRange::all();
         return view('admin.settings.one_link_charges')->with(['one_linke_payment_charges_ranges' => $one_linke_payment_charges_ranges]);
     }
 
@@ -4522,9 +4587,9 @@ class GlobalSettingsController extends Controller
                     return 'Disable';
                 }
             })->editColumn('starting_id', function ($route_management) {
-                // $route_management->starting_id.'-'.
-                return "<a href='https://www.google.com/maps/?q=" . $route_management->starting_lat . "," . $route_management->starting_long . "' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> " . $route_management->starting_name;
-            })
+            // $route_management->starting_id.'-'.
+            return "<a href='https://www.google.com/maps/?q=" . $route_management->starting_lat . "," . $route_management->starting_long . "' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> " . $route_management->starting_name;
+        })
             ->editColumn('end_id', function ($route_management) {
                 return "<a href='https://www.google.com/maps/?q=" . $route_management->end_lat . "," . $route_management->end_long . "' target='_blank' class='btn btn-sm btn-outline-info align-middle'><i class='ft-map-pin'></i></a> " . $route_management->end_name;
 
@@ -4975,18 +5040,18 @@ class GlobalSettingsController extends Controller
                     return $roles->zone_name;
                 }
             })->editColumn('status', function ($roles) {
-                if ($roles->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            })->editColumn('case_nature', function ($roles) {
-                if ($roles->case_nature == 4) {
-                    return 'Claim';
-                } else {
-                    return 'Complaints / Service Request';
-                }
-            });
+            if ($roles->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })->editColumn('case_nature', function ($roles) {
+            if ($roles->case_nature == 4) {
+                return 'Claim';
+            } else {
+                return 'Complaints / Service Request';
+            }
+        });
 
         return $datatables->make(true);
     }
@@ -5137,12 +5202,12 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })->editColumn('status', function ($roles) {
-                if ($roles->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            });
+            if ($roles->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        });
 
         return $datatables->make(true);
     }
@@ -5659,24 +5724,24 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })->editColumn('status', function ($roles) {
-                if ($roles->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            })->editColumn('zone', function ($roles) {
-                if ($roles->zone == '' || $roles->zone == null) {
-                    return 'All Zones';
-                } else {
-                    return $roles->zone;
-                }
-            })->editColumn('city_name', function ($roles) {
-                if ($roles->city_name == '' || $roles->city_name == null) {
-                    return 'All Cities';
-                } else {
-                    return $roles->city_name;
-                }
-            })
+            if ($roles->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })->editColumn('zone', function ($roles) {
+            if ($roles->zone == '' || $roles->zone == null) {
+                return 'All Zones';
+            } else {
+                return $roles->zone;
+            }
+        })->editColumn('city_name', function ($roles) {
+            if ($roles->city_name == '' || $roles->city_name == null) {
+                return 'All Cities';
+            } else {
+                return $roles->city_name;
+            }
+        })
             ->editColumn('service', function ($roles) {
                 if ($roles->service == '' || $roles->service == null) {
                     return '0';
@@ -5865,12 +5930,12 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })->editColumn('status', function ($roles) {
-                if ($roles->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            });
+            if ($roles->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        });
 
         return $datatables->make(true);
     }
@@ -6017,7 +6082,7 @@ class GlobalSettingsController extends Controller
 
         if ($id == 1) {
             $details['fields'] = ['shipper_name', 'tagged_salesperson_name', 'tagged_salesperson_number', 'tagged_salesperson_email'];
-            $attachments =  LeadNotificationAttachment::where('notification_id', $id)->get();
+            $attachments = LeadNotificationAttachment::where('notification_id', $id)->get();
             foreach ($attachments as $image) {
                 $img_url = asset('uploads/notification_attachments/' . $image->attachment);
                 $attachments_details[] = array('id' => $image->id, 'date' => Carbon::parse($image->created_at)->toDateTimeString(), 'image' => $img_url);
@@ -6479,18 +6544,18 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })->editColumn('status', function ($roles) {
-                if ($roles->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            })->editColumn('city_name', function ($roles) {
-                if ($roles->city_name == '' || $roles->city_name == null) {
-                    return 'All Cities';
-                } else {
-                    return $roles->city_name;
-                }
-            });
+            if ($roles->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })->editColumn('city_name', function ($roles) {
+            if ($roles->city_name == '' || $roles->city_name == null) {
+                return 'All Cities';
+            } else {
+                return $roles->city_name;
+            }
+        });
 
         return $datatables->make(true);
     }
@@ -6594,12 +6659,12 @@ class GlobalSettingsController extends Controller
                     return '';
                 }
             })->editColumn('status', function ($referral) {
-                if ($referral->status == 1) {
-                    return 'Enable';
-                } else {
-                    return 'Disable';
-                }
-            });
+            if ($referral->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        });
 
         return $datatables->make(true);
     }
@@ -6797,7 +6862,7 @@ class GlobalSettingsController extends Controller
 
         $city_id = null;
         if ($settings) {
-            $city_id =  explode(',', $settings->text);
+            $city_id = explode(',', $settings->text);
         }
 
         return view('admin.settings.undelivered_sms_hub_wise', compact('city_id', 'cities'));
@@ -7077,7 +7142,7 @@ class GlobalSettingsController extends Controller
         $check_exists = BookingDestinationMapping::where('city_id', $request->city_id);
 
         if ($check_exists->exists()) {
-            return redirect()->back()->with('error',  'This City Keywords Already Exists');
+            return redirect()->back()->with('error', 'This City Keywords Already Exists');
         }
 
         $keywords = explode(',', $request->booking_destination_keywords);
@@ -7158,7 +7223,7 @@ class GlobalSettingsController extends Controller
                 $check_exists = BookingDestinationMapping::where('city_id', $request->city_id);
 
                 if ($check_exists->exists()) {
-                    return redirect()->back()->with('error',  'This City Keywords Already Exists');
+                    return redirect()->back()->with('error', 'This City Keywords Already Exists');
                 }
             }
             BookingDestinationMappingKeyword::where('mapping_id', $request->id)->delete();
@@ -7204,7 +7269,7 @@ class GlobalSettingsController extends Controller
                     }
                 }
             }
-            $invalid_cities  = array();
+            $invalid_cities = array();
             if ($found_keyword) {
                 $data_found = BookingDestinationMappingKeyword::join('booking_destination_mappings as bdm', 'bdm.id', '=', 'booking_destination_mapping_keywords.mapping_id')
                     ->leftjoin('cities as c', 'c.id', '=', 'bdm.city_id')
@@ -7280,7 +7345,6 @@ class GlobalSettingsController extends Controller
                     $sales_target = SalePersonTarget::where('id', $person_id);
                     if ($sales_target->exists()) {
                         $sales_target = $sales_target->first();
-
                         $sale_person_target_del = new SalePersonTargetDelete();
                         $sale_person_target_del->deleted_id = $sales_target->id;
                         $sale_person_target_del->start_date = $sales_target->start_date;
@@ -7297,10 +7361,13 @@ class GlobalSettingsController extends Controller
                         $sale_person_target_del->save();
                     }
                 }
-                SalePersonTarget::whereIn('id', $sales_persons)->delete();
-            }
+                    SalePersonAssignedSegment::whereIn('sale_person_target_id', $sales_persons)->delete();
+                    SalePersonTarget::whereIn('id', $sales_persons)->delete();
+                }
             return response()->json(['status' => 1, 'success' => 'Delete Successfully']);
-        } else {
+            }
+        else 
+        {
             return response()->json(['status' => 0, 'error' => 'No Id Found']);
         }
     }
@@ -7418,7 +7485,7 @@ class GlobalSettingsController extends Controller
 
     public function consignee_refused_otp_bypass_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(),623);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 623);
         $bypass_setting = false;
         $excluded_shippers = array();
         $only_shippers = array();
@@ -7426,7 +7493,7 @@ class GlobalSettingsController extends Controller
 
         $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
 
-        if($otp_bypass_setting->exists()){
+        if ($otp_bypass_setting->exists()) {
             $otp_bypass_setting = $otp_bypass_setting->first();
             $bypass_setting = $otp_bypass_setting->setting_value;
         }
@@ -7459,28 +7526,27 @@ class GlobalSettingsController extends Controller
     public function consignee_refused_otp_bypass_store(Request $request)
     {
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(),624);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 624);
 
-        if($request->has('bypass_setting')){
+        if ($request->has('bypass_setting')) {
 
             $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
 
-            if(!$otp_bypass_setting->exists()){
+            if (!$otp_bypass_setting->exists()) {
                 $otp_bypass_setting = new GlobalSettings();
                 $otp_bypass_setting->setting_value = 1;
                 $otp_bypass_setting->type = 'otp_refusal_bypass';
                 $otp_bypass_setting->save();
-            }
-            else{
+            } else {
                 $otp_bypass_setting = $otp_bypass_setting->first();
                 $otp_bypass_setting->setting_value = 1;
                 $otp_bypass_setting->save();
             }
 
             $all_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_all_shippers');
-            if($all_shipper_settings->exists()){
+            if ($all_shipper_settings->exists()) {
                 $all_shipper_settings = $all_shipper_settings->first();
-            } else{
+            } else {
                 $all_shipper_settings = new GlobalSettings();
                 $all_shipper_settings->type = 'otp_refusal_bypass_all_shippers';
             }
@@ -7501,7 +7567,7 @@ class GlobalSettingsController extends Controller
                 }
                 $settings->text = $excluded_users;
                 $settings->save();
-            } else{
+            } else {
                 GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers')->delete();
             }
 
@@ -7519,14 +7585,13 @@ class GlobalSettingsController extends Controller
                 }
                 $settings->text = $only_users;
                 $settings->save();
-            } else{
+            } else {
                 GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers')->delete();
             }
-        }
-        else{
+        } else {
             $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
 
-            if($otp_bypass_setting->exists()){
+            if ($otp_bypass_setting->exists()) {
                 $otp_bypass_setting = $otp_bypass_setting->first();
                 $otp_bypass_setting->setting_value = 0;
                 $otp_bypass_setting->save();
@@ -7535,13 +7600,13 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
-	public function project_arrival_shippers_index()
-	    {
-	        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
-	        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
-	        $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
-	        return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
-	    }
+    public function project_arrival_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 630);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $project_arrival_shipper_ids = ProjectArrivalShipper::pluck('user_id')->toArray();
+        return view('admin.settings.project_arrival_shippers')->with(['shippers' => $shippers, 'project_arrival_shipper_ids' => $project_arrival_shipper_ids]);
+    }
 
     public function project_arrival_shippers_store(Request $request)
     {
@@ -7549,7 +7614,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 631);
             ProjectArrivalShipper::truncate();
             if (count($request->shippers) > 0) {
-                foreach ($request->shippers as $shipper){
+                foreach ($request->shippers as $shipper) {
                     $project_arrival_shipper = new ProjectArrivalShipper();
                     $project_arrival_shipper->user_id = $shipper;
                     $project_arrival_shipper->save();
@@ -7558,6 +7623,89 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('success', 'Settings Updated!');
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
+    public function star_shippers_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
+        $shippers = User::whereNull('disable_at')
+        ->get();
+        return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
+    }
+
+    public function star_shippers_list()
+    {
+        $star_shippers = StarShipper::join('users as u', 'star_shippers.user_id', '=', 'u.id')
+            ->select('u.name as shipper_name', 'star_shippers.id as id', 'star_shippers.status as status', 'star_shippers.created_at as created_at');
+
+        $datatables = Datatables::of($star_shippers)
+            ->editColumn('status', function ($star_shippers) {
+                if ($star_shippers->status == 1) {
+                    return 'Enable';
+                } else {
+                    return 'Disable';
+                }
+            })
+            ->addColumn('action', function ($star_shippers) {
+                if (session('role_id') == 1 || count(array_intersect([848], session('permissions'))) !== 0) {
+
+                    $dropdown = '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+                    if (session('role_id') == 1 || in_array(848, session('permissions'))) {
+                        if ($star_shippers->status == 1) {
+
+						$dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                        } else {
+                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '</div></div>';
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+        return $datatables->make(true);
+    }
+
+    public function star_shippers_add(Request $request)
+    {
+        $shipper_id = $request->star_shipper_id;
+        if (!empty($shipper_id)) {
+            $shipper_exist = StarShipper::where('user_id', $shipper_id);
+            if ($shipper_exist->exists()) {
+                return redirect()->back()->with('error', 'Already Exist !');
+            } else {
+                $new_shipper = new StarShipper();
+                $new_shipper->user_id = $shipper_id;
+                $new_shipper->add_by = $shipper_id;
+                $new_shipper->save();
+
+                return redirect()->back()->with('success', 'Updated!');
+            }
+        } else {
+            return redirect()->back()->with('error', 'Shipper Required !');
+        }
+    }
+
+    public function star_shippers_enable_disable(Request $request)
+    {
+        $star_shipper = StarShipper::find($request->id);
+
+        if ($star_shipper->status == 1) {
+            $star_shipper->status = 0;
+
+            $star_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Disabled !');
+        } else {
+            $star_shipper->status = 1;
+            $star_shipper->save();
+            return redirect()->back()->with('success', 'Shipper Enabled !');
         }
     }
 
@@ -7584,6 +7732,7 @@ class GlobalSettingsController extends Controller
 
         return view('admin.settings.last_mile.auto_delivery_note_verification')->with(['auto_verification' => $auto_verification,'hubs' => $hubs, 'excluded_hubs' => $excluded_hubs]);
     }
+
     public function auto_delivery_note_verification_store(Request $request){
 
         if($request->has('auto_verification_setting')){
@@ -7632,4 +7781,5 @@ class GlobalSettingsController extends Controller
             return redirect()->back()->with('success', 'Settings Updated!');
         }
     }
+
 }

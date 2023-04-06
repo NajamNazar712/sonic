@@ -155,8 +155,8 @@ class LostShipmentsController extends Controller
                         else {
                             $today = Carbon::now();
                             return $today->diffInDays($shipment->status_date);
-                       }
-                     }
+                        }
+                    }
                 })
                 ->filterColumn('u.name', function ($query, $keyword) {
                     $query->where(function ($sub_query) use ($keyword) {

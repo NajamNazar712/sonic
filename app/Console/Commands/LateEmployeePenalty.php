@@ -5,8 +5,10 @@ namespace App\Console\Commands;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\HR\EmployeeLate;
 use App\Http\Models\HR\EmployeePenalty;
+use App\Http\Models\HR\EmployeePenaltyHistory;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class LateEmployeePenalty extends Command
 {
@@ -41,15 +43,26 @@ class LateEmployeePenalty extends Command
      */
     public function handle()
     {
-        $startWeek = Carbon::now()->subWeek()->startOfWeek()->format('Y-m-d');
-        $endWeek   = Carbon::now()->format('Y-m-d');
+        $startMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
+        $endMonth = Carbon::now()->startOfMonth()->addDays(19)->format('Y-m-d');
+        $lastSixMonth = Carbon::now()->subMonthNoOverflow()->startOfMonth()->addDays(20)->format('Y-m-d');
+        EmployeePenalty::whereDate('date', '<', $startMonth)->update(['is_current_record' => 0]);
+        EmployeePenalty::whereDate('date', '<', $lastSixMonth)
+        ->each(function ($oldRecord) {
+            $newRecord = $oldRecord->replicate();
+            $newRecord->setTable('employee_penalty_histories');
+            $newRecord->save();
+            $oldRecord->delete();
+        });
+            
         $counter = 0;
-        $existing_late_ids = EmployeeLate::whereBetween('attendence_date',[$startWeek, $endWeek])->pluck('attendence_id')->toArray();
+        $existing_late_ids = EmployeeLate::whereBetween('attendence_date',[$startMonth, $endMonth])->pluck('attendence_id')->toArray();
         $employees_attendances = Employee::join('employee_attendances as ea','ea.employee_id','=','employees.id')
             ->join('employee_shifts as es','es.id','=','employees.shift_id')
             ->select('ea.id as attendence_id','ea.employee_id as employee_id','ea.attendance_date','es.start_time','es.extension_minutes','ea.clock_in_datetime')
-            ->whereBetween('ea.attendance_date',[$startWeek, $endWeek])
+            ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
             ->whereNotIn('ea.id', $existing_late_ids)
+            ->whereNotNull('ea.clock_in_datetime')
             ->orderBy('ea.employee_id')
             ->get();
             
@@ -64,37 +77,56 @@ class LateEmployeePenalty extends Command
                         [
                             'attendence_id' => $employees_attendance->attendence_id,
                             'attendence_date' => $employees_attendance->attendance_date,
-                            'date' => $endWeek,
+                            'date' => $endMonth,
                         ]);
                     $counter++;
                 }
+                // DB::connection()->enableQueryLog();
+                // $no_of_late = EmployeeLate::whereBetween('attendence_date',[$startMonth, $endMonth])
+                // ->count();
+               
                 $no_of_late = EmployeeLate::join('employee_attendances as ea','ea.id','=','employee_lates.attendence_id')
-                ->whereBetween('ea.attendance_date',[$startWeek, $endWeek])
+                ->whereBetween('ea.attendance_date',[$startMonth, $endMonth])
+                ->where('ea.employee_id',$employees_attendance->employee_id)
                 ->count();
-                $employee_penalties = EmployeePenalty::where('employee_id',$employees_attendance->employee_id)->first(); 
+                // dd(DB::getQueryLog());
+                // DB::connection()->enableQueryLog();
+                $employee_penalties = EmployeePenalty::
+                where('employee_penalties.employee_id',$employees_attendance->employee_id)
+                ->where('employee_penalties.is_current_record',1)
+                ->first();
+                // dd(DB::getQueryLog());
+
                 if($employee_penalties != null)
                 {
-                    if($counter == 3)
-                    {
-                        $employee_penalties->deduction_count += 1;
-                        $counter = 0;
-                    }
+                    // if($counter == 3)
+                    // {
+                    //     $employee_penalties->deduction_count += 1;
+                    //     $counter = 0;
+                    // }
+
+                    $max_lates = 3;
+                    $deduction_count = floor($no_of_late/$max_lates) ?? 0;
+                    $employee_penalties->deduction_count = $deduction_count;
+                    
                     $employee_penalties->no_of_late = $no_of_late;
                     $employee_penalties->update();
                 }
                 else
                 {
-                    
-                    if($counter == 3)
+
+                    // if($counter == 3)
+                    if($no_of_late >= 3)
                     { 
                         EmployeePenalty::create(
                         [
                             'employee_id' => $employees_attendance['employee_id'],
                             'attendence_id' => $employees_attendance['attendence_id'],
-                            'date' => $endWeek,
+                            'date' => $endMonth,
                             'status' => 1,
                             'no_of_late' => $no_of_late,
                             'deduction_count' => 1,
+                            'is_current_record' => 1,
                         ]);
                     $counter = 0;
                     }

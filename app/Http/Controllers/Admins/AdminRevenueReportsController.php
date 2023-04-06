@@ -311,6 +311,10 @@ class AdminRevenueReportsController extends Controller
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
+        if($report_type == 4){
+            $from = Carbon::today()->subDay()->toDateTimeString();
+            $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
+        }
 
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
 
@@ -375,7 +379,6 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-
         if($report_type == 1){
             $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
         }
@@ -384,6 +387,9 @@ class AdminRevenueReportsController extends Controller
         }
         if($report_type == 3){
             $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
+        }
+        if($report_type == 4 ){
+            $filename = 'revenue_report_by_arrival_on_daily_basis.xlsx';
         }
 
         $details = array();
@@ -569,10 +575,12 @@ class AdminRevenueReportsController extends Controller
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
+
         $filePath = '/reports/revenue/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
+
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
     }
 

@@ -128,6 +128,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RevenueReportByDeliveryDateCutOffDays',
         'App\Console\Commands\RevenueReportRemainingDays',
         'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
+        'App\Console\Commands\RevenueReportDailyBasis',
         'App\Console\Commands\RetailSalesReport',
         'App\Console\Commands\RetailSalesReportCutOffDays',
         'App\Console\Commands\RetailSalesReportRemainingDays',
@@ -166,7 +167,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
-        $schedule->command('employee:penalty')->monthlyOn(20,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
         $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
         if($shifts){
             foreach($shifts as $shift)
@@ -377,6 +378,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
         $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();

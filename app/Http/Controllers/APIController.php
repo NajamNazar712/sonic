@@ -509,6 +509,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
+                'parcel_value' => ['required_if:amount,0', 'nullable', 'numeric', 'min:1'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -559,6 +560,7 @@ class APIController extends Controller
                 }
             }
         } else {
+//            dd('type not 1');
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -583,6 +585,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
+                'parcel_value' => ['required_if:amount,0', 'nullable', 'numeric', 'between:1,1000000'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -699,6 +702,7 @@ class APIController extends Controller
                 $shipment_pre_book = null;
             }
             if ($service_type_id != 5) {
+//                dd('s',$request->all());
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
                 if (!$user_shipping_info->status) {
@@ -796,6 +800,7 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
                 }
             } else {
+//                dd('s1');
                 $pickup_consignee_city = City::find($request->input('consignee_city_id'));
                 if (!$pickup_consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
@@ -968,12 +973,15 @@ class APIController extends Controller
             if ($service_type_id == 3) {
                 $try_and_buy_charges = $request->input('try_and_buy_fees');
                 $amount = 0;
+                $parcel_value = 0;
             } elseif ($service_type_id == 5) {
                 $try_and_buy_charges = null;
                 $amount = 0;
+                $parcel_value = 0;
             } else {
                 $try_and_buy_charges = null;
                 $amount = $request->input('amount');
+                $parcel_value = $request->input('parcel_value');
             }
             $pieces_quantity = 1;
             if ($service_type_id == 1 && $request->has('pieces_quantity')) {
@@ -990,17 +998,21 @@ class APIController extends Controller
 
             if ($payment_mode_id == 4) {
                 $amount = 0;
+                $parcel_value = 0;
             }
+
+
+//            dd('response',$request->all(),$amount,$parcel_value);
 
             $business_category_id = 1;
             if ($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value);
             } else {
 
                 if ($user_type['corporate_rate_type_id'] == 3) {
                     $delivery_type_id = 1;
                 }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value);
             }
 
 

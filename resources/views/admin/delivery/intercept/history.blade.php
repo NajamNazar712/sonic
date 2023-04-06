@@ -11,6 +11,32 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row mb-2 justify-content-center">
+                     <div class="col-4 ">
+                         <div class="form-group input-group">
+                             <div class="input-group-prepend">
+                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                 <span class="la la-calendar-o"></span>
+                             </span>
+                             </div>
+                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                         </div>
+                     </div>
+                     <div class="col-4">
+                         <div class="form-group input-group">
+                             <div class="input-group-prepend">
+                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                 <span class="la la-calendar-o"></span>
+                             </span>
+                             </div>
+                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To">
+                         </div>
+                     </div>
+                    
+                     <div class="col-2">
+                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                     </div>
+                 </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -49,6 +75,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 @endsection
 
@@ -56,6 +84,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -130,6 +161,41 @@
                 }
             } );
 
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -149,7 +215,13 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.intercept.history.list') }}',
+                ajax: {
+                    url: '{{ route('admin.delivery.intercept.history.list') }}',
+                    data: function (d) {
+                        d.search_from = $('input[name="from_date_formatted"]').val();
+                        d.search_to = $('input[name="to_date_formatted"]').val();
+                    }
+                },
                 order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -178,6 +250,8 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
+
+                
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -221,7 +295,9 @@
                 }
             });
 
-
+            $('#search_filter_btn').on('click',function () {
+               table.draw();
+            });
 
         });
     </script>

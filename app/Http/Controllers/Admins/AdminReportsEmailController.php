@@ -2945,14 +2945,14 @@ class AdminReportsEmailController extends Controller
             $attendence_adjustment="Yes";
         }
     
-        $weekly_attendance_summary = ['Trax ID' => $employees_attendance['trax_id'], 'Name' => $employees_attendance['name'], 'Designation' => $employees_attendance['designation'], 'Leaves Availed' => $leave_status , 'Late' => $late, 'Attendance Adjustment' => $attendence_adjustment, 'Clock In' => $employees_attendance['clock_in_datetime'], 'Clock Out' => $employees_attendance['clock_out_datetime']];
+        $weekly_attendance_summary = ['Trax ID' => $employees_attendance['trax_id'], 'Name' => $employees_attendance['name'], 'Designation' => $employees_attendance['designation'], 'Leaves Availed' => $leave_status , 'Late' => $late, 'Attendance Adjustment' => $attendence_adjustment,'Date' =>$employees_attendance['attendance_date'],'Day' =>Carbon::parse($employees_attendance['attendance_date'])->format('l'), 'Clock In' => $employees_attendance['clock_in_datetime'], 'Clock Out' => $employees_attendance['clock_out_datetime']];
         return $weekly_attendance_summary;
     }
     static public function weekly_attendence_summary_excel($summary,$line_manager)
     {
         
         $date = Carbon::now();
-        $create_excel['header'] = ['Trax ID','Name', 'Designation', 'Leaves Availed', 'Late', 'Attendance Adjustment','Clock In','Clock Out'];
+        $create_excel['header'] = ['Trax ID','Name', 'Designation', 'Leaves Availed', 'Late', 'Attendance Adjustment','Date','Day','Clock In','Clock Out'];
         foreach ($summary as $key => $value) {
             $create_excel[] = $value;
         }

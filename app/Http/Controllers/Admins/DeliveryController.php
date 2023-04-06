@@ -176,7 +176,9 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)'));
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type','sts.status as star_status')
+            ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
@@ -200,14 +202,26 @@ class DeliveryController extends Controller
                         return 'complaint_row';
                     } else if ($shipments->booking_type_id == 3) {
                         return "tnb_row";
-                    } else {
+                    }
+                    else {
                         return '';
+                    }
+                    if ($shipments->star_status == 1) {
+                        return 'star_sippers';
                     }
                 },
             ])
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                if ($shipments->star_status == 1)
+                {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
+                }
+                else
+                {
+                    return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+                }
+
             })
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
@@ -348,6 +362,11 @@ class DeliveryController extends Controller
         if ($mode = $request->get('search_shipping_mode')) {
 
             $datatables->where('sm.id', '=', $mode);
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $datatables->where('sts.status',1);
         }
         return $datatables->make(true);
 
@@ -7341,11 +7360,18 @@ class DeliveryController extends Controller
             ->where('shipments.shipper_status_id', 54)
             ->groupBy('shipments.id');
 
-//            dd($shipments);
+
+            
+
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+        }
         return Datatables::of($shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
@@ -8796,6 +8822,7 @@ class DeliveryController extends Controller
     }
 
     public function closed(Request $request){
+        
         $station_deposit_note = StationDepositNote::find($request->sdn_id);
 
         if ($station_deposit_note) {
@@ -8803,6 +8830,8 @@ class DeliveryController extends Controller
                 $station_deposit_note->status = 3;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
+                //StationDepositNoteLog   
+                self::add_sdn_logs($request->sdn_id, 3, Auth::id());
                 return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Closed']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Station Deposit Note Not Resolved']);
@@ -8820,6 +8849,8 @@ class DeliveryController extends Controller
                 $station_deposit_note->status = 2;
                 $station_deposit_note->closed_at = Carbon::now();
                 $station_deposit_note->save();
+                //StationDepositNoteLog
+                self::add_sdn_logs($request->sdn_id, 2, Auth::id());
                 return response()->json(['status' => 1, 'message' => 'Station Deposit Note Status Updated To Resolved']);
             } else {
                 return response()->json(['status' => 0, 'message' => 'Pending Difference Amount']);
@@ -8841,7 +8872,9 @@ class DeliveryController extends Controller
                         $station_deposit_note->status = 3;
                         $station_deposit_note->closed_at = Carbon::now();
                         $station_deposit_note->save();
-                        return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
+                       //StationDepositNoteLog
+                       self::add_sdn_logs($station_deposit_note->id, 3, Auth::id());
+                    return response()->json(['status'=> 1,'success'=>"Station Deposit Notes Status Updated To Closed"]);
                     }else{
                         return response()->json(['status'=> 0,'error'=>"Status Should Be Deposited First"]);
                     }
@@ -8864,6 +8897,9 @@ class DeliveryController extends Controller
                     $station_deposit_note->status = 2;
                     $station_deposit_note->closed_at = Carbon::now();
                     $station_deposit_note->save();
+
+                    //StationDepositNoteLog
+                    self::add_sdn_logs($station_deposit_note->id, 2, Auth::id());
                 }else{
                     $return_id.=  "ID = ".$station_deposit_note->id.", ";
                 }
