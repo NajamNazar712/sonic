@@ -76,7 +76,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.sales_person);
-                                row.push(values.segment);
+                                row.push(values.segments);
                                 row.push(values.start_date);
                                 row.push(values.end_date);
                                 row.push(values.target_days);
