@@ -823,8 +823,23 @@
                                     $international_tracking_number = '';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
-                                shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                if(details.star_shipper == 1)
+                                {
+                                    shipment += '<div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290">';
+                                }
+                                else
+                                {
+                                    shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
+                                }
+
+                                if (details.star_shipper == 1)
+                                {
+                                    shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white"><i class="la la-star" style="color: #FFCA28"></i>' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                }
+                                else
+                                {
+                                    shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                }
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
@@ -1123,6 +1138,9 @@
                                 shipment +=breadth;
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                // shipment += '<td>HH</td>';
+                                shipment += '<td>' + ((details.order_information.parcel_value != 0) ? details.order_information.parcel_value : '-') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment +=height;

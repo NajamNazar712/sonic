@@ -461,6 +461,19 @@
 												@endforeach
 											</select>
 										</div>
+
+										{{--Todo : Parcle Value--}}
+										<div class="form-group input-group">
+											<div class="input-group-prepend">
+												<span class="input-group-text">Rs</span>
+											</div>
+
+											<input type="text" name="parcel_value" id="parcel_value"
+												   class="form-control rounded-right parcel_value"
+												   placeholder="Parcel Value*" data-rule-required="true"
+												   data-msg-required="Parcel Value is Required"  oninput="if(this.value==='0') this.value=''">
+										</div>
+										{{-- todo : Parcle Value End--}}
 									</div>
 								</div>
 
@@ -700,6 +713,24 @@
         }
 
 		$(document).ready(function() {
+			//todo: for parcel value
+			$('#parcel_value').prop('disabled', true);
+			$( "#amount" ).keyup(function() {
+				var amt = $('#amount').val();
+				if (amt == 0 )
+				{
+					// $("#parcel_value").css("background-color", "yellow");
+					$('#parcel_value').prop('disabled', false);
+				}
+				else
+				{
+					// $("#parcel_value").css("background-color", "lightgray");
+					$('#parcel_value').prop('disabled', true);
+					$('#parcel_value').val('');
+				}
+			});
+			// if((amt !== 0) || (amt == null) || (isEmpty(amt)))
+			//todo: for parcel value end
 
             $('#open_shipment').checkboxpicker();
 
@@ -1868,6 +1899,13 @@
 				'allowMinus': false,
 				'allowPlus': false
 			});
+
+			$('.parcel_value').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+			
 					@if($user->logo_status)
 			var cb_table = $('#cod_breakup_table').DataTable({
 						dom: '<"d-inline-block"l><"pull-right"B>tipr',

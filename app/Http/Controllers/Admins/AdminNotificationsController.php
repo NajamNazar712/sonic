@@ -792,6 +792,7 @@ class AdminNotificationsController extends Controller
         else if ($id == 210) {
             $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
         }
+        
         elseif($id == 211)
         {
             $details['fields'] = ['Date&Day'];
@@ -800,10 +801,15 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['employee_name'];
         }
-        elseif($id == 213)
+		elseif($id == 213)
         {
             $details['fields'] = ['link'];
         }
+        else if ($id == 214)
+        {
+            $details['fields'] = ['link'];
+        }
+
         return $details;
     }
 

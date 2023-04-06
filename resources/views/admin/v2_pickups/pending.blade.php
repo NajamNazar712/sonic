@@ -63,6 +63,15 @@
                                         </button>
                                     </div>
                                     <div class="col-md-6">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline" style="margin-top: -10px">
+                                                    <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                            Star Shippers</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
                                         <div class="card">
                                             <div class="card-header">
                                                 <div class="heading-elements">
@@ -709,6 +718,7 @@
                         d.before_cut_off_time = $('#search_filter').val();
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
+                        d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
             rowId: 'id',
@@ -1184,6 +1194,8 @@
                table.draw(true);
             });
 
+
+
             $('#datatable tbody').on('click', 'tr td.all_remarks button.all_remarks_btn', function() {
                 var pickup_req_id = parseInt($(this).attr('rel'));
 
@@ -1222,6 +1234,12 @@
                     }
                 });
                 /* print(pickup_note_id); */
+            });
+
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+                table.draw(true);
+                $('#star_shippers_filter').val(0);
             });
         });
     </script>

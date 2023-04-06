@@ -128,6 +128,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\RevenueReportByDeliveryDateCutOffDays',
         'App\Console\Commands\RevenueReportRemainingDays',
         'App\Console\Commands\RevenueReportByDeliveryDateRemainingDays',
+        'App\Console\Commands\RevenueReportDailyBasis',
         'App\Console\Commands\RetailSalesReport',
         'App\Console\Commands\RetailSalesReportCutOffDays',
         'App\Console\Commands\RetailSalesReportRemainingDays',
@@ -140,6 +141,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\AttendanceAdjustmentShiftWise',
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         'App\Console\Commands\VisionSoftApiExcel',
+		'App\Console\Commands\CreateInvoiceOriginWise',
         ];
 
     /**
@@ -376,6 +378,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
         $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
         $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
 
 
         $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
@@ -466,6 +469,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
 
         $schedule->command('auto:deliverynoteverification')->dailyAt('00:55')->runInBackground();
+
+		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
 
     }

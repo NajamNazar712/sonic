@@ -236,11 +236,14 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
+
         $notification = Notification::find($id);
-    
+
 
         if ($notification) {
+
             if ($notification->status) {
+
                 if ($notification->type_id == 1) {
                     $subject = $notification->subject;
                 }
@@ -10191,6 +10194,35 @@ class NotificationsController extends Controller
                     }
 
                     
+                }
+                else if ($id == 214) {
+//                    $subject = $notification->subject;
+                    $file_path = $reference_1_id['file_path'];
+
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Daily Report By Arrival Date  | ';
+
+                    $subject .= $from;
+
+                    $file = Storage::disk('public')->url($file_path);
+
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+//                    $date = $from;
+//                    if (strpos($subject, '[date]') !== FALSE) {
+//                        $subject = str_replace('[date]', $date, $subject);
+//                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk','shafay.tariq@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }       
