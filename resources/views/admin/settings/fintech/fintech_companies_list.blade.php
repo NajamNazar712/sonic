@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Fintech Dashboard')
+@section('title', 'Fintech Companies List')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                   Fintech Dashboard
+                    Fintech Companies List
                 </h1>
 
                 <div class="card">
@@ -299,7 +299,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.settings.setup_fintech_charges.list') }}',
+                        url: '{{ route('admin.settings.fintech_company_charges.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -338,7 +338,7 @@
                             className: 'btn btn-primary add_material',
                             enabled: true,
                             action: function (e, dt, node, config) {
-                                window.location = "{{route('admin.settings.setup_fintech_charges.form')}}";
+                                window.location = "{{route('admin.settings.fintech_company_charges.form')}}";
                          }
                     
                         },
@@ -360,7 +360,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.settings.setup_fintech_charges.list') }}',
+                ajax: '{{ route('admin.settings.fintech_company_charges.list') }}',
                 rowId: 'row_id',
                 order: [[1, 'asc']],
                 columns: [

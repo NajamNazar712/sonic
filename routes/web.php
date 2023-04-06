@@ -3245,13 +3245,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
          //Added My Murad
 
-        Route::prefix('setup_fintech_charges')->name('setup_fintech_charges.')->group(function () {
+        Route::prefix('fintech_company_charges')->name('fintech_company_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@setup_fintech_charges_index')->name('index');
-            Route::get('show', 'Admins\GlobalSettingsController@setup_fintech_charges_show')->name('form');
+            Route::get('add', 'Admins\GlobalSettingsController@setup_fintech_charges_show')->name('form');
             Route::get('list', 'Admins\GlobalSettingsController@setup_fintech_charges_list')->name('list');
             Route::post('store', 'Admins\GlobalSettingsController@setup_fintech_charges_save')->name('store');
             Route::get('edit/{id}', 'Admins\GlobalSettingsController@setup_fintech_charges_edit')->name('edit');
             Route::post('edit_save', 'Admins\GlobalSettingsController@setup_fintech_charges_edit_save')->name('edit_save');
+         
         });
 
 
@@ -3259,14 +3260,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
         Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
 
-
-
-        // Route::get('show', 'Admins\GlobalSettingsController@setup_fintech_charges_show')->name('form');
-        // Route::get('list', 'Admins\GlobalSettingsController@setup_fintech_charges_list')->name('list');
-      
-        // Route::get('edit/{id}', 'Admins\GlobalSettingsController@setup_fintech_charges_edit')->name('edit');
-        // Route::post('edit_save', 'Admins\GlobalSettingsController@setup_fintech_charges_edit_save')->name('edit_save');
-             
             });
 
 

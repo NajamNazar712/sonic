@@ -29,7 +29,7 @@ class AddFintechChargesPermissionSeeder extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Financials > Add Fintech Charges', 'url'=>'admin.settings.setup_fintech_charges.index', 'permission_id' => 851),
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Financials > Add Fintech Charges', 'url'=>'admin.settings.fintech_company_charges.index', 'permission_id' => 851),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Financials > Add Standard Fintech Charges', 'url'=>'admin.settings.standard_fintech_charges.index', 'permission_id' => 852),
         ));
     }

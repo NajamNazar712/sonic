@@ -2206,7 +2206,7 @@
 
                                     @if (session('role_id') == 1 || in_array(851, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.settings.setup_fintech_charges.index') }}">Fintech Company Charges</a></li>
+                                                href="{{ route('admin.settings.fintech_company_charges.index') }}">Fintech Company Charges</a></li>
                                     @endif  
 
 

@@ -3596,7 +3596,7 @@ class GlobalSettingsController extends Controller
     //Add By Murad
     public function setup_fintech_charges_index(){
         $fintechSetup =  new FintechSetup();
-        return view('admin.settings.fintech.setup_fintech_charges');
+        return view('admin.settings.fintech.fintech_companies_list');
     }
 
 
@@ -3627,7 +3627,7 @@ class GlobalSettingsController extends Controller
         ->addColumn('action', function ($data) {
          
             if(session('role_id') == 1 || in_array(853, session('permissions'))){
-                $edit = '<a href="' .route('admin.settings.setup_fintech_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
+                $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
            
                 $dropdown = '
                     <div class="btn-group">
@@ -3676,8 +3676,11 @@ class GlobalSettingsController extends Controller
 
     public function setup_fintech_charges_edit($id){
         $fintechsetupValues =  new FintechSetupValues();
+        $FintechSetup =  new FintechSetup();
+
+        $fintech_company_name = $FintechSetup::where('id',$id)->first();
         $fintechvalues = $fintechsetupValues::where('company_Id',$id)->get();
-        return view('admin.settings.fintech.form',compact('fintechvalues'));
+        return view('admin.settings.fintech.form',compact('fintechvalues','fintech_company_name'));
     }
 
     public function setup_fintech_charges_edit_save(Request $req){

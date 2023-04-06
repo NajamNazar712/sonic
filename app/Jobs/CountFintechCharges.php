@@ -64,7 +64,7 @@ class CountFintechCharges implements ShouldQueue
                     $standard_charges_FED   = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;
                     $total_charges = round($standard_charges) + round($standard_charges_FED);
                     $charges_applicable = '2';
-                }
+                    }
                     Shipment::where('id', $user_id->id)->update([
                         'fintech_charges' => $total_charges
                     ]);

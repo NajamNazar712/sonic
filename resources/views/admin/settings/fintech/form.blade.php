@@ -24,11 +24,18 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div class="row justify-content-center">
+
+                             
+
                                 <form id="settings_form" class="form-horizontal text-center" method="POST"
-                                    action="{{ route('admin.settings.setup_fintech_charges.edit_save') }}"
+                                    action="{{ route('admin.settings.fintech_company_charges.edit_save') }}"
                                     novalidate="novalidate">
                                     {{ csrf_field() }}
-                               
+                                    <div class="row justify-content-center">
+                                        <div class="form-group">
+                                            <input type="text" value="{{$fintech_company_name->company_name}}"  class="form-control" readonly >
+                                        </div>
+                                    </div> <Br>
                                     <div class="charges_div">
                                         <div class="row justify-content-center">    
                                             <div class="col">
@@ -145,7 +152,7 @@
                                     </div>
 
                                     <div class="col">
-                                        <button type="submit" class="btn btn-primary width-250">Save Changes</button>
+                                        <button type="submit" class="btn btn-primary width-250">Update</button>
                                     </div>
                                 </form>
                             </div>
@@ -160,12 +167,12 @@
                             @include('admin.inc.messages')
                             <div class="row justify-content-center">
                                 <form id="settings_form" class="form-horizontal text-center" method="POST"
-                                    action="{{ route('admin.settings.setup_fintech_charges.store') }}"
+                                    action="{{ route('admin.settings.fintech_company_charges.store') }}"
                                     novalidate="novalidate">
                                     {{ csrf_field() }}
                                     <div class="row justify-content-center">
                                         <div class="form-group">
-                                            <input type="text" name="company_name" class="form-control " placeholder="Company Name" >
+                                            <input type="text" name="company_name" class="form-control " placeholder="* Company Name" >
                                         </div>
                                     </div> <Br>
                                     <div class="charges_div">
@@ -211,7 +218,7 @@
                                                                 name="fintech_range_up[]"
                                                                 onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
-                                                                placeholder="Range Up" required data-rule-required="true"
+                                                                placeholder="* Range Up" required data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>
                                                     </div>
@@ -222,7 +229,7 @@
                                                                 onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
                                                                 
-                                                                placeholder="Range Down" required data-rule-required="true"
+                                                                placeholder="* Range Down" required data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>
                                                     </div>
@@ -232,7 +239,7 @@
                                                                 name="charges[]"
                                                                 onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
-                                                                placeholder="Charges"
+                                                                placeholder="* Charges"
                                                                 data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>
@@ -244,7 +251,7 @@
                                                                 name="additional_charges[]"
                                                                 onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
-                                                                placeholder="Additional "
+                                                                placeholder="* Additional "
                                                                 data-rule-required="true"
                                                                 data-msg-required="This field is required">
                                                         </div>
@@ -256,7 +263,7 @@
                                                                 name="fed_tax[]"
                                                                 onkeydown="inputValidate()"
                                                                 class="form-control input-filtered"
-                                                                 placeholder="Federal Excise Duty Tax"
+                                                                 placeholder="* Federal Excise Duty Tax"
                                                                  
                                                                 data-rule-required="false"
                                                                 data-msg-required="This field is required">
@@ -272,7 +279,7 @@
                                     </div>
 
                                     <div class="col">
-                                        <button type="submit" class="btn btn-primary width-250">Save Company Details</button>
+                                        <button type="submit" class="btn btn-primary width-250">Submit</button>
                                     </div>
                                 </form>
                             </div>
@@ -416,31 +423,31 @@ function inputValidate(){
                     var html = '<div class="row justify_content_center mb-1">\n' +
                         '                                        <div class="col">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="fintech_range_up[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="Range Up" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                               <input type="text" required name="fintech_range_up[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Range Up" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
                         '                                        <div class="col">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name=fintech_range_down[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="Range Down" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                               <input type="text" required name=fintech_range_down[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Range Down" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
 
                         '                                        <div class="col">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="charges[]" onkeydown="inputValidate()" id="" class="form-control input-filtered" placeholder="Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                               <input type="text" required name="charges[]" onkeydown="inputValidate()" id="" class="form-control input-filtered" placeholder="* Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
                         
                         '                                        <div class="col">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="additional_charges[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                               <input type="text" required name="additional_charges[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Additional Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
 
 
                         '                                        <div class="col">\n' +
                         '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="fed_tax[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="Fedral Excise Duty Tax" data-rule-required="true" data-msg-required="This field is required">\n' +
+                        '                                               <input type="text" required name="fed_tax[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Fedral Excise Duty Tax" data-rule-required="true" data-msg-required="This field is required">\n' +
                         '                                            </div>\n' +
                         '                                        </div>\n' +
                         '                                    </div>';
