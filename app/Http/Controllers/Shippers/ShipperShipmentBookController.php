@@ -2992,6 +2992,12 @@ class ShipperShipmentBookController extends Controller
                 if (!isset($row['charges_mode_id'])) {
                     $rows[$key]['charges_mode_id'] = 4;
                 }
+
+                if (!isset($row['parcel_value'])) {
+                    $rows[$key]['parcel_value'] = NULL;
+                    $row['parcel_value'] = NULL;
+                }
+
                 if ($service_type_check_id != null) {
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
