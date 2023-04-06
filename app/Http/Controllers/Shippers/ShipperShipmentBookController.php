@@ -3009,17 +3009,6 @@ class ShipperShipmentBookController extends Controller
                     })];
                 }
 
-                $rules['parcel_value'] = [
-                'nullable',
-                'integer',
-                    'min:1',
-                'digits_between:1,20' ,
-                    Rule::requiredIf(function () use ($row) {
-                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                    })
-                ];
-
-
                 if (!isset($row['pieces_quantity']) || $row['pieces_quantity'] == null) {
                     $row['pieces_quantity'] = 1;
                 }
@@ -3051,6 +3040,15 @@ class ShipperShipmentBookController extends Controller
 //                    }
 //                }
 
+                $rules['parcel_value'] = [
+                    'nullable',
+                    'integer',
+                    'min:1',
+                    'digits_between:1,20' ,
+                    Rule::requiredIf(function () use ($row) {
+                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                    })
+                ];
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -5057,6 +5055,16 @@ class ShipperShipmentBookController extends Controller
 //                            'min:1'];
 //                    }
 //                }
+
+                $rules['parcel_value'] = [
+                    'nullable',
+                    'integer',
+                    'min:1',
+                    'digits_between:1,20' ,
+                    Rule::requiredIf(function () use ($row) {
+                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                    })
+                ];
 
                 $validate = Validator::make($row, $rules, $messages);
 
