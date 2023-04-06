@@ -2430,7 +2430,7 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->leftjoin('city_areas as ca','usi.city_area_id','ca.id')
+            ->leftjoin('city_areas as cas','usi.city_area_id','cas.id')
             ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', $pickup_not_picked, $pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks', 'v2_rider_pickups.audio_path','cas.name as city_area_name');
         if (session('role_id') != 1) {
             $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
