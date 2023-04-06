@@ -2823,7 +2823,7 @@ class ShipperShipmentBookController extends Controller
 //                'digits_between:1,20' ,
 //                //'check_parcel_value',
 //            'min:1'],
-        
+
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [2]);
@@ -3012,6 +3012,7 @@ class ShipperShipmentBookController extends Controller
                 $rules['parcel_value'] = [
                 'nullable',
                 'integer',
+                    'min:1',
                 'digits_between:1,20' ,
                     Rule::requiredIf(function () use ($row) {
                         return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
