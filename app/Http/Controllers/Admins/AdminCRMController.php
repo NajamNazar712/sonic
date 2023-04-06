@@ -1015,10 +1015,11 @@ class AdminCRMController extends Controller
                 });
         }
         else if (session('department_id') == 7){
-            if(!in_array(session('id'), session('sale_users_bypass'))){
+            if(!in_array(session('id'), session('sale_users_bypass')) && !in_array(session('role_id'), [4,6,44])){
                 $launched_request = $launched_request->where('spt.admin_id', Auth::id());
             }
         }
+        // dd($launched_request);
 
         $datatables = Datatables::of($launched_request)
             ->setRowAttr([
