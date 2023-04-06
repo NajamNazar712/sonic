@@ -4806,7 +4806,13 @@ class ShipperShipmentBookController extends Controller
 
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
-            // 'parcel_value' => ['required_if:amount,0', 'nullable', 'integer', 'digits_between:1,20', 'min:1'],
+            'parcel_value' => [
+                'required_if:amount,0',
+                'nullable',
+                'integer',
+                'digits_between:1,20' ,
+                //'check_parcel_value',
+                'min:1'],
             'try_and_buy_charges' => ['required_if:service_type_id,3', 'nullable', 'integer', 'digits_between:1,20', 'min:0'],
             // 'payment_mode_id' => ['required_if:service_type_id,1,2', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
             //     $query->whereNotIn('id', [3]);
@@ -4976,6 +4982,12 @@ class ShipperShipmentBookController extends Controller
                 if (!isset($row['charges_mode_id'])) {
                     $rows[$key]['charges_mode_id'] = 3;
                 }
+
+                if (!isset($row['parcel_value'])) {
+                    $rows[$key]['parcel_value'] = NULL;
+                    $row['parcel_value'] = NULL;
+                }
+
                 if ($service_type_check_id != null) {
                     $rows[$key]['service_type_id'] = $service_type_check_id;
                     $row['service_type_id'] = $service_type_check_id;
@@ -5022,17 +5034,17 @@ class ShipperShipmentBookController extends Controller
                 $rows[$key]['return_address_id'] = $row['return_address_id'];
 
 
-                if (array_key_exists("amount", $row))
-                {
-                    if ($row['amount'] == 0) {
-
-                        $rules['parcel_value'] = [
-                            'required_if:amount,0',
-                            'numeric',
-                            'digits_between:1,20',
-                            'min:1'];
-                    }
-                }
+//                if (array_key_exists("amount", $row))
+//                {
+//                    if ($row['amount'] == 0) {
+//
+//                        $rules['parcel_value'] = [
+//                            'required_if:amount,0',
+//                            'numeric',
+//                            'digits_between:1,20',
+//                            'min:1'];
+//                    }
+//                }
 
                 $validate = Validator::make($row, $rules, $messages);
 
