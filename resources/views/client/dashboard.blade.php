@@ -35,7 +35,7 @@
                                         <span class="la la-calendar-o small-calender-icon"></span>
                                       </span>
                                                 </div>
-                                                <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From">
+                                                <input type="text" name="booking_from_date" class="form-control bg-primary border-primary white rounded-right" id="booking_from_date" placeholder="Booking Date From"  data-value="{{ \Carbon\Carbon::today()->subDays(31)->startOfDay() }}">
                                             </div>
                                         </div>
                                         <div class="col-3">
@@ -45,7 +45,7 @@
                                             <span class="la la-calendar-o small-calender-icon"></span>
                                         </span>
                                                 </div>
-                                                <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To">
+                                                <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To" data-value="{{ \Carbon\Carbon::now() }}">
                                             </div>
                                         </div>
 
@@ -593,9 +593,13 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_to_date').pickadate('picker').set('min', $('#track_form #booking_from_date').pickadate('picker').get('select'));
-                    }
+
+                    var old_date_formatted = $('input[name="booking_from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(31, 'days');
+                    booking_to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    booking_to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    booking_to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
 
@@ -609,9 +613,9 @@
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
-                    }
+                    // if (context.select) {
+                    //     $('#track_form #booking_from_date').pickadate('picker').set('max', $('#track_form #booking_to_date').pickadate('picker').get('select'));
+                    // }
                 }
             });
 

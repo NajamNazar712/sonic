@@ -64,24 +64,46 @@
                     </div>
                     
                 </div>
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                <table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%">
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
+                        <th class="border-primary border-darken-1">Special Request ID.</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Requested By</th>
                         <th class="border-primary border-darken-1">Requested Date</th>
                         <th class="border-primary border-darken-1">Approved By</th>
-                        <th class="border-primary border-darken-1">Department</th>
-                        <th class="border-primary border-darken-1">Designation</th>
-                        <th class="border-primary border-darken-1">Approval Date</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        {{--<th class="border-primary border-darken-1">Approval Date</th> --}}
                         <th class="border-primary border-darken-1">Adjusted Percentage</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
+                        <th class="border-primary border-darken-1">Remaining Amount</th>
                     </tr>
                     </thead>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="sar_admins_modal" data-backdrop="static" role="dialog" aria-labelledby="sar_admins_modal" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title text-center" id="bookings_modal_title">Special Request Approval Details</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -142,6 +164,18 @@
             width: auto !important;
             text-align: left;
         }
+
+        .rejected_requests , .rejected_requests td u a{
+            background-color: rgb(247, 97, 97);
+            /* color: white !important; */
+        }
+        
+        .approved_requests{
+            background-color: rgb(59, 243, 59);
+            /* color: white !important; */
+        }
+
+
     </style>
 @endsection
 @section('js')
@@ -272,33 +306,35 @@
                             head = [];
                             
                             head.push('S.No');  
+                            head.push('Shipper Name');
+                            head.push('Special Request ID');
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Requested By');
                             head.push('Requested Date');
-                            head.push('Approval By');
-                            head.push('Department');
-                            head.push('Designation');
-                            head.push('Approval Date');
+                            // head.push('Approval By');
+                            head.push('Status');
                             head.push('Adjusted Percentage');
                             head.push('COD Amount');
                             head.push('Adjusted Amount');
+                            head.push('Remaining Amount');
                             
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
+                                row.push(values.shipper_name);
+                                row.push(values.id);
                                 row.push(values.request_number);
                                 row.push(values.tracking_number);
                                 row.push(values.requested_by);
                                 row.push(values.requested_date);
-                                row.push(values.approved_by);
-                                row.push(values.department);
-                                row.push(values.designation);
-                                row.push(values.approved_at);
+                                // row.push(values.approved_by_excel);
+                                row.push(values.approved_status);
                                 row.push(values.adjusted_percentage);
                                 row.push(values.cod_amount);
                                 row.push(values.adjusted_amount);
+                                row.push(values.remaining_amount);
 
                                 body.push(row);
                             });
@@ -317,7 +353,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'CRM Report',
+                        title: 'CRM Special Approval Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -330,6 +366,7 @@
                 },
                 serverSide: true,
                 deferLoading: 0,
+                rowId: 'id',
 
                 ajax: {
                     url: '{{ route('admin.reports.crm_special_approval.list') }}',
@@ -350,17 +387,18 @@
                 order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
+                    {data: 'shipper_name', name: 'shipper.name', class: 'align-middle shipper_name'},
+                    {data: 'id', name: 'sar.id', class: 'align-middle id'},
+                    {data: 'id_padded_link', name: 'id_padded_link', class: 'align-middle id_padded_link'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'requested_by', name: 'sarrequestedby.name', class: 'align-middle requested_by'},
                     {data: 'requested_date', name: 'sarrequestedby.created_at', class: 'align-middle requested_date'},
-                    {data: 'approved_by', name: 'sarapproveby.name', class: 'align-middle approved_by'},
-                    {data: 'department', name: 'ad.name', class: 'align-middle department'},
-                    {data: 'designation', name: 'ar.name', class: 'align-middle designation'},
-                    {data: 'approved_at', name: 'sar.approved_date', class: 'align-middle approved_at'},
+                    {data: 'approved_by', name: 'sarrequestedby.created_at', class: 'align-middle text-center approved_by', orderable: false, searchable: false},
+                    {data: 'approved_status', name: 'approved_status', class: 'align-middle text-center approved_status'},
                     {data: 'adjusted_percentage', name: 'sar.adjusted_percentage', class: 'align-middle adjusted_percentage'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
                     {data: 'adjusted_amount', name: 'adjustment.adjustment_amount', class: 'align-middle adjusted_amount'},
+                    {data: 'remaining_amount', name: 'remaining_amount', class: 'align-middle remaining_amount'},
                     
                 ],
                 rowCallback: function(row, data, index) {
@@ -369,6 +407,51 @@
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
+                }
+            });
+
+            $('body').on('click', 'button.approved_by',  function(){
+                var id = $(this).parents('tr').attr('id');
+                // alert(id);
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.reports.crm_special_approval.get_approvers') !!}',
+                        data: {
+                            'sar_id': id,
+                        }
+                    })
+                        .done(function(data) {
+                            if(data.status){
+
+                                $('#sar_admins_modal').modal('show');
+                                var html = `<table class="table table-bordered"> <thead class="text-center"> <tr> <th> Name </th>  <th> Department </th>  <th> Designation </th>  <th> Status </th>  <th> Approved/Reject Date </th>  <th> Reason </th> </tr>  </thead> <tbody class="text-center">`;
+                                 
+
+                                $.each(data.sar_admins, function(index, admin_data) {
+
+                                    var status = admin_data.approved_status == 1 ? "<td class='font-weight-bold'> Pending </td>" : admin_data.approved_status == 3 ? "<td class='text-success font-weight-bold'> Approved </td>" : admin_data.approved_status == 2 ? "<td class='text-danger font-weight-bold'> Rejected </td>" : "";
+                                    var date = admin_data.approved_date ? admin_data.approved_date : '-';
+                                    var reason = admin_data.reason ? admin_data.reason : '-';
+
+                                    html +=`<tr>`;
+                                        html +=`<td>`+admin_data.approver+`</td>`;
+                                        html +=`<td>`+admin_data.department+`</td>`;
+                                        html +=`<td>`+admin_data.designation+`</td>`;
+                                        html += status;
+                                        html +=`<td>`+date+`</td>`;
+                                        html +=`<td>`+reason+`</td>`;
+                                    html +=`</td>`;
+                                });
+
+                                html += `</tbody> </table>`;
+
+                                
+                                   
+                                    ;
+                                $('#sar_admins_modal .modal-body').html(html);
+                            }
+
+                        });
                 }
             });
 
