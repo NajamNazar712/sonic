@@ -2037,6 +2037,7 @@ class GlobalSettingsController extends Controller
 
     public function sales_person_targets_submit(Request $request)
     {
+        
         $start_date = $request->search_date_from_formatted;
         $end_date = Carbon::parse($start_date)->endOfMonth()->toDateTimeString();
         if ($start_date == null || $end_date == null) {
@@ -2051,8 +2052,8 @@ class GlobalSettingsController extends Controller
                     $sales_target = $sales_target->first();
 
                     $sales_person_log = new SalePersonTargetLog();
-                    $sales_person_log->start_date = $sales_target->start_date;
-                    $sales_person_log->end_date = $sales_target->end_date;
+                    $sales_person_log->start_date = $start_date;
+                    $sales_person_log->end_date = $end_date;
                     $sales_person_log->sales_person_id = $sales_target->sales_person_id;
                     $sales_person_log->target_days = $sales_target->target_days;
                     $sales_person_log->target_month = $sales_target->target_month;
@@ -2065,10 +2066,10 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->save();
 
                     foreach($request->segment as $segs){
-                        $segment_history = new SegmentHistory();
-                        $segment_history->sale_person_target_id = $sales_target->id;
-                        $segment_history->segment_id = $segs;
-                        $segment_history->save();
+                    $segment_history = new SegmentHistory();
+                    $segment_history->sale_person_target_id = $sales_target->id;
+                    $segment_history->segment_id = $segs;
+                    $segment_history->save();
                     }
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
@@ -2162,7 +2163,7 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            ->leftJoin('sale_person_targets as spt', 'spt.sales_person_id', '=', 'sale_person_target_logs.sales_person_id')
+            ->leftJoin('sale_person_target_logs as spt', 'spt.sales_person_id', '=', 'sale_person_target_logs.sales_person_id')
             ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_target_logs.segment_id')
             ->select('spt.id as id','sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
             ->orderBy('sale_person_target_logs.created_at');
