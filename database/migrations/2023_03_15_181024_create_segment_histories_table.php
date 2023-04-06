@@ -15,7 +15,7 @@ class CreateSegmentHistoriesTable extends Migration
     {
         Schema::create('segment_histories', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('sale_person_target_id')->index();
+            $table->integer('sale_person_target_log_id')->index();
             $table->integer('segment_id')->index(); 
             $table->timestamps();
         });

@@ -2064,13 +2064,16 @@ class GlobalSettingsController extends Controller
                     $sales_person_log->achieved_revenue_percentage = $sales_target->achieved_revenue_percentage;
                     $sales_person_log->save();
 
+                    $sales_person_assigned_segments = SalePersonAssignedSegment::where('sale_person_target_id',$sales_target->id)->get();
 
-                    foreach($request->segment as $segs){
+                    foreach($sales_person_assigned_segments as $segs){
+
                         $segment_history = new SegmentHistory();
-                        $segment_history->sale_person_target_id = $sales_target->id;
-                        $segment_history->segment_id = $segs;
+                        $segment_history->sale_person_target_log_id = $sales_person_log->id;
+                        $segment_history->segment_id = $segs->id;
                         $segment_history->save();
                     }
+
                     $sales_target->start_date = $start_date;
                     $sales_target->end_date = $end_date;
                     $sales_target->target_days = $request->target_shipment_days;
@@ -2163,16 +2166,14 @@ class GlobalSettingsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 111);
         }
         $targets = SalePersonTargetLog::leftjoin('admins as a', 'a.id', '=', 'sale_person_target_logs.sales_person_id')
-            // ->leftJoin('sale_person_targets as spt', 'spt.sales_person_id', '=', 'sale_person_target_logs.sales_person_id')
-            ->leftJoin('sale_person_target_logs as spt', 'spt.sales_person_id', '=', 'sale_person_target_logs.sales_person_id')
-            ->leftJoin('sale_person_target_segments as spts', 'spts.id', '=', 'sale_person_target_logs.segment_id')
-            ->select('spt.id as id','sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at', 'spts.name as segment')
+            ->select('sale_person_target_logs.id as id','sale_person_target_logs.id as target_id', 'sale_person_target_logs.start_date', 'sale_person_target_logs.end_date', 'a.name as sales_person', 'sale_person_target_logs.target_days', 'sale_person_target_logs.target_month as target_month', 'sale_person_target_logs.average_revenue', 'sale_person_target_logs.created_at')
             ->orderBy('sale_person_target_logs.created_at');
 
             $datatable = Datatables::of($targets)
             ->addColumn('segments', function ($data) {
-                $segment_ids = SalePersonAssignedSegment::where('sale_person_target_id',$data->id)->pluck('segment_id')->toArray();
-                $segments = SalePersonTargetSegment::whereIn('id',$segment_ids)->get();
+                $segments = SegmentHistory::join('sale_person_target_segments as spts','spts.id' , 'segment_histories.segment_id')
+                ->select('spts.name')->where('sale_person_target_log_id',$data->id)->get();
+                // dd($data->id,$segments);
                 $segment_data = '';
                 $count = count($segments);
                 foreach ($segments as $key => $segment) {
