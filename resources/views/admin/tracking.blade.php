@@ -344,7 +344,9 @@
             </div>
         </div>
     </div>
-    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal" aria-hidden="true">
+
+    <div class="modal fade text-left" id="FakeStatusModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="FakeStatusModal"
+         aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
@@ -364,13 +366,13 @@
                             </div>
                             <hr>
                             <input type="hidden" name="tracking_number" id="fake_status_tracking_number">
-                            <div class="row justify-content-center">
-                                <div class="col-12">
-                                    <fieldset class="form-group">
-                                        <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
-                                    </fieldset>
+                                <div class="row justify-content-center">
+                                    <div class="col-12">
+                                        <fieldset class="form-group">
+                                            <textarea class="form-control" name="remarks" id="fake_status_remarks" rows="3" placeholder="Enter Remarks Here..." data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                        </fieldset>
+                                    </div>
                                 </div>
-                            </div>
                             <div class="row justify-content-center">
                                 <div class="col-3">
                                     <button type="submit" class="btn btn-primary btn-block">Submit</button>
@@ -382,6 +384,7 @@
             </div>
         </div>
     </div>
+
     <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -820,8 +823,23 @@
                                     $international_tracking_number = '';
                                 }
                                 shipment += '<div class="mt-4 border-primary">';
-                                shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
-                                shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                if(details.star_shipper == 1)
+                                {
+                                    shipment += '<div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290">';
+                                }
+                                else
+                                {
+                                    shipment += '<div class="d-flex flex-wrap align-items-center bg-primary">';
+                                }
+
+                                if (details.star_shipper == 1)
+                                {
+                                    shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white"><i class="la la-star" style="color: #FFCA28"></i>' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                }
+                                else
+                                {
+                                    shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
+                                }
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
@@ -1120,6 +1138,9 @@
                                 shipment +=breadth;
                                 shipment += '<td><strong>Business Category</strong></td>';
                                 shipment += '<td>'+ details.order_information.business_category +'</td>';
+                                shipment += '<td><strong>Parcel Value</strong></td>';
+                                // shipment += '<td>HH</td>';
+                                shipment += '<td>' + ((details.order_information.parcel_value != 0) ? details.order_information.parcel_value : '-') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment +=height;
@@ -1661,6 +1682,7 @@
                 $('#ReattemptModal').modal('show');
 
             });
+
 
             $('#tracking').on('click','.mark_fake_status', function () {
                 var tracking = $(this).attr('data-tracking');
@@ -2517,6 +2539,14 @@
                 $('#return_reason_select').val('').trigger('change');
                 $('#return_reason_shipment_remarks').val('');
             });
+
+        $("#mark_fake_status_form").validate({
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parent('.form-group'));
+            },
+        });
+
         $( "#reattempt_request_form" ).validate({
             errorClass:"danger",
             errorPlacement: function(error, element) {

@@ -143,7 +143,7 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.summary.index') }}">Summary</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.weight_reconciliation.index') }}">Weight Reconciliation</a></li>
-                        <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment Report</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment</a></li>
 
                         @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
@@ -161,9 +161,10 @@
                         @endif
 
                         @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]))
-                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
                         @endif
 
+{{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
                     </ul>
                 </li>
             @endif

@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Admins;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PHPExcel_Style_NumberFormat;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Yajra\Datatables\Datatables;
 
 class AdminRevenueReportsController extends Controller
 {
@@ -309,6 +311,10 @@ class AdminRevenueReportsController extends Controller
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
+        if($report_type == 4){
+            $from = Carbon::today()->subDay()->toDateTimeString();
+            $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
+        }
 
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
 
@@ -373,7 +379,6 @@ class AdminRevenueReportsController extends Controller
             ->get();
 
 
-
         if($report_type == 1){
             $filename = 'revenue_report_by_arrival_first_to_last.xlsx';
         }
@@ -382,6 +387,9 @@ class AdminRevenueReportsController extends Controller
         }
         if($report_type == 3){
             $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
+        }
+        if($report_type == 4 ){
+            $filename = 'revenue_report_by_arrival_on_daily_basis.xlsx';
         }
 
         $details = array();
@@ -567,10 +575,113 @@ class AdminRevenueReportsController extends Controller
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
+
         $filePath = '/reports/revenue/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
+
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
+    }
+
+    public function revenue_report_by_invoice_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 637);
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $segments = DB::connection('reports')->table('segments')->select('id', 'name')->get();
+        $sub_segments = DB::connection('reports')->table('sub_category_segments')->select('id', 'name')->get();
+        $account_types = DB::connection('reports')->table('account_types')->select('id', 'name')->get();
+        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        return view('admin.reports.revenue_report_by_invoice')->with(['business_categories' => $business_categories, 'shippers' => $shippers, 'cities' => $cities, 'account_types' => $account_types, 'segments' => $segments, 'sub_segments' => $sub_segments, 'shipping_modes' => $shipping_modes]);
+    }
+
+    public function revenue_report_by_invoice_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 638);
+        }
+
+        $from = $request->get('search_date_from');
+        $from = Carbon::parse($from)->toDateTimeString();
+        $to = $request->get('search_date_to');
+        $to = Carbon::parse($to)->toDateTimeString();
+
+        $invoice = DB::connection('reports')->table('revenue_by_invoice_reports as rbi')
+            ->leftjoin('users', 'rbi.user_id', '=', 'users.id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
+            ->leftjoin('business_categories as bc', 'bc.id', '=', 'rbi.business_category_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'rbi.origin_id');
+
+        $invoice->select('at.name as account_type', 'bc.name as business_category', 'seg.name as segment', 'seg_sub.name as sub_segment', 'users.id as account_no', 'users.name as shipper', 'oc.name as origin', 'rbi.invoice_number', 'rbi.invoicing_date', 'rbi.weight_charges', 'rbi.cash_handling_charges', 'rbi.insurance_charges', 'rbi.return_charges', 'rbi.replacement_charges', 'rbi.fuel_surcharge', 'rbi.try_buy_charges', 'rbi.packaging_charges', 'rbi.gst', 'rbi.total_charges', 'rbi.nsa_osa_charges', 'rbi.packing_charges', 'rbi.intercept_charges');
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $invoice->whereBetween('rbi.invoicing_date', [$from, $to]);
+        }
+
+        $datatable = Datatables::of($invoice)
+            ->editColumn('weight_charges', function ($invoice) {
+                return number_format($invoice->weight_charges);
+            })
+            ->editColumn('cash_handling_charges', function ($invoice) {
+                return number_format($invoice->cash_handling_charges);
+            })
+            ->editColumn('insurance_charges', function ($invoice) {
+                return number_format($invoice->insurance_charges);
+            })
+            ->editColumn('return_charges', function ($invoice) {
+                return number_format($invoice->return_charges);
+            })
+            ->editColumn('replacement_charges', function ($invoice) {
+                return number_format($invoice->replacement_charges);
+            })
+            ->editColumn('fuel_surcharge', function ($invoice) {
+                return number_format($invoice->fuel_surcharge);
+            })
+            ->editColumn('packaging_charges', function ($invoice) {
+                return number_format($invoice->packaging_charges);
+            })
+            ->editColumn('try_buy_charges', function ($invoice) {
+                return number_format($invoice->try_buy_charges);
+            })
+            ->editColumn('packing_charges', function ($invoice) {
+                return number_format($invoice->packing_charges);
+            })
+            ->editColumn('total_charges', function ($invoice) {
+                return number_format($invoice->total_charges);
+            })
+            ->editColumn('nsa_osa_charges', function ($invoice) {
+                return number_format($invoice->nsa_osa_charges);
+            })
+            ->editColumn('gst', function ($invoice) {
+                return number_format($invoice->gst);
+            });
+            if($search_invoice_number = $request->get('search_invoice_number')){
+                $datatable->where('rbi.invoice_number','=', $search_invoice_number);
+            }
+            if($shipper = $request->get('search_shipper')){
+                $datatable->where('rbi.user_id','=', $shipper);
+            }
+            if ($origin = $request->get('search_origin')) {
+                $datatable->where('oc.id', '=', $origin);
+            }
+            if ($search_segment = $request->get('search_segment')) {
+                $datatable->where('users.segment_id', '=', $search_segment);
+            }
+            if ($search_sub_segment = $request->get('search_sub_segment')) {
+                $datatable->where('users.sub_segment_id', '=', $search_sub_segment);
+            }
+            if ($search_account_type = $request->get('search_account_type')) {
+                $datatable->where('users.account_type_id', '=', $search_account_type);
+            }
+            if ($search_business_category = $request->get('search_business_category')) {
+                $datatable->where('rbi.business_category_id', '=', $search_business_category);
+            }
+
+            return $datatable->make(true);
     }
 }

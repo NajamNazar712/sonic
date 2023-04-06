@@ -41,7 +41,37 @@
                         </form>
                     </div>
 
+                </div>
+                <div class="row justify-content-end">
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-header">
+                                <div class="heading-elements">
+                                    <ul class="list-inline mb-0">
+                                        <li class="primary border-primary round"><a
+                                                    data-action="collapse">Legend
+                                                <i class="ft-minus"></i></a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-content collapse">
+                                <div class="card-body p-1">
+                                    <h4 class=" info">Legend</h4>
+                                    <input type="hidden" id="legend_filter">
 
+                                    <table class="table mb-0" id="legends_table">
+                                        <tbody>
+                                        <tr class="legends">
+                                            <td class="align-middle" id="2" style="background-color: yellow;">Snatch / Deduction</td>
+                                        </tr>
+
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
                 <form id="post_delivery_note_ids_form" action="{{route('admin.delivery.completed.deposit.dncc')}}" method="post">
                     @csrf
@@ -72,6 +102,9 @@
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
+                        <th class="border-primary border-darken-1">Deposit Amount</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Deposit Slip</th>
                     </tr>
                     </thead>
                 </table>
@@ -229,6 +262,16 @@
         }
         .selectize-control {
             width: 300px !important;
+        }
+        tr.pcc_snatch_deduction {
+            background-color: yellow;
+            color: black;
+        }
+        .legends{
+            cursor:pointer;
+        }
+        .legends tr td{
+            color:black;
         }
     </style>
 @endsection
@@ -461,6 +504,7 @@
                     url:'{{ route('admin.delivery.completed.list') }}',
                     data:function (d) {
                         //d.search_tracking = $('#search_tracking').val();
+                        d.legend_filter = $('#legend_filter').val();
                         d.tracking_numbers = $('#search_tracking').val();
                         d.dncc = $('#dncc').val();
                     }
@@ -488,10 +532,13 @@
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
+                    { data:'deposit_amount' ,name: 'dcc.amount', class: 'align-middle deposit_amount', orderable: false},
+                    { data:'remarks' ,name: 'dcc.remarks', class: 'align-middle remarks', orderable: false},
+                    { data:'deposit_slip_view' ,name: 'deposit_slip_view', class: 'align-middle deposit_slip_view', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    if(data.status == 1){
+                    if(data.status == 1 && data.cash_collection_status == 1){
                         $('td:eq(0)', row).addClass('select-checkbox');
                     }
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
@@ -510,7 +557,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.deposit_slip_view')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -895,7 +942,13 @@
                     });
 
             });
-
+            $('table#legends_table').on('click', 'tr td', function(){
+                var id = parseInt($(this).attr('id'));
+                if(id){
+                    $('#legend_filter').val(id);
+                    table.draw()
+                }
+            });
 
         });
     </script>

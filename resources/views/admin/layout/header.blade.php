@@ -43,3 +43,27 @@
 @yield('css')
 
 <link rel="stylesheet" type="text/css" href="{{asset('css/custom.css')}}">
+
+<style>
+    .star_sippers
+    {
+        /*color: white;*/
+        /*background-color: #D7BE69;*/
+    }
+
+    .star_shipper_bold
+    {
+        font-weight: bolder;
+        font-size: 16px;
+    }
+
+    .star_shippers_icon
+    {
+        display: inline-block;
+        width: 23px;
+        height: 20px;
+        background-image: url('{{url('img/star_icon.png')}}');
+        background-repeat: no-repeat;
+        background-position: center center;
+    }
+</style>

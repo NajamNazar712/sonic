@@ -2,6 +2,7 @@
 @section('title','Receive Return Deliveries')
 
 @section('content')
+
     <h1 class="mb-1">
         Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
@@ -162,7 +163,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -171,6 +172,8 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        var flag = false;
         $(document).ready(function () {
 
             var date = $('#actual_date').pickadate({
@@ -214,6 +217,13 @@
             var shipment_remarks_obj = {};
             var shipment_received_refused_obj = {};
             var note_id = $('#return_note').val();
+            var statusSelection = $('#status_update_form').find('status_drop');
+            var status = statusSelection.val();
+            
+            var remarks = $('#status_update_form').closest('tr').find('input.return_remarks');
+            var errorMsg = $('#status_update_form').closest('tr').find('.error-msg');
+            var errorLabel = $('#status_update_form').closest('tr').find('label[for="' + remarks.attr('id') + '"]');
+            
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(50, session('permissions')))
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -223,7 +233,42 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows !== '') {
-                                swal({
+                               table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var status = $(row.node()).find('select.statusDrop').val();
+                                        var remarks = $(row.node()).find('input.return_remarks');
+                                        // if (status != 60) {
+                                        //     remarks.removeClass('error');
+                                        //     remarks.removeAttr('data-rule-required');
+                                        //     remarks.removeAttr('data-msg-required');
+                                        //     errorMsg.hide();
+                                        //     errorLabel.remove();
+                                        //     flag = false;
+                                            
+                                        // } else if (remarks.val() == '') {
+                                        //     remarks.addClass('error');
+                                        //     remarks.attr('data-rule-required', 'data-rule-required');
+                                        //     remarks.attr('data-msg-required', 'Remarks is required');
+                                        //     errorMsg.show();
+                                        //     errorLabel.show();
+                                        //     flag = true;
+
+                                        // } else {
+                                        //     remarks.removeClass('error');
+                                        //     remarks.removeAttr('data-rule-required');
+                                        //     remarks.removeAttr('data-msg-required');
+                                        //     errorMsg.hide();
+                                        //     errorLabel.remove();
+                                        //     flag = false;
+                                        // }
+                                
+                                    }
+                                });
+                                // if(!flag)
+                                // {
+                                    swal({
                                     title: 'Are You Sure?',
                                     text: 'Select Yes to change this shipment\'s status! Please make sure you have collected the charges!',
                                     icon: 'warning',
@@ -244,7 +289,7 @@
                                     closeOnClickOutside: false,
                                     closeOnEsc: false,
                                     dangerMode: true
-                                }).then(function (confirm) {
+                                    }).then(function (confirm) {
                                     if (confirm) {
                                         var submit_all_status_flag = true;
                                         var not_updated_shipments = [];
@@ -270,6 +315,7 @@
 
                                             }
                                         });
+                                        
                                         if (submit_all_status_flag == false) {
                                             swal({
                                                 title: 'Enter Receiver Name for remaining Returned Shipment(s)',
@@ -347,9 +393,40 @@
                                             });
                                         }
                                     }
-                                });
+                                    });
+                                // }
+                                // else
+                                // {
 
-                            }else{
+                                //     table.rows().nodes().each(function(index) {
+                                //     var row = table.row(index);
+                                //     if ($(row.node()).hasClass('selected')) {
+                                //         var id = parseInt(row.id());
+                                //         var status = $(row.node()).find('select.statusDrop').val();
+                                //         var remarks = $(row.node()).find('input.return_remarks');
+                                //         // console.log(remarks.val());
+                                //         if (status == 60 && remarks.val() == '') 
+                                //         {
+                                //             remarks.attr('data-rule-required', 'true');
+                                //             remarks.attr('data-msg-required', 'Remarks is required');
+                                //             flag = true;
+                                //         } 
+                                //         else 
+                                //         {
+                                //             remarks.attr('data-rule-required', 'false');
+                                //             remarks.removeAttr('data-msg-required');
+                                //             flag = false;
+                                //         }
+
+                                //     }
+                                // });
+
+                                //     remarks.attr('data-rule-required', 'true');
+                                //     remarks.attr('data-msg-required', 'Remarks is required');
+                                //     flag = true;
+                                // }
+                            }
+                            else{
                                 var error = "Something went wrong please refresh page and try again!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
@@ -375,7 +452,6 @@
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
                                     table.button('.returned').enable();
                                     $('#submit_selected_status').attr('disabled', false);
 
@@ -440,7 +516,7 @@
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
-                    {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'remarks',name: 'remarks', class: 'form-group align-middle remarks',orderable: false, searchable: false},
                     {data:'received_or_refused_by',name: 'received_or_refused_by', class: 'align-middle received_or_refused_by',orderable: false, searchable: false},
                     {data:'current_status_name',name: 'current_status_name', class: 'align-middle current_status_name',orderable: false, searchable: false},
                     {data:'return_address',name: 'return_address', class: 'align-middle return_address',orderable: false, searchable: false},
@@ -465,7 +541,7 @@
                     }
                 },
                 drawCallback: function (settings) {
-                    $(".reasonDrop").prepend('<option value="" ></option>').select2({
+                    $(".reasonDrop").select2({
                         placeholder: "Select a Reason",
                         width:'100%'
                     });
@@ -524,13 +600,35 @@
                     $('#submit_selected_status').attr('disabled', true);
                 }
             });
-
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
-                $('#statusSubmit').removeAttr('disabled');
+               $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+                var errorLabel = $(this).closest('tr').find('label[for="' + remarks.attr('id') + '"]');
+                if (status != 60) {
+                    remarks.removeClass('error');
+                    remarks.removeAttr('required');
+                    remarks.removeAttr('data-msg-required');
+                    errorMsg.hide();
+                    errorLabel.remove();
+                    
+                } else if (remarks.val() == '') {
+                    remarks.addClass('error');
+                    remarks.attr('required', 'required');
+                    remarks.attr('data-msg-required', 'Remarks is required');
+                    errorMsg.show();
+                    errorLabel.show();
+                    
+                } else {
+                    remarks.removeClass('error');
+                    remarks.removeAttr('required');
+                    remarks.removeAttr('data-msg-required');
+                    errorMsg.hide();
+                    errorLabel.remove();
+                }
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
                     type:'POST',
@@ -552,12 +650,22 @@
                     }
                 });
             });
+           
             $('body').on('click','.clear',function () {
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
+                var remarks = $(this).closest('tr').find('input.return_remarks');
+                var errorMsg = $(this).closest('tr').find('.error-msg');
+
                 status.val('').trigger("change");
                 reason.val('').trigger("change");
+                reason.val('').trigger("change");
+                if(status.val('').trigger("change") && !remarks.attr('data-msg-required'))
+                {
+                    errorMsg.remove();
+                }
                 $('.remarks input').val('');
+                
             });
 
             $('body').on('click', 'input.open_box', function(){
@@ -572,17 +680,17 @@
                 }
             });
 
-            $('#status_update_form').on('keypress',function (e) {
-                if(e.which == 13) {
-                    e.preventDefault();
-                }
-            });
+            // $('#status_update_form').on('keypress',function (e) {
+            //     if(e.which == 13) {
+            //         e.preventDefault();
+            //     }
+            // });
 
             $('body').on('select2:select','#select_all_status',function (e) {
 
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
-                console.log(statusSelection,status);
+                // console.log(statusSelection,status);
                 var all_reason = $('#select_all_reason');
                 $.ajax({
                     url:'{!! route('admin.return.receive.reason') !!}',
@@ -612,49 +720,88 @@
             });
 
             var shipments = [];
-            $('#status_update_form').bind('submit', function(event) {
+            $('#status_update_form').validate({
+                errorClass: "danger",
+                errorPlacement: function (error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    // console.log('error: ',error);
+                    // console.log(element);
+                    // error.addClass('w-100').appendTo(element.parent());
+                },
+                success: function(label, element) {
+                    console.log(label);
+                    label.remove();
+                    // label.removeClass('danger');
+                },
+                submitHandler: function (form) {
+
                 var shipment = $('#shipment_ids');
                 event.preventDefault();
                 var this_form = this;
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to change shipment\'s status!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function (confirm) {
-                    if (confirm) {
-                        $(table.table().header()).find('input').val('');
-                        $(table.table().header()).find('select').val('').trigger('change.select2');
-                        table.columns().search('').draw();
-                        var id = '';
-                        var count = table.data().count();
-                        for(var i = 0;i<count;i++){
-                            id = table.row( i ).id();
-                            shipments.push(id);
-                        }
-                        var open_box_input = $('#open_box_ids');
-                        open_box_input.val(open_box_ids);
-                        shipment.val(shipments);
-                        this_form.submit();
-                    }
-                });
+                var statusSelection = $(form).find('status_drop');
+                // console.log(statusSelection);
+                var status = statusSelection.val();
+                var remarks = $(form).closest('tr').find('.return_remarks');
 
+                if(!flag)
+                {
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to change shipment\'s status!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $(table.table().header()).find('input').val('');
+                            $(table.table().header()).find('select').val('').trigger('change.select2');
+                            table.columns().search('').draw();
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            
+                            // if (remarks.length && remarks[0].checkValidity()) {
+                            //     remarks.removeClass('error');
+                            //     remarks.next('.error-msg').html('');
+                            // } else {
+                            //     remarks.addClass('error');
+                            //     remarks.next('.error-msg').html('This field is required.');
+                            // }
+                            var open_box_input = $('#open_box_ids');
+                            open_box_input.val(open_box_ids);
+                            shipment.val(shipments);
+                            form.submit();
+                        }
+                    });
+                }
+                else
+                {
+                    // var error = "Remarks are Required When status is Unable to Return";
+                    // toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    remarks.attr('data-rule-required', 'true');
+                    remarks.attr('data-msg-required', 'Remarks is required');
+                    flag = true;
+                }
+            
+            }
             });
 
 
