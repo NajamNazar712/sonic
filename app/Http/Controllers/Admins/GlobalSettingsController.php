@@ -7629,7 +7629,8 @@ class GlobalSettingsController extends Controller
     public function star_shippers_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
-        $shippers = User::all();
+        $shippers = User::whereNull('disable_at')
+        ->get();
         return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
     }
 
