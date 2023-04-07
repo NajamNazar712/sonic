@@ -2400,8 +2400,17 @@ class V2AdminPickupsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 7);
         $pickup_types = [['id' => 0, 'text' => 'Not Pick'], ['id' => 1, 'text' => 'Pick']];
         $pickup_not_pick_reasons = V2PickupRequestNotPickReason::all();
+        $hubs = City::where([['status',1],['hub',1]]);
+        $areas = CityArea::with('hubs')->where('status',1)->get();
 
-        return view('admin.v2_pickups.rider_pickups')->with(['pickup_types' => $pickup_types, 'pickup_not_pick_reasons' => $pickup_not_pick_reasons]);
+        if(session('role_id') != 1)
+        {
+            $hubs = $hubs->WhereIn('id',session('hubs'));
+        }
+
+        $hubs = $hubs->get(['id','name']);
+
+        return view('admin.v2_pickups.rider_pickups')->with(['pickup_types' => $pickup_types, 'pickup_not_pick_reasons' => $pickup_not_pick_reasons,'hubs'=>$hubs,'areas'=>$areas]);
     }
 
     public function pickups_list_v2(Request $request)
@@ -2520,6 +2529,15 @@ class V2AdminPickupsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
+        }
+        if (isset($request->search_hub) && !empty($request->search_hub)) {
+            $search_hub = $request->get('search_hub');
+            $rider_pickups->where('usi.city_id', $search_hub);
+        }
+
+        if (isset($request->search_area) && !empty($request->search_area)) {
+            $search_area = $request->get('search_area');
+            $rider_pickups->where('usi.city_area_id', $search_area);
         }
         return $datatables->make(true);
     }

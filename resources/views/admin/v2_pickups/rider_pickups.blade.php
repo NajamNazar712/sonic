@@ -28,7 +28,7 @@
                             </div> -->
 							<div id="search_form" class="row mb-2 justify-content-center">
 
-		                        <div class="col-4 ">
+		                        <div class="col-3 ">
 
 		                            <div class="form-group input-group ml-1">
 		                                <div class="input-group-prepend">
@@ -40,7 +40,7 @@
 		                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
 		                            </div>
 		                        </div>
-		                        <div class="col-4 ">
+		                        <div class="col-3 ">
 		                            <div class="form-group input-group ml-1">
 		                                <div class="input-group-prepend">
 		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -52,6 +52,27 @@
 		                            </div>
 
 		                        </div>
+
+								<div class="col-3">
+									<div class="form-group">
+										<select name="search_hub" id="search_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required" >
+											@foreach($hubs as $hub)
+												<option value="{{$hub->id}}">{{$hub->name}}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+
+								<div class="col-3">
+									<div class="form-group">
+										<select name="search_area" id="search_area" class="form-control select2">
+											@foreach($areas as $area)
+												<option value="{{$area->id}}">{{$area->name}} - {{ $area->hubs->name }}</option>
+											@endforeach
+										</select>
+									</div>
+								</div>
+
 			                    <div class="col-2">
 			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
 			                    </div>
@@ -332,6 +353,8 @@
 				data: function (d) {
 					d.search_date_from = $('input[name="search_date_from_formatted"]').val();
 					d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+					d.search_hub = $('input[name="search_hub"]').val();
+					d.search_area = $('#search_area').val();
 				}
 			},
 			rowId: 'id',
@@ -475,6 +498,17 @@
 			$('#audio_modal').on('hide.bs.modal', function (e) {
 				$('audio#sound')[0].pause();
 				$('audio#sound')[0].currentTime = 0;
+			});
+
+			$("#search_hub").prepend('<option value="" selected></option>').select2({
+				placeholder: "Select Hub",
+				allowClear: true,
+				width: '100%',
+			});
+			 $("#search_area").prepend('<option value="" selected></option>').select2({
+				placeholder: "Select Area",
+				allowClear: true,
+				width: '100%',
 			});
 
 
