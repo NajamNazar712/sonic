@@ -2,9 +2,14 @@
 <style>
     .text-right {
   text-align: right;
+  
+}
+
+table {
+    border-collapse: collapse;
 }
 </style>
-@section('title', 'Fintech Company | Form')
+@section('title', 'Add Fintech Charges')
 
 @section('content')
     <div class="app-content content">
@@ -38,10 +43,11 @@
                                     <div class="row justify-content-center">
                                         <div class="form-group">
                                             <input type="text" value="{{$fintech_company_name->company_name}}"  class="form-control" readonly >
+                                            <input type="hidden" name="company_id" value="{{$fintech_company_name->id}}"  class="form-control" readonly >
                                         </div>
                                     </div> <Br>
                                     <div class="charges_div">
-                                        <table class="table table-responsive table-lg"> 
+                                        <table  class="table table-responsive table-lg"> 
                                             <thead>      
                                               <tr>
                                                 <th><label>Range Up</label></th>
@@ -140,7 +146,7 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div class="row justify-content-center">
-                                <form id="settings_form" class="form-horizontal text-center" method="POST"
+                                <form id="settings_form"  class="form-horizontal text-center" method="POST"
                                     action="{{ route('admin.settings.fintech_company_charges.store') }}"
                                     novalidate="novalidate">
                                     {{ csrf_field() }}
@@ -150,7 +156,7 @@
                                         </div>
                                     </div> <Br>
 
-                                        <table class="table table-responsive table-lg"> 
+                                        <table  class="table table-responsive table-lg"> 
 
                                           <thead>      
                                             <tr>
@@ -170,9 +176,6 @@
                                             </th>
                                             
                                             </tr>
-                                            
-                                        
-
                                           </thead>
                                             
                                           <tbody id="row_append_body">
@@ -226,14 +229,9 @@
                                                     data-msg-required="This field is required">
                                                 </td>   
 
-                                                <td>
-                                                    <div class="col mb-1">
-                                                        <button type="button" class="btn btn-outline-success btm-sm add_row"
-                                                            id="add_row"><i class="la la-plus"></i></button>
-                                                    </div>
-                                                </td>   
+                                                <td></td>
                                                
-                                            <tr>    
+                                            </tr>    
 
                                             </tbody>
                                             
@@ -242,7 +240,12 @@
 
 
                             
-                                    
+                                            <td>
+                                                <div class="col mb-1">
+                                                    <button type="button" class="btn btn-outline-success btm-sm add_row"
+                                                        id="add_row"><i class="la la-plus"></i></button>
+                                                </div>
+                                            </td>   
 
                                     <div class="col">
                                         <button type="submit" class="btn btn-primary width-250">Submit</button>
@@ -447,7 +450,7 @@ function inputValidate(){
                                                     </div>
                                                 </td>   
                                                
-                                            <tr> `;
+                                            </tr> `;
                     $('#row_append_body').append(html);
 
 
@@ -540,7 +543,7 @@ if (flag == true) {
                                     </div>
                                 </td>   
                                
-                            <tr> `;
+                            </tr> `;
     $('#row_append_body_update').append(html);
 
 

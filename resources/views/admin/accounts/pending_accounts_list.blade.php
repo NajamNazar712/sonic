@@ -371,14 +371,15 @@
 {{-- Add Fintech Charges Modal --}}
 
 
-<div class="modal fade text-left" id="AddFintechChargesModal" data-backdrop="static" role="dialog" aria-labelledby=""
-    aria-hidden="true">
+<div class="modal fade text-left" id="AddFintechChargesModal" data-backdrop="static" role="dialog" aria-labelledby=""aria-hidden="true">
    <div class="modal-dialog modal-md" role="document">
        <div class="modal-content">
            <div class="modal-header">
                <h4 class="modal-title"> Add Fintech Charges</h4>
            </div>
-               <div class="modal-body">
+           <form id="Save_fintech_charges" method="POST" action="{{route('admin.accounts.add_fintech_charges')}}" enctype="multipart/form-data">
+            @csrf 
+            <div class="modal-body">
                    <div class="col text-center">
                        <label class="font-medium-2 font-weight-bold block">Is Shipper Paying Fintech Charges ?</label>
                        <div class="form-group">
@@ -391,10 +392,11 @@
                        <div class="row justify-content-center UserFintechCharges"></div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button " class="btn btn-success"  onclick="save_fintech_charges()" >Submit</button>
+                        <button type="submit" class="btn btn-success"  >Submit</button>
                         <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                     </div>
                    </div>
+            </form>
                </div>
                
           
@@ -461,7 +463,7 @@ function checkboxStatus(){
               $(".UserFintechCharges").append(`
             <div class="form-group text-left">
               
-                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder ="Fintech Charges*" aria-invalid="true">
+                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges Required">
             </div>`);
         } 
         else{
@@ -469,26 +471,61 @@ function checkboxStatus(){
         } 
 }
 
-function save_fintech_charges(){
-        if (document.getElementById('user_fintech_charges_checkbox').checked) {
-               var fintechCharges = $("#user_fintech_charges_txtbox").val();
-               var userID = $("#userID").val();
-               $.ajax({
-                type : 'POST',
-                url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
-                data : {fintechCharges:fintechCharges,userID:userID,'_token': '{{ csrf_token() }}'},
-                success:function(res){
-                    if(res.status == '201'){
-                        $('#AddFintechChargesModal').modal('hide');
-                    }
+$("#Save_fintech_charges" ).validate({
+    errorClass:"danger",
+    errorPlacement: function(error, element) {
+        error.addClass('w-100').appendTo(element.parent('.form-group'));
+    },
+    submitHandler: function(form) {
+        // console.log(form.user_fintech_charges_txtbox);
+        var fintechCharges = $("#user_fintech_charges_txtbox").val();
+        var userID = $("#userID").val();
+        $.ajax({
+            type : 'POST',
+            url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
+            data : {fintechCharges:fintechCharges,userID:userID,'_token': '{{ csrf_token() }}'},
+            success:function(res){
+                if(res.status == '200'){
+                    toastr.success(res.message, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    $('#AddFintechChargesModal').modal('hide');
                 }
-            });
-
-        } 
-        else{
-            $("#user_fintech_charges_txtbox").val('');
-        }
+                else{
+                    toastr.error(res.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            }
+        });
     }
+});
+
+
+
+
+// function save_fintech_charges(){
+//         if (document.getElementById('user_fintech_charges_checkbox').checked) {
+//                var fintechCharges = $("#user_fintech_charges_txtbox").val();
+//                var userID = $("#userID").val();
+//                $.ajax({
+//                 type : 'POST',
+//                 url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
+//                 data : {fintechCharges:fintechCharges,userID:userID,'_token': '{{ csrf_token() }}'},
+//                 success:function(res){
+//                     if(res.status == '201'){
+//                         $('#AddFintechChargesModal').modal('hide');
+//                     }
+//                 }
+//             });
+
+//         } 
+//         else{
+//             $("#user_fintech_charges_txtbox").val('');
+//         }
+//     }
 
     $(document).ready(function() {
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});

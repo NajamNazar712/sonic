@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFintechSetupsTable extends Migration
+class CreateFintechCompaniesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFintechSetupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('fintech_setups', function (Blueprint $table) {
+        Schema::create('fintech_companies', function (Blueprint $table) {
             $table->increments('id');
             $table->string('company_name');
             $table->tinyInteger('status')->default('1');
@@ -30,6 +30,6 @@ class CreateFintechSetupsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fintech_setups');
+        Schema::dropIfExists('fintech_companies');
     }
 }

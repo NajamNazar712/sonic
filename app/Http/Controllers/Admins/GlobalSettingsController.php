@@ -123,8 +123,8 @@ use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\LeadTaggingService;
 use App\Http\Models\ServiceList;
 //Add by Murad
-use App\FintechSetup;
-use App\FintechSetupValues;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 //End
 use Carbon\Carbon;
@@ -3595,7 +3595,7 @@ class GlobalSettingsController extends Controller
 
     //Add By Murad
     public function setup_fintech_charges_index(){
-        $fintechSetup =  new FintechSetup();
+        $fintechSetup =  new FintechCompany();
         return view('admin.settings.fintech.fintech_companies_list');
     }
 
@@ -3605,12 +3605,12 @@ class GlobalSettingsController extends Controller
     }
 
     public function setup_fintech_charges_list(){
-        $fintechSetup =  new FintechSetup();
+        $fintechSetup =  new FintechCompany();
 
 
-        $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_setups.added_by')
-        ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_setups.updated_by')
-        ->select(['fintech_setups.*','created_by.name as admin1','updated_by.name as admin2'])
+        $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
+        ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
+        ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
         ->get();
 
 
@@ -3644,14 +3644,14 @@ class GlobalSettingsController extends Controller
         if(!empty($req->fintech_range_up)){
             DB::beginTransaction();
             try{
-                $FintechSetup =  new FintechSetup();
+                $FintechSetup =  new FintechCompany();
                 $FintechSetup->company_name  = $req->company_name;
                 $FintechSetup->added_by      = Auth::id();
                 $FintechSetup->updated_by    = Auth::id();
                 $FintechSetup->save();
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
                         if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
-                            $FintechSetupValues =  new FintechSetupValues();
+                            $FintechSetupValues =  new FintechCompanyCharges();
                             $FintechSetupValues->company_Id          = $FintechSetup->id;
                             $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
                             $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
@@ -3675,8 +3675,8 @@ class GlobalSettingsController extends Controller
     }
 
     public function setup_fintech_charges_edit($id){
-        $fintechsetupValues =  new FintechSetupValues();
-        $FintechSetup =  new FintechSetup();
+        $fintechsetupValues =  new FintechCompanyCharges();
+        $FintechSetup =  new FintechCompany();
 
         $fintech_company_name = $FintechSetup::where('id',$id)->first();
         $fintechvalues = $fintechsetupValues::where('company_Id',$id)->get();
@@ -3689,7 +3689,7 @@ class GlobalSettingsController extends Controller
                 if(!empty($req->fintech_range_up)){
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
                         if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
-                            $FintechSetupValues =  new FintechSetupValues();
+                            $FintechSetupValues =  new FintechCompanyCharges();
                             $FintechSetupValues->company_Id          = $req->company_id;
                             $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
                             $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
@@ -3701,7 +3701,7 @@ class GlobalSettingsController extends Controller
                     }
                 }
                 for($j = 0; $j < count($req->IndexID); $j++){
-                        $FintechSetupValues =  new FintechSetupValues();
+                        $FintechSetupValues =  new FintechCompanyCharges();
                         $FintechSetupValues::where('id',$req->IndexID[$j])->update([
                             'range_up'            => $req->fintech_range_up_edit[$j],
                             'range_down'          => $req->fintech_range_down_edit[$j],
@@ -3710,7 +3710,7 @@ class GlobalSettingsController extends Controller
                             'fed_tax'             => $req->fed_tax_edit[$j],
                         ]);
                 }
-                $FintechSetup =  new FintechSetup();
+                $FintechSetup =  new FintechCompany();
                 $FintechSetup::where('id',$req->company_id)->update([
                     'updated_by' =>  Auth::id(),
                 ]);

@@ -608,22 +608,25 @@
                <h4 class="modal-title">Add Fintech Charges</h4>
            </div>
                <div class="modal-body">
-                   <div class="col text-center">
-                       <label class="font-medium-2 font-weight-bold block">Is Shipper Paying Fintech Charges ?</label>
-                       <div class="form-group">
-                           <input type="hidden" id="userID">
-                           <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
-                           <input type="checkbox" onchange="checkboxStatus()" id="user_fintech_charges_checkbox" class="switchery restrict_order_id_checkbox" data-size="sm" data-switchery="true">
-                           <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
-                       </div>
+                    <form id="Save_fintech_charges" method="POST" action="{{route('admin.accounts.add_fintech_charges')}}" enctype="multipart/form-data">
+                       @csrf
+                        <div class="col text-center">
+                            <label class="font-medium-2 font-weight-bold block">Is Shipper Paying Fintech Charges ?</label>
+                            <div class="form-group">
+                                <input type="hidden" name="userID" id="userID">
+                                <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                                <input type="checkbox" onchange="checkboxStatus()" id="user_fintech_charges_checkbox" class="switchery restrict_order_id_checkbox" data-size="sm" data-switchery="true">
+                                <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                            </div>
 
-                       <div class="row justify-content-center UserFintechCharges"></div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button " class="btn btn-success"  onclick="save_fintech_charges()" >Submit</button>
-                        <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                    </div>
-                   </div>
+                            <div class="row justify-content-center UserFintechCharges"></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit " class="btn btn-success"  onclick="" >Submit</button>
+                                <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </form>
                </div>
                
           
@@ -663,8 +666,7 @@ function checkboxStatus(){
         $(".UserFintechCharges").html(''); 
               $(".UserFintechCharges").append(`
             <div class="form-group text-left">
-              
-                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges *" aria-invalid="false">
+                <input type="number" name="user_fintech_charges_txtbox" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges *" aria-invalid="false" data-rule-required="true" data-msg-required="Fintech Charges Required">
             </div>`);
         } 
         else{
@@ -672,7 +674,43 @@ function checkboxStatus(){
         } 
 }
 
+
+$("#Save_fintech_charges" ).validate({
+    errorClass:"danger",
+    errorPlacement: function(error, element) {
+        error.addClass('w-100').appendTo(element.parent('.form-group'));
+    },
+    submitHandler: function(form) {
+        // console.log(form.user_fintech_charges_txtbox);
+        var fintechCharges = $("#user_fintech_charges_txtbox").val();
+        var userID = $("#userID").val();
+        $.ajax({
+            type : 'POST',
+            url  :  "{!! route('admin.accounts.add_fintech_charges') !!}",
+            data : {fintechCharges:fintechCharges,userID:userID,'_token': '{{ csrf_token() }}'},
+            success:function(res){
+                if(res.status == '200'){
+                    toastr.success(res.message, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    $('#AddFintechChargesModal').modal('hide');
+                }
+                else{
+                    toastr.error(res.message, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            }
+        });
+    }
+});
+
+
+
 function save_fintech_charges(){
+    
         if (document.getElementById('user_fintech_charges_checkbox').checked) {
                var fintechCharges = $("#user_fintech_charges_txtbox").val();
                var userID = $("#userID").val();
@@ -692,6 +730,7 @@ function save_fintech_charges(){
             $("#user_fintech_charges_txtbox").val('');
         }
     }
+
     $(document).ready(function() {
 
         $("input[name='search_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});

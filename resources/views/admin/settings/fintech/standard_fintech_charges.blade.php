@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Fintech Company | Form')
+@section('title', 'Standard Fintech Changes')
 
 @section('content')
     <div class="app-content content">
@@ -35,7 +35,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        <button type="submit" class="btn btn-primary width-250">Save Charges</button>
+                                        <button type="submit" class="btn btn-primary width-250">Update </button>
                                     </div>
                                 </form>
                             </div>

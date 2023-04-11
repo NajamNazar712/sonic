@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFintechSetupValuesTable extends Migration
+class CreateFintechCompanyChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFintechSetupValuesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fintech_setup_values', function (Blueprint $table) {
+        Schema::create('fintech_company_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->tinyInteger('company_Id');
             $table->string('range_up');
@@ -22,7 +22,6 @@ class CreateFintechSetupValuesTable extends Migration
             $table->string('additional_charges');
             $table->string('fed_tax');
             $table->timestamps();
-       
         });
     }
 
@@ -33,6 +32,6 @@ class CreateFintechSetupValuesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fintech_setup_values');
+        Schema::dropIfExists('fintech_company_charges');
     }
 }

@@ -541,7 +541,7 @@ public function add_fintech_charges(Request $req){
         }
 
         return response()->json([
-            'status'  => '201',
+            'status'  => '200',
             'message' => 'Charges Set Successfully',
         ]);
    }
