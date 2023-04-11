@@ -5768,8 +5768,7 @@ class ReturnController extends Controller
             'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
             'destinationcity.name as destination','sj.updated_at as date',
             'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id','ls.name as last_status')
-            ->where('rider_deliveries.rider_status_id',12)
-            ->groupBy('delivery_note_id');
+            ->where('rider_deliveries.rider_status_id',12);
 
             
         $datatable = Datatables::of($data)
