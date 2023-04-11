@@ -159,7 +159,7 @@
 								$('#admin_roles').append('<a class="nav-link rounded-0 active" id="module_'+details.id+'_tab" data-toggle="pill" href="#module_'+details.id+'_tabpanel" role="tab" aria-controls="module_'+details.id+'_tabpanel" aria-selected="true">('+details.id + ') '+  details.name + ' (' + details.department +')'+'</a>');
 							}
 							else{
-								$('#admin_roles').append('<a class="nav-link rounded-0" id="module_'+details.id+'_tab" data-toggle="pill" href="#module_'+details.id+'_tabpanel" role="tab" aria-controls="module_'+details.id+'_tabpanel" aria-selected="false">('+details.id + ') '+details.name+'</a>');
+								$('#admin_roles').append('<a class="nav-link rounded-0" id="module_'+details.id+'_tab" data-toggle="pill" href="#module_'+details.id+'_tabpanel" role="tab" aria-controls="module_'+details.id+'_tabpanel" aria-selected="false">('+details.id + ') '+details.name+ ' (' + details.department +')'+'</a>');
 							}
 						});
 
