@@ -814,21 +814,49 @@ class AdminNotificationsController extends Controller
     }
 
     public function edit(Request $request) {
-        $notification = Notification::find($request->get('id'));
 
-        if ($notification) {
-            if ($notification->type_id == 1) {
+        preg_match('/\s.*?\n([^\s,]*?)/s', $request->body, $matches);
+        $consignee_name = trim($matches[0]);
+        $cleaned_string = preg_replace('/,/', '', $consignee_name);
+        $required_lenght = substr($cleaned_string, 0, 10);
+        $message =  $request->get('body');
+        $lines = explode("\n", $message);
+        unset($lines[0]);
+        $message = implode("\n", $lines);
+
+
+        $notification = Notification::find($request->get('id'));
+        if ($notification && $notification->id != 132 && $notification->id != 135) 
+        {
+            if ($notification->type_id == 1) 
+            {
                 $notification->subject = $request->get('subject');
             }
 
             $notification->body = $request->get('body');
+
             $notification->updated_by = Auth::id();
 
             $notification->save();
 
             return ['status' => 0, 'success' => 'Notification has been edited'];
+
         }
-        else {
+        else if ($notification->id == 132 || $notification->id == 135) 
+        {
+            if($notification->type_id == 1) 
+            {
+                $notification->subject = $request->get('subject');
+            }
+
+            $notification->body = "Dear " . $required_lenght . "\n" . $message;
+            
+            $notification->updated_by = Auth::id();
+
+            $notification->save();
+
+            return ['status' => 0, 'success' => 'Notification has been edited'];
+        } else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];
         }
     }
