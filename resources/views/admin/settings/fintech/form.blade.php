@@ -1,5 +1,9 @@
 @extends('admin.layout.master')
-
+<style>
+    .text-right {
+  text-align: right;
+}
+</style>
 @section('title', 'Fintech Company | Form')
 
 @section('content')
@@ -37,118 +41,88 @@
                                         </div>
                                     </div> <Br>
                                     <div class="charges_div">
-                                        <div class="row justify-content-center">    
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Range Up</label>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Range Down</label>
+                                        <table class="table table-responsive table-lg"> 
+                                            <thead>      
+                                              <tr>
+                                                <th><label>Range Up</label></th>
+                                                <th><label>Range Down</label></th>
+                                                <th><label>Charges</label></th>
+                                                <th><label>Additional Charges</label></th>
+                                                <th><label>Federal Excise Duty Tax</label></th>
+                                                <th><label>Action</label></th>
 
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Charges</label>
+                                             
+                                              </tr>
+                                            </thead>
+                                              <tbody>
+                                                @foreach($fintechvalues as $key=> $charges)
+                                                <input type="hidden" value ="@if(!empty($fintechvalues)) {{$charges->id}}  @endif" name="IndexID[]">
+                                                <tr>
+                                                    <td>   
+                                                    <input type="text"
+                                                    name="fintech_range_up_edit[]"
+                                                    onkeydown="inputValidate()"
+                                                    class="form-control input-filtered text-right"
+                                                    value ="@if(!empty($fintechvalues)) {{$charges->range_up}}  @endif"
+                                                    placeholder="Range Up" required data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                    </td>  
 
-                                                </div>
-                                            </div>
+                                                    <td>
+                                                    <input type="text"
+                                                    name="fintech_range_down_edit[]"
+                                                    onkeydown="inputValidate()"
+                                                    class="form-control input-filtered text-right"
+                                                    value ="@if(!empty($fintechvalues)) {{$charges->range_down}}  @endif"
+                                                    placeholder="Range Down" required data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                    </td>
 
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Additional Charges</label>
+                                                    <td> 
+                                                    <input type="text" required
+                                                    name="charges_edit[]"
+                                                    class="form-control input-filtered text-right"
+                                                    onkeydown="inputValidate()"
+                                                    placeholder="Charges"
+                                                    value ="@if(!empty($fintechvalues)) {{$charges->charges}}  @endif"
+                                                    data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                    </td>
 
-                                                </div>
-                                            </div>
+                                                    <td>
+                                                    <input type="text" required
+                                                    name="additional_charges_edit[]"
+                                                    class="form-control input-filtered text-right"
+                                                    onkeydown="inputValidate()"
+                                                    value ="@if(!empty($fintechvalues)) {{$charges->additional_charges}}  @endif"
+                                                    placeholder="Additional "
+                                                    data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                    </td>
 
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Federal Excise Duty Tax</label>
-
-                                                </div>
-                                            </div>
-                                        </div>
-                                     
-                                      
-
-                                                @foreach($fintechvalues as $charges)            
-                                                <input type="hidden" value ="@if(!empty($fintechvalues)) {{$charges->company_Id}}  @endif" name="company_id">
-                                                <div class="row justify_content_center mb-1">
-
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text"
-                                                                name="fintech_range_up_edit[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                value ="@if(!empty($fintechvalues)) {{$charges->range_up}}  @endif"
-                                                                placeholder="Range Up" required data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-                                                    <input type="hidden" value ="@if(!empty($fintechvalues)) {{$charges->id}}  @endif" name="IndexID[]">
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text"
-                                                                name="fintech_range_down_edit[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                value ="@if(!empty($fintechvalues)) {{$charges->range_down}}  @endif"
-                                                                placeholder="Range Down" required data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="charges_edit[]"
-                                                                class="form-control input-filtered"
-                                                                onkeydown="inputValidate()"
-                                                                placeholder="Charges"
-                                                                value ="@if(!empty($fintechvalues)) {{$charges->charges}}  @endif"
-                                                                data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="additional_charges_edit[]"
-                                                                class="form-control input-filtered"
-                                                                onkeydown="inputValidate()"
-                                                                value ="@if(!empty($fintechvalues)) {{$charges->additional_charges}}  @endif"
-                                                                placeholder="Additional "
-                                                                data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="fed_tax_edit[]"
-                                                                onkeydown="inputValidate()" 
-                                                                value ="@if(!empty($fintechvalues)) {{$charges->fed_tax}}  @endif"
-                                                                class="form-control input-filtered"
-                                                                 placeholder="Federal Excise Duty Tax"
-                                                                data-rule-required="false"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-
-                                                </div>
+                                                <td>
+                                                    <input type="text" required
+                                                    name="fed_tax_edit[]"
+                                                    onkeydown="inputValidate()" 
+                                                    value ="@if(!empty($fintechvalues)) {{$charges->fed_tax}}  @endif"
+                                                    class="form-control input-filtered text-right"
+                                                    placeholder="Federal Excise Duty Tax"
+                                                    data-rule-required="false"
+                                                    data-msg-required="This field is required">
+                                                </td>  
+                                            </tr>
+                                            
                                                 @endforeach
+                                              </tbody>
+                                              <tbody id="row_append_body_update">
+                                              </tbody>
+                                            
 
-
-
-
+                                        </table>
                                     </div>
                                     <div class="col mb-1">
-                                        <button type="button" class="btn btn-outline-success btm-sm add_row"
-                                            id="add_row"><i class="la la-plus"></i></button>
+                                        <button type="button" class="btn btn-outline-success btm-sm add_row_update"
+                                        id="add_row"><i class="la la-plus"></i></button>
                                     </div>
 
                                     <div class="col">
@@ -172,111 +146,103 @@
                                     {{ csrf_field() }}
                                     <div class="row justify-content-center">
                                         <div class="form-group">
-                                            <input type="text" name="company_name" class="form-control " placeholder="* Company Name" >
+                                            <input type="text" name="company_name" class="form-control " placeholder="Company Name *" >
                                         </div>
                                     </div> <Br>
-                                    <div class="charges_div">
-                                        <div class="row justify-content-center">
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Range Up</label>
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Range Down</label>
 
-                                                </div>
-                                            </div>
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Charges</label>
+                                        <table class="table table-responsive table-lg"> 
 
-                                                </div>
-                                            </div>
+                                          <thead>      
+                                            <tr>
+                                            
+                                            <th>  <label>Range Up</label> </th>
+                                            
+                                            <th> <label>Range Down</label> </th>
+                                            
+                                            <th>  <label>Charges</label> </th>
+                                            
+                                            <th>  <label>Additional Charges</label> </th>
+                                            
+                                            <th>  <label>Federal Excise Duty Tax</label> </th>
 
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Additional Charges</label>
+                                            <th>
+                                                Action
+                                            </th>
+                                            
+                                            </tr>
+                                            
+                                        
 
-                                                </div>
-                                            </div>
+                                          </thead>
+                                            
+                                          <tbody id="row_append_body">
+                                            <tr>
+                                                <td>
+                                                <input type="text"
+                                                name="fintech_range_up[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                placeholder="Range Up *" required data-rule-required="true"
+                                                data-msg-required="This field is required">  
+                                                
+                                                </td>
 
-                                            <div class="col">
-                                                <div class="form-group">
-                                                    <label>Federal Excise Duty Tax</label>
+                                                <td> 
+                                                <input type="text"
+                                                name="fintech_range_down[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                placeholder="Range Down *" required data-rule-required="true"
+                                                data-msg-required="This field is required">
+                                                </td> 
 
-                                                </div>
-                                            </div>
-                                        </div>
-                                     
-                                                <div class="row justify_content_center mb-1">
+                                                <td> 
+                                                    <input type="text" required
+                                                    name="charges[]"
+                                                    onkeydown="inputValidate()"
+                                                    class="form-control input-filtered text-right"
+                                                    placeholder="Charges *"
+                                                    data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                </td> 
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text"
-                                                                name="fintech_range_up[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                placeholder="* Range Up" required data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
+                                                <td> 
+                                                    <input type="text" required
+                                                    name="additional_charges[]"
+                                                    onkeydown="inputValidate()"
+                                                    class="form-control input-filtered text-right"
+                                                    placeholder="Additional *"
+                                                    data-rule-required="true"
+                                                    data-msg-required="This field is required">
+                                                </td> 
+                                               
+                                                <td> 
+                                                    <input type="text" required
+                                                    name="fed_tax[]"
+                                                    onkeydown="inputValidate()"
+                                                    class="form-control input-filtered text-right"
+                                                    placeholder="Federal Excise Duty Tax *"
+                                                    data-rule-required="false"
+                                                    data-msg-required="This field is required">
+                                                </td>   
+
+                                                <td>
+                                                    <div class="col mb-1">
+                                                        <button type="button" class="btn btn-outline-success btm-sm add_row"
+                                                            id="add_row"><i class="la la-plus"></i></button>
                                                     </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text"
-                                                                name="fintech_range_down[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                
-                                                                placeholder="* Range Down" required data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="charges[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                placeholder="* Charges"
-                                                                data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
+                                                </td>   
+                                               
+                                            <tr>    
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="additional_charges[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                placeholder="* Additional "
-                                                                data-rule-required="true"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
+                                            </tbody>
+                                            
+                                            
+                                            </table>       
 
-                                                    <div class="col">
-                                                        <div class="form-group">
-                                                            <input type="text" required
-                                                                name="fed_tax[]"
-                                                                onkeydown="inputValidate()"
-                                                                class="form-control input-filtered"
-                                                                 placeholder="* Federal Excise Duty Tax"
-                                                                 
-                                                                data-rule-required="false"
-                                                                data-msg-required="This field is required">
-                                                        </div>
-                                                    </div>
 
-                                                </div>
-
-                                    </div>
-                                    <div class="col mb-1">
-                                        <button type="button" class="btn btn-outline-success btm-sm add_row"
-                                            id="add_row"><i class="la la-plus"></i></button>
-                                    </div>
+                            
+                                    
 
                                     <div class="col">
                                         <button type="submit" class="btn btn-primary width-250">Submit</button>
@@ -420,38 +386,69 @@ function inputValidate(){
 
                 if (flag == true) {
 
-                    var html = '<div class="row justify_content_center mb-1">\n' +
-                        '                                        <div class="col">\n' +
-                        '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="fintech_range_up[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Range Up" data-rule-required="true" data-msg-required="This field is required">\n' +
-                        '                                            </div>\n' +
-                        '                                        </div>\n' +
-                        '                                        <div class="col">\n' +
-                        '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name=fintech_range_down[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Range Down" data-rule-required="true" data-msg-required="This field is required">\n' +
-                        '                                            </div>\n' +
-                        '                                        </div>\n' +
+                    var html = `<tr>
+                                                <td>
+                                                    
+                                                            <input type="text"
+                                                                name="fintech_range_up[]"
+                                                                onkeydown="inputValidate()"
+                                                                class="form-control input-filtered text-right"
+                                                                placeholder="Range Up *" required data-rule-required="true"
+                                                                data-msg-required="This field is required">
+                                                     
+                                                
+                                                </td>
 
-                        '                                        <div class="col">\n' +
-                        '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="charges[]" onkeydown="inputValidate()" id="" class="form-control input-filtered" placeholder="* Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
-                        '                                            </div>\n' +
-                        '                                        </div>\n' +
-                        
-                        '                                        <div class="col">\n' +
-                        '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="additional_charges[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Additional Charges" data-rule-required="true" data-msg-required="This field is required">\n' +
-                        '                                            </div>\n' +
-                        '                                        </div>\n' +
+                                                <td> 
+                                                    <input type="text"
+                                                                name="fintech_range_down[]"
+                                                                onkeydown="inputValidate()"
+                                                                class="form-control input-filtered text-right"
+                                                                
+                                                                placeholder="Range Down *" required data-rule-required="true"
+                                                                data-msg-required="This field is required">
+                                                </td> 
 
+                                                <td> 
+                                                    <input type="text" required
+                                                                name="charges[]"
+                                                                onkeydown="inputValidate()"
+                                                                class="form-control input-filtered text-right"
+                                                                placeholder="Charges *"
+                                                                data-rule-required="true"
+                                                                data-msg-required="This field is required">
+                                                </td> 
 
-                        '                                        <div class="col">\n' +
-                        '                                            <div class="form-group">\n' +
-                        '                                               <input type="text" required name="fed_tax[]" onkeydown="inputValidate()" class="form-control input-filtered" placeholder="* Fedral Excise Duty Tax" data-rule-required="true" data-msg-required="This field is required">\n' +
-                        '                                            </div>\n' +
-                        '                                        </div>\n' +
-                        '                                    </div>';
-                    $('div.charges_div').append(html);
+                                                <td> 
+                                                    <input type="text" required
+                                                                name="additional_charges[]"
+                                                                onkeydown="inputValidate()"
+                                                                class="form-control input-filtered text-right"
+                                                                placeholder="Additional *"
+                                                                data-rule-required="true"
+                                                                data-msg-required="This field is required">
+                                                </td> 
+                                               
+                                                <td> 
+                                                    <input type="text" required
+                                                                name="fed_tax[]"
+                                                                onkeydown="inputValidate()"
+                                                                class="form-control input-filtered text-right"
+                                                                    placeholder="Federal Excise Duty Tax *"
+                                                                    
+                                                                data-rule-required="false"
+                                                                data-msg-required="This field is required">
+                                                </td>   
+
+                                                <td>
+                                                    <div class="col mb-1">
+                                                        <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btm-sm"
+                                                           ><i class="la la-trash"></i></button>
+                                                    </div>
+                                                </td>   
+                                               
+                                            <tr> `;
+                    $('#row_append_body').append(html);
 
 
 
@@ -474,6 +471,99 @@ function inputValidate(){
                 }
 
             });
+
+
+            $('body').on('click', '.add_row_update', function() {
+
+var old_row = row - 1;
+flag = true;
+if (flag == true) {
+
+    var html = `<tr>
+                                <td>
+                                    
+                                            <input type="text"
+                                                name="fintech_range_up[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                placeholder="Range Up *" required data-rule-required="true"
+                                                data-msg-required="This field is required">
+                                     
+                                
+                                </td>
+
+                                <td> 
+                                    <input type="text"
+                                                name="fintech_range_down[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                
+                                                placeholder="Range Down *" required data-rule-required="true"
+                                                data-msg-required="This field is required">
+                                </td> 
+
+                                <td> 
+                                    <input type="text" required
+                                                name="charges[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                placeholder="Charges *"
+                                                data-rule-required="true"
+                                                data-msg-required="This field is required">
+                                </td> 
+
+                                <td> 
+                                    <input type="text" required
+                                                name="additional_charges[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                placeholder="Additional *"
+                                                data-rule-required="true"
+                                                data-msg-required="This field is required">
+                                </td> 
+                               
+                                <td> 
+                                    <input type="text" required
+                                                name="fed_tax[]"
+                                                onkeydown="inputValidate()"
+                                                class="form-control input-filtered text-right"
+                                                    placeholder="Federal Excise Duty Tax *"
+                                                    
+                                                data-rule-required="false"
+                                                data-msg-required="This field is required">
+                                </td>   
+
+                                <td>
+                                    <div class="col mb-1">
+                                        <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btm-sm"
+                                           ><i class="la la-trash"></i></button>
+                                    </div>
+                                </td>   
+                               
+                            <tr> `;
+    $('#row_append_body_update').append(html);
+
+
+
+    $('#settings_form input.rangeup').inputmask({
+        'alias': 'integer',
+        'allowMinus': false,
+        'allowPlus': false
+    });
+    $('#settings_form input.rangedown').inputmask({
+        'alias': 'integer',
+        'allowMinus': false,
+        'allowPlus': false
+    });
+    $('#settings_form input.charges').inputmask({
+        'alias': 'integer',
+        'allowMinus': false,
+        'allowPlus': false
+    });
+    row++;
+}
+
+});
 
             $('#settings_form').validate({
                 errorClass: 'danger',

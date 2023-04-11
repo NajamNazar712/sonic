@@ -605,11 +605,11 @@
    <div class="modal-dialog modal-md" role="document">
        <div class="modal-content">
            <div class="modal-header">
-               <h4 class="modal-title">Set User Fintech Charges</h4>
+               <h4 class="modal-title">Add Fintech Charges</h4>
            </div>
                <div class="modal-body">
                    <div class="col text-center">
-                       <label class="font-medium-2 font-weight-bold block">Is Shipper Pay Fintech Charges ?</label>
+                       <label class="font-medium-2 font-weight-bold block">Is Shipper Paying Fintech Charges ?</label>
                        <div class="form-group">
                            <input type="hidden" id="userID">
                            <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
@@ -663,8 +663,8 @@ function checkboxStatus(){
         $(".UserFintechCharges").html(''); 
               $(".UserFintechCharges").append(`
             <div class="form-group text-left">
-                <label>Add Fintech</label>
-                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="" aria-invalid="false">
+              
+                <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges *" aria-invalid="false">
             </div>`);
         } 
         else{
@@ -2183,8 +2183,8 @@ function save_fintech_charges(){
                             $(".UserFintechCharges").html('');
                             $(".UserFintechCharges").append(`
                         <div class="form-group text-left">
-                            <label>Add Fintech</label>
-                            <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="" aria-invalid="false">
+                          
+                            <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges *" aria-invalid="false">
                         </div>`);
                         }
                         else{
