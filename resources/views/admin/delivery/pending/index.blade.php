@@ -26,7 +26,7 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-3 mt-1">
+                    <div class="col-3">
                         <div class="form-group">
                             <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
                                 @foreach($areas as $area)

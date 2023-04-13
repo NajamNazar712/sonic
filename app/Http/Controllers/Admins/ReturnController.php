@@ -4565,7 +4565,8 @@ class ReturnController extends Controller
         $return_deliveries = ReturnNote::join('cities as c', 'return_notes.hub_id', '=', 'c.id')
             ->join('zones as z', 'z.id', '=', 'c.zone_id')
             ->join('riders as r', 'return_notes.rider_id', '=', 'r.id')
-            ->select('return_notes.id as return_note_id', 'z.name as zone', 'return_notes.created_at as created_at', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
+            ->join('city_areas as ca', 'ca.id', '=', 'r.area_id')
+            ->select('ca.name as area','return_notes.id as return_note_id', 'z.name as zone', 'return_notes.created_at as created_at', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
 
 
         $datatable = Datatables::of($return_deliveries)

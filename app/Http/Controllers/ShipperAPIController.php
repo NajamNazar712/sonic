@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\CRM\CRMController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
@@ -698,6 +699,7 @@ class ShipperAPIController extends Controller
                     } else {
                         $amount = intval($request->amount);
                         if ($intercept_type == 1) {
+                            $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city,$request->consignee_address);
                             InterceptReBookRequest::create([
                                 'shipment_id' => $request->shipment_id,
                                 'consignee_city_id' => $request->consignee_city,
@@ -710,7 +712,8 @@ class ShipperAPIController extends Controller
                                 'shipper_id' => $user_id,
                                 'status' => 0,
                                 'intercept_type' => $intercept_type,
-                                'admin_id' => NULL
+                                'admin_id' => NULL,
+                                'city_area_id'=>$city_area_id
                             ]);
                             $shipment->consignee_status_id = 54;
                             $shipment->shipper_status_id = 54;
@@ -719,6 +722,9 @@ class ShipperAPIController extends Controller
 
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
                         } else {
+
+                            $new_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city,$request->consignee_address);
+                            $old_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$shipment->consignee_address);
                             InterceptReBookRequestHistory::create([
                                 'shipment_id' => $request->shipment_id,
                                 'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -737,6 +743,8 @@ class ShipperAPIController extends Controller
                                 'new_amount' => $amount,
                                 'intercept_type' => $intercept_type,
                                 'shipper_id' => $user_id,
+                                'new_con_city_area_id' => $new_con_city_area_id,
+                                'old_con_city_area_id' => $old_con_city_area_id,
                             ]);
                             $shipment->consignee_status_id = 55;
                             $shipment->shipper_status_id = 55;

@@ -49,6 +49,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Agent</th>
                         <th class="border-primary border-darken-1">Old Consignee City</th>
+                        <th class="border-primary border-darken-1">Old Consignee Area</th>
                         <th class="border-primary border-darken-1">Old Consignee Name</th>
                         <th class="border-primary border-darken-1">Old Consignee Address</th>
                         <th class="border-primary border-darken-1">Old Consignee Phone 1</th>
@@ -56,6 +57,7 @@
                         <th class="border-primary border-darken-1">Old Consignee Email</th>
                         <th class="border-primary border-darken-1">Old Amount</th>
                         <th class="border-primary border-darken-1">New Consignee City</th>
+                        <th class="border-primary border-darken-1">New Consignee Area</th>
                         <th class="border-primary border-darken-1">New Consignee Name</th>
                         <th class="border-primary border-darken-1">New Consignee Address</th>
                         <th class="border-primary border-darken-1">New Consignee Phone 1</th>
@@ -112,6 +114,7 @@
                             head.push('Origin');
                             head.push('Agent');
                             head.push('Old Consignee City');
+                            head.push('Old Consignee Area');
                             head.push('Old Consignee Name');
                             head.push('Old Consignee Address');
                             head.push('Old Consignee Phone 1');
@@ -119,6 +122,7 @@
                             head.push('Old Consignee Email');
                             head.push('Old Amount');
                             head.push('New Consignee City');
+                            head.push('New Consignee Area');
                             head.push('New Consignee Name');
                             head.push('New Consignee Address');
                             head.push('New Consignee Phone 1');
@@ -137,6 +141,7 @@
                                 row.push(values.origin);
                                 row.push(values.agent);
                                 row.push(values.old_consignee_city);
+                                row.push(values.old_consignee_area);
                                 row.push(values.old_consignee_name);
                                 row.push(values.old_consignee_address);
                                 row.push(values.old_consignee_phone_number_1);
@@ -144,6 +149,7 @@
                                 row.push(values.old_consignee_email);
                                 row.push(values.old_amount);
                                 row.push(values.new_consignee_city);
+                                row.push(values.new_consignee_area);
                                 row.push(values.new_consignee_name);
                                 row.push(values.new_consignee_address);
                                 row.push(values.new_consignee_phone_number_1);
@@ -225,6 +231,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
                     {data: 'old_consignee_city', name: 'odc.name', class: 'align-middle old_consignee_city'},
+                    {data: 'old_consignee_area', name: 'cas2.name', class: 'align-middle old_consignee_area'},
                     {data: 'old_consignee_name', name: 'intercept_re_book_request_histories.old_consignee_name', class: 'align-middle old_consignee_name'},
                     {data: 'old_consignee_address', name: 'intercept_re_book_request_histories.old_consignee_address', class: 'align-middle old_consignee_address'},
                     {data: 'old_consignee_phone_number_1', name: 'intercept_re_book_request_histories.old_consignee_phone_number_1', class: 'align-middle old_consignee_phone_number_1'},
@@ -232,6 +239,7 @@
                     {data: 'old_consignee_email', name: 'intercept_re_book_request_histories.old_consignee_email', class: 'align-middle old_consignee_email'},
                     {data: 'old_amount', name: 'old_amount', class: 'align-middle old_amount'},
                     {data: 'new_consignee_city', name: 'nc.name', class: 'align-middle new_consignee_city'},
+                    {data: 'new_consignee_area', name: 'cas.name', class: 'align-middle new_consignee_area'},
                     {data: 'new_consignee_name', name: 'intercept_re_book_request_histories.new_consignee_name', class: 'align-middle new_consignee_name'},
                     {data: 'new_consignee_address', name: 'intercept_re_book_request_histories.new_consignee_address', class: 'align-middle new_consignee_address'},
                     {data: 'new_consignee_phone_number_1', name: 'intercept_re_book_request_histories.new_consignee_phone_number_1', class: 'align-middle new_consignee_phone_number_1'},
