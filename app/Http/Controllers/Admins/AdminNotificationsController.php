@@ -813,38 +813,11 @@ class AdminNotificationsController extends Controller
         return $details;
     }
 
-    public function edit(Request $request){
-
-        if ($request->get('id') == 132)
-        {
-            preg_match('/\s.*?\n([^\s,]*?)/s', $request->body, $matches);
-            $consignee_name = trim($matches[0]);
-            $cleaned_string = preg_replace('/,/', '', $consignee_name);
-            $required_lenght = substr($cleaned_string, 0, 10);
-            $message =  $request->get('body');
-            $lines = explode("\n", $message);
-            unset($lines[0]);
-            $message = implode("\n", $lines);
-    
-            $first_space_position = strpos($request->body, " ");
-            $first_word = substr($request->body, 0, $first_space_position);
-
-        }else if($request->get('id') == 135)
-        {
-            preg_match('/^[^\p{Arabic}]+/u', $request->get('body'), $matches);
-            $consignee_name = trim($matches[0]);
-            $cleaned_name = preg_replace('/[,،]/u', '', $consignee_name);
-            $required_lenght_urdu = substr($cleaned_name, 0, 10);
-            $first_line = strtok($request->get('body'), "\n");
-            $first_word_urdu = trim(substr($first_line,strpos($first_line, ' ') + 0));
-            preg_match('/[\x{0600}-\x{06FF}\x{0750}-\x{077F}]+/u', $first_word_urdu, $matches);
-            $urdu_word = $matches[0];
-            $lines = preg_replace('/^[^\n]*\n/', '', $request->get('body'));
-        }
-      
-
+    public function edit(Request $request)
+    {
         $notification = Notification::find($request->get('id'));
-        if ($notification && $notification->id != 132 && $notification->id != 135) 
+        
+        if ($notification) 
         {
             if ($notification->type_id == 1) 
             {
@@ -860,29 +833,7 @@ class AdminNotificationsController extends Controller
             return ['status' => 0, 'success' => 'Notification has been edited'];
 
         }
-        else if ($notification->id == 132 || $notification->id == 135) 
-        {
-            if($notification->type_id == 1) 
-            {
-                $notification->subject = $request->get('subject');
-            }
-
-            if($request->get('id') == 132)
-            {
-                $notification->body = $first_word .' '. $required_lenght . "\n" . $message;
-
-            }else if ($request->get('id') == 135)
-            {
-                $notification->body =  $required_lenght_urdu .' '. $urdu_word  . "\n" . $lines;
-            }
-
-            
-            $notification->updated_by = Auth::id();
-
-            $notification->save();
-
-            return ['status' => 0, 'success' => 'Notification has been edited'];
-        } else {
+        else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];
         }
     }
