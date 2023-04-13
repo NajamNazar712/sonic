@@ -4378,20 +4378,20 @@ class AdminHumanResourseController extends Controller
             {
                 if($employee->line_manager_id == Auth::user()->employee_id)
                 {
-                    $availed_leaves = EmployeeLeave::join('employees as a','a.id','a.id','employee_leaves.employee_id')
-                    ->where('a.line_manager_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
+                    // $availed_leaves = EmployeeLeave::join('employees as a','a.id','a.id','employee_leaves.employee_id')
+                    // ->where('a.line_manager_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
                     
-                    // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')->
-                    // join('employees as a','a.id','a.id','employee_leaves.employee_id')
-                    // ->where('a.line_manager_id', Auth::user()->employee_id)
-                    // ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                    $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')->
+                    join('employees as a','a.id','a.id','employee_leaves.employee_id')
+                    ->where('a.line_manager_id', Auth::user()->employee_id)
+                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
                     
                 }else{
 
-                    $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
-                    // $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
-                    // ->where('employee_id', Auth::user()->employee_id)
-                    // ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
+                    // $availed_leaves = EmployeeLeave::where('employee_id', Auth::user()->employee_id)->whereIn('status',[6])->whereIn('leave_type', [1,2,3,4])->count();
+                    $availed_leaves = EmployeeLeave::selectRaw('SUM(DATEDIFF(`to`, `from`) + 1) as leaves_availed')
+                    ->where('employee_id', Auth::user()->employee_id)
+                    ->whereIn('status', [6])->whereIn('leave_type', [1,2,3,4])->value('leaves_availed'); 
                 }
                 return max(0,$availed_leaves);
             })
@@ -4456,19 +4456,7 @@ class AdminHumanResourseController extends Controller
                     
                     if ($emp_id->exists()) {
                         $emp_id = $emp_id->first();
-                        if ($employee->line_manager_id == $emp_id->id) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item approve_by_line_manager" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve By Line Manager</div></button>';
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $employee->leave_id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Reject By Line Manager</div></button>';
-                            // $dropdown .= '<button type="button" class="dropdown-item edit" data-target-id=' . $employee->leave_id . ' rel='.$employee->leave_type_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit</div></button>';
-                            $dropdown .= '
-                            </div>
-                          </div>
-                        ';
-                            return $dropdown;
-
-                        } 
-                        elseif ($employee->trax_id == $emp_id->trax_id) {
+                        if ($employee->trax_id == $emp_id->trax_id) {
                             $dropdown = '
                             <div class="btn-group">
                               <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -5051,6 +5039,7 @@ class AdminHumanResourseController extends Controller
                         $leave_request->applied_reason = $reason;
                         $leave_request->leave_type = $request->edit_leave_type;
                         $leave_request->updated_by = auth()->id();
+                        $leave_request->status = 1;
                         $leave_request->save();
                         $admin_profile->save();
 

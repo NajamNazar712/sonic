@@ -295,7 +295,7 @@
 
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Edit
+                            <button type="submit" name="edit" class="btn btn-primary btn-min-width" value="edit">Update
                             </button>
                         </div>
                     </form>
