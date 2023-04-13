@@ -56,9 +56,6 @@
 								<div class="col-3">
 									<div class="form-group">
 										<select name="search_hub" id="search_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required" >
-											@foreach($hubs as $hub)
-												<option value="{{$hub->id}}">{{$hub->name}}</option>
-											@endforeach
 										</select>
 									</div>
 								</div>
@@ -66,9 +63,7 @@
 								<div class="col-3">
 									<div class="form-group">
 										<select name="search_area" id="search_area" class="form-control select2">
-											@foreach($areas as $area)
-												<option value="{{$area->id}}">{{$area->name}} - {{ $area->hubs->name }}</option>
-											@endforeach
+
 										</select>
 									</div>
 								</div>
@@ -353,7 +348,7 @@
 				data: function (d) {
 					d.search_date_from = $('input[name="search_date_from_formatted"]').val();
 					d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-					d.search_hub = $('input[name="search_hub"]').val();
+					d.search_hub = $('#search_hub').val();
 					d.search_area = $('#search_area').val();
 				}
 			},
@@ -500,13 +495,24 @@
 				$('audio#sound')[0].currentTime = 0;
 			});
 
+			var data1 = $.map({!! $hubs !!}, function (obj) {
+				obj.text = obj.name;
+				return obj;
+			});
+			var data2 = $.map({!! $areas !!}, function (obj) {
+				obj.text = obj.name;
+				return obj;
+			});
+
 			$("#search_hub").prepend('<option value="" selected></option>').select2({
 				placeholder: "Select Hub",
+				data: data1,
 				allowClear: true,
 				width: '100%',
 			});
 			 $("#search_area").prepend('<option value="" selected></option>').select2({
 				placeholder: "Select Area",
+				data : data2,
 				allowClear: true,
 				width: '100%',
 			});
