@@ -23,11 +23,11 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Fintech Company Name</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Added at</th>
                                     <th class="border-primary border-darken-1">Added by</th>
-                                    <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Added at</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">Updated At</th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                     <!-- <th class="border-primary border-darken-1"></th> -->
                                 </tr>
                                 </thead>
@@ -155,6 +155,47 @@
             </div>
         </div>
     </div>
+
+
+{{-- Modal Start --}}
+
+
+<div class="modal fade text-left" id="FintechCompanyStatus" data-backdrop="static" role="dialog" aria-labelledby=""
+    aria-hidden="true">
+   <div class="modal-dialog modal-md" role="document">
+       <div class="modal-content">
+           <div class="modal-header">
+               <h4 class="modal-title">Enable/Disable Fintech Company </h4>
+           </div>
+               <div class="modal-body">
+                    <div class="col text-center">
+                        <label class="font-medium-2 font-weight-bold block">Are You Want to Enable Company? </label>
+                        <div class="form-group">
+                            <input type="hidden" name="userID" id="userID">
+                            <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
+                            <input type="checkbox"  id="user_fintech_charges_checkbox" class="switchery restrict_order_id_checkbox" data-size="sm" data-switchery="true">
+                            <label for="" class="font-medium-2 text-bold-600 ml-1">Yes</label>
+                        </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button " class="btn btn-success"  onclick="save_changes()" >Submit</button>
+                            <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+               </div>
+               
+          
+       </div>
+   </div>
+</div>
+
+{{-- Modal End --}}
+
+
+
+
+
+
 @endsection
 
 
@@ -177,6 +218,90 @@
 
 
     <script type="text/javascript">
+
+    function save_changes(){
+    var id = $("#userID").val();
+    
+    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update Standard Fintech Charges!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            var fintechCharges = $("#user_fintech_charges_txtbox").val();
+                            var userID = $("#userID").val();
+                            if (document.getElementById('user_fintech_charges_checkbox').checked) {
+                               var checkboxval = 'true';
+                            }
+                            else{
+                                var checkboxval = 'false';
+                            }
+                          $.ajax({
+                            type : 'GET',
+                            url  : "{!! route('admin.settings.fintech_company_charges.status') !!}",
+                            data : {id:id,checkboxval:checkboxval},
+                            success:function(res){
+                                if(res.status == '200'){
+                                    toastr.success(res.message, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center',
+                                });
+                                $("#FintechCompanyStatus").modal('hide');
+                                //window.location.reload();
+                                }
+                                else{
+                                    toastr.error(res.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                                
+                                }
+                            }
+
+                            });
+                        }
+                    });
+    }
+
+    function changefintechcompanystatus(event,id,status){
+        if(status == '1'){
+            if (document.getElementById('user_fintech_charges_checkbox').checked) {
+
+            }
+            else{
+                $('#user_fintech_charges_checkbox').click();
+            }
+        }
+        else{
+            if (document.getElementById('user_fintech_charges_checkbox').checked) {
+                $('#user_fintech_charges_checkbox').click();
+            }
+            else{
+               
+            }
+        }
+        $("#userID").val(id);
+        $("#FintechCompanyStatus").modal('show');
+    }
+
+
         $(document).ready(function() {
             $('#rider_category_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -306,15 +431,19 @@
                             head.push('S.No');
                             head.push('Fintech Company Name');
                             head.push('Status');
-                            head.push('Added at');
                             head.push('Added by');
+                            head.push('Added at');
+                            head.push('Updated by');
+                            head.push('Updated at');
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.company_name);
                                 row.push(values.status);
+                                row.push(values.admin1);
                                 row.push(values.created_at);
-                                row.push(values.admin);
+                                row.push(values.admin2);
+                                row.push(values.updated_at);
                  
                              
                                 body.push(row);
@@ -347,7 +476,7 @@
                     
                     {
                     extend: 'excel',
-                    title: 'Rider Incentive Setting',
+                    title: 'Fintech Companies List',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -367,11 +496,11 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'company_name', name: 'company_name', class: 'align-middle company_name'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'admin1', name: 'admin1', class: 'align-middle admin'},
-                    {data: 'updated_at', name: 'updated_at', class: 'align-middle created_at'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
                     {data: 'admin2', name: 'admin2', class: 'align-middle admin'},
-                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'updated_at', name: 'updated_at', class: 'align-middle created_at'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

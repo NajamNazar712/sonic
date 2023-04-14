@@ -18,8 +18,8 @@ class CreateStandardFintechChargesTable extends Migration
             $table->string('standard_fintech_charges');
             $table->string('standard_fed_charges');
             $table->tinyInteger('status')->default('1');
-            $table->tinyInteger('created_by');
-            $table->tinyInteger('updated_by');
+            $table->Integer('created_by');
+            $table->Integer('updated_by');
             $table->timestamps();
         });
     }

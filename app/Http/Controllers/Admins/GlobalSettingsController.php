@@ -3613,9 +3613,6 @@ class GlobalSettingsController extends Controller
         ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
         ->get();
 
-
-
-
         $datatable = Datatables::of($FintechValues)
         ->editColumn('status', function ($data) {
             if ($data->status == 1) {
@@ -3627,18 +3624,45 @@ class GlobalSettingsController extends Controller
         ->addColumn('action', function ($data) {
          
             if(session('role_id') == 1 || in_array(853, session('permissions'))){
+                if($data->status == '1'){
                 $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
-           
+                }else{
+                    $edit ='';
+                }
+
+                $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="changefintechcompanystatus(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Change Status</a>';
+              
+               
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= $edit;
+                    $dropdown .= $edit.$enable;
                 return $dropdown;
             }
         });
+
+        
+        
     return $datatable->make(true);
     }
+
+    public function change_company_status(Request $req){
+        $FintecCompany = FintechCompany::where('id',$req->id);
+      if($req->checkboxval == 'false'){
+            $FintecCompany->update([
+                'status' =>  '0'   
+            ]);
+      }
+      else{
+            $FintecCompany->update([
+                'status' =>  '1'   
+            ]);
+      }
+    
+      return response()->json(['status'=>'200']);
+    }
+
 
     public function setup_fintech_charges_save(Request $req){
         if(!empty($req->fintech_range_up)){
@@ -3650,7 +3674,7 @@ class GlobalSettingsController extends Controller
                 $FintechSetup->updated_by    = Auth::id();
                 $FintechSetup->save();
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
-                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
                             $FintechSetupValues =  new FintechCompanyCharges();
                             $FintechSetupValues->company_Id          = $FintechSetup->id;
                             $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
@@ -3662,7 +3686,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
             DB::commit();
-                return redirect()->back()->with('success', 'Added Successfully');
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Added Successfully');
             } 
             catch(exception $e){
                 DB::rollback();
@@ -3688,7 +3712,7 @@ class GlobalSettingsController extends Controller
            try{ 
                 if(!empty($req->fintech_range_up)){
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
-                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->additional_charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
                             $FintechSetupValues =  new FintechCompanyCharges();
                             $FintechSetupValues->company_Id          = $req->company_id;
                             $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
@@ -3721,7 +3745,7 @@ class GlobalSettingsController extends Controller
                 DB::rollback();
             }   
             finally{
-                return redirect()->back()->with('success', 'Update Charges Successfully'); 
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Charges Updated Successfully'); 
             }
            
         }
@@ -3762,7 +3786,7 @@ class GlobalSettingsController extends Controller
                         $StandardFintectCharges->save();
                     }
                     
-                    return redirect()->back()->with('success', 'Standard Charges Set Successfully'); 
+                    return response()->json(['status' => '200']); 
                 }
                 
                 catch(Exception $e){

@@ -506,52 +506,52 @@ class AdminDashboardController extends Controller
 //Added by Murad
 
 public function add_fintech_charges(Request $req){  
-   $UserFintectCharges = new UserFintectCharges();
-   $values =  $UserFintectCharges::where('user_id',$req->userID)->first();
 
-   if(empty($req->fintechCharges)){
-
-    if(!empty($values)){
-        return response()->json([
-            'status' => '200',
-            'data' => $values
-        ]);
-    } 
-    else{
-        return response()->json([
-            'status' => '404',
-        ]);
-    }
-       
-   }
-   else{
-    try{
-        if(!empty($values->user_id)){
-            $UserFintectCharges::where('user_id',$req->userID)->update([
-                'fintech_charges'  => $req->fintechCharges,
-                'updated_by'       => Auth::id()   
-            ]); 
+    $UserFintectCharges = new UserFintectCharges();
+    $values =  $UserFintectCharges::where('user_id',$req->userID)->first();
+        if(empty($req->fintechCharges)){
+            if(!empty($values)){
+                return response()->json([
+                    'status' => '200',
+                    'data' => $values
+                ]);
+            } 
+                else{
+                    return response()->json([
+                        'status' => '404',
+                    ]);
+                }
+           }
+           else{
+            if($req->checkboxval == 'true'){
+            try{
+                if(!empty($values->user_id)){
+                    $UserFintectCharges::where('user_id',$req->userID)->update([
+                        'fintech_charges'  => $req->fintechCharges,
+                        'updated_by'       => session('id')
+                    ]); 
+                }
+                else{
+                    // dd(Auth::id());
+                    $UserFintectCharges->user_id            = $req->userID;
+                    $UserFintectCharges->fintech_charges    = $req->fintechCharges;
+                    $UserFintectCharges->added_by           = session('id');
+                    $UserFintectCharges->updated_by         = session('id');
+                    $UserFintectCharges->save();
+                }
+                return response()->json([
+                    'status'  => '200',
+                    'message' => 'Charges Set Successfully',
+                ]);
+            }
+            catch(exception $e){
+                return response()->json([
+                    'message' => 'Charges Not Set',
+                ]); 
+                } 
+            }
         }
-        else{
-            $UserFintectCharges->user_id            = $req->userID;
-            $UserFintectCharges->fintech_charges    = $req->fintechCharges;
-            $UserFintectCharges->added_by           = Auth::id();
-            $UserFintectCharges->updated_by         = Auth::id();
-            $UserFintectCharges->save();
-        }
-
-        return response()->json([
-            'status'  => '200',
-            'message' => 'Charges Set Successfully',
-        ]);
-   }
-    catch(exception $e){
-        return response()->json([
-            'message' => 'Charges Not Set',
-        ]); 
-        } 
     }
-}
 
 //End
     public function statistics_search(Request $request)

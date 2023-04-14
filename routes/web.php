@@ -3252,7 +3252,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@setup_fintech_charges_save')->name('store');
             Route::get('edit/{id}', 'Admins\GlobalSettingsController@setup_fintech_charges_edit')->name('edit');
             Route::post('edit_save', 'Admins\GlobalSettingsController@setup_fintech_charges_edit_save')->name('edit_save');
-         
+            Route::get('edit_status', 'Admins\GlobalSettingsController@change_company_status')->name('status');
         });
 
 

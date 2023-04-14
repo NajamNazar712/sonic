@@ -17,7 +17,7 @@ class CreateShipmentFintechChargesTable extends Migration
             $table->increments('id');
             $table->Integer('shipment_id');
             $table->string('fintech_charges');
-            $table->tinyInteger('applied_to')->default('1');
+            $table->Integer('applied_to')->default('1');
             $table->timestamps();
         });
     }

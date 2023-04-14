@@ -15,11 +15,11 @@ class CreateUserFintectChargesTable extends Migration
     {
         Schema::create('user_fintect_charges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->tinyInteger('status')->default('1');
+            $table->Integer('user_id');
+            $table->Integer('status')->default('1');
             $table->string('fintech_charges');
-            $table->tinyInteger('added_by');
-            $table->tinyInteger('updated_by');
+            $table->Integer('added_by');
+            $table->Integer('updated_by');
             $table->timestamps();
         });
     }

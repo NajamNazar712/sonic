@@ -19,7 +19,7 @@ class CreateFintechCompanyChargesTable extends Migration
             $table->string('range_up');
             $table->string('range_down');
             $table->string('charges');
-            $table->string('additional_charges');
+            $table->string('additional_charges')->nullable();
             $table->string('fed_tax');
             $table->timestamps();
         });
