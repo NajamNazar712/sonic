@@ -126,6 +126,7 @@ use App\Http\Models\ServiceList;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
+use App\Jobs\SwichPaymentGatewayApi;
 //End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -3601,7 +3602,12 @@ class GlobalSettingsController extends Controller
 
 
     public function setup_fintech_charges_show(){
-        return view('admin.settings.fintech.form');
+
+    $shipments_id    = '1';
+    $payment_option  = 'EasiPaisa';
+    $items           = 'Test';
+    //$swich_payment_gateway_api = SwichPaymentGatewayApi::dispatch($shipments_id,$payment_option,$items);
+    return view('admin.settings.fintech.form');
     }
 
     public function setup_fintech_charges_list(){
@@ -3758,6 +3764,8 @@ class GlobalSettingsController extends Controller
 
         public function standard_fintech_charges_store(Request $req){
         $StandardFintectCharges = new standard_fintech_charges();
+
+        // dd($req->all());
 
             $validator = Validator::make($req->all(), [
                 'standard_fintech_charges'  => 'required',

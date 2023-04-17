@@ -19,16 +19,29 @@
                                 <form class="form-horizontal text-center" id="save_standard_fintech_charges"  novalidate="novalidate" autocomplete="off">
                                     {{ csrf_field() }}
                                     <div class="row justify-content-center">
-                                        <div class="form-group text-left">
+                                        <div class="form-group">
                                             <label>Standard Fintech Charges*</label>
-                                            <input type="text" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder=""  data-rule-required="true" data-msg-required="Standard Fintech Charges Required">
+                                            <div class="form-group input-group">
+                                                <input type="text" name="standard_fintech_charges" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder=""  data-rule-required="true" data-msg-required="Standard Fintech Charges Required">   <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 
                                     <div class="row justify-content-center">
                                         <div class="form-group">
                                             <label>Standard FED Tax Charges*</label>
-                                            <input type="text" id="standard_FED_Charges"   value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder="" data-rule-required="true" data-msg-required="Standard FED Tax Charges Required">
+                                        
+                                        
+                                            <div class="form-group input-group">
+                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Amount*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required">
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">%</span>
+                                                </div>
+                                            </div>
+                                        
+                                        
                                         </div>
                                     </div>
                                     <div class="col">
@@ -69,6 +82,7 @@
 $("#save_standard_fintech_charges" ).validate({
     errorClass:"danger",
     errorPlacement: function(error, element) {
+        console.log();
         error.addClass('w-100').appendTo(element.parent('.form-group'));
     },
     submitHandler: function(form) {

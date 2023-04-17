@@ -464,7 +464,7 @@ function checkboxStatus(){
               $(".UserFintechCharges").append(`
             
               <div class="form-group text-left">
-                <div class="input-group">
+                <div class="input-group form-group">
                     <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges Required">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
@@ -1830,7 +1830,7 @@ $("#Save_fintech_charges" ).validate({
                             $(".UserFintechCharges").append(`
 
                             <div class="form-group text-left">
-                <div class="input-group">
+                <div class="input-group form-group">
                     <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" placeholder ="Fintech Charges*" class="form-control valid" placeholder="" aria-invalid="false" data-rule-required="true" data-msg-required="Fintech Charges Required">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
