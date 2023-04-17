@@ -245,8 +245,15 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_statuses as hs','hs.id','=','handovers.status_id')
         ->leftjoin('handover_responsibilities as hr','hr.id','=','handovers.from')
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
-        ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining')]);
+        ->leftjoin('city_areas as c_from', function ($join) {
+            $join->on('c_from.city_id', '=', 'hr.hub_id')
+                ->where('c_from.default', 1);
+        })
+        ->leftjoin('city_areas as c_to', function ($join) {
+            $join->on('c_to.city_id', '=', 'hor.hub_id')
+                ->where('c_to.default', 1);
+        })->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments','handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),'c_from.name as from_area','c_to.name as to_area']);
 
         $datatable = Datatables::of($handover_list)
 
@@ -584,8 +591,9 @@ class AdminShipmentHandoverController extends Controller
         }
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
+        ->leftjoin('city_areas as ca', 'ca.id', '=', 'a.area_id')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
-        ->select('handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
+        ->select('ca.name as area','handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
 
         $datatable = Datatables::of($responsibles_list)
         ->setRowAttr([

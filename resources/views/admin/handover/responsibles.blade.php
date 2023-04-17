@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Created by</th>
                                     <th class="border-primary border-darken-1">Updated by</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -270,6 +271,7 @@
                 {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'handover_responsibilities.name', class: 'align-middle name'},
                 {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                {data: 'area', name: 'ca.name', class: 'align-middle area'},
                 {data: 'created', name: 'a.name', class: 'align-middle created'},
                 {data: 'updated', name: 'u.name', class: 'align-middle updated'},
                 {data: 'status', name: 'handover_responsibilities.status', class: 'align-middle status'},
