@@ -169,7 +169,7 @@
            </div>
                <div class="modal-body">
                     <div class="col text-center">
-                        <label class="font-medium-2 font-weight-bold block">Are You Want to Enable Company? </label>
+                    <label class="font-medium-2 font-weight-bold block">Are You Want to Enable Company? </label>
                         <div class="form-group">
                             <input type="hidden" name="userID" id="userID">
                             <label for="" class="font-medium-2 text-bold-600 mr-1">No</label>
@@ -219,41 +219,16 @@
 
     <script type="text/javascript">
 
-    function save_changes(){
-    var id = $("#userID").val();
-    
-    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to update Standard Fintech Charges!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            var fintechCharges = $("#user_fintech_charges_txtbox").val();
+    function save_changes(e,id,status){
+        var fintechCharges = $("#user_fintech_charges_txtbox").val();
                             var userID = $("#userID").val();
-                            if (document.getElementById('user_fintech_charges_checkbox').checked) {
-                               var checkboxval = 'true';
+                            if (status == '1') {
+                               var checkboxval = 'false';
                             }
                             else{
-                                var checkboxval = 'false';
+                                var checkboxval = 'true';
                             }
-                          $.ajax({
+                            $.ajax({
                             type : 'GET',
                             url  : "{!! route('admin.settings.fintech_company_charges.status') !!}",
                             data : {id:id,checkboxval:checkboxval},
@@ -276,8 +251,35 @@
                             }
 
                             });
-                        }
-                    });
+   // var id = $("#userID").val();
+    
+    // swal({
+    //                     title: 'Are You Sure?',
+    //                     text: 'Select Yes to update Standard Fintech Charges!',
+    //                     icon: 'warning',
+    //                     buttons: {
+    //                         cancel: {
+    //                             text: 'No',
+    //                             value: null,
+    //                             visible: true,
+    //                             closeModal: true,
+    //                         },
+    //                         confirm: {
+    //                             text: 'Yes',
+    //                             value: true,
+    //                             visible: true,
+    //                             closeModal: true
+    //                         }
+    //                     },
+    //                     closeOnClickOutside: false,
+    //                     closeOnEsc: false,
+    //                     dangerMode: true
+    //                 }).then(function (confirm) {
+    //                     if(confirm){
+    //                         
+                          
+    //                     }
+    //                 });
     }
 
     function changefintechcompanystatus(event,id,status){

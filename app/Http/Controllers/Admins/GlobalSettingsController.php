@@ -3631,14 +3631,13 @@ class GlobalSettingsController extends Controller
          
             if(session('role_id') == 1 || in_array(853, session('permissions'))){
                 if($data->status == '1'){
-                $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
-                }else{
-                    $edit ='';
+                 $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="save_changes(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-minus-circle"></i> Disabled </a>';
                 }
-
-                $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="changefintechcompanystatus(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Change Status</a>';
-              
-               
+                else{
+                    $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="save_changes(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-plus-circle"></i> Enabled </a>';  
+                }  
+                
+                $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
                 $dropdown = '
                     <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -3659,14 +3658,19 @@ class GlobalSettingsController extends Controller
             $FintecCompany->update([
                 'status' =>  '0'   
             ]);
+            $message =  'Fintech Company has been disable successfully!';
       }
       else{
             $FintecCompany->update([
                 'status' =>  '1'   
             ]);
+
+            $message =  'Fintech Company has been enable successfully!';
       }
     
-      return response()->json(['status'=>'200']);
+      return response()->json([
+        'message' =>$message,
+        'status'=>'200']);
     }
 
 
@@ -3692,7 +3696,7 @@ class GlobalSettingsController extends Controller
                         }
                     }
             DB::commit();
-                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Added Successfully');
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Fintech Company Charges Added');
             } 
             catch(exception $e){
                 DB::rollback();
@@ -3751,7 +3755,7 @@ class GlobalSettingsController extends Controller
                 DB::rollback();
             }   
             finally{
-                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Charges Updated Successfully'); 
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Fintech Company Charges Updated'); 
             }
            
         }

@@ -13,7 +13,7 @@ table {
       text-align: center;
     }
 </style>
-@section('title', 'Add Fintech Charges')
+@section('title', 'Add Fintech Company Charges')
 
 @section('content')
     <div class="app-content content">
@@ -53,14 +53,14 @@ table {
                           
                                 <table  class="table table-responsive"> 
                                             <thead>      
-                                                <tr>
-                                                    <th class="center"><label>Range Up</label></th>
-                                                    <th class="center"><label>Range Down</label></th>
-                                                    <th class="center"><label>Charges</label></th>
-                                                    <th class="center"><label>Additional Charges</label></th>
-                                                    <th class="center"><label>Federal Excise Duty Tax</label></th>
-                                                    <th class="center"></th>
-                                                </tr>
+                                                    <tr>
+                                                        <th class="center"><label>Range Up</label></th>
+                                                        <th class="center"><label>Range Down</label></th>
+                                                        <th class="center"><label>Charges</label></th>
+                                                        <th class="center"><label>Additional Charges</label></th>
+                                                        <th class="center"><label>Federal Excise Duty Tax</label></th>
+                                                      
+                                                    </tr>
                                             </thead>
                                         <tbody>
                                             @foreach($fintechvalues as $key=> $charges)
@@ -114,10 +114,13 @@ table {
                                                 </tr>
                                             @endforeach
                                         </tbody>
-                                            <tbody id="row_append_body_update">
-                                            </tbody>
                                 </table>
                            
+                                <table class="table table-responsive">  
+                                <tbody id="row_append_body_update">
+                                </tbody>
+                                </table>  
+
                                     <div class="col mb-1">
                                         <button type="button" class="btn btn-outline-success btm-sm add_row_update"
                                         id="add_row"><i class="la la-plus"></i></button>
@@ -169,10 +172,10 @@ table {
                                                     <input type="text" 
                                                     name="fintech_range_up[]"
                                                     onkeydown="inputValidate()"
-                                                    class="form-control input-filtered text-right"
+                                                    class="form-control input-filtered"
                                                     placeholder="Range Up*" required data-rule-required="true"
                                                     data-msg-required="This field is required"
-                                                    min="1"
+                                                  
                                                     >  
                                                     
                                                     </div>
@@ -183,8 +186,8 @@ table {
                                                     <input type="text" 
                                                     name="fintech_range_down[]"
                                                     onkeydown="inputValidate()"
-                                                    class="form-control input-filtered text-right"
-                                                    placeholder="Range Down *" required data-rule-required="true"
+                                                    class="form-control input-filtered "
+                                                    placeholder="Range Down*" required data-rule-required="true"
                                                     data-msg-required="This field is required"   min="1">
                                                     </div>
                                                 </td> 
@@ -194,8 +197,8 @@ table {
                                                     <input type="text" 
                                                     name="charges[]"
                                                     onkeydown="inputValidate()"
-                                                    class="form-control input-filtered text-right"
-                                                    placeholder="Charges *"
+                                                    class="form-control input-filtered "
+                                                    placeholder="Charges*"
                                                     data-rule-required="true"
                                                     data-msg-required="This field is required"   min="1">
                                                     </div>
@@ -206,7 +209,7 @@ table {
                                                     <input type="text"
                                                     name="additional_charges[]"
                                                     onkeydown="inputValidate()"
-                                                    class="form-control input-filtered text-right"
+                                                    class="form-control input-filtered "
                                                     placeholder="Additional Charges"   min="1">
                                                     
                                                 </td> 
@@ -216,7 +219,7 @@ table {
                                                     <input type="text"
                                                     name="fed_tax[]"
                                                     onkeydown="inputValidate()"
-                                                    class="form-control input-filtered text-right"
+                                                    class="form-control input-filtered "
                                                     placeholder="FED Tax Charges*"
                                                     data-rule-required="true"
                                                     data-msg-required="This field is required"   min="1">
@@ -233,8 +236,8 @@ table {
                                                         id="add_row"><i class="la la-plus"></i></button>
                                                 </div>
                                             </td>   
-                                    <div class="col">
-                                        <button type="submit" class="btn btn-primary width-100">Submit</button>
+                                    <div class="col" >
+                                        <button type="submit" class="btn btn-primary width-100"> submit</button>
                                     </div>
                                 </form>
                             </div>
@@ -276,7 +279,7 @@ $("#add_company_charges_update" ).validate({
      
         swal({
             title: 'Are You Sure?',
-            text: 'You want to Update Fintech Company Charges',
+            text: 'Select Yes to Update Fintech Company Charges',
             icon: 'warning',
             buttons: {
                 cancel: {
@@ -298,6 +301,7 @@ $("#add_company_charges_update" ).validate({
             }).then(function (confirm) {
                 if(confirm){
                     form.submit();
+            
                 }
         });
     }
@@ -313,7 +317,7 @@ $("#add_company_charges" ).validate({
      
         swal({
             title: 'Are You Sure?',
-            text: 'You want to Add Fintech Company Charges',
+            text: 'Select Yes to Add Fintech Charges',
             icon: 'warning',
             buttons: {
                 cancel: {
@@ -418,16 +422,16 @@ function inputValidate(){
                                         <div class="form-group">
                                                 <input type="text" name="fintech_range_up[]" 
                                                 onkeydown="inputValidate()"
-                                                class="form-control input-filtered text-right"
+                                                class="form-control input-filtered "
                                                 placeholder="Range Up*" required data-rule-required="true"
-                                                data-msg-required="This field is required"   min="1">
+                                                data-msg-required="This field is required"  >
                                         </div>
                                     </td>
                                      <td> 
                                         <div class="form-group">
                                             <input type="text" required name="fintech_range_down[]" 
                                             onkeydown="inputValidate()"
-                                            class="form-control input-filtered text-right"
+                                            class="form-control input-filtered "
                                             placeholder="Range Down*" required data-rule-required="true"
                                             data-msg-required="This field is required"   min="1">
                                         </div>
@@ -436,7 +440,7 @@ function inputValidate(){
                                         <div class="form-group">
                                             <input type="text" name="charges[]" 
                                             onkeydown="inputValidate()"
-                                            class="form-control input-filtered text-right"
+                                            class="form-control input-filtered"
                                             placeholder="Charges*" data-rule-required="true"
                                             data-msg-required="This field is required"   min="1">
                                         </div>
@@ -444,14 +448,14 @@ function inputValidate(){
                                     <td> 
                                         <input type="text" name="additional_charges[]"
                                         onkeydown="inputValidate()"
-                                        class="form-control input-filtered text-right"
+                                        class="form-control input-filtered "
                                         placeholder="Additional Charges"   min="1">
                                     </td> 
                                     <td> 
                                         <div class="form-group">
                                             <input type="text" name="fed_tax[]"    
                                             onkeydown="inputValidate()"
-                                            class="form-control input-filtered text-right"
+                                            class="form-control input-filtered "
                                             placeholder="FED Tax Charges*" data-rule-required="true"
                                             data-msg-required="This field is required"   min="1">
                                         </div>
@@ -491,8 +495,7 @@ var old_row = row - 1;
 flag = true;
 if (flag == true) {
 
-    var html = `
-                <tr>
+    var html = `<tr>
                     <td>
                         <div class="form-group">
                             <input type="text" required name="fintech_range_up[]"
