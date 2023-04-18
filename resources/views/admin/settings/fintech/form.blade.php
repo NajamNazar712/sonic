@@ -170,7 +170,7 @@ table {
                                                 <td>
                                                     <div class="form-group">
                                                     <input type="text" 
-                                                    name="fintech_range_up[]"
+                                                    name="fintech_range_up[0]"
                                                     onkeydown="inputValidate()"
                                                     class="form-control input-filtered"
                                                     placeholder="Range Up*" required data-rule-required="true"
@@ -184,7 +184,7 @@ table {
                                                 <td> 
                                                     <div class="form-group">
                                                     <input type="text" 
-                                                    name="fintech_range_down[]"
+                                                    name="fintech_range_down[0]"
                                                     onkeydown="inputValidate()"
                                                     class="form-control input-filtered "
                                                     placeholder="Range Down*" required data-rule-required="true"
@@ -195,7 +195,7 @@ table {
                                                 <td> 
                                                     <div class="form-group">
                                                     <input type="text" 
-                                                    name="charges[]"
+                                                    name="charges[0]"
                                                     onkeydown="inputValidate()"
                                                     class="form-control input-filtered "
                                                     placeholder="Charges*"
@@ -207,7 +207,7 @@ table {
                                                 <td> 
                                                   
                                                     <input type="text"
-                                                    name="additional_charges[]"
+                                                    name="additional_charges[0]"
                                                     onkeydown="inputValidate()"
                                                     class="form-control input-filtered "
                                                     placeholder="Additional Charges"   min="1">
@@ -378,7 +378,7 @@ function inputValidate(){
                 'allowpercentage': true,
             });
             var row = 1;
-        
+           
             $('body').on('click', '.add_row', function() {
 
                 var old_row = row - 1;
@@ -420,7 +420,7 @@ function inputValidate(){
                     var html = `<tr>
                                     <td>
                                         <div class="form-group">
-                                                <input type="text" name="fintech_range_up[]" 
+                                                <input type="text" name="fintech_range_up[`+row+`]" 
                                                 onkeydown="inputValidate()"
                                                 class="form-control input-filtered "
                                                 placeholder="Range Up*" required data-rule-required="true"
@@ -429,7 +429,7 @@ function inputValidate(){
                                     </td>
                                      <td> 
                                         <div class="form-group">
-                                            <input type="text" required name="fintech_range_down[]" 
+                                            <input type="text" required name="fintech_range_down[`+row+`]" 
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered "
                                             placeholder="Range Down*" required data-rule-required="true"
@@ -438,7 +438,7 @@ function inputValidate(){
                                     </td> 
                                     <td> 
                                         <div class="form-group">
-                                            <input type="text" name="charges[]" 
+                                            <input type="text" name="charges[`+row+`]" 
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered"
                                             placeholder="Charges*" data-rule-required="true"
@@ -446,14 +446,14 @@ function inputValidate(){
                                         </div>
                                     </td> 
                                     <td> 
-                                        <input type="text" name="additional_charges[]"
+                                        <input type="text" name="additional_charges[`+row+`]"
                                         onkeydown="inputValidate()"
                                         class="form-control input-filtered "
                                         placeholder="Additional Charges"   min="1">
                                     </td> 
                                     <td> 
                                         <div class="form-group">
-                                            <input type="text" name="fed_tax[]"    
+                                            <input type="text" name="fed_tax[`+row+`]"    
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered "
                                             placeholder="FED Tax Charges*" data-rule-required="true"
@@ -488,17 +488,17 @@ function inputValidate(){
 
             });
 
-
+            var y = 0;
             $('body').on('click', '.add_row_update', function() {
 
-var old_row = row - 1;
+
 flag = true;
 if (flag == true) {
-
+   
     var html = `<tr>
                     <td>
                         <div class="form-group">
-                            <input type="text" required name="fintech_range_up[]"
+                            <input type="text" required name="fintech_range_up[`+y+`]"
                             onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
                             placeholder="Range Up*" data-rule-required="true" data-msg-required="This field is required" min="1">
@@ -506,7 +506,7 @@ if (flag == true) {
                     </td>
                     <td> 
                         <div class="form-group">
-                            <input type="text" required name="fintech_range_down[]"
+                            <input type="text" required name="fintech_range_down[`+y+`]"
                             onkeydown="inputValidate()" 
                             class="form-control input-filtered text-right"
                             placeholder="Range Down*" required data-rule-required="true"data-msg-required="This field is required">
@@ -514,21 +514,21 @@ if (flag == true) {
                     </td> 
                     <td> 
                         <div class="form-group">
-                            <input type="text" name="charges[]"
+                            <input type="text" name="charges[`+y+`]"
                             onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required">
                         </div>
                     </td> 
                     <td> 
-                        <input type="text" name="additional_charges[]"
+                        <input type="text" name="additional_charges[`+y+`]"
                         onkeydown="inputValidate()"
                         class="form-control input-filtered text-right"
                         placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required">
                     </td>
                     <td> 
                         <div class="form-group">
-                            <input type="text" name="fed_tax[]"
+                            <input type="text" name="fed_tax[`+y+`]"
                             onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required">
@@ -542,9 +542,7 @@ if (flag == true) {
                                
                 </tr>`;
     $('#row_append_body_update').append(html);
-
-
-
+    y++;
     $('#settings_form input.rangeup').inputmask({
         'alias': 'integer',
         'allowMinus': false,

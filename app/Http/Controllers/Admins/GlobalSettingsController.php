@@ -3675,6 +3675,8 @@ class GlobalSettingsController extends Controller
 
 
     public function setup_fintech_charges_save(Request $req){
+
+        dd($req->all());
         if(!empty($req->fintech_range_up)){
             DB::beginTransaction();
             try{
