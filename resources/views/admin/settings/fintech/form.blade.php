@@ -317,7 +317,7 @@ $("#add_company_charges" ).validate({
      
         swal({
             title: 'Are You Sure?',
-            text: 'Select Yes to Add Fintech Charges',
+            text: 'Select Yes to Add Fintech Company Charges! ',
             icon: 'warning',
             buttons: {
                 cancel: {
