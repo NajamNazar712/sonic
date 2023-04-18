@@ -79,7 +79,7 @@ class LeadTaggingController extends Controller
             $body = $lead_notification_email->body;
             $to = $lead->email_address;
             $body_attachment_message = PHP_EOL . 'Please Find the Attachment from the following Link(s).' . PHP_EOL;
-            $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
+            $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->official_phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
 
             $sms_body = $lead_notification_sms->body;
 
@@ -181,7 +181,7 @@ class LeadTaggingController extends Controller
         $body = $lead_notification_email->body;
         $to = $lead->email_address;
 
-        $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
+        $fields = ['shipper_name' => $lead->contact_person, 'tagged_salesperson_name' => $lead->sales_person->name, 'tagged_salesperson_number' => $lead->sales_person->official_phone_number, 'tagged_salesperson_email' => $lead->sales_person->email];
 
         $sms_body = $lead_notification_sms->body;
 
