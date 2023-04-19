@@ -219,89 +219,9 @@
 
     <script type="text/javascript">
 
-    function save_changes(e,id,status){
-        var fintechCharges = $("#user_fintech_charges_txtbox").val();
-                            var userID = $("#userID").val();
-                            if (status == '1') {
-                               var checkboxval = 'false';
-                            }
-                            else{
-                                var checkboxval = 'true';
-                            }
-                            $.ajax({
-                            type : 'GET',
-                            url  : "{!! route('admin.settings.fintech_company_charges.status') !!}",
-                            data : {id:id,checkboxval:checkboxval},
-                            success:function(res){
-                                if(res.status == '200'){
-                                    toastr.success(res.message, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center',
-                                });
-                                $("#FintechCompanyStatus").modal('hide');
-                                window.location.reload();
-                                }
-                                else{
-                                    toastr.error(res.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                                
-                                }
-                            }
-
-                            });
-   // var id = $("#userID").val();
     
-    // swal({
-    //                     title: 'Are You Sure?',
-    //                     text: 'Select Yes to update Standard Fintech Charges!',
-    //                     icon: 'warning',
-    //                     buttons: {
-    //                         cancel: {
-    //                             text: 'No',
-    //                             value: null,
-    //                             visible: true,
-    //                             closeModal: true,
-    //                         },
-    //                         confirm: {
-    //                             text: 'Yes',
-    //                             value: true,
-    //                             visible: true,
-    //                             closeModal: true
-    //                         }
-    //                     },
-    //                     closeOnClickOutside: false,
-    //                     closeOnEsc: false,
-    //                     dangerMode: true
-    //                 }).then(function (confirm) {
-    //                     if(confirm){
-    //                         
-                          
-    //                     }
-    //                 });
-    }
 
-    function changefintechcompanystatus(event,id,status){
-        if(status == '1'){
-            if (document.getElementById('user_fintech_charges_checkbox').checked) {
-
-            }
-            else{
-                $('#user_fintech_charges_checkbox').click();
-            }
-        }
-        else{
-            if (document.getElementById('user_fintech_charges_checkbox').checked) {
-                $('#user_fintech_charges_checkbox').click();
-            }
-            else{
-               
-            }
-        }
-        $("#userID").val(id);
-        $("#FintechCompanyStatus").modal('show');
-    }
+    
 
 
         $(document).ready(function() {
@@ -492,8 +412,8 @@
                 },
                 serverSide: true,
                 ajax: '{{ route('admin.settings.fintech_company_charges.list') }}',
-                rowId: 'row_id',
-                order: [[1, 'asc']],
+                rowId: 'id',
+                order: [[6, 'asc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'company_name', name: 'company_name', class: 'align-middle company_name'},
@@ -515,6 +435,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" style="height:30px; width:150px;" class="select2 form-control">' +
+                        '<option value="1">Enable</option>' +
+                        '<option value="0">Disable</option>' +
+                        '</select>';
       
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -522,6 +446,12 @@
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.status')) {
+                            $(status_select).appendTo($(search))
+                                .on('change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
                         }
      
                         else {
@@ -535,11 +465,20 @@
                         }
                     });
 
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Category",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });
 
 
+            
+            
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if ($(this).hasClass('enable')) {
@@ -592,6 +531,36 @@
                 $('#edit_delivery_payment_select').val('').trigger('change');
                 $('#edit_weight_range_select').val('').trigger('change');
                 $('#edit_incentive_form input.incentive_value').val('');
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action a.status', function() {
+                var fintechCharges = $("#user_fintech_charges_txtbox").val();
+                var userID = $("#userID").val();
+                var id = $(this).parents('tr').attr('id');
+             
+                $.ajax({
+                    type : 'GET',
+                    url  : "{!! route('admin.settings.fintech_company_charges.status') !!}",
+                    data : {id:id},
+                    success:function(res){
+                        if(res.status == '200'){
+                            toastr.success(res.message, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center',
+                        });
+                        $("#FintechCompanyStatus").modal('hide');
+                        
+                        table.draw(true);
+                        }
+                        else{
+                            toastr.error(res.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                        
+                        }
+                    }
+                });
             });
         });
 

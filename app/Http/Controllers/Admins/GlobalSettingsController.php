@@ -3617,6 +3617,7 @@ class GlobalSettingsController extends Controller
         $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
         ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
         ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
+        ->orderBy('fintech_companies.id','ASC')
         ->get();
 
         $datatable = Datatables::of($FintechValues)
@@ -3631,10 +3632,10 @@ class GlobalSettingsController extends Controller
          
             if(session('role_id') == 1 || in_array(853, session('permissions'))){
                 if($data->status == '1'){
-                 $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="save_changes(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-minus-circle"></i> Disabled </a>';
+                 $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-minus-circle"></i> Disabled </a>';
                 }
                 else{
-                    $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status" onclick="save_changes(event,'.$data->id.','.$data->status.')" ><div class="row no-gutters align-items-center"><i class="ft-plus-circle"></i> Enabled </a>';  
+                    $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-plus-circle"></i> Enabled </a>';  
                 }  
                 
                 $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
@@ -3654,7 +3655,7 @@ class GlobalSettingsController extends Controller
 
     public function change_company_status(Request $req){
         $FintecCompany = FintechCompany::where('id',$req->id);
-      if($req->checkboxval == 'false'){
+      if($FintecCompany->first()->status == '1'){
             $FintecCompany->update([
                 'status' =>  '0'   
             ]);
