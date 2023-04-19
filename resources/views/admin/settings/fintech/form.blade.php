@@ -89,7 +89,7 @@ table {
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
                                                             value ="@if(!empty($fintechvalues)) {{$charges->charges}}  @endif"
-                                                            placeholder="Charges*" data-rule-required="true"data-msg-required="This field is required">
+                                                            placeholder="Charges*" data-rule-required="true"data-msg-required="This field is required" min="1">
                                                         </div>    
                                                     </td>
                                                     <td>
@@ -98,7 +98,7 @@ table {
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
                                                             value ="@if(!empty($fintechvalues)) {{$charges->additional_charges}}  @endif"
-                                                            placeholder="Additional Charges" data-rule-required="true"data-msg-required="This field is required">
+                                                            placeholder="Additional Charges" data-rule-required="true"data-msg-required="This field is required" min="1">
                                                         </div>
                                                     </td>
                                                     <td>
@@ -107,7 +107,7 @@ table {
                                                             onkeydown="inputValidate()" 
                                                             class="form-control input-filtered text-right"
                                                             value ="@if(!empty($fintechvalues)) {{$charges->fed_tax}}  @endif"
-                                                            placeholder="Federal Excise Duty Tax*"data-rule-required="false"data-msg-required="This field is required">
+                                                            placeholder="Federal Excise Duty Tax*"data-rule-required="false"data-msg-required="This field is required" min="1">
                                                         </div>     
                                                     </td>  
                                                 </tr>
@@ -172,7 +172,7 @@ table {
                                                     name="fintech_range_up[0]"
                                                     class="form-control input-filtered"
                                                     placeholder="Range Up*" required data-rule-required="true"
-                                                    data-msg-required="This field is required">  
+                                                    data-msg-required="This field is Required">  
                                                     
                                                     </div>
                                                 </td>
@@ -184,7 +184,7 @@ table {
                                                     onkeydown="inputValidate()" 
                                                     class="form-control input-filtered "
                                                     placeholder="Range Down*" required data-rule-required="true"
-                                                    data-msg-required="This field is required" >
+                                                    data-msg-required="This field is Required" min="1" >
                                                     </div>
                                                 </td> 
 
@@ -196,7 +196,7 @@ table {
                                                     class="form-control input-filtered "
                                                     placeholder="Charges*"
                                                     data-rule-required="true"
-                                                    data-msg-required="This field is required"   min="1">
+                                                    data-msg-required="This field is Required"   min="1">
                                                     </div>
                                                 </td> 
 
@@ -218,7 +218,7 @@ table {
                                                     class="form-control input-filtered "
                                                     placeholder="FED Tax Charges*"
                                                     data-rule-required="true"
-                                                    data-msg-required="This field is required"   min="1">
+                                                    data-msg-required="This field is Required"   min="1">
                                                     </div>
                                                 </td> 
                                                 <td></td>
@@ -348,7 +348,7 @@ $("#add_company_charges" ).validate({
 function inputValidate(){
 
     $("input.input-filtered").on("input", function() {
-        this.value = this.value.replace(/^\D+/g, '').replace(/[^1-9..%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
+        this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9..%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
       });
 }
 
@@ -428,7 +428,7 @@ function inputValidate(){
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered "
                                             placeholder="Range Down*" required data-rule-required="true"
-                                            data-msg-required="This field is required"  >
+                                            data-msg-required="This field is required" min="1" >
                                         </div>
                                     </td> 
                                     <td> 
@@ -437,7 +437,7 @@ function inputValidate(){
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered"
                                             placeholder="Charges*" data-rule-required="true"
-                                            data-msg-required="This field is required"  >
+                                            data-msg-required="This field is required" min="1" >
                                         </div>
                                     </td> 
                                     <td> 
@@ -503,7 +503,7 @@ if (flag == true) {
                             <input type="text" required name="fintech_range_down[`+y+`]"
                             onkeydown="inputValidate()" 
                             class="form-control input-filtered text-right"
-                            placeholder="Range Down*" required data-rule-required="true"data-msg-required="This field is required">
+                            placeholder="Range Down*" required data-rule-required="true"data-msg-required="This field is required" min="1">
                         </div>
                     </td> 
                     <td> 
@@ -511,21 +511,21 @@ if (flag == true) {
                             <input type="text" name="charges[`+y+`]"
                             onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
-                            placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required">
+                            placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required " min="1">
                         </div>
                     </td> 
                     <td> 
                         <input type="text" name="additional_charges[`+y+`]"
                         onkeydown="inputValidate()"
                         class="form-control input-filtered text-right"
-                        placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required">
+                        placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required" min="1">
                     </td>
                     <td> 
                         <div class="form-group">
                             <input type="text" name="fed_tax[`+y+`]"
                             onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
-                            placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required">
+                            placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required" min="1">
                         </div>
                     </td>           
                     <td>
