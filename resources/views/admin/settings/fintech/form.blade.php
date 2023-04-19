@@ -74,7 +74,7 @@ table {
                                                     <td>
                                                         <div class="form-group">   
                                                             <input type="text"name="fintech_range_up_edit[]"
-                                                            class="form-control input-filtered text-right"
+                                                            class="form-control input-filtered "
                                                             value ="@if(!empty($fintechvalues)){{$charges->range_up}}@endif"
                                                             placeholder="Range Up*" required data-rule-required="true"data-msg-required="This field is required">
                                                         </div>
@@ -83,7 +83,7 @@ table {
                                                         <div class="form-group">   
                                                             <input type="text"name="fintech_range_down_edit[]"
                                                             onkeydown="inputValidate()"
-                                                            class="form-control input-filtered text-right"
+                                                            class="form-control input-filtered "
                                                             value ="@if(!empty($fintechvalues)){{$charges->range_down}}@endif"
                                                             placeholder="Range Down*"  data-rule-required="true" data-msg-required="This field is required" min="1">
                                                         </div>
@@ -92,7 +92,7 @@ table {
                                                         <div class="form-group">  
                                                             <input type="text" name="charges_edit[]"
                                                             onkeydown="inputValidate()"
-                                                            class="form-control input-filtered text-right"
+                                                            class="form-control input-filtered"
                                                             value ="@if(!empty($fintechvalues)){{$charges->charges}}@endif"
                                                             placeholder="Charges*" data-rule-required="true"data-msg-required="This field is required" min="1">
                                                         </div>    
@@ -101,7 +101,7 @@ table {
                                                         <div class="form-group">  
                                                             <input type="text" name="additional_charges_edit[]"
                                                             onkeydown="inputValidate()"
-                                                            class="form-control input-filtered text-right"
+                                                            class="form-control input-filtered "
                                                             value ="@if(!empty($fintechvalues)){{$charges->additional_charges}}@endif"
                                                             placeholder="Additional Charges" min="1">
                                                         </div>
@@ -110,7 +110,7 @@ table {
                                                         <div class="form-group"> 
                                                             <input type="text" required name="fed_tax_edit[]"
                                                             onkeydown="inputValidate()" 
-                                                            class="form-control input-filtered text-right"
+                                                            class="form-control input-filtered"
                                                             value ="@if(!empty($fintechvalues)){{$charges->fed_tax}}@endif"
                                                             placeholder="Federal Excise Duty Tax*"data-rule-required="false"data-msg-required="This field is required" min="1">
                                                         </div>     
@@ -274,7 +274,7 @@ $("#add_company_charges_update" ).validate({
      
         swal({
             title: 'Are You Sure?',
-            text: 'Select Yes to Update Fintech Company Charges',
+            text: 'Select Yes to Update Fintech Company Charges!',
             icon: 'warning',
             buttons: {
                 cancel: {
@@ -493,7 +493,7 @@ if (flag == true) {
                     <td>
                         <div class="form-group">
                             <input type="text" required name="fintech_range_up[`+y+`]"
-                            class="form-control input-filtered text-right"
+                            class="form-control input-filtered"
                             placeholder="Range Up*" data-rule-required="true" data-msg-required="This field is required">
                         </div>
                     </td>
@@ -501,7 +501,7 @@ if (flag == true) {
                         <div class="form-group">
                             <input type="text" required name="fintech_range_down[`+y+`]"
                             onkeydown="inputValidate()" 
-                            class="form-control input-filtered text-right"
+                            class="form-control input-filtered "
                             placeholder="Range Down*" required data-rule-required="true"data-msg-required="This field is required" min="1">
                         </div>
                     </td> 
@@ -509,21 +509,21 @@ if (flag == true) {
                         <div class="form-group">
                             <input type="text" name="charges[`+y+`]"
                             onkeydown="inputValidate()"
-                            class="form-control input-filtered text-right"
+                            class="form-control input-filtered "
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required " min="1">
                         </div>
                     </td> 
                     <td> 
                         <input type="text" name="additional_charges[`+y+`]"
                         onkeydown="inputValidate()"
-                        class="form-control input-filtered text-right"
+                        class="form-control input-filtered "
                         placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required" min="1">
                     </td>
                     <td> 
                         <div class="form-group">
                             <input type="text" name="fed_tax[`+y+`]"
                             onkeydown="inputValidate()"
-                            class="form-control input-filtered text-right"
+                            class="form-control input-filtered "
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required" min="1">
                         </div>
                     </td>           

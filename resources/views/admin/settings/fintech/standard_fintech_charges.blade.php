@@ -22,7 +22,7 @@
                                         <div class="form-group">
                                             <label>Standard Fintech Charges*</label>
                                             <div class="form-group input-group">
-                                                <input type="text" name="standard_fintech_charges" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder=""  data-rule-required="true" data-msg-required="Standard Fintech Charges Required">   <div class="input-group-append">
+                                                <input type="text" name="standard_fintech_charges" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder="Standard Fintech Charges*"  data-rule-required="true" data-msg-required="Standard Fintech Charges Required" min="1">   <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
@@ -35,7 +35,7 @@
                                         
                                         
                                             <div class="form-group input-group">
-                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Amount*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required">
+                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Amount*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required" min="1">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
