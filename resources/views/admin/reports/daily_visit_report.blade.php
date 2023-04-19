@@ -87,6 +87,7 @@
                         <th class="border-primary border-darken-1">Photo of Business Card</th>
                         <th class="border-primary border-darken-1">Shipper Rating</th>
                         <th class="border-primary border-darken-1">Shipper Feedback</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -98,6 +99,7 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
@@ -161,6 +163,7 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -182,6 +185,38 @@
                 placeholder:'Rating',
                 width:'100%',
                 allowClear:true
+            });
+
+            $(document).on('click', '.dropdown-item', function() {
+                var visit_status = $(this).data('visit-status');
+                var daily_visit_id = parseInt($(this).parents('tr').attr('id'));
+
+                $.ajax({
+                    type: 'POST',
+            
+                    url: '{{ route('admin.reports.daily_visit.set_visit_status') }}',
+                    data: {
+                        daily_visit_id: daily_visit_id,
+                        visit_status: visit_status,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(data) {
+                        
+                        if (data.status == 'success') {
+                            
+                            toastr.success(data.message, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+
+                        } else {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    }
+                });
             });
 
             var from_date = $('#from_date').pickadate({
@@ -302,6 +337,7 @@
                     }
                 },
                 order: [[4, 'desc']],
+                rowId: 'id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'admin' ,name: 'a.name', class: 'align-middle admin'},
@@ -320,6 +356,7 @@
                     { data:'b_c_photo' ,name: 'b_c_photo', class: 'align-middle b_c_photo', sortable: false, orderable: false, searchable: false},
                     { data:'rating' ,name: 'rate.name', class: 'align-middle rating_code'},
                     { data:'rating_comment' ,name: 'daily_visits.comment', class: 'align-middle rating_comment'},
+                    { data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

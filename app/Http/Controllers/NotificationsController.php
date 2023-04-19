@@ -236,9 +236,8 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
-
+        
         $notification = Notification::find($id);
-
 
         if ($notification) {
 
@@ -10224,6 +10223,25 @@ class NotificationsController extends Controller
 
                     self::email($subject, $body, $to, $cc);
                 }
+
+                else if( $id == 215){
+                    
+                    $details = $reference_1_id;
+                    $temp_emails = $reference_2_id;
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $details, $body);  
+                    }
+                    
+                    foreach($temp_emails as $temp_email)
+                    {
+                        self::email($subject, $body, $temp_email);
+                    }
+
+                }
+
             }
         }       
     }

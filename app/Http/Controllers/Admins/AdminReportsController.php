@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\DailyVisit;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\AgentCallMonitoring;
@@ -7486,7 +7487,13 @@ class AdminReportsController extends Controller
             ->leftjoin('cities as c', 'c.id', '=', 'a.default_hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'c.zone_id')
             ->leftjoin('daily_visit_ratings as rate', 'rate.id', 'daily_visits.rating_id')
-            ->select('a.name as admin', 'daily_visits.company_name as company_name', 'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone', 'rate.name as rating_text', 'daily_visits.comment as rating_comment', 'rate.code as rating');
+            ->select('daily_visits.id as id','a.name as admin', 'daily_visits.admin_id as admin_id', 'daily_visits.company_name as company_name', 
+            'daily_visits.customer_name as customer_name', 'daily_visits.customer_address as customer_address', 
+            'daily_visits.phone_no as phone_no', 'daily_visits.email as email', 'dvls.name as lead_status', 
+            'daily_visits.feedback as feedback', 'daily_visits.latitude as latitude', 'daily_visits.longitude as longitude', 
+            'daily_visits.created_at as created_at', 'daily_visits.business_card_image as business_card_image', 
+            'daily_visits.location_image as location_image', 'c.name as city', 'z.name as zone', 'rate.name as rating_text', 
+            'daily_visits.comment as rating_comment', 'rate.code as rating', 'daily_visits.visit_status as visit_status');
 
         $multiple_sales_tags = MultipleSaleLead::join('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
             ->where('multiple_sale_leads.admin_id', Auth::id())
@@ -7528,7 +7535,38 @@ class AdminReportsController extends Controller
                 } else {
                     return '-';
                 }
-            });
+            })
+            
+
+            ->addColumn('action', function($daily_visit) {
+                if (session('role_id') == 1 && (!in_array(session('id'), session('sale_users_bypass')))) {
+
+                $valid_visit = '<button type="button" class="dropdown-item enable" data-visit-status="1"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Valid Visit</div></button>';
+                $invalid_visit = '<button type="button" class="dropdown-item disable" data-visit-status="2"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Invalid Visit</div></button>';
+            
+                $dropdown = '
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                ';
+            
+                if ($daily_visit->visit_status == 2) {
+                    $dropdown .= $valid_visit;
+                } elseif ($daily_visit->visit_status == 1) {
+                    $dropdown .= $invalid_visit;
+                } else {
+                    $dropdown .= $valid_visit . $invalid_visit;
+                }
+            
+                $dropdown .= '
+                        </div>
+                    </div>
+                ';
+            
+                return $dropdown;
+            }
+            });            
+            
 
         //AdminUser Filter
         if ($team_member = $request->get('team_member')) {
@@ -7546,6 +7584,19 @@ class AdminReportsController extends Controller
         }
 
         return $datatables->make(true);
+    }
+    
+
+    public function set_visit_status(Request $request){
+        $set_status = DailyVisit::find($request->daily_visit_id);
+        if($set_status){
+            $set_status->visit_status = $request->visit_status;
+            $set_status->save();
+            return array('status' => 'success' , 'message' => 'Visit Status Updated Successfully');
+
+        }else{
+            return array('status' => 'error' , 'message'  =>  'Visit Status Updated Failed');
+        }
     }
 
     public function delivered_shipment_index()

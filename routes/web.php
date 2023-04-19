@@ -2528,6 +2528,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('daily_visit')->name('daily_visit.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@daily_visit_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@daily_visit_list')->name('list');
+            Route::post('set_visit_status', 'Admins\AdminReportsController@set_visit_status')->name('set_visit_status');
         });
         Route::prefix('delivered_shipment')->name('delivered_shipment.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@delivered_shipment_index')->name('index');
