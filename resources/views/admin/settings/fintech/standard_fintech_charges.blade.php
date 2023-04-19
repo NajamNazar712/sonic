@@ -35,7 +35,7 @@
                                         
                                         
                                             <div class="form-group input-group">
-                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Amount*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required" min="1">
+                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Charges*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -119,7 +119,7 @@ $("#save_standard_fintech_charges" ).validate({
             data : {standard_fintech_charges:standard_fintech_charges,standard_FED_Charges:standard_FED_Charges,'_token': '{{ csrf_token() }}'},
                             success:function(res){
                                 if(res.status == '200'){
-                                    toastr.success(res.message, 'Success!', {
+                                    toastr.success('Standard Fintech Charges has been updated Successfully! ', 'Success!', {
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
                                 });
