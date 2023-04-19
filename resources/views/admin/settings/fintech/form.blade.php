@@ -69,7 +69,7 @@ table {
                                             </thead>
                                         <tbody class="addnewrows">
                                             @foreach($fintechvalues as $key=> $charges)
-                                                <input type="hidden" value ="@if(!empty($fintechvalues)) {{$charges->id}}  @endif" name="IndexID[]">
+                                                <input type="hidden" value ="@if(!empty($fintechvalues)){{$charges->id}} @endif" name="IndexID[]">
                                                 <tr>
                                                     <td>
                                                         <div class="form-group">   
@@ -103,7 +103,7 @@ table {
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
                                                             value ="@if(!empty($fintechvalues)){{$charges->additional_charges}}@endif"
-                                                            placeholder="Additional Charges" data-rule-required="true"data-msg-required="This field is required" min="1">
+                                                            placeholder="Additional Charges" min="1">
                                                         </div>
                                                     </td>
                                                     <td>

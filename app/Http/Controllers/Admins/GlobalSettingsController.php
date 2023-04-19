@@ -3617,7 +3617,7 @@ class GlobalSettingsController extends Controller
         $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
         ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
         ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
-        ->orderBy('fintech_companies.id','ASC')
+        ->orderBy('fintech_companies.id','DESC')
         ->get();
 
         $datatable = Datatables::of($FintechValues)
