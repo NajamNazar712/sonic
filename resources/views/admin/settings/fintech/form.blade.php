@@ -147,7 +147,7 @@ table {
                                     <div class="row justify-content-center">
                                         <div class="form-group">
                                             <input type="text" name="company_name" class="form-control " required data-rule-required="true"
-                                            data-msg-required="Company Name is Required" placeholder="Company Name *" >
+                                            data-msg-required="Company Name is Required" placeholder="Company Name*" >
                                         </div>
                                     </div> <Br>
 
@@ -201,7 +201,6 @@ table {
                                                 </td> 
 
                                                 <td> 
-                                                  
                                                     <input type="text"
                                                     name="additional_charges[0]"
                                                     onkeydown="inputValidate()"
