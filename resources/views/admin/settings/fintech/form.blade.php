@@ -13,8 +13,12 @@ table {
       text-align: center;
     }
 </style>
-@section('title', 'Add Fintech Company Charges')
 
+@if(!empty($fintechvalues))    
+@section('title', 'Edit Fintech Company Charges')
+@else
+@section('title', 'Add Fintech Company Charges')
+@endif
 @section('content')
     <div class="app-content content">
         <div class="content-wrapper">
@@ -59,10 +63,11 @@ table {
                                                         <th class="center"><label>Charges</label></th>
                                                         <th class="center"><label>Additional Charges</label></th>
                                                         <th class="center"><label>Federal Excise Duty Tax</label></th>
+                                                        <th class="center"><label></label></th>
                                                       
                                                     </tr>
                                             </thead>
-                                        <tbody>
+                                        <tbody class="addnewrows">
                                             @foreach($fintechvalues as $key=> $charges)
                                                 <input type="hidden" value ="@if(!empty($fintechvalues)) {{$charges->id}}  @endif" name="IndexID[]">
                                                 <tr>
@@ -70,7 +75,7 @@ table {
                                                         <div class="form-group">   
                                                             <input type="text"name="fintech_range_up_edit[]"
                                                             class="form-control input-filtered text-right"
-                                                            value ="@if(!empty($fintechvalues)) {{$charges->range_up}}  @endif"
+                                                            value ="@if(!empty($fintechvalues)){{$charges->range_up}}@endif"
                                                             placeholder="Range Up*" required data-rule-required="true"data-msg-required="This field is required">
                                                         </div>
                                                     </td>  
@@ -79,7 +84,7 @@ table {
                                                             <input type="text"name="fintech_range_down_edit[]"
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
-                                                            value ="@if(!empty($fintechvalues)) {{$charges->range_down}}  @endif"
+                                                            value ="@if(!empty($fintechvalues)){{$charges->range_down}}@endif"
                                                             placeholder="Range Down*"  data-rule-required="true" data-msg-required="This field is required" min="1">
                                                         </div>
                                                     </td>
@@ -88,7 +93,7 @@ table {
                                                             <input type="text" name="charges_edit[]"
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
-                                                            value ="@if(!empty($fintechvalues)) {{$charges->charges}}  @endif"
+                                                            value ="@if(!empty($fintechvalues)){{$charges->charges}}@endif"
                                                             placeholder="Charges*" data-rule-required="true"data-msg-required="This field is required" min="1">
                                                         </div>    
                                                     </td>
@@ -97,7 +102,7 @@ table {
                                                             <input type="text" name="additional_charges_edit[]"
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
-                                                            value ="@if(!empty($fintechvalues)) {{$charges->additional_charges}}  @endif"
+                                                            value ="@if(!empty($fintechvalues)){{$charges->additional_charges}}@endif"
                                                             placeholder="Additional Charges" data-rule-required="true"data-msg-required="This field is required" min="1">
                                                         </div>
                                                     </td>
@@ -106,20 +111,15 @@ table {
                                                             <input type="text" required name="fed_tax_edit[]"
                                                             onkeydown="inputValidate()" 
                                                             class="form-control input-filtered text-right"
-                                                            value ="@if(!empty($fintechvalues)) {{$charges->fed_tax}}  @endif"
+                                                            value ="@if(!empty($fintechvalues)){{$charges->fed_tax}}@endif"
                                                             placeholder="Federal Excise Duty Tax*"data-rule-required="false"data-msg-required="This field is required" min="1">
                                                         </div>     
-                                                    </td>  
+                                                    </td> 
+                                                    <td></td> 
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                 </table>
-                           
-                                <table class="table table-responsive">  
-                                <tbody id="row_append_body_update">
-                                </tbody>
-                                </table>  
-
                                     <div class="col mb-1">
                                         <button type="button" class="btn btn-outline-success btm-sm add_row_update"
                                         id="add_row"><i class="la la-plus"></i></button>
@@ -534,7 +534,7 @@ if (flag == true) {
                     </td>   
                                
                 </tr>`;
-    $('#row_append_body_update').append(html);
+    $('.addnewrows').append(html);
     y++;
     $('#settings_form input.rangeup').inputmask({
         'alias': 'integer',
