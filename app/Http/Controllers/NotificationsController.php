@@ -7655,7 +7655,8 @@ class NotificationsController extends Controller
                             if (strpos($body, '[' . $key . ']') !== FALSE) {
 
                                 if ($shipment['consignee_name']) {
-                                    $shipment[$field] = substr($shipment[$field], 0, 10);
+                                    $first_name = explode(' ', trim($shipment['consignee_name']));
+                                    $shipment['consignee_name'] = $first_name[0];
                                 }
 
                                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
@@ -7821,9 +7822,11 @@ class NotificationsController extends Controller
 
                     foreach ($shipment_fields as $key => $field) {
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
+                            
                             if ($shipment['consignee_name']) 
                             {
-                                $shipment[$field] = substr($shipment[$field], 0, 10);
+                                $first_name = explode(' ', trim($shipment['consignee_name']));
+                                $shipment['consignee_name'] = $first_name[0];
                             }
                             $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                         }
