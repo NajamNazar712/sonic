@@ -18,6 +18,7 @@ class AddFintechChargesPermissionSeeder extends Seeder
             array('id' => 854, 'name' => 'Add Standard Fintech Charges', 'module_id' => 14),
             array('id' => 855, 'name' => 'Pending-Add Fintech Charges', 'module_id' => 2),
             array('id' => 856, 'name' => 'Active-Add Fintech Charges', 'module_id' => 2),
+            array('id' => 857, 'name' => 'enable-disable Fintech Company', 'module_id' => 14),
         ));
 
         DB::table('activity_trail_actions')->insert(array(

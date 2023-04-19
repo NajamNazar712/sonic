@@ -239,7 +239,7 @@
                                     containerId: 'toast-bottom-center',
                                 });
                                 $("#FintechCompanyStatus").modal('hide');
-                                //window.location.reload();
+                                window.location.reload();
                                 }
                                 else{
                                     toastr.error(res.error, 'Error!', {

@@ -69,10 +69,9 @@ table {
                                                     <td>
                                                         <div class="form-group">   
                                                             <input type="text"name="fintech_range_up_edit[]"
-                                                            onkeydown="inputValidate()"
                                                             class="form-control input-filtered text-right"
                                                             value ="@if(!empty($fintechvalues)) {{$charges->range_up}}  @endif"
-                                                            placeholder="Range Up*" required data-rule-required="true"data-msg-required="This field is required" min="1">
+                                                            placeholder="Range Up*" required data-rule-required="true"data-msg-required="This field is required">
                                                         </div>
                                                     </td>  
                                                     <td>
@@ -171,12 +170,9 @@ table {
                                                     <div class="form-group">
                                                     <input type="text" 
                                                     name="fintech_range_up[0]"
-                                                    onkeydown="inputValidate()"
                                                     class="form-control input-filtered"
                                                     placeholder="Range Up*" required data-rule-required="true"
-                                                    data-msg-required="This field is required"
-                                                  
-                                                    >  
+                                                    data-msg-required="This field is required">  
                                                     
                                                     </div>
                                                 </td>
@@ -185,10 +181,10 @@ table {
                                                     <div class="form-group">
                                                     <input type="text" 
                                                     name="fintech_range_down[0]"
-                                                    onkeydown="inputValidate()"
+                                                    onkeydown="inputValidate()" 
                                                     class="form-control input-filtered "
                                                     placeholder="Range Down*" required data-rule-required="true"
-                                                    data-msg-required="This field is required"   min="1">
+                                                    data-msg-required="This field is required" >
                                                     </div>
                                                 </td> 
 
@@ -352,7 +348,7 @@ $("#add_company_charges" ).validate({
 function inputValidate(){
 
     $("input.input-filtered").on("input", function() {
-        this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9..%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
+        this.value = this.value.replace(/^\D+/g, '').replace(/[^1-9..%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
       });
 }
 
@@ -421,7 +417,6 @@ function inputValidate(){
                                     <td>
                                         <div class="form-group">
                                                 <input type="text" name="fintech_range_up[`+row+`]" 
-                                                onkeydown="inputValidate()"
                                                 class="form-control input-filtered "
                                                 placeholder="Range Up*" required data-rule-required="true"
                                                 data-msg-required="This field is required"  >
@@ -433,7 +428,7 @@ function inputValidate(){
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered "
                                             placeholder="Range Down*" required data-rule-required="true"
-                                            data-msg-required="This field is required"   min="1">
+                                            data-msg-required="This field is required"  >
                                         </div>
                                     </td> 
                                     <td> 
@@ -442,7 +437,7 @@ function inputValidate(){
                                             onkeydown="inputValidate()"
                                             class="form-control input-filtered"
                                             placeholder="Charges*" data-rule-required="true"
-                                            data-msg-required="This field is required"   min="1">
+                                            data-msg-required="This field is required"  >
                                         </div>
                                     </td> 
                                     <td> 
@@ -499,9 +494,8 @@ if (flag == true) {
                     <td>
                         <div class="form-group">
                             <input type="text" required name="fintech_range_up[`+y+`]"
-                            onkeydown="inputValidate()"
                             class="form-control input-filtered text-right"
-                            placeholder="Range Up*" data-rule-required="true" data-msg-required="This field is required" min="1">
+                            placeholder="Range Up*" data-rule-required="true" data-msg-required="This field is required">
                         </div>
                     </td>
                     <td> 
