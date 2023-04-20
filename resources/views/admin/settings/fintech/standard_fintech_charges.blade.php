@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Standard Fintech Changes')
+@section('title', 'Standard Fintech Charges')
 
 @section('content')
     <div class="app-content content">
@@ -33,7 +33,7 @@
                                         <div class="form-group">
                                             <label>Standard FED Tax Charges*</label>
                                             <div class="input-group">
-                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="" class="form-control input-filtered fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax is Required" min="1">
+                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif"  name="standard_FED_Charges" id="standard_FED_Charges" placeholder="" class="form-control input-filtered fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax is Required" min="1">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>

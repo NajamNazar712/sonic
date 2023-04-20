@@ -182,6 +182,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Jobs\CountFintechCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
 
 use App\Http\Models\Admin\UserFintectCharges;
 use CreateCityOsaRatesTable;
@@ -507,27 +508,45 @@ class AdminDashboardController extends Controller
 
 public function add_fintech_charges(Request $req){  
 
+
+  //  dd($req->all());    
     $UserFintectCharges = new UserFintectCharges();
-    $values =  $UserFintectCharges::where('user_id',$req->userID)->first();
+    $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
+    $standard_fintech_charges = standard_fintech_charges::all();
+    if($req->checkboxval == 'false'){
+        $UserFintectCharges::where('user_id',$req->userID)->update([
+            'status'  => 2,
+            'updated_by'       => session('id')
+        ]); 
+
+        return response()->json([
+            'status'  => '200',
+            'message' => 'Fintech Charges Updated Successfully!',
+        ]);
+    }
         if(empty($req->fintechCharges)){
             if(!empty($values)){
                 return response()->json([
-                    'status' => '200',
-                    'data' => $values
+                    'status'    => '200',
+                    'data'      => $values,
+                    'standard'  => $standard_fintech_charges,
                 ]);
             } 
                 else{
                     return response()->json([
-                        'status' => '404',
+                        'status'   => '404',
+                        'standard' => $standard_fintech_charges,
                     ]);
                 }
            }
            else{
-            if($req->checkboxval == 'true'){
+            if($req->checkboxval == 'true'){ 
             try{
-                if(!empty($values->user_id)){
+                $value =  $UserFintectCharges::where('user_id',$req->userID)->first();
+                if(!empty($value->user_id)){
                     $UserFintectCharges::where('user_id',$req->userID)->update([
                         'fintech_charges'  => $req->fintechCharges,
+                        'status'           => '1',
                         'updated_by'       => session('id')
                     ]); 
                 }
@@ -541,14 +560,14 @@ public function add_fintech_charges(Request $req){
                 }
                 return response()->json([
                     'status'  => '200',
-                    'message' => 'Charges Set Successfully',
+                    'message' => 'Fintech Charges Updated Successfully!',
                 ]);
             }
             catch(exception $e){
                 return response()->json([
                     'message' => 'Charges Not Set',
                 ]); 
-                } 
+                }  
             }
         }
     }

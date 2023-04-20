@@ -667,7 +667,8 @@ function checkboxStatus(){
               $(".UserFintechCharges").append(`
               <div class="form-group text-left">
                 <div class="input-group">
-                    <input type="text" id="user_fintech_charges_txtbox" class="form-control fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges is Required" min="1" max="100">
+                    
+                    <input type="text"  onkeydown="inputValidate()" id="user_fintech_charges_txtbox" class="form-control input-filtered fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges is Required">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -688,6 +689,26 @@ $("#Save_fintech_charges" ).validate({
         error.addClass('w-100').appendTo(element.parents('.form-group'));
     },
     submitHandler: function(form) {
+
+
+        console.log(standard_fintech_charges);
+        console.log(txtval);
+        var standard_fintech_charges = parseInt($("#user_fintech_charge_standard").val()); 
+        var txtval =parseInt($('#Save_fintech_charges input.fuel_factor').val());
+
+        console.log(standard_fintech_charges );
+        console.log(txtval);
+        if(standard_fintech_charges > txtval){
+            toastr.error('Shipper Fintech Charges Should be Greater then standard Fintech charges', 'Error!', {
+            positionClass: 'toast-top-center',
+            containerId: 'toast-top-center'
+        });
+        }
+
+
+
+
+        else{
         swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to update Standard Fintech Charges!',
@@ -744,6 +765,7 @@ $("#Save_fintech_charges" ).validate({
                     });
 
     }
+}
 });
 
 
@@ -2267,7 +2289,8 @@ $("#Save_fintech_charges" ).validate({
                       
                             <div class="form-group text-left">
                                 <div class="input-group">
-                                    <input type="text" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech is Charges Required" min="1" max="100">
+                                    <input type="hidden" value="${res.standard[0]['standard_fintech_charges']}" id="user_fintech_charge_standard">
+                                    <input type="text" value="${res.data.fintech_charges}"  onkeydown="inputValidate()" id="user_fintech_charges_txtbox" class="form-control input-filtered fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges is Required">
                                     <div class="input-group-append">
                                         <span class="input-group-text">%</span>
                                     </div>
@@ -2753,6 +2776,26 @@ $("#Save_fintech_charges" ).validate({
             }
         });
     });
+
+
+
+    function inputValidate() {
+    $('#Save_fintech_charges input.fuel_factor').inputmask({
+        'alias': 'integer',
+        'allowMinus': true,
+        'allowPlus': false,
+        'max':100
+    });
+    var oldValue = "";
+    $("input.input-filtered").on("input", function() {
+        if (this.value === "" || this.value !== oldValue) {
+            oldValue = this.value;
+            this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9.%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
+        }
+    });
+}
+
+
 
 </script>
 

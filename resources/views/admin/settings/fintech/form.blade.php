@@ -355,7 +355,7 @@ function inputValidate(){
 
 
         $(document).ready(function() {
-            $('#settings_form input.rangeup').inputmask({
+            $('#add_company_charges input.rangeup').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
