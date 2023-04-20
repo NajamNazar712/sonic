@@ -21,8 +21,8 @@
                                     <div class="row justify-content-center">
                                         <div class="form-group">
                                             <label>Standard Fintech Charges*</label>
-                                            <div class="form-group input-group">
-                                                <input type="text" name="standard_fintech_charges" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder="Standard Fintech Charges*"  data-rule-required="true" data-msg-required="Standard Fintech Charges Required" min="1">   <div class="input-group-append">
+                                            <div class="input-group">
+                                                <input type="text" name="standard_fintech_charges" id="standard_fintech_charges"  value="@if(!empty($value)){{$value->standard_fintech_charges}}@else{{''}}@endif" class="form-control input-filtered fuel_factor" placeholder=""  data-rule-required="true" data-msg-required="Fintech Charges is Required" min="1">   <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
@@ -32,16 +32,12 @@
                                     <div class="row justify-content-center">
                                         <div class="form-group">
                                             <label>Standard FED Tax Charges*</label>
-                                        
-                                        
-                                            <div class="form-group input-group">
-                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="FED Tax Charges*" class="form-control valid fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax Required">
+                                            <div class="input-group">
+                                                <input type="text" value="@if(!empty($value)){{$value->standard_fed_charges}}@else{{''}}@endif" name="standard_FED_Charges" id="standard_FED_Charges" placeholder="" class="form-control input-filtered fuel_factor" aria-invalid="false" data-rule-required="true" data-msg-required=" Fed Tax is Required" min="1">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
                                             </div>
-                                        
-                                        
                                         </div>
                                     </div>
                                     <div class="col">
@@ -80,170 +76,80 @@
 
 
 $("#save_standard_fintech_charges" ).validate({
-    errorClass:"danger",
+    ignore: ":not(:visible),:disabled",
+    errorClass: 'danger',
+    successClass: 'success',
     errorPlacement: function(error, element) {
-        console.log();
-        error.addClass('w-100').appendTo(element.parent('.form-group'));
+        error.addClass('w-100').appendTo(element.parents('.form-group'));
     },
     submitHandler: function(form) {
 
 
         swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to update Standard Fintech Charges!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            var standard_fintech_charges = $("#standard_fintech_charges").val();
-                            var standard_FED_Charges = $("#standard_FED_Charges").val();
-                          $.ajax({
-                            type : 'POST',
-            url  : "{{route('admin.settings.standard_fintech_charges.store')}}",
-            data : {standard_fintech_charges:standard_fintech_charges,standard_FED_Charges:standard_FED_Charges,'_token': '{{ csrf_token() }}'},
-                            success:function(res){
-                                if(res.status == '200'){
-                                    toastr.success('Standard Fintech Charges has been updated Successfully! ', 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                  //  window.location.reload();
-                                }
-                                else{
-                                    toastr.error(res.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                                }
-                            }
-
-                            });
-                        }
+            title: 'Are You Sure?',
+            text: 'Select Yes to update Standard Fintech Charges!',
+            icon: 'warning',
+            buttons: {
+                cancel: {
+                    text: 'No',
+                    value: null,
+                    visible: true,
+                    closeModal: true,
+                },
+                confirm: {
+                    text: 'Yes',
+                    value: true,
+                    visible: true,
+                    closeModal: true
+                }
+            },
+            closeOnClickOutside: false,
+            closeOnEsc: false,
+            dangerMode: true
+        }).then(function (confirm) {
+            if(confirm){
+                var standard_fintech_charges = $("#standard_fintech_charges").val();
+                var standard_FED_Charges = $("#standard_FED_Charges").val();
+                $.ajax({
+                type : 'POST',
+url  : "{{route('admin.settings.standard_fintech_charges.store')}}",
+data : {standard_fintech_charges:standard_fintech_charges,standard_FED_Charges:standard_FED_Charges,'_token': '{{ csrf_token() }}'},
+                success:function(res){
+                    if(res.status == '200'){
+                        toastr.success('Standard Fintech Charges has been updated Successfully! ', 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
                     });
+                        //  window.location.reload();
+                    }
+                    else{
+                        toastr.error(res.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                    }
+                }
+
+                });
+            }
+        });
     }
 });
 
 
 
-// function save_standard_charges(){
-//     swal({
-//                         title: 'Are You Sure?',
-//                         text: 'Select Yes to update Standard Fintech Charges!',
-//                         icon: 'warning',
-//                         buttons: {
-//                             cancel: {
-//                                 text: 'No',
-//                                 value: null,
-//                                 visible: true,
-//                                 closeModal: true,
-//                             },
-//                             confirm: {
-//                                 text: 'Yes',
-//                                 value: true,
-//                                 visible: true,
-//                                 closeModal: true
-//                             }
-//                         },
-//                         closeOnClickOutside: false,
-//                         closeOnEsc: false,
-//                         dangerMode: true
-//                     }).then(function (confirm) {
-//                         if(confirm){
-//                           var standard_fintech_charges    =  $("#standard_fintech_charges").val();
-//                           var standard_FED_Charges        =  $("#standard_FED_Charges").val();
-//                           $.ajax({
-//                             type : 'POST',
-//                             url  : "{{route('admin.settings.standard_fintech_charges.store')}}",
-//                             data : {standard_fintech_charges:standard_fintech_charges,standard_FED_Charges:standard_FED_Charges,'_token': '{{ csrf_token() }}'},
-                          
-//                             success:function(res){
-//                                 if(res.status == '200'){
-//                                     toastr.success(res.message, 'Success!', {
-//                                     positionClass: 'toast-bottom-center',
-//                                     containerId: 'toast-bottom-center'
-//                                 });
-//                                   //  window.location.reload();
-//                                 }
-//                                 else{
-//                                     toastr.error(res.error, 'Error!', {
-//                                     positionClass: 'toast-top-center',
-//                                     containerId: 'toast-top-center'
-//                                 });
-//                                 }
-//                             }
 
-//                             });
-//                         }
-//                     });
-
-// }
-
-            $('#save_standard_fintech_charges input.fuel_factor').inputmask({
-                'alias': 'integer',
-                'allowMinus': true,
-                'allowPlus': false,
-                'max':100
-            });
+        $('#save_standard_fintech_charges input.fuel_factor').inputmask({
+            'alias': 'integer',
+            'allowMinus': true,
+            'allowPlus': false,
+            'max':100
+        });
 
         function inputValidate(){
         $("input.input-filtered").on("input", function() {
         this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9..%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
         });
         }
-
-
-        $(document).ready(function() {
-            $('#settings_form input.rangeup').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
-            $('#settings_form input.rangedown').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
-            $('#settings_form input.charges').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'allowpercentage': true,
-            });
-            $('#settings_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'New Company Generate',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-
-                    form.submit();
-                }
-            });
-        });
     </script>
 @endsection

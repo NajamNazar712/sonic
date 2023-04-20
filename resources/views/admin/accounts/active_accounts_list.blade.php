@@ -665,19 +665,14 @@ function checkboxStatus(){
     if (document.getElementById('user_fintech_charges_checkbox').checked) {
         $(".UserFintechCharges").html(''); 
               $(".UserFintechCharges").append(`
-            <div class="form-group text-left">
-                <div class="input-group form-group">
-                    <input type="number" name="user_fintech_charges_txtbox" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges*" aria-invalid="false" data-rule-required="true" data-msg-required="Fintech Charges Required">
+              <div class="form-group text-left">
+                <div class="input-group">
+                    <input type="text" id="user_fintech_charges_txtbox" class="form-control fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges is Required" min="1" max="100">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
                 </div>
-            </div>
-            
-            
-            
-            
-            `);
+            </div>`);
         } 
         else{
                 $(".UserFintechCharges").html('');     
@@ -686,9 +681,11 @@ function checkboxStatus(){
 
 
 $("#Save_fintech_charges" ).validate({
-    errorClass:"danger",
+    ignore: ":not(:visible),:disabled",
+    errorClass: 'danger',
+    successClass: 'success',
     errorPlacement: function(error, element) {
-        error.addClass('w-100').appendTo(element.parent('.form-group'));
+        error.addClass('w-100').appendTo(element.parents('.form-group'));
     },
     submitHandler: function(form) {
         swal({
@@ -2269,13 +2266,13 @@ $("#Save_fintech_charges" ).validate({
                             $(".UserFintechCharges").append(`
                       
                             <div class="form-group text-left">
-                <div class="input-group form-group">
-                    <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control valid" placeholder="Fintech Charges *" aria-invalid="false">
-                    <div class="input-group-append">
-                        <span class="input-group-text">%</span>
-                    </div>
-                </div>
-            </div>`);
+                                <div class="input-group">
+                                    <input type="text" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" class="form-control fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech is Charges Required" min="1" max="100">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+                            </div>`);
                         }
                         else{
                             if (document.getElementById('user_fintech_charges_checkbox').checked) {

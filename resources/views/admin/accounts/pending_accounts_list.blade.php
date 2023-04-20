@@ -464,8 +464,8 @@ function checkboxStatus(){
               $(".UserFintechCharges").append(`
             
               <div class="form-group text-left">
-                <div class="input-group form-group">
-                    <input type="number" id="user_fintech_charges_txtbox" class="form-control valid" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges Required">
+                <div class="input-group">
+                    <input type="text" id="user_fintech_charges_txtbox" class="form-control fuel_factor" placeholder ="Fintech Charges*" aria-invalid="true"  data-rule-required="true" data-msg-required="Fintech Charges is Required" min="1" max="100">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -478,9 +478,11 @@ function checkboxStatus(){
 }
 
 $("#Save_fintech_charges" ).validate({
-    errorClass:"danger",
+    ignore: ":not(:visible),:disabled",
+    errorClass: 'danger',
+    successClass: 'success',
     errorPlacement: function(error, element) {
-        error.addClass('w-100').appendTo(element.parent('.form-group'));
+        error.addClass('w-100').appendTo(element.parents('.form-group'));
     },
     submitHandler: function(form) {
         swal({
@@ -1776,6 +1778,14 @@ $("#Save_fintech_charges" ).validate({
             }
         });
 
+
+         $('#Save_fintech_charges input.fuel_factor').inputmask({
+            'alias': 'integer',
+            'allowMinus': true,
+            'allowPlus': false,
+            'max':100
+        });
+
         $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
             var id = $(this).parents('tr').attr('id');
             if($(this).hasClass('restrict_order_id')){
@@ -1829,9 +1839,9 @@ $("#Save_fintech_charges" ).validate({
                             $(".UserFintechCharges").html('');
                             $(".UserFintechCharges").append(`
 
-                            <div class="form-group text-left">
-                <div class="input-group form-group">
-                    <input type="number" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" placeholder ="Fintech Charges*" class="form-control valid" placeholder="" aria-invalid="false" data-rule-required="true" data-msg-required="Fintech Charges Required">
+                            <div class="form-group ">
+                <div class="input-group ">
+                    <input type="text" value="${res.data.fintech_charges}" id="user_fintech_charges_txtbox" placeholder ="Fintech Charges*" class="form-control fuel_factor" placeholder="" aria-invalid="false" data-rule-required="true" data-msg-required="Fintech Charges is Required" min="1" max="100">
                     <div class="input-group-append">
                         <span class="input-group-text">%</span>
                     </div>
@@ -1886,6 +1896,17 @@ $("#Save_fintech_charges" ).validate({
         })
 
     });
+
+
+
+$('.percentageController').inputmask({
+    'alias': 'integer',
+    'allowMinus': true,
+    'allowPlus': false,
+    'max':100
+});
+    
+
 
 </script>
 

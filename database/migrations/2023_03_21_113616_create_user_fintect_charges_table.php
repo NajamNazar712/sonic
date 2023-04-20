@@ -13,7 +13,7 @@ class CreateUserFintectChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('user_fintect_charges', function (Blueprint $table) {
+        Schema::create('users_fintech_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->Integer('user_id');
             $table->Integer('status')->default('1');
