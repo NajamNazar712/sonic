@@ -236,11 +236,14 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
+
         $notification = Notification::find($id);
-    
+
 
         if ($notification) {
+
             if ($notification->status) {
+
                 if ($notification->type_id == 1) {
                     $subject = $notification->subject;
                 }
@@ -10069,6 +10072,8 @@ class NotificationsController extends Controller
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Leaves Availed</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Late</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Attendance Adjustment</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Date</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Day</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock In</th>
                                 <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Clock Out</th>';
                         $html .= '</tr></thead><tbody>';
@@ -10076,7 +10081,7 @@ class NotificationsController extends Controller
                             ->join('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
                             ->join('employee_shifts as es', 'es.id', '=', 'employees.shift_id')
                             ->leftjoin('employee_attendance_adjustments as eaa', 'eaa.id', '=', 'employees.id')
-                            ->select('employees.trax_id', 'employees.name as name', 'ed.name as designation', 'ea.leave_status', 'ea.clock_in_datetime', 'ea.clock_out_datetime', 'ea.attendance_date', 'es.start_time', 'es.extension_minutes', 'eaa.status')
+                            ->select('employees.trax_id', 'employees.name as name', 'ed.name as designation', 'ea.leave_status', 'ea.clock_in_datetime', 'ea.clock_out_datetime', 'ea.attendance_date as attendance_date', 'es.start_time', 'es.extension_minutes', 'eaa.status')
                             ->where('employees.line_manager_id', $line_manager->id)
                             ->whereBetween('ea.attendance_date', [$reference_1_id, $reference_2_id])
                             ->orderBy('ea.attendance_date')
@@ -10108,6 +10113,8 @@ class NotificationsController extends Controller
                             } else {
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Yes</td>';
                             }
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance->attendance_date . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . Carbon::parse($employees_attendance->attendance_date)->format('l') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_in_datetime'] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $employees_attendance['clock_out_datetime'] . '</td>';
                             $html .= '</tr>';
@@ -10187,6 +10194,35 @@ class NotificationsController extends Controller
                     }
 
                     
+                }
+                else if ($id == 214) {
+//                    $subject = $notification->subject;
+                    $file_path = $reference_1_id['file_path'];
+
+                    $from = $reference_1_id['from'];
+                    $to = $reference_1_id['to'];
+                    $subject = 'Revenue Daily Report By Arrival Date  | ';
+
+                    $subject .= $from;
+
+                    $file = Storage::disk('public')->url($file_path);
+
+                    $link = '<a href="' . $file . '" target="_blank"><u>Download</u></a>';
+
+//                    $date = $from;
+//                    if (strpos($subject, '[date]') !== FALSE) {
+//                        $subject = str_replace('[date]', $date, $subject);
+//                    }
+
+                    if (strpos($body, '[link]') !== FALSE) {
+                        $body = str_replace('[link]', $link, $body);
+                    }
+
+                    $to = ['tanveer.malik@trax.pk', 'muhammad.jawwad@trax.pk', 'fawad.ahmed@trax.pk', 'waqas@trax.pk','shafay.tariq@trax.pk','huzaifa.aamir@trax.pk','hammad.majid@trax.pk'];
+
+                    $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
+
+                    self::email($subject, $body, $to, $cc);
                 }
             }
         }       

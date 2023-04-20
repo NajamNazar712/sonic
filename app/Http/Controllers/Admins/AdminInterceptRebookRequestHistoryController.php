@@ -64,6 +64,14 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                     });
             });
         }
+
+        
+        if ($request->get('search_from') && $request->get('search_to')) {
+            $from = $request->get('search_from');
+            $to = $request->get('search_to');
+            $intercept->whereBetween('intercept_re_book_request_histories.created_at', [$from, $to]);
+        }
+
         return Datatables::of($intercept)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');

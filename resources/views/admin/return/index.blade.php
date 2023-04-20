@@ -34,6 +34,19 @@
                         </form>
                     </div>
                 </div>
+
+                <div class="col justify-content-end mb-5">
+                    <div class="card-header">
+                        <div class="heading-elements">
+                            <ul class="list-inline">
+                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                        Star Shippers</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -1221,6 +1234,7 @@
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
+                        d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
                 rowId: 'shId',
@@ -2307,7 +2321,11 @@
                 // }
             });
 
-
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+                table.draw(true);
+                $('#star_shippers_filter').val(0);
+            });
       
         });
     </script>

@@ -273,6 +273,7 @@ Route::name('api.')->group(function () {
                 Route::post('calculate_charges', 'Rider\RiderAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'Rider\RiderAPIController@retail_shipment_store')->name('retail_shipment_store');
                 Route::post('retail_shipment_store_v2', 'Rider\RiderAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
+                Route::post('retail_shipment_store_v3', 'Rider\RiderAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
             });
 
             Route::prefix('profile')->name('profile.')->group(function () {
@@ -378,6 +379,7 @@ Route::name('api.')->group(function () {
                 Route::post('calculate_charges', 'AdminAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'AdminAPIController@retail_shipment_store')->name('retail_shipment_store');
                 Route::post('retail_shipment_store_v2', 'AdminAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
+                Route::post('retail_shipment_store_v3', 'AdminAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
             });
 
             Route::prefix('master_cargo')->name('master_cargo.')->group(function () {
@@ -522,6 +524,7 @@ Route::name('api.')->group(function () {
                 Route::post('calculate_charges', 'Retail\RetailAPIController@retail_shipment_calculate_rates')->name('calculate_charges');
                 Route::post('retail_shipment_store', 'Retail\RetailAPIController@retail_shipment_store')->name('retail_shipment_store');
                 Route::post('retail_shipment_store_v2', 'Retail\RetailAPIController@retail_shipment_store_v2')->name('retail_shipment_store_v2');
+                Route::post('retail_shipment_store_v3', 'Retail\RetailAPIController@retail_shipment_store_v3')->name('retail_shipment_store_v3');
             });
 
         });

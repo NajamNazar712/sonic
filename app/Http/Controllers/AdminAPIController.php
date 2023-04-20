@@ -2807,7 +2807,17 @@ class AdminAPIController extends Controller
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
+             $insurance =  intval($pickup_address->insurance);
+        
+            $packaging = ($request->packaging_amount != null) ? intval($request->packaging_amount) : 0;
+
+            $insurance_amount = ($request->insurance_amount != null) ? intval($request->insurance_amount) : 0;
+    
+            if ($insurance_amount > 0) {
+                $insurance_amount = round($insurance_amount * $insurance / 100, 2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
@@ -3189,6 +3199,10 @@ class AdminAPIController extends Controller
             $retail_shipment->length = $length;
             $retail_shipment->breadth = $breadth;
             $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $charges;
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_and_insurance_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
             $retail_shipment->admin_id = $admin_id;
             $retail_shipment->save();
 
@@ -3226,6 +3240,229 @@ class AdminAPIController extends Controller
         }
         return response()->json(['status' => 1, 'message' => 'Invalid Pickup Address']);
     }
+
+
+    public function retail_shipment_store_v3(Request $request)
+    {
+        $admin_id = $request->admin_id;
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $user_id = $setting->setting_value;
+        $pickup_address_id = $request->pickup_address_id;
+        $pickup_address = RetailTraxCenter::where('pickup_address_id', $pickup_address_id);
+        if ($pickup_address->exists()) {
+            $pickup_address = $pickup_address->first();
+            $pickup_city_id = $pickup_address->pickup_address->city_id;
+            $discount = $pickup_address->discount;
+            $insurance = intval($pickup_address->insurance);
+            $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+            $information_display = TRUE;
+
+            $consignee_name = $request->input('consignee_name');
+            $consignee_address = $request->input('consignee_address');
+            $consignee_phone_number_1 = $request->input('consignee_cell_no');
+            $consignee_phone_number_2 = NULL;
+            $consignee_email_address = NULL;
+            $order_id = $request->input('order_id');
+            $package_type = FALSE;
+            $special_instructions = NULL;
+            $charges_mode_id = ($request->has('charges_mode')) ? $request->input('charges_mode') : 1;
+
+            $shipping_mode_check = $request->input('shipping_mode_id');
+            $consignee_city_id = $request->input('city_id');
+            if ($shipping_mode_check == 1) {
+                $shipping_mode_id = 2;
+            } elseif ($shipping_mode_check == 4) {
+                $shipping_mode_id = 3;
+            } else {
+                $shipping_mode_id = 1;
+            }
+            $same_day_timing_id = NULL;
+
+            if ($request->volumetric_weight == 1) {
+                $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+                $length = $request->length;
+                $breadth = $request->breadth;
+                $height = $request->height;
+            } else {
+                $estimated_weight = $request->input('weight');
+                $length = null;
+                $breadth = null;
+                $height = null;
+            }
+
+            $packaging = ($request->packaging_amount != null) ? intval($request->packaging_amount) : 0;
+
+            $insurance_amount = ($request->insurance_amount != null) ? str_replace(',', '', $request->insurance_amount) : 0;
+            if ($insurance_amount > 0) {
+                $insurance_amount = round(intval($insurance_amount) * $insurance / 100, 2);
+            }
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
+           
+            $charges = $rates["total_charges"];
+            if ($shipping_mode_check == 3) {
+                $amount = str_replace(',', '', $request->input('cod_amount'));
+                $r_amount = 0;
+                if ($charges_mode_id == 2) {
+                    $amount = $amount + $charges;
+                }
+            } else {
+                $amount = 0;
+                if ($charges_mode_id == 2) {
+                    $amount = $charges;
+                }
+                $r_amount = 0;
+            }
+            $payment_mode_id = 1;
+            $try_and_buy_charges = NULL;
+
+            $pieces_quantity = $request->input('pieces');
+            $business_category_id = $request->input('business_category_id');
+
+
+            $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+            if ($business_category_id == 2) {
+                $international_shipment_booking = new InternationalShipment();
+                $international_shipment_booking->shipment_id = $shipment_id;
+                $international_shipment_booking->postal_code = 00000;
+                $international_shipment_booking->save();
+            }
+
+
+            $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+            $product_type_id = $request->product_id;
+
+            $item_description = NULL;
+
+            $item_quantity = 1;
+
+            if ($request->input('insurance') == 1) {
+                $price = str_replace(',', '', $request->input('insurance_amount'));
+                $insurance = TRUE;
+            } else {
+                $price = NULL;
+                $insurance = FALSE;
+            }
+
+            $type = 0;
+
+            RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+            if ($pieces_quantity > 1) {
+                RetailShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+            }
+            $destination = $request->city_id;
+
+            $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_cell_no);
+            if ($shipper_info->exists()) {
+                $shipper_info = $shipper_info->first();
+                $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+                $shipper_info->shipper_name = $request->shipper_name;
+                $shipper_info->shipper_cnic = $request->shipper_cnic;
+                $shipper_info->shipper_address = $request->shipper_address;
+                $shipper_info->city_id = $pickup_city_id;
+
+
+                if ($request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                    $shipper_info->bank_id = $request->bank_id;
+                    $shipper_info->iban = $request->iban_no;
+                    $shipper_info->account_number = $request->account_no;
+                    if ($request->hasFile('cheque')) {
+                        $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                        $file = $request->file('cheque');
+                        Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                        $shipper_info->cheque_image = $filename;
+                        $shipper_info->completed_status = 1;
+                    }
+                }
+                $shipper_info->save();
+            } else {
+                $shipper_info = new RetailShipperInfo();
+                $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+                $shipper_info->shipper_name = $request->shipper_name;
+                $shipper_info->shipper_cnic = $request->shipper_cnic;
+                $shipper_info->shipper_address = $request->shipper_address;
+                $shipper_info->city_id = $pickup_city_id;
+                $shipper_info->save();
+                if ($request->hasFile('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                    $shipper_info->bank_id = $request->bank_id;
+                    $shipper_info->iban = $request->iban_no;
+                    $shipper_info->account_number = $request->account_no;
+                    if ($request->hasFile('cheque')) {
+                        $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                        $file = $request->file('cheque');
+                        Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                        $shipper_info->cheque_image = $filename;
+                        $shipper_info->completed_status = 1;
+                    }
+                }
+                $shipper_info->save();
+            }
+            $retail_shipment = new RetailShipment();
+            $retail_shipment->shipment_id = $shipment_id;
+            $retail_shipment->product_type_id = $request->product_id;
+            $retail_shipment->shipping_mode = $request->shipping_mode_id;
+            $retail_shipment->destination = $destination;
+            $retail_shipment->payment_mode_id = $request->payment_mode_id;
+            $retail_shipment->shipper_phone_no = $request->shipper_cell_no;
+            $retail_shipment->shipper_name = $request->shipper_name;
+            $retail_shipment->shipper_cnic = $request->shipper_cnic;
+            $retail_shipment->shipper_address = $request->shipper_address;
+            $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+            $retail_shipment->total_charges = $charges;
+            $retail_shipment->shipper_account_no = $shipper_info->id;
+            $retail_shipment->weight = $estimated_weight;
+            $retail_shipment->length = $length;
+            $retail_shipment->breadth = $breadth;
+            $retail_shipment->height = $height;
+            $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+            $retail_shipment->discount = $rates['discount_amount'];
+            $retail_shipment->packaging_charges = $rates['packaging_charges'];
+            $retail_shipment->insurance_charges = $rates['insurance_amount'];
+            $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
+            $retail_shipment->weight_charges = $rates['charges_without_gst'];
+            $retail_shipment->gst = $rates['gst_charges'];
+            $retail_shipment->admin_id = $admin_id;
+            $retail_shipment->save();
+
+
+            $date = Carbon::today()->toDateString();
+            $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 3)->where('admin_id', $admin_id);
+            if ($cash_deposit->exists()) {
+                $cash_deposit = $cash_deposit->first();
+                $total_shipments = $cash_deposit->total_cn + 1;
+                $total_cash = $cash_deposit->total_cash + $amount;
+                $cash_deposit->total_cn = $total_shipments;
+                $cash_deposit->total_cash = $total_cash;
+                $cash_deposit->save();
+            } else {
+                $cash_deposit = new RetailCashDeposit();
+                $cash_deposit->category = 3;
+                $cash_deposit->admin_id = $admin_id;
+                $cash_deposit->total_cn = 1;
+                $cash_deposit->total_cash = $amount;
+                $cash_deposit->save();
+
+            }
+
+            $cash_deposit_shipment = new RetailCashDepositShipment();
+            $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+            $cash_deposit_shipment->shipment_id = $shipment_id;
+            $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode_id;
+            $cash_deposit_shipment->save();
+
+
+            AdminPickupsController::generate($shipment_id);
+            NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+            return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+        }
+        return response()->json(['status' => 1, 'message' => 'Invalid Pickup Address']);
+    }
+
 
     public function notification_history(Request $request)
     {
