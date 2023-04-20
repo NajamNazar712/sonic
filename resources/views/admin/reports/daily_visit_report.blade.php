@@ -208,6 +208,7 @@
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
                             });
+                            location.reload();
 
                         } else {
                             toastr.error(data.message, 'Error!', {

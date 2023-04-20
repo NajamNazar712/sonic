@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Admin\SalePersonAssignedSegment;
-use App\Admin\SegmentHistory;
+use App\Http\Models\Admin\SalePersonAssignedSegment;
+use App\Http\Models\Admin\SegmentHistory;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
