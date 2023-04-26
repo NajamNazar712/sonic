@@ -19,6 +19,9 @@ Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->n
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
+Route::get('payfast-payment', 'Admins\AdminDashboardController@payfast_payment')->name('payfast-payment');    
+Route::get('payfast-payment-details', 'Admins\AdminDashboardController@payfast_payment_details')->name('payfast-payment-details');    
+
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
@@ -699,6 +702,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 //Added by Murad
 
         Route::post('add_fintech_charges', 'Admins\AdminDashboardController@add_fintech_charges')->name('add_fintech_charges');    
+      
       
 
 //End

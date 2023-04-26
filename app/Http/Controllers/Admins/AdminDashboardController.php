@@ -183,7 +183,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
 use App\Jobs\CountFintechCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
-
+use GuzzleHttp\Client;
 use App\Http\Models\Admin\UserFintectCharges;
 use CreateCityOsaRatesTable;
 
@@ -191,11 +191,15 @@ class AdminDashboardController extends Controller
 {
 
     public function __construct()
-    {
-        $this->middleware('auth:admin');
-
-        $this->middleware('Permission');
+    {   $this->middleware('auth:admin')->except('payfast_payment');
+        $this->middleware('Permission')->except('payfast_payment');
     }
+
+        public function payfast_payment_details(){
+            return view('payfast-payment-view');
+        }
+
+
 
     public function index()
     {
@@ -506,10 +510,13 @@ class AdminDashboardController extends Controller
 
 //Added by Murad
 
-public function add_fintech_charges(Request $req){  
 
 
-  //  dd($req->all());    
+public function payfast_payment(Request $request){
+    dd($request->all());
+}
+
+public function add_fintech_charges(Request $req){        
     $UserFintectCharges = new UserFintectCharges();
     $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
     $standard_fintech_charges = standard_fintech_charges::all();
@@ -575,7 +582,6 @@ public function add_fintech_charges(Request $req){
 //End
     public function statistics_search(Request $request)
     {
-//        return $request;
         $graph = array();
         $destination_id = $request->destination;
         $shipper = $request->shipper;
@@ -594,18 +600,18 @@ public function add_fintech_charges(Request $req){
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
-                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
-                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
-                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $booked               = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
+                $arrived              = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
+                $in_transit           = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
+                $canceled             = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
+                $destination          = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
+                $out_for_delivery     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
+                $return_confirm       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
+                $return_delivered     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
+                $pending_shipments    = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12, 54, 55]);
-                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                $delivered            = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -702,18 +708,18 @@ public function add_fintech_charges(Request $req){
                     });
                 }
 
-                $graph['booked'][] = $booked->count();
-                $graph['arrived'][] = $arrived->count();
-                $graph['in_transit'][] = $in_transit->count();
-                $graph['canceled'][] = $canceled->count();
-                $graph['delivered'][] = $delivered->count();
-                $graph['destination'][] = $destination->count();
-                $graph['out_for_delivery'][] = $out_for_delivery->count();
-                $graph['return_confirm'][] = $return_confirm->count();
-                $graph['return_delivered'][] = $return_delivered->count();
-                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['booked'][]               = $booked->count();
+                $graph['arrived'][]              = $arrived->count();
+                $graph['in_transit'][]           = $in_transit->count();
+                $graph['canceled'][]             = $canceled->count();
+                $graph['delivered'][]            = $delivered->count();
+                $graph['destination'][]          = $destination->count();
+                $graph['out_for_delivery'][]     = $out_for_delivery->count();
+                $graph['return_confirm'][]       = $return_confirm->count();
+                $graph['return_delivered'][]     = $return_delivered->count();
+                $graph['pending_shipments'][]    = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
-                $graph['pending_return'][] = $pending_return->count();
+                $graph['pending_return'][]       = $pending_return->count();
 //                $graph['complaints_launched'][] = $complaints_launched->count();
 //                $graph['complaints_in_process'][]  = $complaints_in_process->count();
 //                $graph['complaints_closed'][] = $complaints_closed->count();
