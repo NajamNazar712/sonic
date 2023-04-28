@@ -7538,7 +7538,7 @@ class AdminReportsController extends Controller
             })
 
             ->editColumn('visit_status', function ($dvr) {
-                $visit_status = '<div class="text-center">';
+                $visit_status = '';
                 if ($dvr->visit_status == 1) {
                     $visit_status .= 'Valid';
                     return $visit_status;
