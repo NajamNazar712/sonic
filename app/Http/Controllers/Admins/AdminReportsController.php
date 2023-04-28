@@ -7536,6 +7536,21 @@ class AdminReportsController extends Controller
                     return '-';
                 }
             })
+
+            ->editColumn('visit_status', function ($dvr) {
+                $visit_status = '<div class="text-center">';
+                if ($dvr->visit_status == 1) {
+                    $visit_status .= 'Valid';
+                    return $visit_status;
+                } else if($dvr->visit_status == 2){
+                    $visit_status .= 'Invalid';
+                    return $visit_status;
+                }
+                else {
+                    $visit_status .= '-';
+                    return $visit_status;
+                }
+            })
             
 
             ->addColumn('action', function($daily_visit) {
