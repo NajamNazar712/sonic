@@ -114,7 +114,6 @@ class InvalidEmailVisit extends Command
 
                 if ($line_manager_emails->exists()) {
                     $line_manager_emails = $line_manager_emails->get();
-
                     $details = '<table style="width:100%;">';
                     $details .= '<thead><tr>
                     <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Sales Person</th>
