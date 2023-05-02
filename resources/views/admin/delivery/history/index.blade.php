@@ -404,7 +404,7 @@
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},
-                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
+                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},

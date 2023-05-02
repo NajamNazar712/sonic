@@ -377,7 +377,7 @@
                         name: 'oc.business_category_id',
                         class: 'align-middle business_category'
                     },
-                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider'},
+                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},

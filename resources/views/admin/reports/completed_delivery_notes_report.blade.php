@@ -530,7 +530,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note_link' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note_link'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
+                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'cni' ,name: 'riders.cnic', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
