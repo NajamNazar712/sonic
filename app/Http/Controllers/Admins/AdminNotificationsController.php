@@ -813,20 +813,25 @@ class AdminNotificationsController extends Controller
         return $details;
     }
 
-    public function edit(Request $request) {
+    public function edit(Request $request)
+    {
         $notification = Notification::find($request->get('id'));
-
-        if ($notification) {
-            if ($notification->type_id == 1) {
+        
+        if ($notification) 
+        {
+            if ($notification->type_id == 1) 
+            {
                 $notification->subject = $request->get('subject');
             }
 
             $notification->body = $request->get('body');
+
             $notification->updated_by = Auth::id();
 
             $notification->save();
 
             return ['status' => 0, 'success' => 'Notification has been edited'];
+
         }
         else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];
