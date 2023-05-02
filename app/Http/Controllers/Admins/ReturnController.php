@@ -1674,7 +1674,7 @@ class ReturnController extends Controller
         return Rider::where('status', 1)
             ->whereHas('city', function ($query) use ($hub_id) {
                 $query->where('hub_id', $hub_id);
-        })->get(['id','name','route_id','trax_id']);
+        })->where('riders.operation_rider_id', 2)->get(['id','name','route_id','trax_id']);
     }
 
     public function get_shipment_details(Request $request){
