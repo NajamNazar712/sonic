@@ -342,9 +342,9 @@
                     {data: 'origin',name: 'cities.name',class: 'align-middle origin'},
                     {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
                     {data: 'hubname',name: 'hub.name',class: 'align-middle hub'},
-                    {data: 'last_status',name: 'sjjj.shipper_status_id',class: 'align-middle last_status'},
-                    {data: 'current_status',name: 'sjj.shipper_status_id',class: 'align-middle current_status'},
-                    {data: 'date',name: 'sjj.updated_at',class: 'align-middle date'},
+                    {data: 'last_status',class: 'align-middle last_status'},
+                    {data: 'current_status',class: 'align-middle current_status'},
+                    {data: 'date',name: 'sj.updated_at',class: 'align-middle date'},
                     {data: 'otp_entered',name: 'otp_entered',class: 'align-middle otp_entered'},
                 ],
                 rowCallback: function(row, data, index) {
