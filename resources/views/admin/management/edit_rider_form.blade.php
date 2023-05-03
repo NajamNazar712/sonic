@@ -338,8 +338,6 @@
                     });
                     routelist.val('').trigger('change');
 
-                      routelist.val('').trigger('change');
-
                     area_list.empty();
                     if(data.areas.length > 0){ 
                         area_list.attr("disabled", false);
