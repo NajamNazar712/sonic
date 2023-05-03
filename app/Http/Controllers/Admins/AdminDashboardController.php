@@ -12940,12 +12940,14 @@ class AdminDashboardController extends Controller
 
         if ($validate->passes()) {
 
-
+            $default_city = CityArea::where('city_id',$request->city_id);
             $city_area = !isset($request->id) ?  new CityArea() : CityArea::find($request->id);
             $city_area->city_id  = $request->city_id;
             $city_area->report_location_id  = $request->report_location_id;
             $city_area->name  = $request->name;
             $city_area->updated_by  = auth()->user()->id;
+            $city_area->status  = 1;
+            $city_area->default  = ($default_city->exists()) ? 0 : 1;
             $city_area->save();
 
             $data = response()->json([

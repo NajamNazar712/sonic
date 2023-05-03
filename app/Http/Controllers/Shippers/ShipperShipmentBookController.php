@@ -7387,6 +7387,14 @@ class ShipperShipmentBookController extends Controller
                 $user_shipping_info = UserShippingInfo::find($pickup_address_id);
                 $user_shipping_info->city_area_id = $find->id;
                 $user_shipping_info->save();
+            }else {
+                $find = CityArea::where('city_id', $city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
+                if ($find->exists()) {
+                    $find = $find->first();
+                    $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+                    $user_shipping_info->city_area_id = $find->id;
+                    $user_shipping_info->save();
+                }
             }
         }
     }
