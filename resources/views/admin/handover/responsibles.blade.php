@@ -70,6 +70,14 @@
                                             </select>
                                     </fieldset>
                                </div>
+
+                                <div class="col-6 form-group">
+                                    <fieldset class="form-group">
+                                        <select  name="city_area_id" id="city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                             <br>
                             <div class="row justify-content-center">
@@ -118,6 +126,13 @@
                                         </select>
                                     </fieldset>
                                 </div>
+                                <div class="col-6 form-group">
+                                    <fieldset class="form-group">
+                                        <select  name="city_area_id" id="edit_city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                             <br><br>
                             <div class="row justify-content-center">
@@ -155,6 +170,17 @@
             placeholder: 'Select Hub',
             dropdownParent:$('#add_responsible_form')
         });
+        $('#city_area_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Area',
+            dropdownParent:$('#add_responsible_form')
+        });
+        $('#edit_city_area_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Area',
+            dropdownParent:$('#edit_responsible_form')
+        });
+
 
         $( "#add_responsible_form" ).validate({
             errorClass:"danger",
@@ -229,6 +255,8 @@
                         });
 
                         $('#edit_hub').val(hub).trigger('change');
+
+                        get_area(data.responsible.hub_id,true,data.responsible.city_area_id);
                 
                         $('#EditResponsibleModal').modal('show');
 
@@ -377,6 +405,58 @@
             $('#responsible_id').val('');
             $('#edit_name').val('');
         });
+
+        $('#hub').change(function(){
+            var city_id = $(this).val();
+            get_area(city_id,false);
+        });
+
+        function get_area(city_id,edit = false,val = null){
+
+            if(!edit) {
+                $('#city_area_id').empty();
+                $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        let data = [];
+                        $.each(result.city_area, function (index, value) {
+                            data += `<option value="${value.id}">${value.name}</option>`
+                        });
+
+                        $('#city_area_id').prepend(data).select2({
+                            width: '100%',
+                            placeholder: 'Select Area',
+                            dropdownParent: $('#add_responsible_form')
+                        });
+
+                    }
+                })
+            }else{
+
+                $('#edit_city_area_id').empty();
+                $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        let data = `<option value="">Select Area</option>`;
+                        $.each(result.city_area, function (index, value) {
+                            data += `<option value="${value.id}">${value.name}</option>`
+                        });
+
+                        $('#edit_city_area_id').prepend(data).select2({
+                            width: '100%',
+                            placeholder: 'Select Area',
+                            dropdownParent: $('#edit_responsible_form')
+                        });
+
+                        $('#edit_city_area_id').val(val).trigger('change');
+                    }
+                })
+            }
+        }
     });
 
 
