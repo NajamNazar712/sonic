@@ -1337,6 +1337,7 @@ class AdminHumanResourseController extends Controller
             $employee->department_id = ($request->has('department')) ? $request->department : 6;
         }
         $employee->city_id = $request->city;
+        $employee->area_id = $request->area;
         $employee->zone_id = $request->zone;
         $employee->official_email = $request->official_email;
         $employee->official_phone_number = $request->official_number;
@@ -1410,6 +1411,7 @@ class AdminHumanResourseController extends Controller
                 $admin->dummy_pin = $employee->pin;
                 $admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
+                $admin->area_id = $request->area;
                 $admin->update();
 
             }
@@ -1429,6 +1431,7 @@ class AdminHumanResourseController extends Controller
                 $rider->rider_category_id = $request->rider_sub_category;
                 $rider->operation_rider_id = $request->rider_functional_category;
                 $rider->route_id = $request->rider_route;
+                $rider->area_id = $request->area;
                 $rider->updated_by = Auth::id();
                 $rider->save();
             }
