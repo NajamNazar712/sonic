@@ -528,6 +528,33 @@ class ReturnController extends Controller
             $datatable->where('sts.status',1);
         }
 
+        if($request->get('complaint_filter') == 1)
+        {
+            $datatable->whereNotNull('crm.id');
+        }
+        if($request->get('out_of_service_area_filter') == 1)
+        {
+            $datatable->where('ssr.id',12);
+        }
+
+        if($request->get('shipment_re_attempt_request_filter') == 1)
+        {
+            $datatable->where('shipments.shipper_status_id',52);
+        }
+
+        if($request->get('try_buy_filter') == 1)
+        {
+            $datatable->where('shipments.booking_type_id',3);
+        }
+
+        if($request->get('return_confirmation_pending_filter') == 1)
+        {
+            $datatable->where('shipments.shipper_status_id',12)
+            ->where('rider_deliveries.rider_status_id',12)
+            ->where('ssr.id',8)
+            ->where('rider_deliveries.otp_entered',1);
+        }
+
         return $datatable->make(true);
     }
 

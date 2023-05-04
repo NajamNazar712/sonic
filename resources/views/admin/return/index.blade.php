@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-@section('title','Return Confirmation Pending Shipments')
+@section('title', 'Return Confirmation Pending Shipments')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('content')
@@ -15,8 +15,8 @@
 
                     <div class="col-3">
                         <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                            @foreach($shipping_mode as $mode)
-                                <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                            @foreach ($shipping_mode as $mode)
+                                <option value="{{ $mode->id }}">{{ $mode->mode }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -25,7 +25,9 @@
                     <div class="col-5">
                         <form id="track_form" class="form-inline mb-1 " novalidate="novalidate">
                             <div class="form-group">
-                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers"
+                                    placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number"
+                                    data-rule-required="true" data-msg-required="Tracking Number is required">
                             </div>
 
                             <div class="form-group ml-1">
@@ -45,56 +47,102 @@
                             </ul>
                         </div>
                     </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="heading-elements">
+                                <ul class="list-inline mb-0">
+                                    <li class="primary border-primary round"><a data-action="collapse">Color Filters <i
+                                                class="ft-plus"></i> </a> </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="card-content collapse">
+                            <div class="card-body p-1">
+                                <div class="row justify-content-end">
+                                    <div class="col-md-6">
+                                        <h4 class=" info">Filters</h4>
+                                        <table class="table mb-0"  id="legends_table">
+                                            <tbody>
+                                                <tr style=color:#010a10; value="0"
+                                                    id="complaint_filter" class="complaint_row legends">
+                                                    <td class="align-middle">Complaint</td>
+                                                </tr>
+                                                <tr style=color:#010a10; value="0"
+                                                    id="out_of_service_area_filter" class="nsa_osa_reason legends">
+                                                    <td class="align-middle">Out of Service Area</td>
+                                                </tr>
+                                                <tr style=color:#010a10; value="0"
+                                                    id="shipment_re_attempt_request_filter" class="goldClass legends">
+                                                    <td class="align-middle">Shipment - Re-Attempt Requested</td>
+                                                </tr>
+                                                <tr style=color:#010a10; value="0"
+                                                    id="try_buy_filter" class="tnb_row legends">
+                                                    <td class="align-middle">Try & Buy</td>
+                                                </tr>
+                                                <tr style=color:#010a10; value="0"
+                                                    id="return_confirmation_pending_filter" class="GreenColor legends">
+                                                    <td class="align-middle">Return Comfirmation Pending</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
+                        <tr role="row" class="bg-primary white">
 
-                        <th class="border-primary border-darken-1"></th>
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name</th>
-                        <th class="border-primary border-darken-1">Shipper Phone(s)</th>
-                        <th class="border-primary border-darken-1">Vendor</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Consignee Phone</th>
-                        <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Sub Station</th>
-                        <th class="border-primary border-darken-1">Collection Amount</th>
-                     {{--   <th class="border-primary border-darken-1">RCP SMS Count</th>--}}
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Shipper Remarks</th>
-                        <th class="border-primary border-darken-1">OSA Estimated Charges</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Status Updated</th>
-                        <th class="border-primary border-darken-1">Confirmation Required</th>
-                        <th class="border-primary border-darken-1">Confirmation On</th>
-                        <th class="border-primary border-darken-1">Delivery Attempt Count</th>
-                        <th class="border-primary border-darken-1">Re-Attempt Count</th>
-                        <th class="border-primary border-darken-1">Assigned Agent</th>
-                        <th class="border-primary border-darken-1">Assigned At</th>
-                        <th class="border-primary border-darken-1">Assigned By</th>
-						<th class="border-primary border-darken-1">Consolidation</th>
-                        <th class="border-primary border-darken-1">Consolidated IDs</th>
-                        <th class="border-primary border-darken-1">Actions</th>
-                    </tr>
+                            <th class="border-primary border-darken-1"></th>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Order ID</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">Shipper Phone(s)</th>
+                            <th class="border-primary border-darken-1">Vendor</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Hub</th>
+                            <th class="border-primary border-darken-1">Consignee Name</th>
+                            <th class="border-primary border-darken-1">Consignee Phone</th>
+                            <th class="border-primary border-darken-1">Address</th>
+                            <th class="border-primary border-darken-1">Sub Station</th>
+                            <th class="border-primary border-darken-1">Collection Amount</th>
+                            {{--   <th class="border-primary border-darken-1">RCP SMS Count</th> --}}
+                            <th class="border-primary border-darken-1">Shipping Mode</th>
+                            <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Shipper Remarks</th>
+                            <th class="border-primary border-darken-1">OSA Estimated Charges</th>
+                            <th class="border-primary border-darken-1">Arrival Date</th>
+                            <th class="border-primary border-darken-1">Status Date</th>
+                            <th class="border-primary border-darken-1">Status Updated</th>
+                            <th class="border-primary border-darken-1">Confirmation Required</th>
+                            <th class="border-primary border-darken-1">Confirmation On</th>
+                            <th class="border-primary border-darken-1">Delivery Attempt Count</th>
+                            <th class="border-primary border-darken-1">Re-Attempt Count</th>
+                            <th class="border-primary border-darken-1">Assigned Agent</th>
+                            <th class="border-primary border-darken-1">Assigned At</th>
+                            <th class="border-primary border-darken-1">Assigned By</th>
+                            <th class="border-primary border-darken-1">Consolidation</th>
+                            <th class="border-primary border-darken-1">Consolidated IDs</th>
+                            <th class="border-primary border-darken-1">Actions</th>
+                        </tr>
                     </thead>
                 </table>
 
             </div>
         </div>
     </div>
-    <div class="modal fade" id="excel_upload_modal" data-backdrop="static" role="dialog" aria-labelledby="excel_upload_modal" aria-hidden="true">
+    <div class="modal fade" id="excel_upload_modal" data-backdrop="static" role="dialog"
+        aria-labelledby="excel_upload_modal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -104,12 +152,20 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="return_status_form" class="form-horizontal" method="POST"
+                        action="{{ route('admin.return.excel.store') }}" novalidate="novalidate"
+                        enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row align-items-center justify-content-center">
                             <div class="col">
                                 <div class="form-group">
-                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary"
+                                        title="Select File" data-rule-required="true"
+                                        data-msg-required="File is required" data-rule-extension="xls|xlsx"
+                                        data-msg-extension="Only file with extension xls or xlsx allowed"
+                                        data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880"
+                                        data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                 </div>
                             </div>
 
@@ -121,7 +177,8 @@
 
                             <div class="col ml-auto">
                                 <div class="form-group text-right">
-                                    <a href="{{ asset('file/Trax Return Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                    <a href="{{ asset('file/Trax Return Status Template.xlsx') }}"
+                                        class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                 </div>
                             </div>
                         </div>
@@ -134,7 +191,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="agent_assign_modal" data-backdrop="static" role="dialog" aria-labelledby="agent_assign_modal" aria-hidden="true">
+    <div class="modal fade" id="agent_assign_modal" data-backdrop="static" role="dialog"
+        aria-labelledby="agent_assign_modal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -144,12 +202,20 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="assign_agent_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate" enctype="multipart/form-data">
+                    <form id="assign_agent_form" class="form-horizontal" method="POST"
+                        action="{{ route('admin.return.excel.assign_agent_excel') }}" novalidate="novalidate"
+                        enctype="multipart/form-data">
                         {{ csrf_field() }}
                         <div class="row align-items-center justify-content-center">
                             <div class="col">
                                 <div class="form-group">
-                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary"
+                                        title="Select File" data-rule-required="true"
+                                        data-msg-required="File is required" data-rule-extension="xls|xlsx"
+                                        data-msg-extension="Only file with extension xls or xlsx allowed"
+                                        data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                                        data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880"
+                                        data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
                                 </div>
                             </div>
 
@@ -161,7 +227,8 @@
 
                             <div class="col ml-auto">
                                 <div class="form-group text-right">
-                                    <a href="{{ asset('file/Trax Agent Assign Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                    <a href="{{ asset('file/Trax Agent Assign Template.xlsx') }}"
+                                        class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                 </div>
                             </div>
                         </div>
@@ -171,19 +238,19 @@
                     <div class="col">
                         <table class="table table-bordered" id="agenttable">
                             <thead>
-                            <tr role="row" class="bg-primary white text-center">
-                                <th colspan="2" class="border-primary border-darken-1">Agents</th>
-                            </tr>
-                            <tr role="row" class="bg-primary bg-lighten-1 white">
-                                <th class="text-center border-primary border-lighten-2">ID</th>
-                                <th class="border-primary border-lighten-2">Name</th>
-                            </tr>
+                                <tr role="row" class="bg-primary white text-center">
+                                    <th colspan="2" class="border-primary border-darken-1">Agents</th>
+                                </tr>
+                                <tr role="row" class="bg-primary bg-lighten-1 white">
+                                    <th class="text-center border-primary border-lighten-2">ID</th>
+                                    <th class="border-primary border-lighten-2">Name</th>
+                                </tr>
                             </thead>
                             <tbody>
-                                @foreach($agents as $agent)
+                                @foreach ($agents as $agent)
                                     <tr role="row">
-                                        <td class="text-center">{{$agent->id}}</td>
-                                        <td>{{$agent->name}}</td>
+                                        <td class="text-center">{{ $agent->id }}</td>
+                                        <td>{{ $agent->name }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>
@@ -197,7 +264,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal" aria-hidden="true">
+    <div class="modal fade" id="EditEstimateChargesModal" role="dialog" aria-labelledby="EditEstimateChargesModal"
+        aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -208,15 +276,19 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form id="update_charges_form" class="form-horizontal mb-1 justify-content-center"
+                        novalidate="novalidate">
 
                         <div class="form-group">
-                            <input type="text" name="estimate_charges" id="estimated_charges_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                            <input type="text" name="estimate_charges" id="estimated_charges_input"
+                                class="form-control decimal" placeholder="Enter Estimate Charges"
+                                data-rule-required="true" data-msg-required="Estimate Charge is required">
 
                         </div>
                         <input type="hidden" id="eec_shipment_id">
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Update Charges</button>
+                            <button type="submit" name="add" class="btn btn-primary update_charges"
+                                value="Add">Update Charges</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -227,7 +299,8 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="EditEstimateChargesModalNSAreattempt" role="dialog" aria-labelledby="EditEstimateChargesModalNSAreattempt" aria-hidden="true">
+    <div class="modal fade" id="EditEstimateChargesModalNSAreattempt" role="dialog"
+        aria-labelledby="EditEstimateChargesModalNSAreattempt" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -238,15 +311,19 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="update_charges_NSAreattempt_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form id="update_charges_NSAreattempt_form" class="form-horizontal mb-1 justify-content-center"
+                        novalidate="novalidate">
 
                         <div class="form-group">
-                            <input type="text" name="estimate_charges" id="estimated_charges_NSAreattempt_input" class="form-control decimal" placeholder="Enter Estimate Charges" data-rule-required="true" data-msg-required="Estimate Charge is required">
+                            <input type="text" name="estimate_charges" id="estimated_charges_NSAreattempt_input"
+                                class="form-control decimal" placeholder="Enter Estimate Charges"
+                                data-rule-required="true" data-msg-required="Estimate Charge is required">
                         </div>
                         <input type="hidden" id="eec_shipment_id_NSAreattempt">
                         <input type="hidden" id="eec_shipment_remark_NSAreattempt">
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary update_charges" value="Add">Re-attempt</button>
+                            <button type="submit" name="add" class="btn btn-primary update_charges"
+                                value="Add">Re-attempt</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -258,7 +335,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
+    <div class="modal fade" id="ReturnConfirmReasonModal" data-backdrop="static" role="dialog"
+        aria-labelledby="ReturnConfirmReasonModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -269,33 +347,39 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form id="update_return_reason_form" class="form-horizontal mb-1 justify-content-center"
+                        novalidate="novalidate">
                         <div class="form-group">
-                            @if($return_confirm_reasons)
-                                <select id="return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
-                                    @foreach($return_confirm_reasons as $reason)
-                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                            @if ($return_confirm_reasons)
+                                <select id="return_reason_select" data-rule-required="true"
+                                    data-msg-required="Reason is required">
+                                    @foreach ($return_confirm_reasons as $reason)
+                                        <option value="{{ $reason->id }}">{{ $reason->name }}</option>
                                     @endforeach
                                 </select>
                             @endif
                         </div>
                         <div class="form-group">
-                            @if($consignee_refused_reasons)
+                            @if ($consignee_refused_reasons)
                                 <fieldset class="form-group d-none">
-                                    <select name="consignee_refused_reasons" id="consignee_refused_reasons" name="consignee_refused_reasons" class="form-control select2">
-                                        @foreach($consignee_refused_reasons as $reasons)
-                                            <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                    <select name="consignee_refused_reasons" id="consignee_refused_reasons"
+                                        name="consignee_refused_reasons" class="form-control select2">
+                                        @foreach ($consignee_refused_reasons as $reasons)
+                                            <option value="{{ $reasons->id }}">{{ $reasons->reasons }}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             @endif
                         </div>
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks" maxlength="100" class="form-control" placeholder="Remarks">
+                            <input type="text" id="return_reason_shipment_remarks" maxlength="100"
+                                class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" id="btnReturn" class="btn btn-primary update_return_confirm" value="Add">Update To Return Confirm</button>
+                            <button type="submit" name="add" id="btnReturn"
+                                class="btn btn-primary update_return_confirm" value="Add">Update To Return
+                                Confirm</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -306,7 +390,8 @@
             </div>
         </div>
     </div>
-    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog" aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
+    <div class="modal fade" id="ReturnConfirmReasonSingleModal" data-backdrop="static" role="dialog"
+        aria-labelledby="ReturnConfirmReasonSingleModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -317,34 +402,39 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form id="single_update_return_reason_form" class="form-horizontal mb-1 justify-content-center"
+                        novalidate="novalidate">
                         <input type="hidden" id="return_reason_shipment_id">
                         <div class="form-group">
-                            @if($return_confirm_reasons)
-                                <select id="single_return_reason_select" data-rule-required="true" data-msg-required="Reason is required">
-                                    @foreach($return_confirm_reasons as $reason)
-                                        <option value="{{$reason->id}}">{{$reason->name}}</option>
+                            @if ($return_confirm_reasons)
+                                <select id="single_return_reason_select" data-rule-required="true"
+                                    data-msg-required="Reason is required">
+                                    @foreach ($return_confirm_reasons as $reason)
+                                        <option value="{{ $reason->id }}">{{ $reason->name }}</option>
                                     @endforeach
                                 </select>
                             @endif
                         </div>
                         <div class="form-group">
-                            @if($consignee_refused_reasons)
+                            @if ($consignee_refused_reasons)
                                 <fieldset class="form-group d-none">
-                                    <select name="single_consignee_refused_reasons" id="single_consignee_refused_reasons" name="single_consignee_refused_reasons" class="form-control select2">
-                                        @foreach($consignee_refused_reasons as $reasons)
-                                            <option value="{{$reasons->id}}">{{$reasons->reasons}}</option>
+                                    <select name="single_consignee_refused_reasons" id="single_consignee_refused_reasons"
+                                        name="single_consignee_refused_reasons" class="form-control select2">
+                                        @foreach ($consignee_refused_reasons as $reasons)
+                                            <option value="{{ $reasons->id }}">{{ $reasons->reasons }}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
                             @endif
                         </div>
                         <div class="form-group">
-                            <input type="text" id="return_reason_shipment_remarks_single" maxlength="100" class="form-control" placeholder="Remarks">
+                            <input type="text" id="return_reason_shipment_remarks_single" maxlength="100"
+                                class="form-control" placeholder="Remarks">
                         </div>
 
                         <div class="form-group ml-1">
-                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm" id="single_reason_update_btn">Update To Return Confirm</button>
+                            <button type="button" name="add" class="btn btn-primary single_update_return_confirm"
+                                id="single_reason_update_btn">Update To Return Confirm</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -356,8 +446,8 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
-         aria-hidden="true">
+    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="AssignAgentModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -365,8 +455,8 @@
                 </div>
                 <div class="modal-body">
                     <select name="Sale_person" id="assign_agent" class="form-control select2">
-                        @foreach($agents as $agent)
-                            <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
+                        @foreach ($agents as $agent)
+                            <option value="{{ $agent->id }}"> {{ $agent->name }} </option>
                         @endforeach
                     </select>
                 </div>
@@ -379,8 +469,8 @@
     </div>
 
 
-    <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConsigneeInformationModal"
-         aria-hidden="true">
+    <div class="modal fade text-left" id="ConsigneeInformationModal" data-backdrop="static" tabindex="-1"
+        role="dialog" aria-labelledby="ConsigneeInformationModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -391,15 +481,17 @@
                 </div>
                 <div class="modal-body">
                     <div id="consignee_info_div"></div>
-                    <form id="label_update_form" class="mb-1 mt-2" method="POST" action="{{ route('admin.settings.blacklist.search.update') }}" novalidate="novalidate">
+                    <form id="label_update_form" class="mb-1 mt-2" method="POST"
+                        action="{{ route('admin.settings.blacklist.search.update') }}" novalidate="novalidate">
                         {{ csrf_field() }}
 
                         <input type="hidden" id="consignee_information_id" name="consignee_information_id">
                         <div class="row justify-content-center">
                             <div class="col-4">
                                 <div class="form-group">
-                                    <select name="label_select" id="label_select" class="form-control" data-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($blacklists as $blacklist)
+                                    <select name="label_select" id="label_select" class="form-control"
+                                        data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach ($blacklists as $blacklist)
                                             <option value="{{ $blacklist->id }}">{{ $blacklist->name }}</option>
                                         @endforeach
                                     </select>
@@ -410,7 +502,8 @@
                         <div class="row justify-content-center">
                             <div class="col-3">
                                 <div class="form-group">
-                                    <button type="submit" name="action" class="btn btn-primary btn-block" id="label_btn" value="label">Label</button>
+                                    <button type="submit" name="action" class="btn btn-primary btn-block"
+                                        id="label_btn" value="label">Label</button>
                                 </div>
                             </div>
 
@@ -421,7 +514,8 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="send_sms_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="send_sms_modal" aria-hidden="true">
+    <div class="modal fade text-left" id="send_sms_modal" data-backdrop="static" tabindex="-1" role="dialog"
+        aria-labelledby="send_sms_modal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary">
@@ -438,17 +532,21 @@
                         <div class="row justify-content-center">
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12 text-center">
                                 <div class="form-group">
-                                    <label for="send_sms_checkbox" class="font-medium-2 font-weight-bold mr-1">Auto</label>
-                                    <input type="checkbox" name="send_sms_checkbox" id="send_sms_checkbox" class="switchery send_sms_checkbox" data-size="sm" data-switchery="true">
-                                    <label for="send_sms_checkbox" class="font-medium-2 font-weight-bold ml-1">Manual</label>
+                                    <label for="send_sms_checkbox"
+                                        class="font-medium-2 font-weight-bold mr-1">Auto</label>
+                                    <input type="checkbox" name="send_sms_checkbox" id="send_sms_checkbox"
+                                        class="switchery send_sms_checkbox" data-size="sm" data-switchery="true">
+                                    <label for="send_sms_checkbox"
+                                        class="font-medium-2 font-weight-bold ml-1">Manual</label>
                                 </div>
                             </div>
                         </div>
-                        <div class="row justify-content-center mannual_sms d-none" >
+                        <div class="row justify-content-center mannual_sms d-none">
                             <div class="col-6">
                                 <div class="form-group input-group text-center">
                                     <label class="font-medium-2 font-weight-bold block ">Send Message TO</label>
-                                    <select name="shipper_consignee" id="shipper_consignee" class="form-control select2" data-msg-required="Select Shipper/Consignee" data-rule-required="true">
+                                    <select name="shipper_consignee" id="shipper_consignee" class="form-control select2"
+                                        data-msg-required="Select Shipper/Consignee" data-rule-required="true">
                                         <option value="shipper">Shipper</option>
                                         <option value="consignee">Consignee</option>
                                     </select>
@@ -457,7 +555,8 @@
                             <div class="col-12 text-center">
                                 <div class="form-group input-group text-center">
                                     <label class="font-medium-2 font-weight-bold block">Message</label>
-                                    <textarea id="send_mannual_message" name="send_mannual_message" disabled class="form-control" placeholder="Type Your Message*" rows="5" data-rule-required="true"></textarea>
+                                    <textarea id="send_mannual_message" name="send_mannual_message" disabled class="form-control"
+                                        placeholder="Type Your Message*" rows="5" data-rule-required="true"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -476,15 +575,20 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
 
     <style>
         table.dataTable {
             font-size: 12px;
         }
-        
+
+        .legends{
+            cursor:pointer;
+        }
+
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -526,50 +630,63 @@
             width: auto !important;
             text-align: left;
         }
+
         .selectize-control {
             width: 300px !important;
         }
-        .goldClass{
+
+        .goldClass {
             background-color: gold;
         }
-        .GreenColor{
+
+        .GreenColor {
             background-color: #0aff00;
         }
     </style>
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/vendors/js/forms/validation/additional-methods.min.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js') }}"
+        type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/selectize.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
-
         var selected_rows = [];
         var restricted_rows = [];
         var tableagent = $('#agenttable').DataTable({
-                scrollY: '200px',
-                });
-            $('#agent_assign_modal').on('shown.bs.modal', function () {
-                tableagent.columns.adjust();
-            });
-        @php $permission = (in_array(490, session('permissions'))); if($permission){ $permission = 1; }else{ $permission = 0; } @endphp
-        $(document).ready(function () {
+            scrollY: '200px',
+        });
+        $('#agent_assign_modal').on('shown.bs.modal', function() {
+            tableagent.columns.adjust();
+        });
+        @php
+            $permission = in_array(490, session('permissions'));
+            if ($permission) {
+                $permission = 1;
+            } else {
+                $permission = 0;
+            }
+        @endphp
+        $(document).ready(function() {
 
             // $('#send_sms_modal').modal('show');
 
-            $('#send_sms_form #shipper_consignee').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder: 'Select Shipper/Consignee',
-                allowClear:true,
-				dropdownParent:$('#send_sms_form')
-            });
+            $('#send_sms_form #shipper_consignee').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Shipper/Consignee',
+                    allowClear: true,
+                    dropdownParent: $('#send_sms_form')
+                });
 
-            $('#send_sms_checkbox').on('change',function(){
+            $('#send_sms_checkbox').on('change', function() {
 
                 var send_sms_checkbox = document.querySelector('.switchery.send_sms_checkbox');
 
@@ -577,25 +694,25 @@
                     $('#send_sms_form #send_via').val('manual');
                     $('.mannual_sms').removeClass('d-none');
 
-                }else if (send_sms_checkbox.checked === false) {
+                } else if (send_sms_checkbox.checked === false) {
                     $('#send_sms_form #send_via').val('auto');
                     $('.mannual_sms').addClass('d-none');
                 }
             });
 
-            $('#shipper_consignee').on('select2:unselect', function () {
+            $('#shipper_consignee').on('select2:unselect', function() {
 
                 $('#send_mannual_message').val('');
                 $('#send_mannual_message').attr('disabled', true);
-			});
+            });
 
             $('#shipper_consignee').select2({
-				placeholder:'Select Shipper/Consignee',
-				width:'100%',
-				allowClear:true
-			}).bind('select2:select', function () {
+                placeholder: 'Select Shipper/Consignee',
+                width: '100%',
+                allowClear: true
+            }).bind('select2:select', function() {
                 $('#send_mannual_message').attr('disabled', false);
-			});
+            });
 
             $('#send_sms_form').validate({
                 errorClass: 'danger',
@@ -614,7 +731,7 @@
                     var send_to = $(form).find('#shipper_consignee').val();
                     var message = $(form).find('#send_mannual_message').val();
 
-                    if(id){
+                    if (id) {
 
                         swal({
                             title: 'Are You Sure?',
@@ -637,8 +754,8 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false,
                             dangerMode: true
-                        }).then(function (confirm) {
-                            if(confirm){
+                        }).then(function(confirm) {
+                            if (confirm) {
                                 swal({
                                     text: 'Please Wait!',
                                     icon: 'info',
@@ -646,44 +763,49 @@
                                     closeOnClickOutside: false,
                                     closeOnEsc: false
                                 });
-                               
-                                $.ajax({
-                                    url: '{!! route('admin.return.rcp_sms') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        '_token': '{{ csrf_token() }}',
-                                        'id': id,
-                                        'send_via': send_via,
-                                        'send_to': send_to,
-                                        'message': message
-                                    }
-                                })
-                                .done(function(data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                    else {
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    }
-                                    $('#send_sms_modal').modal('hide');
 
-                                    swal.close();
-                                    
-                                });    
-                            }                            
+                                $.ajax({
+                                        url: '{!! route('admin.return.rcp_sms') !!}',
+                                        method: 'POST',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'id': id,
+                                            'send_via': send_via,
+                                            'send_to': send_to,
+                                            'message': message
+                                        }
+                                    })
+                                    .done(function(data) {
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {
+                                                positionClass: 'toast-bottom-center',
+                                                containerId: 'toast-bottom-center'
+                                            });
+                                        } else {
+                                            toastr.error(data.error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                        $('#send_sms_modal').modal('hide');
+
+                                        swal.close();
+
+                                    });
+                            }
                         });
                     }
                 }
-			});
+            });
 
-            $('#send_sms_modal').on('hide.bs.modal', function (e) {
+            $('#send_sms_modal').on('hide.bs.modal', function(e) {
 
-                if($("#send_sms_checkbox").is(":checked")){
+                if ($("#send_sms_checkbox").is(":checked")) {
                     $("#send_sms_checkbox").trigger('click');
                 }
 
                 $('#shipper_consignee').val(null).trigger('change');
-                
+
                 $('#send_mannual_message').val('');
                 $('#send_mannual_message').attr('disabled', true);
 
@@ -696,25 +818,25 @@
             });
             $("#assign_agent").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Agent",
-                width:'100%',
-                dropdownParent:$('#AssignAgentModal')
+                width: '100%',
+                dropdownParent: $('#AssignAgentModal')
             });
 
             $("#consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Sub Reason",
-                width:'100%',
-                dropdownParent:$('#update_return_reason_form')
+                width: '100%',
+                dropdownParent: $('#update_return_reason_form')
             });
             $("#single_consignee_refused_reasons").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Sub Reason",
-                width:'100%',
-                dropdownParent:$('#ReturnConfirmReasonSingleModal')
+                width: '100%',
+                dropdownParent: $('#ReturnConfirmReasonSingleModal')
             });
 
             $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Shipping Mode',
-                allowClear:true
+                allowClear: true
             }).bind('change', function() {
                 table.draw();
             });
@@ -726,8 +848,8 @@
                 width: '100%',
                 placeholder: 'Select Reason'
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -740,7 +862,7 @@
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                         },
                         data: params,
-                        success: function (result) {
+                        success: function(result) {
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
@@ -756,7 +878,7 @@
                             head.push('Address');
                             head.push('Sub Station');
                             head.push('Collection Amount');
-                           /* head.push('RCP SMS Count');*/
+                            /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Status');
@@ -775,7 +897,7 @@
                             head.push('Assigned Agent');
                             head.push('Assigned At');
                             head.push('Assigned By');
-							head.push('Consolidation');
+                            head.push('Consolidation');
                             head.push('Consolidation IDs');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -791,11 +913,12 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
+                                row.push(values.consignee_phone_number_1 + '|' + values
+                                    .consignee_phone_number_2);
                                 row.push(values.consignee_address);
                                 row.push(values.sub_station);
                                 row.push(values.amount);
-                            /*    row.push(values.message_count);*/
+                                /*    row.push(values.message_count);*/
                                 row.push(values.mode);
                                 row.push(values.service_type);
                                 row.push(values.status);
@@ -813,7 +936,7 @@
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
                                 row.push(values.assigned_by);
-								row.push(values.consolidation);
+                                row.push(values.consolidation);
                                 row.push(values.consolidated_id);
                                 body.push(row);
                             });
@@ -821,397 +944,467 @@
                         async: false
                     });
 
-                    return {body: body, header: head};
+                    return {
+                        body: body,
+                        header: head
+                    };
                 }
-            } );
+            });
 
             var return_confirm_reasons = @json($return_confirm_reasons);
             var shipment_remarks = {};
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46, 316], session('permissions'))) !== 0)
-                buttons: [
+                    buttons: [
                         @if (session('role_id') == 1 || in_array(316, session('permissions')))
-                    {
-                        text: 'Assign Agent',
-                        className: 'btn btn-primary assign',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows !== ''){
-                                $('#AssignAgentModal').modal('show');
+                            {
+                                text: 'Assign Agent',
+                                className: 'btn btn-primary assign',
+                                enabled: false,
+                                action: function(e, dt, node, config) {
+                                    if (selected_rows !== '') {
+                                        $('#AssignAgentModal').modal('show');
 
-                                $('#assign_agentSubmit').on('click',function () {
-                                    var assign = parseInt($('#assign_agent').val());
-                                    swal({
-                                        text: 'Are you sure, you want to Assign these shipments(s)?',
-                                        icon: 'info',
-                                        buttons: {
-                                            cancel: {
-                                                text: 'No',
-                                                value: null,
-                                                visible: true,
-                                                closeModal: true,
-                                            },
-                                            confirm: {
-                                                text: 'Yes',
-                                                value: true,
-                                                visible: true,
-                                                closeModal: true
-                                            }
-                                        },
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false,
-                                        dangerMode: true
-                                    }).then(function(confirm) {
-                                        if (confirm) {
-                                            if (assign) {
-                                                $.ajax({
-                                                    url: '{!! route('admin.return.assign.agent') !!}',
-                                                    method: 'POST',
-                                                    data: {
-                                                        'admin_id': assign,
-                                                        'shipment_ids[]': selected_rows,
-                                                        '_token': '{{ csrf_token() }}'
+                                        $('#assign_agentSubmit').on('click', function() {
+                                            var assign = parseInt($('#assign_agent').val());
+                                            swal({
+                                                text: 'Are you sure, you want to Assign these shipments(s)?',
+                                                icon: 'info',
+                                                buttons: {
+                                                    cancel: {
+                                                        text: 'No',
+                                                        value: null,
+                                                        visible: true,
+                                                        closeModal: true,
+                                                    },
+                                                    confirm: {
+                                                        text: 'Yes',
+                                                        value: true,
+                                                        visible: true,
+                                                        closeModal: true
                                                     }
-                                                })
-                                                    .done(function (data) {
-                                                        if (data.status == 0) {
-                                                            $('#AssignAgentModal').modal('hide');
-                                                            toastr.success(data.success, 'Success!', {
-                                                                positionClass: 'toast-bottom-center',
-                                                                containerId: 'toast-bottom-center'
+                                                },
+                                                closeOnClickOutside: false,
+                                                closeOnEsc: false,
+                                                dangerMode: true
+                                            }).then(function(confirm) {
+                                                if (confirm) {
+                                                    if (assign) {
+                                                        $.ajax({
+                                                                url: '{!! route('admin.return.assign.agent') !!}',
+                                                                method: 'POST',
+                                                                data: {
+                                                                    'admin_id': assign,
+                                                                    'shipment_ids[]': selected_rows,
+                                                                    '_token': '{{ csrf_token() }}'
+                                                                }
+                                                            })
+                                                            .done(function(data) {
+                                                                if (data
+                                                                    .status == 0
+                                                                    ) {
+                                                                    $('#AssignAgentModal')
+                                                                        .modal(
+                                                                            'hide'
+                                                                            );
+                                                                    toastr
+                                                                        .success(
+                                                                            data
+                                                                            .success,
+                                                                            'Success!', {
+                                                                                positionClass: 'toast-bottom-center',
+                                                                                containerId: 'toast-bottom-center'
+                                                                            });
+                                                                } else {
+                                                                    toastr
+                                                                        .error(
+                                                                            data
+                                                                            .error,
+                                                                            'Error!', {
+                                                                                positionClass: 'toast-top-center',
+                                                                                containerId: 'toast-top-center'
+                                                                            });
+                                                                }
+                                                                selected_rows
+                                                                    = [];
+                                                                restricted_rows
+                                                                    = [];
+
+                                                                table.rows()
+                                                                    .deselect();
+
+                                                                table.draw(
+                                                                true);
+                                                                table.button(
+                                                                        '.assign'
+                                                                        )
+                                                                    .disable();
+                                                                table.button(
+                                                                        '.confirm'
+                                                                        )
+                                                                    .disable();
+                                                                table.button(
+                                                                        '.re-attempt'
+                                                                        )
+                                                                    .disable();
+                                                                table.button(
+                                                                        '.un-assign'
+                                                                        )
+                                                                    .disable();
+
                                                             });
-                                                        } else {
-                                                            toastr.error(data.error, 'Error!', {
+                                                    } else {
+                                                        var error =
+                                                            "Agent Not Selected!";
+                                                        toastr.error(error,
+                                                            'Error!', {
                                                                 positionClass: 'toast-top-center',
                                                                 containerId: 'toast-top-center'
                                                             });
-                                                        }
-                                                        selected_rows = [];
-                                                        restricted_rows = [];
-
-                                                        table.rows().deselect();
-
-                                                        table.draw(true);
-                                                        table.button('.assign').disable();
-                                                        table.button('.confirm').disable();
-                                                        table.button('.re-attempt').disable();
-                                                        table.button('.un-assign').disable();
-
-                                                    });
-                                            } else {
-                                                var error = "Agent Not Selected!";
-                                                toastr.error(error, 'Error!', {
-                                                    positionClass: 'toast-top-center',
-                                                    containerId: 'toast-top-center'
-                                                });
-                                            }
-                                        }
-                                    });
-                                });
-
-                            }else{
-                                var error = "Not selected any shipments!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
-                        @endif
-                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
-                        {
-                        text: 'Un Assign Agent',
-                        className: 'btn btn-primary un-assign',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != '' && restricted_rows.length == 0){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to Un Assign Agent!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        blockPagePermanently();
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
-                                                // shipment_remarks[id] = remark;
-                                            }
+                                                    }
+                                                }
+                                            });
                                         });
 
-                                        $.ajax({
-                                            url: '{!! route('admin.return.unassign.agent') !!}',
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'action': 'un-assign',
-                                            }
-                                        }).done(function (data) {
-                                            UnblockPagePermanently();
-                                            selected_rows = [];
-                                            restricted_rows = [];
-                                            table.rows().deselect();
-                                            table.draw('false');
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.button('.assign').disable();
-                                            table.button('.un-assign').disable();
-
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
+                                    } else {
+                                        var error = "Not selected any shipments!";
+                                        toastr.error(error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
                                         });
                                     }
-                                });
+                                }
+                            },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
+                            {
+                                text: 'Un Assign Agent',
+                                className: 'btn btn-primary un-assign',
+                                enabled: false,
+                                action: function(e, dt, node, config) {
+                                    if (selected_rows != '' && restricted_rows.length == 0) {
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes to Un Assign Agent!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function(confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
 
-                            }
-                        }
-                    },
+                                                    if ($(row.node()).hasClass(
+                                                            'selected')) {
+                                                        var id = parseInt(row.id());
+                                                        // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                        // shipment_remarks[id] = remark;
+                                                    }
+                                                });
+
+                                                $.ajax({
+                                                    url: '{!! route('admin.return.unassign.agent') !!}',
+                                                    method: 'POST',
+                                                    data: {
+                                                        'shipment_ids': selected_rows,
+                                                        '_token': '{{ csrf_token() }}',
+                                                        'action': 'un-assign',
+                                                    }
+                                                }).done(function(data) {
+                                                    UnblockPagePermanently();
+                                                    selected_rows = [];
+                                                    restricted_rows = [];
+                                                    table.rows().deselect();
+                                                    table.draw('false');
+                                                    table.button('.confirm')
+                                                        .disable();
+                                                    table.button('.re-attempt')
+                                                        .disable();
+                                                    table.button('.assign')
+                                                    .disable();
+                                                    table.button('.un-assign')
+                                                        .disable();
+
+                                                    toastr.success(data.success,
+                                                        'Success!', {
+                                                            positionClass: 'toast-bottom-center',
+                                                            containerId: 'toast-bottom-center'
+                                                        });
+
+                                                });
+                                            }
+                                        });
+
+                                    }
+                                }
+                            },
                         @endif
                         @if (session('role_id') == 1 || in_array(45, session('permissions')))
-                    {
-                        text: 'Confirm',
-                        className: 'btn btn-primary confirm',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows !== '' && restricted_rows.length == 0){
-                                $('#ReturnConfirmReasonModal').modal('show');
+                            {
+                                text: 'Confirm',
+                                className: 'btn btn-primary confirm',
+                                enabled: false,
+                                action: function(e, dt, node, config) {
+                                    if (selected_rows !== '' && restricted_rows.length == 0) {
+                                        $('#ReturnConfirmReasonModal').modal('show');
 
-                            }else{
-                                var error = "Not selected any shipments!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            }
-                        }
-                    },
+                                    } else {
+                                        var error = "Not selected any shipments!";
+                                        toastr.error(error, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
+                                    }
+                                }
+                            },
                         @endif
 
                         @if (session('role_id') == 1 || in_array(46, session('permissions')))
-                    {
-                        text: 'Re-Attempt',
-                        className: 'btn btn-primary re-attempt',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != '' && restricted_rows.length == 0){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Re-Attempt!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
+                            {
+                                text: 'Re-Attempt',
+                                className: 'btn btn-primary re-attempt',
+                                enabled: false,
+                                action: function(e, dt, node, config) {
+                                    if (selected_rows != '' && restricted_rows.length == 0) {
+                                        swal({
+                                            title: 'Are You Sure?',
+                                            text: 'Select Yes to change shipment status to Re-Attempt!',
+                                            icon: 'warning',
+                                            buttons: {
+                                                cancel: {
+                                                    text: 'No',
+                                                    value: null,
+                                                    visible: true,
+                                                    closeModal: true,
+                                                },
+                                                confirm: {
+                                                    text: 'Yes',
+                                                    value: true,
+                                                    visible: true,
+                                                    closeModal: true
+                                                }
+                                            },
+                                            closeOnClickOutside: false,
+                                            closeOnEsc: false,
+                                            dangerMode: true
+                                        }).then(function(confirm) {
+                                            if (confirm) {
+                                                blockPagePermanently();
+                                                table.rows().nodes().each(function(index) {
+                                                    var row = table.row(index);
+
+                                                    if ($(row.node()).hasClass(
+                                                            'selected')) {
+                                                        var id = parseInt(row.id());
+                                                        var remark = $(row.node())
+                                                            .find(
+                                                                'td.shipment_remarks textarea'
+                                                                ).val();
+                                                        shipment_remarks[id] =
+                                                            remark;
+                                                    }
+                                                });
+
+                                                $.ajax({
+                                                    url: "{{ route('admin.return.reattempt.status') }}",
+                                                    method: 'POST',
+                                                    data: {
+                                                        'shipment_ids': selected_rows,
+                                                        '_token': '{{ csrf_token() }}',
+                                                        'action': 'reattempt',
+                                                        'remark': shipment_remarks
+                                                    }
+                                                }).done(function(data) {
+                                                    UnblockPagePermanently();
+                                                    selected_rows = [];
+                                                    restricted_rows = [];
+                                                    shipment_remarks = {};
+                                                    table.button('.confirm')
+                                                        .disable();
+                                                    table.button('.re-attempt')
+                                                        .disable();
+                                                    table.button('.assign')
+                                                    .disable();
+                                                    table.button('.un-assign')
+                                                        .disable();
+                                                    table.rows().deselect();
+                                                    table.draw('false');
+
+                                                    if (data.status == 1) {
+                                                        UnblockPagePermanently();
+                                                        table.draw('false');
+                                                        toastr.success(data.success,
+                                                            'Success!', {
+                                                                positionClass: 'toast-bottom-center',
+                                                                containerId: 'toast-bottom-center'
+                                                            });
+                                                    } else {
+                                                        UnblockPagePermanently();
+                                                        toastr.error(data.error,
+                                                            'Error!', {
+                                                                positionClass: 'toast-top-center',
+                                                                containerId: 'toast-top-center'
+                                                            });
+                                                    }
+
+                                                });
+                                            }
+                                        });
+
+                                    }
+                                }
+                            },
+                        @endif {
+                            extend: 'excel',
+                            title: 'Return Marked',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }, {
+                            extend: 'selectAll',
+                            text: 'Select All',
+                            className: 'select_all',
+                            action: function(e) {
+                                e.preventDefault();
+
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+
+                                    if ($(row.node().firstChild).hasClass(
+                                        'select-checkbox') && !$(row.node()).hasClass(
+                                            'selected')) {
+                                        id = parseInt(row.id());
+
+                                        var assigned_agent_id = row.data()
+                                        .assigned_agent_id;
+                                        var tat = row.data().confirmation_on;
+
+                                        hub_id = $(row.node()).data('hub');
+
+                                        var allow = false;
+
+                                        if (hub_ids.length == 0) {
+                                            hub_ids.push(hub_id);
+
+                                            allow = true;
+                                        } else if (hub_ids[0] == hub_id) {
+                                            allow = true;
                                         }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        blockPagePermanently();
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
 
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
-                                                shipment_remarks[id] = remark;
-                                            }
-                                        });
+                                        if (allow) {
+                                            row.select();
 
-                                        $.ajax({
-                                            url:"{{route('admin.return.reattempt.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'action': 'reattempt',
-                                                'remark': shipment_remarks
-                                            }
-                                        }).done(function (data) {
-                                            UnblockPagePermanently();
-                                            selected_rows = [];
-                                            restricted_rows = [];
-                                            shipment_remarks = {};
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.button('.assign').disable();
-                                            table.button('.un-assign').disable();
-                                            table.rows().deselect();
-                                            table.draw('false');
-                                            
-                                            if(data.status == 1){
-                                            UnblockPagePermanently();
-                                            table.draw('false');
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            else{
-                                                UnblockPagePermanently();
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            var index = $.inArray(id, selected_rows);
+
+                                            if (index === -1) {
+                                                selected_rows.push(id);
                                             }
 
-                                        });
+
+                                            if ({{ session('role_id') }} != 1 &&
+                                                {{ $permission }} == 0 &&
+                                                assigned_agent_id != {{ auth()->id() }} &&
+                                                tat > 0) {
+                                                restricted_index = $.inArray(id,
+                                                    restricted_rows);
+
+                                                if (restricted_index === -1) {
+                                                    restricted_rows.push(id);
+                                                }
+                                            }
+
+                                            if (restricted_rows.length == 0) {
+                                                table.button('.confirm').enable();
+                                                table.button('.re-attempt').enable();
+                                            }
+                                            table.button('.assign').enable();
+                                            table.button('.un-assign').enable();
+                                        }
                                     }
                                 });
-
                             }
-                        }
-                    },
-                        @endif
-                    {
+                        }, {
+                            extend: 'selectNone',
+                            text: 'Select None',
+                            className: 'select_none',
+                            action: function(e) {
+                                e.preventDefault();
+
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+
+                                    if ($(row.node().firstChild).hasClass(
+                                        'select-checkbox') && $(row.node()).hasClass(
+                                            'selected')) {
+                                        row.deselect();
+
+                                        id = parseInt(row.id());
+
+                                        var index = $.inArray(id, selected_rows);
+
+                                        if (index !== -1) {
+                                            selected_rows.splice(index, 1);
+                                        }
+
+                                        var restricted_index = $.inArray(id,
+                                            restricted_rows);
+
+                                        if (restricted_index !== -1) {
+                                            restricted_rows.splice(restricted_index, 1);
+                                        }
+
+                                        if (selected_rows.length == 0) {
+                                            table.button('.confirm').disable();
+                                            table.button('.assign').disable();
+                                            table.button('.re-attempt').disable();
+                                            table.button('.un-assign').disable();
+                                            hub_ids.splice(index, 1);
+                                        }
+                                    }
+                                });
+                            }
+                        },
+                        {
+                            title: 'Upload',
+                            className: 'btn btn-primary excel-upload',
+                            text: '<i class="la la-file-excel-o"></i> Upload',
+                            action: function(e) {
+                                $('#excel_upload_modal').modal('show');
+                            }
+                        },
+                        {
+                            title: 'Upload Agent',
+                            className: 'btn btn-primary excel-upload',
+                            text: '<i class="la la-file-excel-o"></i> Upload Agent',
+                            action: function(e) {
+                                $('#agent_assign_modal').modal('show');
+                            }
+                        },
+                        'reset'
+                    ],
+                @else
+                    buttons: [{
                         extend: 'excel',
                         title: 'Return Marked',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }, {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
-                                    id = parseInt(row.id());
-
-                                    var assigned_agent_id = row.data().assigned_agent_id;
-                                    var tat = row.data().confirmation_on;
-
-                                    hub_id = $(row.node()).data('hub');
-
-                                    var allow = false;
-
-                                    if(hub_ids.length == 0) {
-                                        hub_ids.push(hub_id);
-
-                                        allow = true;
-                                    }
-                                    else if(hub_ids[0] == hub_id) {
-                                        allow = true;
-                                    }
-
-                                    if (allow) {
-                                        row.select();
-
-                                        var index = $.inArray(id, selected_rows);
-
-                                        if (index === -1) {
-                                            selected_rows.push(id);
-                                        }
-
-
-                                        if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
-                                        {
-                                            restricted_index = $.inArray(id, restricted_rows);
-
-                                            if (restricted_index === -1) {
-                                                restricted_rows.push(id);
-                                            }
-                                        }
-
-                                        if(restricted_rows.length == 0)
-                                        {
-                                            table.button('.confirm').enable();
-                                            table.button('.re-attempt').enable();
-                                        }
-                                        table.button('.assign').enable();
-                                        table.button('.un-assign').enable();
-                                    }
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action : function(e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function(index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    var restricted_index = $.inArray(id,restricted_rows);
-
-                                    if(restricted_index !== -1)
-                                    {
-                                        restricted_rows.splice(restricted_index,1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.confirm').disable();
-                                        table.button('.assign').disable();
-                                        table.button('.re-attempt').disable();
-                                        table.button('.un-assign').disable();
-                                        hub_ids.splice(index, 1);
-                                    }
-                                }
-                            });
-                        }
-                    },
-                    {
-                        title: 'Upload',
-                        className: 'btn btn-primary excel-upload',
-                        text: '<i class="la la-file-excel-o"></i> Upload',
-                        action : function(e) {
-                            $('#excel_upload_modal').modal('show');
-                        }
-                    },
-                    {
-                        title: 'Upload Agent',
-                        className: 'btn btn-primary excel-upload',
-                        text: '<i class="la la-file-excel-o"></i> Upload Agent',
-                        action : function(e) {
-                            $('#agent_assign_modal').modal('show');
-                        }
-                    },
-                    'reset'
-                ],
-                @else
-                buttons:[{
-                    extend: 'excel',
-                    title: 'Return Marked',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },'reset'],
+                    }, 'reset'],
                 @endif
                 select: {
                     info: false,
@@ -1219,8 +1412,12 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                scrollX: true, scrollY: '500px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                scrollX: true,
+                scrollY: '500px',
+                lengthMenu: [
+                    [50, 100, 500, 1000, -1],
+                    [50, 100, 500, 1000, 'All']
+                ],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
@@ -1234,58 +1431,229 @@
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
-                    data: function (d) {
+                    data: function(d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.complaint_filter = $('#complaint_filter').val();
+                        d.out_of_service_area_filter = $('#out_of_service_area_filter').val();
+                        d.shipment_re_attempt_request_filter = $('#shipment_re_attempt_request_filter').val();
+                        d.try_buy_filter = $('#try_buy_filter').val();
+                        d.return_confirmation_pending_filter = $('#return_confirmation_pending_filter').val();
                     }
                 },
                 rowId: 'shId',
-                order: [[23, 'desc']],
-                columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
-                    {data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                   /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
-                    {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
-                    {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks'},
-                    {data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks'},
-                    {data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'reattemp_status_remarks', name: 'reattempt_shipment_status_remarks.remarks', class: 'align-middle reattemp_status_remarks', orderable: false, searchable: false},
-                    {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
-                    {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
-                    {data: 'delivery_attempt', name: '', class: 'align-middle reattempts',orderable: false, searchable: false},
-                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
-                    {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
-                    {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
-                    {data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
-					{data:'consolidation' ,name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
-                    {data:'consolidated_id' ,name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                order: [
+                    [23, 'desc']
+                ],
+                columns: [{
+                        data: 'shId',
+                        orderable: false,
+                        searchable: false,
+                        class: 'text-center align-middle select p-1',
+                        targets: 0,
+                        render: function(data, type, row) {
+                            return '';
+                        }
+                    },
+                    {
+                        data: 'id',
+                        defaultContent: '',
+                        orderable: false,
+                        searchable: false,
+                        class: 'align-middle serial_number'
+                    },
+                    {
+                        data: 'tracking_number',
+                        name: 'shipments.tracking_number',
+                        class: 'align-middle tracking_number'
+                    },
+                    {
+                        data: 'order_id',
+                        name: 'shipments.order_id',
+                        class: 'align-middle order_id'
+                    },
+                    {
+                        data: 'shipper',
+                        name: 'u.name',
+                        class: 'align-middle shipper'
+                    },
+                    {
+                        data: 'shipper_phone',
+                        name: 'shipper_phone',
+                        class: 'align-middle shipper_phone'
+                    },
+                    {
+                        data: 'vendor_name',
+                        name: 'usi.vendor',
+                        class: 'align-middle vendor_name'
+                    },
+                    {
+                        data: 'origin',
+                        name: 'oc.name',
+                        class: 'align-middle origin'
+                    },
+                    {
+                        data: 'destination',
+                        name: 'dc.name',
+                        class: 'align-middle destination'
+                    },
+                    {
+                        data: 'hub',
+                        name: 'h.name',
+                        class: 'align-middle hub'
+                    },
+                    {
+                        data: 'consignee_name',
+                        name: 'shipments.consignee_name',
+                        class: 'align-middle consignee_name'
+                    },
+                    {
+                        data: 'consignee_phone',
+                        name: 'consignee_phone',
+                        class: 'align-middle consignee_phone'
+                    },
+                    {
+                        data: 'consignee_address',
+                        name: 'shipments.consignee_address',
+                        class: 'align-middle consignee_address'
+                    },
+                    {
+                        data: 'sub_station',
+                        name: 'dlm.area_name',
+                        class: 'align-middle sub_station',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'amount',
+                        name: 'shipments.amount',
+                        class: 'align-middle amount'
+                    },
+                    /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
+                    {
+                        data: 'mode',
+                        name: 'sm.id',
+                        class: 'align-middle mode'
+                    },
+                    {
+                        data: 'service_type',
+                        name: 'bt.id',
+                        class: 'align-middle service_type'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status',
+                        class: 'align-middle status'
+                    },
+                    {
+                        data: 'reason',
+                        name: 'ssr.name',
+                        class: 'align-middle reason'
+                    },
+                    {
+                        data: 'shipment_remarks',
+                        name: 'admin_journey.remarks',
+                        class: 'align-middle shipment_remarks'
+                    },
+                    {
+                        data: 'shipper_remarks',
+                        name: 'shipments_journey.remarks',
+                        class: 'align-middle shipper_remarks'
+                    },
+                    {
+                        data: 'nsa_osa_estimated_charges',
+                        name: 'nsa_osa_estimated_charges',
+                        class: 'align-middle nsa_osa_estimated_charges'
+                    },
+                    {
+                        data: 'arrival',
+                        name: 'sj.created_at',
+                        class: 'align-middle arrival'
+                    },
+                    {
+                        data: 'status_date',
+                        name: 'shipments_journey.created_at',
+                        class: 'align-middle status_date'
+                    },
+                    {
+                        data: 'reattemp_status_remarks',
+                        name: 'reattempt_shipment_status_remarks.remarks',
+                        class: 'align-middle reattemp_status_remarks',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'confirmation_req',
+                        name: '',
+                        class: 'align-middle confirmation_req',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'confirmation_on',
+                        name: '',
+                        class: 'align-middle confirmation_on',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'delivery_attempt',
+                        name: '',
+                        class: 'align-middle reattempts',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'reattempts',
+                        name: 'sret.created_at',
+                        class: 'align-middle reattempts',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'assigned_agent',
+                        name: 'asad.name',
+                        class: 'align-middle assigned_agent'
+                    },
+                    {
+                        data: 'assigned_at',
+                        name: 'ras.created_at',
+                        class: 'align-middle assigned_at'
+                    },
+                    {
+                        data: 'assigned_by',
+                        name: 'asadby.name',
+                        class: 'align-middle assigned_by'
+                    },
+                    {
+                        data: 'consolidation',
+                        name: 'consolidation',
+                        class: 'align-middle consolidation',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'consolidated_id',
+                        name: 'consolidations.consolidation_id',
+                        class: 'align-middle consolidated_id',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        class: 'text-center align-middle action p-1',
+                        orderable: false,
+                        searchable: false
+                    }
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    
-                    if (data.OsaStatus == 0 ) {
+
+                    if (data.OsaStatus == 0) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shId, selected_rows) !== -1) {
@@ -1295,37 +1663,46 @@
                 },
 
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
+                        .appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var td =
+                        '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input =
+                        '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon =
+                        '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select =
+                        '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select =
+                        '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    var service_drop_select =
+                        '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts') || $(header).is('.consolidation') || $(header).is('.reattemp_status_remarks') ) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(
+                                header).is('.action') || $(header).is('.shipment_remarks') || $(
+                                header).is('.reattempts') || $(header).is('.consolidation') ||
+                            $(header).is('.reattemp_status_remarks')) {
                             $(td).appendTo($(search) || $(header).is('sub_station'));
-                        }else if($(header).is('.status')){
+                        } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.mode')){
+                                }).wrap(td);
+                        } else if ($(header).is('.mode')) {
                             $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.service_type')){
+                                }).wrap(td);
+                        } else if ($(header).is('.service_type')) {
                             $(service_drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
+                                }).wrap(td);
+                        } else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1335,41 +1712,41 @@
                             }
                         }
                     });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                    var data = $.map({!! $shipment_status !!}, function(obj) {
                         obj.id = obj.id;
                         obj.text = obj.name;
                         return obj;
                     });
 
                     $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
+                        data: data,
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                    var data1 = $.map({!! $shipping_mode !!}, function(obj) {
                         obj.id = obj.id;
                         obj.text = obj.mode;
                         return obj;
                     });
 
                     $("#mode_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
+                        data: data1,
                         placeholder: "Select Mode",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                    var data2 = $.map({!! $service_type !!}, function(obj) {
                         obj.id = obj.id;
                         obj.text = obj.booking_type;
                         return obj;
                     });
                     $("#service_select").prepend('<option value="" selected></option>').select2({
-                        data:data2,
+                        data: data2,
                         placeholder: "Select Service",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -1377,20 +1754,19 @@
                 }
             });
 
-            $('#AssignAgentModal').on('shown.bs.modal',function (e) {
-            });
-            $('#AssignAgentModal').on('hide.bs.modal', function (e) {
+            $('#AssignAgentModal').on('shown.bs.modal', function(e) {});
+            $('#AssignAgentModal').on('hide.bs.modal', function(e) {
                 $('#assign_agent').val('').trigger('change');
             });
-            $('#ReturnConfirmReasonModal').on('hide.bs.modal', function (e) {
+            $('#ReturnConfirmReasonModal').on('hide.bs.modal', function(e) {
                 $('#return_reason_select').val('').trigger('change');
                 $('#return_reason_shipment_remarks').val('');
             });
-            $('#ReturnConfirmReasonSingleModal').on('hide.bs.modal', function (e) {
+            $('#ReturnConfirmReasonSingleModal').on('hide.bs.modal', function(e) {
                 $('#single_return_reason_select').val('').trigger('change');
                 $('#return_reason_shipment_remarks_single').val('');
             });
-            $('#EditEstimateChargesModalNSAreattempt').on('hide.bs.modal', function (e) {
+            $('#EditEstimateChargesModalNSAreattempt').on('hide.bs.modal', function(e) {
                 $('#estimated_charges_NSAreattempt_input').val('');
             });
 
@@ -1401,15 +1777,18 @@
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
                 var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
-                var assigned_agent_id  = table.row($(this).parents('tr')).data().assigned_agent_id;
-                var tat  = table.row($(this).parents('tr')).data().confirmation_on;
+                var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
+                var tat = table.row($(this).parents('tr')).data().confirmation_on;
 
-                if(con_id){
-                    if(hub_ids.length == 0){
+                if (con_id) {
+                    if (hub_ids.length == 0) {
                         hub_ids.push(hub_id);
-                    }else if(hub_ids[0] != hub_id){
+                    } else if (hub_ids[0] != hub_id) {
                         var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
                         return false;
                     }
                     table.rows().nodes().each(function(index) {
@@ -1420,13 +1799,12 @@
 
                             if (rindex === -1) {
                                 selected_rows.push(rid);
-                                if(id != rid){
+                                if (id != rid) {
 
                                     table.row(row).select();
                                 }
-                            }
-                            else {
-                                if(id != rid){
+                            } else {
+                                if (id != rid) {
 
                                     row.deselect();
                                 }
@@ -1437,8 +1815,7 @@
                                 table.button('.assign').enable();
                                 table.button('.re-attempt').enable();
                                 table.button('.un-assign').enable();
-                            }
-                            else {
+                            } else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
@@ -1446,20 +1823,19 @@
                             }
                         }
                     });
-                }else{
-                    if(hub_ids.length == 0){
+                } else {
+                    if (hub_ids.length == 0) {
                         hub_ids.push(hub_id);
                         var index = $.inArray(id, selected_rows);
 
                         if (index === -1) {
                             selected_rows.push(id);
-                        }
-                        else {
+                        } else {
                             selected_rows.splice(index, 1);
                         }
 
-                        if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
-                        {
+                        if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
+                            assigned_agent_id != {{ auth()->id() }} && tat > 0) {
                             var restricted_index = $.inArray(id, restricted_rows);
 
                             if (restricted_index === -1) {
@@ -1470,37 +1846,33 @@
                         }
 
                         if (selected_rows.length > 0) {
-                            if(restricted_rows.length == 0)
-                            {
+                            if (restricted_rows.length == 0) {
                                 table.button('.re-attempt').enable();
                                 table.button('.confirm').enable();
-                            }
-                            else{
+                            } else {
                                 table.button('.re-attempt').disable();
                                 table.button('.confirm').disable();
                             }
                             table.button('.assign').enable();
                             table.button('.un-assign').enable();
-                        }
-                        else {
+                        } else {
                             table.button('.confirm').disable();
                             table.button('.assign').disable();
                             table.button('.re-attempt').disable();
                             table.button('.un-assign').disable();
                         }
-                    }else{
-                        if(hub_ids[0] == hub_id){
+                    } else {
+                        if (hub_ids[0] == hub_id) {
                             var index = $.inArray(id, selected_rows);
 
                             if (index === -1) {
                                 selected_rows.push(id);
-                            }
-                            else {
+                            } else {
                                 selected_rows.splice(index, 1);
                             }
 
-                            if({{session('role_id')}} != 1 && {{$permission}} == 0 && assigned_agent_id != {{auth()->id()}} && tat > 0)
-                            {
+                            if ({{ session('role_id') }} != 1 && {{ $permission }} == 0 &&
+                                assigned_agent_id != {{ auth()->id() }} && tat > 0) {
                                 var restricted_index = $.inArray(id, restricted_rows);
 
                                 if (restricted_index === -1) {
@@ -1512,27 +1884,27 @@
 
 
                             if (selected_rows.length > 0) {
-                                if(restricted_rows.length == 0)
-                                {
+                                if (restricted_rows.length == 0) {
                                     table.button('.re-attempt').enable();
                                     table.button('.confirm').enable();
-                                }
-                                else{
+                                } else {
                                     table.button('.re-attempt').disable();
                                     table.button('.confirm').disable();
                                 }
                                 table.button('.assign').enable();
                                 table.button('.un-assign').enable();
-                            }
-                            else {
+                            } else {
                                 table.button('.confirm').disable();
                                 table.button('.assign').disable();
                                 table.button('.re-attempt').disable();
                                 table.button('.un-assign').disable();
                             }
-                        }else{
+                        } else {
                             var error = "Selected hubs should be the same!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
                             return false;
                         }
 
@@ -1540,29 +1912,28 @@
                 }
 
             });
-            $('body').on('click','.returnMarkStatus',function () {
+            $('body').on('click', '.returnMarkStatus', function() {
                 var action = $(this).data('action');
                 var id = $(this).data('id');
                 var row_id = $(this).parents('tr').attr('id');
                 var remark = $(this).parents('tr').find('td.shipment_remarks textarea').val();
-                if(action === 'confirm'){
+                if (action === 'confirm') {
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
                     $('#ReturnConfirmReasonSingleModal').modal('show');
                     $('#return_reason_shipment_id').val(row_id);
                     //$('#return_reason_shipment_remarks').val(remark);
-                }else if(action === 'reattempt'){
+                } else if (action === 'reattempt') {
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
-                if(row_id != '' && action === 'reattempt' && id >= 1)
-                {
-                    var Shid =  $(this).parents('tr').attr('id');
-                    if(Shid){
+                if (row_id != '' && action === 'reattempt' && id >= 1) {
+                    var Shid = $(this).parents('tr').attr('id');
+                    if (Shid) {
                         $('#EditEstimateChargesModalNSAreattempt').modal('show');
                         $('#eec_shipment_id_NSAreattempt').val(Shid);
                         $('#eec_shipment_remark_NSAreattempt').val(remark);
                     }
                 }
-                if(row_id != '' && action === 'reattempt'&& id == ''){
+                if (row_id != '' && action === 'reattempt' && id == '') {
 
                     swal({
                         title: 'Are You Sure?',
@@ -1585,27 +1956,33 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url:"{{route('admin.return.marked.status.single')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_id':row_id,
-                                    '_token':'{{ csrf_token() }}',
+                                url: "{{ route('admin.return.marked.status.single') }}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_id': row_id,
+                                    '_token': '{{ csrf_token() }}',
                                     'action': action,
-                                    'remark':remark
+                                    'remark': remark
                                 }
-                            }).done(function (data) {
-                                if(data.status == 1){
+                            }).done(function(data) {
+                                if (data.status == 1) {
                                     UnblockPagePermanently();
                                     table.draw('false');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
 
-                                }else{
+                                } else {
                                     UnblockPagePermanently();
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
 
                                 }
 
@@ -1617,10 +1994,10 @@
                 }
             });
 
-            $('body').on('click','.intercept',function () {
+            $('body').on('click', '.intercept', function() {
                 var row_id = $(this).parents('tr').attr('id');
 
-                if(row_id != ''){
+                if (row_id != '') {
                     var redirect = '{!! route('admin.intercept.index', ':id') !!}';
                     var url = redirect.replace(':id', row_id);
                     window.open(url);
@@ -1721,7 +2098,7 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             $(form).find('button[type=submit]').attr('disabled', 'disabled');
@@ -1735,25 +2112,31 @@
                             });
 
                             $.ajax({
-                                url:"{{route('admin.return.confirm.status')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_ids':selected_rows,
-                                    '_token':'{{ csrf_token() }}',
+                                url: "{{ route('admin.return.confirm.status') }}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}',
                                     'action': 'confirm',
                                     'remark': remarks,
                                     'return_reason_select': return_reason_select,
                                     'consignee_refused_reasons': consignee_refused_reasons,
                                 }
-                            }).done(function (data) {
-                                if(data.status == 1){
+                            }).done(function(data) {
+                                if (data.status == 1) {
                                     UnblockPagePermanently();
                                     table.draw('false');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
 
-                                }else{
+                                } else {
                                     UnblockPagePermanently();
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
 
                                 }
                                 table.rows().deselect();
@@ -1765,7 +2148,8 @@
                                 table.button('.un-assign').disable();
                                 $('#ReturnConfirmReasonModal').modal('hide');
                                 $('#return_reason_select').val(null).trigger('change');
-                                $('button.update_return_confirm').attr('disabled', false);
+                                $('button.update_return_confirm').attr('disabled',
+                                    false);
                             });
                         }
                     });
@@ -1775,103 +2159,102 @@
 
             // select all return confirm work
 
-            $('#return_reason_select').on('change', function () {
+            $('#return_reason_select').on('change', function() {
                 var selected_value = $(this).val();
-                if(selected_value == 38){
+                if (selected_value == 38) {
                     $('#return_reason_shipment_remarks').attr('readonly', true);
                     $('#consignee_refused_reasons').parent('fieldset').removeClass('d-none');
                     $('#btnReturn').attr('disabled', true);
 
-                }else{
+                } else {
                     $('#return_reason_shipment_remarks').attr('readonly', false);
                     $('#consignee_refused_reasons').parent('fieldset').addClass('d-none');
                     $('#btnReturn').attr('disabled', false);
                 }
             });
 
-            $('#consignee_refused_reasons').on('change', function () {
+            $('#consignee_refused_reasons').on('change', function() {
                 var selected_value = $(this).val();
                 var selected_data = $(this).select2('data');
-                var selected_text =  selected_data[0].text;
-                if(selected_value == 12){
+                var selected_text = selected_data[0].text;
+                if (selected_value == 12) {
                     $('#return_reason_shipment_remarks').attr('readonly', false);
                     $('#return_reason_shipment_remarks').val('');
                     // $('#return_reason_shipment_remarks').attr('data-rule-required','true');
                     $('#btnReturn').attr('disabled', true);
 
-                }else{
+                } else {
                     $('#return_reason_shipment_remarks').attr('readonly', true);
                     $('#return_reason_shipment_remarks').val(selected_text);
                     $('#btnReturn').attr('disabled', false);
                 }
-                
+
             });
 
-            $('#return_reason_shipment_remarks_single').keyup(function () {
+            $('#return_reason_shipment_remarks_single').keyup(function() {
                 value = $(this).val();
-                if(value.length > 0)
-                {
+                if (value.length > 0) {
                     $('#single_reason_update_btn').attr('disabled', false);
-                }
-                else{
+                } else {
                     $('#single_reason_update_btn').attr('disabled', true);
                 }
             });
 
             // single return confirm work
 
-            $('#single_return_reason_select').on('change', function () {
+            $('#single_return_reason_select').on('change', function() {
                 var selected_value = $(this).val();
-                if(selected_value == 38){
+                if (selected_value == 38) {
                     $('#return_reason_shipment_remarks_single').attr('readonly', true);
                     $('#single_consignee_refused_reasons').parent('fieldset').removeClass('d-none');
                     $('#single_reason_update_btn').attr('disabled', true);
 
-                }else{
+                } else {
                     $('#return_reason_shipment_remarks_single').attr('readonly', false);
                     $('#single_consignee_refused_reasons').parent('fieldset').addClass('d-none');
                     $('#single_reason_update_btn').attr('disabled', false);
                 }
             });
 
-            $('#single_consignee_refused_reasons').on('change', function () {
+            $('#single_consignee_refused_reasons').on('change', function() {
                 var selected_value = $(this).val();
                 var selected_data = $(this).select2('data');
-                var selected_text =  selected_data[0].text;
-                if(selected_value == 12){
+                var selected_text = selected_data[0].text;
+                if (selected_value == 12) {
                     $('#return_reason_shipment_remarks_single').attr('readonly', false);
                     $('#return_reason_shipment_remarks_single').val('');
                     // $('#return_reason_shipment_remarks').attr('data-rule-required','true');
                     $('#single_reason_update_btn').attr('disabled', true);
 
-                }else{
+                } else {
                     $('#return_reason_shipment_remarks_single').attr('readonly', true);
                     $('#return_reason_shipment_remarks_single').val(selected_text);
                     $('#single_reason_update_btn').attr('disabled', false);
                 }
-                
+
             });
 
-            $('#return_reason_shipment_remarks').keyup(function () {
+            $('#return_reason_shipment_remarks').keyup(function() {
                 value = $(this).val();
-                if(value.length > 0)
-                {
+                if (value.length > 0) {
                     $('#btnReturn').attr('disabled', false);
-                }
-                else{
+                } else {
                     $('#btnReturn').attr('disabled', true);
                 }
             });
 
-            $('#single_reason_update_btn').on('click', function(){
+            $('#single_reason_update_btn').on('click', function() {
                 var shipment_id = $('#return_reason_shipment_id').val();
                 var remarks = $('#return_reason_shipment_remarks_single').val();
                 var single_return_reason_select = $('#single_return_reason_select').val();
                 var single_consignee_refused_reasons = $('#single_consignee_refused_reasons').val();
-                if(single_return_reason_select === ''){
+                if (single_return_reason_select === '') {
                     var error = 'Select a reason!';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }else{
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                } else {
                     swal({
                         title: 'Are You Sure?',
                         text: 'Select Yes to change shipment status to Return-Confirm!',
@@ -1893,33 +2276,40 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             var action = 'confirm';
                             blockPagePermanently();
                             $.ajax({
-                                url:"{{route('admin.return.marked.status.single')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_id':shipment_id,
-                                    '_token':'{{ csrf_token() }}',
+                                url: "{{ route('admin.return.marked.status.single') }}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_id': shipment_id,
+                                    '_token': '{{ csrf_token() }}',
                                     'action': action,
-                                    'remark':remarks,
+                                    'remark': remarks,
                                     'single_return_reason_select': single_return_reason_select,
                                     'single_consignee_refused_reasons': single_consignee_refused_reasons,
                                 }
-                            }).done(function (data) {
-                                if(data.status == 1){
+                            }).done(function(data) {
+                                if (data.status == 1) {
                                     UnblockPagePermanently();
                                     table.draw('false');
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
 
-                                }else{
+                                } else {
                                     UnblockPagePermanently();
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
 
                                 }
-                                $('#single_return_reason_select').val(null).trigger('change');
+                                $('#single_return_reason_select').val(null).trigger(
+                                    'change');
                                 $('#return_reason_shipment_id').val('');
                                 $('#return_reason_shipment_remarks').val('');
                                 $('#ReturnConfirmReasonSingleModal').modal('hide');
@@ -1957,14 +2347,13 @@
                             value: input,
                             text: input
                         }
-                    }
-                    else {
+                    } else {
                         return false;
                     }
                 }
             });
 
-            $('#track_form').bind('submit',function (e) {
+            $('#track_form').bind('submit', function(e) {
                 e.preventDefault();
                 var tracking_numbers = $('#track_form .tracking_numbers').val();
 
@@ -1974,10 +2363,10 @@
 
             });
 
-            $('#datatable').on('click', '.selfCollection', function () {
+            $('#datatable').on('click', '.selfCollection', function() {
                 var row_id = $(this).parents('tr').attr('id');
                 var remark = $.trim($('tr#' + row_id).find('td.shipment_remarks textarea').val());
-                if(row_id){
+                if (row_id) {
                     swal({
                         text: 'Are you sure you want to mark shipment for Self-Collection?',
                         icon: 'info',
@@ -1998,24 +2387,30 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             $.ajax({
-                                url:"{{route('admin.return.marked.self_collection')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_id':row_id,
-                                    'remark':remark,
-                                    '_token':'{{ csrf_token() }}',
+                                url: "{{ route('admin.return.marked.self_collection') }}",
+                                method: 'POST',
+                                data: {
+                                    'shipment_id': row_id,
+                                    'remark': remark,
+                                    '_token': '{{ csrf_token() }}',
                                 }
-                            }).done(function (data) {
+                            }).done(function(data) {
                                 UnblockPagePermanently();
-                                if(data.status == 1){
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }else{
+                                if (data.status == 1) {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
                                     table.draw(false);
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
                                 }
                             });
                         }
@@ -2034,9 +2429,9 @@
             });
 
 
-            $('#datatable').on('click', '.editEstimateCharges', function () {
-                var id =  $(this).parents('tr').attr('id');
-                if(id){
+            $('#datatable').on('click', '.editEstimateCharges', function() {
+                var id = $(this).parents('tr').attr('id');
+                if (id) {
                     $('#EditEstimateChargesModal').modal('show');
                     $('#eec_shipment_id').val(id);
                 }
@@ -2073,14 +2468,14 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             var charges = $('#estimated_charges_NSAreattempt_input').val();
                             var shipment_id = $('#eec_shipment_id_NSAreattempt').val();
                             var shipment_remark = $('#eec_shipment_remark_NSAreattempt').val();
                             $.ajax({
-                                url:"{{route('admin.return.marked.status.single')}}",
+                                url: "{{ route('admin.return.marked.status.single') }}",
                                 method: 'POST',
                                 data: {
                                     'charges': charges,
@@ -2088,24 +2483,30 @@
                                     '_token': '{{ csrf_token() }}',
                                     'action': 'reattempt',
                                     'remark': shipment_remark
-                                    
+
                                 }
-                            }).done(function (data) {
+                            }).done(function(data) {
                                 UnblockPagePermanently();
                                 $('#EditEstimateChargesModal').modal('hide');
 
-                                if(data.status == 1){
-                                UnblockPagePermanently();
-                                table.draw(false);
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                                else{
+                                if (data.status == 1) {
                                     UnblockPagePermanently();
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    table.draw(false);
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    UnblockPagePermanently();
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
                                 }
                                 $('#estimated_charges_NSAreattempt_input').val('');
                                 $('#eec_shipment_id_NSAreattempt').val('');
-                                $('#EditEstimateChargesModalNSAreattempt').modal('hide');
+                                $('#EditEstimateChargesModalNSAreattempt').modal(
+                                'hide');
                             });
 
                         }
@@ -2144,7 +2545,7 @@
                         closeOnClickOutside: false,
                         closeOnEsc: false,
                         dangerMode: true
-                    }).then(function (confirm) {
+                    }).then(function(confirm) {
                         if (confirm) {
                             blockPagePermanently();
                             var charges = $('#estimated_charges_input').val();
@@ -2157,15 +2558,21 @@
                                     'shipment_id': shipment_id,
                                     '_token': '{{ csrf_token() }}'
                                 }
-                            }).done(function (data) {
+                            }).done(function(data) {
                                 UnblockPagePermanently();
                                 $('#EditEstimateChargesModal').modal('hide');
 
-                                if(data.status){
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }else{
+                                if (data.status) {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                } else {
                                     table.draw(false);
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
                                 }
                                 $('#estimated_charges_input').val('');
                                 $('#eec_shipment_id').val('');
@@ -2177,36 +2584,45 @@
             });
 
 
-            $('body').on('click', 'button.consignee_info_label', function () {
+            $('body').on('click', 'button.consignee_info_label', function() {
                 var phone = $(this).attr('rel');
-                if(phone){
+                if (phone) {
                     $.ajax({
-                        url: '{!! route('admin.settings.blacklist.search.consignee') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'phone': phone
-                        }
-                    })
+                            url: '{!! route('admin.settings.blacklist.search.consignee') !!}',
+                            method: 'POST',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'phone': phone
+                            }
+                        })
                         .done(function(data) {
                             if (data.status == 0) {
                                 details = data.details;
                                 $('#consignee_information_id').val(details.consignee.id);
                                 var html = '<div class="row mb-1">';
 
-                                html += '<div class="col-4">Consignee Name :</div><div class="col-8">'+ details.consignee.name +'</div>';
-                                html += '<div class="col-4">Consignee Phone Number 1 :</div><div class="col-8">'+ details.consignee.phone +'</div>';
+                                html += '<div class="col-4">Consignee Name :</div><div class="col-8">' +
+                                    details.consignee.name + '</div>';
+                                html +=
+                                    '<div class="col-4">Consignee Phone Number 1 :</div><div class="col-8">' +
+                                    details.consignee.phone + '</div>';
                                 var consignee_phone = '';
-                                if(details.consignee.phone2 != null){
+                                if (details.consignee.phone2 != null) {
                                     consignee_phone = details.consignee.phone2;
                                 }
-                                html += '<div class="col-4">Consignee Phone Number 2 :</div><div class="col-8">'+ consignee_phone +'</div>';
-                                html += '<div class="col-4">Consignee Address :</div><div class="col-8">'+ details.consignee.address +'</div>';
-                                html += '<div class="col-4">Consignee City :</div><div class="col-8">'+ details.consignee.city +'</div>';
+                                html +=
+                                    '<div class="col-4">Consignee Phone Number 2 :</div><div class="col-8">' +
+                                    consignee_phone + '</div>';
+                                html +=
+                                    '<div class="col-4">Consignee Address :</div><div class="col-8">' +
+                                    details.consignee.address + '</div>';
+                                html += '<div class="col-4">Consignee City :</div><div class="col-8">' +
+                                    details.consignee.city + '</div>';
 
                                 html += '</div>';
                                 if ('blacklist' in details) {
-                                    html += '<div class="row p-1" style="background-color: '+ details.blacklist.color +'; color:white;">';
+                                    html += '<div class="row p-1" style="background-color: ' + details
+                                        .blacklist.color + '; color:white;">';
                                     html += '<div class="col-12">';
                                     html += '<table class="table table-sm table-bordered mb-0">';
                                     html += '<tbody>';
@@ -2225,7 +2641,7 @@
                                     html += '<td>' + details.blacklist.delivered_ratio + ' %</td>';
                                     html += '<td>' + details.blacklist.undelivered + '</td>';
                                     html += '<td>' + details.blacklist.undelivered_ratio + ' %</td>';
-                                    html += '<td>' + details.blacklist.return + '</td>';
+                                    html += '<td>' + details.blacklist.return+'</td>';
                                     html += '<td>Rs. ' + details.blacklist.return_ratio + ' %</td>';
                                     html += '</tr>';
                                     html += '</tbody>';
@@ -2238,12 +2654,17 @@
                                 $('#label_select').val('').trigger('change');
                                 $('#ConsigneeInformationModal').modal('show');
 
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
-                            else {
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
+                            } else {
                                 $(form).find('button.search').prop('disabled', false);
 
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         });
                 }
@@ -2270,7 +2691,7 @@
                 }
             });
 
-            $('#datatable tbody').on('click', '.dropdown-menu a.rcp_sms', function () {
+            $('#datatable tbody').on('click', '.dropdown-menu a.rcp_sms', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
 
@@ -2325,12 +2746,37 @@
                 // }
             });
 
-            $('#star_shippers_filter').on('click',function () {
+            $('#star_shippers_filter').on('click', function() {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
             });
-      
+            $('#complaint_filter').on('click', function() {
+                $('#complaint_filter').val(1);
+                table.draw(true);
+                $('#complaint_filter').val(0);
+            });
+            $('#out_of_service_area_filter').on('click', function() {
+                $('#out_of_service_area_filter').val(1);
+                table.draw(true);
+                $('#out_of_service_area_filter').val(0);
+            });
+            $('#shipment_re_attempt_request_filter').on('click', function() {
+                $('#shipment_re_attempt_request_filter').val(1);
+                table.draw(true);
+                $('#shipment_re_attempt_request_filter').val(0);
+            });
+            $('#try_buy_filter').on('click', function() {
+                $('#try_buy_filter').val(1);
+                table.draw(true);
+                $('#try_buy_filter').val(0);
+            });
+            $('#return_confirmation_pending_filter').on('click', function() {
+                $('#return_confirmation_pending_filter').val(1);
+                table.draw(true);
+                $('#return_confirmation_pending_filter').val(0);
+            });
+
         });
     </script>
 @endsection
