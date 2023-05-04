@@ -2076,11 +2076,19 @@
                                                 Confirmation Pending TAT Setting</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(526, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_time_setting.index') }}">Debriefing
                                                 Time Setting</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
+
+                                    <li><a class="menu-item"
+                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Debriefing
+                                        Role Setting</a></li> 
+
+@endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_break_time.index') }}">Debriefing
@@ -2626,6 +2634,8 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+
+                        
 
                     </ul>
                 </li>
