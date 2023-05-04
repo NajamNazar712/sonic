@@ -79,6 +79,7 @@
                         <th class="border-primary border-darken-1">Status Updated</th>
                         <th class="border-primary border-darken-1">Confirmation Required</th>
                         <th class="border-primary border-darken-1">Confirmation On</th>
+                        <th class="border-primary border-darken-1">Delivery Attempt Count</th>
                         <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Assigned Agent</th>
                         <th class="border-primary border-darken-1">Assigned At</th>
@@ -769,6 +770,7 @@
 
                             head.push('Confirmation Required');
                             head.push('Confirmation On');
+                            head.push('Delivery Attempt Count');
                             head.push('Re-Attempt Count');
                             head.push('Assigned Agent');
                             head.push('Assigned At');
@@ -806,6 +808,7 @@
                                 row.push(values.reattemp_status_remarks);
                                 row.push(values.confirmation_req);
                                 row.push(values.confirmation_on);
+                                row.push(values.delivery_attempt);
                                 row.push(values.reattempts);
                                 row.push(values.assigned_agent);
                                 row.push(values.assigned_at);
@@ -1268,6 +1271,7 @@
                     {data: 'reattemp_status_remarks', name: 'reattempt_shipment_status_remarks.remarks', class: 'align-middle reattemp_status_remarks', orderable: false, searchable: false},
                     {data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
                     {data: 'confirmation_on', name: '', class: 'align-middle confirmation_on', orderable: false, searchable: false},
+                    {data: 'delivery_attempt', name: '', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
                     {data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},

@@ -83,8 +83,11 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Last Status</th>
+                            <th class="border-primary border-darken-1">Last Status Date</th>
                             <th class="border-primary border-darken-1">Current Status</th>
-                            <th class="border-primary border-darken-1">Status Date</th>
+                            <th class="border-primary border-darken-1">Current Status Date</th>
+                            <th class="border-primary border-darken-1">RCP Reason</th>
+                            <th class="border-primary border-darken-1">RCP Count</th>
                             <th class="border-primary border-darken-1">OTP Status</th>
                         </tr>
                     </thead>
@@ -265,8 +268,11 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Last Status');
+                            head.push('Last Status Date');
                             head.push('Current Status');
-                            head.push('Status Date');
+                            head.push('Current Status Date');
+                            head.push('RCP Reason');
+                            head.push('RCP Count');
                             head.push('OTP Status');
 
                             $.each(result.data, function(index, values) {
@@ -280,8 +286,11 @@
                                 row.push(values.destination);
                                 row.push(values.hubname);
                                 row.push(values.last_status);
+                                row.push(values.last_status_date);
                                 row.push(values.current_status);
                                 row.push(values.date);
+                                row.push(values.reason);
+                                row.push(values.rcp_count);
                                 row.push(values.otp_entered);
                                 body.push(row);
                             });
@@ -343,14 +352,16 @@
                     {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
                     {data: 'hubname',name: 'hub.name',class: 'align-middle hub'},
                     {data: 'last_status',class: 'align-middle last_status'},
+                    {data: 'last_status_date',name: 'ls.updated_at',class: 'align-middle date'},
                     {data: 'current_status',class: 'align-middle current_status'},
                     {data: 'date',name: 'sj.updated_at',class: 'align-middle date'},
+                    {data: 'reason',name: 'ssr.name',class: 'align-middle date'},
+                    {data: 'rcp_count',class: 'align-middle date'},
                     {data: 'otp_entered',name: 'otp_entered',class: 'align-middle otp_entered'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    //console.log(data);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
