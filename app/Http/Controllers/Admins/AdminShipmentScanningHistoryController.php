@@ -73,7 +73,7 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $c = City::find($admin->default_hub_id);
                                 ($c) ? $city = $c['name'] : $city = '-';
                                 $scanned_by = $admin->name;
-                                $area = $admin->area->name;
+                                ($area) ? $area = $admin->area->name : $area = '-';
                             } elseif ($scanning_history->user_type == 2) {
                                 $account_type = 'Shipper';
                                 $user = User::find($scanning_history->user_id);
@@ -101,7 +101,7 @@ class AdminShipmentScanningHistoryController extends Controller
                                 $c = City::find($rider->city_id);
                                 ($c) ? $city = $c['name'] : $city = '-';
                                 $scanned_by = $rider->name;
-                                $area = $rider->area->name;
+                                ($area) ? $area = $rider->area->name : $area = '-';
                             } else {
                                 $account_type = '-';
                                 $scanned_by = '-';
