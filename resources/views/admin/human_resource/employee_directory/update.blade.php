@@ -2408,12 +2408,14 @@
                                     var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                                     area_list.append(newOption);
                                 });
-                                area_list.val('').trigger('change');
+                                area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+
+                        
                             }
                             else{
                                 console.log('aya re aya');
                                 area_list.attr("disabled", true);
-                                area_list.attr("data-rule-required", false);
+                                area_list.attr("duired", false);
                                 $('#area_list-error').remove();
                             }
                             @endif
@@ -2423,6 +2425,7 @@
                 @endif
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
+           
 
 
             $("#shift_list").prepend('<option value="" selected></option>').select2({
@@ -2856,10 +2859,10 @@
                 });
                 area_list.val({!! $employee->area_id !!}).trigger('change');
             
-            @else{
+            @else
                 area_list.attr("disabled", true);
                 area_list.attr("data-rule-required", false);
-                ('#area_list-error').hide();
+                $('#area_list-error').hide();
             @endif
 
         });
