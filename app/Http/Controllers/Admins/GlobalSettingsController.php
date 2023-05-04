@@ -7786,8 +7786,20 @@ class GlobalSettingsController extends Controller
     public function debriefing_role_setting_index()
     {
         $roles = DB::table('admin_roles')->whereIn('id',[18,49,26,21,100,32,103])->get();
+        $settings = GlobalSettings::where('type', 'debriefing_role_setting');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }else{
+            $settings = new GlobalSettings();
+            $settings->type = 'debriefing_role_setting';
+            $settings->setting_value = 1;
+
+        }
+
         $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
-        $role = explode(',',$settings[0]->text);
+
+        $role = explode(',',$settings->text);
 
 
         $selected_roles = DB::table('admin_roles')->whereIn('id',$role)->pluck('id')->toArray();
