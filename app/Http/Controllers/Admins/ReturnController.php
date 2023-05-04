@@ -2409,7 +2409,8 @@ class ReturnController extends Controller
     }
 
     public function return_receive_status(Request $request,$id){
-        // dd('asd');
+
+
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
@@ -2629,7 +2630,8 @@ class ReturnController extends Controller
     public function receive_return_reason(Request $request){
 
         $status_id = $request->status;
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id','name')->orderBy('name')->get();
+        // apply condition
+        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id','name')->where('id','!=',23)->orderBy('name')->get();
 
         if(!$statuses->isEmpty()){
             return response()->json(['status'=>0,'reasons'=>$statuses]);
