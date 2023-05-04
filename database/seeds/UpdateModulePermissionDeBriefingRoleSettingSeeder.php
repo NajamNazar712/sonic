@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class UpdateModulePermissionDeBriefingRoleSettings extends Seeder
+class UpdateModulePermissionDeBriefingRoleSettingSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,5 +13,6 @@ class UpdateModulePermissionDeBriefingRoleSettings extends Seeder
     {
         DB::table('module_permissions')->insert(array(
             array('id' => 858, 'name' => 'Debriefing Role Settings View', 'module_id' => 14),
-        ));    }
+        )); 
+    }
 }
