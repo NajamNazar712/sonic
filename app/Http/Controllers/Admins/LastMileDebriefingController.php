@@ -104,8 +104,8 @@ class LastMileDebriefingController extends Controller
             ->whereIn('admins.id', $admin_ids)
             ->whereIn('admins.role_id', $roles)
             ->where('admins.status',1)
-            ->where('ea.clock_out_datetime','=',null)
-            ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
+            // ->where('ea.clock_out_datetime','=',null)
+            // ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
             ->select('admins.id', 'admins.name')->get();
 
             return response()->json(['status' => 1, 'agents' => $agents,'delivery_note_id'=>$delivery_note_id]);
