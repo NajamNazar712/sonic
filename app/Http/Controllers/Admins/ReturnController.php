@@ -1405,7 +1405,7 @@ class ReturnController extends Controller
             ->leftJoin('shipments_journey as shj', function ($join) {
                 $join->on('shj.shipment_id', '=', 'shipments.id')
                     ->where('shj.id','=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12)'));
             })
             ->leftjoin('riders as rider','rider.id','shj.rider_id')
             ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id',
