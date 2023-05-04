@@ -1350,6 +1350,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_list(Request $request){
+
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),87);
@@ -1399,7 +1400,26 @@ class ReturnController extends Controller
             })
             ->leftJoin('admins as a','a.id','=','sjn.admin_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id','a.name as receiver_name','sts.status as star_status')
+            // new join
+            /*>leftjoin('shipments_journey as shj','shj.shipment_id','=','shipments.id')*/
+            ->leftJoin('shipments_journey as shj', function ($join) {
+                $join->on('shj.shipment_id', '=', 'shipments.id')
+                    ->where('shj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 20)'));
+            })
+            ->leftjoin('riders as rider','rider.id','shj.rider_id')
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id',
+                'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking',
+                'u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address',
+                'rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni',
+                'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id',
+                'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
+                'shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount',
+                'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason',
+                'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date',
+                'shipments_journey.created_at as last_status_date','sj.created_at as arrival',
+                'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by',
+                'shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id','a.name as receiver_name','sts.status as star_status','rider.trax_id as rider_id' ,'rider.name as rider_name')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
