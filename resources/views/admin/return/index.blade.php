@@ -38,25 +38,26 @@
                 </div>
 
                 <div class="col justify-content-end mb-5">
-                    <div class="card-header">
-                        <div class="heading-elements">
-                            <ul class="list-inline">
-                                <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                        Star Shippers</a>
-                                </li>
-                            </ul>
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="heading-elements">
+                                <ul class="list-inline">
+                                    <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                            Star Shippers</a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
                     <div class="card">
                         <div class="card-header">
                             <div class="heading-elements">
                                 <ul class="list-inline mb-0">
-                                    <li class="primary border-primary round"><a data-action="collapse">Color Filters <i
+                                    <li class="primary border-primary round"><a data-action="collapse">Filters <i
                                                 class="ft-plus"></i> </a> </li>
                                 </ul>
                             </div>
                         </div>
-                        
                         <div class="card-content collapse">
                             <div class="card-body p-1">
                                 <div class="row justify-content-end">
