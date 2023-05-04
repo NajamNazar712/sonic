@@ -11,12 +11,10 @@
                 <h1 class="mb-1">
                     Role Setting
                 </h1>
-
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
                             <div class="row justify-content-center">
                                 <div class="col-6">
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.debriefing_role_setting.update') }}" novalidate="novalidate">
@@ -25,7 +23,12 @@
                                             <div class="col-12 form-group">
                                                 <select name="roles[]" id="roles_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
                                                     @foreach($roles as $role)
+                                                    @if(isset($selected_roles))
                                                         <option value="{{$role->id}}" {{ in_array($role->id, $selected_roles) ? 'selected' : '' }} >{{$role->name}}</option>
+                                                    @else
+                                                    <option value="{{$role->id}}">{{$role->name}}</option>
+
+                                                    @endif
                                                     @endforeach
                                                 </select>
                                             </div>
