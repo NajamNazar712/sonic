@@ -83,7 +83,7 @@
                                                 </tr>
                                                 <tr value="0"
                                                     id="return_confirmation_pending_filter" class="GreenColor">
-                                                    <td class="align-middle cursor_color">Return Comfirmation Pending</td>
+                                                    <td class="align-middle cursor_color">Return Confirmation Pending</td>
                                                 </tr>
                                             </tbody>
                                         </table>
