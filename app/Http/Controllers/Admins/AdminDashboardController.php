@@ -12788,7 +12788,6 @@ class AdminDashboardController extends Controller
 
     public function add_city_sub_area($city_id){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 642);
-
         $cities = City::where('id',$city_id)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
         return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);

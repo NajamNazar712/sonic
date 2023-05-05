@@ -387,6 +387,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_index()
     {
+    
         ActivityTrailController::createActivityTrailLog(Auth::id(), 57);
         $rider_type = RiderType::all();
         $route = Route::all();

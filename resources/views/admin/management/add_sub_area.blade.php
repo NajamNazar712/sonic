@@ -33,7 +33,7 @@
 
                                 <fieldset class="form-group">
                                     <select name="report_location_id" id="report_location_id" class="form-control select2" required  data-rule-required="true" data-msg-required="This field is required">
-                                        <option value="">Select Reporting Location</option>
+                                        <option value="">Select Reporting Location *</option>
                                         @foreach($reporting_locations as $rl)
                                             <option value="{{$rl->id}}">{{$rl->name}}</option>
                                         @endforeach
@@ -152,7 +152,7 @@
 
             $('#report_location_id').select2({
                 width:'100%',
-                placeholder:"Select Reporting Location",
+                placeholder:"Select Reporting Location *",
                 allowClear:true,
                 dropdownParent:$('#add_city_form')
             });

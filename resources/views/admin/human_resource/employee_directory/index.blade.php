@@ -51,7 +51,7 @@
                                             </div>
                                         </div>
                                         
-{{--                                        @if($employee->department_id == 6)--}}
+                                      
                                          <div class="col-3 mt-1">
                                             <div class="form-group">
                                                 <select name="area" id="select_area" class="select2 form-control " style="width: 100%">
@@ -61,7 +61,7 @@
                                                 </select>
                                             </div>
                                         </div>
-{{--                                        @endif--}}
+                                        
 
                                         <input type="hidden" id="filter_line_manager" value="0">
                                         <div class="col-4 mt-1">
