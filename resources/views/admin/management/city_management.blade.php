@@ -173,7 +173,7 @@
                 @if (session('role_id') == 1 || in_array(89, session('permissions')))
 
                     buttons: [{
-                       text: '<i class="la la-map-marker"></i> Add City',
+                       text: '<i class="la la-map-marker"></i> Add Areas',
                        className: 'btn btn-primary',
                        enabled: true,
                        action: function (e, dt, node, config) {
