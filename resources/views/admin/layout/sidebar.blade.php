@@ -671,22 +671,22 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), [1, 18, 49, 26, 21 ,32, 100, 103]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
                                 <ul class="menu-content">
-                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103])  || in_array(495, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(495, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.supervisor.index') }}">Supervisor
                                                 Dashboard</a></li>
                                     @endif
-                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103])  || in_array(496, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(496, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103])  || session('role_id') == 1)
+                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
