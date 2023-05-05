@@ -41,6 +41,62 @@
                                         <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
                                     </div>
                                 </form>
+                       
+                                <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                    <div class="col-3 mt-1">
+                                        <div class="form-group input-group ">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                            </div>
+                                            <input type="text" name="search_date_from"
+                                                   class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                   id="search_date_from" placeholder="Select From Date">
+                                        </div>
+                                    </div>
+                                    <div class="col-3 mt-1">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                            </div>
+                                            <input type="text" name="search_date_to"
+                                                   class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                   id="search_date_to" placeholder="Select To Date">
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-3 mt-1">
+
+                                    <select name="search_origin" id="search_origin" class="form-control select2 col-4">
+                                        @foreach($hubs as $hub)
+                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                
+                                <div class="col-3 mt-1">
+
+                                    <select name="search_destination" id="search_destination" class="form-control select2 col-4">
+                                        @foreach($hubs as $hub)
+                                            <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                    <div class="col-4 mt-1">
+                                        <div class="form-group">
+                                            <button type="button" id="search_filter_btn"
+                                                    class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                                Search
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
                             </div>
 
 
@@ -159,6 +215,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         .red{
             background-color: #FFC0CB;
@@ -173,6 +231,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+	    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
@@ -201,6 +262,24 @@
                     this.value = '';
                 }
             });
+
+            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Origin',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
+        $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Destination',
+            allowClear:true
+        }).bind('change', function() {
+            table.draw();
+        });
+
+
+        
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -292,7 +371,10 @@
                         d.vehicle_number = $('#vehicle_number_search_form #vehicle_number').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
                         d.bag_number = $('#bag_number_search_form #bag_number').val();
-
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
                     }
                 },
                 rowId: 'id',
@@ -661,6 +743,8 @@
                     });
             });
 
+            
+
             $('#bag_number_search_form').bind('submit', function(e) {
                 e.preventDefault();
 
@@ -685,6 +769,39 @@
                 if (length == 0 || length >= 12) {
                     table.draw();
                 }
+            });
+
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            	
+			 $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
         });
     </script>

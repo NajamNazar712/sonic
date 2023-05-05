@@ -3319,6 +3319,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
         });
 
+
+        Route::prefix('debriefing_role_setting')->name('debriefing_role_setting.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_role_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_role_setting_update')->name('update');
+
+        });
+
         Route::prefix('omni')->name('omni.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@omni_user_setting_update')->name('update');
