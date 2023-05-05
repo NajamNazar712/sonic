@@ -437,7 +437,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 ||
+            @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]) ||
                     count(array_intersect(
                             [
                                 32,
@@ -671,7 +671,7 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), [1, 18]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
@@ -686,7 +686,7 @@
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (session('role_id') == 18 || session('role_id') == 1)
+                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
@@ -2076,11 +2076,19 @@
                                                 Confirmation Pending TAT Setting</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(526, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_time_setting.index') }}">Debriefing
                                                 Time Setting</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
+
+                                    <li><a class="menu-item"
+                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Debriefing
+                                        Role Setting</a></li> 
+
+@endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_break_time.index') }}">Debriefing
@@ -2626,6 +2634,8 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+
+                        
 
                     </ul>
                 </li>

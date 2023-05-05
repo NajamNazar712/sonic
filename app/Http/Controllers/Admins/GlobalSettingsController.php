@@ -7782,4 +7782,42 @@ class GlobalSettingsController extends Controller
         }
     }
 
+
+    public function debriefing_role_setting_index()
+    {
+        $roles = DB::table('admin_roles')->whereIn('id',[18,49,26,21,100,32,103])->get();
+        $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
+
+        if($settings->isEmpty()){
+            return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles]);
+        }else{
+            $role = explode(',',$settings[0]->text);
+            $selected_roles = DB::table('admin_roles')->whereIn('id',$role)->pluck('id')->toArray();
+            return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles, 'selected_roles'=>$selected_roles]);
+        }
+    }
+
+
+    public function debriefing_role_setting_update(Request $request)
+    {
+        if($request->has('roles')){
+            $roles = implode(',', $request->roles);
+            $settings = GlobalSettings::where('type', 'debriefing_role_setting');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            }else{
+                $settings = new GlobalSettings();
+                $settings->type = 'debriefing_role_setting';
+                $settings->setting_value = 1;
+
+            }
+            $settings->text = $roles;
+            $settings->save();
+        }else{
+            GlobalSettings::where('type', 'debriefing_role_setting')->delete();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }

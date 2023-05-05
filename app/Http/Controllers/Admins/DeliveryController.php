@@ -2202,7 +2202,8 @@ class DeliveryController extends Controller
             if (ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 5)->count() > 1) {
                 $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [12, 34])->orderBy('name')->get();
             } else {
-                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6, 12, 34])->orderBy('name')->get();
+                $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')
+                    ->whereNotIn('id', [4, 6, 12, 34])->orderBy('name')->get();
             }
         } else {
             if (ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 5)->count() > 1) {
@@ -2211,7 +2212,7 @@ class DeliveryController extends Controller
                 if ($status_id == 12) {
                     $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
                 } else {
-                    $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6])->orderBy('name')->get();
+                    $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->whereNotIn('id', [4, 6,23])->orderBy('name')->get();
                 }
             }
         }
@@ -2228,7 +2229,7 @@ class DeliveryController extends Controller
     {
         $status_id = $request->status;
 
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->orderBy('name')->get();
+        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->where('id','!=',23)->orderBy('name')->get();
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
