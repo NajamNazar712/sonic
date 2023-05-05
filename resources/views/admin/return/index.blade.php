@@ -63,27 +63,27 @@
                                 <div class="row justify-content-end">
                                     <div class="col-md-6">
                                         <h4 class=" info">Filters</h4>
-                                        <table class="table mb-0"  id="legends_table">
+                                        <table class="table mb-0">
                                             <tbody>
-                                                <tr style=color:#010a10; value="0"
-                                                    id="complaint_filter" class="complaint_row legends">
-                                                    <td class="align-middle">Complaint</td>
+                                                <tr value="0"
+                                                    id="complaint_filter" class="complaint_row">
+                                                    <td class="align-middle cursor_color">Complaint</td>
                                                 </tr>
-                                                <tr style=color:#010a10; value="0"
-                                                    id="out_of_service_area_filter" class="nsa_osa_reason legends">
-                                                    <td class="align-middle">Out of Service Area</td>
+                                                <tr value="0"
+                                                    id="out_of_service_area_filter" class=" nsa_osa_reason">
+                                                    <td class="align-middle cursor_color" >Out of Service Area</td>
                                                 </tr>
-                                                <tr style=color:#010a10; value="0"
-                                                    id="shipment_re_attempt_request_filter" class="goldClass legends">
-                                                    <td class="align-middle">Shipment - Re-Attempt Requested</td>
+                                                <tr value="0"
+                                                    id="shipment_re_attempt_request_filter" class="goldClass">
+                                                    <td class="align-middle cursor_color">Shipment - Re-Attempt Requested</td>
                                                 </tr>
-                                                <tr style=color:#010a10; value="0"
-                                                    id="try_buy_filter" class="tnb_row legends">
-                                                    <td class="align-middle">Try & Buy</td>
+                                                <tr value="0"
+                                                    id="try_buy_filter" class="tnb_row">
+                                                    <td class="align-middle cursor_color">Try & Buy</td>
                                                 </tr>
-                                                <tr style=color:#010a10; value="0"
-                                                    id="return_confirmation_pending_filter" class="GreenColor legends">
-                                                    <td class="align-middle">Return Comfirmation Pending</td>
+                                                <tr value="0"
+                                                    id="return_confirmation_pending_filter" class="GreenColor">
+                                                    <td class="align-middle cursor_color">Return Comfirmation Pending</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -586,8 +586,9 @@
             font-size: 12px;
         }
 
-        .legends{
+        .cursor_color{
             cursor:pointer;
+            color:#010a10;
         }
 
         table.dataTable thead tr th {
