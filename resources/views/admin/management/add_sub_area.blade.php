@@ -13,9 +13,13 @@
 
                         <form id="add_city_form" class="row p-1 mb-2" method="post" onsubmit="event.preventDefault()">
                             @csrf
+
+                            @foreach($cities as $city)
+                            <input type="hidden" value="{{ $city->id }}" name="city_id">
+                            @endforeach
                             <div class="col-3">
                                 <fieldset class="form-group">
-                                    <select name="city_id" id="city_id" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
+                                    <select disabled name="city_id" id="city_id" class="form-control select2"  required data-rule-required="true" data-msg-required="This field is required">
                                         @foreach($cities as $city)
                                             <option value="{{$city->id}}">{{$city->name}}</option>
                                         @endforeach
@@ -142,12 +146,13 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            // $('#city_id').prop('disabled', true);            
 
             $('#city_id').select2({
                 width:'100%',
                 placeholder:"Select City",
                 allowClear:true,
-                dropdownParent:$('#add_city_form')
+                dropdownParent:$('#add_city_form'),
             });
 
             $('#report_location_id').select2({
@@ -343,15 +348,20 @@
             $("#add_city_form").submit(function(e) {
 
                 var form = $(this).serialize();
+                
+                $('#city_id').removeAttr('disabled');
+
                 $.ajax({
                     url: '{{ route('admin.management.city_sub_area_post') }}',
                     method: 'POST',
-                    data: form,
-                    })
-                    .done(function (data) {
+                    data: form
+                })
+                .done(function (data) {
                         if(data.status === 1){
 
                             table.draw();
+                            $('#city_id').prop('disabled', true);            
+
                             swal({
                                 title: 'Success',
                                 text:'Success',
@@ -368,6 +378,8 @@
 
                             content = document.createElement('div');
                             content.innerHTML = log;
+                            
+                            $('#city_id').prop('disabled', true);            
 
                             swal({
                                 title: 'Error',
