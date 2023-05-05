@@ -10077,7 +10077,7 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -10100,7 +10100,7 @@ class AdminDashboardController extends Controller
                         }
                     }
 
-                    if (session('role_id') == 1 || in_array(91, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(850, session('permissions'))) {
                         if ($result->isHub == 1) {
                             $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
                                 <div class="row no-gutters align-items-center">
@@ -12939,12 +12939,14 @@ class AdminDashboardController extends Controller
 
         if ($validate->passes()) {
 
-
+            $default_city = CityArea::where('city_id',$request->city_id);
             $city_area = !isset($request->id) ?  new CityArea() : CityArea::find($request->id);
             $city_area->city_id  = $request->city_id;
             $city_area->report_location_id  = $request->report_location_id;
             $city_area->name  = $request->name;
             $city_area->updated_by  = auth()->user()->id;
+            $city_area->status  = 1;
+            $city_area->default  = ($default_city->exists()) ? 0 : 1;
             $city_area->save();
 
             $data = response()->json([

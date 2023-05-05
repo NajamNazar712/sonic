@@ -141,6 +141,7 @@
                                     <th class="border-primary border-darken-1">Contact No(s).</th>
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     {{-- <th class="border-primary border-darken-1">Trax Reason</th>
                                     <th class="border-primary border-darken-1">Trax Remark(s)</th>
@@ -525,6 +526,7 @@
                         head.push('Contact No(s).');
                         head.push('Address');
                         head.push('City');
+                        head.push('Area');
                         head.push('Status');
                         head.push('Trax Reason');
                         head.push('Trax Remark(s)');
@@ -557,6 +559,7 @@
                             row.push(values.contact_number);
                             row.push(values.address);
                             row.push(values.city);
+                            row.push(values.city_area_name);
                             row.push(values.pickup_status);
                             row.push(values.trax_reason);
                             row.push(values.trax_remarks);
@@ -733,6 +736,7 @@
                 {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
+                {data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
                 {data: 'pickup_status', name: 'prs.id', class: 'align-middle pickup_status'},
                 
                 /* {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},

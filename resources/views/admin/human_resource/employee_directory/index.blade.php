@@ -883,7 +883,7 @@
                     success:function (data) {
 
                         routelist.empty();
-                        $.each(data, function (key, value) {
+                        $.each(data.route, function (key, value) {
                             var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
                             routelist.append(newOption);
                         });

@@ -9,6 +9,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
@@ -50,6 +51,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeRefusedReason;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -125,7 +127,8 @@ class DeliveryController extends Controller
         $shipping_mode = ShippingMode::all();
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $service_type = BookingType::all();
-        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs]);
+        $areas = CityArea::with('hubs')->where('status',1)->get();
+        return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs, 'areas'=>$areas]);
     }
 
     public function pending_list(Request $request)
@@ -140,6 +143,8 @@ class DeliveryController extends Controller
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
+            ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->join('shipments_journey', function ($join) {
@@ -176,7 +181,7 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipment_items where shipment_items.shipment_id = shipments.id)'));
             })
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination','dc.id as destination_city_id', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type','ca.name as area')->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
@@ -191,6 +196,10 @@ class DeliveryController extends Controller
 
         if ($hub = $request->get('search_hub')) {
             $shipments = $shipments->where('h.id', '=', $hub);
+        }
+
+        if ($area = $request->get('search_area')) {
+            $shipments = $shipments->where('caa.city_area_id', '=', $area);
         }
 
         $datatables = Datatables::of($shipments)
@@ -1106,12 +1115,13 @@ class DeliveryController extends Controller
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('city_areas as cas', 'cas.id', '=', 'riders.area_id')
             ->join('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z','oc.zone_id','=','z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','delivery_notes.created_via_app as created_via'])
+            ->select(['cas.name as city_area_name','delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','delivery_notes.created_via_app as created_via'])
             ->where('delivery_notes.status', 0);
 
 
@@ -7288,7 +7298,8 @@ class DeliveryController extends Controller
                     ->where('sj.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id', 'irbr.intercept_type as type')
+            ->leftjoin('city_areas as cas', 'cas.id', '=', 'irbr.city_area_id')
+            ->select('agent.name as agent', 'shipments.id as shId', 'shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as old_destination', 'odc.name as new_destination', 'h.name as hub', 'irbr.consignee_name', 'irbr.consignee_phone_number_1 as phone', 'irbr.consignee_address', 'irbr.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipper_status_id', 'irbr.intercept_type as type','cas.name as city_area_name')
             ->where('shipments.shipper_status_id', 54)
             ->groupBy('shipments.id');
 
@@ -7375,6 +7386,8 @@ class DeliveryController extends Controller
                     // if($shipment->self_collection == 1){
 
                     // }
+                    $new_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($intercept->consignee_city,$intercept->consignee_address);
+                    $old_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$shipment->consignee_address);
 
                     InterceptReBookRequestHistory::create([
                         'shipment_id' => $shipment->id,
@@ -7393,7 +7406,9 @@ class DeliveryController extends Controller
                         'old_amount' => $shipment->amount,
                         'new_amount' => $intercept->amount,
                         'shipper_id' => $intercept->shipper_id,
-                        'intercept_type' => $intercept->intercept_type
+                        'intercept_type' => $intercept->intercept_type,
+                        'new_con_city_area_id' => $new_con_city_area_id,
+                        'old_con_city_area_id' => $old_con_city_area_id,
                     ]);
 
                     $shipment->consignee_city_id = $intercept['consignee_city_id'];

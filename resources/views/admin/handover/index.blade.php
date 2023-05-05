@@ -27,11 +27,10 @@
                         </div>
                     </form>
                     <div class="row mb-2 justify-content-center">
-
-                        <div class="col-2">
+                        <div class="col-3">
                             <fieldset class="form-group">
                                 <select name="hub" id="hub" class="form-control select2 dynamic" data-dependent="from"
-                                 required>
+                                        required>
                                     @foreach($hubs as $hub)
                                         <option value="{{$hub->id}}">{{$hub->name}}</option>
                                     @endforeach
@@ -40,7 +39,7 @@
                             </fieldset>
 
                         </div>
-                        <div class="col-2">
+                        <div class="col-3">
                             <fieldset class="form-group">
                                 <select name="from" id="from" class="form-control select2" required>
                                 </select>
@@ -48,14 +47,20 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <input type="text" readonly id="from_sub_area" class="form-control from_sub_area width-215" placeholder="From Sub Area">
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
                             <fieldset class="form-group">
                                 <input type="text" name="from_dept_area_desg" id="from_dept_area_desg" class="form-control from_dept_area_desg width-215" placeholder="From Person Dept/Area/DES*">
                                 <div class="danger" id="from_dept_area_desg_error" style="display:none;">This field is required</div>
                             </fieldset>
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3">
                             <fieldset class="form-group">
                                 <select name="to" id="to" class="form-control select2" required>
                                 </select>
@@ -63,7 +68,13 @@
                             </fieldset>
                         </div>
 
-                        <div class="col-2">
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <input type="text" readonly  id="to_sub_area" class="form-control to_sub_area width-215" placeholder="To Sub Area">
+                            </fieldset>
+                        </div>
+
+                        <div class="col-3">
                             <fieldset class="form-group">
                                 <input type="text" name="to_dept_area_desg" id="to_dept_area_desg" class="form-control to_dept_area_desg" placeholder=" To Person Dept/Area/DES*">
                                 <div class="danger" id="to_dept_area_desg_error" style="display:none;">This field is required</div>
@@ -136,6 +147,7 @@
                 placeholder:'Select To Person*',
             });
 
+            let global_responsibility_id = null;
             $('.dynamic').change(function(){
                 if($(this).val() != '')
                 {
@@ -161,16 +173,44 @@
 
 
            
-            $("#from").change(function()
-           {    
-               $('#to').empty();
+            $("#from").change(function() {
+                $('#to').empty();
                  $('#from option').clone().appendTo('#to');
                  $('#to').find('option').get(0).remove();
                  $("#to").prepend("<option value='' selected='selected'>Select To Person</option>");
-                
                  var value = $(this).val();
                 $("#to option[value='"+value+"']").remove();
+                var _token = $('input[name="_token"]').val();
+
+                $.ajax({
+                    url: '{!! route('admin.handover.create.sub_area') !!}',
+                    method:"POST",
+                    data:{id:value ,_token:_token,},
+                    success:function(result){
+                       if(result.status) {
+                           $('#from_sub_area').val(result.sub_area_id);
+                       }
+                    }
+                })
+
              });
+
+            $('#to').change(function () {
+
+                var _token = $('input[name="_token"]').val();
+                var value = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.handover.create.sub_area') !!}',
+                    method:"POST",
+                    data:{id:value ,_token:_token,},
+                    success:function(result){
+                        if(result.status) {
+                            $('#to_sub_area').val(result.sub_area_id);
+                        }
+                    }
+                })
+
+            });
 
             
             // $('#hub').change(function(){

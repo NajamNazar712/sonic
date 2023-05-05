@@ -28,7 +28,7 @@
                             </div> -->
 							<div id="search_form" class="row mb-2 justify-content-center">
 
-		                        <div class="col-4 ">
+		                        <div class="col-3 ">
 
 		                            <div class="form-group input-group ml-1">
 		                                <div class="input-group-prepend">
@@ -40,7 +40,7 @@
 		                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
 		                            </div>
 		                        </div>
-		                        <div class="col-4 ">
+		                        <div class="col-3 ">
 		                            <div class="form-group input-group ml-1">
 		                                <div class="input-group-prepend">
 		                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -52,6 +52,22 @@
 		                            </div>
 
 		                        </div>
+
+								<div class="col-3">
+									<div class="form-group">
+										<select name="search_hub" id="search_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required" >
+										</select>
+									</div>
+								</div>
+
+								<div class="col-3">
+									<div class="form-group">
+										<select name="search_area" id="search_area" class="form-control select2">
+
+										</select>
+									</div>
+								</div>
+
 			                    <div class="col-2">
 			                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
 			                    </div>
@@ -83,6 +99,7 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Address</th>
 										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Area</th>
 										<th class="border-primary border-darken-1">Type</th>
 										<th class="border-primary border-darken-1">Updated At</th>
 										<th class="border-primary border-darken-1">Start Location Latitude</th>
@@ -249,6 +266,7 @@
 							head.push('Shipper');
 							head.push('Address');
 							head.push('City');
+							head.push('Area');
 							head.push('Type');
 							head.push('Updated At');
 							head.push('Start Location Latitude');
@@ -277,6 +295,7 @@
 								row.push(values.shipper);
 								row.push(values.pickup_address);
 								row.push(values.city);
+								row.push(values.city_area_name);
 								row.push(values.pickup_type);
 								row.push(values.created_at);
 								row.push(values.start_location_latitude);
@@ -329,16 +348,19 @@
 				data: function (d) {
 					d.search_date_from = $('input[name="search_date_from_formatted"]').val();
 					d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+					d.search_hub = $('#search_hub').val();
+					d.search_area = $('#search_area').val();
 				}
 			},
 			rowId: 'id',
-			order: [[6, 'desc']],
+			order: [[7, 'desc']],
 			columns: [
 				{data: 'added_at', name: 'v2_rider_pickups.added_at', class: 'align-middle added_at'},
 				{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 				{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 				{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 				{data: 'city', name: 'c.name', class: 'align-middle city'},
+				{data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
 				{data: 'pickup_type', name: 'v2_rider_pickups.pickup_type', class: 'align-middle pickup_type'},
 				{data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'align-middle created_at'},
 				{data: 'start_location_latitude', name: 'v2_rider_pickups.start_location_latitude', class: 'align-middle start_location_latitude'},
@@ -471,6 +493,28 @@
 			$('#audio_modal').on('hide.bs.modal', function (e) {
 				$('audio#sound')[0].pause();
 				$('audio#sound')[0].currentTime = 0;
+			});
+
+			var data1 = $.map({!! $hubs !!}, function (obj) {
+				obj.text = obj.name;
+				return obj;
+			});
+			var data2 = $.map({!! $areas !!}, function (obj) {
+				obj.text = obj.name;
+				return obj;
+			});
+
+			$("#search_hub").prepend('<option value="" selected></option>').select2({
+				placeholder: "Select Hub",
+				data: data1,
+				allowClear: true,
+				width: '100%',
+			});
+			 $("#search_area").prepend('<option value="" selected></option>').select2({
+				placeholder: "Select Area",
+				data : data2,
+				allowClear: true,
+				width: '100%',
 			});
 
 

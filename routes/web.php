@@ -3638,6 +3638,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('fetch1', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_to')->name('fetch1');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
+            Route::post('sub_area', 'AdminShipmentHandoverController@sub_area')->name('sub_area');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
@@ -3659,6 +3660,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'AdminShipmentHandoverController@responsibles_status')->name('status');
             Route::post('details', 'AdminShipmentHandoverController@responsibles_editview')->name('details');
             Route::post('edit', 'AdminShipmentHandoverController@responsibles_edit')->name('edit');
+            Route::post('get_sub_area', 'AdminShipmentHandoverController@get_sub_area')->name('get_sub_area');
         });
     });
     Route::prefix('power_bi')->name('power_bi.')->group(function () {

@@ -111,6 +111,7 @@ class V2AdminPickupsController extends Controller
             ->leftjoin('territories as t', 't.id', '=', 'u.territory_id')
             ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+            ->leftjoin('city_areas as cas', 'cas.id', '=', 'usi.city_area_id')
             ->join('v2_pickup_request_statuses as prs', 'prs.id', '=', 'v2_pickup_requests.status_id')
             ->join('v2_pickup_request_rider_statuses as rs', 'rs.id', '=', 'v2_pickup_requests.rider_status')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v2_pickup_requests.current_rider_id')
@@ -134,7 +135,7 @@ class V2AdminPickupsController extends Controller
             })
 //            ->leftJoin('v2_rider_pickups as vpr', 'vpr.pickup_request_id', '=', 'v2_pickup_requests.id')
 
-            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks', 't.name as territory')
+            ->select('v2_pickup_requests.id','v2_pickup_requests.reminder_status as reminder', 'v2_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v2_pickup_requests.created_at as requested_date', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.booked as bookings_link', 'v2_pickup_requests.received', 'v2_pickup_requests.received as received_link', 'usi.vendor as vendor_name', 'prs.name as pickup_status', 'rs.name as rider_status', 'v2_pickup_requests.attempts', 'cr.name as current_rider', 'lr.name as last_rider', 'v2_pickup_requests.try_and_buy', 'v2_pickup_requests.vendor', 'v2_pickup_requests.status_id', 'v2_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'vpr.shipments as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v2_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v2_pickup_requests.remarks as rev_remarks', 't.name as territory','cas.name as city_area_name')
             ->whereNotIn('v2_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -2399,8 +2400,17 @@ class V2AdminPickupsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 7);
         $pickup_types = [['id' => 0, 'text' => 'Not Pick'], ['id' => 1, 'text' => 'Pick']];
         $pickup_not_pick_reasons = V2PickupRequestNotPickReason::all();
+        $hubs = City::where([['status',1],['hub',1]]);
+        $areas = CityArea::with('hubs')->where('status',1)->get();
 
-        return view('admin.v2_pickups.rider_pickups')->with(['pickup_types' => $pickup_types, 'pickup_not_pick_reasons' => $pickup_not_pick_reasons]);
+        if(session('role_id') != 1)
+        {
+            $hubs = $hubs->WhereIn('id',session('hubs'));
+        }
+
+        $hubs = $hubs->get(['id','name']);
+
+        return view('admin.v2_pickups.rider_pickups')->with(['pickup_types' => $pickup_types, 'pickup_not_pick_reasons' => $pickup_not_pick_reasons,'hubs'=>$hubs,'areas'=>$areas]);
     }
 
     public function pickups_list_v2(Request $request)
@@ -2429,7 +2439,8 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', $pickup_not_picked, $pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks', 'v2_rider_pickups.audio_path');
+            ->leftjoin('city_areas as cas','usi.city_area_id','cas.id')
+            ->select('v2_rider_pickups.id', 'v2_rider_pickups.added_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'v2_rider_pickups.pickup_type', 'v2_rider_pickups.created_at', 'v2_rider_pickups.start_location_latitude', 'v2_rider_pickups.start_location_longitude', 'v2_rider_pickups.actual_location_latitude', 'v2_rider_pickups.actual_location_longitude', 'v2_rider_pickups.distance_from_start_to_actual', 'v2_rider_pickups.current_location_latitude', 'v2_rider_pickups.current_location_longitude', 'v2_rider_pickups.distance_from_current_to_actual', 'v2_rider_pickups.shipments', 'pnpr.name as reason', 'v2_rider_pickups.picture_path', 'v2_rider_pickups.pickup_note_id', 'v2_rider_pickups.pickup_request_id', $pickup_not_picked, $pickup_picked, 'v2_rider_pickups.rider_remarks as rider_remarks', 'v2_rider_pickups.audio_path','cas.name as city_area_name');
         if (session('role_id') != 1) {
             $rider_pickups = $rider_pickups->whereIn('c.hub_id', session('hubs'));
         }
@@ -2519,6 +2530,15 @@ class V2AdminPickupsController extends Controller
             $to = $request->get('search_date_to');
             $rider_pickups->whereBetween('v2_rider_pickups.created_at', [$from, $to]);
         }
+        if (isset($request->search_hub) && !empty($request->search_hub)) {
+            $search_hub = $request->get('search_hub');
+            $rider_pickups->where('usi.city_id', $search_hub);
+        }
+
+        if (isset($request->search_area) && !empty($request->search_area)) {
+            $search_area = $request->get('search_area');
+            $rider_pickups->where('usi.city_area_id', $search_area);
+        }
         return $datatables->make(true);
     }
     public function pickups_action_log_index_v2()
@@ -2529,7 +2549,8 @@ class V2AdminPickupsController extends Controller
         $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
         $admins = DB::connection('reports')->table('admins')->get(['id', 'name']);
         $cities = DB::connection('reports')->table('cities')->get(['id', 'name']);
-        return view('admin.v2_pickups.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders' => $riders, 'admins' => $admins, 'cities' => $cities]);
+        $cities_areas = DB::connection('reports')->table('city_areas')->where('status',1)->get(['id', 'name']);
+        return view('admin.v2_pickups.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders' => $riders, 'admins' => $admins, 'cities' => $cities,'cities_areas'=>$cities_areas]);
     }
     public function pickups_action_log_list_v2(Request $request)
     {
@@ -2544,7 +2565,8 @@ class V2AdminPickupsController extends Controller
             ->join('users as u', 'pr.shipper_id', 'u.id')
             ->join('user_shipping_infos as usi', 'pr.pickup_address_id', 'usi.id')
             ->join('cities as c', 'usi.city_id', 'c.id')
-            ->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.created_at', 'pra.assigned_by', 'pr.city_id as city_id', 'pr.current_rider_id');
+            ->leftjoin('city_areas as cas', 'cas.id', '=', 'usi.city_area_id')
+            ->select('v2_rider_pickup_action_logs.id', 'v2_rider_pickup_action_logs.logged_at', 'r.name as rider', 'u.name as shipper', 'usi.pickup_address', 'c.name as city', 'pa.name as type', 'v2_rider_pickup_action_logs.pickup_note_id', 'v2_rider_pickup_action_logs.pickup_request_id', 'pr.created_at', 'pra.assigned_by', 'pr.city_id as city_id', 'pr.current_rider_id','cas.name as city_area_name');
 
         if (session('role_id') != 1) {
             $rider_pickup_action_logs = $rider_pickup_action_logs->whereIn('c.hub_id', session('hubs'));
@@ -2569,6 +2591,9 @@ class V2AdminPickupsController extends Controller
         }
         if ($city = $request->get('search_city')) {
             $rider_pickup_action_logs->where('pr.city_id', '=', $city);
+        }
+        if ($city_area = $request->get('search_city_area')) {
+            $rider_pickup_action_logs->where('usi.city_area_id', '=', $city_area);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

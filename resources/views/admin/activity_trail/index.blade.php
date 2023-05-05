@@ -52,7 +52,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Team Member Name</th>
-                                        <th class="border-primary border-darken-1"> areas name</th>
+                                        <th class="border-primary border-darken-1">Team Member Area Name</th>
                                         <th class="border-primary border-darken-1">Designation</th>
                                         <th class="border-primary border-darken-1">Screen Name</th>
                                         <th class="border-primary border-darken-1">Action Performed</th>
@@ -179,7 +179,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                order: [[ 5, "desc" ]],
+                order: [[ 4, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {

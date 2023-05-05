@@ -1372,6 +1372,7 @@ class AdminHumanResourseController extends Controller
                 $employee->fiscal_leave_count = 23;
             }
         }
+        $employee->area_id = $request->area;
         $employee->update();
 
         if ($employee->employee_type_id == 1) {
@@ -1411,6 +1412,7 @@ class AdminHumanResourseController extends Controller
                 $admin->dummy_pin = $employee->pin;
                 $admin->updated_by = Auth::id();
                 $admin->shift_id = $employee->shift_id;
+                $admin->area_id = $employee->area_id;
                 $admin->update();
 
             }
@@ -1431,6 +1433,7 @@ class AdminHumanResourseController extends Controller
                 $rider->operation_rider_id = $request->rider_functional_category;
                 $rider->route_id = $request->rider_route;
                 $rider->updated_by = Auth::id();
+                $rider->area_id = $request->area;
                 $rider->save();
             }
         }
