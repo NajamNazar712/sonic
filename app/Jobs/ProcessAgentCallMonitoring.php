@@ -69,14 +69,17 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                          return false;
                     }
                     $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
-        
+
+                    $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
+                    $roles = explode(',',$settings[0]->text);
+                    
                     $today = Carbon::now()->format('Y-m-d');
                     $admin_ids = AgentDay::where('date',$today)
                         ->where('status',1)
                         ->whereIn('agent_id',$admin_ids)
                         ->pluck('agent_id')
                         ->toArray();
-                    $admins = Admin::whereIn('id', $admin_ids)->where('role_id', 18)->where('status',1)->pluck('id')->toArray();
+                    $admins = Admin::whereIn('id', $admin_ids)->whereIn('role_id', $roles)->where('status',1)->pluck('id')->toArray();
                     $recs = array();
                     if(count($admins) > 0){
                    
