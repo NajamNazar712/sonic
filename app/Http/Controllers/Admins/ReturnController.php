@@ -5780,19 +5780,25 @@ class ReturnController extends Controller
 
         $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
         ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
                 ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
         })
-        ->leftJoin('shipments_journey as for_rcp_count', function ($join) {
-            $join->on('for_rcp_count.shipment_id', 'shipments.id')->where('for_rcp_count.verification',1);
-        })
-        ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
+        
+        ->leftJoin('shipment_status as cs', 'cs.id','=','shipments.shipper_status_id')
         ->leftJoin('shipments_journey as sjls', function ($join) {
-            $join->on('sjls.shipment_id', '=', 'shipments.id')
-                ->where('sjls.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and id < sj.id and verification = 1)')
-                );
+            $subquery = DB::table('shipments_journey')
+                ->select(DB::raw('MAX(id)'))
+                ->where('verification', 1)
+                ->whereRaw('shipment_id = sj.shipment_id')
+                ->whereRaw('reference_1_id = rider_deliveries.delivery_note_id')
+                ->whereRaw('id < sj.id')
+                ->groupBy('shipment_id', 'reference_1_id');
+            $join->on('sjls.id', '=', DB::raw("({$subquery->toSql()})"))
+                ->mergeBindings($subquery);
         })
+        
         ->leftJoin('shipment_status as ls', 'ls.id','=','sjls.shipper_status_id')
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
         ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
@@ -5800,19 +5806,18 @@ class ReturnController extends Controller
         ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
         ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
+
         ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
             'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
             'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-            'destinationcity.name as destination','sj.updated_at as date', 'sjls.updated_at as last_status_date',
+            'destinationcity.name as destination','sj.created_at as date', 'sjls.created_at as last_status_date',
             'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id','ls.name as last_status',
             'ssr.name as reason',
-            DB::raw('SUM(for_rcp_count.shipper_status_id = 12) as rcp_count')
+             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.reference_1_id = rider_deliveries.delivery_note_id and shipments_journey.shipper_status_id = 12  ) as rcp_count')
         )
+
         ->whereIn('rider_deliveries.rider_status_id',[12,52])
-        ->groupBy('rider_deliveries.delivery_note_id', 'riders.name', 
-        'emp.trax_id', 'shipments.tracking_number', 'shipments.id', 'cities.name', 
-        'destinationcity.name', 'sj.updated_at', 'sjls.updated_at', 'rider_deliveries.otp_entered', 
-        'hub.name', 'cs.name', 'cs.id', 'ls.name', 'ssr.name');
+        ->groupBy('rider_deliveries.delivery_note_id');
 
             
         $datatable = Datatables::of($data)
