@@ -5798,15 +5798,20 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
+        //DB::enableQueryLog();
         $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
         ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
 
+
+        //for the current row
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
+                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1 and reference_1_id = rider_deliveries.delivery_note_id)'));
         })
         
-        ->leftJoin('shipment_status as cs', 'cs.id','=','shipments.shipper_status_id')
+        ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
+
+        //for the last row
         ->leftJoin('shipments_journey as sjls', function ($join) {
             $subquery = DB::table('shipments_journey')
                 ->select(DB::raw('MAX(id)'))
@@ -5838,7 +5843,8 @@ class ReturnController extends Controller
 
         ->whereIn('rider_deliveries.rider_status_id',[12,52])
         ->groupBy('rider_deliveries.delivery_note_id');
-
+        //$data->get();
+        //dd(DB::getQueryLog());
             
         $datatable = Datatables::of($data)
         ->editColumn('tracking_number', function ($shipments) {
