@@ -5838,7 +5838,7 @@ class ReturnController extends Controller
             'destinationcity.name as destination','sj.created_at as date', 'sjls.created_at as last_status_date',
             'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id','ls.name as last_status',
             'ssr.name as reason',
-             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.reference_1_id = rider_deliveries.delivery_note_id and shipments_journey.shipper_status_id = 12  ) as rcp_count')
+             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.shipper_status_id = 12  ) as rcp_count')
         )
 
         ->whereIn('rider_deliveries.rider_status_id',[12,52])
