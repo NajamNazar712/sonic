@@ -171,7 +171,7 @@
             $('#search_city_area').prop('disabled', false);
 
             $.ajax({
-                url: '{{ route('admin.v2_pickups.action_log.getCityAreas') }}'
+                url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
                 , type: 'GET'
                 , data: {
                     city_id: cityId

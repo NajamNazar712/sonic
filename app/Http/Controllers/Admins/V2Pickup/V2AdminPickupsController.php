@@ -2506,7 +2506,7 @@ class V2AdminPickupsController extends Controller
         return view('admin.v2_pickups.action_log.index')->with(['pickup_actions' => $pickup_actions, 'riders' => $riders, 'admins' => $admins, 'cities' => $cities, 'cities_areas' => $cities_areas]);
     }
 
-    public function getCityAreas(Request $request)
+    public function get_city_areas(Request $request)
     {
         $cityId = $request->input('city_id');
         $areas = CityArea::where('city_id', $cityId)->where('status', 1)->get();

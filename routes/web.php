@@ -1080,7 +1080,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('action_log')->name('action_log.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_index_v2')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_list_v2')->name('list');
-            Route::get('getCityAreas', 'Admins\V2Pickup\V2AdminPickupsController@getCityAreas')->name('getCityAreas');
+            Route::get('getCityAreas', 'Admins\V2Pickup\V2AdminPickupsController@get_city_areas')->name('get_city_areas');
 
         });
         Route::prefix('un_assigned')->name('un_assigned.')->group(function () {
