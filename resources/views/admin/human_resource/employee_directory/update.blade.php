@@ -197,7 +197,10 @@
                                                 </select>
                                             </div>
                                         </div>
-                                         <div class="col-md-12">
+
+                                        @if($employee->employee_type_id == 2 || $employee->employee_type_id == 1 && $employee->department_id == 6)
+                                            
+                                        <div class="col-md-12">
                                             <div class="form-group">
                                                 <label>Area<span class="text-danger">*</span></label>
                                                 <select name="area" id="area_list" class="select2 form-control " data-rule-required="true"  data-msg-required="Area is required" style="width: 100%">
@@ -205,6 +208,8 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        @endif
+
                                         @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">

@@ -58,6 +58,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
@@ -260,6 +261,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
@@ -284,6 +286,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
@@ -474,6 +477,7 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},

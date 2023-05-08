@@ -54,6 +54,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -310,6 +311,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -339,6 +341,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.rider_type);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -402,6 +405,7 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},

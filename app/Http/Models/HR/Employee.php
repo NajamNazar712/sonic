@@ -87,6 +87,8 @@ class Employee extends Model
     {
         return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
     }
+
+
     
 
 }
