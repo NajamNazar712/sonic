@@ -12878,7 +12878,6 @@ class AdminDashboardController extends Controller
 
     public function city_sub_area_post(Request $request){
 
-
         $names = [
             'id' => 'ID',
             'name' => 'Name',
