@@ -56,6 +56,7 @@
 								<div class="col-3">
 									<div class="form-group">
 										<select name="search_hub" id="search_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required" >
+											
 										</select>
 									</div>
 								</div>
@@ -499,26 +500,46 @@
 				obj.text = obj.name;
 				return obj;
 			});
-			var data2 = $.map({!! $areas !!}, function (obj) {
-				obj.text = obj.name;
-				return obj;
-			});
 
 			$("#search_hub").prepend('<option value="" selected></option>').select2({
 				placeholder: "Select Hub",
 				data: data1,
 				allowClear: true,
 				width: '100%',
-			});
+			}).bind('change', function() {
+            var cityId = $(this).val();
+
+            $('#search_area').empty();
+
+            if (cityId === '') {
+                $('#search_area').prop('disabled', true);
+                return;
+            }
+
+            $('#search_area').prop('disabled', false);
+
+            $.ajax({
+                url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
+                , type: 'GET'
+                , data: {
+                    city_id: cityId
+                }
+                , dataType: 'json'
+                , success: function(response) {
+                    $.each(response, function(index, area) {
+                        $('#search_area').append('<option value="' + area.id + '">' + area.name + '</option>');
+                    });
+                }
+                , error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+		});
 			 $("#search_area").prepend('<option value="" selected></option>').select2({
 				placeholder: "Select Area",
-				data : data2,
 				allowClear: true,
 				width: '100%',
 			});
-
-
-	
 		});
 	</script>
 @endsection
