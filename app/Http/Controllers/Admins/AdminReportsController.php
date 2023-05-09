@@ -8051,7 +8051,7 @@ class AdminReportsController extends Controller
 
     public function last_mile_status_data($from, $to, $destination, $hub, $zone, $rider)
     {
-        $min_id = 11588107;
+        $min_id = 106116005;
         $data = array();
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
