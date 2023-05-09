@@ -7392,7 +7392,7 @@ class DeliveryController extends Controller
                     // if($shipment->self_collection == 1){
 
                     // }
-                    $new_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($intercept->consignee_city_id,$intercept->consignee_address);
+                    $new_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($intercept->consignee_city,$intercept->consignee_address);
                     $old_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$shipment->consignee_address);
 
                     InterceptReBookRequestHistory::create([
