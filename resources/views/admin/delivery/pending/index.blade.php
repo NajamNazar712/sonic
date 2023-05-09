@@ -29,9 +29,7 @@
                     <div class="col-3">
                         <div class="form-group">
                             <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
-                                @foreach($areas as $area)
-                                    <option value="{{$area->id}}">{{$area->name}} - {{$area->hubs->name}} </option>
-                                @endforeach
+                                
                             </select>
                         </div>
                     </div>
@@ -164,8 +162,35 @@
             placeholder: 'Hub',
             allowClear:true
         }).bind('change', function() {
+            var cityId = $(this).val();
             table.draw();
-        });
+
+            $('#search_area').empty();
+
+            if (cityId === '') {
+                $('#search_area').prop('disabled', true);
+                return;
+            }
+
+            $('#search_area').prop('disabled', false);
+
+            $.ajax({
+                url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
+                , type: 'GET'
+                , data: {
+                    city_id: cityId
+                }
+                , dataType: 'json'
+                , success: function(response) {
+                    $.each(response, function(index, area) {
+                        $('#search_area').append('<option value="' + area.id + '">' + area.name + '</option>');
+                    });
+                }
+                , error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+		});
         $("#search_area").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Area",
             allowClear: true,
