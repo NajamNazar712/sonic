@@ -2093,8 +2093,7 @@ $roles = explode("," , $settings->text);
                                     @if (session('role_id') == 1 || in_array(858, session('permissions')))
 
                                     <li><a class="menu-item"
-                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Debriefing
-                                        Role Setting</a></li> 
+                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Caller Agent Role Assigning</a></li> 
 
 @endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))
