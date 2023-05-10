@@ -1,3 +1,10 @@
+@php
+$settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
+if($settings)
+{
+$roles = explode("," , $settings->text);
+}
+@endphp
 <div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
@@ -437,7 +444,7 @@
             @endif
 
 
-            @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]) ||
+            @if (in_array(session('role_id'), [1]) ||
                     count(array_intersect(
                             [
                                 32,
@@ -671,7 +678,7 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), array_merge([1], $roles)) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
@@ -686,7 +693,7 @@
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (in_array(session('role_id'), [1, 18, 49, 26, 21 , 32, 100, 103]))
+                                    @if (in_array(session('role_id'), array_merge([1], $roles)))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
