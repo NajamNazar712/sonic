@@ -70,8 +70,8 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                     }
                     $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
 
-                    $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
-                    $roles = explode(',',$settings[0]->text);
+                    $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
+                    $roles = explode(',',$settings->text);
                     
                     $today = Carbon::now()->format('Y-m-d');
                     $admin_ids = AgentDay::where('date',$today)
