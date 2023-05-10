@@ -1,6 +1,6 @@
 @php
 $settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
-if($settings)
+if(isset($settings))
 {
 $roles = explode("," , $settings->text);
 }
@@ -678,7 +678,7 @@ $roles = explode("," , $settings->text);
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), array_merge([1], $roles)) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), array_merge([1], is_array($roles) ? $roles : [])) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
@@ -693,7 +693,7 @@ $roles = explode("," , $settings->text);
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (in_array(session('role_id'), array_merge([1], $roles)))
+                                    @if (in_array(session('role_id'), array_merge([1], is_array($roles) ? $roles : [])))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
