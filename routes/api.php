@@ -22,6 +22,9 @@ Route::name('api.')->group(function () {
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
+    Route::post('get-shipment-details', 'APIController@get_shipment_details')->name('get-shipment-details');
+
+
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 

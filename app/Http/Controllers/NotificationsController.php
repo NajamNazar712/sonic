@@ -108,7 +108,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
 use App\Jobs\ProcessOTPSMSForBotSMS;
-
+use App\PayFastTransactionDetials;
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -234,11 +234,9 @@ class NotificationsController extends Controller
         }
     }
 
-    static public function send($id, $reference_1_id, $reference_2_id = NULL)
+    static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
     {
         $notification = Notification::find($id);
-    
-
         if ($notification) {
             if ($notification->status) {
                 if ($notification->type_id == 1) {
@@ -932,20 +930,26 @@ class NotificationsController extends Controller
                     }
 
                     self::sms($body, $to);
-                } else if ($id == 12) {
+                } 
+                
+                else if ($id == 12) {
+
+                    $payment_link = $reference_3_id;
+                    
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
-
                     $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
-
                     $delivery_note = DeliveryNote::find($reference_1_id);
-
                     $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
-
                     $shipment = Shipment::find($reference_2_id);
-                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment->id);
 
+                    //PayFast Payment Link Send 
+                        // $payfast = new PayFastTransactionDetials();
+                        // $payment_link = $payfast::where('invoice_ref_id',$shipment->tracking_number)->first();  
+                    //End
+
+
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment['id']);
                     $shipper = $shipment->user;
-
                     $to = $shipment->consignee_phone_number_1;
 
                     foreach ($delivery_note_fields as $key => $field) {
@@ -963,6 +967,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                         }
                     }
+                    
                     if ($delivery_note->special_rider) {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
@@ -991,8 +996,13 @@ class NotificationsController extends Controller
                             $brand_name = $shipper->name;
                         }
                     }
+
                     if (strpos($body, '[company_name]') !== FALSE) {
                         $body = str_replace('[company_name]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $brand_name), 0, 25), $body);
+                    }
+
+                    if (strpos($body, '[online_payment_link]') !== FALSE) {
+                        $body = str_replace('[online_payment_link]', $payment_link, $body);
                     }
 
                     if (strpos($body, '[payment_mode]') !== FALSE) {
@@ -1005,7 +1015,10 @@ class NotificationsController extends Controller
                         }
                     }
                     self::sms($body, $to);
-                } else if ($id == 13) {
+                } 
+                
+                
+                else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];

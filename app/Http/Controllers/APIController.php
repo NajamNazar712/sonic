@@ -230,6 +230,27 @@ class APIController extends Controller
         return $phone_number;
     }
 
+
+    public function get_shipment_details(Request $req){
+        $Shipment = new Shipment();
+        $shipmentDetails = $Shipment->where('tracking_number',$req->trackingID)
+        ->join('cities','shipments.consignee_city_id','cities.id')
+        ->select(
+        'shipments.tracking_number as TrankingID', 
+        'shipments.consignee_name as Name',
+        'shipments.consignee_address as Address',
+        'shipments.fintech_charges as fintech_amount',
+        'shipments.amount as codAmount',
+        'cities.name as city_name',
+        'cities.name as city_name'
+        )->first();
+        return response()->json([
+            'data' => $shipmentDetails,
+        ]);
+    }
+
+
+
     public function login(Request $request)
     {
         $rules = [

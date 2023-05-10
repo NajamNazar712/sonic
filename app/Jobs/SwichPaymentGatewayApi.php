@@ -7,24 +7,25 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Bus\PendingDispatch;
 use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Exception;
 use App\Http\Models\Shipment;
+use Illuminate\Support\Facades\Cache;
+use App\PayFastTransactionDetials;
 class SwichPaymentGatewayApi implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-        protected $shipments_id,$payment_option,$items;     
+        protected $shipments_id;     
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($shipments_id,$payment_option,$items)
+    public function __construct($shipments_id )
     {
         $this->shipments_id    = $shipments_id;
-        $this->payment_option  = $payment_option;
-        $this->items           = $items;
     }
 
     /**
@@ -35,8 +36,120 @@ class SwichPaymentGatewayApi implements ShouldQueue
     public function handle()
     {
 
+        //Pay Fast Api Integration Payment Link Start
         $customer_details = Shipment::where('id',$this->shipments_id)->first();
-        $total_amount = $customer_details->amount + $customer_details->fintech_charges;
+        if(!empty($customer_details)){
+            $url              = 'https://invoice.apps.net.pk:7088/api/merchant/invoice/create';
+            $client_id        = 'b207f5c8-e8b9-11ed-898c-005056a4e164';
+            $client_secret    = '3854b5d902f0fe5f7e9bca547aad92bc6bb8574ef1656e1788bbc41e41bc7834';
+
+            //Parameters
+            $email              = 'info@trax.com';
+            $recipient_email    = 'info@trax.com';
+            $Bill_cat           = 'Bill';
+            $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
+            $billing_month      =  date('Y-m');
+            $description        = 'This is demo description';
+        
+            //request body
+            $request_body  = http_build_query([
+                'customer_email'   => $email,
+                'total_amount'     => $total_amount,
+                'invoice_ref_id'   => $customer_details->tracking_number,
+                'billing_month'    => $billing_month,
+                'bill_category'    => $Bill_cat,
+                'due_in_days'      => 10,
+                'expires_in_days'  => 15,
+                'description'      => $description,
+                'recipient_email'  => $recipient_email
+            ]);
+        
+            $client = new Client();
+            $response = $client->request('Post', $url, [
+                'headers' => [
+                    'Content-Type' => 'application/x-www-form-urlencoded',
+                    'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                ],
+                'body' => $request_body,
+            ]);
+    
+            $body       = $response->getBody()->getContents();
+            $data       = json_decode($body, true);
+            $dueDate    = date("Y-m-d", strtotime($data['due_date']));
+            $expireDate = date("Y-m-d", strtotime($data['expiry_date']));
+            $payfast    = new PayFastTransactionDetials();
+            $payfast->invoice_key          = $data['invoice_key'];
+            $payfast->bill_consumer_number = $data['bill_consumer_number'];
+            $payfast->invoice_number       = $data['invoice_number'];
+            $payfast->invoice_id           = $data['invoice_id'];
+            $payfast->invoice_ref_id       = $data['invoice_ref_id'];
+            $payfast->total_amount         = $data['total_amount'];
+            $payfast->payment_link         = $data['payment_link'];
+            $payfast->due_date             = $dueDate ;
+            $payfast->expiry_date          = $expireDate;
+            $payfast->save();
+
+            $result = 42;
+
+        return $result;
+
+
+        }
+        
+
+        //Pay Fast Api Integration Payment Link End     
+
+        /* 
+        // Pay Fast APi Integration Url Redirection Start
+        
+        $payment_data = [];
+        
+        //Authentication
+        $Url              = 'https://ipguat.apps.net.pk/Ecommerce/api/Transaction/GetAccessToken';
+        $customer_details = Shipment::where('id',$this->shipments_id)->first();
+        $total_amount     = $customer_details->amount + $customer_details->fintech_charges;
+        $merchant_id      = '17727'; // this is demo marchant ID.
+        $secured_key      = 'WOXN60IICwSRuLQ2CdLlD9uNCrlo';   // Secure Hash 
+        $BASKET_ID        = $this->shipments_id;
+        $TXNAMT           = $total_amount;
+        //End
+
+        //Authntication Api. 
+        $client = new Client();
+        $response = $client->post($Url, [
+            'form_params' => [
+                'merchant_id'   => $merchant_id,
+                'secured_key'   => $secured_key,
+                'BASKET_ID'     => $BASKET_ID,
+                'TXNAMT'        => $TXNAMT,
+            ]
+        ]);
+        $body = json_decode($response->getBody());
+        $Access_token = $body->ACCESS_TOKEN;
+
+        //redirect parametes to payfast portal
+        $payment_data['MERCHANT_ID']    =  $merchant_id;
+        $payment_data['MERCHANT_NAME']  = 'digiHS'; // repalce it with original name
+        $payment_data['TOKEN']          =  $Access_token; 
+        $payment_data['PROCCODE']       = '00'; // it always 00
+        $payment_data['TXNAMT']         =  $TXNAMT;
+        $payment_data['SUCCESS_URL']    = 'http://sonic.test/payfast-payment'; // replace with the actual route
+        $payment_data['FAILURE_URL']    = 'http://sonic.test/payfast-payment'; // replace with the actual route
+        $payment_data['BASKET_ID']      =  $BASKET_ID;
+        $payment_data['ORDER_DATE']     =  date('Y-m-d');
+        $payment_data['CHECKOUT_URL']   = 'http://sonic.test'; // repalce its with application hostname.
+        //End
+
+        //  dd($payment_data);
+            return response()->json(['data' =>  $payment_data]);
+
+        // Pay Fast APi Integration Url Redirection End
+        */
+
+
+        /* 
+        // Swich Api Integration Start
+   
         // Payment APi Parameters
         $shipments_id           = $this->shipments_id; //customerTransactionId
         $client_id              = '48b65b60d8364ad5b2ed1e31bc1ca399'; //clientId
@@ -129,5 +242,8 @@ class SwichPaymentGatewayApi implements ShouldQueue
                 'message' => 'Invalid Request'
             ]);
         }
+       
+        // Swich Api Integration Start      
+    */
     }
 }

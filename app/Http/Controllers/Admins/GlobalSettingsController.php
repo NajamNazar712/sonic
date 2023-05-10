@@ -127,6 +127,7 @@ use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Jobs\SwichPaymentGatewayApi;
+use Session;
 //End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -3606,7 +3607,8 @@ class GlobalSettingsController extends Controller
     $shipments_id    = '1';
     $payment_option  = 'EasiPaisa';
     $items           = 'Test';
-    //$swich_payment_gateway_api = SwichPaymentGatewayApi::dispatch($shipments_id,$payment_option,$items);
+//    $swich_payment_gateway_api = SwichPaymentGatewayApi::dispatch($shipments_id,$payment_option,$items);
+
     return view('admin.settings.fintech.form');
     }
 

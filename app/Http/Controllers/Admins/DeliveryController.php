@@ -108,7 +108,8 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
-
+use App\Jobs\SwichPaymentGatewayApi;
+use App\Helpers\PayfastApiCall;
 class DeliveryController extends Controller
 {
 
@@ -1037,7 +1038,9 @@ class DeliveryController extends Controller
                             //Urdu
                             NotificationsController::send(135, $note->id, $shipment);
                         } else {
-                            NotificationsController::send(12, $note->id, $shipment);
+                            $shipments_id = $shipment;
+                            $payment_link =  PayfastApiCall::ApiCall($shipments_id);  
+                            NotificationsController::send(12, $note->id, $shipment,$payment_link);   
                         }
                     }
                     else{
@@ -8333,8 +8336,52 @@ class DeliveryController extends Controller
                     NotificationsController::send(132, $delivery_note_id, $shipment->id);
                     //Urdu
                     NotificationsController::send(135, $delivery_note_id, $shipment->id);
-                } else {
-                    NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                } 
+                else {
+                 
+                //Pay Fast Api Integration Payment Link Start
+                $url              = 'https://invoice.apps.net.pk:7088/api/merchant/invoice/create';
+                $client_id        = 'b207f5c8-e8b9-11ed-898c-005056a4e164';
+                $client_secret    = '3854b5d902f0fe5f7e9bca547aad92bc6bb8574ef1656e1788bbc41e41bc7834';
+                $customer_details = Shipment::where('id',$shipment['id'])->first();
+        
+                //Parameters
+                $email              = 'info@trax.com';
+                $recipient_email    = 'info@trax.com';
+                $Bill_cat           = 'Bill';
+                $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
+                $billing_month      =  date('Y-m');
+                $description        = 'This is demo description';
+    
+                //request body
+                $request_body  = http_build_query([
+                    'customer_email'   => $email,
+                    'total_amount'     => $total_amount,
+                    'invoice_ref_id'   => $customer_details->tracking_number,
+                    'billing_month'    => $billing_month,
+                    'bill_category'    => $Bill_cat,
+                    'due_in_days'      => 10,
+                    'expires_in_days'  => 15,
+                    'description'      => $description,
+                    'recipient_email'  => $recipient_email
+                ]);
+            
+                $client = new Client();
+                $response = $client->request('Post', $url, [
+                    'headers' => [
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                        'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                    ],
+                    'body' => $request_body,
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $data = json_decode($body, true);
+                //Pay Fast Api Integration Payment Link End   
+                    $shipment = array();
+                    $shipment['id'] = $shipment->id;
+                    $shipment['link'] = $data['payment_link'];
+                    NotificationsController::send(12, $delivery_note_id, $shipment);
                 }
 
                 return response()->json(['status' => 0, 'success' => 'Shipments Added']);

@@ -6,7 +6,7 @@
     <form method="POST" action="https://ipguat.apps.net.pk/Ecommerce/api/Transaction/PostTransaction" >
         <input type="text" name="MERCHANT_ID"       value="17727" ><BR>
         <input type="text" name="MERCHANT_NAME"     value="digiHS" ><BR>
-        <input type="text" name="TOKEN"             value="5lTgT2Asd4qYadgyrYT77WEj1RhptJS942g-zg6J8uI" ><BR>
+        <input type="text" name="TOKEN"             value="y4UmQKn5_qhVB_Ou-PzZrXgKqLmSfbHcfimSk_fsmR8" ><BR>
         <input type="text" name="PROCCODE"          value="00" ><BR>
         <input type="text" name="TXNAMT"            value="120" ><BR>
         <input type="text" name="SUCCESS_URL"       value="http://sonic.test/payfast-payment" ><BR>

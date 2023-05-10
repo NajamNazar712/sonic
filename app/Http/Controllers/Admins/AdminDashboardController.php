@@ -195,12 +195,10 @@ class AdminDashboardController extends Controller
         $this->middleware('Permission')->except('payfast_payment');
     }
 
-        public function payfast_payment_details(){
-            return view('payfast-payment-view');
-        }
 
-
-
+    public function payfast_payment_details(){
+        return view('payfast-payment-view');
+    }
     public function index()
     {
 
