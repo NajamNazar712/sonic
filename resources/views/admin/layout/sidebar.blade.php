@@ -1,5 +1,6 @@
 @php
 $settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
+$roles = [];
 if(isset($settings))
 {
 $roles = explode("," , $settings->text);
@@ -678,7 +679,7 @@ $roles = explode("," , $settings->text);
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), array_merge([1], is_array($roles) ? $roles : [])) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), array_merge([1], $roles)) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
@@ -693,7 +694,7 @@ $roles = explode("," , $settings->text);
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (in_array(session('role_id'), array_merge([1], is_array($roles) ? $roles : [])))
+                                    @if (in_array(session('role_id'), array_merge([1], $roles)))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
@@ -2092,8 +2093,7 @@ $roles = explode("," , $settings->text);
                                     @if (session('role_id') == 1 || in_array(858, session('permissions')))
 
                                     <li><a class="menu-item"
-                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Debriefing
-                                        Role Setting</a></li> 
+                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Caller Agent Role Assigning</a></li> 
 
 @endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))

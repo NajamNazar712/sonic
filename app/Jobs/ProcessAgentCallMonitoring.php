@@ -47,7 +47,7 @@ class ProcessAgentCallMonitoring implements ShouldQueue
             $rider = Rider::find($delivery_note->rider_id);
             if($rider){
                 if($rider->rider_type_id != 2 && $rider->operation_rider_id != 2){
-
+                    
                     $count = 1;
                     $admin_ids = array();
                     $admins = array();
@@ -69,9 +69,16 @@ class ProcessAgentCallMonitoring implements ShouldQueue
                          return false;
                     }
                     $admin_ids = AdminHub::where('hub_id',$delivery_note->hub_id)->pluck('admin_id')->toArray();
+                    
+                    $settings = GlobalSettings::where('type', 'debriefing_role_setting');
 
-                    $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
-                    $roles = explode(',',$settings->text);
+                    if ($settings->exists()) {
+                        $settings = $settings->first();
+                        $roles = explode(',',$settings->text);
+                    }
+                    else {
+                        $roles = [18, 49, 26, 21 , 32, 100, 103];
+                    }
                     
                     $today = Carbon::now()->format('Y-m-d');
                     $admin_ids = AgentDay::where('date',$today)
