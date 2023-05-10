@@ -812,6 +812,9 @@ class Permission
             'settings.debriefing_report_cut_off_time.store' => 175,
             'settings.debriefing_break_time.index' => 674,
             'settings.debriefing_break_time.store' => 674,
+            'settings.debriefing_role_setting.index' => 858,
+            'settings.debriefing_role_setting.update' => 858,
+
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
