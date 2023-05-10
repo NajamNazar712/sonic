@@ -7788,7 +7788,7 @@ class GlobalSettingsController extends Controller
         $roles = DB::table('admin_roles')->get();
         $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
 
-        if($settings->isEmpty()){
+        if(!isset($settings)){
             return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles]);
         }else{
             $role = explode(',',$settings->text);
