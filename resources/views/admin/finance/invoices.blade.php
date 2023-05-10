@@ -127,7 +127,9 @@
 						<th class="border-primary border-darken-1">S. No.</th>
 						<th class="border-primary border-darken-1">Account Type</th>
 						<th class="border-primary border-darken-1">Invoice Number</th>
+						<th class="border-primary border-darken-1">Shipper Account ID</th>
 						<th class="border-primary border-darken-1">Shipper</th>
+						<th class="border-primary border-darken-1">Sales Person</th>
 						<th class="border-primary border-darken-1">City</th>
 						<th class="border-primary border-darken-1">Total Charges</th>
 						<th class="border-primary border-darken-1">Total GST</th>
@@ -758,7 +760,9 @@
 							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 							{data:'account', name: 'account_type', class: 'align-middle text-center account'},
 							{data:'invoice_number_btn', name: 'invoice_number_btn', class: 'align-middle text-center invoice_number_btn'},
+							{data:'shipper_account_id', name: 'shipper_account_id', class: 'align-middle text-center shipper_account_id'},
 							{data:'shipper', name: 'shipper', class: 'align-middle text-center shipper'},
+							{data:'sales_person_name', name: 'sales_person_name', class: 'align-middle text-center sales_person_name'},
 							{data:'city', name: 'city', class: 'align-middle text-center city'},
 							{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
 							{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
