@@ -534,7 +534,10 @@
 									head.push('S.No');
 									head.push('Account Type');
 									head.push('Invoice No.');
+									head.push('Shipper Account ID');
 									head.push('Shipper');
+									head.push('Sales Person');
+									head.push('Invoice No.');
 									head.push('City');
 									head.push('Total Charges');
 									head.push('Total GST');
@@ -562,7 +565,9 @@
 										row.push(index + 1);
 										row.push(values.account);
 										row.push(values.invoice_number);
+										row.push(values.shipper_account_id);
 										row.push(values.shipper);
+										row.push(values.sales_person_name);
 										row.push(values.city);
 										row.push(values.total_charges);
 										row.push(values.total_gst);
@@ -754,7 +759,7 @@
 							}
 						},
 						rowId: 'id',
-						order: [[10, 'desc']],
+						order: [[12	, 'desc']],
 						columns: [
 							{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 							{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
