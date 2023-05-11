@@ -891,7 +891,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+            ->leftjoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
