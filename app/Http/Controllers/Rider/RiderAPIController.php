@@ -7909,13 +7909,22 @@ class RiderAPIController extends Controller
             $pickup_address = $pickup_address->first();
             $pickup_city_id = $pickup_address->pickup_address->city_id;
             $discount =  $pickup_address->discount;
+            $insurance =  intval($pickup_address->insurance);
             $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
             if ($request->volumetric_weight == 1) {
                 $weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             } else {
                 $weight = $request->input('weight');
             }
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight);
+
+            $packaging = ($request->packaging_amount != null) ?  intval($request->packaging_amount) : 0;
+        
+            $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
+            if($insurance_amount > 0 ){
+                $insurance_amount = round(intval($insurance_amount) * $insurance / 100,2);
+            }
+        
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
@@ -10946,8 +10955,10 @@ class RiderAPIController extends Controller
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
                     if($attendance->leave_status == 2){
-                        $datum["status"] = 4;
-                    }else{
+                        $datum["status"] = 4; //adjustment apply
+                    } else if($attendance->leave_status == 1) {
+                        $datum["status"] = 5; //leave apply
+                    } else {
                         if ($shift_exists == 1) {
                             if ($attendance->clock_in_datetime) {
                                 $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
@@ -11254,10 +11265,10 @@ class RiderAPIController extends Controller
             'added_at' => ['required'],
             'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
             'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id'],
-            'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
-            'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
-            'actual_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
+            'start_location_latitude' => ['required'],
+            'start_location_longitude' => ['required'],
+            'actual_location_latitude' => ['required'],
+            'actual_location_longitude' => ['required'],
             'shipment_ids' => ['nullable'],
             'shipments' => ['nullable', 'integer', 'digits_between:1,10'],
             'picture' => ['nullable', 'image']
@@ -12107,6 +12118,10 @@ class RiderAPIController extends Controller
                 $data['approver_email'] = $employee->line_manager->email;
                 $data['approver_name'] = $employee->line_manager->name;
                 $data['user_type'] = 0;
+                $data['total_leaves'] = $employee->leave_count;
+                $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
+                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                $data['availed_leaves'] = $availed_leaves;
                 return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
             }
             return response()->json(['status' => 1, 'message' => "Line Manager is not selected!"]);
@@ -12119,7 +12134,7 @@ class RiderAPIController extends Controller
         $rules = [
             'from' => ['required'],
             'to' => ['required'],
-            'reason' => ['required', 'max:500'],
+            'reason' => ['required_if:leave_type,[1,5,6]', 'max:500'],
             'leave_type' => ['required', 'integer', 'digits_between:1,10', 'exists:leave_types,id'],
             'leave_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:employee_leaves,id'],
         ];
@@ -13851,4 +13866,225 @@ class RiderAPIController extends Controller
             }
         }
     }
+
+    public function retail_shipment_store_v3(Request $request)
+    {  
+        $rider_id = $request->rider_id;
+        $setting = GlobalSettings::where('type', 'retail_store')->first();
+        $user_id = $setting->setting_value;
+        $pickup_address_id = $request->pickup_address_id;
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        $pickup_city_id = $user_shipping_info->city_id;
+        $information_display = TRUE;
+        $trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+
+        $consignee_name = $request->input('consignee_name');
+        $consignee_address = $request->input('consignee_address');
+        $consignee_phone_number_1 = $request->input('consignee_cell_no');
+        $consignee_phone_number_2 = NULL;
+        $consignee_email_address = NULL;
+        $order_id = $request->input('order_id');
+        $package_type = FALSE;
+        $special_instructions = NULL;
+
+
+        $retail_type = RetailTraxCenter::where('pickup_address_id',$pickup_address_id)->first();
+        $discount = $retail_type->discount;
+        $insurance = $retail_type->insurance;
+
+
+        $shipping_mode_check = $request->input('shipping_mode_id');
+        $consignee_city_id = $request->input('city_id');
+        if ($shipping_mode_check == 1) {
+            $shipping_mode_id = 2;
+        } elseif ($shipping_mode_check == 4) {
+            $shipping_mode_id = 3;
+        } else {
+            $shipping_mode_id = 1;
+        }
+        $same_day_timing_id = NULL;
+
+        $city = City::find($pickup_city_id);
+
+        /*$request->weight_charges = str_replace(',', '', $request->input('weight_charges'));
+        $request->fuel_surcharge = str_replace(',', '', $request->input('fuel_surcharge'));
+        $city = City::find($pickup_city_id);
+        $gst = $city->zone->gst;
+        $total_charges_without_gst = $request->weight_charges + $request->fuel_surcharge;
+        $gst = $gst * $total_charges_without_gst;
+        $total_charges = $total_charges_without_gst + $gst;*/
+
+          if ($request->volumetric_weight == 1) {
+            $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
+            $length = $request->length;
+            $breadth = $request->breadth;
+            $height = $request->height;
+        } else {
+            $estimated_weight = $request->input('weight');
+            $length = null;
+            $breadth = null;
+            $height = null;
+        }
+
+        $packaging = ($request->packaging_amount != null) ? intval($request->packaging_amount) : 0;
+
+        $insurance_amount = ($request->insurance_amount != null) ? str_replace(',', '', $request->insurance_amount) : 0;
+        if ($insurance_amount > 0) {
+            $insurance_amount = round(intval($insurance_amount) * $insurance / 100, 2);
+        }
+
+        $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
+
+        $charges = $rates["total_charges"];
+
+        if ($shipping_mode_check == 3) {
+            $amount = str_replace(',', '', $request->input('cod_amount'));
+            $r_amount = 0;
+        } else {
+            $amount = 0;
+            $r_amount = 0;
+        }
+        $payment_mode_id = 1;
+        $try_and_buy_charges = NULL;
+        
+
+        $pieces_quantity = $request->input('pieces');
+        $business_category_id = $request->input('business_category_id');
+
+        $charges_mode_id = 1;
+
+        $shipment_id = RetailShipmentBookController::book($user_id, 1, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $r_amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $business_category_id, $length, $breadth, $height);
+
+        $tracking_number = RetailShipmentBookController::generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+        $product_type_id = $request->product_id;
+
+        $item_description = NULL;
+
+        $item_quantity = 1;
+
+        if ($request->input('insurance') == 1) {
+            $price = str_replace(',', '', $request->input('insurance_amount'));
+            $insurance = TRUE;
+        } else {
+            $price = NULL;
+            $insurance = FALSE;
+        }
+
+        $type = 0;
+
+        RetailShipmentBookController::add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
+
+        if ($pieces_quantity > 1) {
+            RetailShipmentBookController::create_shipment_pieces($shipment_id, $pieces_quantity);
+        }
+        $destination = $request->city_id;
+
+        $shipper_info = RetailShipperInfo::where('shipper_phone_no', $request->shipper_cell_no);
+        if ($shipper_info->exists()) {
+            $shipper_info = $shipper_info->first();
+            $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+
+
+            if ($request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                $shipper_info->bank_id = $request->bank_id;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        } else {
+            $shipper_info = new RetailShipperInfo();
+            $shipper_info->shipper_phone_no = $request->shipper_cell_no;
+            $shipper_info->shipper_name = $request->shipper_name;
+            $shipper_info->shipper_cnic = $request->shipper_cnic;
+            $shipper_info->shipper_address = $request->shipper_address;
+            $shipper_info->city_id = $pickup_city_id;
+            $shipper_info->save();
+            if ($request->hasFile('cheque') && $request->iban_no != null && $request->account_no != null && $request->bank_id != null) {
+                $shipper_info->bank_id = $request->bank_id;
+                $shipper_info->iban = $request->iban_no;
+                $shipper_info->account_number = $request->account_no;
+                if ($request->hasFile('cheque')) {
+                    $filename = 'retail_shipper_' . $shipper_info->id . '_cheque_image.png';
+                    $file = $request->file('cheque');
+                    Storage::disk('public')->putFileAs('retail_shipper_cheque', $file, $filename);
+                    $shipper_info->cheque_image = $filename;
+                    $shipper_info->completed_status = 1;
+                }
+            }
+            $shipper_info->save();
+        }
+        $retail_shipment = new RetailShipment();
+        $retail_shipment->shipment_id = $shipment_id;
+        $retail_shipment->product_type_id = $request->product_id;
+        $retail_shipment->shipping_mode = $request->shipping_mode_id;
+        $retail_shipment->destination = $destination;
+        $retail_shipment->payment_mode_id = $request->payment_mode_id;
+        $retail_shipment->shipper_phone_no = $request->shipper_cell_no;
+        $retail_shipment->shipper_name = $request->shipper_name;
+        $retail_shipment->shipper_cnic = $request->shipper_cnic;
+        $retail_shipment->shipper_address = $request->shipper_address;
+        $retail_shipment->trax_box_id = ($request->trax_box_id != -1) ? $request->trax_box_id : null;
+        $retail_shipment->total_charges = $charges;
+        $retail_shipment->shipper_account_no = $shipper_info->id;
+        $retail_shipment->weight = $estimated_weight;
+        $retail_shipment->length = $length;
+        $retail_shipment->breadth = $breadth;
+        $retail_shipment->height = $height;
+        $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
+        $retail_shipment->discount = $rates['discount_amount'];
+        $retail_shipment->packaging_charges = $rates['packaging_charges'];
+        $retail_shipment->insurance_charges = $rates['insurance_amount'];        
+        $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
+        $retail_shipment->weight_charges = $rates['charges_without_gst'];
+        $retail_shipment->gst = $rates['gst_charges'];
+        $retail_shipment->rider_id = $rider_id;
+        $retail_shipment->save();
+
+
+        $date = Carbon::today()->toDateString();
+        $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', 4)->where('admin_id', $rider_id);
+        if ($cash_deposit->exists()) {
+            $cash_deposit = $cash_deposit->first();
+            $total_shipments = $cash_deposit->total_cn + 1;
+            $total_cash = $cash_deposit->total_cash + $amount;
+            $cash_deposit->total_cn = $total_shipments;
+            $cash_deposit->total_cash = $total_cash;
+            $cash_deposit->save();
+        } else {
+            $cash_deposit = new RetailCashDeposit();
+            $cash_deposit->category = 4;
+            $cash_deposit->rider_id = $rider_id;
+            $cash_deposit->total_cn = 1;
+            $cash_deposit->total_cash = $amount;
+            $cash_deposit->save();
+
+        }
+
+        $cash_deposit_shipment = new RetailCashDepositShipment();
+        $cash_deposit_shipment->cash_deposit_id = $cash_deposit->id;
+        $cash_deposit_shipment->shipment_id = $shipment_id;
+        $cash_deposit_shipment->shipping_mode_id = $request->shipping_mode_id;
+        $cash_deposit_shipment->save();
+
+
+        AdminPickupsController::generate($shipment_id);
+        NotificationsController::send(115, $tracking_number, $shipper_info->id);
+
+        return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
+
+    }
+
+
 }

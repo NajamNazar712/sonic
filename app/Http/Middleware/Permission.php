@@ -77,7 +77,7 @@ class Permission
             'pickups.assigned.pickups' => 20,
             'pickups.assigned.cancel' => 21,
             'pickups.assigned.view_details' => 20,
-//            'pickups.assigned.print' => 22,
+            //'pickups.assigned.print' => 22,
             'pickups.receive.index' => 23,
             'pickups.receive.list' => 23,
             'pickups.receive.bookings.all' => 23,
@@ -812,6 +812,9 @@ class Permission
             'settings.debriefing_report_cut_off_time.store' => 175,
             'settings.debriefing_break_time.index' => 674,
             'settings.debriefing_break_time.store' => 674,
+            'settings.debriefing_role_setting.index' => 858,
+            'settings.debriefing_role_setting.update' => 858,
+
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
@@ -1074,7 +1077,7 @@ class Permission
             'leads.index' => 416,
             'leads.list' => 416,
             'leads.add_status' => 419,
-//            'leads.tag_sale_person' => 420,
+            //'leads.tag_sale_person' => 420,
             'leads.lead_log' => 416,
             'leads.add_remarks' => 416,
             'leads.view_remarks' => 416,
@@ -1331,7 +1334,6 @@ class Permission
             'human_resource.employee_penalty.index' => 829,
 
             'reports.one_link_charges_summary.index' => 824,
-			'reports.one_link_charges_summary.index' => 824,
 
             'settings.onelink_payment_charges.index' => 825,
 
@@ -1340,8 +1342,11 @@ class Permission
 
 			'settings.consignee_refused_otp_bypass.index' => 826,
             'otp_history.index' => 827,
+            'settings.star_shippers.index' => 846,
+    		'settings.auto_delivery_note_verification.index' => 836,
+			'reports.revenue_report_by_invoice.index' => 839,
+			'return.return_confirm_otp.index' => 849,
         ],
-
         'shipper' => [
             'shipment.book.index' => 1,
             'shipment.book.store' => 1,

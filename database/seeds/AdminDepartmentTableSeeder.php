@@ -2,8 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class
-AdminDepartmentTableSeeder extends Seeder
+class AdminDepartmentTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.

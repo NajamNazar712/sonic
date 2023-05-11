@@ -79,6 +79,10 @@ class LastMileDebriefingController extends Controller
 
     public function supervisor_agents(Request $request){
         $admin_ids = AdminHub::where('hub_id',$request->hub_id)->pluck('admin_id')->toArray();
+
+        $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
+        $roles = explode(',',$settings[0]->text);
+        
        
         $delivery_note_id = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
         ->join('shipments as s','s.id','=','dns.shipment_id')
@@ -93,10 +97,12 @@ class LastMileDebriefingController extends Controller
             ->whereIn('agent_id',$admin_ids)
             ->pluck('agent_id')
             ->toArray();
+
+            
         if(count($admin_ids) > 0){
             $agents = Admin::join('employee_attendances as ea','ea.employee_id','=','admins.employee_id')
             ->whereIn('admins.id', $admin_ids)
-            ->where('admins.role_id', 18)
+            ->whereIn('admins.role_id', $roles)
             ->where('admins.status',1)
             ->where('ea.clock_out_datetime','=',null)
             ->where('ea.attendance_date','=',Carbon::now()->format('Y-m-d'))
@@ -388,6 +394,7 @@ class LastMileDebriefingController extends Controller
 
     public function caller_agent_view()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 237);
 
         $break_hour = GlobalSettings::where('type','debriefing_break_time_setting');

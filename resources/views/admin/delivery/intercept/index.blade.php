@@ -220,19 +220,19 @@
                 }
 
             var from_date = $('#from_date').pickadate({
-            firstDay: 1,
-            clear: 'Clear',
-            format:'dd mmmm, yyyy',
-            selectYears: true,
-            selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
-            hiddenSuffix: '_formatted',
-            onOpen: function() {
-                $('#from_date_root').css('top','40px');
-            },
-            onSet: function(context) {
-            }
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#to_date').pickadate('picker').set('min', $('#from_date').pickadate('picker').get('select'));
+                    }
+                }
             });
+
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
@@ -241,10 +241,10 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
-                },
                 onSet: function(context) {
+                    if (context.select) {
+                        $('#from_date').pickadate('picker').set('max', $('#to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
 

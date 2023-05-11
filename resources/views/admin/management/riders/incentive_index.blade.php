@@ -572,6 +572,7 @@
                     if (confirm) {
 
                         blockPagePermanently();
+                        let edit_url = '{!! route("admin.human_resource.employee_directory.edit", ["employee" => ":id"]) !!}'.replace(':id', rider_id);
                         $.ajax({
                             url: '{!! route('admin.management.riders.permanent') !!}',
                             method: 'POST',
@@ -581,7 +582,8 @@
                             }
                         }).done(function (data) {
                             if(data.status == 0){
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                window.location.href = data.route + '?from=rider-incentive';
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }

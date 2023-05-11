@@ -103,61 +103,26 @@ class AdminNotificationsController extends Controller
         }
         else {
             $segment = isset($request->segment) ? $request->segment : null ;
-            if($request->get('search_city') == 0)
-            {
-                if ($request->get('shipper_status') == 1) {
-                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->get()->pluck('email')->toArray();
-                }
-                else if ($request->get('shipper_status') == 2) {
-                    $emails = User::where('status', '=', 4)->where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->get()->pluck('email')->toArray();
-                }
-                else {
-                    $emails = User::where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->get()->pluck('email')->toArray();
-                }
+
+            if ($request->get('shipper_status') == 1) {
+                $emails = User::where('status', '=', 3)->where('blacklist', '=', 0);
             }
-            else
-            {
-                if ($request->get('shipper_status') == 1) {
-                    $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
-                }
-                else if ($request->get('shipper_status') == 2) {
-                    $emails = User::where('status', '=', 4)
-                        ->where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
-                }
-                else {
-                    $emails = User::where('blacklist', '=', 0)
-                        ->where(function ($que) use ($segment){
-                            if(!empty($segment))
-                                $que->where('segment_id',$segment);
-                        })
-                        ->where('city_id', '=', $request->get('search_city'))->get()->pluck('email')->toArray();
-                }
+            else if ($request->get('shipper_status') == 2) {
+                $emails = User::where('status', '=', 4)->where('blacklist', '=', 0);
             }
+            else {
+                $emails = User::where('blacklist', '=', 0);
+            }
+
+            if ($segment != null && $segment != 3) {
+                $emails = $emails->where('segment_id', $segment);
+            }
+
+            if($request->get('search_city') != 0){
+                $emails = $emails->where('city_id', '=', $request->get('search_city'));
+            }
+
+            $emails = $emails->get()->pluck('email')->toArray();
         }
 
         if (!empty($emails)) {
@@ -807,13 +772,6 @@ class AdminNotificationsController extends Controller
         }
         elseif($id == 205){
             $details['fields'] = ['admin', 'preview'];
-        }elseif($id == 208)
-        {
-            $details['fields'] = ['employee_name', 'emp_id'];
-        }
-        elseif($id == 209)
-        {
-            $details['fields'] = ['line_manager'];
         }
         else if ($id == 206)
         {
@@ -823,26 +781,57 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['month','year','link'];
         }
+        elseif($id == 208)
+        {
+            $details['fields'] = ['employee_name', 'emp_id'];
+        }
+        elseif($id == 209)
+        {
+            $details['fields'] = ['line_manager','preview','link'];
+        }
         else if ($id == 210) {
             $details['fields'] = ['company_name', 'arrival_at', 'pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number', 'item_product_type', 'item_description', 'item_quantity', 'amount'];
         }
+        
+        elseif($id == 211)
+        {
+            $details['fields'] = ['Date&Day'];
+        }
+        elseif($id == 212)
+        {
+            $details['fields'] = ['employee_name'];
+        }
+		elseif($id == 213)
+        {
+            $details['fields'] = ['link'];
+        }
+        else if ($id == 214)
+        {
+            $details['fields'] = ['link'];
+        }
+
         return $details;
     }
 
-    public function edit(Request $request) {
+    public function edit(Request $request)
+    {
         $notification = Notification::find($request->get('id'));
-
-        if ($notification) {
-            if ($notification->type_id == 1) {
+        
+        if ($notification) 
+        {
+            if ($notification->type_id == 1) 
+            {
                 $notification->subject = $request->get('subject');
             }
 
             $notification->body = $request->get('body');
+
             $notification->updated_by = Auth::id();
 
             $notification->save();
 
             return ['status' => 0, 'success' => 'Notification has been edited'];
+
         }
         else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];

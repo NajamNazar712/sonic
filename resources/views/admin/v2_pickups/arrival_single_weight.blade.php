@@ -856,10 +856,10 @@
                 submitHandler: function (form) {
 
                     $('#ShipmentWeightModal').modal('hide');
-                    if(unassigned_pickups){
-                        $('#RiderModal').modal('show');
-                    }
-                    else{
+                    // if(unassigned_pickups){
+                    //     $('#RiderModal').modal('show');
+                    // }
+                    // else{
                         swal({
                             text: 'Are you sure, you want to Receive these Shipments?',
                             icon: 'warning',
@@ -894,7 +894,7 @@
                                 form.submit();
                             }
                         });
-                    }
+                    // }
 
                 }
             });

@@ -63,6 +63,15 @@
                                         </button>
                                     </div>
                                     <div class="col-md-6">
+                                        <div class="card-header">
+                                            <div class="heading-elements">
+                                                <ul class="list-inline" style="margin-top: -10px">
+                                                    <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                            Star Shippers</a>
+                                                    </li>
+                                                </ul>
+                                            </div>
+                                        </div>
                                         <div class="card">
                                             <div class="card-header">
                                                 <div class="heading-elements">
@@ -78,7 +87,7 @@
                                                     <h4 class=" info">Legend</h4>
                                                     <input type="hidden" id="legend_filter">
 
-                                                    <table class="table mb-0">
+                                                    <table class="table mb-0" id="legends_table">
                                                         <tbody>
                                                         @foreach($legends as $legend)
                                                             @if($legend->id == 7)
@@ -712,6 +721,7 @@
                         d.before_cut_off_time = $('#search_filter').val();
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
+                        d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
             rowId: 'id',
@@ -1044,12 +1054,14 @@
                     });
             }
 
-            for (let i = 1; i <= 8; i++) {
-                $('#'+i+'').on('click', function () {
-                $('#legend_filter').val(i);
-                table.draw();
-            });
-            }
+            
+            $('table#legends_table').on('click', 'tr', function(){
+                var id = parseInt($(this).attr('id'));
+                if(id){
+                    $('#legend_filter').val(id);
+                    table.draw()
+                }
+            })
             $('body').on('click','.reminderMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
@@ -1186,6 +1198,8 @@
                table.draw(true);
             });
 
+
+
             $('#datatable tbody').on('click', 'tr td.all_remarks button.all_remarks_btn', function() {
                 var pickup_req_id = parseInt($(this).attr('rel'));
 
@@ -1224,6 +1238,12 @@
                     }
                 });
                 /* print(pickup_note_id); */
+            });
+
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+                table.draw(true);
+                $('#star_shippers_filter').val(0);
             });
         });
     </script>
