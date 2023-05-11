@@ -7789,7 +7789,7 @@ class GlobalSettingsController extends Controller
         $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
 
         if(!isset($settings)){
-            return view('admin.settings.deb riefing_role_setting')->with(['roles' => $roles]);
+            return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles]);
         }else{
             $role = explode(',',$settings->text);
             $selected_roles = DB::table('admin_roles')->whereIn('id',$role)->pluck('id')->toArray();
