@@ -265,17 +265,60 @@ class ShipperDashboardController extends Controller
         $count = DB::connection($connection)->table('shipments')->where(function ($query) {
             $query->where('shipments.user_id', session('user_id'))
                 ->orwhereIn('shipments.user_id', session('sister_users'));
-            })->count();
+            });
 
-        $shipments = DB::connection($connection)->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+        if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
+            $from = $request->get('booking_from_date');
+            $to = $request->get('booking_to_date');
+            $count = $count->whereBetween('shipments.created_at', [$from, $to]);
+        }
+
+        $from_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from);
+
+        $to_id = NULL;
+
+        if ($from_id->exists()) {
+            $from_id = $from_id->first()->id;
+
+            $to_id = DB::connection($connection)->table('shipments')->select('id')->where('created_at', '>=', $from)->where('created_at', '<=', $to)->where('id', '>=', $from_id);
+
+            if ($to_id->exists()) {
+                $to_id = $to_id->orderBy('id', 'DESC')->first()->id;
+            }
+            else {
+                $to_id = NULL;
+            }
+        }
+        else {
+            $from_id = NULL;
+        }
+
+        if ($from_id && $to_id) {
+            $count = $count->where('shipments.id', '>=', $from_id)
+                ->where('shipments.id', '<=', $to_id);
+        }
+
+        $from_sj_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+
+        if ($from_sj_id->exists()) {
+            $from_sj_id = $from_sj_id->first()->id;
+        }
+        else {
+            $from_sj_id = NULL;
+        }
+
+        $count = $count->count();
+
+        $shipments = DB::connection($connection)->table('shipments')
+            ->leftJoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftJoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('payment_modes as pm','pm.id','=','shipments.payment_mode_id')
-            ->leftJoin('shipments_journey', function ($join) {
+            ->join('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.id', '=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
@@ -300,6 +343,15 @@ class ShipperDashboardController extends Controller
                         ->where('sus.substitute_user_id', '=', Auth::id());
                 });
             }
+        }
+
+        if ($from_id && $to_id) {
+            $shipments = $shipments->where('shipments.id', '>=', $from_id)
+                ->where('shipments.id', '<=', $to_id);
+        }
+
+        if ($from_sj_id) {
+            $shipments = $shipments->where('shipments_journey.id', '>=', $from_sj_id);
         }
 
         $datatable = Datatables::of($shipments)

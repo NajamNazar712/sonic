@@ -530,6 +530,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
+                'parcel_value' => ['nullable', 'numeric', 'min:1'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -580,6 +581,7 @@ class APIController extends Controller
                 }
             }
         } else {
+//            dd('type not 1');
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -604,6 +606,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
+                'parcel_value' => ['nullable', 'numeric', 'between:1,1000000'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -720,6 +723,7 @@ class APIController extends Controller
                 $shipment_pre_book = null;
             }
             if ($service_type_id != 5) {
+//                dd('s',$request->all());
                 $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
                 if (!$user_shipping_info->status) {
@@ -817,6 +821,7 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
                 }
             } else {
+//                dd('s1');
                 $pickup_consignee_city = City::find($request->input('consignee_city_id'));
                 if (!$pickup_consignee_city->status) {
                     return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $pickup_consignee_city->city_id . ' is deactivated']);
@@ -989,12 +994,15 @@ class APIController extends Controller
             if ($service_type_id == 3) {
                 $try_and_buy_charges = $request->input('try_and_buy_fees');
                 $amount = 0;
+                $parcel_value = 0;
             } elseif ($service_type_id == 5) {
                 $try_and_buy_charges = null;
                 $amount = 0;
+                $parcel_value = 0;
             } else {
                 $try_and_buy_charges = null;
                 $amount = $request->input('amount');
+                $parcel_value = $request->input('parcel_value');
             }
             $pieces_quantity = 1;
             if ($service_type_id == 1 && $request->has('pieces_quantity')) {
@@ -1011,17 +1019,21 @@ class APIController extends Controller
 
             if ($payment_mode_id == 4) {
                 $amount = 0;
+                $parcel_value = 0;
             }
+
+
+//            dd('response',$request->all(),$amount,$parcel_value);
 
             $business_category_id = 1;
             if ($user_type['account_type_id'] == 1) {
-                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id);
+                $shipment_id = ShipperShipmentBookController::book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces_quantity, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value);
             } else {
 
                 if ($user_type['corporate_rate_type_id'] == 3) {
                     $delivery_type_id = 1;
                 }
-                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id);
+                $shipment_id = ShipperShipmentBookController::corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces_quantity, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value);
             }
 
 
@@ -1409,6 +1421,11 @@ class APIController extends Controller
             $origin = $shipment->pickup_address->city->name;
             $destination = $shipment->consignee_city->name;
 
+
+
+            $order_date = $shipment->pickup_date;
+            $booking_date = $shipment->created_at;
+
             if ($type == 0) {
                 $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
@@ -1445,7 +1462,7 @@ class APIController extends Controller
                 }
             }
 
-            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination]);
+            return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status, 'reason' => $reason, 'current_status_datetime' => $current_status_datetime, 'origin' => $origin, 'destination' => $destination, 'order_date' => $order_date, 'booking_date' => $booking_date]);
         }
     }
 
@@ -1481,6 +1498,9 @@ class APIController extends Controller
             $details['tracking_number'] = $tracking_number;
 
             $details['order_id'] = $shipment->order_id;
+
+            $details['order_date'] = $shipment->pickup_date;
+            $details['booking_date'] = $shipment->created_at;
 
             $shipper = $shipment->user;
 
@@ -2079,6 +2099,21 @@ class APIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+        } else {
+            return response()->json(['status' => 1, 'message' => ' No City Present']);
+        }
+    }
+
+    public function shopify_cities(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $cities = City::where('status', 1)->where('business_category_id', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->select('id', 'name')->get();
+
+            return response()->json(['status' => 0, 'message' => 'List of Cities', 'cities' => $cities]);
         } else {
             return response()->json(['status' => 1, 'message' => ' No City Present']);
         }
@@ -2909,6 +2944,9 @@ class APIController extends Controller
 
                     $detail['order_id'] = $shipment->order_id;
 
+                    $details['order_date'] = $shipment->pickup_date;
+                    $details['booking_date'] = $shipment->created_at;
+
                     $shipper = $shipment->user;
 
                     $detail['shipper']['name'] = $shipper->name;
@@ -3090,6 +3128,8 @@ class APIController extends Controller
                     $detail['status'] = $current_status;
                     $detail['reason'] = $reason;
                     $detail['current_status_datetime'] = $current_status_datetime;
+                    $detail['order_date'] = $shipment->pickup_date;
+                    $detail['booking_date'] = $shipment->created_at;
 
                     $details[] = $detail;
                 }
@@ -4102,9 +4142,6 @@ class APIController extends Controller
         }
 
         $rules = [
-            'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
-                $query->where('user_id', $user_id);
-            })],
             'case_nature_id' => ['required'],
         ];
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -4114,6 +4151,16 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            if ($nature_id == 1 || $nature_id == 2 || $nature_id == 4) {
+                $rules = [
+                    'tracking_number' => ['required_without:tracking_numbers', 'integer', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                        $query->where('user_id', $user_id);
+                    })],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+            }
 
             if ($nature_id == 1 || $nature_id == 2) {
                 //complaints
@@ -4249,6 +4296,23 @@ class APIController extends Controller
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'case_nature_type_id not found!']);
+                }
+            } else if($nature_id == 3){
+                $rules = [
+                    'description' => ['required'],
+                ];
+                $validate = Validator::make($request->all(), $rules, $this->messages);
+
+                $validate->setAttributeNames($this->names);
+
+                if ($validate->fails()) {
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+                } else {
+
+                    $crm_request = CRMController::add($nature_id, null, 1, 1, $user_id, $launched_by, null, $user_id, null, $description);
+
+                        // $crm_request = CRMController::add($nature_id, $complaint_id, 1, 1, $user_id, $launched_by, $shipment->id, $user_id, null, $description);
+                    return response()->json(['status' => 0, 'message' => 'CRM Request has been added', 'id' => $crm_request]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'case_nature_id should be 1 (Complaints), 2 (Service Request) and 4 (Claims)']);
@@ -6426,7 +6490,7 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-        $jazzcash_account_ids = [10104, 14781 , 14110];
+        $jazzcash_account_ids = [10104, 14781 , 14110, 10381, 10358];
         if (!in_array($user_id, $jazzcash_account_ids)) {
             return response()->json(['status' => 1, 'message' => 'Shipper is not allowed.']);
         }
@@ -6716,7 +6780,11 @@ class APIController extends Controller
             }
 
             $estimated_weight = $request->input('estimated_weight');
-            $amount = $request->input('amount');
+
+            $amount = 0;
+            if($request->has('amount')){
+                $amount = $request->input('amount');
+            }
 
             $same_day_timing_id = null;
             $try_and_buy_charges = null;

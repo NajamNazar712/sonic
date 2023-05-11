@@ -4566,7 +4566,8 @@ class AdminFinanceController extends Controller
             ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'))
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'),'sts.status as star_status')
             ->groupBy('pending_payments.id');
 
             // dd($pending_payments);
@@ -4581,6 +4582,13 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($pending_payments)
+            ->setRowAttr([
+                'class' => function ($pending_payments)  {
+                    if ($pending_payments->star_status == 1) {
+                        return 'star_sippers';
+                    }
+                }
+            ])
             ->addColumn('total_deductable', function ($pending_payments) {
                 return number_format(($pending_payments->total_charges + $pending_payments->total_gst), 2);
 
@@ -4593,11 +4601,29 @@ class AdminFinanceController extends Controller
                 return $fn_charges;
             })
             ->editColumn('shipper', function ($shipment) {
-                if ($shipment->booking_type_id == 4) {
-                    return $shipment->shipper . ' (' . $shipment->poc . ')';
-                } else {
-                    return $shipment->shipper;
+                if ($shipment->booking_type_id == 4)
+                {
+                    if ($shipment->star_status == 1)
+                    {
+                        return '<p><i class="star_shippers_icon"></i>'.$shipment->shipper.'(' . $shipment->poc . ')'.'</p>';
+                    }
+                    else
+                    {
+                        return $shipment->shipper . ' (' . $shipment->poc . ')';
+                    }
                 }
+                else
+                    {
+                        if ($shipment->star_status == 1)
+                        {
+                            return '<p><i class="star_shippers_icon"></i>'.$shipment->shipper.'</p>';
+                        }
+                        else
+                        {
+                            return $shipment->shipper;
+                        }
+                }
+
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
@@ -4785,6 +4811,11 @@ class AdminFinanceController extends Controller
             } else {
                 $datatables->whereRaw('false');
             }
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $datatables->where('sts.status',1);
         }
 
         return $datatables->make(true);
@@ -5793,7 +5824,8 @@ class AdminFinanceController extends Controller
                 });
             })
             ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 'done_payments.updated_at as updated_at');
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('done_payments.user_id as user_id', 'done_payments.id as id', 'done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', 'dpc.amount as total_amount', 'dpc.charges as total_charges', 'dpc.gst as total_gst', 'dpc.payable as total_payable', 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 'done_payments.ibft_charges', 'dpc.packaging_charges', 'dpc.adjustment as adjustment_charges', 'done_payments.status_updated_at as status_updated_at', 'dpc.wht as total_wht', 'done_payments.created_at as start_date', 'done_payments.updated_at as end_date', 'ad.name as admin_name', 'done_payments.updated_at as updated_at','sts.status as star_status');
 
         if (session('department_id') == 7) {
             if (!in_array(session('id'), session('sale_users_bypass'))) {
@@ -5808,6 +5840,23 @@ class AdminFinanceController extends Controller
            
         $datatables = Datatables::of($done_payments)
             ->setTotalRecords($count)
+            ->setRowAttr([
+                'class' => function ($done_payments)  {
+                    if ($done_payments->star_status == 1) {
+                        return 'star_sippers';
+                    }
+                }
+            ])
+            ->addColumn('shipper', function ($done_payment) {
+                if ($done_payment->star_status == 1)
+                {
+                    return '<p><i class="star_shippers_icon"></i>'.$done_payment->shipper.'</p>';
+                }
+                else
+                {
+                    return $done_payment->shipper;
+                }
+            })
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             })
@@ -5893,6 +5942,17 @@ class AdminFinanceController extends Controller
                     return 'Paid';
                 } else if ($done_payment->status == 2) {
                     return 'Reverted';
+                } else {
+                    return 'Unknown';
+                }
+            })
+            ->addColumn('paid_reverted_at', function($done_payment) {
+                if ($done_payment->status == 0) {
+                    return '-';
+                } else if ($done_payment->status == 1) {
+                    return $done_payment->status_updated_at;
+                } else if ($done_payment->status == 2) {
+                    return $done_payment->status_updated_at;
                 } else {
                     return 'Unknown';
                 }
@@ -6063,11 +6123,11 @@ class AdminFinanceController extends Controller
             $datatables->whereBetween('done_payments.status_updated_at', [$from, $to]);
         }
 
-
-//         dd($datatables->make(true));
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $datatables->where('sts.status',1);
+        }
         return $datatables->make(true);
-
-
     }
 
     public function view_status_history(Request $request)
@@ -10804,7 +10864,8 @@ class AdminFinanceController extends Controller
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
-            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id','invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount')
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('invoices.id as id', 'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id','invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
             ->where('ubi.default_bank', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -10813,7 +10874,8 @@ class AdminFinanceController extends Controller
 
         $reim_invoice = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->select('invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'))
+            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->select('invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'),'sts.status as star_status')
             ->where('invoice_for_reimbursements.to_show', 1);
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
@@ -10823,6 +10885,23 @@ class AdminFinanceController extends Controller
         $invoices = DB::query()->fromSub($reim_invoice->union($invoice), 'invoices');
 
         $datatables = Datatables::of($invoices)
+            ->setRowAttr([
+                'class' => function ($invoices)  {
+                    if ($invoices->star_status == 1) {
+                        return 'star_sippers';
+                    }
+                }
+            ])
+            ->addColumn('shipper', function ($invoice) {
+                if ($invoice->star_status == 1)
+                {
+                    return '<i class="star_shippers_icon"></i>'.$invoice->shipper.'';
+                }
+                else
+                {
+                    return $invoice->shipper;
+                }
+            })
             ->addColumn('account', function ($invoice) {
                 if ($invoice->account_type == 2) {
                     return 'Corporate Account';
@@ -11023,6 +11102,11 @@ class AdminFinanceController extends Controller
             $to = date('Y-m-d 23:59:59', strtotime($request->get('generation_to')));
             $datatables->whereBetween('invoices.created_at', [$from, $to]);
 
+        }
+
+        if($request->get('star_shipper_filter') == 1)
+        {
+            $datatables->where('invoices.star_status',1);
         }
         
         return $datatables->make(true);
@@ -13686,16 +13770,15 @@ class AdminFinanceController extends Controller
                                     $shipment->save();
 
                                     ShipmentsPaymentJourneyController::add($shipment->id, 3, Auth::id(), '', $done_payment->id, 1);
-
-
+                                    
                                     $done_payment_id = $done_payment->retail_done_payment_calculations->retail_done_payment_id;
                                     $detail = array();
-
+                                    
                                     $detail['name'] = $done_payment->shipper->shipper_name;;
-                                    $detail['phone'] = $done_payment->shipper->shipper_phone_no;
-                                    $detail['updated_at'] = $done_payment->updated_at;
+                                    $detail['phone'] =  $done_payment->shipper->shipper_phone_no;
+                                    $detail['updated_at'] =  $done_payment->updated_at;
                                     $detail['done_payment_id'] = $done_payment_id;
-                                    NotificationsController::send(172, $detail);
+                                    NotificationsController::send(172,$detail);
                                 }
                             }
                         }

@@ -95,6 +95,18 @@
 								</div>
 							</div>
 
+							<div class="col justify-content-end mb-3">
+								<div class="card-header">
+									<div class="heading-elements">
+										<ul class="list-inline" >
+											<li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+													Star Shippers</a>
+											</li>
+										</ul>
+									</div>
+								</div>
+							</div>
+
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -620,6 +632,7 @@
 						d.search_shipper = $('#search_shipper').val();
 						d.shipper_status = $('#shipper_status_form select.shipper_status').val();
 						d.shipper_document_status = $('#shipper_document_status_form select.shipper_document_status').val();
+						d.star_shipper_filter = $('#star_shippers_filter').val();
 					}
 				},
 				rowId: 'id',
@@ -1524,6 +1537,13 @@
 					}
 				});
 			}
+
+			$('#star_shippers_filter').on('click',function () {
+				$('#star_shippers_filter').val(1);
+				table.draw(true);
+				$('#star_shippers_filter').val(0);
+			});
+
 		});
 	</script>
 @endsection

@@ -30,6 +30,18 @@
                                 </div>
                             </form>
 
+                            <div class="col justify-content-end">
+                                <div class="card-header">
+                                    <div class="heading-elements">
+                                        <ul class="list-inline" style="margin-top: -10px">
+                                            <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
+                                                    Star Shippers</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <b><label class="ml-1" id="count"></label></b>
                                 <thead>
@@ -41,6 +53,8 @@
                                     <th class="border-primary border-darken-1">Shipper Name</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Responsible Hub</th>
+                                    <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">COD Amount</th>
@@ -291,7 +305,12 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
+
                         url: '{{ route('admin.crm.resolved.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -302,6 +321,8 @@
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
+                            head.push('Responsible Hub');
+                            head.push('Responsible Zone');
                             head.push('Shipment Status');
                             head.push('Arrival Date');
                             head.push('COD Amount');
@@ -338,6 +359,8 @@
                                 row.push(values.shipper_name);
                                 row.push(values.origin);
                                 row.push(values.destination);
+                                row.push(values.responsible_hub);
+                                row.push(values.responsible_zone);
                                 row.push(values.status);
                                 row.push(values.arrival);
                                 row.push(values.cod_amount);
@@ -681,12 +704,17 @@
                 },
                 ajax: {
                     url: '{{ route('admin.crm.resolved.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                        d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
                 rowId: 'id',
-                order: [[24, 'desc']],
+                order: [[26, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -695,6 +723,8 @@
                     {data: 'shipper_name', name: 'user.name', class: 'align-middle shipper_name'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'cod_amount', name: 's.amount', class: 'align-middle cod_amount'},
@@ -764,7 +794,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.in_process_resolved_tat')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.in_process_resolved_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone')) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
@@ -1379,6 +1409,12 @@
                                     }
                                 });
             }
+            $('#star_shippers_filter').on('click',function () {
+                $('#star_shippers_filter').val(1);
+                table.draw(true);
+                $('#star_shippers_filter').val(0);
+            });
+
         });
     </script>
 @endsection

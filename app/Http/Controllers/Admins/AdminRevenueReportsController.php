@@ -5,12 +5,14 @@ namespace App\Http\Controllers\Admins;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use PHPExcel_Style_NumberFormat;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Yajra\Datatables\Datatables;
 
 class AdminRevenueReportsController extends Controller
 {
@@ -42,6 +44,8 @@ class AdminRevenueReportsController extends Controller
         $sales = DB::connection('reports')->table('shipments_journey as sj')
             ->join('shipments', 'shipments.id', 'sj.shipment_id')
             ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'u.segment_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'u.sub_segment_id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -83,7 +87,7 @@ class AdminRevenueReportsController extends Controller
                     ->where('is.id', '=',
                         DB::connection('reports')->raw('(select max(id) from invoice_shipments where invoice_shipments.shipment_id = shipments.id and invoice_shipments.type != 2)'));
             })
-            ->select('shipments.tracking_number', 'u.id as account_no', 'bc.name as buisness_category', 'u.name as shipper', 'shipments.order_id as order_id', 'ss.name as current_status', 'sps.name as payment_status', 'dps.done_payment_id as payment_number', 'dnsdn.station_deposit_note_id as sdn_number', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'z.name as zone', 'zcc.class', 'sm.mode as shipping_mode', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.chargeable_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.packaging_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.intercept_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'shipments.amount as s_collection_amount', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sj.created_at as delivered_or_returned', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'sj.shipper_status_id as dr_status_id', 'shipments.shipment_type')
+            ->select('shipments.tracking_number', 'u.id as account_no', 'bc.name as buisness_category', 'u.name as shipper', 'shipments.order_id as order_id', 'ss.name as current_status', 'sps.name as payment_status', 'dps.done_payment_id as payment_number', 'dnsdn.station_deposit_note_id as sdn_number', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'z.name as zone', 'zcc.class', 'sm.mode as shipping_mode', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.chargeable_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.packaging_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.intercept_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'shipments.amount as s_collection_amount', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sj.created_at as delivered_or_returned', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'sj.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'seg.name as segment', 'seg_sub.name as sub_segment')
             ->whereIn('sj.shipper_status_id', [14,20,30,36,37])
             ->where('sj.verification', '=', 1)
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
@@ -107,7 +111,7 @@ class AdminRevenueReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Account No.', 'Business Category', 'Shipper', 'Order Id', 'Status', 'Payment Status', 'Payment Number', 'SDN Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Zone', 'Class', 'Shipping Mode', 'Collection Amount', 'Actual Weight', 'Chargeable Weight', 'Weight Charges', 'Cash Handling Charges', 'Insurance Charges', 'Packaging Charges', 'Fuel Surcharge', 'Return Charges', 'Replacement Charges', 'Packing Charges', 'Try & Buy Charges', 'NSA/OSA Charges', 'Intercept Charges', 'GST', 'Total Charges', 'Estimated Charges', 'Net Payable', 'Delivered/Returned Date'];
+        $details[] = ['S.No.', 'Tracking Number', 'Account No.', 'Business Category', 'Shipper', 'Segment', 'Sub Segment', 'Order Id', 'Status', 'Payment Status', 'Payment Number', 'SDN Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Zone', 'Class', 'Shipping Mode', 'Collection Amount', 'Actual Weight', 'Chargeable Weight', 'Weight Charges', 'Cash Handling Charges', 'Insurance Charges', 'Packaging Charges', 'Fuel Surcharge', 'Return Charges', 'Replacement Charges', 'Packing Charges', 'Try & Buy Charges', 'NSA/OSA Charges', 'Intercept Charges', 'GST', 'Total Charges', 'Estimated Charges', 'Net Payable', 'Delivered/Returned Date'];
 
         $serial_number = 1;
         foreach ($sales as $sale) {
@@ -210,6 +214,8 @@ class AdminRevenueReportsController extends Controller
             $row[] = $account_number;
             $row[] = $sale->buisness_category;
             $row[] = $shipper;
+            $row[] = $sale->segment;
+            $row[] = $sale->sub_segment;
             $row[] = $sale->order_id;
             $row[] = $sale->current_status;
             $row[] = $sale->payment_status;
@@ -251,11 +257,9 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
-        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('V')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('W')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -272,8 +276,10 @@ class AdminRevenueReportsController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('AH')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AI')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AJ')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AK')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AL')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AK1')->getFont()->setBold(TRUE);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AM1')->getFont()->setBold(TRUE);
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
@@ -309,6 +315,10 @@ class AdminRevenueReportsController extends Controller
             $from = Carbon::today()->subMonth(1)->firstOfMonth()->addDays(25)->toDateTimeString();
             $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
         }
+        if($report_type == 4){
+            $from = Carbon::today()->subDay()->toDateTimeString();
+            $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
+        }
 
         $from_id = DB::table('shipments_journey')->select(DB::raw('MIN(id) as id'))->where('created_at', '>=', $from)->first()->id;
 
@@ -317,6 +327,8 @@ class AdminRevenueReportsController extends Controller
         $sales = DB::connection('reports')->table('shipments_journey as sj')
             ->join('shipments', 'shipments.id', 'sj.shipment_id')
             ->leftJoin('users as u', 'u.id', '=', 'shipments.user_id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'u.segment_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'u.sub_segment_id')
             ->leftJoin('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->leftJoin('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -363,7 +375,7 @@ class AdminRevenueReportsController extends Controller
                     ->where('dr.id', '=',
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37) and shipments_journey.verification = 1)'));
             })
-            ->select('shipments.tracking_number', 'u.id as account_no', 'bc.name as buisness_category', 'u.name as shipper', 'shipments.order_id as order_id', 'ss.name as current_status', 'sps.name as payment_status', 'dps.done_payment_id as payment_number', 'dnsdn.station_deposit_note_id as sdn_number', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'z.name as zone', 'zcc.class', 'sm.mode as shipping_mode', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.chargeable_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.packaging_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.intercept_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'shipments.amount as s_collection_amount', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'dr.created_at as delivered_or_returned', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type')
+            ->select('shipments.tracking_number', 'u.id as account_no', 'bc.name as buisness_category', 'u.name as shipper', 'shipments.order_id as order_id', 'ss.name as current_status', 'sps.name as payment_status', 'dps.done_payment_id as payment_number', 'dnsdn.station_deposit_note_id as sdn_number', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'z.name as zone', 'zcc.class', 'sm.mode as shipping_mode', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.chargeable_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.packaging_material_charges', 'shipments.fuel_surcharge', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.packaging_charges', 'shipments.try_and_buy_charges', 'shipments.nsa_osa_charges', 'shipments.intercept_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'shipments.amount as s_collection_amount', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'dr.created_at as delivered_or_returned', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'seg.name as segment', 'seg_sub.name as sub_segment')
             ->where('sj.shipper_status_id', '=', 2)
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
@@ -371,7 +383,6 @@ class AdminRevenueReportsController extends Controller
             ->where('sj.id', '>=', $from_id)
             ->where('sj.id', '<=', $to_id)
             ->get();
-
 
 
         if($report_type == 1){
@@ -383,10 +394,13 @@ class AdminRevenueReportsController extends Controller
         if($report_type == 3){
             $filename = 'revenue_report_by_arrival_26_to_last.xlsx';
         }
+        if($report_type == 4 ){
+            $filename = 'revenue_report_by_arrival_on_daily_basis.xlsx';
+        }
 
         $details = array();
 
-        $details[] = ['S.No.', 'Tracking Number', 'Account No.', 'Business Category', 'Shipper', 'Order Id', 'Status', 'Payment Status', 'Payment Number', 'SDN Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Zone', 'Class', 'Shipping Mode', 'Collection Amount', 'Actual Weight', 'Chargeable Weight', 'Weight Charges', 'Cash Handling Charges', 'Insurance Charges', 'Packaging Charges', 'Fuel Surcharge', 'Return Charges', 'Replacement Charges', 'Packing Charges', 'Try & Buy Charges', 'NSA/OSA Charges', 'Intercept Charges', 'GST', 'Total Charges', 'Estimated Charges', 'Net Payable', 'Delivered/Returned Date'];
+        $details[] = ['S.No.', 'Tracking Number', 'Account No.', 'Business Category', 'Shipper', 'Segment', 'Sub Segment', 'Order Id', 'Status', 'Payment Status', 'Payment Number', 'SDN Number', 'Service Type', 'Arrival Date', 'Origin', 'Destination', 'Hub', 'Zone', 'Class', 'Shipping Mode', 'Collection Amount', 'Actual Weight', 'Chargeable Weight', 'Weight Charges', 'Cash Handling Charges', 'Insurance Charges', 'Packaging Charges', 'Fuel Surcharge', 'Return Charges', 'Replacement Charges', 'Packing Charges', 'Try & Buy Charges', 'NSA/OSA Charges', 'Intercept Charges', 'GST', 'Total Charges', 'Estimated Charges', 'Net Payable', 'Delivered/Returned Date'];
 
         $serial_number = 1;
         foreach ($sales as $sale) {
@@ -489,6 +503,8 @@ class AdminRevenueReportsController extends Controller
             $row[] = $account_number;
             $row[] = $sale->buisness_category;
             $row[] = $shipper;
+            $row[] = $sale->segment;
+            $row[] = $sale->sub_segment;
             $row[] = $sale->order_id;
             $row[] = $sale->current_status;
             $row[] = $sale->payment_status;
@@ -530,11 +546,9 @@ class AdminRevenueReportsController extends Controller
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
-        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_TEXT);
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('U')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('V')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('W')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
@@ -551,8 +565,10 @@ class AdminRevenueReportsController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('AH')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AI')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
         $spreadsheet->getActiveSheet()->getStyle('AJ')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AK')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('AL')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
-        $spreadsheet->getActiveSheet()->getStyle('A1:AK1')->getFont()->setBold(TRUE);
+        $spreadsheet->getActiveSheet()->getStyle('A1:AM1')->getFont()->setBold(TRUE);
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
@@ -567,10 +583,113 @@ class AdminRevenueReportsController extends Controller
         $writer->save('php://output');
         $contents = ob_get_contents();
         ob_end_clean();
+
         $filePath = '/reports/revenue/' . $filename;
         Storage::disk('public')->put($filePath, $contents);
         $from = Carbon::parse($from)->toDateString();
         $to = Carbon::parse($to)->toDateString();
+
         return ['file_path' => $filePath, 'from' => $from, 'to' => $to];
+    }
+
+    public function revenue_report_by_invoice_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 637);
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $segments = DB::connection('reports')->table('segments')->select('id', 'name')->get();
+        $sub_segments = DB::connection('reports')->table('sub_category_segments')->select('id', 'name')->get();
+        $account_types = DB::connection('reports')->table('account_types')->select('id', 'name')->get();
+        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        return view('admin.reports.revenue_report_by_invoice')->with(['business_categories' => $business_categories, 'shippers' => $shippers, 'cities' => $cities, 'account_types' => $account_types, 'segments' => $segments, 'sub_segments' => $sub_segments, 'shipping_modes' => $shipping_modes]);
+    }
+
+    public function revenue_report_by_invoice_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 638);
+        }
+
+        $from = $request->get('search_date_from');
+        $from = Carbon::parse($from)->toDateTimeString();
+        $to = $request->get('search_date_to');
+        $to = Carbon::parse($to)->toDateTimeString();
+
+        $invoice = DB::connection('reports')->table('revenue_by_invoice_reports as rbi')
+            ->leftjoin('users', 'rbi.user_id', '=', 'users.id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'users.segment_id')
+            ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'users.sub_segment_id')
+            ->leftjoin('account_types as at', 'at.id', '=', 'users.account_type_id')
+            ->leftjoin('business_categories as bc', 'bc.id', '=', 'rbi.business_category_id')
+            ->leftjoin('cities as oc', 'oc.id', '=', 'rbi.origin_id');
+
+        $invoice->select('at.name as account_type', 'bc.name as business_category', 'seg.name as segment', 'seg_sub.name as sub_segment', 'users.id as account_no', 'users.name as shipper', 'oc.name as origin', 'rbi.invoice_number', 'rbi.invoicing_date', 'rbi.weight_charges', 'rbi.cash_handling_charges', 'rbi.insurance_charges', 'rbi.return_charges', 'rbi.replacement_charges', 'rbi.fuel_surcharge', 'rbi.try_buy_charges', 'rbi.packaging_charges', 'rbi.gst', 'rbi.total_charges', 'rbi.nsa_osa_charges', 'rbi.packing_charges', 'rbi.intercept_charges');
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $invoice->whereBetween('rbi.invoicing_date', [$from, $to]);
+        }
+
+        $datatable = Datatables::of($invoice)
+            ->editColumn('weight_charges', function ($invoice) {
+                return number_format($invoice->weight_charges);
+            })
+            ->editColumn('cash_handling_charges', function ($invoice) {
+                return number_format($invoice->cash_handling_charges);
+            })
+            ->editColumn('insurance_charges', function ($invoice) {
+                return number_format($invoice->insurance_charges);
+            })
+            ->editColumn('return_charges', function ($invoice) {
+                return number_format($invoice->return_charges);
+            })
+            ->editColumn('replacement_charges', function ($invoice) {
+                return number_format($invoice->replacement_charges);
+            })
+            ->editColumn('fuel_surcharge', function ($invoice) {
+                return number_format($invoice->fuel_surcharge);
+            })
+            ->editColumn('packaging_charges', function ($invoice) {
+                return number_format($invoice->packaging_charges);
+            })
+            ->editColumn('try_buy_charges', function ($invoice) {
+                return number_format($invoice->try_buy_charges);
+            })
+            ->editColumn('packing_charges', function ($invoice) {
+                return number_format($invoice->packing_charges);
+            })
+            ->editColumn('total_charges', function ($invoice) {
+                return number_format($invoice->total_charges);
+            })
+            ->editColumn('nsa_osa_charges', function ($invoice) {
+                return number_format($invoice->nsa_osa_charges);
+            })
+            ->editColumn('gst', function ($invoice) {
+                return number_format($invoice->gst);
+            });
+            if($search_invoice_number = $request->get('search_invoice_number')){
+                $datatable->where('rbi.invoice_number','=', $search_invoice_number);
+            }
+            if($shipper = $request->get('search_shipper')){
+                $datatable->where('rbi.user_id','=', $shipper);
+            }
+            if ($origin = $request->get('search_origin')) {
+                $datatable->where('oc.id', '=', $origin);
+            }
+            if ($search_segment = $request->get('search_segment')) {
+                $datatable->where('users.segment_id', '=', $search_segment);
+            }
+            if ($search_sub_segment = $request->get('search_sub_segment')) {
+                $datatable->where('users.sub_segment_id', '=', $search_sub_segment);
+            }
+            if ($search_account_type = $request->get('search_account_type')) {
+                $datatable->where('users.account_type_id', '=', $search_account_type);
+            }
+            if ($search_business_category = $request->get('search_business_category')) {
+                $datatable->where('rbi.business_category_id', '=', $search_business_category);
+            }
+
+            return $datatable->make(true);
     }
 }
