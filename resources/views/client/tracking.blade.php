@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Tracking
+					Tracking 
 				</h1>
 
 				<div class="card">
@@ -747,6 +747,8 @@
 			});
 
 			$('#tracking').on('click', '.print', function() {
+
+                // alert('1');
 				id = $(this).attr('id');
 
 				print(id);
