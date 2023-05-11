@@ -120,6 +120,7 @@
                                         <th class="border-primary border-darken-1">Launched By Name</th>
                                         {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
                                         <th class="border-primary border-darken-1">Launched Date</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
                                         <th class="border-primary border-darken-1">Closed Date</th>
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
@@ -266,6 +267,7 @@
                             head.push('Launched By');
                             head.push('Launched By Name');
                             head.push('Launched Date');
+                            head.push('Shipper Name');
                             head.push('Closed Date');
 
                             $.each(result.data, function(index, values) {
@@ -284,6 +286,7 @@
                                 row.push(values.added_by);
                                 row.push(values.launched_by_name);
                                 row.push(values.created_at);
+                                row.push(values.shipper_name);
                                 row.push(values.closed_at);
 
                                 body.push(row);
@@ -339,6 +342,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'launched_by_name', name: 'crm_requests.launched_by_id', class: 'align-middle launched_by_name',orderable: false, searchable: false},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
                     {data: 'closed_at', name: 'crmst.created_at', class: 'align-middle closed_at'},
 
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

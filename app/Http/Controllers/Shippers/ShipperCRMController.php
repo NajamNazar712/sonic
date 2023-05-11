@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
+use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
@@ -55,6 +56,14 @@ class ShipperCRMController extends Controller
         return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status, 'launched' => $launched, 'in_process' => $in_process, 'closed' => $closed, 'closed_reason_statuses' => $closed_reason_statuses]);
     }
     public function requests_list(Request $request){
+
+        $masp = [session('user_id')];
+        $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
+        
+        if(count($merged_account_sister_mapping) >  0){
+            $masp = array_merge($masp,$merged_account_sister_mapping);
+        }
+        
         $launched_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -67,13 +76,14 @@ class ShipperCRMController extends Controller
             ->leftjoin('crm_closed_reason_statuses as crmcrs', 'crmcrs.id', '=', 'crmcr.status_id')
             ->leftjoin('crm_request_status_histories as crmst', function ($join) {
                 $join->on('crmst.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crm_requests.status_id', 4)
-                    ->where('crmst.id', '=',
-                        DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id)'));
+                ->where('crm_requests.status_id', 4)
+                ->where('crmst.id', '=',
+                DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id)'));
             })
-            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr','crmst.created_at as closed_at','crm_requests.launched_by_id','crmcrs.name as at_fault')
-            ->where('crm_requests.shipper_id', session('user_id'));
-
+            ->leftjoin('users as u', 'u.id', '=', 'crm_requests.shipper_id')
+            ->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'crs.name as request_status', 'ad.name as agent', 'a.name as name', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at','crm_requests.description','crm_requests.status_id', 'ss.name as shipment_status','crm_requests.description as descr','crmst.created_at as closed_at','crm_requests.launched_by_id','crmcrs.name as at_fault', 'u.name as shipper_name')
+            ->whereIn('crm_requests.shipper_id', $masp);
+            
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
