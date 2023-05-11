@@ -1378,6 +1378,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\DeliveryController@history_shipments')->name('shipments');
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
         });
+
+        Route::prefix('shipments')->name('delivery_shipments.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@shipment_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@shipment_list')->name('list');
+
+        });
+
         Route::prefix('quick_receiving')->name('quick_receiving.')->group(function () {
             Route::get('', 'Admins\DeliveryController@quick_receiving_delivery_index')->name('index');
             Route::post('', 'Admins\DeliveryController@quick_receiving_submit')->name('submit');
