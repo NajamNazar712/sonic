@@ -63,6 +63,17 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
+                                <option value="" disabled ></option> <!-- added this line -->
+                                @foreach($merged_accounts as $merged_account)
+                                    <option value="{{$merged_account->id}}">{{$merged_account->name}} </option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+
 
                     <div class="col-3">
                         <div class="form-group input-group">
@@ -283,6 +294,11 @@
                 placeholder:'Select Service Type',
                 width:'100%',
                 allowClear:true
+            });
+            $('#search_account_type').select2({
+                placeholder:'Select Merged Account ',
+                width:'100%',
+                // allowClear:true
             });
 
 
@@ -553,6 +569,7 @@
                         d.search_status = $('#search_status').val();
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                         d.search_service_type = $('#search_service_type').val();
+                        d.search_account_type = $('#search_account_type').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.dr_search_date_from = $('input[name="dr_search_date_from_formatted"]').val();
