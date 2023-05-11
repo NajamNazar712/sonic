@@ -53,6 +53,7 @@
 
 @section('css')
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 <style>
     table.dataTable {
         font-size: 12px;
@@ -107,11 +108,42 @@
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 
 <script>
     $(document).ready(function() {
+        $('body').on('click', '.printdeliverynote', function () {
+            var deliverynote = $(this).attr('data-id');
+            print(deliverynote);
+        });
+        function print(id) {
+            $.ajax({
+                url: '{!! route('admin.delivery.receive.print') !!}',
+                method: 'POST',
+                data: {
+                    'id': id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+                .done(function (data) {
+                    var tab = window.open('', '_blank');
 
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    } else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+        }
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -135,10 +167,10 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.delivery_note);                              
+                                row.push(values.excel_delivery_note);                              
                                 row.push(values.riderID);
                                 row.push(values.rider);
-                                row.push(values.tracking_number);
+                                row.push(values.excel_tracking_number);
                                 row.push(values.created_at);
                                 body.push(row);
                             });
@@ -158,6 +190,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -220,7 +253,14 @@
 
 
           
-                $('#search_filter_btn').on('click',function () {
+            $('#search_filter_btn').on('click',function () {
+                let delivery_note = $('#scan_delivery_note').val()
+                if(delivery_note.length == 0 ){
+                    var error = "Please add one delivery note at least";
+
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    return false;
+                }
                 table.draw();
             });     
 
