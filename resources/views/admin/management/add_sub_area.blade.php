@@ -29,7 +29,7 @@
 
                             <div class="col-3">
                                 <fieldset class="form-group">
-                                    <input type="text" required name="name" id="name" class="form-control name" placeholder="Name">
+                                    <input type="text" required name="name" id="name" class="form-control name" placeholder="Add Area Name *">
                                 </fieldset>
                             </div>
 

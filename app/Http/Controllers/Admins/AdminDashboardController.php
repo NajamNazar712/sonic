@@ -10105,7 +10105,7 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
                                 <div class="row no-gutters align-items-center">
                                     <div class="col-2"><i class="ft-plus-circle"></i></div>
-                                    <div class="col-9 offset-1">Add Area</div>
+                                    <div class="col-9 offset-1">Add Areas</div>
                                 </div>                          
                             </a>';
                         }
