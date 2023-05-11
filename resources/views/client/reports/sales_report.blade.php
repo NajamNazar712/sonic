@@ -68,7 +68,7 @@
                             <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
                                 <option value="" disabled ></option> <!-- added this line -->
                                 @foreach($merged_accounts as $merged_account)
-                                    <option value="{{$merged_account->id}}">{{$merged_account->name}} &#x25BE;</option>
+                                    <option value="{{$merged_account->id}}">{{$merged_account->name}} </option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -298,7 +298,7 @@
             $('#search_account_type').select2({
                 placeholder:'Select Merged Account ',
                 width:'100%',
-                allowClear:true
+                // allowClear:true
             });
 
 
