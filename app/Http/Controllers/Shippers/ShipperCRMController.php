@@ -100,6 +100,9 @@ class ShipperCRMController extends Controller
                 $to = $request->get('search_date_to');
                 $launched_request = $launched_request->whereBetween('crm_requests.created_at', [$from, $to]);
             }
+            if(isset($request->search_account_type) && count($request->search_account_type) > 0){
+                $launched_request->whereIn('crm_requests.shipper_id', $request->search_account_type);
+            }
         $datatables = Datatables::of($launched_request)
             ->addColumn('id_padded', function ($requests) {
                 return str_pad($requests->id, 6, '0', STR_PAD_LEFT);
