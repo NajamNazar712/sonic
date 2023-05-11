@@ -40,6 +40,16 @@
                                             <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right search_date_to" id="search_date_to" placeholder="Date (To)">
                                         </div>
                                     </div>
+                                    <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
+                                                <option value="" disabled ></option> <!-- added this line -->
+                                                @foreach($merged_accounts as $merged_account)
+                                                    <option value="{{$merged_account->id}}">{{$merged_account->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
                 
                                     <div class="w-100"></div>
                 
@@ -158,7 +168,11 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-
+            $('#search_account_type').select2({
+                placeholder:'Select Merged Account ',
+                width:'100%',
+                // allowClear:true
+            });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 // clear: '',
@@ -319,9 +333,9 @@
                 ajax:{
                     url: '{{ route('cod.crm.request.list') }}',
                     data: function (d) {
-                        
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_account_type = $('#search_account_type').val();
                     }
                 },
                 rowId: 'id',

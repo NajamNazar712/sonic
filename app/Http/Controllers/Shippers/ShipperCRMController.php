@@ -29,6 +29,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\CRM\CrmClosedReasonStatus;
+use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -52,8 +53,18 @@ class ShipperCRMController extends Controller
         $in_process = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->count();
         $closed = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->count();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
+        $merged_accounts = [];
+        $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
+        if($get_merged_head_id){
+            $merged_head_id =  $get_merged_head_id->merged_head_id;
 
-        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status, 'launched' => $launched, 'in_process' => $in_process, 'closed' => $closed, 'closed_reason_statuses' => $closed_reason_statuses]);
+            $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
+                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+                ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+                ->where('merged_head_id', $merged_head_id)
+                ->get();
+        }
+        return view('client.crm.requests')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'status' => $status, 'shipment_status' => $shipment_status, 'launched' => $launched, 'in_process' => $in_process, 'closed' => $closed, 'closed_reason_statuses' => $closed_reason_statuses, 'merged_accounts' => $merged_accounts]);
     }
     public function requests_list(Request $request){
 
