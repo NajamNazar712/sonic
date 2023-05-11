@@ -7140,7 +7140,7 @@ class AdminFinanceController extends Controller
                                 $invoice_shipment->type = $pending_invoice_shipment->type;
                                 $invoice_shipment->charges = $pending_invoice_shipment->charges;
                                 $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                                $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                                $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
 
                                 $invoice_shipment->save();
 
