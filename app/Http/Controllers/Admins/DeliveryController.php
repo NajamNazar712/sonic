@@ -380,7 +380,7 @@ class DeliveryController extends Controller
             $operation_rider_category = OperationRidersCategory::all();
         }
         else{
-            $operation_rider_category = OperationRidersCategory::where('id', 2)->get();
+            $operation_rider_category = OperationRidersCategory::all();
         }
         $settings = GlobalSettings::where('type','rider_otp');
         if($settings->exists()) {
@@ -1094,7 +1094,6 @@ class DeliveryController extends Controller
         }
 
     }
-
 
     public function delivery_note_receive_index()
     {
