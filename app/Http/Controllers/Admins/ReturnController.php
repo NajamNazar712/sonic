@@ -5865,4 +5865,44 @@ class ReturnController extends Controller
 
         return $datatable->make(true);
     }
+
+
+    public function return_shipments_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
+        $startOfYear = Carbon::now()->startOfYear();
+        $receive_notes_id = DB::table('return_notes')->whereDate('created_at',$startOfYear)->get();
+        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id]);
+    }
+
+
+    public function return_shipments_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 653);
+        }
+
+        $shipments = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->join('shipments as sh', 'sh.id', '=', 'return_notes.id')
+            ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
+
+
+
+        $datatables = Datatables::of($shipments)
+        ->editColumn('return_note', function ($return) {
+            return "<a href='javascript:void(0);' data-id=".$return->return_note." class='printreturnnote'><u>" . str_pad($return->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+        })
+        ->editColumn('tracking_number', function ($return) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$return->tracking_number' class='tracking' target='_blank'>$return->tracking_number</a></u>";
+        });
+
+        $return_note_numbers = $request->get('return_note_number');
+        if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
+            $datatables->whereIn('rns.return_note_id', $return_note_numbers);
+        }
+
+        return $datatables->make(true);
+    }
 }

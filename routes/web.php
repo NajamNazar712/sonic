@@ -1526,6 +1526,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
             Route::post('delete_lastimage', 'Admins\ReturnController@history_delete_lastimage')->name('delete_lastimage');
         });
+
+
+        Route::prefix('return_shipments')->name('return_shipments.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@return_shipments_list')->name('list');
+        });
+
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
             Route::get('', 'Admins\ReturnController@cx_sales_index')->name('index');
             Route::get('list', 'Admins\ReturnController@cx_sales_list')->name('list');

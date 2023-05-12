@@ -9406,24 +9406,16 @@ class DeliveryController extends Controller
 
     public function shipment_index()
     {
-
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 650);
         $startOfYear = Carbon::now()->startOfYear();
-        // $current_time = Carbon::now();
         $delivery_notes_id = DB::table('delivery_notes')->whereDate('created_at',$startOfYear)->get();
-                // $delivery_notes_id = DB::table('delivery_notes')->get();
-
         return view('admin.delivery.delivery_shipments.index')->with(['delivery_notes_id' => $delivery_notes_id]);
     }
 
     public function shipment_list(Request $request)
     {
-
-        
-        // $startOfYear = Carbon::now()->startOfYear();
-        // $current_time = Carbon::now();
-
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 80);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 651);
         }
 
         $shipments = DeliveryNote::join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -9431,19 +9423,14 @@ class DeliveryController extends Controller
             ->join('shipments as sh', 'sh.id', '=', 'delivery_notes.id')
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as excel_delivery_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'delivery_notes.created_at as created_at']);
 
-
-
         $datatables = Datatables::of($shipments)
         ->editColumn('delivery_note', function ($deliveries) {
             return "<a href='javascript:void(0);' data-id=".$deliveries->delivery_note." class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
         })
         ->editColumn('tracking_number', function ($deliveries) {
             $route = route('admin.tracking.index');
-            // if ($deliveries->star_status == 1) {
-            //     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
-            // } else {
             return "<u><a href='{$route}?tracking_number=$deliveries->tracking_number' class='tracking' target='_blank'>$deliveries->tracking_number</a></u>";
-            // }
+            
         });
 
         $delivery_note_numbers = $request->get('delivery_note_number');
