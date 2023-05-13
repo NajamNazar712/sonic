@@ -207,13 +207,11 @@
                         title: 'Return Note Shipment',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
-                    'reset'
                 ],
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.return.return_shipments.list') }}',
                     data: function (d) {
-                        
                         d.return_note_number = $('#scan_return_note').val();
                     }
                 },

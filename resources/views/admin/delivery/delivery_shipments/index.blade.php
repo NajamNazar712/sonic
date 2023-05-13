@@ -200,7 +200,6 @@
                         title: 'Deliveries Note Shipment',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
-                    'reset'
                 ],
                 serverSide: true,
                 ajax: {
