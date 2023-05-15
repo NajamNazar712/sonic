@@ -23,6 +23,14 @@
                         </select>
                         
                     </div>
+                    <div class="col-4 form-group">
+                        <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                            @foreach($riders as $rider)
+                            <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
+                            @endforeach
+                        </select>
+                        
+                    </div>
                     <div class="col-2 mb-3">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -198,7 +206,7 @@
                     {
                         extend: 'excel',
                         className: 'd-none',
-                        title: 'Deliveries Note Shipments',
+                        title: 'Delivery Note Shipments',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
                 ],
@@ -208,6 +216,7 @@
                     data: function (d) {
                         
                         d.delivery_note_number = $('#scan_delivery_note').val();
+                        d.rider_id = $('#rider').val();
                     }
                 },
                 rowId: 'delivery_notes.id',
@@ -258,8 +267,9 @@
           
             $('#search_filter_btn').on('click',function () {
                 let delivery_note = $('#scan_delivery_note').val()
-                if(delivery_note.length == 0 ){
-                    var error = "Please select at least one delivery note id";
+                let rider = $('#rider').val()
+                if(delivery_note.length == 0 && rider == ""){
+                    var error = "Please select at least one delivery note id OR rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -269,10 +279,16 @@
 
 
             $('#scan_delivery_note').select2({
-            placeholder: 'Select Note ID(s)*'
-            , width: '100%'
-            , allowClear: true
-        })
+                placeholder: 'Select Note ID(s)*'
+                , width: '100%'
+                , allowClear: true
+            })
+
+            $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider'
+                , width: '100%'
+                , allowClear: true
+            })
             
        
 

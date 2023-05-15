@@ -9409,7 +9409,14 @@ class DeliveryController extends Controller
         $startOfYear = Carbon::now()->startOfYear();
         $delivery_notes_id = DB::table('delivery_notes')->whereDate('created_at', '>',$startOfYear)
         ->orderBy('id', 'DESC')->get();
-        return view('admin.delivery.delivery_shipments.index')->with(['delivery_notes_id' => $delivery_notes_id]);
+
+        $riders = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+        ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+        ->leftjoin('shipments as sh', 'sh.id', '=', 'dns.shipment_id')
+        ->whereDate('delivery_notes.created_at', '>', $startOfYear)
+        ->select('riders.name as rider',  'riders.trax_id as riderID')
+        ->distinct()->get();
+        return view('admin.delivery.delivery_shipments.index')->with(['delivery_notes_id' => $delivery_notes_id, 'riders' => $riders]);
     }
 
     public function shipment_list(Request $request)
@@ -9438,6 +9445,10 @@ class DeliveryController extends Controller
         $delivery_note_numbers = $request->get('delivery_note_number');
         if (is_array($delivery_note_numbers) && count($delivery_note_numbers) > 0) {
             $datatables->whereIn('dns.delivery_note_id', $delivery_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $datatables->where('riders.trax_id', $rider_id);
         }
 
         return $datatables->make(true);

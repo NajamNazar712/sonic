@@ -16,9 +16,17 @@
             <div class="row mb-2 justify-content-center">
 
                     <div class="col-4 form-group">
-                        <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
                             @foreach($receive_notes_id as $receive_note_id)
                             <option value="{{$receive_note_id->id}}">{{$receive_note_id->id}}</option>
+                            @endforeach
+                        </select>
+                        
+                    </div>
+                    <div class="col-4 form-group">
+                        <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                            @foreach($riders as $rider)
+                            <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
                             @endforeach
                         </select>
                         
@@ -215,6 +223,7 @@
                     url: '{{ route('admin.return.return_shipments.list') }}',
                     data: function (d) {
                         d.return_note_number = $('#scan_return_note').val();
+                        d.rider_id = $('#rider').val();
                     }
                 },
                 rowId: 'return_note_id',
@@ -265,8 +274,9 @@
           
             $('#search_filter_btn').on('click',function () {
                 let return_note = $('#scan_return_note').val()
-                if(return_note.length == 0 ){
-                    var error = "Please select at least one return note id";
+                let rider = $('#rider').val()
+                if(return_note.length == 0 && rider == ""){
+                    var error = "Please select at least one return note id OR rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -276,10 +286,16 @@
 
 
             $('#scan_return_note').select2({
-            placeholder: 'Select Note ID(s)*'
-            , width: '100%'
-            , allowClear: true
-        })
+                placeholder: 'Select Note ID(s)'
+                , width: '100%'
+                , allowClear: true
+            })
+            
+            $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider'
+                , width: '100%'
+                , allowClear: true
+            })
         
 
     })

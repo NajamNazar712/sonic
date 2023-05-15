@@ -5873,7 +5873,15 @@ class ReturnController extends Controller
         $startOfYear = Carbon::now()->startOfYear();
         $receive_notes_id = DB::table('return_notes')->whereDate('created_at', '>',$startOfYear)
         ->orderBy('id', 'DESC')->get();
-        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id]);
+        $riders = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
+            ->whereDate('return_notes.created_at', '>', $startOfYear)
+            ->select('riders.name as rider',  'riders.trax_id as riderID')
+            ->distinct()->get();
+
+        // dd($receive_notes_id, $riders);
+        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id, 'riders' => $riders]);
     }
 
 
@@ -5904,6 +5912,10 @@ class ReturnController extends Controller
         $return_note_numbers = $request->get('return_note_number');
         if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
             $datatables->whereIn('rns.return_note_id', $return_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $datatables->where('riders.trax_id', $rider_id);
         }
 
         return $datatables->make(true);
