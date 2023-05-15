@@ -654,7 +654,7 @@ $roles = explode("," , $settings->text);
                                                 Deliveries</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(566, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(860, session('permissions')))
                                     <li><a class="menu-item"
                                             href="{{ route('admin.return.return_shipments.index') }}">Return
                                             Shipments</a></li>
