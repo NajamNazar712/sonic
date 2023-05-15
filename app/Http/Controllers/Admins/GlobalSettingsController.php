@@ -7787,6 +7787,8 @@ class GlobalSettingsController extends Controller
 
     public function debriefing_role_setting_index()
     {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 654);
         $roles = DB::table('admin_roles')->get();
         $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
 
