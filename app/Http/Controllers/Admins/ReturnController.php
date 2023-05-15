@@ -5871,7 +5871,8 @@ class ReturnController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
         $startOfYear = Carbon::now()->startOfYear();
-        $receive_notes_id = DB::table('return_notes')->whereDate('created_at', '>',$startOfYear)->get();
+        $receive_notes_id = DB::table('return_notes')->whereDate('created_at', '>',$startOfYear)
+        ->orderBy('id', 'DESC')->get();
         return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id]);
     }
 
@@ -5886,7 +5887,7 @@ class ReturnController extends Controller
         $shipments = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
-            ->whereDate('delivery_notes.created_at', '>', $startOfYear)
+            ->whereDate('return_notes.created_at', '>', $startOfYear)
             ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
 
 

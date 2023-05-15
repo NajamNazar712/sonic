@@ -9407,7 +9407,8 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 650);
         $startOfYear = Carbon::now()->startOfYear();
-        $delivery_notes_id = DB::table('delivery_notes')->whereDate('created_at', '>',$startOfYear)->get();
+        $delivery_notes_id = DB::table('delivery_notes')->whereDate('created_at', '>',$startOfYear)
+        ->orderBy('id', 'DESC')->get();
         return view('admin.delivery.delivery_shipments.index')->with(['delivery_notes_id' => $delivery_notes_id]);
     }
 
