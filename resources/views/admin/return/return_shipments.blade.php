@@ -206,7 +206,7 @@
                     {
                         extend: 'excel',
                         className: 'd-none',
-                        title: 'Return Note Shipment',
+                        title: 'Return Note Shipments',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
                 ],
