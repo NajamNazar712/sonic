@@ -5882,9 +5882,11 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 653);
         }
 
-        $shipments = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
-            ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
-            ->join('shipments as sh', 'sh.id', '=', 'return_notes.id')
+        $startOfYear = Carbon::now()->startOfYear();
+        $shipments = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'return_notes.id')
+            ->whereDate('delivery_notes.created_at', '>', $startOfYear)
             ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
 
 
