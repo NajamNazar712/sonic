@@ -5871,7 +5871,7 @@ class ReturnController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
         $startOfYear = Carbon::now()->startOfYear();
-        $receive_notes_id = DB::table('return_notes')->whereDate('created_at',$startOfYear)->get();
+        $receive_notes_id = DB::table('return_notes')->whereDate('created_at', '>',$startOfYear)->get();
         return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id]);
     }
 
