@@ -197,6 +197,7 @@
                 buttons: [
                     {
                         extend: 'excel',
+                        className: 'd-none',
                         title: 'Deliveries Note Shipment',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
@@ -233,6 +234,9 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                
+                    if(data)
+                        $(".buttons-excel").removeClass("d-none");
                 },
 
                 // drawCallback: function (settings) {

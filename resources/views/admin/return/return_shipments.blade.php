@@ -190,6 +190,7 @@
             });
 
         var table = $('#datatable').DataTable({
+                
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: false, scrollY: '500px',
                 
@@ -204,6 +205,7 @@
                 buttons: [
                     {
                         extend: 'excel',
+                        className: 'd-none',
                         title: 'Return Note Shipment',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
@@ -239,6 +241,9 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    if(data)
+                        $(".buttons-excel").removeClass("d-none");
                 },
 
                 // drawCallback: function (settings) {
