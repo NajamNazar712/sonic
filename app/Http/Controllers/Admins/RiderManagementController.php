@@ -1452,4 +1452,11 @@ class RiderManagementController extends Controller
         return back()->with(['success'=>"Rider OTP Updated Successfully"]);
     }
 
+
+
+    public function rider_remarks_index()
+    {
+        dd(1);
+    }
+
 }
