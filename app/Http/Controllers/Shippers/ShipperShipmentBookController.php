@@ -2867,7 +2867,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
-
+            $spreadsheet[1][1] = 'Yes'; //Added Forcefully yes while the shipper insert no, 
             $excel_type = $request->excel_type;
 
             $column_count = null;
@@ -2927,7 +2927,7 @@ class ShipperShipmentBookController extends Controller
             }
             unset($spreadsheet[0]);
         }
-
+     
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
             $rows = array();
 
