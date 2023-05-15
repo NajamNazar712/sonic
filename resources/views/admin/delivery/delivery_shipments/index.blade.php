@@ -38,7 +38,7 @@
                     <th class="border-primary border-darken-1">S No.</th>
                     <th class="border-primary border-darken-1">Delivery Note No.</th>
                     <th class="border-primary border-darken-1">Rider ID</th>
-                    <th class="border-primary border-darken-1">Rider Name</th>
+                    <th class="border-primary border-darken-1">Rider</th>
                     <th class="border-primary border-darken-1">Tracking Number</th>
                     <th class="border-primary border-darken-1">Created At</th>
                 </tr>
@@ -225,7 +225,7 @@
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
                     {data: 'riderID', name: 'riders.id', class: 'align-middle riderID'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number', name: 'sh.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle created_at'},
 
                   
@@ -255,7 +255,7 @@
             $('#search_filter_btn').on('click',function () {
                 let delivery_note = $('#scan_delivery_note').val()
                 if(delivery_note.length == 0 ){
-                    var error = "Please add one delivery note at least";
+                    var error = "Please select at least one delivery note id";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -265,7 +265,7 @@
 
 
             $('#scan_delivery_note').select2({
-            placeholder: 'Select Note ID'
+            placeholder: 'Select Note ID(s)*'
             , width: '100%'
             , allowClear: true
         })
