@@ -2070,7 +2070,9 @@ class AdminCargoManifestController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 404);
         $shipping_mode = ShippingMode::all();
         $bag_status = CargoManifestBagStatus::all();
-        return view('admin.cargo.manifest.index')->with(['shipping_mode' => $shipping_mode, 'bag_status' => $bag_status]);
+        $hubs = City::where('status','1')->where('business_category_id','1')->where('hub','1')->select('id','name')->get();
+
+        return view('admin.cargo.manifest.index')->with(['shipping_mode' => $shipping_mode, 'bag_status' => $bag_status, 'hubs'=>$hubs]);
     }
 
     public function manifest_list(Request $request)
@@ -2101,7 +2103,6 @@ class AdminCargoManifestController extends Controller
             ->where(function ($query) {
                 $query->where('cargo_manifest_bags.shipments', '!=', DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'))
                     ->orWhere('cargo_manifest_bags.completed', 0);
-                
             });
 
 
@@ -2216,9 +2217,28 @@ class AdminCargoManifestController extends Controller
                 $datatables->where('cm.vehicle_number', 'like', '%' . $vehicle_number . '%');
             }
         }
+
         if ($manifest_id = $request->get('manifest_number')) {
             $datatables->where('cm.id', '=', $manifest_id);
         }
+
+        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+            $datatables->whereBetween('cmbj.created_at', [$from, $stop_date]);
+        }
+
+        if ($search_origin = $request->get('search_origin')) {
+            $datatables = $datatables->where('oh.id', '=', $search_origin);
+        }
+
+        if ($search_destination = $request->get('search_destination')) {
+            $datatables = $datatables->where('dh.id', '=', $search_destination);
+        }
+
+
+		
 
         return $datatables->make(true);
     }

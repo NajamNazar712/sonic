@@ -970,7 +970,7 @@ class NotificationsController extends Controller
                     if ($delivery_note->special_rider) {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
-                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->special_rider_phone), $body);
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->special_rider_name), 0, 20), $body);
                             } else {
                                 $body = str_replace('[rider]', '', $body);
                             }
@@ -978,7 +978,7 @@ class NotificationsController extends Controller
                     } else {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
-                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20) . ' ' . str_replace('-', '', $delivery_note->rider->phone), $body);
+                                $body = str_replace('[rider]', substr(preg_replace('/[^A-Za-z0-9 ]/', '', $delivery_note->rider->name), 0, 20), $body);
                             } else {
                                 $body = str_replace('[rider]', '', $body);
                             }

@@ -7629,8 +7629,10 @@ class GlobalSettingsController extends Controller
     public function star_shippers_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
-        $shippers = User::whereNull('disable_at')
-        ->get();
+        $shippers = User::where('status','=',3)
+            ->where('blacklist',0)
+            //->whereNull('disable_at')
+            ->get();
         return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
     }
 
@@ -7780,6 +7782,44 @@ class GlobalSettingsController extends Controller
             }
             return redirect()->back()->with('success', 'Settings Updated!');
         }
+    }
+
+
+    public function debriefing_role_setting_index()
+    {
+        $roles = DB::table('admin_roles')->get();
+        $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
+
+        if(!isset($settings)){
+            return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles]);
+        }else{
+            $role = explode(',',$settings->text);
+            $selected_roles = DB::table('admin_roles')->whereIn('id',$role)->pluck('id')->toArray();
+            return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles, 'selected_roles'=>$selected_roles]);
+        }
+    }
+
+
+    public function debriefing_role_setting_update(Request $request)
+    {
+        if($request->has('roles')){
+            $roles = implode(',', $request->roles);
+            $settings = GlobalSettings::where('type', 'debriefing_role_setting');
+
+            if ($settings->exists()) {
+                $settings = $settings->first();
+            }else{
+                $settings = new GlobalSettings();
+                $settings->type = 'debriefing_role_setting';
+                $settings->setting_value = 1;
+
+            }
+            $settings->text = $roles;
+            $settings->save();
+        }else{
+            GlobalSettings::where('type', 'debriefing_role_setting')->delete();
+        }
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 
 }
