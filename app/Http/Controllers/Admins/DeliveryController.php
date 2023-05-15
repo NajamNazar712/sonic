@@ -383,7 +383,7 @@ class DeliveryController extends Controller
         if (session('role_id') == 1) {
             $operation_rider_category = OperationRidersCategory::all();
         } else {
-            $operation_rider_category = OperationRidersCategory::where('id', 2)->get();
+            $operation_rider_category = OperationRidersCategory::all();
         }
         $settings = GlobalSettings::where('type', 'rider_otp');
         if ($settings->exists()) {
@@ -1080,7 +1080,6 @@ class DeliveryController extends Controller
         }
     }
 
-
     public function delivery_note_receive_index()
     {
 
@@ -1256,9 +1255,9 @@ class DeliveryController extends Controller
 
 
                     if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
-                        if (session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)) {
+//                         if(session('role_id') == 1 || !($result->operation_rider_id == 1 && $result->rider_type_id == 1)){
                             $dropdown .= $receive_button;
-                        }
+//                         }
                     }
                     $rider_check = true;
                     if ($result->operation_rider_id == 1) {
@@ -1338,11 +1337,11 @@ class DeliveryController extends Controller
             }
             $rider_check = true;
             $rider = Rider::find($delivery_note->rider_id);
-            if ($rider->operation_rider_id == 1) {
-                if ($rider->rider_type_id == 1) {
+            /*if($rider->operation_rider_id == 1){
+                if($rider->rider_type_id == 1){
                     $rider_check = false;
                 }
-            }
+            }*/
             if (($delivery_note->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(304, session('permissions'))) && $rider_check) {
                 if (DeliveryNoteShipment::where('delivery_note_id', $id)->where('status', '>', 0)->count() == 0) {
                     $service_type = BookingType::all();
