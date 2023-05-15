@@ -9420,7 +9420,7 @@ class DeliveryController extends Controller
         $startOfYear = Carbon::now()->startOfYear();
         $shipments = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
-            ->leftjoin('shipments as sh', 'sh.id', '=', 'delivery_notes.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'dns.shipment_id')
             ->whereDate('delivery_notes.created_at', '>', $startOfYear)
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as excel_delivery_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'delivery_notes.created_at as created_at']);
 
