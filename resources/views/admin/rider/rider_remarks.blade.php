@@ -26,6 +26,8 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated At</th>
+                        <th class="border-primary border-darken-1">Action</th>
+
 
                     </tr>
                     </thead>
@@ -121,7 +123,7 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
-    {{-- <script type="text/javascript">
+    <script type="text/javascript">
         $(document).ready(function () {
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -135,36 +137,33 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Request Note No.');
+                            head.push('Rider Name');
+                            head.push('Trax ID');
+                            head.push('City');
                             head.push('Hub');
                             head.push('Zone');
-                            head.push('Rider');
-                            head.push('Rider Type');
-                            head.push('Route');
-                            head.push('No. Of Shipments');
-                            // head.push('Total COD');
-                            head.push('Requested At');
-                            head.push('Last Updated By');
-                            head.push('Last Updated (Date)');
+                            head.push('Created At');
+                            head.push('Status');
+                            head.push('Updated By');
+                            head.push('Updated At');
 
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.request_note_id_padded);
+                                row.push(values.rider_name);
+                                row.push(values.traxID);
+                                row.push(values.city_name);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
-                                row.push(values.rider);
-                                row.push(values.rt);
-                                row.push(values.route);
-                                row.push(values.shipments_count);
-                                // row.push(values.amount);
+                                row.push(values.created_at);
+                                row.push(values.status);
                                 row.push(values.date);
-                                row.push(values.admin_name);
                                 row.push(values.updated_at);
+                                row.push(values.updated_by);
                                 body.push(row);
                             });
                         },
-                        url: '{{ route('admin.return.rider_request.list') }}',
+                        url: '{{ route('admin.management.riders.rider_remarks.list') }}',
                         data: params,
                         async: false
                     });
@@ -175,7 +174,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
+                scrollX: false, scrollY: '500px',
                 buttons: [
                     {
                         extend: 'excel',
@@ -193,7 +192,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.return.rider_request.list') }}',
+                    url: '{{ route('admin.management.riders.rider_remarks.list') }}',
                     data: function (d) {
                         d.return_note_number = $('#scan_return_note').val();
                         d.search_tracking = $('#search_tracking').val();
@@ -212,17 +211,15 @@
                             return '';
                         }
                     },
-                    {data: 'request_note_id_padded', name: 'rider_return_note_requests.id', class: 'align-middle request_note'},
-                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                    {data: 'rider_name', name: 'r.name', class: 'align-middle hub'},
+                    {data: 'traxID', name: 'r.trax_id', class: 'align-middle rider'},
+                    {data: 'city_name', name: 'city.name', class: 'align-middle rider_types'},
+                    {data: 'hub', name: 'c.name', class: 'align-middle route', orderable: false},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                    {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
-                    {data: 'route', name: 'route', class: 'align-middle route', orderable: false},
-                    {data: 'shipments_count_link',name: 'return_notes.shipments_count',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
-                    // {data: 'amount', name: 'rider_return_note_requests.total_cod_amount', class: 'align-middle amount'},
-                    {data: 'date', name: 'rider_return_note_requests.created_at', class: 'align-middle date'},
-                    {data: 'admin_name', name: 'ad.name', class: 'align-middle admin_name'},
-                    {data: 'updated_at', name: 'rider_return_note_requests.updated_at', class: 'align-middle updated_at'},
+                    {data: 'created_at',name: 'rider_remarks.created_at',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
+                    {data: 'status', name: 'rider_remarks.rider_remarks_status_id', class: 'align-middle date'},
+                    {data: 'updated_by', name: 'rider_remarks.updated_by', class: 'align-middle admin_name'},
+                    {data: 'updated_at', name: 'rider_remarks.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function (row, data, index) {
@@ -242,7 +239,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_count_link')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }  else {
                             var current = $(input).appendTo($(search)).on('change', function () {
@@ -296,7 +293,7 @@
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.return.rider_request.shipments') !!}',
+                    url: '{!! route('admin.management.riders.rider_remarks.list') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -442,5 +439,5 @@
             }
 
         });
-    </script> --}}
+    </script>
 @endsection

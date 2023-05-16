@@ -1467,13 +1467,12 @@ class RiderManagementController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),657);
         }
-        $rider_remarks = RiderRemark::leftJoin('rider as r', 'r.id', '=', 'rider_remarks.rider_id')
-        ->leftJoin('cities as city','r.id', '=', 'city.id')
+        $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
+        ->leftJoin('cities as city','r.city_id', '=', 'city.id')
+        ->leftJoin('cities as c','city.hub_id','=','c.id')
         ->leftjoin('zones as z','city.zone_id','=','z.id')
-        ->select('r.name as rider_name','r.id as id', 'r.trax_id as traxID','z.name as zone_name','rider_remarks.');
+        ->select('r.name as rider_name','r.id as id', 'r.trax_id as traxID','city.name as city_name','c.name as hub','z.name as zone_name','rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at');
 
-
-    
         return Datatables::of($rider_remarks)
             ->editColumn('status', function ($rider_remarks) {
                 return ($rider_remarks->status == 1) ? 'In Process' : 'Resolved';
