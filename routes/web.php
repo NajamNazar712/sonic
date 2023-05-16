@@ -1382,6 +1382,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipments')->name('delivery_shipments.')->group(function () {
             Route::get('', 'Admins\DeliveryController@shipment_index')->name('index');
             Route::get('list', 'Admins\DeliveryController@shipment_list')->name('list');
+            Route::get('notes', 'Admins\DeliveryController@delivery_notes_list')->name('notes');
 
         });
 
@@ -1531,6 +1532,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_shipments')->name('return_shipments.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_shipments_index')->name('index');
             Route::get('list', 'Admins\ReturnController@return_shipments_list')->name('list');
+            Route::get('notes', 'Admins\ReturnController@return_notes_list')->name('notes');
         });
 
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {

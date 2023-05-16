@@ -9406,14 +9406,18 @@ class DeliveryController extends Controller
     public function shipment_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 650);
-        $startOfYear = Carbon::now()->startOfYear();
-        $delivery_notes_id = DB::table('delivery_notes')->whereDate('created_at', '>',$startOfYear)
+        $delivery_note_id = 1282681;
+
+        $delivery_notes_id = DB::table('delivery_notes')
+        // ->whereDate('id', '>',$delivery_note_id) //open for production
+        ->select("id")
+        ->selectRaw("LPAD(id, 6, '0') as delivery_note_id_padded")
         ->orderBy('id', 'DESC')->get();
 
         $riders = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
         ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
         ->leftjoin('shipments as sh', 'sh.id', '=', 'dns.shipment_id')
-        ->whereDate('delivery_notes.created_at', '>', $startOfYear)
+        // ->whereDate('delivery_notes.id', '>', $delivery_note_id) //open for production
         ->select('riders.name as rider',  'riders.trax_id as riderID')
         ->distinct()->get();
         return view('admin.delivery.delivery_shipments.index')->with(['delivery_notes_id' => $delivery_notes_id, 'riders' => $riders]);
@@ -9425,11 +9429,11 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 651);
         }
 
-        $startOfYear = Carbon::now()->startOfYear();
+        $delivery_note_id = 1282681;
         $shipments = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'dns.shipment_id')
-            ->whereDate('delivery_notes.created_at', '>', $startOfYear)
+            // ->whereDate('delivery_notes.id', '>', $delivery_note_id) //open for production
             ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as excel_delivery_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'delivery_notes.created_at as created_at']);
 
         $datatables = Datatables::of($shipments)
@@ -9452,5 +9456,24 @@ class DeliveryController extends Controller
         }
 
         return $datatables->make(true);
+    }
+
+    public function delivery_notes_list(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        if($rider_id){
+            $receive_notes_id = DB::table('delivery_notes')
+            ->leftjoin('riders', 'riders.id', 'delivery_notes.rider_id' )
+            ->select('delivery_notes.id')
+            ->selectRaw("LPAD(delivery_notes.id, 6, '0') as delivery_note_id_padded")
+            ->where('riders.trax_id', $rider_id)
+            // ->whereDate('return_notes.id', '>', $receive_note_id) //open for production
+            ->orderBy('delivery_notes.id', 'DESC')->get();
+
+            return response()->json(['status' => true, 'receive_notes_ids'=> $receive_notes_id]);
+        } else {
+
+            return response()->json(['status' => false, 'message' => 'Selected rider data not found']);
+        }
     }
 }

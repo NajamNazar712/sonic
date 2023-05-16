@@ -14,28 +14,25 @@
 
 
             <div class="row mb-2 justify-content-center">
-
-                    <div class="col-4 form-group">
-                        <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($receive_notes_id as $receive_note_id)
-                            <option value="{{$receive_note_id->id}}">{{$receive_note_id->id}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-4 form-group">
-                        <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($riders as $rider)
-                            <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-2 mb-3">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
+                <div class="col-4 form-group">
+                    <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
+                        @endforeach
+                    </select>
                 </div>
-                
+                <div class="col-4 form-group">
+                    <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($receive_notes_id as $receive_note_id)
+                        <option value="{{$receive_note_id->id}}">{{$receive_note_id->return_note_id_padded}}</option>
+                        @endforeach
+                    </select>
+                    
+                </div>
+                <div class="col-2 mb-3">
+                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                </div>
+            
 
             </div>
 
@@ -125,38 +122,59 @@
     $(document).ready(function() {
 
         function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.return.receive.rn.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+            $.ajax({
+                url: '{!! route('admin.return.receive.rn.print') !!}',
+                method: 'POST',
+                data: {
+                    'id': id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+            .done(function(data) {
+                var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
+                if(!tab) {
+                    swal({
+                        title: 'Popup Blocker Enabled!',
+                        text: 'Please add this site to your exception list.',
+                        icon: 'error',
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
                     });
-            }
-            $('body').on('click', '.printreturnnote', function() {
-                var returnnote = $(this).attr('data-id');
-                print(returnnote)
-                // console.log(returnnote);
+                }
+                else {
+                    tab.document.write(data);
+                    tab.document.close();
+                    tab.focus();
+                }
             });
+        }
+        $('body').on('click', '.printreturnnote', function() {
+            var returnnote = $(this).attr('data-id');
+            print(returnnote)
+            // console.log(returnnote);
+        });
+        $('#rider').on('change', function() {
+            var rider_id = $(this).val();
+            $.ajax({
+                url: '{!! route('admin.return.return_shipments.notes') !!}',
+                method: 'GET',
+                data: {
+                    'rider_id': rider_id,
+                }
+            })
+            .done(function(data) {
+                console.log(data);
+                $("#scan_return_note").empty();
+                let options = "";
+                data.receive_notes_ids.forEach(p => {
+                    options += `<option value="${p.id}">${p.return_note_id_padded}</option>`;
+                })
+                $('#scan_return_note').append(options);
+                
+            });
+            
+        });
        
 
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {

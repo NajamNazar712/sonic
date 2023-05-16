@@ -14,29 +14,25 @@
 
 
             <div class="row mb-2 justify-content-center">
-
-                    <div class="col-4 form-group">
-                        <select name="scan_delivery_note[]" id="scan_delivery_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($delivery_notes_id as $delivery_note_id)
-                            <option value="{{$delivery_note_id->id}}">{{$delivery_note_id->id}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-4 form-group">
-                        <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($riders as $rider)
-                            <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-2 mb-3">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
+                <div class="col-4 form-group">
+                    <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
+                        @endforeach
+                    </select>
+                    
                 </div>
-                
-
+                <div class="col-4 form-group">
+                    <select name="scan_delivery_note[]" id="scan_delivery_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($delivery_notes_id as $delivery_note_id)
+                        <option value="{{$delivery_note_id->id}}">{{$delivery_note_id->id}}</option>
+                        @endforeach
+                    </select>
+                    
+                </div>
+                <div class="col-2 mb-3">
+                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                </div>
             </div>
 
 
@@ -152,6 +148,27 @@
                     }
                 });
         }
+        $('#rider').on('change', function() {
+            var rider_id = $(this).val();
+            $.ajax({
+                url: '{!! route('admin.delivery.delivery_shipments.notes') !!}',
+                method: 'GET',
+                data: {
+                    'rider_id': rider_id,
+                }
+            })
+            .done(function(data) {
+                console.log(data);
+                $("#scan_delivery_note").empty();
+                let options = "";
+                data.receive_notes_ids.forEach(p => {
+                    options += `<option value="${p.id}">${p.delivery_note_id_padded}</option>`;
+                })
+                $('#scan_delivery_note').append(options);
+                
+            });
+            
+        });
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
