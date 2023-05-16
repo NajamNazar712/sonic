@@ -1468,8 +1468,10 @@ class RiderManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),657);
         }
         $rider_remarks = RiderRemark::leftJoin('rider as r', 'r.id', '=', 'rider_remarks.rider_id')
-        ->leftJoin('cities as city','r.id', '=', 'city.id');
-      
+        ->leftJoin('cities as city','r.id', '=', 'city.id')
+        ->leftjoin('zones as z','city.zone_id','=','z.id')
+        ->select('r.name as rider_name','r.id as id', 'r.trax_id as traxID','z.name as zone_name','rider_remarks.');
+
 
     
         return Datatables::of($rider_remarks)
