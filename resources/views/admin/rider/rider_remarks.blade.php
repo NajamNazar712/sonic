@@ -12,16 +12,68 @@
                 @include('admin.inc.messages')
 
 
+                <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="col-3 mt-1">
+                        <div class="form-group input-group ">
+                            <div class="input-group-prepend">
+                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                            <span class="la la-calendar-o"></span>
+                        </span>
+                            </div>
+                            <input type="text" name="search_date_from"
+                                   class="form-control pickadate bg-primary border-primary white rounded-right"
+                                   id="search_date_from" placeholder="Select From Date">
+                        </div>
+                    </div>
+                    <div class="col-3 mt-1">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                            <span class="la la-calendar-o"></span>
+                        </span>
+                            </div>
+                            <input type="text" name="search_date_to"
+                                   class="form-control pickadate bg-primary border-primary white rounded-right"
+                                   id="search_date_to" placeholder="Select To Date">
+                        </div>
+                    </div>
+
+                    <div class="col-3 mt-1">
+
+                        <select name="search_city" id="search_city" class="form-control select2 col-4">
+                            @foreach($cities as $city)
+                                <option value="{{$city->id}}">{{$city->name}}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    
+                    <div class="col-4 mt-1">
+                        <div class="form-group">
+                            <button type="button" id="search_filter_btn"
+                                    class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+                    
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Rider Remarks ID</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Trax ID</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Rider Remarks</th>
+                        <th class="border-primary border-darken-1">Response</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
@@ -64,7 +116,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -119,12 +172,56 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
             type="text/javascript"></script>
 
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+       <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'City',
+            allowClear:true
+        })
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
+
+
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -137,11 +234,14 @@
                             head = [];
 
                             head.push('S.No');
+                            head.push('Rider Remarks ID');
                             head.push('Rider Name');
                             head.push('Trax ID');
                             head.push('City');
                             head.push('Hub');
                             head.push('Zone');
+                            head.push('Rider Remarks');
+                            head.push('Response');
                             head.push('Created At');
                             head.push('Status');
                             head.push('Updated By');
@@ -150,11 +250,14 @@
                             $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.id);
                                 row.push(values.rider_name);
                                 row.push(values.traxID);
                                 row.push(values.city_name);
                                 row.push(values.hub);
                                 row.push(values.zone_name);
+                                row.push(values.rider_remarks);
+                                row.push(values.response);
                                 row.push(values.created_at);
                                 row.push(values.status);
                                 row.push(values.date);
@@ -178,7 +281,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending Return Note Requests',
+                        title: 'Rider Remarks',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
@@ -194,11 +297,12 @@
                 ajax: {
                     url: '{{ route('admin.management.riders.rider_remarks.list') }}',
                     data: function (d) {
-                        d.return_note_number = $('#scan_return_note').val();
-                        d.search_tracking = $('#search_tracking').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_city = $('#search_city').val();
                     }
                 },
-                rowId: 'request_note_id',
+                rowId: 'rider_remarks.id',
                 order: [[9, 'desc']],
                 columns: [
                     {
@@ -211,14 +315,17 @@
                             return '';
                         }
                     },
-                    {data: 'rider_name', name: 'r.name', class: 'align-middle hub'},
-                    {data: 'traxID', name: 'r.trax_id', class: 'align-middle rider'},
-                    {data: 'city_name', name: 'city.name', class: 'align-middle rider_types'},
-                    {data: 'hub', name: 'c.name', class: 'align-middle route', orderable: false},
+                    {data: 'id', name: 'rider_remarks.id', class: 'align-middle hub'},
+                    {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
+                    {data: 'traxID', name: 'r.trax_id', class: 'align-middle traxID'},
+                    {data: 'city_name', name: 'city.name', class: 'align-middle city_name'},
+                    {data: 'hub', name: 'c.name', class: 'align-middle hub', orderable: false},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'created_at',name: 'rider_remarks.created_at',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
-                    {data: 'status', name: 'rider_remarks.rider_remarks_status_id', class: 'align-middle date'},
-                    {data: 'updated_by', name: 'rider_remarks.updated_by', class: 'align-middle admin_name'},
+                    {data: 'rider_remarks', name: 'rider_remarks.rider_remarks', class: 'align-middle rider_remarks'},
+                    {data: 'response', name: 'rider_remarks.response', class: 'align-middle response'},
+                    {data: 'created_at',name: 'rider_remarks.created_at',class: 'align-middle created_at text-center',orderable: false, searchable: false},
+                    {data: 'status', name: 'rider_remarks.rider_remarks_status_id', class: 'align-middle status'},
+                    {data: 'updated_by', name: 'rider_remarks.updated_by', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'rider_remarks.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
@@ -255,188 +362,7 @@
                 }
             });
 
-            $('#otp_input').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'mask': '999999'
-            });
-
-            /*$('body').on('click', '.printreturnnote', function () {
-                var returnnote = $(this).parents('tr').attr('id');
-                print(returnnote);
-            });
-            $('body').on('click', '.printTempDNCC', function () {
-                var note_id = $(this).parents('tr').attr('id');
-                var temporary = 'temporary';
-                printTemp(note_id, temporary);
-            });
-            $('body').on('click', '.printUndeliveredDNCC', function () {
-                var note_id = $(this).parents('tr').attr('id');
-                printUndelivered(note_id);
-            });
-            $('body').on('keyup change', '#otp_input', function () {
-                if ($(this).val().length === 6) {
-                    $('#otp_submit').attr('disabled', false);
-                } else {
-                    $('#otp_submit').attr('disabled', true);
-                }
-            });*/
-
-
-            var route = '{!! route('admin.tracking.index') !!}';
-
-            $('#datatable tbody').on('click', 'tr td.shipments_count_link button', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
-
-                $.ajax({
-                    url: '{!! route('admin.management.riders.rider_remarks.list') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'request_note_id': id
-                    }
-                })
-                    .done(function (data) {
-                        if (data) {
-                            var html = '';
-
-                            if (data.shipments) {
-                                $.each(data.shipments, function (index, tracking_number) {
-                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
-
-            });
-
-            $('#otp_submit').on('click', function () {
-                otp_verification();
-            });
-
-            $('#otp_input').keypress(function (event) {
-                if (event.keyCode == 13) {
-                    otp_verification();
-                }
-            });
-
-            function reassign_rider() {
-                var rider = $('#riders').val();
-                if (rider) {
-                    swal({
-                        text: 'Are you sure, you want to Reassign rider?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            $.ajax({
-                                url: '{!! route('admin.return.receive.reassign_rider') !!}',
-                                method: 'post',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'rider': rider,
-                                    'oper_id': $('#operation_rider_id').val(),
-                                    'return_note_id': $('#return_note_id').val()
-                                }
-                            })
-                                .done(function (data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                    table.draw(true);
-                                    $('#reassign_modal').modal('hide');
-                                });
-                        }
-                    });
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            }
-
-            function otp_generation() {
-                var rider = $('#riders').val();
-                // if (rider) {
-                //     $('#OtpModal').modal('show');
-                //     $.ajax({
-                //         url: '{!! route('admin.delivery.note.otp.generate') !!}',
-                //         method: 'POST',
-                //         data: {
-                //             'rider': rider,
-                //             '_token': '{{ csrf_token() }}'
-                //         }
-                //     }).done(function (data) {
-                //         $('#otp_input').focus();
-                //     });
-                // } else {
-                //     var error = "Rider not selected!";
-                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                // }
-            }
-
-            function otp_verification() {
-                var otp = $('#otp_input').val();
-                var rider = $('#riders').val();
-                if (rider) {
-                    // if (otp.length == 6) {
-                    //     $.ajax({
-                    //         url: '{!! route('admin.delivery.note.otp.verify') !!}',
-                    //         type: 'POST',
-                    //         data: {
-                    //             'rider': rider,
-                    //             'otp': otp,
-                    //             '_token': '{{ csrf_token() }}'
-                    //         }
-                    //     }).done(function (data) {
-                    //         $('#otp_input').val('');
-                    //         $('#otp_submit').attr('disabled', true);
-                    //         if (data.status === 0) {
-                    //             toastr.error(data.error, 'Error!', {
-                    //                 positionClass: 'toast-top-center',
-                    //                 containerId: 'toast-top-center'
-                    //             });
-                    //         } else {
-                    //             $('#OtpModal').modal('hide');
-                    //             reassign_rider();
-                    //         }
-                    //     });
-                    // }
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            }
+       
 
         });
     </script>

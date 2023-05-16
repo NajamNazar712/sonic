@@ -1458,7 +1458,8 @@ class RiderManagementController extends Controller
     public function rider_remarks_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(),656);
-        return view('admin.rider.rider_remarks');
+        $cities = City::where('status','1')->where('business_category_id','1')->select('id','name')->get();
+        return view('admin.rider.rider_remarks')->with(['cities'=>$cities]);
     }
 
     public function rider_remarks_list(Request $request)
@@ -1471,14 +1472,26 @@ class RiderManagementController extends Controller
         ->leftJoin('cities as city','r.city_id', '=', 'city.id')
         ->leftJoin('cities as c','city.hub_id','=','c.id')
         ->leftjoin('zones as z','city.zone_id','=','z.id')
-        ->select('r.name as rider_name','r.id as id', 'r.trax_id as traxID','city.name as city_name','c.name as hub','z.name as zone_name','rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at');
+        ->select(['r.name as rider_name','r.id as id', 'r.trax_id as traxID','city.id as city_id','city.name as city_name','c.name as hub','z.name as zone_name','rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at','rider_remarks.rider_remarks as rider_remarks','rider_remarks.response as response', 'rider_remarks.id as id']);
 
-        return Datatables::of($rider_remarks)
-            ->editColumn('status', function ($rider_remarks) {
-                return ($rider_remarks->status == 1) ? 'In Process' : 'Resolved';
+        $datatables = Datatables::of($rider_remarks)
+        ->editColumn('status', function ($rider_remarks) {
+            return ($rider_remarks->status == 1) ? 'In Process' : 'Resolved';
             })
+            
+            ->editColumn('id', function ($rider_remarks) {
+                return 'R-00'.$rider_remarks->id;
+            })
+
+            ->filterColumn('rider_remarks.id', function($query, $keyword) {
+                $keyword = str_replace('R-00', '', ($keyword));
+                if($keyword != ''){
+                    $query->where('rider_remarks.id', $keyword);
+                }
+            })
+            
             ->addColumn("action", function ($rider_remarks) {
-                if($rider_remarks->trax_id && $rider_remarks->trax_id != null){
+                if($rider_remarks->traxID && $rider_remarks->traxID != null){
                     if (session('role_id') == 1) {
                         $dropdown = '
                           <div class="btn-group">
@@ -1486,7 +1499,7 @@ class RiderManagementController extends Controller
                             <div class="dropdown-menu dropdown-menu-sm">
                         ';
                             if (session('role_id') == 1 || in_array(862, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_remarks->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_remarks->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Response</div></button>';
                             }
                         $dropdown .= '
                             </div>
@@ -1500,10 +1513,20 @@ class RiderManagementController extends Controller
                 } else {
                     return '';
                 }
-            })
-            ->make(true);
-    }
+            });
+        
+            if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $datatables->whereBetween('rider_remarks.created_at', [$from, $stop_date]);
+            }
 
-
+            if ($search_city = $request->get('search_city')) {
+                $datatables = $datatables->where('city_id', '=', $search_city);
+            }
+    
+            return $datatables->make(true);
+        }
 
 }
