@@ -4547,6 +4547,8 @@ class AdminAPIController extends Controller
                     $pickup_incentive = ($payslip->pickup_incentive != NULL) ? number_format($payslip->pickup_incentive) : '-';
                     $delivery_incentive = ($payslip->delivery_incentive != NULL) ? number_format($payslip->delivery_incentive) : '-';
                     $operations_incentive = ($payslip->operation_incentive != NULL) ? number_format($payslip->operation_incentive) : '-';
+                    $retail_incentive = ($payslip->retail_incentive != NULL) ? number_format($payslip->retail_incentive) : '-';
+                    $sales_incentive = ($payslip->sales_incentive != NULL) ? number_format($payslip->sales_incentive) : '-';
                     $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? number_format($payslip->extra_duty_allowance) : '-';
                     $others_addition = ($payslip->others_addition != NULL) ? number_format($payslip->others_addition) : '-';
 
@@ -4811,26 +4813,26 @@ class AdminAPIController extends Controller
                             <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
+                            <td colspan="2" class="border twice-right">Retail Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $retail_incentive .'</td>
                             <td colspan="2"  class="border twice-right">Penalty</td>
                             <td colspan="2"  class="border twice-right">' . $penalty . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Others Addition</td>
-                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2" class="border twice-right">Sales Incentive</td>
+                            <td colspan="2"  class="border twice-right">'. $sales_incentive .'</td>
                             <td colspan="2"  class="border twice-right">Medical Insurance</td>
                             <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right"></td>
+                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance  . '</td>
                             <td colspan="2"  class="border twice-right">Van Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right"></td>
-                            <td colspan="2"  class="border twice-right"></td>
+                            <td colspan="2" class="border twice-right">Others Addition</td>
+                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
                             <td colspan="2"  class="border twice-right">Others Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
                         </tr>
