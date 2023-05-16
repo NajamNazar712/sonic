@@ -281,7 +281,7 @@
                             head.push('Zone');
                             head.push('Business Category');
                             head.push('Rider');
-                            head.push('Rider Trax');
+                            head.push('Rider Trax ID');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
