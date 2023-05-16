@@ -47,6 +47,7 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Trax ID</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -280,6 +281,7 @@
                             head.push('Zone');
                             head.push('Business Category');
                             head.push('Rider');
+                            head.push('Rider Trax');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -303,6 +305,7 @@
                                 row.push(values.zone_name);
                                 row.push(values.business_category);
                                 row.push(values.rider);
+                                row.push(values.rider_trax_id);
                                 row.push(values.rt);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -375,6 +378,7 @@
                         class: 'align-middle business_category'
                     },
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
+                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
