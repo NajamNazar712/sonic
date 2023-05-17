@@ -563,6 +563,12 @@ $roles = explode("," , $settings->text);
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.delivery.history.index') }}">History</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(859, session('permissions')))
+                                    <li><a class="menu-item"
+                                            href="{{ route('admin.delivery.delivery_shipments.index') }}">Delivery Shipments</a></li>
+                                @endif
+
                                     @if (session('role_id') == 1 || in_array(441, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.delivery.signature.index') }}">Signature</a>
@@ -647,6 +653,13 @@ $roles = explode("," , $settings->text);
                                                 href="{{ route('admin.return.return_deliveries.index') }}">Return
                                                 Deliveries</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(860, session('permissions')))
+                                    <li><a class="menu-item"
+                                            href="{{ route('admin.return.return_shipments.index') }}">Return
+                                            Shipments</a></li>
+                                @endif
+
                                     @if (session('role_id') == 1 || in_array(600, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.rcp_agent.index') }}">RCP Agent

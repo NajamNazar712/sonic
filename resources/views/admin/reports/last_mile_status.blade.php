@@ -175,6 +175,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                min: new Date(2022, 0, 1),
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
                 },
@@ -192,6 +193,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                min: new Date(2022, 0, 1),
                 onOpen: function() {
                     $('#to_date_root').css('top', '40px');
                 },
