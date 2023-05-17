@@ -9315,7 +9315,9 @@ class DeliveryController extends Controller
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
-                                NotificationsController::send(12, $note->id, $shipment);
+                                $shipments_id = $shipment;
+                                $payment_link =  PayfastApiCall::ApiCall($shipments_id); 
+                                NotificationsController::send(12, $note->id, $shipment,$payment_link);
                             }
                         }
                     }
