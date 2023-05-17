@@ -899,6 +899,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
             });
 
+
+            Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
+                Route::get('', 'Admins\RiderManagementController@rider_remarks_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@rider_remarks_list')->name('list');
+            });
+            
+        
             Route::prefix('rider_request')->name('rider_request.')->group(function () {
                 Route::get('', 'Admins\RiderManagementController@rider_request_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');

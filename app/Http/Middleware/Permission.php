@@ -1345,6 +1345,9 @@ class Permission
 			'return.return_confirm_otp.index' => 849,
             'return.return_shipments.index'=> 860,
             'delivery.delivery_shipments.index'=> 859,
+        
+            'management.riders.rider_remarks.index'=>862,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
