@@ -17,8 +17,9 @@ class CreateRiderRemarksTable extends Migration
             $table->increments('id');
             $table->integer('rider_id')->index();
             $table->longText('rider_remarks');
-            $table->longText('response')->nullable();
+            $table->longText('response_1')->nullable();
             $table->integer('rider_remarks_status_id')->default(1);
+            $table->longText('response_2')->nullable();
             $table->integer('updated_by')->nullable()->index();
             $table->timestamps();
         });

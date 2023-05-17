@@ -6,9 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class RiderRemark extends Model
 {
+    protected $table = 'rider_remarks';
+    
     public function remark_statuses()
     {
-        return $this->hasMany('App\Http\Models\RiderRemark', 'id');
+        return $this->hasMany('App\Http\Models\Rider\RiderRemarkStatus','rider_remarks_status_id','id');
     }
 
     public function rider_id()
