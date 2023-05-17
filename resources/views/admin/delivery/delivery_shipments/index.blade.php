@@ -296,13 +296,13 @@
 
 
             $('#scan_delivery_note').select2({
-                placeholder: 'Select Note ID(s)*'
+                placeholder: 'Select Note ID(s)'
                 , width: '100%'
                 , allowClear: true
             })
 
             $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
-                placeholder: 'Select Rider'
+                placeholder: 'Select Rider*'
                 , width: '100%'
                 , allowClear: true
             })

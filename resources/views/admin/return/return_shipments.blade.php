@@ -310,7 +310,7 @@
             })
             
             $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
-                placeholder: 'Select Rider'
+                placeholder: 'Select Rider*'
                 , width: '100%'
                 , allowClear: true
             })

@@ -5904,11 +5904,13 @@ class ReturnController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
         $return_note_id = 237666;
-        $receive_notes_id = DB::table('return_notes')
-        // ->whereDate('id', '>',$return_note_id) //open for production
-        ->select("id")
-        ->selectRaw("LPAD(id, 6, '0') as return_note_id_padded")
-        ->orderBy('id', 'DESC')->get();
+        // $receive_notes_id = DB::table('return_notes')
+        // // ->whereDate('id', '>',$return_note_id) //open for production
+        // ->select("id")
+        // ->selectRaw("LPAD(id, 6, '0') as return_note_id_padded")
+        // ->orderBy('id', 'DESC')->get();
+        $receive_notes_id = [];
+
         $riders = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
@@ -5964,8 +5966,8 @@ class ReturnController extends Controller
             ->leftjoin('riders', 'riders.id', 'return_notes.rider_id' )
             ->select('return_notes.id')
             ->selectRaw("LPAD(return_notes.id, 6, '0') as return_note_id_padded")
-            ->where('riders.trax_id', $rider_id)
             // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+            ->where('riders.trax_id', $rider_id)
             ->orderBy('return_notes.id', 'DESC')->get();
 
             return response()->json(['status' => true, 'receive_notes_ids'=> $receive_notes_id]);
