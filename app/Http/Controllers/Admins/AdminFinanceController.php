@@ -891,7 +891,7 @@ class AdminFinanceController extends Controller
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
+            ->leftjoin('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
             ->leftJoin('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 's.id')
@@ -7140,7 +7140,7 @@ class AdminFinanceController extends Controller
                                 $invoice_shipment->type = $pending_invoice_shipment->type;
                                 $invoice_shipment->charges = $pending_invoice_shipment->charges;
                                 $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                                $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+                                $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
 
                                 $invoice_shipment->save();
 
@@ -7235,7 +7235,7 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->charges = $packaging_material_request->amount;
                             $invoice_shipment->gst = round($packaging_material_request->amount * $gst);
                             $invoice_amount = $packaging_material_request->amount + round($packaging_material_request->amount * $gst);
-                            $invoice_shipment->invoice_amount = $invoice_amount;
+                            $invoice_shipment->invoice_amount = round($invoice_amount);
 
                             $invoice_shipment->save();
 
@@ -12516,7 +12516,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment->type = $pending_invoice_shipment->type;
             $invoice_shipment->charges = $pending_invoice_shipment->charges;
             $invoice_shipment->gst = $pending_invoice_shipment->gst;
-            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+            $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
 
             $invoice_shipment->save();
 
