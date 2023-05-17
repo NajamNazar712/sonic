@@ -1448,7 +1448,12 @@ class ReturnController extends Controller
                     ->where('shj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12)'));
             })
-            ->leftjoin('riders as rider','rider.id','shj.rider_id')
+            ->leftJoin('shipments_journey as sjrider', function ($join) {
+                $join->on('sjrider.shipment_id', '=', 'shipments.id')
+                    ->where('sjrider.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.consignee_status_id = 12)'));
+            })
+            ->leftjoin('riders as rider','rider.id','sjrider.rider_id')
             ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id',
                 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking',
                 'u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address',
