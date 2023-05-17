@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Role Setting')
+@section('title', 'Caller Agent Role Assigning')
 
 @section('content')
 <div class="app-content content">
@@ -9,7 +9,7 @@
         </div>
         <div class="content-body">
             <h1 class="mb-1">
-                Role Setting
+                Caller Agent Role Assigning
             </h1>
             <div class="card">
                 <div class="card-content" aria-expanded="true">

@@ -7629,8 +7629,10 @@ class GlobalSettingsController extends Controller
     public function star_shippers_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
-        $shippers = User::whereNull('disable_at')
-        ->get();
+        $shippers = User::where('status','=',3)
+            ->where('blacklist',0)
+            //->whereNull('disable_at')
+            ->get();
         return view('admin.settings.star_shippers.index')->with(['shippers' => $shippers]);
     }
 
@@ -7785,13 +7787,15 @@ class GlobalSettingsController extends Controller
 
     public function debriefing_role_setting_index()
     {
-        $roles = DB::table('admin_roles')->whereIn('id',[18,49,26,21,100,32,103])->get();
-        $settings = GlobalSettings::where('type', 'debriefing_role_setting')->get();
 
-        if($settings->isEmpty()){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 654);
+        $roles = DB::table('admin_roles')->get();
+        $settings = GlobalSettings::where('type', 'debriefing_role_setting')->first();
+
+        if(!isset($settings)){
             return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles]);
         }else{
-            $role = explode(',',$settings[0]->text);
+            $role = explode(',',$settings->text);
             $selected_roles = DB::table('admin_roles')->whereIn('id',$role)->pluck('id')->toArray();
             return view('admin.settings.debriefing_role_setting')->with(['roles' => $roles, 'selected_roles'=>$selected_roles]);
         }

@@ -188,11 +188,14 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Delivery Note Date</th>
+                        <th class="border-primary border-darken-1">Trax IDs</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
                         <th class="border-primary border-darken-1">Update Via App</th>
                         <th class="border-primary border-darken-1">Update Via DBF</th>
+
+
                     </tr>
                     </thead>
 
@@ -501,6 +504,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Delivery Note Data');
+                            head.push('Trax IDs');
                             head.push('Rider Name');
                             head.push('Rider Category');
                             head.push('Total Shipment');
@@ -517,6 +521,7 @@
                                 row.push(values.city);
                                 row.push(values.zone);
                                 row.push(values.created_at);
+                                row.push(values.trax_id);
                                 row.push(values.rider);
                                 row.push(values.rider_cat);
                                 row.push(values.total_shipments);
@@ -532,6 +537,7 @@
 
                             footer.push('');
                             footer.push('Total');
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
@@ -599,11 +605,14 @@
                     {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'trax_id', name: 'r.trax_id', class: 'align-middle text-center trax_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'rider_cat', name: 'rd.name', class: 'align-middle text-center rider_cat'},
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false}
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
+
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
