@@ -5914,7 +5914,7 @@ class ReturnController extends Controller
         $riders = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
-            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+             ->whereDate('return_notes.id', '>', $return_note_id) //open for production
             ->select('riders.name as rider',  'riders.trax_id as riderID')
             ->distinct()->get();
 
@@ -5932,7 +5932,7 @@ class ReturnController extends Controller
         $shipments = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
             ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
-            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+             ->whereDate('return_notes.id', '>', $return_note_id) //open for production
             ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
 
 
@@ -5966,7 +5966,7 @@ class ReturnController extends Controller
             ->leftjoin('riders', 'riders.id', 'return_notes.rider_id' )
             ->select('return_notes.id')
             ->selectRaw("LPAD(return_notes.id, 6, '0') as return_note_id_padded")
-            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+            ->whereDate('return_notes.id', '>', $return_note_id) //open for production
             ->where('riders.trax_id', $rider_id)
             ->orderBy('return_notes.id', 'DESC')->get();
 
