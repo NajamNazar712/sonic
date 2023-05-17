@@ -14,7 +14,7 @@ class UpdateManifestBagShipmentsForMisrouteforwarded extends Seeder
      */
     public function run()
     {
-        $shipment_ids = array(23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938,23970938);
+        $shipment_ids = array(23996315,24001497,24049073,23998203,23970950,23848970,23959661,23783648,23894761,23919991,24013273,23809283,23919513,23956153,23936152,24014560,23715936,23903634,23900538,23994032,23936399,23794787);
 
         foreach ($shipment_ids as $shipment_id) {
 
@@ -25,10 +25,10 @@ class UpdateManifestBagShipmentsForMisrouteforwarded extends Seeder
                     if ($mis_fwd) {
                         $mis_fwd->delete();
                     }
-                    // $mis = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 11)->orderBy('id', 'desc')->first();
-                    // if ($mis) {
-                    //     $mis->delete();
-                    // }
+                    $mis = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 11)->orderBy('id', 'desc')->first();
+                    if ($mis) {
+                        $mis->delete();
+                    }
                     $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->orderBy('id', 'desc')->first();
                     Shipment::where('id', $shipment_id)->update(['shipper_status_id' => $journey->shipper_status_id, 'consignee_status_id' => $journey->consignee_status_id]);
                 }
