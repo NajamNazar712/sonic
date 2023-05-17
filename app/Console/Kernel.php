@@ -143,6 +143,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\VisionSoftApiExcel',
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
+        'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         ];
 
     /**

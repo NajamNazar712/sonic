@@ -2654,8 +2654,14 @@ $roles = explode("," , $settings->text);
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
-
-                        
+<!--                         add side bar-->
+                            @if (session('role_id') == 1 || in_array(698, session('permissions')))
+                                <li><a class="menu-item"
+                                       href="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.index') }}">
+                                        SMS Notification Return Delivered to shipper
+                                        </a>
+                                </li>
+                            @endif
 
                     </ul>
                 </li>

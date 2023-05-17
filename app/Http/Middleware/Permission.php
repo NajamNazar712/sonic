@@ -1344,6 +1344,8 @@ class Permission
     		'settings.auto_delivery_note_verification.index' => 836,
 			'reports.revenue_report_by_invoice.index' => 839,
 			'return.return_confirm_otp.index' => 849,
+            'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,

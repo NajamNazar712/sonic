@@ -10158,23 +10158,35 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);
                 }
 
-                else if( $id == 215){
-                // dd('hiiii');
-                    
+                else if( $id == 215) {
+                    // dd('hiiii');
+
                     $details = $reference_1_id;
                     $temp_emails = $reference_2_id;
                     $subject = $notification->subject;
                     $body = $notification->body;
 
                     if (strpos($body, '[preview]') !== FALSE) {
-                        $body = str_replace('[preview]', $details, $body);  
-                    }
-                    
-                    foreach($temp_emails as $temp_email)
-                    {
-                        self::email($subject, $body, $temp_email);
+                        $body = str_replace('[preview]', $details, $body);
                     }
 
+                    foreach ($temp_emails as $temp_email) {
+                        self::email($subject, $body, $temp_email);
+                    }
+                }
+                // Today work has been done
+                else if ($id == 216) {
+
+                    if (strpos($body, '[return_notes_id]') !== FALSE) {
+                        $body = str_replace('[return_notes_id]', $details, $body);
+                    }
+                    if (strpos($body, '[shipments_count]') !== FALSE) {
+                        $body = str_replace('[shipments_count]', $details, $body);
+                    }
+                    if (strpos($body, '[tracking_number]') !== FALSE) {
+                        $body = str_replace('[tracking_number]', $details, $body);
+                    }
+                    self::sms($body, $to);
                 }
 
             }
