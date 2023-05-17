@@ -1254,10 +1254,10 @@ $roles = explode("," , $settings->text);
                     @endif                
 
 
-                    @if (in_array(session('role_id'), [1,104,70,63,3,8,9,10,11,15,18,19,23,25,33,46,55,65,72,76,78,84,85,89,93,95,96]) || in_array(862, session('permissions')))
+                    {{-- @if (in_array(session('role_id'), [1,104,70,63,3,8,9,10,11,15,18,19,23,25,33,46,55,65,72,76,78,84,85,89,93,95,96]) || in_array(862, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Rider Remarks</span></a>
                         </li>
-                    @endif                
+                    @endif                 --}}
                 
                 </ul>
             </li>
