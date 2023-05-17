@@ -15,7 +15,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            <div class="row mt-2">
+                            {{-- <div class="row mt-2">
                                 <div class="card col-12">
                                     <div class="card-content collapse show">
                                         <div class="card-body">
@@ -44,6 +44,15 @@
                                                             @endforeach
                                                         </select>
                                                     </div>
+                                                    <div class="col-4">
+                                                        <fieldset class="form-group">
+                                                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </fieldset>
+                                                    </div>
                                                     <div class="form-group col">
                                                         <select name="search_sale_person" id="search_sale_person"
                                                                 class="select2 form-control">
@@ -61,6 +70,150 @@
                                         </div>
                                     </div>
                                 </div>
+                            </div> --}}
+                            <div class="row mb-2 justify-content-center">
+
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_destination" id="search_destination" class="form-control select2">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+            
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        {{-- <select name="search_hub" id="search_hub" class="form-control select2">
+                                            @foreach($hubs as $hub)
+                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                            @endforeach
+                                        </select> --}}
+                                        <select name="search_origin" id="search_origin" class="select2 form-control">
+                                            @foreach($cities as $city)
+                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+            
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_zone" id="search_zone" class="form-control select2">
+                                            @foreach($zones as $zone)
+                                                <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+            
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_case_nature" id="search_case_nature" class="form-control select2">
+                                            @foreach($case_natures as $case_nature)
+                                                <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+            
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                            @foreach($case_nature_types as $case_nature_type)
+                                                <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+            
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_agent" id="search_agent" class="form-control select2">
+                                            @foreach($agents as $agent)
+                                                <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="shipment_status" id="shipment_status" class="form-control select2">
+                                            @foreach($shipment_status as $status)
+                                            <option value="{{$status->id}}">{{$status->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+{{--             
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="shipment_status" id="shipment_status" class="form-control select2" multiple="multiple" >
+                                            @foreach($shipment_status as $status)
+                                                 <option value="{{$status->id}}">{{$status->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div> --}}
+            
+                                {{-- <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                            @foreach($shipping_modes as $shipping_mode)
+                                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                            @endforeach
+                                        </select>
+                                    </fieldset>
+                                </div>
+             --}}
+            
+                                <div class="col-4">
+                                    {{-- <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                        </div>
+                                        <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                                    </div> --}}
+                                </div>
+            
+            
+                                <div class="col-4">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                        </div>
+                                        <input type="text" name="from_date"
+                                               class="form-control bg-primary border-primary white rounded-right"
+                                               id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today() }}">
+                                    </div>
+            
+                                </div>
+            
+                                <div class="col-4">
+                                    <div class="form-group input-group">
+                                        <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o"></span>
+                                        </span>
+                                        </div>
+                                        <input type="text" name="to_date"
+                                               class="form-control bg-primary border-primary white rounded-right"
+                                               id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
+                                    </div>
+                                </div>
+            
+                                <div class="col-2">
+                                    <button type="button" id="search_filter_btn"
+                                            class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
+                                        Search
+                                    </button>
+                                </div>
+                                
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3" id="total_leads_div">
@@ -660,6 +813,51 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            // $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Search Shipping Mode',
+            //     width:'100%',
+            //     allowClear:true
+            // });
+            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Destination',
+                width:'100%',
+                allowClear:true
+            });
+            $("#search_origin").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Origin",
+                width: '100%'
+            });
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_agent').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Agent',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_case_nature').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Case Nature',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_case_nature_type').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Case Nature Type',
+                width:'100%',
+                allowClear:true
+            });
+            $('#shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipment Status',
+                width:'100%',
+                allowClear:true
+            });
+            // $('#search_status').select2({
+            //     placeholder:'Search CRM Status',
+            //     width:'100%',
+            //     allowClear:true
+            // })
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
                     body = [];
@@ -1224,13 +1422,13 @@
                         return obj;
                     });
 
-                    $('#shipment_status').prepend('<option value="" selected></option>').select2({
-                        data:data4,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $('#shipment_status').prepend('<option value="" selected></option>').select2({
+                    //     data:data4,
+                    //     placeholder: "Select Status",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
 
                     $('#added_by').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Launched By Type",

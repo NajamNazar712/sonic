@@ -27,6 +27,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Connection;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Admins\ActivityTrailController;
 
@@ -43,8 +44,8 @@ class CRMDashboardController extends Controller
 
     public function crm_dashboard_index(){
         // ActivityTrailController::createActivityTrailLog(Auth::id(),312);
-        $case_nature = CrmRequestCaseNature::select('id', 'name')->get();
-        $case_nature_type = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $case_natures = CrmRequestCaseNature::select('id', 'name')->get();
+        $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
@@ -58,6 +59,15 @@ class CRMDashboardController extends Controller
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
+        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        // $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
+        // $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
+        $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        
+
+
         //From Admin Leads 
         // $today = Carbon::now()->endOfDay();
         // $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
@@ -97,7 +107,7 @@ class CRMDashboardController extends Controller
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
 
-        return view('admin.crm.dashboard')->with(['case_nature' => $case_nature, 'case_nature_type' => $case_nature_type, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ]);
+        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ]);
     }
 
     public function crm_dashboard_list(Request $request){
