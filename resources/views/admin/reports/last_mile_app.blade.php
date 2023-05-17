@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Last Mile App ahad
+        Last Mile App
     </h1>
 
     <div class="card">
