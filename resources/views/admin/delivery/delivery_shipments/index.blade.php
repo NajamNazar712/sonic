@@ -286,7 +286,7 @@
                 let delivery_note = $('#scan_delivery_note').val()
                 let rider = $('#rider').val()
                 if(delivery_note.length == 0 && rider == ""){
-                    var error = "Please select at least one delivery note id OR rider";
+                    var error = "Please select rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
