@@ -3654,6 +3654,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\AdminCRMController@bulk_claim_submit')->name('submit');
             Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
         });
+        Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('', 'Admins\CRMDashboardController@crm_dashboard_index')->name('index');
+            Route::get('list', 'Admins\CRMDashboardController@crm_dashboard_list')->name('list');
+            // Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
+        });
+
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {

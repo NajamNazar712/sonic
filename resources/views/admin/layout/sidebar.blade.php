@@ -872,6 +872,9 @@ $roles = explode("," , $settings->text);
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-commenting-o"></i>CRM</span></a>
                     <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(795, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.crm.dashboard.index') }}">CRM Dashboard</a></li>
+                        @endif
                         @if (session('role_id') == 1 ||
                                 session('department_id') == 3 ||
                                 count(array_intersect([233, 234, 235, 236], session('permissions'))) !== 0)
@@ -906,6 +909,7 @@ $roles = explode("," , $settings->text);
                                 <li><a class="menu-item" href="{{ route('admin.crm.bulk_claim.index') }}">Bulk Claim
                                         Logging</a></li>
                             @endif
+                          
                         @endif
                     </ul>
                 </li>
