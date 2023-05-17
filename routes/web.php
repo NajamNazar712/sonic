@@ -2370,7 +2370,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::prefix('qsr')->name('qsr.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@qsr_list')->name('list');
         });
         Route::prefix('return_note')->name('return_note.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
