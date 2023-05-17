@@ -47,19 +47,18 @@ class NotificationReturnedDeliveredToShipper extends Command
 
         $start_date_formatted = $start_date->format('Y-m-d H:i:s.u');
         $end_date_formatted = $end_date->format('Y-m-d H:i:s.u');
-      /*  dd($start_date_formatted,$end_date_formatted );*/
 
         $users = User::join('shipments as shipp', 'shipp.user_id', '=', 'users.id')
             ->join('shipments_journey as shaj', 'shaj.shipment_id', '=', 'shipp.id')
             ->where('users.status', 3)
             ->where('shaj.shipper_status_id', 25)
-            ->whereBetween('shipp.created_at', [
+            ->whereBetween('shaj.created_at', [
                 $start_date_formatted,
                 $end_date_formatted
             ])
             ->get();
+             dd($users);
 
-        dd($users);
 
 
 
