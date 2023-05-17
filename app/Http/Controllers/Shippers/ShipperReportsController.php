@@ -12,6 +12,7 @@ use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -34,7 +35,20 @@ class ShipperReportsController extends Controller
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->select('id', 'mode')->get();
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-        return view('client.reports.sales_report')->with(['cities' => $cities, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'service_types' => $service_types]);
+
+        $user_id = session('user_id');
+        $merged_accounts = [];
+        $get_merged_head_id = MergedSisterAccount::where('user_id', $user_id)->first();
+        if($get_merged_head_id){
+            $merged_head_id =  $get_merged_head_id->merged_head_id;
+
+            $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
+                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+                ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+                ->where('merged_head_id', $merged_head_id)
+                ->get();
+        }
+        return view('client.reports.sales_report')->with(['cities' => $cities, 'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'service_types' => $service_types, 'merged_accounts'=>$merged_accounts]);
     }
     public function sales_list(Request $request)
     {
@@ -315,6 +329,9 @@ class ShipperReportsController extends Controller
         }
         if ($service_type = $request->get('search_service_type')) {
             $datatable->where('shipments.booking_type_id', '=', $service_type);
+        }
+        if(isset($request->search_account_type) && count($request->search_account_type) > 0){
+            $datatable->whereIn('shipments.user_id', $request->search_account_type);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

@@ -484,7 +484,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[23, 'desc']],
+                order: [[25, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -505,7 +505,7 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'rider_id', name: 'rider.trax_id', class: 'align-middle rider_id'},
-                    {data: 'rider_name', name: 'rider.name', class: 'align-middle receiver_name'},
+                    {data: 'rider_name', name: 'rider.name', class: 'align-middle rider_name'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
                     {data: 'return_confirmed_by', name: 'cb.name', class: 'align-middle return_confirmed_by', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},

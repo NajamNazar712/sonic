@@ -14,7 +14,7 @@ class AddVisitStatusToDailyVisitsTable extends Migration
     public function up()
     {
         Schema::table('daily_visits', function (Blueprint $table) {
-            $table->string('visit_status')->default('0')->nullable();
+            $table->string('visit_status')->default('0');
         });
     }
 

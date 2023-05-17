@@ -331,6 +331,8 @@ class RiderManagementController extends Controller
         $rider->rider_category_id = $request->rider_category;
         $rider->rider_main_category_id = $request->rider_main_category;
 
+        $rider->operation_rider_id = $request->operation_rider_id;
+
         if($request->has('special_rider_checkbox')){
             $rider->special_rider = 1;
         }else{
