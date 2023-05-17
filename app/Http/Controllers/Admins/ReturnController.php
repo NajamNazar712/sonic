@@ -5898,4 +5898,80 @@ class ReturnController extends Controller
 
         return $datatable->make(true);
     }
+
+
+    public function return_shipments_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
+        $return_note_id = 237666;
+        $receive_notes_id = DB::table('return_notes')
+        // ->whereDate('id', '>',$return_note_id) //open for production
+        ->select("id")
+        ->selectRaw("LPAD(id, 6, '0') as return_note_id_padded")
+        ->orderBy('id', 'DESC')->get();
+        $riders = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
+            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+            ->select('riders.name as rider',  'riders.trax_id as riderID')
+            ->distinct()->get();
+
+        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id, 'riders' => $riders]);
+    }
+
+
+    public function return_shipments_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 653);
+        }
+
+        $return_note_id = 237666;
+        $shipments = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
+            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+            ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
+
+
+        $datatables = Datatables::of($shipments)
+        ->editColumn('return_note', function ($return) {
+            return "<a href='javascript:void(0);' data-id=".$return->return_note." class='printreturnnote'><u>" . str_pad($return->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+        })
+        ->editColumn('tracking_number', function ($return) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$return->tracking_number' class='tracking' target='_blank'>$return->tracking_number</a></u>";
+        });
+
+        $return_note_numbers = $request->get('return_note_number');
+        if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
+            $datatables->whereIn('rns.return_note_id', $return_note_numbers);
+        }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $datatables->where('riders.trax_id', $rider_id);
+        }
+
+        return $datatables->make(true);
+    }
+
+    public function return_notes_list(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $return_note_id = 237666;
+        if($rider_id){
+            $receive_notes_id = DB::table('return_notes')
+            ->leftjoin('riders', 'riders.id', 'return_notes.rider_id' )
+            ->select('return_notes.id')
+            ->selectRaw("LPAD(return_notes.id, 6, '0') as return_note_id_padded")
+            ->where('riders.trax_id', $rider_id)
+            // ->whereDate('return_notes.id', '>', $return_note_id) //open for production
+            ->orderBy('return_notes.id', 'DESC')->get();
+
+            return response()->json(['status' => true, 'receive_notes_ids'=> $receive_notes_id]);
+        } else {
+
+            return response()->json(['status' => false, 'message' => 'Selected rider data not found']);
+        }
+    }
 }
