@@ -70,28 +70,35 @@ class AutoDeliveryNoteVerify extends Command
                     foreach ($delivery_notes as $delivery_note) {
 
                         $shipment_ids = $delivery_note->delivery_note_shipments()->pluck('shipment_id');
-                        $shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('booking_type_id', [2,3,4,5,6]);
+                        $shipments = Shipment::whereIn('id', $shipment_ids)->where('booking_type_id', 6);
                         if($shipments->exists()){
                             continue;
                         }
-                        /*$delivered_shipments = Shipment::whereIn('id', $shipment_ids)->where('shipper_status_id', 14);
+
+                        $delivered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', [30, 36, 37, 56]);
                         if($delivered_shipments->exists()){
                             continue;
-                        }*/
+                        }
 
                         $shipments = Shipment::whereIn('id', $shipment_ids)->select('id', 'shipper_status_id', 'booking_type_id', 'packaging_material_request', 'packaging_material_charges')->get();
 
                         foreach ($shipments as $shipment){
                             $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
                             ShipmentsJourneyController::add($shipments_journey->shipment_id, $shipments_journey->shipper_status_id, $shipments_journey->consignee_status_id, $shipments_journey->status_reason_id, $shipments_journey->remarks, $shipments_journey->user_id, 346, $shipments_journey->reference_1_id, $shipments_journey->reference_2_id, 1, $shipments_journey->received_or_refused_by, $shipments_journey->rider_id);
-
                             if($shipment->shipper_status_id == 14){
+                                if($shipment->booking_type_id == 1){
+                                        if (($shipment->packaging_material_request == 1 && $shipment->packaging_material_charges != '') || $shipment->packaging_material_request == 0) {
+                                            AdminFinanceController::add_payment($shipment->id, 0);
+                                        }
 
-                                if (($shipment->packaging_material_request == 1 && $shipment->packaging_material_charges != '') || $shipment->packaging_material_request == 0) {
-                                    AdminFinanceController::add_payment($shipment->id, 0);
+                                }
+                                else if($shipment->booking_type_id == 4){
+                                    AdminFinanceController::done_payment($shipment->id, 0);
                                 }
                                 FinalChargesWebhookController::webhook_subscription($shipment->id);
+
                             }
+
                         }
                         $current_time = Carbon::now();
                         DeliveryNote::where('id', $delivery_note->id)->update(['verified_by' => 346, 'status' => 1, 'last_updated_at' => $current_time, 'status_verified_at' => $current_time]);

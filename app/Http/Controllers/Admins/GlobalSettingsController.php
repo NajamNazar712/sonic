@@ -7716,6 +7716,7 @@ class GlobalSettingsController extends Controller
         $auto_verification = false;
         $excluded_hubs = array();
 
+        $auto_verification_time = '01:00';
         $hubs = City::select('id', 'name')->where('status', 1)->where('hub', 1)->get();
 
         $auto_verification_setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
@@ -7732,7 +7733,14 @@ class GlobalSettingsController extends Controller
             $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
         }
 
-        return view('admin.settings.last_mile.auto_delivery_note_verification')->with(['auto_verification' => $auto_verification,'hubs' => $hubs, 'excluded_hubs' => $excluded_hubs]);
+        $auto_verification_setting_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
+
+        if($auto_verification_setting_time->exists()){
+            $auto_verification_setting_time  = $auto_verification_setting_time->first();
+            $auto_verification_time = $auto_verification_setting_time->text;
+        }
+
+        return view('admin.settings.last_mile.auto_delivery_note_verification')->with(['auto_verification' => $auto_verification,'hubs' => $hubs, 'excluded_hubs' => $excluded_hubs, 'auto_verification_time' => $auto_verification_time]);
     }
 
     public function auto_delivery_note_verification_store(Request $request){
@@ -7768,6 +7776,23 @@ class GlobalSettingsController extends Controller
                 $settings->save();
             }else{
                 GlobalSettings::where('type', 'delivery_note_auto_verification_exclude_hubs')->delete();
+            }
+
+            if($request->has('timepicker')){
+                $auto_verification_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
+
+                if(!$auto_verification_time->exists()){
+                    $auto_verification_time = new GlobalSettings();
+                    $auto_verification_time->setting_value = 0;
+                    $auto_verification_time->type = 'delivery_note_auto_verification_time';
+                    $auto_verification_time->text = $request->timepicker;
+                    $auto_verification_time->save();
+                }
+                else{
+                    $auto_verification_time = $auto_verification_time->first();
+                    $auto_verification_time->text = $request->timepicker;
+                    $auto_verification_time->save();
+                }
             }
             return redirect()->back()->with('success', 'Settings Updated!');
 
