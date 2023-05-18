@@ -3656,7 +3656,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('dashboard')->name('dashboard.')->group(function () {
             Route::get('', 'Admins\CRMDashboardController@crm_dashboard_index')->name('index');
-            Route::get('list', 'Admins\CRMDashboardController@crm_dashboard_list')->name('list');
+            Route::post('list', 'Admins\CRMDashboardController@crm_dashboard_list')->name('list');
             // Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
         });
 

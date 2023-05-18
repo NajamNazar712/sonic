@@ -19,6 +19,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -46,6 +47,7 @@ class CRMDashboardController extends Controller
         // ActivityTrailController::createActivityTrailLog(Auth::id(),312);
         $case_natures = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
+        $crm_request_statuses = CrmRequestStatus::select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
@@ -107,10 +109,11 @@ class CRMDashboardController extends Controller
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
 
-        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ]);
+        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ,'crm_request_statuses' => $crm_request_statuses]);
     }
 
     public function crm_dashboard_list(Request $request){
+       
         if($request->get('excel') && $request->get('excel') == true)
         {
             // ActivityTrailController::createActivityTrailLog(Auth::id(),313);
@@ -188,10 +191,10 @@ class CRMDashboardController extends Controller
                     ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
             })
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status')
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
-
+          
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {

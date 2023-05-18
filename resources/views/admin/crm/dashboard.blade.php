@@ -149,9 +149,9 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="avg_tat" id="avg_tat" class="form-control select2">
-                                            <option value="launch_in_process">Launch-In Process</option>
-                                            <option value="launch_resolved">Launch-Resolved</option>
-                                            <option value="launch_closed">Launch-Closed</option>
+                                            @foreach($crm_request_statuses as $status)
+                                            <option value="{{$status->id}}">{{$status->name}}</option>
+                                            @endforeach
                                         </select>
                                     </fieldset>
                                 </div>
@@ -196,9 +196,7 @@
                                             <span class="la la-calendar-o"></span>
                                         </span>
                                         </div>
-                                        <input type="text" name="from_date"
-                                               class="form-control bg-primary border-primary white rounded-right"
-                                               id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today() }}">
+                                        <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
             
                                 </div>
@@ -210,15 +208,12 @@
                                             <span class="la la-calendar-o"></span>
                                         </span>
                                         </div>
-                                        <input type="text" name="to_date"
-                                               class="form-control bg-primary border-primary white rounded-right"
-                                               id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
+                                        <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
                                 </div>
             
                                 <div class="col-2">
-                                    <button type="button" id="search_filter_btn"
-                                            class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
+                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
                                         Search
                                     </button>
                                 </div>
@@ -347,7 +342,7 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3" id="dormant_div">
-                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
@@ -356,7 +351,7 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
-                                                        <span>Valid</span>
+                                                        <span>Closure Rate</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -372,8 +367,8 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
-                                                        <span>InValid</span>
+                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p>(100%)</h3>
+                                                        <span>Ratio</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -424,6 +419,7 @@
                                     <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
+                                    <th class="border-primary border-darken-1">Last Status Date</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
@@ -914,6 +910,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#avg_tat').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Avg. TATs',
+                width:'100%',
+                allowClear:true
+            });
             // $('#search_status').select2({
             //     placeholder:'Search CRM Status',
             //     width:'100%',
@@ -928,7 +929,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.crm.in_process.list') }}',
+                        url: '{{ route('admin.crm.dashboard.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -949,6 +950,7 @@
                             head.push('Responsible Zone');
                             head.push('Shipment Status');
                             head.push('Arrival Date');
+                            head.push('Last Status Date');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -990,6 +992,7 @@
                                 row.push(values.responsible_zone);
                                 row.push(values.status);
                                 row.push(values.arrival);
+                                row.push(values.last_status_date);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -1265,7 +1268,7 @@
                     processing: data_table_loader
                 },
                 ajax: {
-                    url: '{{ route('admin.crm.in_process.list') }}',
+                    url: '{{ route('admin.crm.dashboard.list') }}',
                     method:'post',
                     headers: {
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -1291,6 +1294,7 @@
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
