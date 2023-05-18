@@ -146,6 +146,15 @@
                                         </select>
                                     </fieldset>
                                 </div>
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <select name="avg_tat" id="avg_tat" class="form-control select2">
+                                            <option value="launch_in_process">Launch-In Process</option>
+                                            <option value="launch_resolved">Launch-Resolved</option>
+                                            <option value="launch_closed">Launch-Closed</option>
+                                        </select>
+                                    </fieldset>
+                                </div>
 {{--             
                                 <div class="col-4">
                                     <fieldset class="form-group">
@@ -227,33 +236,14 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="total_leads" class="d-inline">{{$leads['total']}}</p> (100%)
                                                         </h3>
-                                                        <span>Total Leads</span>
+                                                        <span>Launch</span>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="received_leads_div">
-                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
-                                        <div class="card-content">
-                                            <div class="card-body">
-                                                <div class="media d-flex">
-                                                    <div class="align-self-center">
-                                                        <i class="icon-flag text-white font-large-2 float-left"></i>
-                                                    </div>
-                                                    <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="received_leads" class="d-inline">{{$leads['received']}}</p> (<p
-                                                                    id="received_percentage"
-                                                                    class="d-inline">{{$leads['received_percentage']}}</p>%)
-                                                        </h3>
-                                                        <span>Leads Received</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                
                                 <div class="col-3" id="in_process_div">
                                     <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
                                         <div class="card-content">
@@ -275,7 +265,26 @@
                                         </div>
                                     </div>
                                 </div>
-            
+                                <div class="col-3" id="received_leads_div">
+                                    <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="icon-flag text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="received_leads" class="d-inline">{{$leads['received']}}</p> (<p
+                                                                    id="received_percentage"
+                                                                    class="d-inline">{{$leads['received_percentage']}}</p>%)
+                                                        </h3>
+                                                        <span>Resolved</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <div class="col-3" id="in_process_activation_div">
                                     <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                                         <div class="card-content">
@@ -291,7 +300,7 @@
                                                                 class="d-inline">{{$leads['in_process_for_activation_percentage']}}</p>
                                                             %)
                                                         </h3>
-                                                        <span>In Process For Activation</span>
+                                                        <span>Closed</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -311,7 +320,60 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
-                                                        <span>Dormant</span>
+                                                        <span>Valid</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="dormant_div">
+                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                                        <span>InValid</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row justify-content-center">
+                                <div class="col-3" id="dormant_div">
+                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                                        <span>Valid</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-3" id="dormant_div">
+                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <div class="media d-flex">
+                                                    <div class="align-self-center">
+                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                    </div>
+                                                    <div class="media-body text-white text-right">
+                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                                        <span>InValid</span>
                                                     </div>
                                                 </div>
                                             </div>
