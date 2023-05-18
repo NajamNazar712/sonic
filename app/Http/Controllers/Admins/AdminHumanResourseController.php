@@ -1295,7 +1295,8 @@ class AdminHumanResourseController extends Controller
         $replacement_info = $employee->replacement_employee;
         $employee_natures = EmployeeNature::select('id', 'name')->get();
         $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')->where('employee_type_id', $employee->employee_type_id)->whereNotNull('trax_id')->get();
-  		 $areas_list = CityArea::where('city_id',$employee->city_id)->where('status',1)->get();        $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
+  		 $areas_list = CityArea::where('city_id',$employee->city_id)->where('status',1)->get();
+           $line_managers = Employee::leftjoin('cities as c', 'c.id', 'employees.city_id')
             ->leftjoin('cities as h', 'h.id', 'c.hub_id')
             ->where('is_line_manager', 1)
             ->where('trax_id', '!=', $employee->trax_id)

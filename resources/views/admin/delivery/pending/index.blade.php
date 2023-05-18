@@ -310,6 +310,7 @@
                     d.search_shipping_mode = $('#search_shipping_mode').val();
                     d.search_hub = $('#search_hub').val();
                     d.star_shipper_filter = $('#star_shippers_filter').val();
+                    d.search_area = $('#search_area').val();
                 }
             },
             rowId: 'shId',

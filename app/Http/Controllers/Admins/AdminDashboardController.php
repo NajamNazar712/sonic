@@ -12823,6 +12823,11 @@ class AdminDashboardController extends Controller
                   return  'Active';
               }
             })
+            ->editColumn('relocation_name', function ($result) {
+                $rl = $result->relocation_name . '-'.$result->city_name;
+                return $rl;
+
+            })
             ->editColumn('default', function ($result) {
               if($result->default == 1){
                   return 'Yes';

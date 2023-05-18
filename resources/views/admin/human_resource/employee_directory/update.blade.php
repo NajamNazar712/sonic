@@ -199,7 +199,7 @@
                                             </div>
                                         </div>
 
-                                        @if($employee->employee_type_id == 2 || $employee->employee_type_id == 1 && $employee->department_id == 6)
+                                        @if(($employee->employee_type_id == 2 || $employee->employee_type_id == 1 ) && $employee->department_id == 6)
                                             
                                         <div class="col-md-12">
                                             <div class="form-group">

@@ -191,12 +191,14 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Name');
-                            head.push('City');
-                            head.push('Relocation Name');
+                            head.push('Area Name');
+                            head.push('Hub');
+                            head.push('Relocation Location');
                             head.push('Status');
                             head.push('Default');
-                            console.log(result.data);
+                            head.push('Updated By');
+                            head.push('Created At');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -206,7 +208,8 @@
                                 row.push(values.relocation_name);
                                 row.push(values.status);
                                 row.push(values.default);
-
+                                row.push(values.admin_name);
+                                row.push(values.created_at);
                                 body.push(row);
                             });
                         },

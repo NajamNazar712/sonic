@@ -238,14 +238,17 @@
 
         var area_list = $('#area_list');
         area_list.empty();
-        @if(count($areas_list) > 0)
+        @if(count($areas_list) > 0);
             var areas = @json($areas_list);
             area_list.attr("disabled", false);
+            area_list.append(`<option value="">Select Area</option>`)
             $.each(areas, function (key, value) {
                 var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                 area_list.append(newOption);
             });
-            area_list.val({!! $rider->area_id !!}).trigger('change');
+            @if(!empty($rider->area_id))
+                area_list.val({{ $rider->area_id }}).trigger('change');
+            @endif
         
         @else{
             area_list.attr("disabled", true);
