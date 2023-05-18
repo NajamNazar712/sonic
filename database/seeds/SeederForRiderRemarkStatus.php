@@ -12,8 +12,10 @@ class SeederForRiderRemarkStatus extends Seeder
     public function run()
     {
         DB::table('rider_remark_statuses')->insert(array(
-            array('id' => 1, 'name' => 'In Process'),
-            array('id' => 2, 'name' => 'Resolved'),
+            array('id' => 1, 'name' => 'Created'),
+            array('id' => 2, 'name' => 'In Process'),
+            array('id' => 3, 'name' => 'Resolved'),
+
         )); 
     }
 }

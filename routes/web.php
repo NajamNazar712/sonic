@@ -903,6 +903,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
                 Route::get('', 'Admins\RiderManagementController@rider_remarks_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_remarks_list')->name('list');
+                Route::post('post', 'Admins\RiderManagementController@rider_remarks_post')->name('post');
+
             });
             
         

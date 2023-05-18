@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRiderRemarksTable extends Migration
+class CreateRiderRemarksResponseTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateRiderRemarksTable extends Migration
      */
     public function up()
     {
-        Schema::create('rider_remarks', function (Blueprint $table) {
+        Schema::create('rider_remarks_response', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('rider_id')->index();
-            $table->longText('rider_remarks');
-            $table->integer('rider_remarks_status_id')->default(1);
+            $table->integer('rider_remarks_id')->index();
+            $table->longText('response');
+            $table->longText('type');
             $table->integer('updated_by')->nullable()->index();
             $table->timestamps();
         });
@@ -30,6 +30,6 @@ class CreateRiderRemarksTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rider_remarks');
+        Schema::dropIfExists('rider_remarks_response');
     }
 }
