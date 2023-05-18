@@ -528,9 +528,8 @@
                             row.push(values.response_2);
                             row.push(values.created_at);
                             row.push(values.status);
-                            row.push(values.date);
+                            row.push(values.admin_name);
                             row.push(values.updated_at);
-                            row.push(values.updated_by);
                             body.push(row);
                         });
                     }
