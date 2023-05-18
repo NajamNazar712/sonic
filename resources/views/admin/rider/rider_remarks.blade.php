@@ -89,6 +89,7 @@
                     <th class="border-primary border-darken-1">Zone</th>
                     <th class="border-primary border-darken-1">Rider Remarks</th>
                     <th class="border-primary border-darken-1">Initial Response</th>
+                    <th class="border-primary border-darken-1">Final Response</th>
                     <th class="border-primary border-darken-1">Created At</th>
                     <th class="border-primary border-darken-1">Status</th>
                     <th class="border-primary border-darken-1">Updated By</th>
@@ -504,7 +505,8 @@
                         head.push('Hub');
                         head.push('Zone');
                         head.push('Rider Remarks');
-                        head.push('Response');
+                        head.push('Initial Response');
+                        head.push('Final Response');
                         head.push('Created At');
                         head.push('Status');
                         head.push('Updated By');
@@ -521,6 +523,7 @@
                             row.push(values.zone_name);
                             row.push(values.rider_remarks);
                             row.push(values.response);
+                            row.push(values.response_2);
                             row.push(values.created_at);
                             row.push(values.status);
                             row.push(values.date);
@@ -626,7 +629,12 @@
                 }
                 , {
                     data: 'response'
-                    , name: 'rider_remarks.response'
+                    , name: 'rrr.response'
+                    , class: 'align-middle response'
+                }
+                , {
+                    data: 'response_2'
+                    , name: 'rrr_2.response'
                     , class: 'align-middle response'
                 }
                 , {

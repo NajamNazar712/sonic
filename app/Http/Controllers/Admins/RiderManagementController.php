@@ -1431,12 +1431,41 @@ class RiderManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 657);
         }
         $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
-            ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by') 
-            ->leftJoin('rider_remarks_response as rrr', 'rrr.id', '=', 'rider_remarks.id')            
+            ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by')
             ->leftJoin('cities as city', 'r.city_id', '=', 'city.id')
             ->leftJoin('cities as c', 'city.hub_id', '=', 'c.id')
-            ->leftjoin('zones as z', 'city.zone_id', '=', 'z.id')
-            ->select(['r.name as rider_name', 'r.id as id', 'r.trax_id as traxID', 'city.id as city_id', 'city.name as city_name', 'c.name as hub', 'z.name as zone_name', 'rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at', 'rider_remarks.rider_remarks as rider_remarks', 'rrr.response_1 as response', 'rider_remarks.id as id', 'rrr.response_2 as response_2', 'ad.name as admin_name']);
+            ->leftJoin('zones as z', 'city.zone_id', '=', 'z.id')
+            ->leftJoin('rider_remarks_response as rrr', function ($join) {
+                $join->on('rrr.rider_remarks_id', '=', 'rider_remarks.id')
+                    ->where('rrr.type', '=', 1)
+                    ->whereRaw('rrr.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 1)');
+            })
+            ->leftJoin('rider_remarks_response as rrr_2', function ($join) {
+                $join->on('rrr_2.rider_remarks_id', '=', 'rider_remarks.id')
+                    ->where('rrr_2.type', '=', 2)
+                    ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
+            })
+            ->select([
+                'rider_remarks.id as id',
+                'r.name as rider_name',
+                'r.id as rider_id',
+                'r.trax_id as traxID',
+                'city.id as city_id',
+                'city.name as city_name',
+                'c.name as hub',
+                'z.name as zone_name',
+                'rider_remarks.created_at as created_at',
+                'rider_remarks.rider_remarks_status_id as status',
+                'rider_remarks.updated_by as updated_by',
+                'rider_remarks.updated_at as updated_at',
+                'rider_remarks.rider_remarks as rider_remarks',
+                'rrr.response as response',
+                'rrr_2.response as response_2',
+                'rider_remarks.id as rider_remarks_id',
+                'ad.name as admin_name'
+            ]);
+
+
 
         $datatables = Datatables::of($rider_remarks)
             ->editColumn('status', function ($rider_remarks) {
@@ -1461,10 +1490,10 @@ class RiderManagementController extends Controller
             })
 
             ->addColumn("action", function ($rider_remarks) {
-                if ((session('role_id') == 1)) {
+                if ((session('role_id') == 1) && $rider_remarks->status != 3) {
                     $dropdown = '
-                          <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                          <div class="btn-group" id="dasdas">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle action"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
                         ';
 
@@ -1499,7 +1528,7 @@ class RiderManagementController extends Controller
 
 
         if ($search_rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('r.id', '=', $search_rider);
+            $datatables = $datatables->where('id', '=', $search_rider);
         }
 
         if ($search_remark = $request->get('search_remark')) {
@@ -1547,18 +1576,23 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
+
                 $response = new RiderRemarksResponse();
+
 
                 if (isset($request->initial_response)) {
                     $rider_remark->updated_by = Auth::id();
                     $response->rider_remarks_id = $rider_remark->id;
-                    $response->response_1 = $request->initial_response;
+                    $response->response = $request->initial_response;
+                    $response->updated_by = Auth::id();;
+                    $response->type = '1';
+
                     $rider_remark->save();
                     $response->save();
                     return response()->json(['status' => 1]);
                 }
             }
-        }elseif(isset($request->id) && isset($request->final_response)){
+        } elseif (isset($request->id) && isset($request->final_response)) {
             $validations = [
                 'id' => 'required',
                 'final_response' => 'required',
@@ -1571,11 +1605,14 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
+                // $response = RiderRemarksResponse::where('rider_remarks_id', $rider_remark->id)->first();
                 $response = new RiderRemarksResponse();
-
                 if (isset($request->final_response)) {
                     $response->rider_remarks_id = $rider_remark->id;
-                    $response->response_2 = $request->final_response;
+                    $response->response = $request->final_response;
+                    $response->type = '2';
+                    $response->updated_by = Auth::id();;
+
                     $rider_remark->updated_by = Auth::id();
                     $rider_remark->save();
                     $response->save();
@@ -1583,7 +1620,7 @@ class RiderManagementController extends Controller
                     return response()->json(['status' => 1]);
                 }
             }
-        }elseif(isset($request->id) && isset($request->status_value_2)){
+        } elseif (isset($request->id) && isset($request->status_value_2)) {
             $validations = [
                 'id' => 'required',
                 'status_value_2' => 'required',

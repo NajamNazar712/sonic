@@ -12371,7 +12371,6 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
 
-
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
         if ($delivery_notes->exists()) {
@@ -14107,6 +14106,47 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
         }
            
+    }
+    public function rider_remark_list(Request $request)
+    {
+        $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
+        ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by')
+        ->leftJoin('cities as city', 'r.city_id', '=', 'city.id')
+        ->leftJoin('cities as c', 'city.hub_id', '=', 'c.id')
+        ->leftJoin('zones as z', 'city.zone_id', '=', 'z.id')
+        ->leftJoin('rider_remarks_response as rrr', function ($join) {
+            $join->on('rrr.rider_remarks_id', '=', 'rider_remarks.id')
+            ->where('rrr.type', '=', 1)
+            ->whereRaw('rrr.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 1)');
+        })
+        ->leftJoin('rider_remarks_response as rrr_2', function ($join) {
+            $join->on('rrr_2.rider_remarks_id', '=', 'rider_remarks.id')
+            ->where('rrr_2.type', '=', 2)
+            ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
+        })
+        ->leftJoin('rider_remark_statuses as rrs', 'rrs.id', '=', 'rider_remarks.rider_remarks_status_id')
+        ->select([
+            'rider_remarks.id as id',
+            'r.name as rider_name',
+            'r.id as rider_id',
+            'r.trax_id as traxID',
+            'city.id as city_id',
+            'city.name as city_name',
+            'c.name as hub',
+            'z.name as zone_name',
+            'rider_remarks.created_at as created_at',
+            'rrs.name as status',
+            'rider_remarks.updated_by as updated_by',
+            'rider_remarks.updated_at as updated_at',
+            'rider_remarks.rider_remarks as rider_remarks',
+            'rrr.response as response',
+            'rrr_2.response as response_2',
+            'rider_remarks.id as rider_remarks_id',
+            'ad.name as admin_name'
+        ])->get();
+
+
+        return response()->json(['data' => $rider_remarks]);
     }
 
 

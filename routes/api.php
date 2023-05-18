@@ -173,6 +173,8 @@ Route::name('api.')->group(function () {
 
             Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@rider_remarks')->name('add');
+                Route::get('get', 'Rider\RiderAPIController@rider_remark_list')->name('list');
+
             });
 
       
