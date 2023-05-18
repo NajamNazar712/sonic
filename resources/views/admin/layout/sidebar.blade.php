@@ -1,3 +1,11 @@
+@php
+$settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
+$roles = [];
+if(isset($settings))
+{
+$roles = explode("," , $settings->text);
+}
+@endphp
 <div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
@@ -437,7 +445,7 @@
             @endif
 
 
-            @if (session('role_id') == 1 ||
+            @if (in_array(session('role_id'), [1]) ||
                     count(array_intersect(
                             [
                                 32,
@@ -555,6 +563,12 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.delivery.history.index') }}">History</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(859, session('permissions')))
+                                    <li><a class="menu-item"
+                                            href="{{ route('admin.delivery.delivery_shipments.index') }}">Delivery Shipments</a></li>
+                                @endif
+
                                     @if (session('role_id') == 1 || in_array(441, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.delivery.signature.index') }}">Signature</a>
@@ -639,6 +653,13 @@
                                                 href="{{ route('admin.return.return_deliveries.index') }}">Return
                                                 Deliveries</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(860, session('permissions')))
+                                    <li><a class="menu-item"
+                                            href="{{ route('admin.return.return_shipments.index') }}">Return
+                                            Shipments</a></li>
+                                @endif
+
                                     @if (session('role_id') == 1 || in_array(600, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.rcp_agent.index') }}">RCP Agent
@@ -671,7 +692,7 @@
                                 </ul>
                             </li>
                         @endif
-                        @if (in_array(session('role_id'), [1, 18]) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
+                        @if (in_array(session('role_id'), array_merge([1], $roles)) || count(array_intersect([495, 496, 497], session('permissions'))) !== 0)
 
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Debriefing</span></a>
@@ -686,7 +707,7 @@
                                                 href="{{ route('admin.debriefing.agents_call_monitoring.index') }}">Agents
                                                 Call Monitoring</a></li>
                                     @endif
-                                    @if (session('role_id') == 18 || session('role_id') == 1)
+                                    @if (in_array(session('role_id'), array_merge([1], $roles)))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.debriefing.caller_agent.index') }}">Caller Agent
                                                 Screen</a></li>
@@ -1230,7 +1251,15 @@
 					@if (session('role_id') == 1 || in_array(827, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.otp_history.index') }}"><span class="menu-title">OTP History</span></a>
                         </li>
-                    @endif                </ul>
+                    @endif                
+
+
+                    {{-- @if (in_array(session('role_id'), [1,104,70,63,3,8,9,10,11,15,18,19,23,25,33,46,55,65,72,76,78,84,85,89,93,95,96]) || in_array(862, session('permissions')))
+                        <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Rider Remarks</span></a>
+                        </li>
+                    @endif                 --}}
+                
+                </ul>
             </li>
 
             @if (session('role_id') == 1 ||
@@ -2076,11 +2105,18 @@
                                                 Confirmation Pending TAT Setting</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(526, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_time_setting.index') }}">Debriefing
                                                 Time Setting</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(858, session('permissions')))
+
+                                    <li><a class="menu-item"
+                                        href="{{ route('admin.settings.debriefing_role_setting.index') }}">Caller Agent Role Assigning</a></li> 
+
+@endif
                                     @if (session('role_id') == 1 || in_array(674, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.debriefing_break_time.index') }}">Debriefing
@@ -2626,6 +2662,8 @@
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+
+                        
 
                     </ul>
                 </li>

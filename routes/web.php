@@ -899,6 +899,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
             });
 
+
+            Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
+                Route::get('', 'Admins\RiderManagementController@rider_remarks_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@rider_remarks_list')->name('list');
+            });
+            
+        
             Route::prefix('rider_request')->name('rider_request.')->group(function () {
                 Route::get('', 'Admins\RiderManagementController@rider_request_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');
@@ -1378,6 +1385,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\DeliveryController@history_shipments')->name('shipments');
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
         });
+
+        Route::prefix('shipments')->name('delivery_shipments.')->group(function () {
+            Route::get('', 'Admins\DeliveryController@shipment_index')->name('index');
+            Route::get('list', 'Admins\DeliveryController@shipment_list')->name('list');
+            Route::get('notes', 'Admins\DeliveryController@delivery_notes_list')->name('notes');
+
+        });
+
         Route::prefix('quick_receiving')->name('quick_receiving.')->group(function () {
             Route::get('', 'Admins\DeliveryController@quick_receiving_delivery_index')->name('index');
             Route::post('', 'Admins\DeliveryController@quick_receiving_submit')->name('submit');
@@ -1519,6 +1534,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delete_image', 'Admins\ReturnController@history_delete_image')->name('delete_image');
             Route::post('delete_lastimage', 'Admins\ReturnController@history_delete_lastimage')->name('delete_lastimage');
         });
+
+
+        Route::prefix('return_shipments')->name('return_shipments.')->group(function () {
+            Route::get('', 'Admins\ReturnController@return_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@return_shipments_list')->name('list');
+            Route::get('notes', 'Admins\ReturnController@return_notes_list')->name('notes');
+        });
+
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
             Route::get('', 'Admins\ReturnController@cx_sales_index')->name('index');
             Route::get('list', 'Admins\ReturnController@cx_sales_list')->name('list');
@@ -3317,6 +3340,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('debriefing_time_setting')->name('debriefing_time_setting.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@debriefing_time_setting_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@debriefing_time_setting_update')->name('update');
+        });
+
+
+        Route::prefix('debriefing_role_setting')->name('debriefing_role_setting.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@debriefing_role_setting_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@debriefing_role_setting_update')->name('update');
+
         });
 
         Route::prefix('omni')->name('omni.')->group(function () {
