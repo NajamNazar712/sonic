@@ -424,6 +424,10 @@
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
+                                    <th class="border-primary border-darken-1">Shipping Mode</th>
+                                    <th class="border-primary border-darken-1">Sales Person</th>
+                                    <th class="border-primary border-darken-1">KAE</th>
+                                    <th class="border-primary border-darken-1">Segment</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
@@ -955,6 +959,10 @@
                             head.push('Case Nature Type');
                             head.push('Description');
                             head.push('Channel');
+                            head.push('Shipping Mode');
+                            head.push('Sales Person');
+                            head.push('KAE');
+                            head.push('Segment');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
@@ -997,6 +1005,10 @@
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
                                 row.push(values.channel);
+                                row.push(values.shipping_mode);
+                                row.push(values.sale_person);
+                                row.push(values.kae);
+                                row.push(values.segment);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
@@ -1299,6 +1311,10 @@
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
+                    {data: 'kae', name: 'ad3.name', class: 'align-middle kae'},
+                    {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
