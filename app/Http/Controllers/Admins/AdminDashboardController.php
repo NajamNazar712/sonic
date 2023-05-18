@@ -9219,7 +9219,8 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users) {
+            ->addColumn('duplication', function ($users)  use ($request){
+
                 $count = 0;
                 if ($users->duplicate_phone != null) {
                     $count++;
@@ -9233,7 +9234,8 @@ class AdminDashboardController extends Controller
                 if ($users->duplicate_name != null) {
                     $count++;
                 }
-                if ($count > 0) {
+               
+                if ($count > 0 && !$request->get('excel')) {
                     return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
                 } else {
                     return $count;
@@ -9564,7 +9566,7 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn('duplication', function ($users) {
+            ->addColumn('duplication', function ($users)  use ($request){
                 $count = 0;
                 if ($users->duplicate_phone != null) {
                     $count++;
@@ -9578,7 +9580,7 @@ class AdminDashboardController extends Controller
                 if ($users->duplicate_name != null) {
                     $count++;
                 }
-                if ($count > 0) {
+                if ($count > 0 && !$request->get('excel')) {
                     return '<button class="btn btn-sm btn-outline-info align-middle duplicate_modal">' . $count . '</button>';
                 } else {
                     return $count;
