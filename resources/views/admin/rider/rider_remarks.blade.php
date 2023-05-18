@@ -133,6 +133,35 @@
     </div>
 </div>
 
+<div class="modal fade text-left" id="rider_remarks_final" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Final Response</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <form id="rider_remarks" action="" method="post">
+                    <div class="row mb-2">
+                        <div class="col-12 form-group">
+                            <label for="description">Add Final Response</label>
+                            <textarea id="final_response" name="final_response" class="form-control" rows="4" placeholder="Enter A Response"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <button id="" type="submit" class="btn btn-primary btn-block">Add Response</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 @endsection
@@ -311,7 +340,7 @@
             });
         });
 
-        $('body').on('click', '.initial_response', function() {
+        $('body').on('click', '.initial_response', function(event) {
             var id = $(this).attr('data-id');
             $('#rider_remarks').modal('show');
 
@@ -352,6 +381,93 @@
                             });
                         }
                     })
+                
+            });
+        });
+
+        $('body').on('click', '.final_response', function(event) {
+            var id = $(this).attr('data-id');
+            console.log(id)
+            $('#rider_remarks_final').modal('show');
+
+            $('#rider_remarks_final').on('submit', function(event) {
+                event.preventDefault(); 
+                let final_response = $("#final_response").val();
+                console.log(final_response)
+                    $.ajax({
+                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                        , method: 'POST'
+                        , data: {
+                            '_token': '{{ csrf_token() }}',
+                        'id': id,
+                        'final_response' :final_response,
+                        }
+                        , success: function(data) {
+                            if (data.status == 1) {
+                                $('#rider_remarks_final').modal('hide');
+                                $('#rider_remarks_final').on('hidden.bs.modal', function () {
+                                    $(this).find('form').trigger('reset');
+                                })
+                                table.draw();
+                                toastr.success(data.success, 'Success!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                        , error: function(xhr, status, error) {
+                            toastr.error('An error occurred while processing the request.', 'Error!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                        }
+                    })
+                
+            });
+        });
+
+        $('body').on('click', '.rider_remarks_btn_1', function(event) {
+            var id = $(this).attr('data-id');
+            var status_value_2 = $(this).attr('data-value');
+
+                    event.preventDefault(); 
+            
+                    $.ajax({
+                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                        , method: 'POST'
+                        , data: {
+                            '_token': '{{ csrf_token() }}',
+                            'id': id,
+                        'status_value_2': status_value_2,
+                     
+
+                        }
+                        , success: function(data) {
+                            if (data.status == 1) {
+                                table.draw();
+                                toastr.success(data.success, 'Status Has Been Changed!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+                            } else {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                        , error: function(xhr, status, error) {
+                            toastr.error('An error occurred while processing the request.', 'Error!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                        }
+                
                 
             });
         });
@@ -526,9 +642,9 @@
                     , class: 'align-middle status'
                 }
                 , {
-                    data: 'updated_by'
-                    , name: 'rider_remarks.updated_by'
-                    , class: 'align-middle updated_by'
+                    data: 'admin_name'
+                    , name: 'ad.name'
+                    , class: 'align-middle admin_name'
                 }
                 , {
                     data: 'updated_at'

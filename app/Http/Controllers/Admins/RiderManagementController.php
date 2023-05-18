@@ -33,6 +33,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Rider\RiderRemark;
+use App\Http\Models\Rider\RiderRemarksResponse;
 use App\Http\Models\Rider\RiderRemarkStatus;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -1430,10 +1431,12 @@ class RiderManagementController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 657);
         }
         $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
+            ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by') 
+            ->leftJoin('rider_remarks_response as rrr', 'rrr.id', '=', 'rider_remarks.id')            
             ->leftJoin('cities as city', 'r.city_id', '=', 'city.id')
             ->leftJoin('cities as c', 'city.hub_id', '=', 'c.id')
             ->leftjoin('zones as z', 'city.zone_id', '=', 'z.id')
-            ->select(['r.name as rider_name', 'r.id as id', 'r.trax_id as traxID', 'city.id as city_id', 'city.name as city_name', 'c.name as hub', 'z.name as zone_name', 'rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at', 'rider_remarks.rider_remarks as rider_remarks', 'rider_remarks.response_1 as response', 'rider_remarks.id as id', 'rider_remarks.response_2 as response_2']);
+            ->select(['r.name as rider_name', 'r.id as id', 'r.trax_id as traxID', 'city.id as city_id', 'city.name as city_name', 'c.name as hub', 'z.name as zone_name', 'rider_remarks.created_at as created_at', 'rider_remarks.rider_remarks_status_id as status', 'rider_remarks.updated_by as updated_by', 'rider_remarks.updated_at as updated_at', 'rider_remarks.rider_remarks as rider_remarks', 'rrr.response_1 as response', 'rider_remarks.id as id', 'rrr.response_2 as response_2', 'ad.name as admin_name']);
 
         $datatables = Datatables::of($rider_remarks)
             ->editColumn('status', function ($rider_remarks) {
@@ -1469,8 +1472,8 @@ class RiderManagementController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process </div></button>
                             <button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></button>';
                     } elseif (($rider_remarks->status == 2) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-id=' . $rider_remarks . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></button>
-                        ';
+                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></button>
+                        <button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></button>';
                     }
                     $dropdown .= '
                             </div>
@@ -1514,44 +1517,95 @@ class RiderManagementController extends Controller
                 'id' => 'required',
                 'status_value' => 'required',
             ];
-            
+
             $validate = Validator::make($request->all(), $validations);
-            
+
             if ($validate->fails()) {
                 return response()->json(['status' => 0, 'errors' => $validate->errors()]);
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-                
+
                 if (isset($request->status_value)) {
                     $rider_remark->rider_remarks_status_id = $request->status_value;
+                    $rider_remark->updated_by = Auth::id();
                     $rider_remark->save();
-                    
+
                     return response()->json(['status' => 1]);
                 }
             }
-        } elseif(isset($request->id) && isset($request->initial_response)) {
+        } elseif (isset($request->id) && isset($request->initial_response)) {
             $validations = [
                 'id' => 'required',
                 'initial_response' => 'required',
             ];
-            
+
             $validate = Validator::make($request->all(), $validations);
-            
+
             if ($validate->fails()) {
                 return response()->json(['status' => 0, 'errors' => $validate->errors()]);
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-                
+                $response = new RiderRemarksResponse();
+
                 if (isset($request->initial_response)) {
-                    $rider_remark->response_1 = $request->initial_response;
+                    $rider_remark->updated_by = Auth::id();
+                    $response->rider_remarks_id = $rider_remark->id;
+                    $response->response_1 = $request->initial_response;
                     $rider_remark->save();
-                    
+                    $response->save();
+                    return response()->json(['status' => 1]);
+                }
+            }
+        }elseif(isset($request->id) && isset($request->final_response)){
+            $validations = [
+                'id' => 'required',
+                'final_response' => 'required',
+            ];
+
+            $validate = Validator::make($request->all(), $validations);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+            } else {
+                $id = $request->id;
+                $rider_remark = RiderRemark::find($id);
+                $response = new RiderRemarksResponse();
+
+                if (isset($request->final_response)) {
+                    $response->rider_remarks_id = $rider_remark->id;
+                    $response->response_2 = $request->final_response;
+                    $rider_remark->updated_by = Auth::id();
+                    $rider_remark->save();
+                    $response->save();
+
+                    return response()->json(['status' => 1]);
+                }
+            }
+        }elseif(isset($request->id) && isset($request->status_value_2)){
+            $validations = [
+                'id' => 'required',
+                'status_value_2' => 'required',
+            ];
+
+            $validate = Validator::make($request->all(), $validations);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+            } else {
+                $id = $request->id;
+                $rider_remark = RiderRemark::find($id);
+
+                if (isset($request->status_value_2)) {
+                    $rider_remark->rider_remarks_status_id = $request->status_value_2;
+                    $rider_remark->updated_by = Auth::id();
+
+                    $rider_remark->save();
+
                     return response()->json(['status' => 1]);
                 }
             }
         }
     }
-    
 }
