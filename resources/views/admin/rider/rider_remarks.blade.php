@@ -369,13 +369,16 @@
                                     , containerId: 'toast-top-center'
                                 });
                             } else {
-                                toastr.error(data.error, 'Error!', {
+                                var error = "Please Fill To Submit A Response";
+
+                                toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center'
                                     , containerId: 'toast-top-center'
                                 });
                             }
                         }
                         , error: function(xhr, status, error) {
+                            console.log(xhr)
                             toastr.error('An error occurred while processing the request.', 'Error!', {
                                 positionClass: 'toast-top-center'
                                 , containerId: 'toast-top-center'
@@ -394,7 +397,6 @@
             $('#rider_remarks_final').on('submit', function(event) {
                 event.preventDefault(); 
                 let final_response = $("#final_response").val();
-                console.log(final_response)
                     $.ajax({
                         url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
                         , method: 'POST'
