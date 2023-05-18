@@ -1058,9 +1058,14 @@ class DeliveryController extends Controller
                             //Urdu
                             NotificationsController::send(135, $note->id, $shipment);
                         } else {
-                            $shipments_id = $shipment;
-                            $payment_link =  PayfastApiCall::ApiCall($shipments_id);  
-                            NotificationsController::send(12, $note->id, $shipment,$payment_link);   
+                              //When Admin Create Delivery Note
+                            $payment_detials = PayfastApiCall::ApiCall();   
+                            $rand            = $payment_detials['unique_key'];
+                            $payment_link    = $payment_detials['payment_link'];
+                            $url             = $payment_detials['url'];
+                            $shipments_id = array_wrap($shipment);
+                            CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
+                            //NotificationsController::send(12, $note->id, $shipment,$payment_link);   
                         }
                     }
                     else{
@@ -9191,10 +9196,10 @@ class DeliveryController extends Controller
 
             
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
-
-            
                 Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
-                CountFintechCharges::dispatch($valid_shipments);
+                
+                
+               
                 $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                     $query->where('booking_type_id', '!=', 4)
                         ->orWhere(function ($sub_query) {
@@ -9315,9 +9320,22 @@ class DeliveryController extends Controller
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
-                                $shipments_id = $shipment;
-                                $payment_link =  PayfastApiCall::ApiCall($shipments_id); 
-                                NotificationsController::send(12, $note->id, $shipment,$payment_link);
+
+                                $environment = config('app.env');
+                                if($environment == 'production'){
+                                    $rand = "";
+                                    $url          = "";
+                                    $payment_link = "";
+                                }
+                                else{
+                                    $rand = rand(111111,999999);
+                                    $url          = "http://127.0.0.1:8000/api/online-transaction-details";
+                                    $payment_link = "http://127.0.0.1:8000/Pay-Online/$rand";
+                                }
+                                //When Approved Delivery Note
+                                $shipments_id = array_wrap($shipment);
+                                CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);
+                                NotificationsController::send(12, $note->id, $shipment);
                             }
                         }
                     }
