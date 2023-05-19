@@ -1313,7 +1313,7 @@
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
-                    {data: 'kae', name: 'ad3.name', class: 'align-middle kae'},
+                    {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
