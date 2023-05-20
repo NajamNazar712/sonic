@@ -809,6 +809,10 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['link'];
         }
+        else if ($id == 216)
+        {
+            $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
+        }
 
         return $details;
     }

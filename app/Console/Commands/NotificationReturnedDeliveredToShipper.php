@@ -2,10 +2,15 @@
 
 namespace App\Console\Commands;
 
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 
 
@@ -42,31 +47,20 @@ class NotificationReturnedDeliveredToShipper extends Command
      */
     public function handle()
     {
-        $start_date = Carbon::now()->endOfDay()->subDay()->setTimezone('UTC');
-        $end_date = Carbon::now()->endOfDay()->setTimezone('UTC');
+        $from = Carbon::today()->subDay()->toDateTimeString();
+        $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
-        $start_date_formatted = $start_date->format('Y-m-d H:i:s.u');
-        $end_date_formatted = $end_date->format('Y-m-d H:i:s.u');
+        $users = GlobalSettings::where('type', 'returned_shipment_notification')->first();
+        $current_users = $users->text;
 
-        $users = User::join('shipments as shipp', 'shipp.user_id', '=', 'users.id')
-            ->join('shipments_journey as shaj', 'shaj.shipment_id', '=', 'shipp.id')
-            ->where('users.status', 3)
-            ->where('shaj.shipper_status_id', 25)
-            ->whereBetween('shaj.created_at', [
-                $start_date_formatted,
-                $end_date_formatted
-            ])
+        $return_notes = ReturnNote::join('return_note_shipments as rnsh', 'rnsh.return_note_id', '=', 'return_notes.id')
+            ->join('shipments', 'shipments.id', '=', 'rnsh.shipment_id')
+            ->join('users as u', 'u.id', '=', 'shipments.user_id')
+            ->select('rnsh.return_note_id as return_id', 'rnsh.shipment_id', 'shipments.user_id','u.phone as phone_number', DB::raw('COUNT(rnsh.shipment_id) as total_shipments'))
+            ->groupBy('rnsh.return_note_id')
+            ->whereIn('shipments.user_id', explode(',', $current_users))
+            ->whereBetween('return_notes.updated_at', [$from, $to])
             ->get();
-             dd($users);
-
-
-
-
-        /*->select('hubs.name as hub_name', 'petty_cash_consignees.consignee_name as consignee_name', 'petty_cash_consignees.id as id')
-        ->first();*/
-
-
-
-
+          NotificationsController::send(216,$return_notes);
     }
 }

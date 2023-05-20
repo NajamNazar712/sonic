@@ -18,6 +18,7 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
@@ -464,6 +465,7 @@ class NotificationsController extends Controller
                         $details['weight'] = $shipment->actual_weight;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
+                        $details['return_notes_id']= $shipment->return_notes_id;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -10159,7 +10161,6 @@ class NotificationsController extends Controller
                 }
 
                 else if( $id == 215) {
-                    // dd('hiiii');
 
                     $details = $reference_1_id;
                     $temp_emails = $reference_2_id;
@@ -10177,18 +10178,32 @@ class NotificationsController extends Controller
                 // Today work has been done
                 else if ($id == 216) {
 
-                    if (strpos($body, '[return_notes_id]') !== FALSE) {
-                        $body = str_replace('[return_notes_id]', $details, $body);
-                    }
-                    if (strpos($body, '[shipments_count]') !== FALSE) {
-                        $body = str_replace('[shipments_count]', $details, $body);
-                    }
-                    if (strpos($body, '[tracking_number]') !== FALSE) {
-                        $body = str_replace('[tracking_number]', $details, $body);
-                    }
-                    self::sms($body, $to);
-                }
+                    foreach ($reference_1_id as $return_note) {
 
+                        $tracking_no = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
+                            ->where('return_note_shipments.return_note_id', $return_note->return_id)
+                            ->select('s.tracking_number')
+                            ->get();
+
+                        $temp = $tracking_no->pluck('tracking_number')->toArray();
+                        $tracking = implode(',', $temp);
+
+                        if (strpos($body, '[return_notes_id]') !== FALSE) {
+                            $body = str_replace('[return_notes_id]', $return_note->return_id, $body);
+                        }
+                        if (strpos($body, '[shipments_count]') !== FALSE) {
+                            $body = str_replace('[shipments_count]', $return_note->total_shipments, $body);
+                        }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $tracking, $body);
+                        }
+
+                        $to = $return_note['phone_number'];
+
+                        self::sms($body, $to);
+                        $return_note = null;
+                    }
+                }
             }
         }
     }
