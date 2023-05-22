@@ -1065,7 +1065,7 @@ class DeliveryController extends Controller
                             $url             = $payment_detials['url'];
                             $shipments_id = array_wrap($shipment);
                             CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
-                            //NotificationsController::send(12, $note->id, $shipment,$payment_link);   
+                        //NotificationsController::send(12, $note->id, $shipment,$payment_link);   
                         }
                     }
                     else{

@@ -3276,9 +3276,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
         });
         
-
-         //Added My Murad
-
         Route::prefix('fintech_company_charges')->name('fintech_company_charges.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@setup_fintech_charges_index')->name('index');
             Route::get('add', 'Admins\GlobalSettingsController@setup_fintech_charges_show')->name('form');
