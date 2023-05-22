@@ -344,7 +344,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $datatable->whereBetween('journey.created_at', [$from, $to]);
         }
         if ($status_id = $request->get('search_shipment_status')) {
             //            dd($status_id);
