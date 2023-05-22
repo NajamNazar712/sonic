@@ -446,6 +446,7 @@
                                     <th class="border-primary border-darken-1">Address Longitude</th>
                                     <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
@@ -981,6 +982,7 @@
                             head.push('Address Longitude');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
+                            head.push('Arrival to Today (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
                             head.push('Last Comment Date');
@@ -1027,6 +1029,7 @@
                                 row.push(values.address_longitude);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
+                                row.push(values.arrival_today);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
                                 row.push(values.last_comment_date);
@@ -1333,6 +1336,7 @@
                     {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
+                    {data: 'arrival_today', name: 'sj1.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},

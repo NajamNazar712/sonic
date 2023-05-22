@@ -198,12 +198,20 @@ class CRMDashboardController extends Controller
             ->leftjoin('segments as seg','us.segment_id','seg.id')
             ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
             ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment',)
+            ->leftJoin('shipments_journey as sj1', function ($join) {
+                $join->on('sj1.shipment_id', '=', 'crm_requests.shipment_id')
+                    ->where(
+                        'sj1.id',
+                        '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
+                    );
+            })
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
             // ->get();
             // dd($in_process_request);
-          
+            $current_date = Carbon::now();
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
             $in_process_request = $in_process_request->where(function ($query) {
                 $query->where(function ($sub_query) {
@@ -603,7 +611,6 @@ class CRMDashboardController extends Controller
                 }
             })
             ->orderColumn('tagged_to_manual', DB::raw('IF (crt.crm_request_tagging_type_id = 1, adp.name, IF (crt.crm_request_tagging_type_id = 2, at.name, ""))') . ' $1')
-            
             ->addColumn('tagged_to_kae', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
@@ -776,6 +783,10 @@ class CRMDashboardController extends Controller
                     $responsible_zone = '-';
                 }
                 return $responsible_zone;
+            })->addColumn('arrival_today', function ($request)use($current_date) {
+                return ($request->arrival_date && $current_date) ? with((new Carbon($request->arrival_date, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
+                    $date->isSunday();
+                }, $current_date)) : '-';
             });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
