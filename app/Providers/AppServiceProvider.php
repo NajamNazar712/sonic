@@ -3,8 +3,10 @@
 namespace App\Providers;
 
 
+use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
 use App\DailyVisit;
 use App\Http\Models\Admin\AdminsScreenList;
+use App\Http\Models\Notification;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
@@ -51,10 +53,39 @@ class AppServiceProvider extends ServiceProvider
 
                 $ticker = $settings->text;
 
-                if (!empty($ticker)) {
-                    $view->with('ticker', $ticker);
-                }
+                $current_user = session('user_id');
+                $return_users = NotificationReturnedDeliveredToShipper::where('user_id',$current_user)->where('status',1);
 
+                if ($return_users->exists())
+                {
+                    $return_users = $return_users->get();
+                    $tick_data = "";
+                    $notification = Notification::find(216);
+                    if ($notification) {
+                        if ($notification->status) {
+                            $body = $notification->body;
+                            foreach ($return_users as $key => $return_noted) {
+                                $old_body = $body;
+                                if (strpos($old_body, '[return_notes_id]') !== FALSE) {
+                                    $old_body = str_replace('[return_notes_id]', $return_noted->return_note_id, $old_body);
+                                }
+                                if (strpos($old_body, '[shipments_count]') !== FALSE) {
+                                    $old_body = str_replace('[shipments_count]', $return_noted->shipment_count, $old_body);
+                                }
+                                $tick_data .=  $old_body . "\n\n";
+
+                            }
+                        }
+                    }
+
+                    $view->with('ticker',$tick_data);
+                }
+                else
+                {
+                    if (!empty($ticker)) {
+                        $view->with('ticker', $ticker);
+                    }
+                }
             }
 
             if($search_sonic && $search_sonic->exists()){

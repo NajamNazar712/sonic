@@ -109,11 +109,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
 use App\Jobs\ProcessOTPSMSForBotSMS;
-
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
+use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
 class NotificationsController extends Controller
 {
     static private function sms($body, $to, $otp = NULL)
@@ -10178,6 +10177,7 @@ class NotificationsController extends Controller
                 }
                 // Today work has been done
                 else if ($id == 216) {
+                    $notify = [];
                     foreach ($reference_1_id as $key=> $return_noted) {
                         $old_body = $body;
                         if (strpos($old_body, '[return_notes_id]') !== FALSE) {
@@ -10186,10 +10186,21 @@ class NotificationsController extends Controller
                         if (strpos($old_body, '[shipments_count]') !== FALSE) {
                             $old_body = str_replace('[shipments_count]', $return_noted->total_shipments, $old_body);
                         }
-
                         $to = $return_noted['phone_number'];
                         self::sms($old_body, $to);
+                        $notify[$key] = [
+                            'return_note_id'=>$return_noted->return_id,
+                            'user_id'=>$return_noted->user_id,
+                            'shipment_count'=>$return_noted->total_shipments,
+                            'status'=>1,
+                            'created_at'=>Carbon::now(),
+                            'updated_at'=>Carbon::now(),
+                        ];
                     }
+                    $user_ids = $reference_1_id->pluck('user_id')->toArray();
+                    NotificationReturnedDeliveredToShipper::whereIn('user_id',$user_ids)->update(['status'=>0]);
+                    NotificationReturnedDeliveredToShipper::insert($notify);
+
                 }
             }
         }
