@@ -304,7 +304,8 @@ class ShipperReturnController extends Controller
     public function return_marked_single_status(Request $request){
         $parcel = Shipment::find($request->shipment_id);
         if($parcel){
-            if(!in_array($parcel->shipper_status_id, [20, 52])){
+            // if(!in_array($parcel->shipper_status_id, [20, 52])){
+            if($parcel->shipper_status_id == 12){
 
 //                if (!$parcel->packaging_material_request) {
                     Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
