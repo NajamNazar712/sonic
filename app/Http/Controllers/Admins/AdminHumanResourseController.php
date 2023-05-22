@@ -3169,11 +3169,11 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
         $payslips = EmployeePayslip::leftjoin('payslip_pdfs as pp', 'pp.payslip_id', '=', 'employee_payslips.id')->select('employee_payslips.id as id', 'employee_payslips.payroll_month as payroll_month', 'employee_payslips.trax_id as trax_id', 'employee_payslips.name as name', 'employee_payslips.designation as designation', 'employee_payslips.department as department', 'employee_payslips.hub as hub', 'employee_payslips.zone as zone', 'employee_payslips.joining_date as joining_date', 'employee_payslips.cnic as cnic', 'employee_payslips.total_deduction as total_deduction', 'employee_payslips.net_salary as net_salary', 'employee_payslips.iban as iban', 'employee_payslips.total_salary as total_salary', 'employee_payslips.hub_id as hub_id', 'pp.id as pdf_id', 'pp.file_path as file_path');
-        // if (!in_array(596, session('permissions'))) {
-        //     $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
-        // } else {
-        //     $payslips->whereIn('hub_id', session('hubs'));
-        // }
+        if (!in_array(596, session('permissions'))) {
+            $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
+        } else {
+            $payslips->whereIn('hub_id', session('hubs'));
+        }
 
         $datatable = Datatables::of($payslips)
             ->editColumn('total_salary', function ($payslip) {
