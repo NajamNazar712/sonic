@@ -9131,6 +9131,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[consignee]', $shipment->consignee_name, $body);
                     }
 
+
                     if (strpos($body, '[tracking_number]') !== FALSE) {
                         $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
                     }
@@ -10177,31 +10178,17 @@ class NotificationsController extends Controller
                 }
                 // Today work has been done
                 else if ($id == 216) {
-
-                    foreach ($reference_1_id as $return_note) {
-
-                        $tracking_no = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
-                            ->where('return_note_shipments.return_note_id', $return_note->return_id)
-                            ->select('s.tracking_number')
-                            ->get();
-
-                        $temp = $tracking_no->pluck('tracking_number')->toArray();
-                        $tracking = implode(',', $temp);
-
-                        if (strpos($body, '[return_notes_id]') !== FALSE) {
-                            $body = str_replace('[return_notes_id]', $return_note->return_id, $body);
+                    foreach ($reference_1_id as $key=> $return_noted) {
+                        $old_body = $body;
+                        if (strpos($old_body, '[return_notes_id]') !== FALSE) {
+                            $old_body = str_replace('[return_notes_id]', $return_noted->return_id, $old_body);
                         }
-                        if (strpos($body, '[shipments_count]') !== FALSE) {
-                            $body = str_replace('[shipments_count]', $return_note->total_shipments, $body);
-                        }
-                        if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $tracking, $body);
+                        if (strpos($old_body, '[shipments_count]') !== FALSE) {
+                            $old_body = str_replace('[shipments_count]', $return_noted->total_shipments, $old_body);
                         }
 
-                        $to = $return_note['phone_number'];
-
-                        self::sms($body, $to);
-                        $return_note = null;
+                        $to = $return_noted['phone_number'];
+                        self::sms($old_body, $to);
                     }
                 }
             }

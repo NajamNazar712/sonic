@@ -47,20 +47,27 @@ class NotificationReturnedDeliveredToShipper extends Command
      */
     public function handle()
     {
-        $from = Carbon::today()->subDay()->toDateTimeString();
+        $from =  Carbon::now()->startOfDay()->toDateTimeString();
         $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
-        $users = GlobalSettings::where('type', 'returned_shipment_notification')->first();
-        $current_users = $users->text;
 
-        $return_notes = ReturnNote::join('return_note_shipments as rnsh', 'rnsh.return_note_id', '=', 'return_notes.id')
-            ->join('shipments', 'shipments.id', '=', 'rnsh.shipment_id')
-            ->join('users as u', 'u.id', '=', 'shipments.user_id')
-            ->select('rnsh.return_note_id as return_id', 'rnsh.shipment_id', 'shipments.user_id','u.phone as phone_number', DB::raw('COUNT(rnsh.shipment_id) as total_shipments'))
-            ->groupBy('rnsh.return_note_id')
-            ->whereIn('shipments.user_id', explode(',', $current_users))
-            ->whereBetween('return_notes.updated_at', [$from, $to])
-            ->get();
-          NotificationsController::send(216,$return_notes);
+        $users = GlobalSettings::where('type', 'returned_shipment_notification');
+        if($users->exists()) {
+            $users = $users->first();
+            $current_users = $users->text;
+            $c_user = explode(',', $current_users);
+
+            $return_notes = ReturnNote::join('return_note_shipments as rnsh', 'rnsh.return_note_id', '=', 'return_notes.id')
+                ->join('shipments', 'shipments.id', '=', 'rnsh.shipment_id')
+                ->join('users as u', 'u.id', '=', 'shipments.user_id')
+                ->select('return_notes.id as return_id', 'rnsh.shipment_id', 'shipments.user_id', 'u.phone as phone_number', 'return_notes.shipments_count as total_shipments')
+                ->groupBy('return_notes.id')
+                ->whereIn('shipments.user_id', $c_user)
+                ->whereBetween('return_notes.updated_at', [$from, $to])
+//            ->pluck('return_id')->toArray();
+                ->get();//                dd($return_notes);
+            ;
+            NotificationsController::send(216, $return_notes);
+        }
     }
 }
