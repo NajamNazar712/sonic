@@ -21,10 +21,7 @@ Route::name('api.')->group(function () {
     Route::post('store_device_token', 'APIController@store_device_token')->name('store_device_token');
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
-
-    Route::get('test11', function(Request $request){
-        return response()->json('experiment here', 200);
-    });
+    Route::post('test11', 'APIController@test11')->name('test11');
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 

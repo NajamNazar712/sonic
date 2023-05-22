@@ -196,6 +196,9 @@ class APIController extends Controller
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
     ];
 
+    public function test11(){
+        return response()->json(['test' => 'Hello']);
+    }
     public static function phone_number($phone_number)
     {
         //Removing anything after Comma (,)
