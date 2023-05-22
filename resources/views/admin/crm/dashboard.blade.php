@@ -432,8 +432,8 @@
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
                                     <th class="border-primary border-darken-1">Tagged (Admin/Department)</th>
-                                    <th class="border-primary border-darken-1">Manual Tagged To</th>
-                                    <th class="border-primary border-darken-1">Tagged At</th>
+                                    {{-- <th class="border-primary border-darken-1">Manual Tagged To</th>
+                                    <th class="border-primary border-darken-1">Tagged At</th> --}}
                                     <th class="border-primary border-darken-1">Auto Tagged To KAE</th>
                                     <th class="border-primary border-darken-1">Auto Tagged To Operation</th>
                                   {{--  <th class="border-primary border-darken-1">Special Request</th>--}}
@@ -442,11 +442,12 @@
                                     <th class="border-primary border-darken-1">Agent Assigned Date</th>
                                     <th class="border-primary border-darken-1">Agent Assigned By</th>
                                     <th class="border-primary border-darken-1">Address</th>
-                                    <th class="border-primary border-darken-1">Address Latitude</th>
-                                    <th class="border-primary border-darken-1">Address Longitude</th>
+                                    {{-- <th class="border-primary border-darken-1">Address Latitude</th>
+                                    <th class="border-primary border-darken-1">Address Longitude</th> --}}
                                     <th class="border-primary border-darken-1">Valid Date</th>
                                     <th class="border-primary border-darken-1">Launched To Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Arrival to Today (TAT)</th>
+                                    <th class="border-primary border-darken-1">Last status to Today (TAT)</th>
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
@@ -968,8 +969,8 @@
                             head.push('Launched By');
                             head.push('Launched By Type');
                             head.push('Tagged (Admin/Department)');
-                            head.push('Manual Tagged To');
-                            head.push('Tagged At');
+                            // head.push('Manual Tagged To');
+                            // head.push('Tagged At');
                             head.push('Auto Tagged To KAE');
                             head.push('Auto Tagged To Operation');
                             
@@ -978,11 +979,12 @@
                             head.push('Agent Assigned Date');
                             head.push('Agent Assigned By');
                             head.push('Address');
-                            head.push('Address Latitude');
-                            head.push('Address Longitude');
+                            // head.push('Address Latitude');
+                            // head.push('Address Longitude');
                             head.push('Valid Date');
                             head.push('Launched To Today (TAT)');
                             head.push('Arrival to Today (TAT)');
+                            head.push('Last status to Today (TAT)');
                             head.push('Last Comment By');
                             head.push('Last Comment');
                             head.push('Last Comment Date');
@@ -1015,8 +1017,8 @@
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
                                 row.push(values.tagged);
-                                row.push(values.tagged_to_manual);
-                                row.push(values.tagged_date);
+                                // row.push(values.tagged_to_manual);
+                                // row.push(values.tagged_date);
                                 row.push(values.tagged_to_kae);
                                 row.push(values.tagged_to_operation);
                                 
@@ -1025,11 +1027,12 @@
                                 row.push(values.agent_assigned_date);
                                 row.push(values.agent_assigned_by);
                                 row.push(values.address);
-                                row.push(values.address_latitude);
-                                row.push(values.address_longitude);
+                                // row.push(values.address_latitude);
+                                // row.push(values.address_longitude);
                                 row.push(values.valid_date);
                                 row.push(values.current_tat);
                                 row.push(values.arrival_today);
+                                row.push(values.last_status_today);
                                 row.push(values.last_comment_name);
                                 row.push(values.last_comment.replace(/<br>/gi, '\n'));
                                 row.push(values.last_comment_date);
@@ -1322,9 +1325,9 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
+                    // {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
                   /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
-                    {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
+                    // {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
@@ -1332,11 +1335,12 @@
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
-                    {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
-                    {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
+                    // {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
+                    // {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
-                    {data: 'arrival_today', name: 'sj1.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
+                    {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
+                    {data: 'last_status_today', name: 's.updated_at', class: 'align-middle last_status_today', orderable: false, searchable: false},
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
