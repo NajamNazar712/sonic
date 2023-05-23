@@ -1524,7 +1524,7 @@ class RiderManagementController extends Controller
 
 
         if ($search_rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('id', '=', $search_rider);
+            $datatables = $datatables->where('rider_id', '=', $search_rider);
         }
 
         if ($search_remark = $request->get('search_remark')) {
