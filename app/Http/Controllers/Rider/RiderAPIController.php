@@ -14111,7 +14111,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-            $createdAt = Carbon::parse($rider_time_period->created_at);
+            $createdAt = Carbon::parse($rider_time_period['created_at']);
             $newDate = $createdAt->copy()->endOfDay();
 
             if(!isset($rider_time_period) || $newDate->isPast()){
