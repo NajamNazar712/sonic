@@ -118,7 +118,8 @@ class CRMDashboardController extends Controller
         {
             // ActivityTrailController::createActivityTrailLog(Auth::id(),313);
         }
-        $in_process_request = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+
+        $dashboard_list = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
             ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
             ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
@@ -206,14 +207,15 @@ class CRMDashboardController extends Controller
             //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
             //         );
             // })
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today')
+            // ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'us.sub_segment_id')
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value')
             ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
             // ->get();
-            // dd($in_process_request);
+            // dd($dashboard_list);
             $current_date = Carbon::now();
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
-            $in_process_request = $in_process_request->where(function ($query) {
+            $dashboard_list = $dashboard_list->where(function ($query) {
                 $query->where(function ($sub_query) {
                     $sub_query->where('crm_requests.agent_id', Auth::id())
                         ->orWhere(function ($sub_query) {
@@ -254,14 +256,14 @@ class CRMDashboardController extends Controller
             });
         }
         else if (in_array(session('role_id'), [67, 43])){
-            $in_process_request = $in_process_request->where('at.id', Auth::id());
+            $dashboard_list = $dashboard_list->where('at.id', Auth::id());
         }
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
-                $in_process_request = $in_process_request->where('spt.admin_id', Auth::id());
+                $dashboard_list = $dashboard_list->where('spt.admin_id', Auth::id());
             }
         }
-        $datatables = Datatables::of($in_process_request)
+        $datatables = Datatables::of($dashboard_list)
             ->setRowAttr([
                 'class' => function ($shipments) {
                     $ret = '';
@@ -792,11 +794,24 @@ class CRMDashboardController extends Controller
                 return ($request->last_status_today && $current_date) ? with((new Carbon($request->last_status_today, 'UTC'))->diffInWeekendDays($current_date) - (new Carbon($request->last_status_today, 'UTC'))->diffInDaysFiltered(function (Carbon $date) {
                     $date->isSunday();
                 }, $current_date)) : '-';
+            })
+            ->addColumn('shipper_category', function($requests){
+                if($requests->kae != null){
+                    return 'Key Account';
+                }else{
+                    return 'Non-Key Account';
+                }
             });
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
+        // if ($origin = $request->get('search_origin')) {
+        //     $datatables->where('oc.id', '=', $origin);
+        // }
+        // if ($destination = $request->get('search_destination')) {
+        //     $datatables->where('dc.id', '=', $destination);
+        // }
 
         if($request->get('star_shipper_filter') == 1)
         {

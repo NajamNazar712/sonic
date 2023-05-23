@@ -76,8 +76,8 @@
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <select name="search_destination" id="search_destination" class="form-control select2">
-                                            @foreach($cities as $city)
-                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @foreach($cities as $destination)
+                                                <option value="{{$destination->id}}">{{$destination->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
@@ -91,8 +91,8 @@
                                             @endforeach
                                         </select> --}}
                                         <select name="search_origin" id="search_origin" class="select2 form-control">
-                                            @foreach($cities as $city)
-                                                <option value="{{$city->id}}">{{$city->name}}</option>
+                                            @foreach($cities as $origin)
+                                                <option value="{{$origin->id}}">{{$origin->name}}</option>
                                             @endforeach
                                         </select>
                                     </fieldset>
@@ -422,6 +422,7 @@
                                     <th class="border-primary border-darken-1">Last Status Date</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
                                     <th class="border-primary border-darken-1">Case Nature Type</th>
+                                    <th class="border-primary border-darken-1">COD Value</th>
                                     <th class="border-primary border-darken-1">Description</th>
                                     <th class="border-primary border-darken-1">Channel</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -959,6 +960,7 @@
                             head.push('Last Status Date');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
+                            head.push('COD Value');
                             head.push('Description');
                             head.push('Channel');
                             head.push('Shipping Mode');
@@ -1007,6 +1009,7 @@
                                 row.push(values.last_status_date);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
+                                row.push(values.cod_value);
                                 row.push(values.description);
                                 row.push(values.channel);
                                 row.push(values.shipping_mode);
@@ -1315,6 +1318,7 @@
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
