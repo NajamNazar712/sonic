@@ -429,6 +429,7 @@
                                     <th class="border-primary border-darken-1">Sales Person</th>
                                     <th class="border-primary border-darken-1">KAE</th>
                                     <th class="border-primary border-darken-1">Segment</th>
+                                    <th class="border-primary border-darken-1">Key account category</th>
                                     <th class="border-primary border-darken-1">Agent</th>
                                     <th class="border-primary border-darken-1">Launched By</th>
                                     <th class="border-primary border-darken-1">Launched By Type</th>
@@ -967,6 +968,7 @@
                             head.push('Sales Person');
                             head.push('KAE');
                             head.push('Segment');
+                            head.push('Key account category');
                             head.push('Agent');
                             head.push('Launched By');
                             head.push('Launched By Type');
@@ -1016,6 +1018,7 @@
                                 row.push(values.sale_person);
                                 row.push(values.kae);
                                 row.push(values.segment);
+                                row.push(values.shipper_category);
                                 row.push(values.agent);
                                 row.push(values.launched_by_name);
                                 row.push(values.added_by);
@@ -1325,6 +1328,7 @@
                     {data: 'sale_person', name: 'ad1.name', class: 'align-middle sale_person'},
                     {data: 'kae', name: 'ad2.name', class: 'align-middle kae'},
                     {data: 'segment', name: 'seg.name', class: 'align-middle segment'},
+                    {data: 'shipper_category', name: 'shipper_category', class: 'align-middle shipper_category'},
                     {data: 'agent', name: 'ad.name', class: 'align-middle agent'},
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
@@ -2142,6 +2146,9 @@
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
             });
         });
     </script>

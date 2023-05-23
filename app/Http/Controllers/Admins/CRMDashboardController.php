@@ -153,6 +153,7 @@ class CRMDashboardController extends Controller
             ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
             ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
+            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
@@ -806,12 +807,12 @@ class CRMDashboardController extends Controller
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
-        // if ($origin = $request->get('search_origin')) {
-        //     $datatables->where('oc.id', '=', $origin);
-        // }
-        // if ($destination = $request->get('search_destination')) {
-        //     $datatables->where('dc.id', '=', $destination);
-        // }
+        if ($origin = $request->get('search_origin')) {
+            $datatables->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $datatables->where('dc.id', '=', $destination);
+        }
 
         if($request->get('star_shipper_filter') == 1)
         {
