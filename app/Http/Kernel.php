@@ -70,7 +70,6 @@ class Kernel extends HttpKernel
         'AdminAPIDWSToken' => \App\Http\Middleware\AdminAPIDWSToken::class,
         'RetailUserAPIToken' => \App\Http\Middleware\RetailUserAPIToken::class,
         'ConsigneeAPIToken' => \App\Http\Middleware\ConsigneeAPIToken::class,
-        'ShipperAPIToken' => \App\Http\Middleware\ShipperAPIToken::class,
-        'XSS' => \App\Http\Middleware\XSSMiddleware::class,
+        'ShipperAPIToken' => \App\Http\Middleware\ShipperAPIToken::class
     ];
 }

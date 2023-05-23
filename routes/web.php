@@ -18,7 +18,7 @@ Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->n
 
 Route::get('/', function () {
     return redirect()->route('cod.login');
-})->middleware('XSS');
+});
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
