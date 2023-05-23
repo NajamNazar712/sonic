@@ -14110,12 +14110,20 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $rider_remark = new RiderRemark;
-            $rider_remark->rider_id = $request->rider_id;
-            $rider_remark->rider_remarks = $request->rider_remarks;
-            $rider_remark->save();
-            return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
-        }
+            $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
+            $createdAt = Carbon::parse($rider_time_period->created_at);
+            $newDate = $createdAt->copy()->endOfDay();
+
+            if(!isset($rider_time_period) || $newDate->isPast()){
+                $rider_remark = new RiderRemark;
+                $rider_remark->rider_id = $request->rider_id;
+                $rider_remark->rider_remarks = $request->rider_remarks;
+                $rider_remark->save();
+                return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
+            }
+        }   
            
     }
     public function rider_remark_list(Request $request)
