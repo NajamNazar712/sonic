@@ -1418,10 +1418,6 @@ class RiderManagementController extends Controller
         $riders = Rider::where('status', '1')->select('id', 'name')->get();
         $remarks = RiderRemark::select('id')->get();
         $statuses = RiderRemarkStatus::with('rider_remarks')->get();
-        // foreach($statuses as $status){
-
-        //     dd(gettype($status->rider_remarks->rider_remarks_status_id));
-        // }
         return view('admin.rider.rider_remarks')->with(['cities' => $cities, 'riders' => $riders, 'remarks' => $remarks, 'statuses' => $statuses]);
     }
 

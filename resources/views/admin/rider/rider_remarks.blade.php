@@ -348,7 +348,6 @@
             $('#rider_remarks').on('submit', function(event) {
                 event.preventDefault(); 
                 let initial_response = $("#initial_response").val();
-                console.log(initial_response)
                     $.ajax({
                         url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
                         , method: 'POST'
@@ -391,7 +390,6 @@
 
         $('body').on('click', '.final_response', function(event) {
             var id = $(this).attr('data-id');
-            console.log(id)
             $('#rider_remarks_final').modal('show');
 
             $('#rider_remarks_final').on('submit', function(event) {
@@ -417,7 +415,9 @@
                                     , containerId: 'toast-top-center'
                                 });
                             } else {
-                                toastr.error(data.error, 'Error!', {
+                                var error = "Please Fill To Submit A Response";
+
+                                toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center'
                                     , containerId: 'toast-top-center'
                                 });
