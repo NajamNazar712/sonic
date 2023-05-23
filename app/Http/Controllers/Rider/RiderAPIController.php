@@ -14100,13 +14100,8 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-            $createdAt = Carbon::parse($rider_time_period['created_at']);
+            $createdAt = Carbon::parse($rider_time_period->created_at);
             $newDate = $createdAt->copy()->endOfDay();
-            $remaining_time = Carbon::now()->diff($newDate);
-
-            $hours_remaining = $remaining_time->h;
-            $minutes_remaining = $remaining_time->i;
-            $seconds_remaining = $remaining_time->s;
 
             if(!isset($rider_time_period) || $newDate->isPast()){
                 $rider_remark = new RiderRemark;
@@ -14115,7 +14110,7 @@ class RiderAPIController extends Controller
                 $rider_remark->save();
                 return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
             }else{
-                return response()->json(['status' => 1, 'message' => 'Try After This Remaining Time: '.$hours_remaining.' hours, '.$minutes_remaining.' minutes, '.$seconds_remaining.' seconds']);
+                return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
             }
         }   
            
