@@ -48,7 +48,8 @@ class AutoDeliveryNoteVerify extends Command
      */
     public function handle()
     {
-        $date = Carbon::yesterday();
+        $date = Carbon::today()->subDays(9);
+
         $excluded_hubs = array();
         $setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
 
@@ -63,7 +64,7 @@ class AutoDeliveryNoteVerify extends Command
                     $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
                 }
 
-                $delivery_notes = DeliveryNote::whereDate('created_at', $date)->where(['status' => 0, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
+                $delivery_notes = DeliveryNote::whereDate('created_at', '>=', $date)->where(['status' => 0, 'pending_status' => 1])->whereNotIn('hub_id', $excluded_hubs);
 
                 if($delivery_notes->exists()){
                     $delivery_notes = $delivery_notes->get();
