@@ -14173,7 +14173,7 @@ class RiderAPIController extends Controller
         }else{
             return response()->json(['status' => 1, 'data' => 'No Remarks Have Been Found']);
         }    
-    }
+     }
 
 
 }
