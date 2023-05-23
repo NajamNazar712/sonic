@@ -14126,6 +14126,8 @@ class RiderAPIController extends Controller
     }
     public function rider_remark_list(Request $request)
     {
+        $rider = $request->rider_id;
+
         $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
         ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by')
         ->leftJoin('cities as city', 'r.city_id', '=', 'city.id')
@@ -14142,6 +14144,7 @@ class RiderAPIController extends Controller
             ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
         })
         ->leftJoin('rider_remark_statuses as rrs', 'rrs.id', '=', 'rider_remarks.rider_remarks_status_id')
+        ->where('rider_remarks.rider_id', '=', $rider)
         ->select([
             'rider_remarks.id as id',
             'r.name as rider_name',
