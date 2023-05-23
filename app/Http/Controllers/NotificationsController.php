@@ -10178,8 +10178,11 @@ class NotificationsController extends Controller
                 // Today work has been done
                 else if ($id == 216) {
                     $notify = [];
+
                     foreach ($reference_1_id as $key=> $return_noted) {
+
                         $old_body = $body;
+
                         if (strpos($old_body, '[return_notes_id]') !== FALSE) {
                             $old_body = str_replace('[return_notes_id]', $return_noted->return_id, $old_body);
                         }
@@ -10187,7 +10190,7 @@ class NotificationsController extends Controller
                             $old_body = str_replace('[shipments_count]', $return_noted->total_shipments, $old_body);
                         }
                         $to = $return_noted['phone_number'];
-                        self::sms($old_body, $to);
+                       /* self::sms($old_body, $to);*/
                         $notify[$key] = [
                             'return_note_id'=>$return_noted->return_id,
                             'user_id'=>$return_noted->user_id,
@@ -10197,6 +10200,7 @@ class NotificationsController extends Controller
                             'updated_at'=>Carbon::now(),
                         ];
                     }
+
                     $user_ids = $reference_1_id->pluck('user_id')->toArray();
                     NotificationReturnedDeliveredToShipper::whereIn('user_id',$user_ids)->update(['status'=>0]);
                     NotificationReturnedDeliveredToShipper::insert($notify);
