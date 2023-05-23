@@ -12552,7 +12552,17 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
+                    
                     $deliveries['tracking_number'] = $tracking_number;
+
+                    if($shipment_data->shipper_status_id == 5)
+                    {
+                        $shipment_reattempt = ShipmentsJourney::where('shipment_id', '=', $deliveries['shipment_id'])
+                        ->orderBy('id', 'desc')
+                        ->skip(1)
+                        ->first();
+                    }
+                    
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
@@ -12563,6 +12573,7 @@ class RiderAPIController extends Controller
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
+                    $deliveries['shipment_reattempt'] = $shipment_reattempt->shipper_status_id == 13 ? 1 : 0;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
@@ -14100,10 +14111,8 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-            $createdAt = Carbon::parse($rider_time_period->created_at);
-            $newDate = $createdAt->copy()->endOfDay();
-
-            if(!isset($rider_time_period) || $newDate->isPast()){
+            
+            if(!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()){
                 $rider_remark = new RiderRemark;
                 $rider_remark->rider_id = $request->rider_id;
                 $rider_remark->rider_remarks = $request->rider_remarks;
