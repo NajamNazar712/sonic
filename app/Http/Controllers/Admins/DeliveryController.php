@@ -994,8 +994,6 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-
                     $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                     if ($handover_shipments->exists()) {
                         $handover_shipments = $handover_shipments->first();
@@ -1015,9 +1013,6 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-
-                    NotificationsController::send(10, $note->id, $shipment);
-                    NotificationsController::send(11, $note->id, $shipment);
 
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                     $dbf_otp = mt_rand(100000, 999999);
@@ -1050,6 +1045,10 @@ class DeliveryController extends Controller
                         $shipment_otp->otp = null;
                         $shipment_otp->save();
                     }
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                    NotificationsController::send(10, $note->id, $shipment);
+                    NotificationsController::send(11, $note->id, $shipment);
+
                 }
                 $process_one_link['shipment_ids'] = $valid_shipments;
                 $process_one_link['delivery_note_id'] = $note->id;
