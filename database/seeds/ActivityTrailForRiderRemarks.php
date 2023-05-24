@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class ActivityTrailForRiderComments extends Seeder
+class ActivityTrailForRiderRemarks extends Seeder
 {
     /**
      * Run the database seeds.
