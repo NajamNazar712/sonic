@@ -14168,7 +14168,7 @@ class RiderAPIController extends Controller
         if(!$rider_remarks->isEmpty()){
             return response()->json(['status' => 0, 'data' => $rider_remarks]);
         }else{
-            return response()->json(['status' => 1, 'data' => 'No Remarks Have Been Found']);
+            return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
         }
     }
 
