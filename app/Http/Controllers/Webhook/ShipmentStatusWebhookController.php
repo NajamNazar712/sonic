@@ -53,6 +53,9 @@ class ShipmentStatusWebhookController extends Controller
                 if($shipment_otp){
                     $data['otp'] = $shipment_otp->otp;
                 }
+                else{
+                    $data['otp'] = NULL;
+                }
             }
             else{
                 $data['otp'] = NULL;
