@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentOtp;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
 use App\Jobs\ProcessShipmentStatusWebhook;
@@ -17,7 +19,7 @@ use Illuminate\Support\Facades\Log;
 
 class ShipmentStatusWebhookController extends Controller
 {
-    static public function webhook_subscription($shipment_id, $shipper_status_id){
+    static public function webhook_subscription($shipment_id, $shipper_status_id, $status_reason_id = NULL){
 
         $date = Carbon::now()->toDateTimeString();
         $shipment = Shipment::find($shipment_id);
@@ -39,6 +41,23 @@ class ShipmentStatusWebhookController extends Controller
                 $data['status'] = ShipmentStatus::find($shipper_status_id)->name;
             }
 
+            if($status_reason_id){
+                $data['reason'] = ShipmentStatusReason::find($status_reason_id)->name;
+            }
+            else{
+                $data['reason'] = NULL;
+            }
+
+            if($shipper_status_id == 5){
+                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
+                if($shipment_otp){
+                    $data['opt'] = $shipment_otp->otp;
+                }
+            }
+            else{
+                $data['opt'] = NULL;
+            }
+
             $data['date_time'] = $date;
             $data['url'] = $subscriber->url;
             dispatch(new ProcessShipmentStatusWebhook($data));
@@ -46,7 +65,7 @@ class ShipmentStatusWebhookController extends Controller
         }
     }
 
-    static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date){
+    static public function webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason = NULL, $otp = NULL){
         $attempts = 5;
         $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'connect_timeout' => 30, 'timeout' => 30]);
 
@@ -54,12 +73,18 @@ class ShipmentStatusWebhookController extends Controller
         for($i = 0; $i < $attempts; $i++){
             try{
 
+                $payload = [];
+                $payload['tracking_number'] = $tracking_number;
+                $payload['status'] = $status;
+                $payload['date_time'] = $date;
+                if($reason){
+                    $payload['reason'] = $reason;
+                }
+                if($otp){
+                    $payload['otp'] = $otp;
+                }
                 $response = $client->post('', [
-                    'form_params' => [
-                        'tracking_number' => $tracking_number,
-                        'status' => $status,
-                        'date_time' => $date
-                    ]
+                    'form_params' => $payload
                 ]);
                 $status_code = $response->getStatusCode();
 
