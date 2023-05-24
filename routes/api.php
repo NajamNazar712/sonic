@@ -171,6 +171,11 @@ Route::name('api.')->group(function () {
                 Route::post('', 'Rider\RiderAPIController@get_rider_location')->name('get');
             });
 
+            Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
+                Route::post('add', 'Rider\RiderAPIController@rider_remarks')->name('add');
+            });
+
+      
             //Current
             Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
@@ -200,6 +205,9 @@ Route::name('api.')->group(function () {
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
             });
+
+           
+
 
 
             Route::prefix('history')->name('history.')->group(function () {

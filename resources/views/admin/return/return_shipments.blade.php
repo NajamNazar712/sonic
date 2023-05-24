@@ -14,20 +14,25 @@
 
 
             <div class="row mb-2 justify-content-center">
-
-                    <div class="col-4 form-group">
-                        <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($receive_notes_id as $receive_note_id)
-                            <option value="{{$receive_note_id->id}}">{{$receive_note_id->id}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-2 mb-3">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
+                <div class="col-4 form-group">
+                    <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
+                        @endforeach
+                    </select>
                 </div>
-                
+                <div class="col-4 form-group">
+                    <select name="scan_return_note[]" id="scan_return_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($receive_notes_id as $receive_note_id)
+                        <option value="{{$receive_note_id->id}}">{{$receive_note_id->return_note_id_padded}}</option>
+                        @endforeach
+                    </select>
+                    
+                </div>
+                <div class="col-2 mb-3">
+                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                </div>
+            
 
             </div>
 
@@ -38,7 +43,7 @@
                     <th class="border-primary border-darken-1">S No.</th>
                     <th class="border-primary border-darken-1">Return Note No.</th>
                     <th class="border-primary border-darken-1">Rider ID</th>
-                    <th class="border-primary border-darken-1">Rider Name</th>
+                    <th class="border-primary border-darken-1">Rider</th>
                     <th class="border-primary border-darken-1">Tracking Number</th>
                     <th class="border-primary border-darken-1">Created At</th>
                 </tr>
@@ -117,38 +122,59 @@
     $(document).ready(function() {
 
         function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.return.receive.rn.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+            $.ajax({
+                url: '{!! route('admin.return.receive.rn.print') !!}',
+                method: 'POST',
+                data: {
+                    'id': id,
+                    '_token': '{{ csrf_token() }}'
+                }
+            })
+            .done(function(data) {
+                var tab = window.open('', '_blank');
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
+                if(!tab) {
+                    swal({
+                        title: 'Popup Blocker Enabled!',
+                        text: 'Please add this site to your exception list.',
+                        icon: 'error',
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
                     });
-            }
-            $('body').on('click', '.printreturnnote', function() {
-                var returnnote = $(this).attr('data-id');
-                print(returnnote)
-                // console.log(returnnote);
+                }
+                else {
+                    tab.document.write(data);
+                    tab.document.close();
+                    tab.focus();
+                }
             });
+        }
+        $('body').on('click', '.printreturnnote', function() {
+            var returnnote = $(this).attr('data-id');
+            print(returnnote)
+            // console.log(returnnote);
+        });
+        $('#rider').on('change', function() {
+            var rider_id = $(this).val();
+            $.ajax({
+                url: '{!! route('admin.return.return_shipments.notes') !!}',
+                method: 'GET',
+                data: {
+                    'rider_id': rider_id,
+                }
+            })
+            .done(function(data) {
+                console.log(data);
+                $("#scan_return_note").empty();
+                let options = "";
+                data.receive_notes_ids.forEach(p => {
+                    options += `<option value="${p.id}">${p.return_note_id_padded}</option>`;
+                })
+                $('#scan_return_note').append(options);
+                
+            });
+            
+        });
        
 
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
@@ -190,6 +216,7 @@
             });
 
         var table = $('#datatable').DataTable({
+                
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: false, scrollY: '500px',
                 
@@ -204,7 +231,8 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Return Note Shipment',
+                        className: 'd-none',
+                        title: 'Return Note Shipments',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
                 ],
@@ -213,6 +241,7 @@
                     url: '{{ route('admin.return.return_shipments.list') }}',
                     data: function (d) {
                         d.return_note_number = $('#scan_return_note').val();
+                        d.rider_id = $('#rider').val();
                     }
                 },
                 rowId: 'return_note_id',
@@ -231,7 +260,7 @@
                     {data: 'return_note', name: 'return_notes.id', class: 'align-middle return_note'},
                     {data: 'riderID', name: 'riders.id', class: 'align-middle riderID'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number', name: 'sh.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
 
                   
@@ -239,6 +268,9 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    if(data)
+                        $(".buttons-excel").removeClass("d-none");
                 },
 
                 // drawCallback: function (settings) {
@@ -260,8 +292,9 @@
           
             $('#search_filter_btn').on('click',function () {
                 let return_note = $('#scan_return_note').val()
-                if(return_note.length == 0 ){
-                    var error = "Please add one Return note at least";
+                let rider = $('#rider').val()
+                if(return_note.length == 0 && rider == ""){
+                    var error = "Please select rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -271,10 +304,16 @@
 
 
             $('#scan_return_note').select2({
-            placeholder: 'Select Note ID'
-            , width: '100%'
-            , allowClear: true
-        })
+                placeholder: 'Select Note ID(s)'
+                , width: '100%'
+                , allowClear: true
+            })
+            
+            $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider*'
+                , width: '100%'
+                , allowClear: true
+            })
         
 
     })

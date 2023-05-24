@@ -899,6 +899,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\RiderManagementController@blacklist_list')->name('list');
             });
 
+
+            Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
+                Route::get('', 'Admins\RiderManagementController@rider_remarks_index')->name('index');
+                Route::get('list', 'Admins\RiderManagementController@rider_remarks_list')->name('list');
+            });
+            
+        
             Route::prefix('rider_request')->name('rider_request.')->group(function () {
                 Route::get('', 'Admins\RiderManagementController@rider_request_index')->name('index');
                 Route::get('list', 'Admins\RiderManagementController@rider_request_list')->name('list');
@@ -1382,6 +1389,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipments')->name('delivery_shipments.')->group(function () {
             Route::get('', 'Admins\DeliveryController@shipment_index')->name('index');
             Route::get('list', 'Admins\DeliveryController@shipment_list')->name('list');
+            Route::get('notes', 'Admins\DeliveryController@delivery_notes_list')->name('notes');
 
         });
 
@@ -1531,6 +1539,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('return_shipments')->name('return_shipments.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_shipments_index')->name('index');
             Route::get('list', 'Admins\ReturnController@return_shipments_list')->name('list');
+            Route::get('notes', 'Admins\ReturnController@return_notes_list')->name('notes');
         });
 
         Route::prefix('cx_sales')->name('cx_sales.')->group(function () {
@@ -2961,7 +2970,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_add')->name('add');
         });
 
-        Route::prefix('return_confirmation_pending_shipment_selection_time')->name('return_confirmation_pending_shipment_selection_time.')->group(function () {
+        Route::prefix('return_confirmation_pending_shipment_selection_time')->name('return_confirmation_pending_shipment_selection_time.')->group(function ()       {
             Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_store')->name('store');
         });

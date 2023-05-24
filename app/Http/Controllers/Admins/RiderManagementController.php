@@ -32,6 +32,7 @@ use App\RiderMainCategory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Rider\RiderRemark;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
@@ -1451,5 +1452,59 @@ class RiderManagementController extends Controller
 
         return back()->with(['success'=>"Rider OTP Updated Successfully"]);
     }
+
+
+
+    public function rider_remarks_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(),656);
+        return view('admin.rider.rider_remarks');
+    }
+
+    public function rider_remarks_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),657);
+        }
+        $rider_remarks = RiderRemark::leftJoin('rider as r', 'r.id', '=', 'rider_remarks.rider_id')
+        ->leftJoin('cities as city','r.id', '=', 'city.id')
+        ->leftjoin('zones as z','city.zone_id','=','z.id')
+        ->select('r.name as rider_name','r.id as id', 'r.trax_id as traxID','z.name as zone_name','rider_remarks.');
+
+
+    
+        return Datatables::of($rider_remarks)
+            ->editColumn('status', function ($rider_remarks) {
+                return ($rider_remarks->status == 1) ? 'In Process' : 'Resolved';
+            })
+            ->addColumn("action", function ($rider_remarks) {
+                if($rider_remarks->trax_id && $rider_remarks->trax_id != null){
+                    if (session('role_id') == 1) {
+                        $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                        ';
+                            if (session('role_id') == 1 || in_array(862, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $rider_remarks->id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve Rider</div></button>';
+                            }
+                        $dropdown .= '
+                            </div>
+                          </div>
+                        ';
+
+                        return $dropdown;
+                    } else {
+                        return '';
+                    }
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+
+
 
 }

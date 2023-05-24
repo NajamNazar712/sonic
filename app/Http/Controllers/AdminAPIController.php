@@ -8937,7 +8937,8 @@ class AdminAPIController extends Controller
             $riders = Rider::where('status', 1)
                 ->whereHas('city', function ($query) use ($hub_id) {
                     $query->where('hub_id', $hub_id);
-                })->select('id', 'name', 'route_id', 'trax_id');
+                })->where('riders.operation_rider_id', 2)
+                ->select('id', 'name', 'route_id', 'trax_id');
             if ($riders->exists()) {
                 $riders = $riders->get();
                 $data = array();
