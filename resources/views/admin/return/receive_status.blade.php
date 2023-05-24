@@ -4,7 +4,7 @@
 @section('content')
 
     <h1 class="mb-1">
-       Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
+      Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">

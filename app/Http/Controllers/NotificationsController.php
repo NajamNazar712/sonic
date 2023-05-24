@@ -10191,7 +10191,7 @@ class NotificationsController extends Controller
                         }
                         $to = $return_noted['phone_number'];
 
-                       /*self::sms($old_body, $to);*/
+                       self::sms($old_body, $to);
                         // $notify[$key] = [
                         //     'return_note_id'=>$return_noted->return_id,
                         //     'user_id'=>$return_noted->user_id,

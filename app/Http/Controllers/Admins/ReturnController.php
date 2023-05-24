@@ -2780,25 +2780,7 @@ class ReturnController extends Controller
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
-                        $users = GlobalSettings::where('type', 'returned_shipment_notification');
 
-                        if($users->exists()) {
-                            $users = $users->first();
-                            $current_users = $users->text;
-                            $c_user = explode(',', $current_users);
-
-                            if(in_array($shipment->user_id,$c_user)){
-                                  $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id',$request->return_note_id,'user_id' => $shipment->user_id,'shipment_id' => $shipment->id,'status' => 0]);
-                                    if(!$return_delivered_to_shipper->exists()){
-                                        $return_delivered = ReturnDeliveredToShipperSms::new();
-                                        $return_delivered->return_note_id = $request->return_note_id;
-                                        $return_delivered->user_id = $shipment->user_id;
-                                        $return_delivered->shipment_id = $shipment->id;
-                                        $return_delivered->status = 0;
-                                        $return_delivered->save();
-                                }
-                            }
-                        }
 
 //                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
 //                        if ($packaging_material_shipment != null) {
@@ -2889,6 +2871,7 @@ class ReturnController extends Controller
     }
 
     public function receive_return_status_submit_all(Request $request){
+
         if(!empty($request->shipment_ids)){
             $shipment_ids = $request->shipment_ids;
             $shipment_status = $request->shipment_status;
@@ -2909,8 +2892,11 @@ class ReturnController extends Controller
                 $open_box_ids = $request->open_box_ids;
             }
             $return_note_details = ReturnNote::find($request->return_note_id);
+
             if($shipment_status == 25){
+
                 foreach ($shipment_ids as $shipment_id) {
+
                     $parcel = Shipment::where('id', $shipment_id)->first();
                     $shipment_remark = "remarks.$shipment_id";
                     $received_or_refused_by = "received_or_refused_by.$shipment_id";
@@ -2919,6 +2905,7 @@ class ReturnController extends Controller
                             $parcel->open_box = 1;
                             $parcel->save();
                             ShipmentOpenBoxJourneyController::add($shipment_id, 7,Auth::id());
+
                         }
                     }
                     if(!ReturnNoteShipment::join('return_notes', 'return_notes.id', '=', 'return_note_shipments.return_note_id')->where('return_note_shipments.return_note_id','>', $request->return_note_id)->where('shipment_id', $shipment_id)->exists()) {
@@ -2943,6 +2930,29 @@ class ReturnController extends Controller
                             ShipmentsJourneyController::add($shipment_id, 25, 25, $shipment_reason, ($request->has($shipment_remark) ? $request->remarks[$shipment_id] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment_id] : null));
 
                             Shipment::where('id', $shipment_id)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
+
+                            $users = GlobalSettings::where('type', 'returned_shipment_notification');
+
+                            if($users->exists()) {
+
+                                $users = $users->first();
+                                $current_users = $users->text;
+                                $c_user = explode(',', $current_users);
+//                                dd($parcel->user_id,$c_user);
+                                if(in_array($parcel->user_id,$c_user)){
+//                                    dd('kdk');
+                                    $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id'=>$request->return_note_id,'user_id' => $parcel->user_id,'shipment_id' => $parcel->id,'status' => 0]);
+                                    if(!$return_delivered_to_shipper->exists()){
+//                                        dd('kjkj');
+                                        $return_delivered = new ReturnDeliveredToShipperSms();
+                                        $return_delivered->return_note_id = $request->return_note_id;
+                                        $return_delivered->user_id = $parcel->user_id;
+                                        $return_delivered->shipment_id = $parcel->id;
+                                        $return_delivered->status = 0;
+                                        $return_delivered->save();
+                                    }
+                                }
+                            }
 //                            if($parcel->packaging_material_request){
 //                                $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
 //                                if ($packaging_material_shipment != null) {
@@ -2980,16 +2990,18 @@ class ReturnController extends Controller
 //                                    $packaging_request_history->save();
 //                                }
 //                            }
-
                         }
                         // ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment_id])->update(['status' => 1]);
                     }
+
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment_id])->update(['status'=>1]);
                     if($return_note_details->completion_status == 0){
                         $return_note_details->completion_status = 1;
                         $return_note_details->save();
                     }
+
                 }
+
                 $shipment_status_count = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status' => 0])->count();
                 if($shipment_status_count == 0){
                     $return_note_details->updated_by = Auth::id();
