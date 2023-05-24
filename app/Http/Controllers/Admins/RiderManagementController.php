@@ -1413,6 +1413,7 @@ class RiderManagementController extends Controller
 
     public function rider_remarks_index()
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 656);
         $cities = City::where('status', '1')->where('business_category_id', '1')->select('id', 'name')->get();
         $riders = Rider::where('status', '1')->select('id', 'name')->get();
@@ -1486,30 +1487,45 @@ class RiderManagementController extends Controller
             })
 
             ->addColumn("action", function ($rider_remarks) {
-            if (array_intersect([863,864,865,866], session('permissions')) && $rider_remarks->status != 3) {
+                $array = DB::table('admin_role_module_permissions')->where('role_id',Auth::user()->role_id)->pluck('permission_id')->toArray();
+                
+                if ($rider_remarks->status != 3 && count(array_intersect([863, 864, 865, 866], $array)) != null) {
                     $dropdown = '
-                          <div class="btn-group" id="dasdas">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle action"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="btn-group" id="dasdas">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle action" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
-                        ';
-
-                    if (($rider_remarks->status == 1) && (array_intersect([863,864,865,866], session('permissions')) || session('role_id') == 1)) {
-                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process </div></button>
-                            <button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></button>';
-                    } elseif (($rider_remarks->status == 2) && (array_intersect([863,864,865,866], session('permissions'))|| session('role_id') == 1 )) {
-                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></button>
-                        <button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></button>';
+                    ';
+            
+                    if (($rider_remarks->status == 1) || session('role_id') == 1) {
+                        if($rider_remarks->status == 1 && in_array(863, $array) && in_array(863, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></div></button>';
+                        }
+                        if($rider_remarks->status == 1 && in_array(864, $array) && in_array(864, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process</div></div></button>';
+                        }
                     }
+            
+                    if (($rider_remarks->status == 2) || session('role_id') == 1) {
+                        if ($rider_remarks->status == 2 &&  in_array(865, $array) && in_array(865, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></div></button>';
+                        }
+                        if ($rider_remarks->status == 2 &&  in_array(866, $array) && in_array(866, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></div></button>';
+                        }
+                    }
+            
                     $dropdown .= '
                             </div>
-                          </div>
-                        ';
-
+                        </div>
+                    ';
+            
                     return $dropdown;
-                } else {
+                } 
+                else {
                     return '';
                 }
             });
+            
 
         if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
             $from = $request->get('search_date_from');
