@@ -48,7 +48,7 @@
                         </div>
                         @if($return_note_status == 0)
                             <div class="col-3">
-                                <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update</button>
+                                <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i>Bulk Update</button>
                             </div>
                         @endif
                     </div>

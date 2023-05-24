@@ -111,6 +111,7 @@ class ReturnController extends Controller
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
+
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
@@ -2250,11 +2251,13 @@ class ReturnController extends Controller
     }
 
     public function return_receive_deliveries_view(){
+
         ActivityTrailController::createActivityTrailLog(Auth::id(),308);
         return view('admin.return.receive');
     }
 
     public function return_receive_deliveries_list(Request $request){
+
 
         if($request->get('excel') && $request->get('excel') == true)
         {

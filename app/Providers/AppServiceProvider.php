@@ -62,7 +62,6 @@ class AppServiceProvider extends ServiceProvider
 
                         if ($return_users->exists())
                         {
-
                             $return_users = $return_users->get();
                             $notification = Notification::find(216);
 
