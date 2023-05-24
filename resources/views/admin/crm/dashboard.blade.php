@@ -71,154 +71,156 @@
                                     </div>
                                 </div>
                             </div> --}}
-                            <div class="row mb-2 justify-content-center">
+                            <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
+                                <div class="row mb-2 justify-content-center">
 
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_destination" id="search_destination" class="form-control select2">
-                                            @foreach($cities as $destination)
-                                                <option value="{{$destination->id}}">{{$destination->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-            
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        {{-- <select name="search_hub" id="search_hub" class="form-control select2">
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select> --}}
-                                        <select name="search_origin" id="search_origin" class="select2 form-control">
-                                            @foreach($cities as $origin)
-                                                <option value="{{$origin->id}}">{{$origin->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-            
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_zone" id="search_zone" class="form-control select2">
-                                            @foreach($zones as $zone)
-                                                <option value="{{$zone->id}}">{{$zone->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-            
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_case_nature" id="search_case_nature" class="form-control select2">
-                                            @foreach($case_natures as $case_nature)
-                                                <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-            
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
-                                            @foreach($case_nature_types as $case_nature_type)
-                                                <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-            
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_agent" id="search_agent" class="form-control select2">
-                                            @foreach($agents as $agent)
-                                                <option value="{{$agent->id}}">{{$agent->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="shipment_status" id="shipment_status" class="form-control select2">
-                                            @foreach($shipment_status as $status)
-                                            <option value="{{$status->id}}">{{$status->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="avg_tat" id="avg_tat" class="form-control select2">
-                                            @foreach($crm_request_statuses as $status)
-                                            <option value="{{$status->id}}">{{$status->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-{{--             
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="shipment_status" id="shipment_status" class="form-control select2" multiple="multiple" >
-                                            @foreach($shipment_status as $status)
-                                                 <option value="{{$status->id}}">{{$status->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div> --}}
-            
-                                {{-- <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                            @foreach($shipping_modes as $shipping_mode)
-                                                <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
-                                            @endforeach
-                                        </select>
-                                    </fieldset>
-                                </div>
-             --}}
-            
-                                <div class="col-4">
-                                    {{-- <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
-                                        </div>
-                                        <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                                @foreach($cities as $destination)
+                                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            {{-- <select name="search_hub" id="search_hub" class="form-control select2">
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                @endforeach
+                                            </select> --}}
+                                            <select name="search_origin" id="search_origin" class="select2 form-control">
+                                                @foreach($cities as $origin)
+                                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_zone" id="search_zone" class="form-control select2">
+                                                @foreach($zones as $zone)
+                                                    <option value="{{$zone->id}}">{{$zone->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_case_nature" id="search_case_nature" class="form-control select2">
+                                                @foreach($case_natures as $case_nature)
+                                                    <option value="{{$case_nature->id}}">{{$case_nature->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_case_nature_type" id="search_case_nature_type" class="form-control select2">
+                                                @foreach($case_nature_types as $case_nature_type)
+                                                    <option value="{{$case_nature_type->id}}">{{$case_nature_type->type}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_agent" id="search_agent" class="form-control select2">
+                                                @foreach($agents as $agent)
+                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="shipment_status" id="shipment_status" class="form-control select2">
+                                                @foreach($shipment_status as $status)
+                                                <option value="{{$status->id}}">{{$status->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="avg_tat" id="avg_tat" class="form-control select2">
+                                                @foreach($crm_request_statuses as $status)
+                                                <option value="{{$status->id}}">{{$status->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+    {{--             
+                                    <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="shipment_status" id="shipment_status" class="form-control select2" multiple="multiple" >
+                                                @foreach($shipment_status as $status)
+                                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
                                     </div> --}}
-                                </div>
-            
-            
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
-                                        </div>
-                                        <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::today() }}">
+                
+                                    {{-- <div class="col-4">
+                                        <fieldset class="form-group">
+                                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                                @foreach($shipping_modes as $shipping_mode)
+                                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
                                     </div>
-            
-                                </div>
-            
-                                <div class="col-4">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
-                                        </div>
-                                        <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
+                --}}
+                
+                                    <div class="col-4">
+                                        {{-- <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                            </div>
+                                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From">
+                                        </div> --}}
                                     </div>
+                
+                
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                            </div>
+                                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" >
+                                        </div>
+                
+                                    </div>
+                
+                                    <div class="col-4">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                            </div>
+                                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >
+                                        </div>
+                                    </div>
+                
+                                    <div class="col-2">
+                                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width search_filter_btn"><i class="la la-search"></i>
+                                            Search
+                                        </button>
+                                    </div>
+                                    
                                 </div>
-            
-                                <div class="col-2">
-                                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
-                                        Search
-                                    </button>
-                                </div>
-                                
-                            </div>
+                            </form>
                             <div class="row justify-content-center">
                                 <div class="col-3" id="total_leads_div">
                                     <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
@@ -418,6 +420,7 @@
                                     <th class="border-primary border-darken-1">Responsible Hub</th>
                                     <th class="border-primary border-darken-1">Responsible Zone</th>
                                     <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Last Status Date</th>
                                     <th class="border-primary border-darken-1">Case Nature</th>
@@ -453,7 +456,7 @@
                                     <th class="border-primary border-darken-1">Last Comment By</th>
                                     <th class="border-primary border-darken-1">Last Comment</th>
                                     <th class="border-primary border-darken-1">Last Comment Date</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    {{-- <th class="border-primary border-darken-1"></th> --}}
                                 </tr>
                                 </thead>
                             </table>
@@ -873,17 +876,16 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
-            // $('#search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-            //     placeholder:'Search Shipping Mode',
-            //     width:'100%',
-            //     allowClear:true
-            // });
+            //Dropdown
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Destination',
                 width:'100%',
@@ -923,11 +925,33 @@
                 width:'100%',
                 allowClear:true
             });
-            // $('#search_status').select2({
-            //     placeholder:'Search CRM Status',
-            //     width:'100%',
-            //     allowClear:true
-            // })
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            //endDropDown
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
@@ -957,6 +981,7 @@
                             head.push('Responsible Hub');
                             head.push('Responsible Zone');
                             head.push('Shipment Status');
+                            head.push('Status');
                             head.push('Arrival Date');
                             head.push('Last Status Date');
                             head.push('Case Nature');
@@ -1007,6 +1032,7 @@
                                 row.push(values.responsible_hub);
                                 row.push(values.responsible_zone);
                                 row.push(values.status);
+                                row.push(values.crm_request_status);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
                                 row.push(values.case_nature);
@@ -1272,7 +1298,7 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'CRM Request (In-Process)',
+                        title: 'CRM Request (Dashboard)',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
@@ -1300,6 +1326,16 @@
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_zone = $('#search_zone').val();
+                        d.search_case_nature = $('#search_case_nature').val();
+                        d.search_case_nature_type = $('#search_case_nature_type').val();
+                        d.search_agent = $('#search_agent').val();
+                        d.shipment_status = $('#shipment_status').val();
+                        d.avg_tat = $('#avg_tat').val();
+                        d.from_date = $('input[name="from_date_formatted"]').val();
+                        d.to_date = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'id',
@@ -1317,6 +1353,7 @@
                     {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
                     {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
+                    {data: 'crm_request_status', name: 'crs.name', class: 'align-middle crm_request_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
@@ -1352,7 +1389,7 @@
                     {data: 'last_comment_name', name: 'last_comment_name', class: 'align-middle last_comment_name'},
                     {data: 'last_comment', name: 'ccs.comment', class: 'align-middle last_comment'},
                     {data: 'last_comment_date', name: 'ccs.created_at', class: 'align-middle last_comment_date'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    // {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\AdminDepartment;
@@ -19,6 +20,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmSettings;
 use App\Http\Models\CRM\CrmTatHolidays;
 use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\City;
@@ -155,7 +157,6 @@ class CRMDashboardController extends Controller
             ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
             ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
-            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
             ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
             ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
@@ -209,8 +210,10 @@ class CRMDashboardController extends Controller
             //         );
             // })
             // ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'us.sub_segment_id')
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value')
-            ->where('crm_requests.status_id', 2)
+            ->leftjoin('admins as a1', 'a1.id', '=', 'crm_requests.agent_id')
+            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
+            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value','crs.name as crm_request_status')
+            // ->where('crm_requests.status_id', 2)
             ->groupBy('crm_requests.id');
             // ->get();
             // dd($dashboard_list);
@@ -639,7 +642,6 @@ class CRMDashboardController extends Controller
                 }
             })
             ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
-            
             ->addColumn('tagged_to_operation', function($requests){
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
                 if($crm_tagging){
@@ -664,19 +666,19 @@ class CRMDashboardController extends Controller
                 }
             })
             ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
-            ->addColumn('action', function($requests) {
-                $route = route('admin.crm.request.details', ['id' => $requests->id]);
-                    $dropdown = '
-                <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">';
-                    $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-                    $dropdown .= '</div>
-                </div>
-                ';
+            // ->addColumn('action', function($requests) {
+            //     $route = route('admin.crm.request.details', ['id' => $requests->id]);
+            //         $dropdown = '
+            //     <div class="btn-group">
+            //         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            //         <div class="dropdown-menu dropdown-menu-sm">';
+            //         $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
+            //         $dropdown .= '</div>
+            //     </div>
+            //     ';
 
-                    return $dropdown;
-            })
+            //         return $dropdown;
+            // })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
@@ -803,22 +805,158 @@ class CRMDashboardController extends Controller
                     return 'Non-Key Account';
                 }
             });
-
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $datatables->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
         if ($origin = $request->get('search_origin')) {
             $datatables->where('oc.id', '=', $origin);
         }
+        if ($zone = $request->get('search_zone')) {
+            $datatables->where('z.id', '=', $zone);
+        }
         if ($destination = $request->get('search_destination')) {
             $datatables->where('dc.id', '=', $destination);
         }
-
-        if($request->get('star_shipper_filter') == 1)
+        if ($case_nature = $request->get('search_case_nature')) {
+            $datatables->where('crcn.id', '=', $case_nature);
+        }
+        if ($case_nature_type = $request->get('search_case_nature_type')) {
+            $datatables->where('crcnt.id', '=', $case_nature_type);
+        }
+        if ($agent = $request->get('search_agent')) {
+            $datatables->where('a1.id', '=', $agent);
+        }
+        if ($shipment_status = $request->get('shipment_status')) {
+            $datatables->where('s.shipper_status_id', '=', $shipment_status);
+        }
+        if ($avg_tat = $request->get('avg_tat')) {
+            $datatables->where('crm_requests.status_id', '=', $avg_tat);
+        }
+        if ($request->get('from_date') && $request->get('to_date')) {
+            $from = $request->get('from_date');
+            $to = $request->get('to_date');
+            $datatables->whereBetween('crm_requests.created_at', [$from, $to]);
+        }
+       if($request->get('star_shipper_filter') == 1)
         {
             $datatables->where('sts.status',1);
         }
-
         return $datatables->make(true);
     }
+
+    // public function bulk_admin_tag(Request $request){
+        
+    //     if(count($request->crm_request_ids) > 0){
+    //         $tagged_hub = null;
+    //         if($request->tagged_hub != null){
+    //             $tagged_hub = $request->tagged_hub;
+    //         }
+    //         foreach($request->crm_request_ids as $crm_request_id){
+    //             $crm_request = CrmRequest::where('id', $crm_request_id)->first();
+    //             if($request->crm_request_tagging_type_id == 1){
+    //                 $name = AdminDepartment::where('id', $request->tagged_id)->first();
+    //             }
+    //             else if($request->crm_request_tagging_type_id == 2){
+    //                 $name = Admin::where('id', $request->tagged_id)->first();
+    //             }
+    //             $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
+    //             if(!empty($tagged_crm_request)){
+    //                 if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
+                        
+    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+
+    //                     CrmRequestTagging::create([
+    //                         'crm_request_id' => $crm_request_id,
+    //                         'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+    //                         'tagged_id' => $request->tagged_id,
+    //                         'hub_id' => $tagged_hub
+    //                     ]);
+    //                     // CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+    //                     //     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+    //                     //     'tagged_id' => $request->tagged_id,
+    //                     //     'hub_id' => $tagged_hub
+    //                     // ]);
+
+    //                     CrmRequestTaggingHistory::create([
+    //                         'crm_request_id' => $crm_request_id,
+    //                         'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+    //                         'tagged_id' => $request->tagged_id,
+    //                         'agent_id' => Auth::id(),
+    //                         'hub_id' => $tagged_hub
+    //                     ]);
+
+    //                     NotificationsController::send(31,$crm_request_id);
+    //                 }
+    //             }
+    //             else{
+    //                 CrmRequestTagging::create([
+    //                     'crm_request_id' => $crm_request_id,
+    //                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+    //                     'tagged_id' => $request->tagged_id,
+    //                     'hub_id' => $tagged_hub
+    //                 ]);
+
+    //                 CrmRequestTaggingHistory::create([
+    //                     'crm_request_id' => $crm_request_id,
+    //                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
+    //                     'tagged_id' => $request->tagged_id,
+    //                     'agent_id' => Auth::id(),
+    //                     'hub_id' => $tagged_hub
+    //                 ]);
+    //                 NotificationsController::send(31,$crm_request_id);
+    //             }
+    //         }
+            
+    //         return ['status' => 0, 'success' => 'Request(s) successfully tagged to ' . $name['name']];
+    //     }
+    // }
+    // public function admin_un_tag(Request $request){
+        
+    //     if($request->multiple == 1){
+    //         if(count($request->crm_request_ids) > 0){
+    //             foreach($request->crm_request_ids as $crm_request_id){
+    //                 $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
+    //                 if($check_previous){
+    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+                       
+    //                     CrmRequestTagging::create([
+    //                         'crm_request_id' => $crm_request_id,
+    //                         'crm_request_tagging_type_id' => 3,
+    //                         'tagged_id' => null
+    //                     ]);
+    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
+    //                     ]);
+    //                     CrmRequestTaggingHistory::create([
+    //                         'crm_request_id' => $crm_request_id,
+    //                         'crm_request_tagging_type_id' => 3,
+    //                         'tagged_id' => null,
+    //                         'agent_id' => Auth::id()
+    //                     ]);
+    //                 }
+    //             }
+    //         }
+    //         return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
+    //     }
+    //     else{
+    //         $crm_request_id = $request->crm_request_id;
+    //         $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
+    //         if($check_previous){
+    //             CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
+    //                     CrmRequestTagging::create([
+    //                         'crm_request_id' => $crm_request_id,
+    //                         'crm_request_tagging_type_id' => 3,
+    //                         'tagged_id' => null
+    //                     ]);
+
+               
+    //             CrmRequestTaggingHistory::create([
+    //                 'crm_request_id' => $crm_request_id,
+    //                 'crm_request_tagging_type_id' => 3,
+    //                 'tagged_id' => null,
+    //                 'agent_id' => Auth::id()
+    //             ]);
+    //         }
+    //         return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
+    //     }
+    // }
 }
