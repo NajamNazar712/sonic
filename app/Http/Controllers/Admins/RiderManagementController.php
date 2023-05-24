@@ -1486,17 +1486,17 @@ class RiderManagementController extends Controller
             })
 
             ->addColumn("action", function ($rider_remarks) {
-            if (array_intersect([862,863,864,865,866], session('permissions')) && $rider_remarks->status != 3) {
+            if (array_intersect([863,864,865,866], session('permissions')) && $rider_remarks->status != 3) {
                     $dropdown = '
                           <div class="btn-group" id="dasdas">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle action"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
                         ';
 
-                    if (($rider_remarks->status == 1) && (array_intersect([862,863,864,865,866], session('permissions')) || session('role_id') == 1)) {
+                    if (($rider_remarks->status == 1) && (array_intersect([863,864,865,866], session('permissions')) || session('role_id') == 1)) {
                         $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process </div></button>
                             <button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></button>';
-                    } elseif (($rider_remarks->status == 2) && (array_intersect([862,863,864,865,866], session('permissions'))|| session('role_id') == 1 )) {
+                    } elseif (($rider_remarks->status == 2) && (array_intersect([863,864,865,866], session('permissions'))|| session('role_id') == 1 )) {
                         $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></button>
                         <button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></button>';
                     }
