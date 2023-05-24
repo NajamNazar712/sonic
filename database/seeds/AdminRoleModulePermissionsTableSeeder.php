@@ -1329,7 +1329,7 @@ class AdminRoleModulePermissionsTableSeeder extends Seeder
 
             elseif($permission_id[$i]==863)
             {
-                $roles = array(1, 9, 8, 105, 10, 3, 93);
+                $roles = array(9, 8, 105, 10, 3, 93);
 
                 for($j=0;$j<count($roles);$j++)
                 {
