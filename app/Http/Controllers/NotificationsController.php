@@ -112,7 +112,7 @@ use App\Jobs\ProcessOTPSMSForBotSMS;
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
+use App\Http\Models\ReturnDeliveredToShipperSms;
 class NotificationsController extends Controller
 {
     static private function sms($body, $to, $otp = NULL)
@@ -10179,65 +10179,36 @@ class NotificationsController extends Controller
                 else if ($id == 216) {
                     $notify = [];
 
-                    foreach ($reference_1_id as $key=> $return_noted) {
+                    foreach ($reference_1_id as $key=> $return_note) {
 
                         $old_body = $body;
 
                         if (strpos($old_body, '[return_notes_id]') !== FALSE) {
-                            $old_body = str_replace('[return_notes_id]', $return_noted->return_id, $old_body);
+                            $old_body = str_replace('[return_notes_id]', $return_note->return_id, $old_body);
                         }
                         if (strpos($old_body, '[shipments_count]') !== FALSE) {
-                            $old_body = str_replace('[shipments_count]', $return_noted->total_shipments, $old_body);
+                            $old_body = str_replace('[shipments_count]', $return_note->shipment_count, $old_body);
                         }
                         $to = $return_noted['phone_number'];
 
                        /*self::sms($old_body, $to);*/
-                        $notify[$key] = [
-                            'return_note_id'=>$return_noted->return_id,
-                            'user_id'=>$return_noted->user_id,
-                            'shipment_count'=>$return_noted->total_shipments,
-                            'status'=>1,
-                            'created_at'=>Carbon::now(),
-                            'updated_at'=>Carbon::now(),
+                        // $notify[$key] = [
+                        //     'return_note_id'=>$return_noted->return_id,
+                        //     'user_id'=>$return_noted->user_id,
+                        //     'shipment_count'=>$return_noted->total_shipments,
+                        //     'status'=>1,
+                        //     'created_at'=>Carbon::now(),
+                        //     'updated_at'=>Carbon::now(),
 
-                        ];
+                        // ];
 
                     }
 
-                    $user_ids = $reference_1_id->pluck('user_id')->toArray();
-                    NotificationReturnedDeliveredToShipper::whereIn('user_id',$user_ids)->update(['status'=>0]);
-                    NotificationReturnedDeliveredToShipper::insert($notify);
+                    // $user_ids = $reference_1_id->pluck('user_id')->toArray();
+                    // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
+                    // ReturnDeliveredToShipperSms::insert($notify);
                 }
 
-               /* else if ($id == 217) {
-                    $notify = [];
-                    foreach ($reference_1_id as $key=> $return_noted) {
-
-                        $old_body = $body;
-
-
-                        if (strpos($old_body, '[return_notes_id]') !== FALSE) {
-                            $old_body = str_replace('[return_notes_id]', $return_noted->return_id, $old_body);
-                        }
-                        if (strpos($old_body, '[shipments_count]') !== FALSE) {
-                            $old_body = str_replace('[shipments_count]', $return_noted->total_shipments, $old_body);
-                        }
-                        self::email($subject, $body, $to);
-                        $subject = $original_subject;
-                        $notify[$key] = [
-                            'return_note_id'=>$return_noted->return_id,
-                            'user_id'=>$return_noted->user_id,
-                            'shipment_count'=>$return_noted->total_shipments,
-                            'status'=>1,
-                            'created_at'=>Carbon::now(),
-                            'updated_at'=>Carbon::now(),
-                        ];
-                    }
-
-                    $user_ids = $reference_1_id->pluck('user_id')->toArray();
-                    NotificationReturnedDeliveredToShipper::whereIn('user_id',$user_ids)->update(['status'=>0]);
-                    NotificationReturnedDeliveredToShipper::insert($notify);
-                }*/
             }
         }
     }

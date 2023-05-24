@@ -19,6 +19,11 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
           <span>{{ $ticker }}</span>
         </div>
       @endif
+      @if (isset($shipper_return_note_ticker))
+          <div class="marquee3k" data-speed="0.25" data-pausable="bool">
+            <span>{{$shipper_return_note_ticker}}</span>
+        </div>
+      @endif
 
       <div class="content-body">
         @yield('content')

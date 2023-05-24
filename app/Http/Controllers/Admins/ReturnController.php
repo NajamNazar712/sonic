@@ -50,6 +50,7 @@ use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnConfirmationPendingSmsAttempt;
+use App\ReturnDeliveredToShipperSms;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
@@ -2778,6 +2779,26 @@ class ReturnController extends Controller
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+
+                        $users = GlobalSettings::where('type', 'returned_shipment_notification');
+
+                        if($users->exists()) {
+                            $users = $users->first();
+                            $current_users = $users->text;
+                            $c_user = explode(',', $current_users);
+
+                            if(in_array($shipment->user_id,$c_user)){
+                                  $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id',$request->return_note_id,'user_id' => $shipment->user_id,'shipment_id' => $shipment->id,'status' => 0]);
+                                    if(!$return_delivered_to_shipper->exists()){
+                                        $return_delivered = ReturnDeliveredToShipperSms::new();
+                                        $return_delivered->return_note_id = $request->return_note_id;
+                                        $return_delivered->user_id = $shipment->user_id;
+                                        $return_delivered->shipment_id = $shipment->id;
+                                        $return_delivered->status = 0;
+                                        $return_delivered->save();
+                                }
+                            }
+                        }
 
 //                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
 //                        if ($packaging_material_shipment != null) {

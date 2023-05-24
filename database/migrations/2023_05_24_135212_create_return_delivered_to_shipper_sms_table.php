@@ -4,8 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-
-class CreateNotificationReturnedDeliveredToShipperTable extends Migration
+class CreateReturnDeliveredToShipperSmsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -14,12 +13,12 @@ class CreateNotificationReturnedDeliveredToShipperTable extends Migration
      */
     public function up()
     {
-        Schema::create('notification_returned_delivered_to_shipper', function (Blueprint $table) {
+        Schema::create('return_delivered_to_shipper_sms', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('return_note_id');
-            $table->integer('shipment_count');
-            $table->tinyInteger('status');
+            $table->integer('user_id')->index();
+            $table->integer('return_note_id')->index();
+            $table->integer('shipment_id')->index();
+            $table->smallInteger('status')->index();
             $table->timestamps();
         });
     }
@@ -31,6 +30,6 @@ class CreateNotificationReturnedDeliveredToShipperTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('notification_returned_delivered_to_shipper');
+        Schema::dropIfExists('return_delivered_to_shipper_sms');
     }
 }
