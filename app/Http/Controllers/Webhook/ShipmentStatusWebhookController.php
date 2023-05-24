@@ -51,11 +51,14 @@ class ShipmentStatusWebhookController extends Controller
             if($shipper_status_id == 5){
                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
                 if($shipment_otp){
-                    $data['opt'] = $shipment_otp->otp;
+                    $data['otp'] = $shipment_otp->otp;
+                }
+                else{
+                    $data['otp'] = NULL;
                 }
             }
             else{
-                $data['opt'] = NULL;
+                $data['otp'] = NULL;
             }
 
             $data['date_time'] = $date;
