@@ -599,6 +599,111 @@
     });
         //End update_call_status_modal
 
+        $('#update_call_status_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var data = 
+                    {
+                    shipment_id: $('#shipment_id').val(),
+                    call_finding_id: $('#call_finding_dropdown').val(),
+                    sub_status_call_finding_id: $('#sub_status_call_finding').val(),
+                    custom_remark: $('#custom_remark').val(),
+                    call_to_id: $('#call_to').val(),
+                    '_token': '{{ csrf_token() }}'
+                    };
+                    // AJAX request
+                    $.ajax({
+                        url: "{{ route('admin.return.update_call_status') }}",
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            if (response.status == 1) 
+                            {
+                                swal({
+                                    text: 'Call Status Updated Successfully',
+                                    icon: 'success',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            $('#update_call_status_modal').modal('hide');
+                            }
+                            else{
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: 'Please Update Status Again',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Form submission failed:', textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+
+
+        $("#call_finding_dropdown").change(function () {
+                var selectedValue = $(this).val();
+                
+                if (selectedValue === '1') {
+                    $('.sub_status_call_finding_container').removeClass('d-none');
+                    $('#sub_status_call_finding').attr('data-rule-required',true);
+                    $('#sub_status_call_finding').attr('data-msg-required','Call Finding is required');
+                }
+                else {
+                    $('.sub_status_call_finding_container').addClass('d-none');
+                    $('#sub_status_call_finding').removeAttr('data-rule-required',true);
+                    $('#sub_status_call_finding').removeAttr('data-msg-required','Call Finding is required');
+                }         
+            });
+                
+        $("#sub_status_call_finding").change(function () {
+                var selectedValue = $(this).val();
+
+                if (selectedValue === '7') {
+                    $('.custom_remark_container').removeClass('d-none');
+                    $('#custom_remark').attr('data-rule-required',true);
+                    $('#custom_remark').attr('data-msg-required','Other Remarks is required');
+                }
+                else {
+                    $('.custom_remark_container').addClass('d-none');
+                    $('#custom_remark').removeAttr('data-rule-required',true);
+                    $('#custom_remark').removeAttr('data-msg-required','Other Remarks is required');
+                }
+            });
+             
+            
+        $('#sub_status_call_finding').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Status',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+
+        $('#call_finding_dropdown').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Call Finding',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+
+        $('#call_to').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Call To',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+
 
             $('#damage_claim_product_cost').inputmask({
                 'alias': 'decimal',
