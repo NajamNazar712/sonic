@@ -1441,7 +1441,7 @@ class RiderManagementController extends Controller
                 $join->on('rrr_2.rider_remarks_id', '=', 'rider_remarks.id')
                     ->where('rrr_2.type', '=', 2)
                     ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
-            })
+            })    
             ->select([
                 'rider_remarks.id as id',
                 'r.name as rider_name',
@@ -1460,7 +1460,8 @@ class RiderManagementController extends Controller
                 'rrr_2.response as response_2',
                 'rider_remarks.id as rider_remarks_id',
                 'ad.name as admin_name'
-            ]);
+            ])
+            ->orderBy('rider_remarks.created_at', 'desc');
 
 
 
