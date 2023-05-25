@@ -253,19 +253,19 @@
     $(document).ready(function() {
 
 
-        var data = $.map({!! $rider_statuses !!}, function (obj) {
-            obj.text = obj.name;
-            console.log(obj)
-            return obj;
-        });
+        // var data = $.map({!! $rider_statuses !!}, function (obj) {
+        //     obj.text = obj.name;
+        //     console.log(obj)
+        //     return obj;
+        // });
 
-        $("#status_select").prepend('<option value="" selected></option>').select2({
-            data:data,
-            placeholder: "Select Status",
-            width:'100%',
-            containerCssClass: 'select-xs',
-            dropdownCssClass: 'form-control-sm p-0'
-        });
+        // $("#status_select").prepend('<option value="" selected></option>').select2({
+        //     data:data,
+        //     placeholder: "Select Status",
+        //     width:'100%',
+        //     containerCssClass: 'select-xs',
+        //     dropdownCssClass: 'form-control-sm p-0'
+        // });
 
         var search_date_to = $('#search_form #search_date_to').pickadate({
             firstDay: 1
@@ -764,6 +764,20 @@
                             current.val(column.search());
                         }
                     }
+
+                    var data = $.map({!! $rider_statuses !!}, function (obj) {
+                        obj.text = obj.name;
+                        console.log(obj)
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                 });
                 this.api().table().columns.adjust();
             }

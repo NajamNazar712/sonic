@@ -1465,7 +1465,11 @@ class RiderManagementController extends Controller
             ])
             ->orderBy('rider_remarks.updated_at', 'desc');
 
-
+            if(in_array(session('role_id'),[10,105,122]))
+            {
+                $rider_remarks = $rider_remarks->whereIn('city.hub_id', session('hubs'));
+            }
+            
 
         $datatables = Datatables::of($rider_remarks)
             ->editColumn('status', function ($rider_remarks) {
