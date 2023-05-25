@@ -356,64 +356,71 @@
         $('body').on('click', '.initial_response', function(event) {
             var id = $(this).attr('data-id');
             $('#rider_remarks').modal('show');
+            var toastrShown = false; 
 
-            $('#rider_remarks').on('submit', function(event) {
-                event.preventDefault();
-                let initial_response = $("#initial_response").val();
-                $.ajax({
-                    url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
-                    , method: 'POST'
-                    , data: {
-                        '_token': '{{ csrf_token() }}'
-                        , 'id': id
-                        , 'initial_response': initial_response
-                    , }
-                    , success: function(data) {
-                        if (data.status == 1) {
-                            $('#rider_remarks').modal('hide');
-                            $('#rider_remarks').on('hidden.bs.modal', function() {
-                                $(this).find('form').trigger('reset');
-                                $('#initial_response').removeClass('is-invalid'); 
-                                $('.invalid-feedback').removeClass('text-danger').html(''); 
-                            })
-                            table.draw();
+                $('#rider_remarks').on('submit', function(event) {
+                    event.preventDefault();
+                    let initial_response = $("#initial_response").val();
+                    $.ajax({
+                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                        , method: 'POST'
+                        , data: {
+                            '_token': '{{ csrf_token() }}'
+                            , 'id': id
+                            , 'initial_response': initial_response
+                        , }
+                        , success: function(data) {
+                            if (data.status == 1) {
+                                $('#rider_remarks').modal('hide');
+                                $('#rider_remarks').on('hidden.bs.modal', function() {
+                                    $(this).find('form').trigger('reset');
+                                    $('#initial_response').removeClass('is-invalid'); 
+                                    $('.invalid-feedback').removeClass('text-danger').html(''); 
+                                })
+                                table.draw();
 
-                            response = 'Initial Response Has Been Added';
-                            toastr.success(response, 'Success!', {
-                                positionClass: 'toast-top-center'
-                                , containerId: 'toast-top-center'
-                            });
-                        } else {
-                            var initialResponseField = $('#initial_response');
-                            if (initialResponseField.val().trim() === '') {
-                                initialResponseField.addClass('is-invalid');
-                                var errorElement = initialResponseField.next('.invalid-feedback');
-                                errorElement.addClass('text-danger').html('Initial Response is required');
-                            } else {
-                                var error = "Please Fill To Submit A Response";
-                                toastr.error(error, 'Error!', {
+                                if (!toastrShown) { // Check if success toastr has been shown
+                                response = 'Initial Response Has Been Added';
+                                toastr.success(response, 'Success!', {
                                     positionClass: 'toast-top-center'
                                     , containerId: 'toast-top-center'
                                 });
+
+                                toastrShown = true; 
+                            }
+                            } else {
+                                var initialResponseField = $('#initial_response');
+                                if (initialResponseField.val().trim() === '') {
+                                    initialResponseField.addClass('is-invalid');
+                                    var errorElement = initialResponseField.next('.invalid-feedback');
+                                    errorElement.addClass('text-danger').html('Initial Response is required');
+                                } else {
+                                    var error = "Please Fill To Submit A Response";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center'
+                                        , containerId: 'toast-top-center'
+                                    });
+                                }
                             }
                         }
-                    }
-                    , error: function(xhr, status, error) {
-                        console.log(xhr)
-                        toastr.error('An error occurred while processing the request.', 'Error!', {
-                            positionClass: 'toast-top-center'
-                            , containerId: 'toast-top-center'
-                        });
-                    }
-                })
+                        , error: function(xhr, status, error) {
+                            console.log(xhr)
+                            toastr.error('An error occurred while processing the request.', 'Error!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                        }
+                    })
 
-            });
+                });
         });
 
         $('body').on('click', '.final_response', function(event) {
             var id = $(this).attr('data-id');
             $('#rider_remarks_final').modal('show');
 
+
+            toastrShown = false; 
             $('#rider_remarks_final').on('submit', function(event) {
                 event.preventDefault();
                 let final_response = $("#final_response").val();
@@ -435,11 +442,14 @@
                             })
                             table.draw();
 
+                            if(!toastrShown){
                             var response = 'Final Response Has Been Added'
                             toastr.success(response, 'Success!', {
                                 positionClass: 'toast-top-center'
                                 , containerId: 'toast-top-center'
                             });
+                            toastrShown = true; // Set the flag to indicate success toastr has been shown
+                        }
                         } else {
                             var initialResponseField = $('#final_response');
                             if (initialResponseField.val().trim() === '') {
