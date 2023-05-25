@@ -1719,198 +1719,41 @@
                             return '';
                         }
                     },
-                    {
-                        data: 'id',
-                        defaultContent: '',
-                        orderable: false,
-                        searchable: false,
-                        class: 'align-middle serial_number'
-                    },
-                    {
-                        data: 'tracking_number',
-                        name: 'shipments.tracking_number',
-                        class: 'align-middle tracking_number'
-                    },
-                    {
-                        data: 'order_id',
-                        name: 'shipments.order_id',
-                        class: 'align-middle order_id'
-                    },
-                    {
-                        data: 'shipper',
-                        name: 'u.name',
-                        class: 'align-middle shipper'
-                    },
-                    {
-                        data: 'shipper_phone',
-                        name: 'shipper_phone',
-                        class: 'align-middle shipper_phone'
-                    },
-                    {
-                        data: 'vendor_name',
-                        name: 'usi.vendor',
-                        class: 'align-middle vendor_name'
-                    },
-                    {
-                        data: 'origin',
-                        name: 'oc.name',
-                        class: 'align-middle origin'
-                    },
-                    {
-                        data: 'destination',
-                        name: 'dc.name',
-                        class: 'align-middle destination'
-                    },
-                    {
-                        data: 'hub',
-                        name: 'h.name',
-                        class: 'align-middle hub'
-                    },
-                    {
-                        data: 'consignee_name',
-                        name: 'shipments.consignee_name',
-                        class: 'align-middle consignee_name'
-                    },
-                    {
-                        data: 'consignee_phone',
-                        name: 'consignee_phone',
-                        class: 'align-middle consignee_phone'
-                    },
-                    {
-                        data: 'consignee_address',
-                        name: 'shipments.consignee_address',
-                        class: 'align-middle consignee_address'
-                    },
-                    {
-                        data: 'sub_station',
-                        name: 'dlm.area_name',
-                        class: 'align-middle sub_station',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'amount',
-                        name: 'shipments.amount',
-                        class: 'align-middle amount'
-                    },
+                    { data: 'id', defaultContent: '', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    { data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    { data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    { data: 'shipper_phone',  name: 'shipper_phone', class: 'align-middle shipper_phone'},
+                    { data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
+                    { data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    { data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    { data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
+                    { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    { data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', orderable: false, searchable: false},
+                    { data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
-                    {
-                        data: 'mode',
-                        name: 'sm.id',
-                        class: 'align-middle mode'
-                    },
-                    {
-                        data: 'service_type',
-                        name: 'bt.id',
-                        class: 'align-middle service_type'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle status'
-                    },
-                    {
-                        data: 'reason',
-                        name: 'ssr.name',
-                        class: 'align-middle reason'
-                    },
-                    
-                    {
-                        data: 'remarks',
-                        name: 'sscf.remark',
-                        class: 'align-middle text-center remarks'
-                    },
-                    {
-                        data: 'shipper_remarks',
-                        name: 'shipments_journey.remarks',
-                        class: 'align-middle shipper_remarks'
-                    },
-                    {
-                        data: 'nsa_osa_estimated_charges',
-                        name: 'nsa_osa_estimated_charges',
-                        class: 'align-middle nsa_osa_estimated_charges'
-                    },
-                    {
-                        data: 'arrival',
-                        name: 'sj.created_at',
-                        class: 'align-middle arrival'
-                    },
-                    {
-                        data: 'status_date',
-                        name: 'shipments_journey.created_at',
-                        class: 'align-middle status_date'
-                    },
-                    {
-                        data: 'reattemp_status_remarks',
-                        name: 'reattempt_shipment_status_remarks.remarks',
-                        class: 'align-middle reattemp_status_remarks',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'confirmation_req',
-                        name: '',
-                        class: 'align-middle confirmation_req',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'confirmation_on',
-                        name: '',
-                        class: 'align-middle confirmation_on',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'delivery_attempt',
-                        name: '',
-                        class: 'align-middle reattempts',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'reattempts',
-                        name: 'sret.created_at',
-                        class: 'align-middle reattempts',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'assigned_agent',
-                        name: 'asad.name',
-                        class: 'align-middle assigned_agent'
-                    },
-                    {
-                        data: 'assigned_at',
-                        name: 'ras.created_at',
-                        class: 'align-middle assigned_at'
-                    },
-                    {
-                        data: 'assigned_by',
-                        name: 'asadby.name',
-                        class: 'align-middle assigned_by'
-                    },
-                    {
-                        data: 'consolidation',
-                        name: 'consolidation',
-                        class: 'align-middle consolidation',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'consolidated_id',
-                        name: 'consolidations.consolidation_id',
-                        class: 'align-middle consolidated_id',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'text-center align-middle action p-1',
-                        orderable: false,
-                        searchable: false
-                    }
+                    { data: 'mode', name: 'sm.id', class: 'align-middle mode'},
+                    { data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                    { data: 'status', name: 'status', class: 'align-middle status'},
+                    { data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
+                    { data: 'remarks', name: 'sscf.remark', class: 'align-middle text-center remarks'},
+                    { data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks' },
+                    { data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges' },
+                    { data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival' },
+                    { data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    { data: 'reattemp_status_remarks', name: 'reattempt_shipment_status_remarks.remarks', class: 'align-middle reattemp_status_remarks', orderable: false, searchable: false},
+                    { data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
+                    { data: 'confirmation_on', name: '',  class: 'align-middle confirmation_on', orderable: false, searchable: false},
+                    { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
+                    { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
+                    { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
+                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
+                    { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
+                    { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
+                    { data: 'action',name: 'action',class: 'text-center align-middle action p-1',orderable: false,searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
