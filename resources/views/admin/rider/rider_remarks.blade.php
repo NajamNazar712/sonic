@@ -64,7 +64,7 @@
 
 
 
-                <div class="col-4 mt-1">
+                <div class="col-2 mt-1">
                     <div class="form-group">
                         <button type="button" id="search_filter_btn" class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
                             Search
