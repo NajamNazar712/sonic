@@ -656,7 +656,8 @@
                 , {
                     data: 'id'
                     , name: 'rider_remarks.id'
-                    , class: 'align-middle hub'
+                    , class: 'align-middle id'
+                    , orderable: true
                 }
                 , {
                     data: 'rider_name'
@@ -697,7 +698,7 @@
                 , {
                     data: 'response_2'
                     , name: 'rrr_2.response'
-                    , class: 'align-middle response'
+                    , class: 'align-middle response_2'
                 }
                 , {
                     data: 'created_at'
