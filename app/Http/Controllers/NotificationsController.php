@@ -31,6 +31,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\ReturnNoteRequest;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -1140,7 +1141,6 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 15) {
-                    dd($reference_1_id);
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -3169,7 +3169,7 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 39) {
-                    dd(1);
+
                     $subject = $notification->subject;
                     $body = $notification->body;
 
@@ -3190,7 +3190,7 @@ class NotificationsController extends Controller
 
                     $today->hour = $rdts_time;
 
-                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name'];
+                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name',''];
 
                     $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By', 'returned_at' => 'Returned At'];
 
@@ -3303,7 +3303,37 @@ class NotificationsController extends Controller
                                     }
                                 }
 
-                                $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+                                $body = str_replace('[' . $first_field . ']', $shipment_details,$body);
+
+                                $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
+                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','rns.shipment_id')
+                                    ->where('sj.shipper_status_id',25)
+                                    ->where('sj.user_id',$user_id)
+                                    ->whereBetween('sj.created_at',[$yesterday,$today])
+                                    ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
+                                    ->get();
+                                    $da = [];
+									$i = 0;
+									foreach($data1 as $key=>$value){
+										
+										$da[$value->return_note_id]['shipment_id'][$i] = isset($da[$value->return_note_id]['shipment_id'][$i]) ? $da[$value->return_note_id]['shipment_id'][$i]  : $value->shipment_id ;
+										$da[$value->return_note_id]['count'] = isset($da[$value->return_note_id]['count']) ? $da[$value->return_note_id]['count']+=1  : 1 ;
+									
+										$i++;
+									}		
+											$return_detail = "";
+											foreach($da as $key=>$val){
+											
+												$shipment_ids = implode(',',$val['shipment_id']);
+												$count = $val['count'];
+												$return_detail.= PHP_EOL.PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ,".PHP_EOL."which havig the following shipment ids : $shipment_ids.".PHP_EOL."---".PHP_EOL;
+												//dd($shipment_ids,$key,$val['count']);
+											}
+
+
+                                if (strpos($body, '[return_detail]') !== FALSE) {
+                                        $body = str_replace('[return_detail]', $return_detail, $body);
+                                    }
 
                                 self::email($subject, $body, $to);
 
@@ -7909,7 +7939,6 @@ class NotificationsController extends Controller
 
                     self::sms_otp($body, $to, $name, $otp, 1);
                 } else if ($id == 139) {
-
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
 
