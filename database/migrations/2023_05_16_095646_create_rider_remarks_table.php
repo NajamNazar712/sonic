@@ -16,7 +16,7 @@ class CreateRiderRemarksTable extends Migration
         Schema::create('rider_remarks', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('rider_id')->index();
-            $table->longText('rider_remarks');
+            $table->string('rider_remarks', 255);
             $table->integer('rider_remarks_status_id')->default(1);
             $table->integer('updated_by')->nullable()->index();
             $table->timestamps();

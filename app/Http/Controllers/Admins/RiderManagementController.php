@@ -1419,7 +1419,9 @@ class RiderManagementController extends Controller
         $riders = Rider::where('status', '1')->select('id', 'name')->get();
         $remarks = RiderRemark::select('id')->get();
         $statuses = RiderRemarkStatus::with('rider_remarks')->get();
-        return view('admin.rider.rider_remarks')->with(['cities' => $cities, 'riders' => $riders, 'remarks' => $remarks, 'statuses' => $statuses]);
+        $rider_statuses = RiderRemarkStatus::select('id','name')->get();
+
+        return view('admin.rider.rider_remarks')->with(['cities' => $cities, 'riders' => $riders, 'remarks' => $remarks, 'statuses' => $statuses, 'rider_statuses' => $rider_statuses]);
     }
 
     public function rider_remarks_list(Request $request)

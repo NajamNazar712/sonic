@@ -231,6 +231,10 @@
 
     }
 
+    .hidden {
+  display: none;
+}
+
 </style>
 @endsection
 
@@ -247,6 +251,21 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
+
+
+        var data = $.map({!! $rider_statuses !!}, function (obj) {
+            obj.text = obj.name;
+            console.log(obj)
+            return obj;
+        });
+
+        $("#status_select").prepend('<option value="" selected></option>').select2({
+            data:data,
+            placeholder: "Select Status",
+            width:'100%',
+            containerCssClass: 'select-xs',
+            dropdownCssClass: 'form-control-sm p-0'
+        });
 
         var search_date_to = $('#search_form #search_date_to').pickadate({
             firstDay: 1
@@ -523,9 +542,9 @@
                 var rowData = table.row(row).data();
 
                 if (rowData['response'] == '' || rowData['response'] == null) {
-                    $(this).prop('disabled', true);
+                    $(this).prop('disabled', true).addClass('hidden');
                 } else {
-                    $(this).prop('disabled', false);
+                    $(this).prop('disabled', false).removeClass('hidden');
                 }
             });
         }
@@ -684,8 +703,7 @@
                     data: 'created_at'
                     , name: 'rider_remarks.created_at'
                     , class: 'align-middle created_at text-center'
-                    , orderable: false
-                    , searchable: false
+                   
                 }
                 , {
                     data: 'status'
@@ -725,12 +743,18 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
                     if ($(header).is('.serial_number') || $(header).is('.action')) {
                         $(td).appendTo($(search));
+                    }else if($(header).is('.status')){
+                        $(drop_select).appendTo($(search))
+                        .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                     } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -748,8 +772,8 @@
         table.on('draw', function() {
             updateButtonStatus();
         });
-
-
+        
+        
     });
 
 </script>

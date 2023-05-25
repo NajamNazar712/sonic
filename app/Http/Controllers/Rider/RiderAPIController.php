@@ -14101,13 +14101,7 @@ class RiderAPIController extends Controller
     {
           $rules = [
             'rider_remarks' => [
-                'required', 'string', function ($attribute, $value, $fail) {
-                    $wordCount = str_word_count($value);
-                    if ($wordCount > 250) {
-                        $fail('The ' . $attribute . ' must not exceed 250 words.');
-                    }
-                },
-            ],
+                'required', 'string']
         ];
 
 
