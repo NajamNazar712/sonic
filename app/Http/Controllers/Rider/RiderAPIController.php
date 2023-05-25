@@ -14022,7 +14022,9 @@ class RiderAPIController extends Controller
                 'rrr_2.response as response_2',
                 'rider_remarks.id as rider_remarks_id',
                 'ad.name as admin_name'
-            ])->get();
+            ])
+            ->orderBy('rider_remarks.updated_at', 'desc')
+            ->get();
 
 
         if (!$rider_remarks->isEmpty()) {
