@@ -3309,7 +3309,7 @@ class NotificationsController extends Controller
                                     ->leftjoin('shipments_journey as sj','sj.shipment_id','=','rns.shipment_id')
                                     ->where('sj.shipper_status_id',25)
                                     ->where('sj.user_id',$user_id)
-                                    ->whereBetween('sj.created_at',[$yesterday,$today])
+                                  //  ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
                                     ->get();
                                     $da = [];
@@ -3320,20 +3320,19 @@ class NotificationsController extends Controller
 										$da[$value->return_note_id]['count'] = isset($da[$value->return_note_id]['count']) ? $da[$value->return_note_id]['count']+=1  : 1 ;
 									
 										$i++;
-									}		
-											$return_detail = "";
-											foreach($da as $key=>$val){
-											
-												$shipment_ids = implode(',',$val['shipment_id']);
-												$count = $val['count'];
-												$return_detail.= PHP_EOL.PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ,".PHP_EOL."which havig the following shipment ids : $shipment_ids.".PHP_EOL."---".PHP_EOL;
-												//dd($shipment_ids,$key,$val['count']);
-											}
-
+									}
+									$return_detail = "";
+									foreach($da as $key=>$val){
+									
+										$shipment_ids = implode(',',$val['shipment_id']);
+										$count = $val['count'];
+										$return_detail.= PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ,".PHP_EOL."---".PHP_EOL;
+										
+									}
 
                                 if (strpos($body, '[return_detail]') !== FALSE) {
-                                        $body = str_replace('[return_detail]', $return_detail, $body);
-                                    }
+                                    $body = str_replace('[return_detail]', $return_detail, $body);
+                                }
 
                                 self::email($subject, $body, $to);
 
@@ -10218,7 +10217,7 @@ class NotificationsController extends Controller
                         }
                         $to = $return_note['phone_number'];
 //die();
-                        self::sms($old_body, $to);
+                       /* self::sms($old_body, $to);*/
                         // $notify[$key] = [
                         //     'return_note_id'=>$return_noted->return_id,
                         //     'user_id'=>$return_noted->user_id,
