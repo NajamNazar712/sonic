@@ -5850,8 +5850,7 @@ class ReturnController extends Controller
 
         ->whereIn('rider_deliveries.rider_status_id',[12,52])
         ->groupBy('rider_deliveries.delivery_note_id');
-        //$data->get();
-        //dd(DB::getQueryLog());
+        
             
         $datatable = Datatables::of($data)
         ->editColumn('tracking_number', function ($shipments) {
