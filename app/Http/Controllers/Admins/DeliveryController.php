@@ -1065,7 +1065,7 @@ class DeliveryController extends Controller
                             $url             = $payment_detials['url'];
                             $shipments_id = array_wrap($shipment);
                             CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
-                        //NotificationsController::send(12, $note->id, $shipment,$payment_link);   
+                            NotificationsController::send(12, $note->id, $shipment,$payment_link);   
                         }
                     }
                     else{
@@ -9320,22 +9320,14 @@ class DeliveryController extends Controller
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
+                                $payment_detials = PayfastApiCall::ApiCall();   
+                                $rand            = $payment_detials['unique_key'];
+                                $payment_link    = $payment_detials['payment_link'];
+                                $url             = $payment_detials['url'];
+                                $shipments_id    = array_wrap($shipment);
+                                CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
+                                NotificationsController::send(12, $note->id, $shipment,$payment_link);   
 
-                                $environment = config('app.env');
-                                if($environment == 'production'){
-                                    $rand = "";
-                                    $url          = "";
-                                    $payment_link = "";
-                                }
-                                else{
-                                    $rand = rand(111111,999999);
-                                    $url          = "http://127.0.0.1:8000/api/online-transaction-details";
-                                    $payment_link = "http://127.0.0.1:8000/Pay-Online/$rand";
-                                }
-                                //When Approved Delivery Note
-                                $shipments_id = array_wrap($shipment);
-                                CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);
-                                NotificationsController::send(12, $note->id, $shipment);
                             }
                         }
                     }

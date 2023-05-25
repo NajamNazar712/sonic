@@ -23,8 +23,8 @@ class PayfastApiCall
         }
         else{
             $rand = rand(111111,999999);
-            $url          = "http://192.168.8.138/api/online-transaction-details";
-            $payment_link = "http://192.168.8.138/Pay-Online/$rand";
+            $url          = "http://192.168.0.210:8080/api/online-transaction-details";
+            $payment_link = "http://192.168.0.210:8080/Pay-Online/$rand";
         }
 
         $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];

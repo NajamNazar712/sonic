@@ -3663,58 +3663,7 @@ class GlobalSettingsController extends Controller
 
 
     public function setup_fintech_charges_index(){
-        $shipment       = Shipment::where('tracking_number','2022021725594')->first();
-        $user_id        = $shipment->user_id;
-        $cod_Amount     = $shipment->amount;
-        $fintechCharges = $shipment->fintech_charges;
-        $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
-            if($userFintechCharges->exists()){
-                $fed_chargess    = 0;
-                $fintect_charges = $userFintechCharges->first()->fintech_charges;
-            }
-            else{
-                $standard_fintech_charges = new standard_fintech_charges();
-                $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
-                $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
-            }
-        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
-        ->where('range_up', '<=', $cod_Amount)->where('company_Id','1')
-        ->first();
-
-        // Calcualtion company charges
-        $company_charges     = $select_range->charges;
-        $company_fed_charges = $select_range->fed_tax;
-
-        //Company Charges with range
-        $calculate_company_charges = round(($cod_Amount / 100) * $company_charges) ; 
-        $calculate_tax = round(($calculate_company_charges / 100)*$company_fed_charges);
-        $total_company_amount = $calculate_tax + $calculate_company_charges;
-
-        //user or Stadard fintech Charges
-        $fintech_charges_percentage = round(($cod_Amount / 100) * $fintect_charges);
-        $fed_charges_percentage     = round(($fintech_charges_percentage / 100) * $fed_chargess);
-        $total_fintech_calculated   = $fintech_charges_percentage + $fed_charges_percentage;
-
-        //Total payable Fintech Charges 
-        $total_calculated_charges = $total_fintech_calculated - $total_company_amount;
-           $results =  [
-            'Shipment Fintech'           => $fintechCharges,
-            'select range'               => $select_range,
-            'Cod'                        => $cod_Amount, 
-            'Company_charges'            => $company_charges,
-            'Fed Charges'                => $company_fed_charges,  
-            'Calculate charges'          => $calculate_company_charges,
-            'Calculate Fed'              => $calculate_tax ,
-            'Total Amount'               => $total_company_amount,
-            'User charges'               => $fintect_charges,
-            'User FED'                   => $fed_chargess,  
-            'Calculate charges user'     => $fintech_charges_percentage,
-            'Calculate charges user Fed' => $fed_charges_percentage ,
-            'Total Amount user'          => $total_fintech_calculated,
-            'Total Calculated'           => $total_calculated_charges   
-           ];
-           
-           dd($results);
+        
         $fintechSetup =  new FintechCompany();
         return view('admin.settings.fintech.fintech_companies_list');
     }
@@ -3724,9 +3673,7 @@ class GlobalSettingsController extends Controller
 
         $shipments_id    = '1';
         $payment_option  = 'EasiPaisa';
-            $items           = 'Test';
-    //    $swich_payment_gateway_api = SwichPaymentGatewayApi::dispatch($shipments_id,$payment_option,$items);
-
+        $items           = 'Test';
         return view('admin.settings.fintech.form');
     }
 

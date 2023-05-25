@@ -46,7 +46,6 @@ class CountFintechCharges implements ShouldQueue
     {
         $valid_shipments = $this->valid_shipments;
         if(is_array($valid_shipments)){
-     
             try{
                 foreach($valid_shipments as $valid_shipments_valuse){
                 $user_id = Shipment::where('id',$valid_shipments_valuse)->first();

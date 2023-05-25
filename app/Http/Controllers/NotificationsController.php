@@ -97,6 +97,7 @@ use App\Http\Models\City;
 use App\Http\Models\Invoice;
 use App\Http\Models\SMS;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use GuzzleHttp\Client;
 use GuzzleHttp\Psr7;
 use GuzzleHttp\Exception\RequestException;
@@ -138,6 +139,7 @@ class NotificationsController extends Controller
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
         $notification_history = new EmployeeNotificationHistory();
+        
         $notification_history->employee_id = $employee_id;
         $notification_history->employee_type_id = $employee_type;
         $notification_history->title = $title;
@@ -240,7 +242,6 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL, $reference_3_id = NULL)
     {
-        
         $notification = Notification::find($id);
         if ($notification) {
 
@@ -10191,6 +10192,29 @@ class NotificationsController extends Controller
 
                 }
 
+                else if ($id == 217) {
+                    $fintech_transaction = FintechPaymentDetails::find($reference_2_id);
+                    $rider = Rider::find($reference_1_id);
+                    if ($fintech_transaction && $rider) {
+                        if (strpos($body, '[amount]') !== FALSE) {
+                            $body = str_replace('[amount]', $fintech_transaction->cod_amount, $body);
+                        }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $fintech_transaction->tracking_id, $body);
+                        }
+                        if (strpos($body, '[tip]') !== FALSE) {
+                            $body = str_replace('[tip]', $fintech_transaction->rider_tip, $body);
+                        }
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            $body = str_replace('[rider]', $rider->name, $body);
+                        }
+
+                        // $to = $rider->phone;
+                        $to = '03110127222';
+                        self::sms($body, $to);
+                    }       
+                }
+
             }
         }
     }
@@ -10535,6 +10559,38 @@ class NotificationsController extends Controller
                         $admin_id = Admin::where('employee_id', $employee_id)->value('id');
                         if ($admin_id)
                             self::push_notification($admin_id, $employee_type, $title, $body);
+                    }
+                } 
+                
+                //For Fintech
+
+                else if ($id == 21) {
+                    $fintech_transaction = FintechPaymentDetails::find($reference2_id);
+                    $rider = Rider::find($reference1_id);
+                    if ($fintech_transaction && $rider) {
+
+                        //title
+                        if (strpos($title, '[tracking_number]') !== FALSE) {
+                            $title = str_replace('[tracking_number]', $fintech_transaction->tracking_id, $title);
+                        }
+                        if (strpos($title, '[amount]') !== FALSE) {
+                            $title = str_replace('[amount]', $fintech_transaction->cod_amount, $title);
+                        }
+
+                        //body
+                        if (strpos($body, '[amount]') !== FALSE) {
+                            $body = str_replace('[amount]', $fintech_transaction->cod_amount, $body);
+                        }
+                        if (strpos($body, '[tracking_number]') !== FALSE) {
+                            $body = str_replace('[tracking_number]', $fintech_transaction->tracking_id, $body);
+                        }
+                        if (strpos($body, '[tip]') !== FALSE) {
+                            $body = str_replace('[tip]', $fintech_transaction->rider_tip, $body);
+                        }
+                        if (strpos($body, '[rider]') !== FALSE) {
+                            $body = str_replace('[rider]', $rider->name, $body);
+                        }
+                        self::push_notification($employee_id, $employee_type, $title, $body);
                     }
                 }
             }

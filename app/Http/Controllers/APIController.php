@@ -86,7 +86,15 @@ use SnappyPDF;
 use Validator;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Admin\UserFintectCharges;
+
 use App\Jobs\ProcessGulAhmedShipmentConfirmation;
+
+
 use Vectorface\Whip\Whip;
 
 class APIController extends Controller
@@ -5344,8 +5352,19 @@ class APIController extends Controller
                                     // 2 last digit for decimal values
                                     // example amount is 120 filling length +0000000012000
 
-                                    $amount_length = strlen($shipment_data->amount);
 
+                                    //standard Fintech Charges and Standard FED
+
+                                    $standard_fintech_charges = standard_fintech_charges::where('id','1')->first();
+                                    $charges =  $standard_fintech_charges->standard_fintech_charges;   //stdadard charges
+                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax            
+
+                                    //Calculate 
+                                    $calculate_standard_charges = round(($shipment_data->amount / 100)*$charges);
+                                    $calculate_fed_charges      = round(($calculate_standard_charges / 100)*$fed);
+                                    $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges; 
+                                    $amount_length = strlen($total_cod );
+                                    
                                     // prefix + because we only have possitive value to be collected
                                     $return_data['amount_within_dueDate'] .= "+";
 
@@ -5354,7 +5373,7 @@ class APIController extends Controller
                                         $return_data['amount_within_dueDate'] .= "0";
                                     }
 
-                                    $return_data['amount_within_dueDate'] .= $shipment_data->amount;
+                                    $return_data['amount_within_dueDate'] .= $total_cod;
 
                                     // adding 00 for decimal value Required for 1Link API
                                     $return_data['amount_within_dueDate'] .= "00";
@@ -6859,5 +6878,82 @@ class APIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
+    }
+
+    public function fintech_payment_detials(Request $req){
+      $shipments = Shipment::join('delivery_note_shipments','shipments.id','delivery_note_shipments.shipment_id')
+      ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
+      ->where('shipments.tracking_number',$req->tracking_id)
+      ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id',
+               'shipments.amount as cod_amount','shipments.fintech_charges as fintech_amount',
+               'delivery_notes.id as delivery_note_id','shipments.id as shipment_id'
+               )->first();
+
+        $user_id          = $shipments->shipper_id;
+        $cod_Amount       = $shipments->cod_amount;
+        $fintechCharges   = $shipments->fintech_amount;
+        $delivery_note_id = $shipments->delivery_note_id;
+        $shipment_id      = $shipments->shipment_id;
+
+        $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
+        $standard_fintech_charges = new standard_fintech_charges();
+        $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
+
+            if($userFintechCharges->exists()){
+                $fintect_charges = $userFintechCharges->first()->fintech_charges;
+            }
+            else{
+                $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
+            }
+
+        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
+        ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
+        ->first();
+
+        function calculatepercentage($total_amount,$charges,$fed){
+            $percentage = round(($total_amount / 100) * $charges) ; 
+            $tax = round(($percentage / 100)*$fed);
+            $total = $tax + $percentage;
+            return  $total;
+        }
+
+        // Calcualtion company charges
+        $company_charges     = $select_range->charges;
+        $company_fed_charges = $select_range->fed_tax;
+
+        //fintech Compnay Charges
+        $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
+     
+        //user or Stadard fintech Charges
+        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
+
+        //Total payable Fintech Charges 
+        $total_calculated_charges = $total_fintech_calculated - $total_company_amount;
+        
+        $total_amount_received =  $cod_Amount + $fintechCharges;     
+
+        $fintech_details = new FintechPaymentDetails();
+        $fintech_details->tracking_id            =  $req->tracking_id;
+        $fintech_details->delivery_note_id       =  $delivery_note_id;
+        $fintech_details->cod_amount             =  $req->cod_amount;
+        $fintech_details->fintech_amount         =  $req->fintech_charges;
+        $fintech_details->rider_tip              =  $req->tip;
+        $fintech_details->rider_id               =  $shipments->rider;
+        $fintech_details->fintech_company_id     =  $req->fintech_company;
+        $fintech_details->fintech_transaction_id =  $req->transaction_id;
+        $fintech_details->save();
+
+        $shipment = Shipment::find($shipment_id);
+        $shipment->received_amount = $total_amount_received;
+        $shipment->save();
+
+        NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
+        NotificationsController::send(217, $shipments->rider, $fintech_details->id);
+
+        return response()->json([
+        [
+            'status' => 0, 
+            'message' => 'Successful Bill Payment']
+        ]);
     }
 }

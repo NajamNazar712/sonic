@@ -21,7 +21,7 @@ class ShipmentOutForDelivery extends Seeder
             'name'          => 'Shipment Out for Delivery for Consignee',
             'type_id'       => 2,
             'body'          => 'Dear [consignee_name],' . PHP_EOL . 'Your order from [company_name] is Out for Delivery under [tracking_number]. Please keep [amount] ready for collection.' . PHP_EOL . 'click to pay online : [online_payment_link]'  . PHP_EOL . PHP_EOL . PHP_EOL . 'Please contact at info@trax.pk or 0304-11-11-232 for further details.', 
-            'status'        => 0,
+            'status'        => 1,
             'updated_by'    => 3,
         ]);
 
