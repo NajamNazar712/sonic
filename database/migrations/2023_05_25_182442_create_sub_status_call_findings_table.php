@@ -15,6 +15,7 @@ class CreateSubStatusCallFindingsTable extends Migration
     {
         Schema::create('sub_status_call_findings', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('remark');
             $table->timestamps();
         });
     }

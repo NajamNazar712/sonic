@@ -20,6 +20,8 @@ use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\ReturnReattemptRatio;
+use App\Http\Models\Admin\StatusRemark;
+use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
@@ -109,7 +111,7 @@ class ReturnController extends Controller
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)->get();
             return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding]);
-        }
+    }
 
     public function return_marked_list(Request $request){ //status 12 shipments
         if($request->get('excel') && $request->get('excel') == true)
@@ -273,6 +275,14 @@ class ReturnController extends Controller
                     return $shipment->shipper;
                 }
             })
+            
+            ->addColumn('remarks',function ($shipper){
+                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
+                return $btn;
+
+            })
+
             ->editColumn('shipper_remarks', function ($shipment) {
                 if ($shipment->current_status_id == 52) {
                     return $shipment->shipper_remarks;
@@ -459,6 +469,7 @@ class ReturnController extends Controller
                     $contains = 0;
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
+                $call_history = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="call_history"><i class="ft-plus-circle primary"></i> Call History</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
@@ -5980,5 +5991,40 @@ class ReturnController extends Controller
 
             return response()->json(['status' => false, 'message' => 'Selected rider data not found']);
         }
+    }
+    public function update_call_status(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+
+
+        $status = new StatusRemark();
+        $status->shipment_id = $request->shipment_id;
+        $status->call_finding_id = $request->call_finding_id;
+        $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
+        $status->call_to_id = $request->call_to_id;
+        $status->sub_status_call_finding_remarks = $request->custom_remark;
+        $status->shipment_status_id = $shipment->shipper_status_id;
+        $status->updated_by = Auth::id();
+
+        $status->save();
+
+        return response()->json(['status' => 1]);
+
+    }
+    public function call_status_history(Request $request)
+    {
+
+        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
+        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
+        ->leftJoin('admins','admins.id','status_remarks.updated_by')
+        ->where('status_remarks.shipment_id',$request->shipment_id)
+
+        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
+        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
+        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
+        'shipment_status.name as status', 'admins.name as updated_by')
+        ->orderBy('status_remarks.updated_at','desc')->limit(10)->get();
+        
+        return $shipment;
     }
 }
