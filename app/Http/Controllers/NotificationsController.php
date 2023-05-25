@@ -10211,6 +10211,7 @@ class NotificationsController extends Controller
                         if (strpos($old_body, '[return_notes_id]') !== FALSE) {
                             $old_body = str_replace('[return_notes_id]', $return_note->return_id, $old_body);
                         }
+                        dd(  $old_body);
                         if (strpos($old_body, '[shipments_count]') !== FALSE) {
 //                            dd($old_body,$return_note->shipment_count);
                             $old_body = str_replace('[shipments_count]', $return_note->shipment_count, $old_body);
