@@ -75,8 +75,53 @@ class CRMDashboardController extends Controller
         // From Admin Leads 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
+        if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
+        {
+            $crm['total'] = CrmRequest::get();
+            // whereBetween('created_at', [$thirtyDays, $today]);
+            $crm['launched'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 1);
+            $crm['in_process'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 2);
+            $crm['resolved'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 3);
+            $crm['closed'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4);
+            $crm['valid'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 6);
+            $crm['in_valid'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 7);
+        }else
+        {
+            // dd(auth()->user()->id);
+            $crm['total'] = CrmRequest::get();
+            // whereBetween('created_at', [$thirtyDays, $today]);
+            $crm['launched'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 1)->where('agent_id',auth()->user()->id);
+            $crm['in_process'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 2)->where('agent_id',auth()->user()->id);
+            $crm['resolved'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 3)->where('agent_id',auth()->user()->id);
+            $crm['closed'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 4)->where('agent_id',auth()->user()->id);
+            $crm['valid'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 6)->where('agent_id',auth()->user()->id);
+            $crm['in_valid'] = CrmRequest::
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            where('status_id', 7)->where('agent_id',auth()->user()->id);
+        }
 
-        $crm['launched'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->where('status_id', 1);
         // $leads['total'] = CrmRequest::whereBetween('requested_date', [$thirtyDays, $today]);
         // $leads['received'] = Lead::whereBetween('requested_date', [$thirtyDays, $today])->where('status_id', 1);
         // $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8])->whereBetween('requested_date', [$thirtyDays, $today]);
@@ -94,6 +139,7 @@ class CRMDashboardController extends Controller
         //     $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         //     $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         // }
+
 
         if (session('role_id') != 1) {
             //$crm['launched'] = $crm['launched']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
@@ -118,16 +164,39 @@ class CRMDashboardController extends Controller
         } 
 
 
+        $crm['total'] = $crm['total']->count();
+        $crm['launched'] = $crm['launched']->count();
+        $crm['in_process'] = $crm['in_process']->count();
+        $crm['resolved'] = $crm['resolved']->count();
+        $crm['closed'] = $crm['closed']->count();
+        $crm['valid'] = $crm['valid']->count();
+        $crm['in_valid'] = $crm['in_valid']->count();
 
-        $leads['total'] = "3";
-        $leads['received'] = "3";
-        $leads['received_percentage'] = "3";
-        $leads['in_process'] = "3";
-        $leads['in_process_percentage'] = "3";
+        // $crm['in_process_percentage'] = "0";
+        // $crm['resolved_percentage'] = "0";
+        // $crm['closed_percentage'] = "0";
+        // $crm['valid_percentage'] = "0";
+        $crm['in_valid_percentage'] = "0";
+
+        if ($crm['total'] > 0) {
+            // $crm['in_process_percentage'] = round(($crm['in_process'] / $crm['total']) * 100, 2);
+            // $crm['resolved_percentage'] = round(($crm['resolved_percentage'] / $crm['total']) * 100, 2);
+            // $crm['closed_percentage'] = round(($crm['closed'] / $crm['total']) * 100, 2);
+            // $crm['valid_percentage'] = round(($crm['valid'] / $crm['total']) * 100, 2);
+            $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
+        }
+       
         $leads['in_process_for_activation'] = "3";
-        // $leads['in_process_percentage'] = "3";
         $leads['in_process_for_activation_percentage'] = "3";
         $leads['dormant'] = "3";
+
+        $crm['launched'] = number_format($crm['launched']);
+        $crm['in_process'] = number_format($crm['in_process']);
+        $crm['resolved'] = number_format($crm['resolved']);
+        $crm['closed'] = number_format($crm['closed']);
+        $crm['valid'] = number_format($crm['valid']);
+        $crm['in_valid'] = number_format($crm['in_valid']);
+
 
         $cities = City::where('status', 1)->select('id', 'name')->get();
 
@@ -137,7 +206,7 @@ class CRMDashboardController extends Controller
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
 
-        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ,'crm_request_statuses' => $crm_request_statuses]);
+        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ,'crm_request_statuses' => $crm_request_statuses, 'crm' => $crm]);
     }
 
     public function crm_dashboard_list(Request $request){
@@ -985,4 +1054,111 @@ class CRMDashboardController extends Controller
     //         return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
     //     }
     // }
+    public function card_data(Request $request){
+        // if ($request->get('agent_id')) {
+            // $from = $request->get('from_date');
+            // $to = $request->get('to_date');
+            // $card_data['launched'] = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            // $card_data['in_process'] = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            // $card_data['closed'] = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+            
+            $card_data['total'] = CrmRequest::count();
+            // whereBetween('created_at', [$thirtyDays, $today])
+            // ->count();
+            $card_data['launched'] = CrmRequest::where('status_id', 1);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['launched']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+               $card_data['launched']->whereBetween('created_at', [$from, $to]);
+            } 
+            $card_data['in_process'] = CrmRequest::where('status_id', 2);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['in_process']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+                $card_data['in_process']->whereBetween('created_at', [$from, $to]);
+            }
+            $card_data['resolved'] = CrmRequest::where('status_id', 3);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['resolved']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+                $card_data['resolved']->whereBetween('created_at', [$from, $to]);
+            }
+            $card_data['closed'] = CrmRequest::where('status_id', 4);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['closed']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+                $card_data['closed']->whereBetween('created_at', [$from, $to]);
+            }
+            $card_data['valid'] = CrmRequest::where('status_id', 6);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['valid']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+                $card_data['valid']->whereBetween('created_at', [$from, $to]);
+            }
+            $card_data['in_valid'] = CrmRequest::where('status_id', 7);
+            // whereBetween('created_at', [$thirtyDays, $today])->
+            if($agent_id = $request->get('agent_id'))
+            {
+                $card_data['in_valid']->where('agent_id',$agent_id);
+            }
+            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            {
+                $card_data['in_valid']->whereBetween('created_at', [$from, $to]);
+            }
+            
+            $card_data['launched'] = $card_data['launched']->count();
+            $card_data['in_process'] = $card_data['in_process']->count();
+            $card_data['resolved'] = $card_data['resolved']->count();
+            $card_data['closed'] = $card_data['closed']->count();
+            $card_data['valid'] = $card_data['valid']->count();
+            $card_data['in_valid'] = $card_data['in_valid']->count();
+
+            $card_data['in_valid_percentage'] = "0";
+
+            if ($card_data['total'] > 0) {
+                // $crm['in_process_percentage'] = round(($crm['in_process'] / $crm['total']) * 100, 2);
+                // $crm['resolved_percentage'] = round(($crm['resolved_percentage'] / $crm['total']) * 100, 2);
+                // $crm['closed_percentage'] = round(($crm['closed'] / $crm['total']) * 100, 2);
+                // $crm['valid_percentage'] = round(($crm['valid'] / $crm['total']) * 100, 2);
+                $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
+            }
+
+           
+
+            $card_data['launched'] = number_format($card_data['launched']);
+            $card_data['in_process'] = number_format($card_data['in_process']);
+            $card_data['resolved'] = number_format($card_data['resolved']);
+            $card_data['closed'] = number_format($card_data['closed']);
+            $card_data['valid'] = number_format($card_data['valid']);
+            $card_data['in_valid'] = number_format($card_data['in_valid']);
+
+
+
+            return response()->json(['status' => 1, 'card_data' => $card_data]);
+        // }else{
+        //     return response()->json(['status' => 0]);
+        // }
+    }
+
+
 }

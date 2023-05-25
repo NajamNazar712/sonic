@@ -231,7 +231,8 @@
                                                         <i class="icon-grid text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="total_leads" class="d-inline">{{$leads['total']}}</p> (100%)
+                                                        <h3 class="text-white"><p id="launched" class="d-inline">{{$crm['launched']}}</p> 
+                                                            {{-- (100%) --}}
                                                         </h3>
                                                         <span>Launch</span>
                                                     </div>
@@ -250,10 +251,9 @@
                                                         <i class="icon-clock text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="in_process"
-                                                                                  class="d-inline">{{$leads['in_process']}}</p> (<p
-                                                                    id="in_process_percentage"
-                                                                    class="d-inline">{{$leads['in_process_percentage']}}</p>%)
+                                                        <h3 class="text-white">
+                                                            <p id="in_process" class="d-inline">{{$crm['in_process']}}</p> 
+                                                            {{-- (<p id="in_process_percentage" class="d-inline">{{$crm['in_process_percentage']}}</p>%) --}}
                                                         </h3>
                                                         <span>In Process</span>
                                                     </div>
@@ -271,9 +271,8 @@
                                                         <i class="icon-flag text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="received_leads" class="d-inline">{{$leads['received']}}</p> (<p
-                                                                    id="received_percentage"
-                                                                    class="d-inline">{{$leads['received_percentage']}}</p>%)
+                                                        <h3 class="text-white"><p id="resolved" class="d-inline">{{$crm['resolved']}}</p> 
+                                                            {{-- (<p id="received_percentage" class="d-inline">{{$crm['resolved_percentage']}}</p>%) --}}
                                                         </h3>
                                                         <span>Resolved</span>
                                                     </div>
@@ -291,11 +290,8 @@
                                                         <i class="icon-clock text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="in_process_activation"
-                                                                                  class="d-inline">{{$leads['in_process_for_activation']}}</p>
-                                                            (<p id="in_process_for_activation_percentage"
-                                                                class="d-inline">{{$leads['in_process_for_activation_percentage']}}</p>
-                                                            %)
+                                                        <h3 class="text-white"><p id="closed" class="d-inline">{{$crm['closed']}}</p>
+                                                            {{-- (<p id="in_process_for_activation_percentage" class="d-inline">{{$crm['closed_percentage']}}</p> %) --}}
                                                         </h3>
                                                         <span>Closed</span>
                                                     </div>
@@ -316,7 +312,7 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                                        <h3 class="text-white"><p id="valid" class="d-inline">{{$crm['valid']}} </p></h3>
                                                         <span>Valid</span>
                                                     </div>
                                                 </div>
@@ -333,7 +329,10 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
+                                                        <h3 class="text-white"><p id="in_valid" class="d-inline">{{$crm['in_valid']}} </p>
+                                                            (<p id="in_valid_percentage"
+                                                            class="d-inline">{{$crm['in_valid_percentage']}}</p>
+                                                        %)</h3>
                                                         <span>InValid</span>
                                                     </div>
                                                 </div>
@@ -341,8 +340,6 @@
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            <div class="row justify-content-center">
                                 <div class="col-3" id="dormant_div">
                                     <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                                         <div class="card-content">
@@ -353,7 +350,7 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
-                                                        <span>Closure Rate</span>
+                                                        <span>Closure Rate (In_progress)</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -370,7 +367,7 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p>(100%)</h3>
-                                                        <span>Ratio</span>
+                                                        <span>Ratio (In_progress)</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -953,6 +950,45 @@
             });
             //endDropDown
 
+            //Card Function
+            function get_summary_cards_data() {
+                var agent_id = $('#search_agent').val();
+                var from_date = $('input[name="from_date"]').val();
+                var to_date = $('input[name="to_date"]').val();
+               
+                $.ajax({
+                    url: '{!! route('admin.crm.dashboard.card_data') !!}',
+                    method: 'post',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'from_date': from_date,
+                        'to_date': to_date,
+                        'agent_id': agent_id,
+
+                    }
+                }).done(function (data) {
+                    if(data.status){
+                        console.log(data.card_data);
+                        $('#launched').text(data.card_data.launched);
+                        $('#in_process').text(data.card_data.in_process);
+                        $('#resolved').text(data.card_data.resolved);
+                        $('#closed').text(data.card_data.closed);
+                        $('#valid').text(data.card_data.valid);
+                        $('#in_valid').text(data.card_data.in_valid);
+                        $('#in_valid_percentage').text(data.card_data.in_valid_percentage);
+                    }else{
+                        $('#launched').text(0);
+                        $('#in_process').text(0);
+                        $('#resolved').text(0);
+                        $('#closed').text(0);
+                        $('#valid').text(0);
+                        $('#in_valid').text(0);
+                        $('#in_valid_percentage').text(0);
+
+                    }
+                });
+            }
+            //end Card Function
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
                     body = [];
@@ -2185,6 +2221,7 @@
                 $('#star_shippers_filter').val(0);
             });
             $('#search_filter_btn').on('click',function () {
+                get_summary_cards_data();
                 table.draw();
             });
         });
