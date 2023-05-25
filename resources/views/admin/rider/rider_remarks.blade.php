@@ -220,6 +220,17 @@
         text-align: left;
     }
 
+    .invalid-feedback{
+        text-align: start !important;
+        font-size: 15px;
+    }
+
+    .invalid-feedback_final{
+        text-align: start !important;
+        font-size: 15px;
+
+    }
+
 </style>
 @endsection
 
@@ -362,9 +373,13 @@
                             $('#rider_remarks').modal('hide');
                             $('#rider_remarks').on('hidden.bs.modal', function() {
                                 $(this).find('form').trigger('reset');
+                                $('#initial_response').removeClass('is-invalid'); 
+                                $('.invalid-feedback').removeClass('text-danger').html(''); 
                             })
                             table.draw();
-                            toastr.success(data.success, 'Success!', {
+
+                            response = 'Initial Response Has Been Added';
+                            toastr.success(response, 'Success!', {
                                 positionClass: 'toast-top-center'
                                 , containerId: 'toast-top-center'
                             });
@@ -373,7 +388,7 @@
                             if (initialResponseField.val().trim() === '') {
                                 initialResponseField.addClass('is-invalid');
                                 var errorElement = initialResponseField.next('.invalid-feedback');
-                                errorElement.addClass('text-danger').html('Response is required');
+                                errorElement.addClass('text-danger').html('Initial Response is required');
                             } else {
                                 var error = "Please Fill To Submit A Response";
                                 toastr.error(error, 'Error!', {
@@ -415,6 +430,8 @@
                             $('#rider_remarks_final').modal('hide');
                             $('#rider_remarks_final').on('hidden.bs.modal', function() {
                                 $(this).find('form').trigger('reset');
+                                $('#final_response').removeClass('is-invalid'); 
+                                $('.invalid-feedback_final').removeClass('text-danger').html(''); 
                             })
                             table.draw();
 
