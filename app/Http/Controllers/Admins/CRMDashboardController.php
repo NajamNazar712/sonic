@@ -72,11 +72,12 @@ class CRMDashboardController extends Controller
         
 
 
-        //From Admin Leads 
-        // $today = Carbon::now()->endOfDay();
-        // $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
+        // From Admin Leads 
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(58)->startOfDay();
 
-        // $leads['total'] = Lead::whereBetween('requested_date', [$thirtyDays, $today]);
+        $crm['launched'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->where('status_id', 1);
+        // $leads['total'] = CrmRequest::whereBetween('requested_date', [$thirtyDays, $today]);
         // $leads['received'] = Lead::whereBetween('requested_date', [$thirtyDays, $today])->where('status_id', 1);
         // $leads['in_process'] = Lead::whereIn('status_id', [2, 5, 6, 7, 8])->whereBetween('requested_date', [$thirtyDays, $today]);
         // $leads['in_process_for_activation'] = Lead::where('status_id', 9)->whereBetween('requested_date', [$thirtyDays, $today]);
@@ -93,6 +94,31 @@ class CRMDashboardController extends Controller
         //     $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         //     $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
         // }
+
+        if (session('role_id') != 1) {
+            //$crm['launched'] = $crm['launched']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            //Ask Nabeel Bhai
+            // $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            // $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            // $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            // $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+            // $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        }
+        if (session('department_id') == 7) {
+            if (!in_array(session('id'), session('sale_users_bypass')) && session('role_id') != 44 && session('role_id') != 60) {
+                // $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+                // $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
+                // $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+                // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->where('leads.sale_person_id', Auth::id());
+                // $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
+                // $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
+                // $leads['dormant'] = $leads['dormant']->where('leads.sale_person_id', Auth::id());
+            }
+        } 
+
+
+
         $leads['total'] = "3";
         $leads['received'] = "3";
         $leads['received_percentage'] = "3";
