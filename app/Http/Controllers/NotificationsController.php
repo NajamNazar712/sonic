@@ -240,7 +240,7 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
-        
+
         $notification = Notification::find($id);
 
         if ($notification) {
@@ -464,7 +464,7 @@ class NotificationsController extends Controller
                         $details['weight'] = $shipment->actual_weight;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
-                        $details['return_notes_id']= $shipment->return_notes_id;
+                        $details['return_notes_id'] = $shipment->return_notes_id;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -1140,6 +1140,7 @@ class NotificationsController extends Controller
                         }
                     }
                 } else if ($id == 15) {
+                    dd($reference_1_id);
                     if ($reference_1_id != 0) {
                         $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
@@ -7822,9 +7823,8 @@ class NotificationsController extends Controller
 
                     foreach ($shipment_fields as $key => $field) {
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
-                            
-                            if ($shipment['consignee_name']) 
-                            {
+
+                            if ($shipment['consignee_name']) {
                                 $first_name = explode(' ', trim($shipment['consignee_name']));
                                 $shipment['consignee_name'] = $first_name[0];
                             }
@@ -10158,9 +10158,7 @@ class NotificationsController extends Controller
                     $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
-                }
-
-                else if( $id == 215) {
+                } else if ($id == 215) {
 
                     $details = $reference_1_id;
                     $temp_emails = $reference_2_id;
@@ -10174,24 +10172,24 @@ class NotificationsController extends Controller
                     foreach ($temp_emails as $temp_email) {
                         self::email($subject, $body, $temp_email);
                     }
-                }
-                // Today work has been done
+                } // Today work has been done
+
                 else if ($id == 216) {
-                    $notify = [];
 
-                    foreach ($reference_1_id as $key=> $return_note) {
-
+                    foreach ($reference_1_id as $key => $return_note) {
+//dd($return_note);
                         $old_body = $body;
 
                         if (strpos($old_body, '[return_notes_id]') !== FALSE) {
                             $old_body = str_replace('[return_notes_id]', $return_note->return_id, $old_body);
                         }
                         if (strpos($old_body, '[shipments_count]') !== FALSE) {
+//                            dd($old_body,$return_note->shipment_count);
                             $old_body = str_replace('[shipments_count]', $return_note->shipment_count, $old_body);
                         }
-                        $to = $return_noted['phone_number'];
-
-                       self::sms($old_body, $to);
+                        $to = $return_note['phone_number'];
+//die();
+                        self::sms($old_body, $to);
                         // $notify[$key] = [
                         //     'return_note_id'=>$return_noted->return_id,
                         //     'user_id'=>$return_noted->user_id,

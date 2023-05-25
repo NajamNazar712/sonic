@@ -41,7 +41,8 @@ class AppServiceProvider extends ServiceProvider
                     $search_sonic = AdminsScreenList::select('id', 'name', 'url');
                 }
 
-            } else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
+            }
+            else if (Auth::guard('web')->check() || Auth::guard('substitute_users')->check()) {
                 $settings = GlobalSettings::where('type', 'shipper_ticker');
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
@@ -62,8 +63,6 @@ class AppServiceProvider extends ServiceProvider
                         }
                     }
                 }
-
-
             } else {
                 $settings = NULL;
                 $search_sonic = NULL;

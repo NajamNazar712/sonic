@@ -50,6 +50,7 @@ class NotificationReturnedDeliveredToShipper extends Command
     {
         $from =  Carbon::now()->startOfDay()->toDateTimeString();
         $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
+//        dd($from,$to);
 
 //         $users = GlobalSettings::where('type', 'returned_shipment_notification');
 
@@ -75,9 +76,10 @@ class NotificationReturnedDeliveredToShipper extends Command
 
         $return_deliverd_to_shippers = ReturnDeliveredToShipperSms::join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
          ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
-         ->select('return_delivered_to_shipper_sms.return_note_id as return_id', 'shipments.user_id', 'u.phone as phone_number',DB::raw('(select count(id) from return_delivered_to_shipper_sms where user_id = return_delivered_to_shipper_sms.user_id and return_note_id = return_delivered_to_shipper_sms  and status = 0) as shipment_count'))
+         ->select('return_delivered_to_shipper_sms.return_note_id as return_id', 'shipments.user_id', 'u.phone as phone_number',DB::raw('(select count(id) from return_delivered_to_shipper_sms where user_id = return_delivered_to_shipper_sms.user_id and return_note_id = return_delivered_to_shipper_sms.return_note_id  and status = 0) as shipment_count'))
          ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
-         ->groupBy('return_delivered_to_shipper_sms.return_note_id');
+         ->groupBy('return_delivered_to_shipper_sms.return_note_id')
+        ->get();
 
         NotificationsController::send(216, $return_deliverd_to_shippers);
 
