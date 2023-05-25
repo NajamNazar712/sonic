@@ -14099,9 +14099,17 @@ class RiderAPIController extends Controller
 
     public function rider_remarks(Request $request)
     {
-        $rules = [
-           'rider_remarks' => ['required'],
+          $rules = [
+            'rider_remarks' => [
+                'required', 'string', function ($attribute, $value, $fail) {
+                    $wordCount = str_word_count($value);
+                    if ($wordCount > 250) {
+                        $fail('The ' . $attribute . ' must not exceed 250 words.');
+                    }
+                },
+            ],
         ];
+
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -14163,7 +14171,9 @@ class RiderAPIController extends Controller
             'rrr_2.response as final_response',
             'rider_remarks.id as rider_remarks_id',
             'ad.name as admin_name'
-        ])->get();
+        ])
+        ->orderBy('rider_remarks.updated_at', 'desc')
+        ->get();
 
         if(!$rider_remarks->isEmpty()){
             return response()->json(['status' => 0, 'data' => $rider_remarks]);
