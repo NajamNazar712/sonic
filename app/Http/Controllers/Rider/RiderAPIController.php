@@ -14159,8 +14159,8 @@ class RiderAPIController extends Controller
             'rider_remarks.updated_by as updated_by',
             'rider_remarks.updated_at as updated_at',
             'rider_remarks.rider_remarks as rider_remarks',
-            'rrr.response as response',
-            'rrr_2.response as response_2',
+            'rrr.response as initial_response',
+            'rrr_2.response as final_response',
             'rider_remarks.id as rider_remarks_id',
             'ad.name as admin_name'
         ])->get();
