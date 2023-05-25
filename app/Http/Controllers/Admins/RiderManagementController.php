@@ -1487,10 +1487,8 @@ class RiderManagementController extends Controller
                 }
             })
 
-            ->addColumn("action", function ($rider_remarks) {
-                $array = DB::table('admin_role_module_permissions')->where('role_id',Auth::user()->role_id)->pluck('permission_id')->toArray();
-                
-                if ($rider_remarks->status != 3 && count(array_intersect([863, 864, 865, 866], $array)) != null) {
+            ->addColumn("action", function ($rider_remarks) {                
+                if ($rider_remarks->status != 3) {
                     $dropdown = '
                         <div class="btn-group" id="dasdas">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle action" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1498,19 +1496,19 @@ class RiderManagementController extends Controller
                     ';
             
                     if (($rider_remarks->status == 1) || session('role_id') == 1) {
-                        if($rider_remarks->status == 1 && in_array(863, $array) && in_array(863, session('permissions'))) {
+                        if($rider_remarks->status == 1  && in_array(863, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></div></button>';
                         }
-                        if($rider_remarks->status == 1 && in_array(864, $array) && in_array(864, session('permissions'))) {
+                        if($rider_remarks->status == 1  && in_array(864, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process</div></div></button>';
                         }
                     }
             
                     if (($rider_remarks->status == 2) || session('role_id') == 1) {
-                        if ($rider_remarks->status == 2 &&  in_array(865, $array) && in_array(865, session('permissions'))) {
+                        if ($rider_remarks->status == 2  && in_array(865, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></div></button>';
                         }
-                        if ($rider_remarks->status == 2 &&  in_array(866, $array) && in_array(866, session('permissions'))) {
+                        if ($rider_remarks->status == 2  && in_array(866, session('permissions'))) {
                             $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></div></button>';
                         }
                     }
