@@ -1461,7 +1461,7 @@ class RiderManagementController extends Controller
                 'rider_remarks.id as rider_remarks_id',
                 'ad.name as admin_name'
             ])
-            ->orderBy('rider_remarks.created_at', 'desc');
+            ->orderBy('rider_remarks.updated_at', 'desc');
 
 
 
