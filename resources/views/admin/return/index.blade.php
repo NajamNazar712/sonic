@@ -2099,6 +2099,13 @@
 
 
                 }
+                if (action === 'call_history') {
+                    var call_history = $(this).parents('tr').attr('id');
+                    if (call_history) {
+                        $('#shipment_id').val(call_history);
+                        $('#update_call_status_modal').modal('show');
+                    }
+                }
             });
 
             $('body').on('click', '.intercept', function() {

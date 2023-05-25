@@ -535,6 +535,71 @@
 	<script>
 		$(document).ready(function() {
 
+            $('#tracking').on('click', '.call_status', function () {
+            var id = $(this).attr('id');
+            var tracking = $(this).attr('data-tracking');
+            var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+            $('#shipment_id').val(id);
+
+            $('#call_history_modal .modal-body').html('');
+            $('#call_history_modal').modal('show');
+
+            $.ajax({
+                url: '{{ route("admin.return.call_status_history") }}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'shipment_id': id
+                }
+            })
+            .done(function(data) {
+                if (data) {
+                    var modalBody = $('#remarks_log_modal_body');
+
+                    modalBody.html('');
+
+                    var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
+                    tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Other Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                    tableHtml += '<tbody class="text-center">';
+                        //limit max 10 rows
+                    $.each(data, function(index, value) {
+                        var updated_at = value.updated_at;
+                        var trimmedDateTime = updated_at.substring(0, 10);
+                        var trimmedTime = updated_at.substring(11, 16);
+                        var remark = value.remark;
+                        var custom_remarks = value.sub_status_call_finding_remarks;
+                        if(custom_remarks == null){
+                            custom_remarks = '-';
+                        }
+                        var status = value.status;
+                        var updated_by = value.updated_by;
+                        var call_to_id = value.call_to_id;
+                        if(call_to_id == 1){
+                            call_to_id = 'Shipper';
+                        } else{
+                            call_to_id = 'Consignee';
+                        }
+                        var call_finding_id = value.call_finding_id;
+                        if(call_finding_id == 1){
+                            call_finding_id = 'Un-responsive';
+                        } else{
+                            call_finding_id = '';
+                        }
+
+                        tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + call_to_id + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
+                    });
+
+                    tableHtml += '</tbody></table>';
+
+                    modalBody.append(tableHtml);
+                }
+            });
+
+        $('#update_call_status_modal').modal('show');
+    });
+        //End update_call_status_modal
+
+
             $('#damage_claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
