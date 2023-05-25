@@ -458,6 +458,55 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog" aria-labelledby="update_call_status_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Call History</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        @csrf
+                        <div class="form-group text-left">
+                            <input type="hidden" id="shipment_id" value="">
+                            <select name="call_finding_dropdown" class="form-control select2" id="call_finding_dropdown" data-rule-required="true" data-msg-required="Call Finding is required">
+                                <option value="1">Unresponsive</option>
+                            </select>
+                        </div>
+                        <div class="form-group text-left sub_status_call_finding_container d-none">
+                            <select name="sub_status_call_finding" class="form-control select2" id="sub_status_call_finding">
+                                @foreach($sub_status_call_finding as $sscf)
+                                <option value="{{$sscf->id}}">{{ $sscf->remark }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="form-group text-left custom_remark_container d-none">
+                            <input type="text" id="custom_remark" name="custom_remark" class="form-control" placeholder="Enter Other Text">
+                        </div>
+                        <div class="form-group text-left">
+                            <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true" data-msg-required="Call To is required">
+                                <option value="1">Shipper</option>
+                                <option value="2">Consignee</option>
+                            </select>
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" id="btnReturn" class="btn btn-primary update_return_confirm" value="Add">Update Call History</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                    <div class="modal-header text-center">
+                        <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
+                    </div>
+                    <div class="modal-body text-center" id="remarks_log_modal_body">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -842,6 +891,11 @@
                                 }
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+                                
+                                @if (session('role_id') == 1 || in_array(867, session('permissions')))
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 call_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Call History</button>';
+                                @endif
+                                
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
                                     shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 mark_fake_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Mark Fake Status</button>';
                                 @endif

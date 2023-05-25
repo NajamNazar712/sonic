@@ -280,7 +280,6 @@ class ReturnController extends Controller
                 $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
                 $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
                 return $btn;
-
             })
 
             ->editColumn('shipper_remarks', function ($shipment) {
@@ -487,6 +486,8 @@ class ReturnController extends Controller
                         if ((session('role_id') == 1 || (in_array(45, session('permissions')))) && !$result->consolidation_id) {
                             $dropdown .= $confirm_button;
                         }
+
+                        $dropdown .= $call_history;
 
                         if ((session('role_id') == 1 || in_array(46, session('permissions'))) && !$result->consolidation_id) {
                             $dropdown .= $re_attempt_button;
