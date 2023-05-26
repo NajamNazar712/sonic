@@ -3333,7 +3333,7 @@ class NotificationsController extends Controller
                                 if (strpos($body, '[return_detail]') !== FALSE) {
                                     $body = str_replace('[return_detail]', $return_detail, $body);
                                 }
-                                dd($body);
+                                dd($body,$return_detail);
 
                                 self::email($subject, $body, $to);
 
