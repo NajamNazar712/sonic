@@ -91,8 +91,7 @@ class NotificationReturnedDeliveredToShipper extends Command
             )
             ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
             ->groupBy('return_delivered_to_shipper_sms.return_note_id')
-            ->get()
-        ->toArray();
+            ->get();
 
 //        dd($return_deliverd_to_shippers);
 
