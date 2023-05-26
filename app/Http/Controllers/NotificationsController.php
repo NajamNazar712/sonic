@@ -3306,9 +3306,10 @@ class NotificationsController extends Controller
                                 $body = str_replace('[' . $first_field . ']', $shipment_details,$body);
 
                                 $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
-                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','rns.shipment_id')
+                                    ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
+                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
                                     ->where('sj.shipper_status_id',25)
-                                    ->where('sj.user_id',$user_id)
+                                    ->where('s.user_id',$user_id)
                                     ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
                                     ->get();
