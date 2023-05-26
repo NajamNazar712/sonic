@@ -5244,74 +5244,82 @@ class APIController extends Controller
             $delivery_note = DeliveryNote::find($delivery_note_id);
             $shipment = Shipment::find($shipment_id);
             //save detials in fintech payment
-                $rider_id         = $delivery_note->rider_id;
-                $rider_tip        = 0;
-                $user_id          = $shipment->user_id;
-                $delivery_note    = $delivery_note->id;
-                $shipment_id      = $shipment->id;
-                $shipment_amount  = $shipment->amount;
-                $onelink_amount   = $transaction_amount;
-                $fintech_company  = 2;
+        //         $rider_id         = $delivery_note->rider_id;
+        //         $rider_tip        = 0;
+        //         $user_id          = $shipment->user_id;
+        //         $delivery_note    = $delivery_note->id;
+        //         $shipment_id      = $shipment->id;
+        //         $shipment_amount  = $shipment->amount;
+        //         $onelink_amount   = $transaction_amount;
+        //         $fintech_company  = 2;
                              
-                $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
-                $standard_fintech_charges = new standard_fintech_charges();
-                $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
+        //         $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
+        //         $standard_fintech_charges = new standard_fintech_charges();
+        //         $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
         
-                    if($userFintechCharges->exists()){
-                        $fintect_charges = $userFintechCharges->first()->fintech_charges;
-                    }
-                    else{
-                        $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
-                    }
+        //             if($userFintechCharges->exists()){
+        //                 $fintect_charges = $userFintechCharges->first()->fintech_charges;
+        //             }
+        //             else{
+        //                 $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
+        //             }
 
-                $select_range = FintechCompanyCharges::where('range_down', '>=', $shipment_amount)
-                ->where('range_up', '<=', $shipment_amount)->where('company_Id',$fintech_company)
-                ->first();
+        //         $select_range = FintechCompanyCharges::where('range_down', '>=', $shipment_amount)
+        //         ->where('range_up', '<=', $shipment_amount)->where('company_Id',$fintech_company)
+        //         ->first();
 
-                if($select_range->exists()){
-                    $company_charges     = $select_range->charges;
-                    $company_fed_charges = $select_range->fed_tax;
-                }
-                else{
-                    $company_charges     = $standard_fintech_charges->first()->standard_fed_charges;
-                    $company_fed_charges = $fed_chargess;
-                }
+        //         if($select_range->exists()){
+        //             $company_charges     = $select_range->charges;
+        //             $company_fed_charges = $select_range->fed_tax;
+        //         }
+        //         else{
+        //             $company_charges     = $standard_fintech_charges->first()->standard_fed_charges;
+        //             $company_fed_charges = $fed_chargess;
+        //         }
 
-                function calculatepercentage($total_amount,$charges,$fed){
-                    $percentage = round(($total_amount / 100) * $charges) ; 
-                    $tax = round(($percentage / 100)*$fed);
-                    $total = $tax + $percentage;
-                    return  [$total,$tax];
-                }
+        //         function calculatepercentage($total_amount,$charges,$fed){
+        //             $percentage = round(($total_amount / 100) * $charges) ; 
+        //             $tax = round(($percentage / 100)*$fed);
+        //             $total = $tax + $percentage;
+        //             return  [$total,$tax];
+        //         }
 
+        //         //fintech Compnay Charges
+        //     $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
+            
+        //     //user or Stadard fintech Charges
+        //     $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
 
-                //here 
+        //     //Total payable Fintech Charges 
+        //     $revenue = $req->fintech_charges - $total_company_amount[0];
+
+        //         //here 
                 
-        //fintech Compnay Charges
-        $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
+        // //fintech Compnay Charges
+        // $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
      
-        //user or Stadard fintech Charges
-        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
+        // //user or Stadard fintech Charges
+        // $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
 
-        //Total payable Fintech Charges 
-        $revenue = $req->fintech_charges - $total_company_amount[0];
+        // //Total payable Fintech Charges 
+        // $revenue = $req->fintech_charges - $total_company_amount[0];
         
-        $total_amount_received =  $cod_Amount + $fintechCharges;     
+        // $total_amount_received =  $cod_Amount + $fintechCharges;     
 
-        $fintech_details = new FintechPaymentDetails();
-        $fintech_details->tracking_id             =  $req->tracking_id;
-        $fintech_details->delivery_note_id        =  $delivery_note_id;
-        $fintech_details->transaction_id          =  $req->transaction_id;
-        $fintech_details->cod_amount              =  $req->cod_amount;
-        $fintech_details->fintech_amount          =  $req->fintech_charges;
-        $fintech_details->fed_amount              =  $total_fintech_calculated[1]; //set
-        $fintech_details->rider_tip               =  $req->tip;
-        $fintech_details->rider_id                =  $shipments->rider;
-        $fintech_details->fintech_company_id      =  $req->fintech_company;
-        $fintech_details->total_fintech_amount    =  $req->fintech_charges; //set
-        $fintech_details->fintech_company_charges =  $total_company_amount[0]; //set
-        $fintech_details->revenue                 =  $revenue;
-        $fintech_details->save();
+        // $fintech_details = new FintechPaymentDetails();
+        // $fintech_details->tracking_id             =  $req->tracking_id;
+        // $fintech_details->delivery_note_id        =  $delivery_note_id;
+        // $fintech_details->transaction_id          =  $req->transaction_id;
+        // $fintech_details->cod_amount              =  $req->cod_amount;
+        // $fintech_details->fintech_amount          =  $req->fintech_charges;
+        // $fintech_details->fed_amount              =  $total_fintech_calculated[1]; //set
+        // $fintech_details->rider_tip               =  $req->tip;
+        // $fintech_details->rider_id                =  $shipments->rider;
+        // $fintech_details->fintech_company_id      =  $req->fintech_company;
+        // $fintech_details->total_fintech_amount    =  $req->fintech_charges; //set
+        // $fintech_details->fintech_company_charges =  $total_company_amount[0]; //set
+        // $fintech_details->revenue                 =  $revenue;
+        // $fintech_details->save();
 
 
                 //here 
