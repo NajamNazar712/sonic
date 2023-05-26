@@ -1463,7 +1463,6 @@ class RiderManagementController extends Controller
                 'rider_remarks.id as rider_remarks_id',
                 'ad.name as admin_name'
             ]);
-            // ->orderBy('rider_remarks.updated_at', 'desc');
 
             if(in_array(session('role_id'),[10,105,122]))
             {
@@ -1579,6 +1578,7 @@ class RiderManagementController extends Controller
                 if (isset($request->status_value)) {
                     $rider_remark->rider_remarks_status_id = $request->status_value;
                     $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
                     $rider_remark->save();
 
                     return response()->json(['status' => 1]);
@@ -1597,7 +1597,6 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-
                 $response = new RiderRemarksResponse();
 
 
@@ -1605,7 +1604,10 @@ class RiderManagementController extends Controller
                     $rider_remark->updated_by = Auth::id();
                     $response->rider_remarks_id = $rider_remark->id;
                     $response->response = $request->initial_response;
-                    $response->updated_by = Auth::id();;
+                    $response->updated_by = Auth::id();
+                    $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
+                    $response->updated_at = Carbon::now();
                     $response->type = '1';
 
                     $rider_remark->save();
@@ -1626,15 +1628,15 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-                // $response = RiderRemarksResponse::where('rider_remarks_id', $rider_remark->id)->first();
                 $response = new RiderRemarksResponse();
                 if (isset($request->final_response)) {
                     $response->rider_remarks_id = $rider_remark->id;
                     $response->response = $request->final_response;
                     $response->type = '2';
                     $response->updated_by = Auth::id();;
-
                     $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
+                    $response->updated_at = Carbon::now();
                     $rider_remark->save();
                     $response->save();
 
@@ -1658,7 +1660,7 @@ class RiderManagementController extends Controller
                 if (isset($request->status_value_2)) {
                     $rider_remark->rider_remarks_status_id = $request->status_value_2;
                     $rider_remark->updated_by = Auth::id();
-
+                    $rider_remark->updated_at = Carbon::now();
                     $rider_remark->save();
 
                     return response()->json(['status' => 1]);
