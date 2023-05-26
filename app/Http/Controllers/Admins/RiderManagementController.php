@@ -1493,7 +1493,7 @@ class RiderManagementController extends Controller
             })
 
             ->addColumn("action", function ($rider_remarks) {                
-                if ($rider_remarks->status != 3 && count(array_intersect([863, 864, 865 ,866], session('permissions'))) !== 0) {
+                if ($rider_remarks->status != 3 && count(array_intersect([863, 864, 865 ,866], session('permissions'))) !== 0 && session('role_id') == 1) {
                     $dropdown = '
                         <div class="btn-group" id="dasdas">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle action" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
