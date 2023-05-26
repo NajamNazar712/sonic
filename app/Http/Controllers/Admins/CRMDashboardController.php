@@ -217,101 +217,99 @@ class CRMDashboardController extends Controller
         }
 
         $dashboard_list = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
-            ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
-            ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
-            ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
-            ->leftjoin('admins as a', function ($join) {
-                $join->on('a.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(0));
-            })
-            ->leftjoin('users as u', function ($join) {
-                $join->on('u.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(1));
-            })
-            ->leftjoin('substitute_users as su', function ($join) {
-                $join->on('su.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(2));
-            })
-            ->leftjoin('retail_users as ru', function ($join) {
-                $join->on('ru.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(3));
-            })
-            ->leftjoin('consignee_users as cu', function ($join) {
-                $join->on('cu.id', '=', 'crm_requests.launched_by_id')
-                    ->where('crm_requests.launched_by', '=', DB::raw(4));
-            })
-            ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-            ->leftjoin('shipments_journey as sj', function ($join){
-                $join->on('sj.shipment_id', '=', 's.id')
-                ->where('sj.shipper_status_id',2);
-            })
-            ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
-            ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
-            ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-            ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
-            ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
-            ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-            ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
-            ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
-            ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
-            ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
-                $join->on('crth.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crth.id','=',
-                        DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
-            })
-            ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
-            ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
-            ->leftjoin('sale_person_tags as spt', function($join) {
-                $join->on('spt.user_id', '=', 's.user_id')
-                    ->where('spt.status', '=', 0);
-            })
-            ->leftjoin('crm_request_status_histories as res', function ($join) {
-                $join->on('res.crm_request_id', '=', 'crm_requests.id')
-                    ->where('res.id','=',
-                        DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
-            })
-            ->leftjoin('crm_request_agent_histories as resa', function ($join) {
-                $join->on('resa.crm_request_id', '=', 'crm_requests.id')
-                    ->where('resa.id','=',
-                        DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
-            })
-            ->leftjoin('admins as resby', 'resby.id', '=', 'resa.assigned_by')
-            ->leftjoin('crm_comments as ccs', function($join){
-                $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
-                    ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
-            })
-            ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
-            ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
-            ->leftjoin('crm_request_escalation_taggings as cret', 'cret.crm_request_id', '=', 'crm_requests.id')
-            ->leftjoin('crm_request_status_histories as crsh', function($join){
-                $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
-                    ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
-            })
-            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->join('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
-            ->leftjoin('admins as ad1','spt.admin_id','=','ad1.id')
-            
-            ->leftjoin('users as us','us.id','=','s.user_id')
-            ->leftjoin('segments as seg','us.segment_id','seg.id')
-            ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
-            ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
-            // ->leftJoin('shipments_journey as sj1', function ($join) {
-            //     $join->on('sj1.shipment_id', '=', 'crm_requests.shipment_id')
-            //         ->where(
-            //             'sj1.id',
-            //             '=',
-            //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
-            //         );
-            // })
-            // ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'us.sub_segment_id')
-            ->leftjoin('admins as a1', 'a1.id', '=', 'crm_requests.agent_id')
-            ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
-            ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value','crs.name as crm_request_status')
-            // ->where('crm_requests.status_id', 2)
-            ->groupBy('crm_requests.id');
-            // ->get();
-            // dd($dashboard_list);
+        ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+        ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
+        ->leftjoin('admins as ad', 'ad.id', '=', 'crm_requests.agent_id')
+        ->leftjoin('admins as a', function ($join) {
+            $join->on('a.id', '=', 'crm_requests.launched_by_id')
+                ->where('crm_requests.launched_by', '=', DB::raw(0));
+        })
+        ->leftjoin('users as u', function ($join) {
+            $join->on('u.id', '=', 'crm_requests.launched_by_id')
+                ->where('crm_requests.launched_by', '=', DB::raw(1));
+        })
+        ->leftjoin('substitute_users as su', function ($join) {
+            $join->on('su.id', '=', 'crm_requests.launched_by_id')
+                ->where('crm_requests.launched_by', '=', DB::raw(2));
+        })
+        ->leftjoin('retail_users as ru', function ($join) {
+            $join->on('ru.id', '=', 'crm_requests.launched_by_id')
+                ->where('crm_requests.launched_by', '=', DB::raw(3));
+        })
+        ->leftjoin('consignee_users as cu', function ($join) {
+            $join->on('cu.id', '=', 'crm_requests.launched_by_id')
+                ->where('crm_requests.launched_by', '=', DB::raw(4));
+        })
+        ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+        ->leftjoin('shipments_journey as sj', function ($join){
+            $join->on('sj.shipment_id', '=', 's.id')
+            ->where('sj.shipper_status_id',2);
+        })
+        ->leftjoin('shipment_status as ss', 'ss.id', '=', 's.shipper_status_id')
+        ->leftjoin('users as user', 'user.id', '=', 'crm_requests.shipper_id')
+        ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+        ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+        ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
+        ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+        ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
+        ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
+        ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
+        ->leftjoin('crm_request_taggings as crt', 'crt.crm_request_id', '=', 'crm_requests.id')
+        ->leftjoin('crm_request_tagging_histories as crth', function ($join) {
+            $join->on('crth.crm_request_id', '=', 'crm_requests.id')
+                ->where('crth.id','=',
+                    DB::raw('(select max(id) from crm_request_tagging_histories where crm_request_tagging_histories.crm_request_id = crm_requests.id)'));
+        })
+        ->leftjoin('admin_departments as adp', 'adp.id', '=', 'crt.tagged_id')
+        ->leftjoin('admins as at', 'at.id', '=', 'crt.tagged_id')
+        ->leftjoin('sale_person_tags as spt', function($join) {
+            $join->on('spt.user_id', '=', 's.user_id')
+                ->where('spt.status', '=', 0);
+        })
+        ->leftjoin('crm_request_status_histories as res', function ($join) {
+            $join->on('res.crm_request_id', '=', 'crm_requests.id')
+                ->where('res.id','=',
+                    DB::raw('(select max(id) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 2)'));
+        })
+        ->leftjoin('crm_request_agent_histories as resa', function ($join) {
+            $join->on('resa.crm_request_id', '=', 'crm_requests.id')
+                ->where('resa.id','=',
+                    DB::raw('(select max(id) from crm_request_agent_histories where crm_request_agent_histories.crm_request_id = crm_requests.id and crm_request_agent_histories.agent_id = crm_requests.agent_id)'));
+        })
+        ->leftjoin('admins as resby', 'resby.id', '=', 'resa.assigned_by')
+        ->leftjoin('crm_comments as ccs', function($join){
+            $join->on('ccs.crm_request_id', '=', 'crm_requests.id')
+                ->where('ccs.id', '=', DB::raw('(select max(id) from crm_comments where crm_comments.crm_request_id = crm_requests.id)'));
+        })
+        ->leftjoin('admins as accs', 'accs.id', '=', 'ccs.comment_by_id')
+        ->leftjoin('users as uccs', 'uccs.id', '=', 'ccs.comment_by_id')
+        ->leftjoin('crm_request_escalation_taggings as cret', 'cret.crm_request_id', '=', 'crm_requests.id')
+        ->leftjoin('crm_request_status_histories as crsh', function($join){
+            $join->on('crsh.crm_request_id', '=', 'crm_requests.id')
+                ->where('crsh.created_at', '=', DB::raw('(select max(created_at) from crm_request_status_histories where crm_request_status_histories.crm_request_id = crm_requests.id and crm_request_status_histories.status_id = 5)'));
+        })
+        ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+        ->leftjoin('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
+        ->leftjoin('admins as ad1','spt.admin_id','=','ad1.id')
+        
+        ->leftjoin('users as us','us.id','=','s.user_id')
+        ->leftjoin('segments as seg','us.segment_id','seg.id')
+        ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
+        ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
+        // ->leftJoin('shipments_journey as sj1', function ($join) {
+        //     $join->on('sj1.shipment_id', '=', 'crm_requests.shipment_id')
+        //         ->where(
+        //             'sj1.id',
+        //             '=',
+        //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
+        //         );
+        // })
+        // ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'us.sub_segment_id')
+        ->leftjoin('admins as a1', 'a1.id', '=', 'crm_requests.agent_id')
+        ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
+        ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value','crs.name as crm_request_status')
+        // ->where('crm_requests.status_id', 2)
+        ->groupBy('crm_requests.id');
             $current_date = Carbon::now();
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
             $dashboard_list = $dashboard_list->where(function ($query) {
@@ -1055,6 +1053,7 @@ class CRMDashboardController extends Controller
     //     }
     // }
     public function card_data(Request $request){
+        // dd($request->all());
         // if ($request->get('agent_id')) {
             // $from = $request->get('from_date');
             // $to = $request->get('to_date');
@@ -1065,66 +1064,247 @@ class CRMDashboardController extends Controller
             $card_data['total'] = CrmRequest::count();
             // whereBetween('created_at', [$thirtyDays, $today])
             // ->count();
-            $card_data['launched'] = CrmRequest::where('status_id', 1);
+
+            //Launched
+            $card_data['launched'] = CrmRequest::where('crm_requests.status_id', 1);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['launched']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
-            {
-               $card_data['launched']->whereBetween('created_at', [$from, $to]);
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {   
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['launched']->whereBetween('created_at', [$from, $stop_date]);
             } 
-            $card_data['in_process'] = CrmRequest::where('status_id', 2);
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            } 
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            } 
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['launched']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            } 
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                // dd($search_case_nature_type);
+                $card_data['launched'] = $card_data['launched']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            } 
+
+            //In_process
+            $card_data['in_process'] = CrmRequest::where('crm_requests.status_id', 2);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['in_process']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
-            {
-                $card_data['in_process']->whereBetween('created_at', [$from, $to]);
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {   
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['in_process']->whereBetween('created_at', [$from, $stop_date]);
             }
-            $card_data['resolved'] = CrmRequest::where('status_id', 3);
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            }
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['in_process']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            }
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['in_process'] = $card_data['in_process']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            }     
+            
+            //Resolved
+            $card_data['resolved'] = CrmRequest::where('crm_requests.status_id', 3);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['resolved']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {
-                $card_data['resolved']->whereBetween('created_at', [$from, $to]);
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['resolved']->whereBetween('created_at', [$from, $stop_date]);
             }
-            $card_data['closed'] = CrmRequest::where('status_id', 4);
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            }
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['resolved']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            } 
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['resolved'] =  $card_data['resolved']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            }     
+
+            //Closed
+            $card_data['closed'] = CrmRequest::where('crm_requests.status_id', 4);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['closed']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
-            {
-                $card_data['closed']->whereBetween('created_at', [$from, $to]);
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {   
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['closed']->whereBetween('created_at', [$from, $stop_date]);
             }
-            $card_data['valid'] = CrmRequest::where('status_id', 6);
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            }
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['closed']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            }
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['closed'] =   $card_data['closed']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            }    
+
+            //Valid
+            $card_data['valid'] = CrmRequest::where('crm_requests.status_id', 6);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['valid']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
-            {
-                $card_data['valid']->whereBetween('created_at', [$from, $to]);
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {   
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['valid']->whereBetween('created_at', [$from, $stop_date]);
             }
-            $card_data['in_valid'] = CrmRequest::where('status_id', 7);
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            }
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['valid']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            }
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['valid'] =  $card_data['valid']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            }    
+
+            //InValid
+            $card_data['in_valid'] = CrmRequest::where('crm_requests.status_id', 7);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['in_valid']->where('agent_id',$agent_id);
             }
-            if($from = $request->get('from_date') && $to = $request->get('to_date'))
-            {
-                $card_data['in_valid']->whereBetween('created_at', [$from, $to]);
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            {   
+                $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+                $card_data['in_valid']->whereBetween('created_at', [$from, $stop_date]);
             }
+            if ($origin = $request->get('search_origin'))
+            {   
+                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination'))
+            {   
+                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+            }
+            if ($zone = $request->get('search_zone'))
+            {   
+                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+            }
+            if ($search_case_nature = $request->get('search_case_nature'))
+            {   
+                $card_data['in_valid']->leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
+                ->where('crcn.id', '=', $search_case_nature);
+            }
+            if ($search_case_nature_type = $request->get('search_case_nature_type'))
+            {   
+                $card_data['in_valid'] =  $card_data['in_valid']->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
+                ->where('crcnt.id', '=', $search_case_nature_type);
+            }    
             
             $card_data['launched'] = $card_data['launched']->count();
             $card_data['in_process'] = $card_data['in_process']->count();
@@ -1132,7 +1312,6 @@ class CRMDashboardController extends Controller
             $card_data['closed'] = $card_data['closed']->count();
             $card_data['valid'] = $card_data['valid']->count();
             $card_data['in_valid'] = $card_data['in_valid']->count();
-
             $card_data['in_valid_percentage'] = "0";
 
             if ($card_data['total'] > 0) {

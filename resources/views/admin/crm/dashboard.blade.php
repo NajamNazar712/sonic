@@ -952,15 +952,32 @@
 
             //Card Function
             function get_summary_cards_data() {
+                var search_origin = $('#search_origin').val();
+                var search_destination = $('#search_destination').val();
+                var search_zone = $('#search_zone').val();
+                var search_case_nature = $('#search_case_nature').val();
+                var search_case_nature_type = $('#search_case_nature_type').val();
+                var shipment_status = $('#shipment_status').val();
+                var avg_tat = $('#avg_tat').val();
                 var agent_id = $('#search_agent').val();
-                var from_date = $('input[name="from_date"]').val();
-                var to_date = $('input[name="to_date"]').val();
+                // var from_date = $('input[name="from_date"]').val();
+                // var to_date = $('input[name="to_date"]').val();
+                var from_date = $('input[name="from_date_formatted"]').val();
+                var to_date = $('input[name="to_date_formatted"]').val();
+        
                
                 $.ajax({
                     url: '{!! route('admin.crm.dashboard.card_data') !!}',
                     method: 'post',
                     data: {
                         '_token': '{{ csrf_token() }}',
+                        'search_origin': search_origin,
+                        'search_destination': search_destination,
+                        'search_zone': search_zone,
+                        'search_case_nature': search_case_nature,
+                        'search_case_nature_type': search_case_nature_type,
+                        'shipment_status': shipment_status,
+                        'avg_tat': avg_tat,
                         'from_date': from_date,
                         'to_date': to_date,
                         'agent_id': agent_id,
