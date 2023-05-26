@@ -242,16 +242,14 @@
     }
 
     .hidden {
-  display: none;
-}
+        display: none;
+    }
 
 </style>
 @endsection
 
 @section('js')
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -261,21 +259,6 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
-
-
-        // var data = $.map({!! $rider_statuses !!}, function (obj) {
-        //     obj.text = obj.name;
-        //     console.log(obj)
-        //     return obj;
-        // });
-
-        // $("#status_select").prepend('<option value="" selected></option>').select2({
-        //     data:data,
-        //     placeholder: "Select Status",
-        //     width:'100%',
-        //     containerCssClass: 'select-xs',
-        //     dropdownCssClass: 'form-control-sm p-0'
-        // });
 
         var search_date_to = $('#search_form #search_date_to').pickadate({
             firstDay: 1
@@ -332,21 +315,9 @@
         })
 
 
-
-
         $('#search_filter_btn').on('click', function() {
             table.draw(true);
         });
-
-
-        // $('body').on('click', '.rider_remarks_btn', function() {
-        //     var row = $(this).closest('tr');
-        //     var rowData = table.row(row).data();
-
-        //     if (rowData['response'] == '' || rowData['response'] == null) {
-        //         $(this).prop('disabled', true);
-        //     }
-        // });
 
 
         $('body').on('click', '.rider_remarks_btn', function(event) {
@@ -676,7 +647,7 @@
             }
             , rowId: 'rider_remarks.id'
             , order: [
-                [1, 'desc']
+                [13, 'desc']
             ]
             , columns: [{
                     orderable: false
@@ -692,7 +663,6 @@
                     data: 'id'
                     , name: 'rider_remarks.id'
                     , class: 'align-middle id'
-                    , orderable: true
                 }
                 , {
                     data: 'rider_name'
@@ -713,7 +683,6 @@
                     data: 'hub'
                     , name: 'c.name'
                     , class: 'align-middle hub'
-                    , orderable: false
                 }
                 , {
                     data: 'zone_name'
