@@ -660,7 +660,7 @@
             }
             , rowId: 'rider_remarks.id'
             , order: [
-                [9, 'desc']
+                [1, 'desc']
             ]
             , columns: [{
                     orderable: false
