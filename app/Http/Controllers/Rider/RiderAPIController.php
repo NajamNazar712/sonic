@@ -12437,7 +12437,7 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
-
+                    
                     $deliveries['tracking_number'] = $tracking_number;
 
                     if ($shipment_data->shipper_status_id == 5) {
@@ -13950,16 +13950,11 @@ class RiderAPIController extends Controller
 
     public function rider_remarks(Request $request)
     {
-        $rules = [
+          $rules = [
             'rider_remarks' => [
-                'required', 'string', function ($attribute, $value, $fail) {
-                    $wordCount = str_word_count($value);
-                    if ($wordCount > 250) {
-                        $fail('The ' . $attribute . ' must not exceed 250 words.');
-                    }
-                },
-            ],
+                'required', 'string']
         ];
+
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
@@ -13969,17 +13964,18 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-
-            if (!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()) {
+            
+            if(!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()){
                 $rider_remark = new RiderRemark;
                 $rider_remark->rider_id = $request->rider_id;
                 $rider_remark->rider_remarks = $request->rider_remarks;
                 $rider_remark->save();
                 return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
-            } else {
+            }else{
                 return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
             }
-        }
+        }   
+           
     }
     public function rider_remark_list(Request $request)
     {

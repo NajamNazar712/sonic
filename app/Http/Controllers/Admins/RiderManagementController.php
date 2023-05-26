@@ -1413,16 +1413,15 @@ class RiderManagementController extends Controller
 
     public function rider_remarks_index()
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 656);
         $cities = City::where('status', '1')->where('business_category_id', '1')->select('id', 'name')->get();
         $riders = Rider::where('status', '1')->select('id', 'name')->get();
-        $remarks = RiderRemark::select('id')->get();
+        $remarks = RiderRemark::select('id')->orderBy('id','desc')->get();
         $statuses = RiderRemarkStatus::with('rider_remarks')->get();
-        // foreach($statuses as $status){
+        $rider_statuses = RiderRemarkStatus::select('id','name')->get();
 
-        //     dd(gettype($status->rider_remarks->rider_remarks_status_id));
-        // }
-        return view('admin.rider.rider_remarks')->with(['cities' => $cities, 'riders' => $riders, 'remarks' => $remarks, 'statuses' => $statuses]);
+        return view('admin.rider.rider_remarks')->with(['cities' => $cities, 'riders' => $riders, 'remarks' => $remarks, 'statuses' => $statuses, 'rider_statuses' => $rider_statuses]);
     }
 
     public function rider_remarks_list(Request $request)
@@ -1444,7 +1443,7 @@ class RiderManagementController extends Controller
                 $join->on('rrr_2.rider_remarks_id', '=', 'rider_remarks.id')
                     ->where('rrr_2.type', '=', 2)
                     ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
-            })
+            })    
             ->select([
                 'rider_remarks.id as id',
                 'r.name as rider_name',
@@ -1465,7 +1464,11 @@ class RiderManagementController extends Controller
                 'ad.name as admin_name'
             ]);
 
-
+            if(in_array(session('role_id'),[10,105,122]))
+            {
+                $rider_remarks = $rider_remarks->whereIn('city.hub_id', session('hubs'));
+            }
+            
 
         $datatables = Datatables::of($rider_remarks)
             ->editColumn('status', function ($rider_remarks) {
@@ -1489,31 +1492,44 @@ class RiderManagementController extends Controller
                 }
             })
 
-            ->addColumn("action", function ($rider_remarks) {
-                if ((session('role_id') == 1) && $rider_remarks->status != 3) {
+            ->addColumn("action", function ($rider_remarks) {                
+                if ($rider_remarks->status != 3 && count(array_intersect([863, 864, 865 ,866], session('permissions'))) !== 0) {
                     $dropdown = '
-                          <div class="btn-group" id="dasdas">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle action"  data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="btn-group" id="dasdas">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle action" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">
-                        ';
-
-                    if (($rider_remarks->status == 1) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process </div></button>
-                            <button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></button>';
-                    } elseif (($rider_remarks->status == 2) && (session('role_id') == 1 || in_array(533, session('permissions')))) {
-                        $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></button>
-                        <button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></button>';
+                    ';
+            
+                    if (($rider_remarks->status == 1)) {
+                        if(in_array(863, session('permissions')) || session('role_id') == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item initial_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Initial Response</div></div></button>';
+                        }
+                        if(in_array(864, session('permissions')) || session('role_id') == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn" data-value="2" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">In Process</div></div></button>';
+                        }
                     }
+            
+                    if (($rider_remarks->status == 2)) {
+                        if (in_array(865, session('permissions')) || session('role_id') == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item final_response" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Final Response</div></div></button>';
+                        }
+                        if (in_array(866, session('permissions')) || session('role_id') == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item rider_remarks_btn_1" data-value="3" data-id=' . $rider_remarks->id . ' rel="#" data-toggle="modal" data-target="#"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Resolved</div></div></button>';
+                        }
+                    }
+            
                     $dropdown .= '
                             </div>
-                          </div>
-                        ';
-
+                        </div>
+                    ';
+            
                     return $dropdown;
-                } else {
+                } 
+                else {
                     return '';
                 }
             });
+            
 
         if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
             $from = $request->get('search_date_from');
@@ -1528,11 +1544,15 @@ class RiderManagementController extends Controller
 
 
         if ($search_rider = $request->get('search_rider')) {
-            $datatables = $datatables->where('id', '=', $search_rider);
+            $datatables = $datatables->where('rider_id', '=', $search_rider);
         }
 
         if ($search_remark = $request->get('search_remark')) {
             $datatables = $datatables->where('rider_remarks.id', '=', $search_remark);
+        }
+
+        if ($search_rider_status = $request->get('search_rider_status')) {
+            $datatables = $datatables->where('rider_remarks.rider_remarks_status_id', '=', $search_rider_status);
         }
 
         return $datatables->make(true);
@@ -1558,6 +1578,7 @@ class RiderManagementController extends Controller
                 if (isset($request->status_value)) {
                     $rider_remark->rider_remarks_status_id = $request->status_value;
                     $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
                     $rider_remark->save();
 
                     return response()->json(['status' => 1]);
@@ -1576,7 +1597,6 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-
                 $response = new RiderRemarksResponse();
 
 
@@ -1584,7 +1604,10 @@ class RiderManagementController extends Controller
                     $rider_remark->updated_by = Auth::id();
                     $response->rider_remarks_id = $rider_remark->id;
                     $response->response = $request->initial_response;
-                    $response->updated_by = Auth::id();;
+                    $response->updated_by = Auth::id();
+                    $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
+                    $response->updated_at = Carbon::now();
                     $response->type = '1';
 
                     $rider_remark->save();
@@ -1605,15 +1628,15 @@ class RiderManagementController extends Controller
             } else {
                 $id = $request->id;
                 $rider_remark = RiderRemark::find($id);
-                // $response = RiderRemarksResponse::where('rider_remarks_id', $rider_remark->id)->first();
                 $response = new RiderRemarksResponse();
                 if (isset($request->final_response)) {
                     $response->rider_remarks_id = $rider_remark->id;
                     $response->response = $request->final_response;
                     $response->type = '2';
                     $response->updated_by = Auth::id();;
-
                     $rider_remark->updated_by = Auth::id();
+                    $rider_remark->updated_at = Carbon::now();
+                    $response->updated_at = Carbon::now();
                     $rider_remark->save();
                     $response->save();
 
@@ -1637,7 +1660,7 @@ class RiderManagementController extends Controller
                 if (isset($request->status_value_2)) {
                     $rider_remark->rider_remarks_status_id = $request->status_value_2;
                     $rider_remark->updated_by = Auth::id();
-
+                    $rider_remark->updated_at = Carbon::now();
                     $rider_remark->save();
 
                     return response()->json(['status' => 1]);

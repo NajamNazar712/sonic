@@ -11,7 +11,6 @@
         <div class="card-body">
             @include('admin.inc.messages')
 
-
             <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                 <div class="col-3 mt-1">
                     <div class="form-group input-group ">
@@ -23,6 +22,7 @@
                         <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Select From Date">
                     </div>
                 </div>
+
                 <div class="col-3 mt-1">
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
@@ -33,26 +33,7 @@
                         <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Select To Date">
                     </div>
                 </div>
-
-                <div class="col-3 mt-1">
-
-                    <select name="search_city" id="search_city" class="form-control select2 col-4">
-                        @foreach($cities as $city)
-                        <option value="{{$city->id}}">{{$city->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-
-                <div class="col-3 mt-1">
-                    <select name="search_rider" id="search_rider" class="form-control select2 col-4">
-                        @foreach($riders as $rider)
-                        <option value="{{$rider->id}}">{{$rider->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-
+                
                 <div class="col-3 mt-1">
                     <select name="search_remark" id="search_remark" class="form-control select2 col-4">
                         @foreach($remarks as $remark)
@@ -61,10 +42,31 @@
                     </select>
                 </div>
 
+                <div class="col-3 mt-1">
+                    <select name="search_rider_status" id="search_rider_status" class="form-control select2 col-4">
+                        @foreach($rider_statuses as $rider_status)
+                        <option value="{{$rider_status->id}}">{{$rider_status->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div class="col-3 mt-1">
+                    <select name="search_rider" id="search_rider" class="form-control select2 col-4">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-
-
-                <div class="col-4 mt-1">
+                <div class="col-3 mt-1">
+                    <select name="search_city" id="search_city" class="form-control select2 col-4">
+                        @foreach($cities as $city)
+                        <option value="{{$city->id}}">{{$city->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div class="col-2 mt-1">
                     <div class="form-group">
                         <button type="button" id="search_filter_btn" class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
                             Search
@@ -95,8 +97,7 @@
                     <th class="border-primary border-darken-1">Updated By</th>
                     <th class="border-primary border-darken-1">Updated At</th>
                     <th class="border-primary border-darken-1">Action</th>
-
-
+                    
                 </tr>
             </thead>
         </table>
@@ -118,8 +119,8 @@
                 <form id="rider_remarks" action="" method="post">
                     <div class="row mb-2">
                         <div class="col-12 form-group">
-                            <label for="description">Add Initial Response</label>
-                            <textarea id="initial_response" name="initial_response" class="form-control" rows="4" placeholder="Enter A Response"></textarea>
+                            <textarea id="initial_response" name="initial_response" class="form-control" rows="4" placeholder="Enter A Response *"></textarea>
+                            <div class="invalid-feedback"></div>
                         </div>
                     </div>
 
@@ -147,8 +148,9 @@
                 <form id="rider_remarks" action="" method="post">
                     <div class="row mb-2">
                         <div class="col-12 form-group">
-                            <label for="description">Add Final Response</label>
-                            <textarea id="final_response" name="final_response" class="form-control" rows="4" placeholder="Enter A Response"></textarea>
+                            <textarea id="final_response" name="final_response" class="form-control" rows="4" placeholder="Enter A Response *"></textarea>
+                            <div class="invalid-feedback_final"></div>
+
                         </div>
                     </div>
 
@@ -219,13 +221,26 @@
         text-align: left;
     }
 
+    .invalid-feedback{
+        text-align: start !important;
+        font-size: 15px;
+    }
+
+    .invalid-feedback_final{
+        text-align: start !important;
+        font-size: 15px;
+
+    }
+
+    .hidden {
+        display: none;
+    }
+
 </style>
 @endsection
 
 @section('js')
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
@@ -264,13 +279,18 @@
             }
         });
 
+        $('#search_rider_status').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Status'
+            , allowClear: true
+        })
+
+
         $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%'
             , placeholder: 'Cities'
             , allowClear: true
         })
-
-
 
 
         $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
@@ -285,150 +305,173 @@
             , allowClear: true
         })
 
+
         $('#search_filter_btn').on('click', function() {
             table.draw(true);
         });
-
-
-        // $('body').on('click', '.rider_remarks_btn', function() {
-        //     var row = $(this).closest('tr');
-        //     var rowData = table.row(row).data();
-
-        //     if (rowData['response'] == '' || rowData['response'] == null) {
-        //         $(this).prop('disabled', true);
-        //     }
-        // });
 
 
         $('body').on('click', '.rider_remarks_btn', function(event) {
             var id = $(this).attr('data-id');
             var status_value = $(this).attr('data-value');
 
-                    event.preventDefault(); 
-            
-                    $.ajax({
-                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
-                        , method: 'POST'
-                        , data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                        'status_value': status_value,
-                     
+            event.preventDefault();
 
-                        }
-                        , success: function(data) {
-                            if (data.status == 1) {
-                                table.draw();
-                                toastr.success(data.success, 'Status Has Been Changed!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                        , error: function(xhr, status, error) {
-                            toastr.error('An error occurred while processing the request.', 'Error!', {
-                                positionClass: 'toast-top-center'
-                                , containerId: 'toast-top-center'
-                            });
-                        }
-                
-                
+            $.ajax({
+                url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                , method: 'POST'
+                , data: {
+                    '_token': '{{ csrf_token() }}'
+                    , 'id': id
+                    , 'status_value': status_value,
+
+
+                }
+                , success: function(data) {
+                    if (data.status == 1) {
+                        table.draw();
+                        toastr.success(data.success, 'Status Has Been Changed!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                , error: function(xhr, status, error) {
+                    toastr.error('An error occurred while processing the request.', 'Error!', {
+                        positionClass: 'toast-top-center'
+                        , containerId: 'toast-top-center'
+                    });
+                }
+
+
             });
         });
 
         $('body').on('click', '.initial_response', function(event) {
             var id = $(this).attr('data-id');
             $('#rider_remarks').modal('show');
+            var toastrShown = false; 
 
-            $('#rider_remarks').on('submit', function(event) {
-                event.preventDefault(); 
-                let initial_response = $("#initial_response").val();
-                console.log(initial_response)
+                $('#rider_remarks').on('submit', function(event) {
+                    event.preventDefault();
+                    let initial_response = $("#initial_response").val();
                     $.ajax({
                         url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
                         , method: 'POST'
                         , data: {
-                            '_token': '{{ csrf_token() }}',
-                        'id': id,
-                        'initial_response' :initial_response,
-                        }
+                            '_token': '{{ csrf_token() }}'
+                            , 'id': id
+                            , 'initial_response': initial_response
+                        , }
                         , success: function(data) {
                             if (data.status == 1) {
                                 $('#rider_remarks').modal('hide');
-                                $('#rider_remarks').on('hidden.bs.modal', function () {
+                                $('#rider_remarks').on('hidden.bs.modal', function() {
                                     $(this).find('form').trigger('reset');
+                                    $('#initial_response').removeClass('is-invalid'); 
+                                    $('.invalid-feedback').removeClass('text-danger').html(''); 
                                 })
                                 table.draw();
-                                toastr.success(data.success, 'Success!', {
+
+                                if (!toastrShown) { // Check if success toastr has been shown
+                                response = 'Initial Response Has Been Added';
+                                toastr.success(response, 'Success!', {
                                     positionClass: 'toast-top-center'
                                     , containerId: 'toast-top-center'
                                 });
+
+                                toastrShown = true; 
+                            }
                             } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
+                                var initialResponseField = $('#initial_response');
+                                if (initialResponseField.val().trim() === '') {
+                                    initialResponseField.addClass('is-invalid');
+                                    var errorElement = initialResponseField.next('.invalid-feedback');
+                                    errorElement.addClass('text-danger').html('Initial Response is required');
+                                } else {
+                                    var error = "Please Fill To Submit A Response";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center'
+                                        , containerId: 'toast-top-center'
+                                    });
+                                }
                             }
                         }
                         , error: function(xhr, status, error) {
+                            console.log(xhr)
                             toastr.error('An error occurred while processing the request.', 'Error!', {
                                 positionClass: 'toast-top-center'
                                 , containerId: 'toast-top-center'
                             });
                         }
                     })
-                
-            });
+
+                });
         });
 
         $('body').on('click', '.final_response', function(event) {
             var id = $(this).attr('data-id');
-            console.log(id)
             $('#rider_remarks_final').modal('show');
 
+
+            toastrShown = false; 
             $('#rider_remarks_final').on('submit', function(event) {
-                event.preventDefault(); 
+                event.preventDefault();
                 let final_response = $("#final_response").val();
-                console.log(final_response)
-                    $.ajax({
-                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
-                        , method: 'POST'
-                        , data: {
-                            '_token': '{{ csrf_token() }}',
-                        'id': id,
-                        'final_response' :final_response,
+                $.ajax({
+                    url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                    , method: 'POST'
+                    , data: {
+                        '_token': '{{ csrf_token() }}'
+                        , 'id': id
+                        , 'final_response': final_response
+                    , }
+                    , success: function(data) {
+                        if (data.status == 1) {
+                            $('#rider_remarks_final').modal('hide');
+                            $('#rider_remarks_final').on('hidden.bs.modal', function() {
+                                $(this).find('form').trigger('reset');
+                                $('#final_response').removeClass('is-invalid'); 
+                                $('.invalid-feedback_final').removeClass('text-danger').html(''); 
+                            })
+                            table.draw();
+
+                            if(!toastrShown){
+                            var response = 'Final Response Has Been Added'
+                            toastr.success(response, 'Success!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                            toastrShown = true; // Set the flag to indicate success toastr has been shown
                         }
-                        , success: function(data) {
-                            if (data.status == 1) {
-                                $('#rider_remarks_final').modal('hide');
-                                $('#rider_remarks_final').on('hidden.bs.modal', function () {
-                                    $(this).find('form').trigger('reset');
-                                })
-                                table.draw();
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
+                        } else {
+                            var initialResponseField = $('#final_response');
+                            if (initialResponseField.val().trim() === '') {
+                                initialResponseField.addClass('is-invalid');
+                                var errorElement = initialResponseField.next('.invalid-feedback_final');
+                                errorElement.addClass('text-danger').html('Final Response is required');
                             } else {
-                                toastr.error(data.error, 'Error!', {
+                                var error = "Please Fill To Submit A Response";
+                                toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center'
                                     , containerId: 'toast-top-center'
                                 });
                             }
                         }
-                        , error: function(xhr, status, error) {
-                            toastr.error('An error occurred while processing the request.', 'Error!', {
-                                positionClass: 'toast-top-center'
-                                , containerId: 'toast-top-center'
-                            });
-                        }
-                    })
-                
+                    }
+                    , error: function(xhr, status, error) {
+                        toastr.error('An error occurred while processing the request.', 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    }
+                })
+
             });
         });
 
@@ -436,40 +479,40 @@
             var id = $(this).attr('data-id');
             var status_value_2 = $(this).attr('data-value');
 
-                    event.preventDefault(); 
-            
-                    $.ajax({
-                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
-                        , method: 'POST'
-                        , data: {
-                            '_token': '{{ csrf_token() }}',
-                            'id': id,
-                        'status_value_2': status_value_2,
-                     
+            event.preventDefault();
 
-                        }
-                        , success: function(data) {
-                            if (data.status == 1) {
-                                table.draw();
-                                toastr.success(data.success, 'Status Has Been Changed!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center'
-                                    , containerId: 'toast-top-center'
-                                });
-                            }
-                        }
-                        , error: function(xhr, status, error) {
-                            toastr.error('An error occurred while processing the request.', 'Error!', {
-                                positionClass: 'toast-top-center'
-                                , containerId: 'toast-top-center'
-                            });
-                        }
-                
-                
+            $.ajax({
+                url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                , method: 'POST'
+                , data: {
+                    '_token': '{{ csrf_token() }}'
+                    , 'id': id
+                    , 'status_value_2': status_value_2,
+
+
+                }
+                , success: function(data) {
+                    if (data.status == 1) {
+                        table.draw();
+                        toastr.success(data.success, 'Status Has Been Changed!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                , error: function(xhr, status, error) {
+                    toastr.error('An error occurred while processing the request.', 'Error!', {
+                        positionClass: 'toast-top-center'
+                        , containerId: 'toast-top-center'
+                    });
+                }
+
+
             });
         });
 
@@ -479,13 +522,29 @@
                 var rowData = table.row(row).data();
 
                 if (rowData['response'] == '' || rowData['response'] == null) {
-                    $(this).prop('disabled', true);
+                    $(this).prop('disabled', true).addClass('hidden');
                 } else {
-                    $(this).prop('disabled', false);
+                    $(this).prop('disabled', false).removeClass('hidden');
                 }
             });
         }
         updateButtonStatus();
+
+
+
+        function updateFinalButtonStatus() {
+            $('.rider_remarks_btn_1').each(function() {
+                var row = $(this).closest('tr');
+                var rowData = table.row(row).data();
+
+                if (rowData['response_2'] == '' || rowData['response_2'] == null) {
+                    $(this).prop('disabled', true).addClass('hidden');
+                } else {
+                    $(this).prop('disabled', false).removeClass('hidden');
+                }
+            });
+        }
+        updateFinalButtonStatus();
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {
                 body = [];
@@ -526,9 +585,8 @@
                             row.push(values.response_2);
                             row.push(values.created_at);
                             row.push(values.status);
-                            row.push(values.date);
+                            row.push(values.admin_name);
                             row.push(values.updated_at);
-                            row.push(values.updated_by);
                             body.push(row);
                         });
                     }
@@ -546,7 +604,7 @@
 
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr'
-            , scrollX: false
+            , scrollX: true
             , scrollY: '500px'
             , buttons: [{
                     extend: 'excel'
@@ -574,12 +632,13 @@
                     d.search_city = $('#search_city').val();
                     d.search_rider = $('#search_rider').val();
                     d.search_remark = $('#search_remark').val();
+                    d.search_rider_status = $('#search_rider_status').val();
 
                 }
             }
             , rowId: 'rider_remarks.id'
             , order: [
-                [9, 'desc']
+                [13, 'desc']
             ]
             , columns: [{
                     orderable: false
@@ -594,7 +653,7 @@
                 , {
                     data: 'id'
                     , name: 'rider_remarks.id'
-                    , class: 'align-middle hub'
+                    , class: 'align-middle id'
                 }
                 , {
                     data: 'rider_name'
@@ -615,7 +674,6 @@
                     data: 'hub'
                     , name: 'c.name'
                     , class: 'align-middle hub'
-                    , orderable: false
                 }
                 , {
                     data: 'zone_name'
@@ -635,14 +693,13 @@
                 , {
                     data: 'response_2'
                     , name: 'rrr_2.response'
-                    , class: 'align-middle response'
+                    , class: 'align-middle response_2'
                 }
                 , {
                     data: 'created_at'
                     , name: 'rider_remarks.created_at'
                     , class: 'align-middle created_at text-center'
-                    , orderable: false
-                    , searchable: false
+                   
                 }
                 , {
                     data: 'status'
@@ -682,12 +739,18 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
                     if ($(header).is('.serial_number') || $(header).is('.action')) {
                         $(td).appendTo($(search));
+                    }else if($(header).is('.status')){
+                        $(drop_select).appendTo($(search))
+                        .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                     } else {
                         var current = $(input).appendTo($(search)).on('change', function() {
                             column.search($(this).val(), false, false, true).draw();
@@ -697,6 +760,20 @@
                             current.val(column.search());
                         }
                     }
+
+                    var data = $.map({!! $rider_statuses !!}, function (obj) {
+                        obj.text = obj.name;
+                        console.log(obj)
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                 });
                 this.api().table().columns.adjust();
             }
@@ -704,9 +781,10 @@
 
         table.on('draw', function() {
             updateButtonStatus();
+            updateFinalButtonStatus();
         });
-
-
+        
+        
     });
 
 </script>
