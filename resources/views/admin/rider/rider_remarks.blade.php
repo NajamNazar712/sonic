@@ -45,16 +45,14 @@
                         @endforeach
                     </select>
                 </div>
-                
+
                 <div class="col-3 mt-1">
-                    
-                    <select name="search_city" id="search_city" class="form-control select2 col-4">
-                        @foreach($cities as $city)
-                        <option value="{{$city->id}}">{{$city->name}}</option>
+                    <select name="search_rider_status" id="search_rider_status" class="form-control select2 col-4">
+                        @foreach($rider_statuses as $rider_status)
+                        <option value="{{$rider_status->id}}">{{$rider_status->name}}</option>
                         @endforeach
                     </select>
                 </div>
-                
                 
                 <div class="col-3 mt-1">
                     <select name="search_rider" id="search_rider" class="form-control select2 col-4">
@@ -63,13 +61,11 @@
                         @endforeach
                     </select>
                 </div>
-                
-                
+
                 <div class="col-3 mt-1">
-                    
-                    <select name="search_rider_status" id="search_rider_status" class="form-control select2 col-4">
-                        @foreach($rider_statuses as $rider_status)
-                        <option value="{{$rider_status->id}}">{{$rider_status->name}}</option>
+                    <select name="search_city" id="search_city" class="form-control select2 col-4">
+                        @foreach($cities as $city)
+                        <option value="{{$city->id}}">{{$city->name}}</option>
                         @endforeach
                     </select>
                 </div>
