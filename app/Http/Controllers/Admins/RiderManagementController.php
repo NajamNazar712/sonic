@@ -1417,7 +1417,7 @@ class RiderManagementController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 656);
         $cities = City::where('status', '1')->where('business_category_id', '1')->select('id', 'name')->get();
         $riders = Rider::where('status', '1')->select('id', 'name')->get();
-        $remarks = RiderRemark::select('id')->get();
+        $remarks = RiderRemark::select('id')->orderBy('id','desc')->get();
         $statuses = RiderRemarkStatus::with('rider_remarks')->get();
         $rider_statuses = RiderRemarkStatus::select('id','name')->get();
 

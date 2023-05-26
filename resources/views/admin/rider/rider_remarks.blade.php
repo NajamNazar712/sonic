@@ -11,7 +11,6 @@
         <div class="card-body">
             @include('admin.inc.messages')
 
-
             <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                 <div class="col-3 mt-1">
                     <div class="form-group input-group ">
@@ -23,6 +22,7 @@
                         <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Select From Date">
                     </div>
                 </div>
+
                 <div class="col-3 mt-1">
                     <div class="form-group input-group">
                         <div class="input-group-prepend">
@@ -33,10 +33,6 @@
                         <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Select To Date">
                     </div>
                 </div>
-
-
-
-                
                 
                 <div class="col-3 mt-1">
                     <select name="search_remark" id="search_remark" class="form-control select2 col-4">
@@ -101,8 +97,7 @@
                     <th class="border-primary border-darken-1">Updated By</th>
                     <th class="border-primary border-darken-1">Updated At</th>
                     <th class="border-primary border-darken-1">Action</th>
-
-
+                    
                 </tr>
             </thead>
         </table>
