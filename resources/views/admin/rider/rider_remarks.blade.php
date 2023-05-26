@@ -34,25 +34,10 @@
                     </div>
                 </div>
 
-                <div class="col-3 mt-1">
-
-                    <select name="search_city" id="search_city" class="form-control select2 col-4">
-                        @foreach($cities as $city)
-                        <option value="{{$city->id}}">{{$city->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
 
 
-                <div class="col-3 mt-1">
-                    <select name="search_rider" id="search_rider" class="form-control select2 col-4">
-                        @foreach($riders as $rider)
-                        <option value="{{$rider->id}}">{{$rider->name}}</option>
-                        @endforeach
-                    </select>
-                </div>
-
-
+                
+                
                 <div class="col-3 mt-1">
                     <select name="search_remark" id="search_remark" class="form-control select2 col-4">
                         @foreach($remarks as $remark)
@@ -60,10 +45,35 @@
                         @endforeach
                     </select>
                 </div>
-
-
-
-
+                
+                <div class="col-3 mt-1">
+                    
+                    <select name="search_city" id="search_city" class="form-control select2 col-4">
+                        @foreach($cities as $city)
+                        <option value="{{$city->id}}">{{$city->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                
+                <div class="col-3 mt-1">
+                    <select name="search_rider" id="search_rider" class="form-control select2 col-4">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                
+                <div class="col-3 mt-1">
+                    
+                    <select name="search_rider_status" id="search_rider_status" class="form-control select2 col-4">
+                        @foreach($rider_statuses as $rider_status)
+                        <option value="{{$rider_status->id}}">{{$rider_status->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
                 <div class="col-2 mt-1">
                     <div class="form-group">
                         <button type="button" id="search_filter_btn" class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
@@ -295,13 +305,18 @@
             }
         });
 
+        $('#search_rider_status').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Status'
+            , allowClear: true
+        })
+
+
         $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%'
             , placeholder: 'Cities'
             , allowClear: true
         })
-
-
 
 
         $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
@@ -315,6 +330,9 @@
             , placeholder: 'Remark ID'
             , allowClear: true
         })
+
+
+
 
         $('#search_filter_btn').on('click', function() {
             table.draw(true);
@@ -608,7 +626,7 @@
 
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr'
-            , scrollX: false
+            , scrollX: true
             , scrollY: '500px'
             , buttons: [{
                     extend: 'excel'
@@ -636,6 +654,7 @@
                     d.search_city = $('#search_city').val();
                     d.search_rider = $('#search_rider').val();
                     d.search_remark = $('#search_remark').val();
+                    d.search_rider_status = $('#search_rider_status').val();
 
                 }
             }

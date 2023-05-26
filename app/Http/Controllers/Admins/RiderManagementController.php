@@ -1552,6 +1552,10 @@ class RiderManagementController extends Controller
             $datatables = $datatables->where('rider_remarks.id', '=', $search_remark);
         }
 
+        if ($search_rider_status = $request->get('search_rider_status')) {
+            $datatables = $datatables->where('rider_remarks.rider_remarks_status_id', '=', $search_rider_status);
+        }
+
         return $datatables->make(true);
     }
 
