@@ -2940,10 +2940,10 @@ class ReturnController extends Controller
                                 $c_user = explode(',', $current_users);
 //                                dd($parcel->user_id,$c_user);
                                 if(in_array($parcel->user_id,$c_user)){
-//                                    dd('kdk');
+//
                                     $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id'=>$request->return_note_id,'user_id' => $parcel->user_id,'shipment_id' => $parcel->id,'status' => 0]);
                                     if(!$return_delivered_to_shipper->exists()){
-//                                        dd('kjkj');
+//
                                         $return_delivered = new ReturnDeliveredToShipperSms();
                                         $return_delivered->return_note_id = $request->return_note_id;
                                         $return_delivered->user_id = $parcel->user_id;
