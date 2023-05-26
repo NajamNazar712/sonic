@@ -229,7 +229,9 @@
             function get_summary_cards_data() {
                 var from_date = $('input[name="search_date_from_formatted"]').val();
                 var to_date = $('input[name="search_date_to_formatted"]').val();
-               
+                var to_date = $('input[name="search_date_to_formatted"]').val();
+                var search_account_type = $('#search_account_type').val();
+
                 $.ajax({
                     url: '{!! route('cod.crm.request.card_data') !!}',
                     method: 'post',
@@ -237,6 +239,7 @@
                         '_token': '{{ csrf_token() }}',
                         'from_date': from_date,
                         'to_date': to_date,
+                        'search_account_type': search_account_type,
 
                     }
                 }).done(function (data) {
