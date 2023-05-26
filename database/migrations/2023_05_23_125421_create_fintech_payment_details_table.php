@@ -17,12 +17,16 @@ class CreateFintechPaymentDetailsTable extends Migration
             $table->increments('id');
             $table->bigInteger('tracking_id');
             $table->bigInteger('delivery_note_id');
+            $table->String('transaction_id');
             $table->Integer('cod_amount');
             $table->Integer('fintech_amount');
+            $table->Integer('fed_amount');
             $table->Integer('rider_tip');
             $table->Integer('rider_id');
             $table->Integer('fintech_company_id');
-            $table->String('fintech_transaction_id');
+            $table->Integer('total_fintech_amount');
+            $table->Integer('fintech_company_charges');
+            $table->Integer('revenue');
             $table->timestamps();
         });
     }

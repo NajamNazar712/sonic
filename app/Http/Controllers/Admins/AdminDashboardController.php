@@ -503,13 +503,6 @@ class AdminDashboardController extends Controller
         return view('admin.simple_dashboard');
     }
 
-
-
-
-//Added by Murad
-
-
-
 public function payfast_payment(Request $request){
     dd($request->all());
 }
@@ -576,8 +569,6 @@ public function add_fintech_charges(Request $req){
             }
         }
     }
-
-//End
     public function statistics_search(Request $request)
     {
         $graph = array();

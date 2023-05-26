@@ -708,14 +708,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('restrict_order_id/info', 'Admins\AdminDashboardController@restrict_order_id_info')->name('restrict_order_id.info');
         Route::post('restrict_order_id/submit', 'Admins\AdminDashboardController@restrict_order_id_submit')->name('restrict_order_id.submit');
         Route::post('/add_retag_territory', 'Admins\AdminDashboardController@add_retag_territory')->name('add_retag_territory');
-
-//Added by Murad
-
         Route::post('add_fintech_charges', 'Admins\AdminDashboardController@add_fintech_charges')->name('add_fintech_charges');    
-      
-      
-
-//End
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {

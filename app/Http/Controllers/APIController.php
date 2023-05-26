@@ -5242,11 +5242,86 @@ class APIController extends Controller
             $one_link_payment_transaction->save();
 
             $delivery_note = DeliveryNote::find($delivery_note_id);
+            $shipment = Shipment::find($shipment_id);
+            //save detials in fintech payment
+                $rider_id         = $delivery_note->rider_id;
+                $rider_tip        = 0;
+                $user_id          = $shipment->user_id;
+                $delivery_note    = $delivery_note->id;
+                $shipment_id      = $shipment->id;
+                $shipment_amount  = $shipment->amount;
+                $onelink_amount   = $transaction_amount;
+                $fintech_company  = 2;
+                             
+                $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
+                $standard_fintech_charges = new standard_fintech_charges();
+                $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
+        
+                    if($userFintechCharges->exists()){
+                        $fintect_charges = $userFintechCharges->first()->fintech_charges;
+                    }
+                    else{
+                        $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
+                    }
+
+                $select_range = FintechCompanyCharges::where('range_down', '>=', $shipment_amount)
+                ->where('range_up', '<=', $shipment_amount)->where('company_Id',$fintech_company)
+                ->first();
+
+                if($select_range->exists()){
+                    $company_charges     = $select_range->charges;
+                    $company_fed_charges = $select_range->fed_tax;
+                }
+                else{
+                    $company_charges     = $standard_fintech_charges->first()->standard_fed_charges;
+                    $company_fed_charges = $fed_chargess;
+                }
+
+                function calculatepercentage($total_amount,$charges,$fed){
+                    $percentage = round(($total_amount / 100) * $charges) ; 
+                    $tax = round(($percentage / 100)*$fed);
+                    $total = $tax + $percentage;
+                    return  [$total,$tax];
+                }
+
+
+                //here 
+                
+        //fintech Compnay Charges
+        $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
+     
+        //user or Stadard fintech Charges
+        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
+
+        //Total payable Fintech Charges 
+        $revenue = $req->fintech_charges - $total_company_amount[0];
+        
+        $total_amount_received =  $cod_Amount + $fintechCharges;     
+
+        $fintech_details = new FintechPaymentDetails();
+        $fintech_details->tracking_id             =  $req->tracking_id;
+        $fintech_details->delivery_note_id        =  $delivery_note_id;
+        $fintech_details->transaction_id          =  $req->transaction_id;
+        $fintech_details->cod_amount              =  $req->cod_amount;
+        $fintech_details->fintech_amount          =  $req->fintech_charges;
+        $fintech_details->fed_amount              =  $total_fintech_calculated[1]; //set
+        $fintech_details->rider_tip               =  $req->tip;
+        $fintech_details->rider_id                =  $shipments->rider;
+        $fintech_details->fintech_company_id      =  $req->fintech_company;
+        $fintech_details->total_fintech_amount    =  $req->fintech_charges; //set
+        $fintech_details->fintech_company_charges =  $total_company_amount[0]; //set
+        $fintech_details->revenue                 =  $revenue;
+        $fintech_details->save();
+
+
+                //here 
+
+            //    
             $update_count = $delivery_note->one_link_payment_count + 1;
             $delivery_note->one_link_payment_count = $update_count;
             $delivery_note->save();
             $amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id)->where('shipment_id', $shipment_id)->sum('transaction_amount');
-            $shipment = Shipment::find($shipment_id);
+            
             $shipment->received_amount = $amount;
             $shipment->save();
 
@@ -5329,7 +5404,7 @@ class APIController extends Controller
                                     // check bill status
                                     if ($shipment_data->amount == $shipment_data->received_amount) {
                                         // Bill paid status
-                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no', $tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_number', $tracking_no)->first();
 
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5364,7 +5439,7 @@ class APIController extends Controller
                                     $calculate_fed_charges      = round(($calculate_standard_charges / 100)*$fed);
                                     $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges; 
                                     $amount_length = strlen($total_cod );
-                                    
+                                  
                                     // prefix + because we only have possitive value to be collected
                                     $return_data['amount_within_dueDate'] .= "+";
 
@@ -5374,7 +5449,6 @@ class APIController extends Controller
                                     }
 
                                     $return_data['amount_within_dueDate'] .= $total_cod;
-
                                     // adding 00 for decimal value Required for 1Link API
                                     $return_data['amount_within_dueDate'] .= "00";
 
@@ -6914,7 +6988,7 @@ class APIController extends Controller
             $percentage = round(($total_amount / 100) * $charges) ; 
             $tax = round(($percentage / 100)*$fed);
             $total = $tax + $percentage;
-            return  $total;
+            return  [$total,$tax];
         }
 
         // Calcualtion company charges
@@ -6928,19 +7002,23 @@ class APIController extends Controller
         $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
 
         //Total payable Fintech Charges 
-        $total_calculated_charges = $total_fintech_calculated - $total_company_amount;
+        $revenue = $req->fintech_charges - $total_company_amount[0];
         
         $total_amount_received =  $cod_Amount + $fintechCharges;     
 
         $fintech_details = new FintechPaymentDetails();
-        $fintech_details->tracking_id            =  $req->tracking_id;
-        $fintech_details->delivery_note_id       =  $delivery_note_id;
-        $fintech_details->cod_amount             =  $req->cod_amount;
-        $fintech_details->fintech_amount         =  $req->fintech_charges;
-        $fintech_details->rider_tip              =  $req->tip;
-        $fintech_details->rider_id               =  $shipments->rider;
-        $fintech_details->fintech_company_id     =  $req->fintech_company;
-        $fintech_details->fintech_transaction_id =  $req->transaction_id;
+        $fintech_details->tracking_id             =  $req->tracking_id;
+        $fintech_details->delivery_note_id        =  $delivery_note_id;
+        $fintech_details->transaction_id          =  $req->transaction_id;
+        $fintech_details->cod_amount              =  $req->cod_amount;
+        $fintech_details->fintech_amount          =  $req->fintech_charges;
+        $fintech_details->fed_amount              =  $total_fintech_calculated[1]; //set
+        $fintech_details->rider_tip               =  $req->tip;
+        $fintech_details->rider_id                =  $shipments->rider;
+        $fintech_details->fintech_company_id      =  $req->fintech_company;
+        $fintech_details->total_fintech_amount    =  $req->fintech_charges; //set
+        $fintech_details->fintech_company_charges =  $total_company_amount[0]; //set
+        $fintech_details->revenue                 =  $revenue;
         $fintech_details->save();
 
         $shipment = Shipment::find($shipment_id);

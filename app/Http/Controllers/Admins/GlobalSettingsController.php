@@ -3679,8 +3679,6 @@ class GlobalSettingsController extends Controller
 
     public function setup_fintech_charges_list(){
         $fintechSetup =  new FintechCompany();
-
-
         $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
         ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
         ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
