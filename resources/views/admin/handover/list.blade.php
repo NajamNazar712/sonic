@@ -169,6 +169,39 @@
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
+            }).bind("change",function(){
+                var search_from_admin = $('#search_from_admin');
+                var search_to_admin = $('#search_to_admin');
+                let id = $(this).val();
+                search_from_admin.attr("disabled", true);
+                search_to_admin.attr("disabled", true);
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.handover.list.get_user') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                    .done(function (data) {
+                        search_from_admin.empty();
+                        search_to_admin.empty();
+                        if(data.users.length > 0){
+                            search_from_admin.attr("disabled", false);
+                            search_to_admin.attr("disabled", false);
+                            $.each(data.users, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                search_from_admin.append(newOption);
+                                search_to_admin.append(newOption);
+                            });
+                        }else{
+                            search_from_admin.attr("disabled", true);
+                            search_to_admin.attr("disabled", true);
+                        }
+
+                    });
+                }
             });
             $('#search_from_admin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select From Person',

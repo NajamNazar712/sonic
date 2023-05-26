@@ -721,6 +721,16 @@ class AdminShipmentHandoverController extends Controller
             return response()->json(['status' => 0 ]);
         }
     }
+    public function get_user(Request  $request){
+        if(isset($request->city_id)){
+            $users = HandoverResponsibilities::where('hub_id',$request->city_id)->where('status',1);
+            if($users->exists()){
+                return response()->json(['status' => 1,'users'=>$users->get()]);
+            }
+        }else{
+            return response()->json(['status' => 0 ]);
+        }
+    }
 
 
 }
