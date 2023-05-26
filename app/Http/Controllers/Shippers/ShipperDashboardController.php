@@ -115,6 +115,8 @@ use App\Http\Models\Rider\RiderReturnDelivery;
 use App\Http\Models\Admin\PODImage;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\Sister_account\MergedSisterAccount;
+
 //use Illuminate\Support\Facades\Auth;
 
 class ShipperDashboardController extends Controller
@@ -249,12 +251,32 @@ class ShipperDashboardController extends Controller
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
 
+
+        $merged_accounts = [];
+        $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
+        if($get_merged_head_id){
+            $merged_head_id =  $get_merged_head_id->merged_head_id;
+
+            $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
+                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
+                ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+                ->where('merged_head_id', $merged_head_id)
+                ->get();
+        }
 //        END
 
 
-      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module]);
+      return view('client.dashboard')->with(['case_nature' => $case_nature,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status,'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'business_categories' => $business_categories , 'payment_module' => $payment_module, 'merged_accounts'=> $merged_accounts]);
     }
     public function orders_list(Request $request) {
+
+        $masp = [session('user_id')];
+        $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
+        
+        if(count($merged_account_sister_mapping) >  0){
+            $masp = array_merge($masp,$merged_account_sister_mapping);
+        }
+
          if (!in_array(session('user_id'), [167, 1159, 2035, 3324, 4740, 4758, 5982, 10104, 14110, 7762])) {
             $connection = 'reports';
          }
@@ -262,10 +284,23 @@ class ShipperDashboardController extends Controller
              $connection = 'mysql';
          }
 
-        $count = DB::connection($connection)->table('shipments')->where(function ($query) {
-            $query->where('shipments.user_id', session('user_id'))
-                ->orwhereIn('shipments.user_id', session('sister_users'));
-            });
+        $count = DB::connection($connection)->table('shipments')
+        
+        
+        ->where(function ($query) use ($masp, $request) {
+            if(isset($request->search_account_type) && count($request->search_account_type) > 0){
+                $query->whereIn('shipments.user_id', $request->search_account_type);
+            } else {
+                $query->whereIn('shipments.user_id', $masp);
+            }
+        });
+
+        // ->where(function ($query){ 
+        //     $query->where('shipments.user_id', session('user_id'))
+        //         ->orwhereIn('shipments.user_id', session('sister_users'));
+        // });
+
+      
 
         if ($request->get('booking_from_date') && $request->get('booking_from_date')) {
             $from = $request->get('booking_from_date');
@@ -327,6 +362,7 @@ class ShipperDashboardController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftJoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('business_categories as bc', 'shipments.business_category_id', '=' , 'bc.id')
+            ->whereIn('shipments.user_id', $masp)
             ->select(['u.id as user_id', 'u.name as user_name', 'shipments_journey.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments_journey.shipper_status_id as status_id', 'shipments.booked_by as booked_by', 'bc.name as business_category' ,'pm.mode as payment_module','shipments.tracking_number as tracking','shipments_journey.reference_1_id as deliverynote']);
 //            ->where('shipments.user_id', session('user_id'))
 //            ->orwhereIn('shipments.user_id', session('sister_users'))
@@ -336,6 +372,11 @@ class ShipperDashboardController extends Controller
             $query->where('shipments.user_id', session('user_id'))
                 ->orwhereIn('shipments.user_id', session('sister_users'));
         });
+
+        if(isset($request->search_account_type) && count($request->search_account_type) > 0){
+            $shipments = $shipments->whereIn('shipments.user_id', $request->search_account_type);
+        }
+
         if(session('user_type') == 2){
             if(session('restriction') == 1){
                 $shipments = $shipments->join('substitute_user_shipments as sus', function($join){

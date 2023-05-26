@@ -20,6 +20,8 @@ use App\Http\Models\Admin\ReturnNoteImage;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\http\Models\Admin\ReturnReasonMandatoryShipper;
 use App\Http\Models\Admin\ReturnReattemptRatio;
+use App\Http\Models\Admin\StatusRemark;
+use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
@@ -104,10 +106,11 @@ class ReturnController extends Controller
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
 
+        $sub_status_call_finding = SubStatusCallFinding::all();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)
             ->where('a.status',1)->get();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons]);
+            return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -272,6 +275,19 @@ class ReturnController extends Controller
                     return $shipment->shipper;
                 }
             })
+            
+            ->addColumn('remarks',function ($shipper){
+                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
+                return $btn;
+            })
+
+            ->addColumn('remarks_excel',function ($shipper){
+                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
+                return $status_count;
+
+            })
+
             ->editColumn('shipper_remarks', function ($shipment) {
                 if ($shipment->current_status_id == 52) {
                     return $shipment->shipper_remarks;
@@ -458,6 +474,7 @@ class ReturnController extends Controller
                     $contains = 0;
                 $open_intercept = CityDelivery::where('city_id', $result->consignee_city_id)->where('shipping_mode_id',$result->shipping_mode_id)->exists();
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
+                $call_history = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="call_history"><i class="ft-plus-circle primary"></i> Call History</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-id="'.$contains.'" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';//data-id is checking whter it is OSA/NSA or not 1 for yes and 0 for no
                 $intercept = '<a href="javascript:void(0);" class="dropdown-item intercept"><i class="ft-plus-circle primary"></i> Intercept/Re-Book</a>';
                 $self_collection_button = '<a href="javascript:void(0);" class="dropdown-item selfCollection" data-action="selfCollection"><i class="ft-plus-circle primary"></i> Mark for Self Collection</a>';
@@ -475,6 +492,8 @@ class ReturnController extends Controller
                         if ((session('role_id') == 1 || (in_array(45, session('permissions')))) && !$result->consolidation_id) {
                             $dropdown .= $confirm_button;
                         }
+
+                        $dropdown .= $call_history;
 
                         if ((session('role_id') == 1 || in_array(46, session('permissions'))) && !$result->consolidation_id) {
                             $dropdown .= $re_attempt_button;
@@ -1391,6 +1410,7 @@ class ReturnController extends Controller
     }
 
     public function return_confirmed_list(Request $request){
+
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),87);
@@ -1440,7 +1460,31 @@ class ReturnController extends Controller
             })
             ->leftJoin('admins as a','a.id','=','sjn.admin_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address','rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by','shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id','a.name as receiver_name','sts.status as star_status')
+            // new join
+            /*>leftjoin('shipments_journey as shj','shj.shipment_id','=','shipments.id')*/
+            ->leftJoin('shipments_journey as shj', function ($join) {
+                $join->on('shj.shipment_id', '=', 'shipments.id')
+                    ->where('shj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12)'));
+            })
+            ->leftJoin('shipments_journey as sjrider', function ($join) {
+                $join->on('sjrider.shipment_id', '=', 'shipments.id')
+                    ->where('sjrider.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.consignee_status_id = 12 and shipments_journey.rider_id is not null)'));
+            })
+            ->leftjoin('riders as rider','rider.id','sjrider.rider_id')
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id',
+                'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking',
+                'u.name as shipper','usi.phone as shipper_phone','usi.pickup_address as shipper_return_address',
+                'rsi.phone as shipper_phone_omni','rsi.pickup_address as shipper_return_address_omni',
+                'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id',
+                'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
+                'shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount',
+                'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason',
+                'shipments_journey.remarks as remarks','shipments_journey.created_at as status_date',
+                'shipments_journey.created_at as last_status_date','sj.created_at as arrival',
+                'shipments.booking_type_id', 'usi.poc','crm.id as complaint','cb.name as return_confirmed_by',
+                'shipments_journey.user_id as shipper_id', 'rc.name as return_city_name', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'),'dc.id as destination_city_id','a.name as receiver_name','sts.status as star_status','rider.trax_id as rider_id' ,'rider.name as rider_name')
             ->whereIn('shipments.shipper_status_id',$status_return);
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass')) ){
@@ -1715,7 +1759,7 @@ class ReturnController extends Controller
         return Rider::where('status', 1)
             ->whereHas('city', function ($query) use ($hub_id) {
                 $query->where('hub_id', $hub_id);
-        })->get(['id','name','route_id','trax_id']);
+        })->where('riders.operation_rider_id', 2)->get(['id','name','route_id','trax_id']);
     }
 
     public function get_shipment_details(Request $request){
@@ -2452,7 +2496,8 @@ class ReturnController extends Controller
     }
 
     public function return_receive_status(Request $request,$id){
-        // dd('asd');
+
+
         $return = ReturnNote::where('id',$id);
         if($return->exists()){
             $return = $return->first();
@@ -2672,7 +2717,8 @@ class ReturnController extends Controller
     public function receive_return_reason(Request $request){
 
         $status_id = $request->status;
-        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id','name')->orderBy('name')->get();
+        // apply condition
+        $statuses = ShipmentStatus::find($status_id)->reasons()->select('id','name')->where('id','!=',23)->orderBy('name')->get();
 
         if(!$statuses->isEmpty()){
             return response()->json(['status'=>0,'reasons'=>$statuses]);
@@ -5780,21 +5826,32 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
+        //DB::enableQueryLog();
         $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
         ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+
+
+        //for the current row
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
+                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1 and reference_1_id = rider_deliveries.delivery_note_id)'));
         })
-        ->leftJoin('shipments_journey as for_rcp_count', function ($join) {
-            $join->on('for_rcp_count.shipment_id', 'shipments.id')->where('for_rcp_count.verification',1);
-        })
+        
         ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
+
+        //for the last row
         ->leftJoin('shipments_journey as sjls', function ($join) {
-            $join->on('sjls.shipment_id', '=', 'shipments.id')
-                ->where('sjls.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and id < sj.id and verification = 1)')
-                );
+            $subquery = DB::table('shipments_journey')
+                ->select(DB::raw('MAX(id)'))
+                ->where('verification', 1)
+                ->whereRaw('shipment_id = sj.shipment_id')
+                ->whereRaw('reference_1_id = rider_deliveries.delivery_note_id')
+                ->whereRaw('id < sj.id')
+                ->groupBy('shipment_id', 'reference_1_id');
+            $join->on('sjls.id', '=', DB::raw("({$subquery->toSql()})"))
+                ->mergeBindings($subquery);
         })
+        
         ->leftJoin('shipment_status as ls', 'ls.id','=','sjls.shipper_status_id')
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
         ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
@@ -5802,20 +5859,19 @@ class ReturnController extends Controller
         ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
         ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
         ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
+
         ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
             'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
             'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-            'destinationcity.name as destination','sj.updated_at as date', 'sjls.updated_at as last_status_date',
+            'destinationcity.name as destination','sj.created_at as date', 'sjls.created_at as last_status_date',
             'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id','ls.name as last_status',
             'ssr.name as reason',
-            DB::raw('SUM(for_rcp_count.shipper_status_id = 12) as rcp_count')
+             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.shipper_status_id = 12  ) as rcp_count')
         )
-        ->whereIn('rider_deliveries.rider_status_id',[12,52])
-        ->groupBy('rider_deliveries.delivery_note_id', 'riders.name', 
-        'emp.trax_id', 'shipments.tracking_number', 'shipments.id', 'cities.name', 
-        'destinationcity.name', 'sj.updated_at', 'sjls.updated_at', 'rider_deliveries.otp_entered', 
-        'hub.name', 'cs.name', 'cs.id', 'ls.name', 'ssr.name');
 
+        ->whereIn('rider_deliveries.rider_status_id',[12,52])
+        ->groupBy('rider_deliveries.delivery_note_id');
+        
             
         $datatable = Datatables::of($data)
         ->editColumn('tracking_number', function ($shipments) {
@@ -5872,9 +5928,22 @@ class ReturnController extends Controller
     public function return_shipments_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 652);        
-        $startOfYear = Carbon::now()->startOfYear();
-        $receive_notes_id = DB::table('return_notes')->whereDate('created_at',$startOfYear)->get();
-        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id]);
+        $return_note_id = 237666;
+        // $receive_notes_id = DB::table('return_notes')
+        // // ->whereDate('id', '>',$return_note_id) //open for production
+        // ->select("id")
+        // ->selectRaw("LPAD(id, 6, '0') as return_note_id_padded")
+        // ->orderBy('id', 'DESC')->get();
+        $receive_notes_id = [];
+
+        $riders = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
+            ->where('return_notes.id', '>', $return_note_id) //open for production
+            ->select('riders.name as rider',  'riders.trax_id as riderID')
+            ->distinct()->get();
+
+        return view('admin.return.return_shipments')->with(['receive_notes_id'=>$receive_notes_id, 'riders' => $riders]);
     }
 
 
@@ -5884,11 +5953,12 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 653);
         }
 
-        $shipments = ReturnNote::join('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
-            ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
-            ->join('shipments as sh', 'sh.id', '=', 'return_notes.id')
+        $return_note_id = 237666;
+        $shipments = ReturnNote::leftjoin('return_note_shipments as rns', 'return_notes.id', '=', 'rns.return_note_id')
+            ->leftjoin('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('shipments as sh', 'sh.id', '=', 'rns.shipment_id')
+            ->where('return_notes.id', '>', $return_note_id) //open for production
             ->select(['return_notes.id as return_note', 'return_notes.id as excel_return_note', 'riders.name as rider', 'riders.trax_id as riderID', 'sh.tracking_number as tracking_number', 'sh.tracking_number as excel_tracking_number', 'return_notes.created_at as created_at']);
-
 
 
         $datatables = Datatables::of($shipments)
@@ -5904,7 +5974,66 @@ class ReturnController extends Controller
         if (is_array($return_note_numbers) && count($return_note_numbers) > 0) {
             $datatables->whereIn('rns.return_note_id', $return_note_numbers);
         }
+        $rider_id = $request->get('rider_id');
+        if (isset($rider_id) && $rider_id != null) {
+            $datatables->where('riders.trax_id', $rider_id);
+        }
 
         return $datatables->make(true);
+    }
+
+    public function return_notes_list(Request $request)
+    {
+        $rider_id = $request->rider_id;
+        $return_note_id = 237666;
+        if($rider_id){
+            $receive_notes_id = DB::table('return_notes')
+            ->leftjoin('riders', 'riders.id', 'return_notes.rider_id' )
+            ->select('return_notes.id')
+            ->selectRaw("LPAD(return_notes.id, 6, '0') as return_note_id_padded")
+            ->where('return_notes.id', '>', $return_note_id) //open for production
+            ->where('riders.trax_id', $rider_id)
+            ->orderBy('return_notes.id', 'DESC')->get();
+
+            return response()->json(['status' => true, 'receive_notes_ids'=> $receive_notes_id]);
+        } else {
+
+            return response()->json(['status' => false, 'message' => 'Selected rider data not found']);
+        }
+    }
+    public function update_call_status(Request $request){
+
+        $shipment = Shipment::find($request->shipment_id);
+
+
+        $status = new StatusRemark();
+        $status->shipment_id = $request->shipment_id;
+        $status->call_finding_id = $request->call_finding_id;
+        $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
+        $status->call_to_id = $request->call_to_id;
+        $status->sub_status_call_finding_remarks = $request->custom_remark;
+        $status->shipment_status_id = $shipment->shipper_status_id;
+        $status->updated_by = Auth::id();
+
+        $status->save();
+
+        return response()->json(['status' => 1]);
+
+    }
+    public function call_status_history(Request $request)
+    {
+
+        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
+        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
+        ->leftJoin('admins','admins.id','status_remarks.updated_by')
+        ->where('status_remarks.shipment_id',$request->shipment_id)
+
+        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
+        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
+        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
+        'shipment_status.name as status', 'admins.name as updated_by')
+        ->orderBy('status_remarks.updated_at','desc')->limit(10)->get();
+        
+        return $shipment;
     }
 }
