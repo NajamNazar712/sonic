@@ -561,7 +561,7 @@
                     var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
                     tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Other Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
                     tableHtml += '<tbody class="text-center">';
-                        //limit max 10 rows
+
                     $.each(data, function(index, value) {
                         var updated_at = value.updated_at;
                         var trimmedDateTime = updated_at.substring(0, 10);
@@ -593,11 +593,19 @@
 
                     modalBody.append(tableHtml);
                 }
+                
             });
 
         $('#update_call_status_modal').modal('show');
     });
         //End update_call_status_modal
+
+        $('#update_call_status_modal').on('shown.bs.modal', function () {
+                $('#call_to').val('').change();
+                $('#custom_remark').val('');
+                $('#sub_status_call_finding').val('').change();
+                $('#call_finding_dropdown').val('').change();
+            });
 
         $('#update_call_status_form').validate({
                 errorClass: 'danger',
@@ -630,6 +638,7 @@
                                     closeOnEsc: false
                                 });
                             $('#update_call_status_modal').modal('hide');
+                            window.reaload();
                             }
                             else{
                                 swal({
