@@ -56,7 +56,7 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                                 </div>
-                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="" data-rule-required="true" data-msg-required="From date is required">
+                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="From date is required" data-value="{{ Carbon\Carbon::now()->subDays(7) }}">
                             </div>
                         </div>
                         <div class="col-3">
@@ -66,7 +66,7 @@
                                     <span class="la la-calendar-o"></span>
                                 </span>
                                 </div>
-                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="" data-rule-required="true" data-msg-required="To date is required">
+                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="To date is required" data-value="{{ Carbon\Carbon::now() }}">
                             </div>
                         </div>
                         <div class="col-2">
@@ -196,12 +196,15 @@
                 allowClear:true
             });
 
-            var max = '{{ Carbon\Carbon::now() }}';
 
+
+
+            var today = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: max,
+                // min: new Date(thirtydays),
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -211,13 +214,18 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(7, 'days');
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: max,
+                max : new Date(today),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -227,7 +235,8 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-
+                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
 

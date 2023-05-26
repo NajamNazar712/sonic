@@ -814,7 +814,6 @@ class Permission
             'settings.debriefing_break_time.store' => 674,
             'settings.debriefing_role_setting.index' => 858,
             'settings.debriefing_role_setting.update' => 858,
-
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
@@ -1344,6 +1343,11 @@ class Permission
     		'settings.auto_delivery_note_verification.index' => 836,
 			'reports.revenue_report_by_invoice.index' => 839,
 			'return.return_confirm_otp.index' => 849,
+            'return.return_shipments.index'=> 860,
+            'delivery.delivery_shipments.index'=> 859,
+        
+            'management.riders.rider_remarks.index'=>862,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
