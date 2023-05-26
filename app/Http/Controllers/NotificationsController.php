@@ -3309,7 +3309,7 @@ class NotificationsController extends Controller
                                     ->leftjoin('shipments_journey as sj','sj.shipment_id','=','rns.shipment_id')
                                     ->where('sj.shipper_status_id',25)
                                     ->where('sj.user_id',$user_id)
-                                  //  ->whereBetween('sj.created_at',[$yesterday,$today])
+                                    ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
                                     ->get();
                                     $da = [];
