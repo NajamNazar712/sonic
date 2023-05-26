@@ -567,6 +567,22 @@
             });
         }
         updateButtonStatus();
+
+
+
+        function updateFinalButtonStatus() {
+            $('.rider_remarks_btn_1').each(function() {
+                var row = $(this).closest('tr');
+                var rowData = table.row(row).data();
+
+                if (rowData['response_2'] == '' || rowData['response_2'] == null) {
+                    $(this).prop('disabled', true).addClass('hidden');
+                } else {
+                    $(this).prop('disabled', false).removeClass('hidden');
+                }
+            });
+        }
+        updateFinalButtonStatus();
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
             if (this.context.length) {
                 body = [];
@@ -805,6 +821,7 @@
 
         table.on('draw', function() {
             updateButtonStatus();
+            updateFinalButtonStatus();
         });
         
         
