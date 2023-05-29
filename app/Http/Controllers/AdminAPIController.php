@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\DailyVisit;
+use App\Http\Controllers\Admins\AdminCargoManifestController;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\DeliveryController;
@@ -29,11 +30,14 @@ use App\Http\Models\Admin\CancelledShipmentArrival;
 use App\Http\Models\Admin\CargoManifest\CargoManifest;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\CargoManifest\CargoManifestDraftBags;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2JunctionMapping;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\ChangeShipmentAmountLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\Lead\Lead;
 use App\Http\Models\Admin\Lead\LeadLog;
@@ -100,6 +104,7 @@ use App\Http\Models\HR\LeaveType;
 use App\Http\Models\HR\StaffCategory;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\InternationalShipment;
+use App\Http\Models\ManifestBagLostShipment;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PayslipPdf;
@@ -4547,8 +4552,6 @@ class AdminAPIController extends Controller
                     $pickup_incentive = ($payslip->pickup_incentive != NULL) ? number_format($payslip->pickup_incentive) : '-';
                     $delivery_incentive = ($payslip->delivery_incentive != NULL) ? number_format($payslip->delivery_incentive) : '-';
                     $operations_incentive = ($payslip->operation_incentive != NULL) ? number_format($payslip->operation_incentive) : '-';
-                    $retail_incentive = ($payslip->retail_incentive != NULL) ? number_format($payslip->retail_incentive) : '-';
-                    $sales_incentive = ($payslip->sales_incentive != NULL) ? number_format($payslip->sales_incentive) : '-';
                     $extra_duty_allowance = ($payslip->extra_duty_allowance != NULL) ? number_format($payslip->extra_duty_allowance) : '-';
                     $others_addition = ($payslip->others_addition != NULL) ? number_format($payslip->others_addition) : '-';
 
@@ -4813,26 +4816,26 @@ class AdminAPIController extends Controller
                             <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Retail Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $retail_incentive .'</td>
+                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
                             <td colspan="2"  class="border twice-right">Penalty</td>
                             <td colspan="2"  class="border twice-right">' . $penalty . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Sales Incentive</td>
-                            <td colspan="2"  class="border twice-right">'. $sales_incentive .'</td>
+                            <td colspan="2" class="border twice-right">Others Addition</td>
+                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
                             <td colspan="2"  class="border twice-right">Medical Insurance</td>
                             <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                            <td colspan="2"  class="border twice-right">' . $extra_duty_allowance  . '</td>
+                            <td colspan="2" class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right">Van Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                         </tr>
                         <tr class="text-left">
-                            <td colspan="2" class="border twice-right">Others Addition</td>
-                            <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                            <td colspan="2" class="border twice-right"></td>
+                            <td colspan="2"  class="border twice-right"></td>
                             <td colspan="2"  class="border twice-right">Others Deduction</td>
                             <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
                         </tr>
@@ -11630,6 +11633,1043 @@ class AdminAPIController extends Controller
         )
         ->where('launched_by_id', $admin_id)->orderBy('id', 'DESC')->get();
         return response()->json(['status' => 0, 'crm_requests' => $crm_requests ]);
+    }
+
+    public function create_shipment_details(Request $request)
+    {
+        if ($request->has('pieces_confirm')) {
+            $rules = [
+                'tracking_number' => ['required'],
+                'pieces_confirm' => ['required'],
+            ];
+        }
+        else
+        {
+            $rules = [
+                'tracking_number' => ['required'],
+                'bag_type' => ['required'],
+                'hub_id' => ['required'],
+                'shipping_mode_id' => ['required'],
+                //'pieces_confirm' => ['required'],
+            ];
+        }
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else
+            {
+            $misrouted_history_hub = 0;
+            $intercept_re_book_history_hub = 0;
+
+            $shipment = Shipment::where('tracking_number', $request->tracking_number);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                /*  if($shipment->shipper_status_id == 49){
+                      return ['status' => 1, 'error' => 'Misroute-Forwarded Shipments not allowed'];
+                  }*/
+
+                /* if(CargoManifestBag::where('seal_number',$shipment->tracking_number)->where('status_id',1)->exists()){
+                     return ['status' => 1, 'error' => 'Bag Already Created'];
+                 }
+
+
+                 if($shipment->consignee_city->hub_city->id ==  Auth::user()->default_hub_id){
+                     return ['status' => 1, 'error' => 'Cannot create bag with same origin and destination'];
+                 }*/
+
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if (!$dispute_check) {
+                    return ['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                }
+
+                if ($shipment->shipper_status_id == 55) {
+
+                    $intercept_rebook_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->latest()->first();
+                    if ($intercept_rebook_history) {
+                        $intercept_re_book_history_hub = $intercept_rebook_history->old_consignee_city->hub_id;
+
+                        if ($intercept_re_book_history_hub == $intercept_rebook_history->new_consignee_city->hub_id) {
+                            return ['status' => 1, 'message' => 'Cannot create bag for same hub'];
+                        }
+                    }
+
+                }
+
+                if ($shipment->shipper_status_id == 49) {
+                    $misrouted_history = MisroutedHistory::where('shipment_id', $shipment->id)->latest()->first();
+                    if ($misrouted_history) {
+                        $city = City::where('id', $misrouted_history->old_consignee_city_id)->first();
+                        $misrouted_history_hub = $city->hub_id;
+                    }
+                }
+
+
+                if (
+                    (($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) && in_array($shipment->consignee_city->hub_id, $request->admin_hubs))
+
+                    || (($shipment->shipper_status_id != 35 && $shipment->shipper_status_id != 37 && $shipment->shipper_status_id != 20 && $shipment->shipper_status_id != 30 && $shipment->shipper_status_id != 55 && $shipment->shipper_status_id != 49) && in_array($shipment->pickup_address->city->hub_id, $request->admin_hubs))
+
+                    || (($shipment->shipper_status_id == 55 && in_array($intercept_re_book_history_hub, session('hubs'))) || ($shipment->shipper_status_id == 49 && in_array($misrouted_history_hub, $request->admin_hubs)))
+                ) {
+
+
+                    $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+                    if ($on_hold_shipment->exists()) {
+                        if (!in_array(Auth::id(), [10, 288, 423])) {
+                            $on_hold_shipment = $on_hold_shipment->first();
+                            $dispatch_date = Carbon::parse($on_hold_shipment->dispatch_date);
+                            $today = Carbon::today();
+                            if ($dispatch_date > $today) {
+                                $dispatch_date = $dispatch_date->toFormattedDateString();
+                                return ['status' => 1, 'message' => 'Shipment is marked as On-Hold until ' . $dispatch_date];
+                            }
+                        }
+                    }
+                    if ($shipment->packaging_material_request == 1) {
+
+
+                        $packaging_material_request = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+
+                        if ($packaging_material_request != null) {
+                            if ($packaging_material_request->status_id != 3) {
+                                return ['status' => 1, 'message' => 'Packaging Material Request is not dispatched yet!'];
+                            }
+                        }
+                        $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number', $shipment->tracking_number)->first();
+                        if ($packaging_material_request_stock != null) {
+                            if ($packaging_material_request_stock->status_id != 3) {
+                                return ['status' => 1, 'message' => 'Warehouse Stock Request is not dispatched yet!'];
+                            }
+                        }
+                    }
+
+
+                    if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                        if ($shipment->shipper_status_id == 2) {
+                            $hub_id = $shipment->pickup_address->city->hub_id;
+                        } else if ($shipment->shipper_status_id == 49) {
+                            $shipment_details = $shipment->misrouted_history()->latest()->first();
+                            $city_details = City::find($shipment_details->old_consignee_city_id);
+                            $hub_id = $city_details->hub_id;
+                        } else if ($shipment->shipper_status_id == 55) {
+                            $shipment_details = $shipment->intercept_history;
+                            $city_details = City::find($shipment_details->old_consignee_city_id);
+                            $hub_id = $city_details->hub_id;
+                        } else {
+                            $hub_id = $shipment->consignee_city->hub_id;
+                        }
+
+                        $allowed = FALSE;
+//                            dd($request->all(),session('role_id'));
+                        if ($request->admin_role_id == 1) {
+                            $allowed = TRUE;
+                        } else if (in_array($hub_id, $request->admin_hubs)) {
+                            $allowed = TRUE;
+                        } else if ($shipment->shipper_status_id == 49 && in_array($shipment->pickup_address->city->hub_id, $request->admin_hubs)) {
+                            $allowed = TRUE;
+                        }
+
+                        if ($allowed) {
+                            if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (in_array($shipment->shipper_status_id, [49, 55]) && ($shipment->consignee_city->hub_id != $hub_id)) || ($shipment->shipper_status_id == 20)) {
+                                if ($shipment->return_address_id != NULL) {
+                                    if (($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->return_address->city->hub_id)) {
+                                        return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                                    }
+                                } else if (($shipment->shipper_status_id == 20) && ($shipment->consignee_city->hub_id == $shipment->pickup_address->city->hub_id)) {
+                                    return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                                }
+
+                                if ($request->bag_type != 0) {
+                                    if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                        $hub_id = $shipment->consignee_city->hub_id;
+                                    } else {
+                                        if (in_array($shipment->shipper_status_id, [20])) {
+                                            if ($shipment->return_address_id != null) {
+                                                $hub_id = $shipment->return_address->city->hub_id;
+                                            } else {
+                                                $hub_id = $shipment->pickup_address->city->hub_id;
+                                            }
+                                        } else {
+                                            $hub_id = $shipment->pickup_address->city->hub_id;
+                                        }
+                                    }
+                                } else {
+                                    $hub_id = 0;
+                                }
+
+                                if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
+                                    /*  if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {*/
+                                    $details = array();
+
+                                    if ($request->bag_type != 0) {
+                                        if ($request->bag_type == 1) {
+                                            if (!in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                                return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                                            }
+
+                                            $bag_type = 1;
+                                        } else {
+                                            if (!in_array($shipment->shipper_status_id, [20, 30, 37])) {
+                                                return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                                            }
+
+                                            $bag_type = 2;
+                                        }
+                                    } else {
+                                        if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                                            $details['bag_type'] = 1;
+
+                                            $bag_type = 1;
+                                        } else {
+                                            $details['bag_type'] = 2;
+
+                                            $bag_type = 2;
+                                        }
+                                    }
+
+                                    if ($bag_type == 1) {
+                                        $destination = $shipment->consignee_city;
+                                    } else {
+                                        if ($shipment->return_address_id != NULL) {
+                                            $destination = $shipment->return_address->city;
+                                        } else {
+                                            $destination = $shipment->pickup_address->city;
+                                        }
+
+                                    }
+                                    if (!$request->has('pieces_confirm')) {
+                                        if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                            $details = array();
+                                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                            $details['id'] = $shipment->id;
+                                            $details['tracking_number'] = $shipment->tracking_number;
+                                            $details['pieces_count'] = $shipment->pieces;
+                                            $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                            return ['status' => 0, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                        }
+                                    }
+                                    $details['id'] = $shipment->id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['order_id'] = $shipment->order_id;
+                                    $details['service_type'] = $shipment->booking_type->booking_type;
+                                    $details['destination'] = $destination->name;
+                                    $details['amount'] = number_format($shipment->amount);
+                                    $hub = $destination->hub_city;
+
+                                    $details['hub']['id'] = $hub->id;
+                                    $details['hub']['name'] = $hub->name;
+
+                                    $shipping_mode_id = $request->shipping_mode_id;
+
+                                    if ($shipping_mode_id == 0) {
+                                        $shipping_mode_id = $shipment->shipping_mode->id;
+
+                                        $details['shipping_mode']['id'] = $shipment->shipping_mode->id;
+                                        $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
+                                    }
+
+                                    if ($request->hub_id == 0) {
+                                        if ($bag_type == 1) {
+                                            $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                                                ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                                                ->join('cities as dc', function ($join) {
+                                                    $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                                                        ->on('oc.hub_id', '!=', 'dc.hub_id');
+                                                })
+                                                ->select(DB::raw('count(shipments.id) as count'))
+                                                ->where('dc.hub_id', $hub->id)
+                                                ->whereIn('shipments.shipper_status_id', [2, 49, 55])
+                                                ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                                        } else {
+
+                                            $shipments = Shipment::leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                                                ->leftjoin('cities as dc', 'usi.city_id', '=', 'dc.id')
+                                                ->leftjoin('user_shipping_infos as rsi', 'shipments.return_address_id', '=', 'rsi.id')
+                                                ->leftjoin('cities as rc', 'rsi.city_id', '=', 'rc.id')
+                                                ->join('cities as oc', function ($join) use ($hub) {
+                                                    $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                                                        ->where(function ($query) use ($hub) {
+                                                            $query->where(function ($sub_query) use ($hub) {
+                                                                $sub_query->whereIn('shipments.shipper_status_id', [30, 37])
+                                                                    ->where('dc.hub_id', '!=', 'oc.hub_id')
+                                                                    ->where('dc.hub_id', $hub->id);
+                                                            })
+                                                                ->orWhere(function ($sub_query) use ($hub) {
+                                                                    $sub_query->where('shipments.shipper_status_id', 20)
+                                                                        ->where(function ($sub_sub_query) use ($hub) {
+                                                                            $sub_sub_query->where(function ($sub_sub_sub_query) use ($hub) {
+                                                                                $sub_sub_sub_query->whereNull('return_address_id')
+                                                                                    ->where('dc.hub_id', '!=', 'oc.hub_id')
+                                                                                    ->where('dc.hub_id', $hub->id);
+                                                                            })
+                                                                                ->orWhere(function ($sub_sub_sub_query) use ($hub) {
+                                                                                    $sub_sub_sub_query->whereNotNull('return_address_id')
+                                                                                        ->where('rc.hub_id', '!=', 'oc.hub_id')
+                                                                                        ->where('rc.hub_id', $hub->id);
+                                                                                });
+                                                                        });
+                                                                });
+                                                        });
+                                                })
+                                                ->select(DB::raw('count(shipments.id) as count'))
+                                                ->where('shipments.shipping_mode_id', $shipping_mode_id);
+
+                                        }
+
+                                        if (session('role_id') != 1) {
+                                            $shipments = $shipments->whereIn('oc.hub_id', $request->admin_hubs);
+                                        }
+
+                                        $shipments = $shipments->first();
+
+                                        $details['total'] = $shipments->count;
+                                    }
+                                    ShipmentScanningJourneyController::add($shipment->id, 2, 1, $request->adminid, null, null);
+
+                                    return response()->json(['status' => 0, 'message' => 'Shipment has been added', 'details' => $details]);
+                                    /*}
+                                    else {
+                                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
+                                         }*/
+                                } else {
+                                    return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
+                                }
+                            } else {
+                                return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+                            }
+                        } else {
+                            return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
+                        }
+                    } else {
+                        return ['status' => 1, 'message' => 'Given Tracking Number\'s Shipment has already been modified'];
+                    }
+                } else {
+                    return ['status' => 1, 'message' => 'Shipment belongs to another hub'];
+                }
+            } else {
+                return ['status' => 1, 'message' => 'No Shipment with given Tracking Number is present'];
+            }
+        }
+    }
+
+    public function bag_piece_details(Request $request)
+    {
+        $rules = [
+            'shipment_id' => ['required'],
+            'piece_id' => ['required'],
+            'screen_location_id' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipment_id = $request->shipment_id;
+            $shipment_piece_id = $request->piece_id;
+
+            $admin_id = $request->admin_id;
+            $hub = Admin::find($admin_id);
+
+            $shipment_piece = ShipmentPiece::where('tracking_number', $shipment_piece_id);
+            if ($shipment_piece->exists()) {
+                $shipment_piece = $shipment_piece->first();
+                if ($shipment_piece->shipment_id == $shipment_id) {
+                    $scanned_shipment_piece = $shipment_piece->tracking_number;
+                    ShipmentScanningJourneyController::add($shipment_id, $request->screen_location_id, 1, $admin_id, null, null, $shipment_piece->id);
+                    return ['status' => 0, 'message' => 'Shipment Piece found!', 'scanned_shipment_piece' => $scanned_shipment_piece];
+                } else {
+                    return ['status' => 1, 'message' => 'Given Item ID does not belong here'];
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'No Shipment Item with given Item ID is present'];
+            }
+        }
+    } // todo : when pieces scan
+
+    public function create_bag_details(Request $request)
+    {
+        //todo: shipment_ids = id of details of previous api (create_shipment_details)
+        $rules = [
+            'shipment_ids' => ['required'],
+            'bag_type' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+
+            $shipment_ids = explode(',', $request->shipment_ids);
+
+            $admin_idd = $request->admin_id;
+            $default_ub_idd = Admin::find($admin_idd);
+            $default_ub_idd = $default_ub_idd->default_hub_id;
+
+            $shipment = Shipment::find(current($shipment_ids));
+
+            if($shipment)
+            {
+                $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                if (!$dispute_check) {
+                    return ['status' => 1, 'message' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                }
+
+                if ($shipment->shipper_status_id == 49) {
+                    $shipment_details = $shipment->misrouted_history()->latest()->first();
+                    $city_details = City::find($shipment_details->old_consignee_city_id);
+                    $origin = $city_details->hub_city;
+                } else if ($shipment->shipper_status_id == 55) {
+                    $shipment_details = $shipment->intercept_history;
+                    $city_details = City::find($shipment_details->old_consignee_city_id);
+                    $origin = $city_details->hub_city;
+                } else {
+                    if ($shipment->shipper_status_id == 20) {
+                        if ($shipment->return_address_id != null) {
+                            $origin = $shipment->return_address->city->hub_city;
+                        } else {
+                            $origin = $shipment->pickup_address->city->hub_city;
+                        }
+                    } else {
+                        $origin = $shipment->pickup_address->city->hub_city;
+                    }
+                }
+
+                $origin_details = array();
+
+                if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 49 || $shipment->shipper_status_id == 55 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 30) {
+                    $origin_details['id'] = $origin->id;
+                } else {
+                    $origin_details['id'] = $default_ub_idd;
+                }
+
+                $origin_details['name'] = $origin->name;
+
+                $destination = $shipment->consignee_city->hub_city;
+
+                $destination_details = array();
+
+                $destination_details['id'] = $destination->id;
+                $destination_details['name'] = $destination->name;
+
+                $details = array();
+
+                if ($request->bag_type == 1) {
+                    $details['origin'] = $origin_details;
+                    $details['destination'] = $destination_details;
+                } else {
+                    $details['origin'] = $destination_details;
+                    $details['destination'] = $origin_details;
+                }
+
+                $details['actual_weight'] = 0;
+
+                foreach ($shipment_ids as $shipment_id) {
+                    $shipment_actual_weight = Shipment::find($shipment_id);
+                    $details['actual_weight'] = $details['actual_weight'] + $shipment_actual_weight->actual_weight;
+                }
+
+                return ['status' => 0, 'bag_details' => $details];
+            }
+            else
+            {
+                return ['status' => 1, 'message' => 'No shipment found !'];
+            }
+        }
+    }
+
+    public function create_bag_seal_number(Request $request)
+    {
+        $rules = [
+            'seal_number' => 'required|digits_between:6,50',
+            'id' => 'nullable|int',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            if ($request->filled('seal_number')) {
+                $seal_number = CargoManifestBag::where('seal_number', $request->input('seal_number'))->where('open_bag', 0);
+
+                if ($request->has('id')) {
+                    $seal_number = $seal_number->where('id', '!=', $request->input('id'));
+                }
+
+                if (!$seal_number->exists()) {
+                    return ['status' => 0, 'seal_massage' => 'success'];
+                } else {
+                    return ['status' => 1, 'massage' => 'Already exist seal number !'];
+                }
+            } else {
+                return ['status' => 1, 'massage' => 'Seal number is required !'];
+            }
+        }
+    }
+
+    public function create_store(Request $request)
+    {
+
+        //todo: shipment_ids = id of details of previous api (create_shipment_details)
+        $rules = [
+            'shipment_ids' => ['required',],
+            //'open_box_ids' => ['required'],
+            'origin_hub_id' => ['required'],
+            'origin_hub_name' => ['required'],
+            'destination_hub_id' => ['required'],
+            'destination_hub_name' => ['required'],
+            'seal_number' => ['required'],
+            'actual_weight' => ['required'],
+            'bag_type' => ['required'],
+            //'submit_form' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shipments = 0;
+            $quantity = 0;
+            $shipments_weight = 0;
+
+            $shipment_ids = explode(',', $request->input('shipment_ids'));
+            $open_box_ids = explode(',', $request->input('open_box_ids'));
+
+            foreach ($shipment_ids as $key => $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment->shipper_status_id == 20) {
+                    $lost_shipment = ManifestBagLostShipment::where('shipment_id', $shipment_id)->latest()->first();
+                    if ($lost_shipment) {
+                        $bag = CargoManifestBag::find($lost_shipment->bag_id);
+                        if ($bag->lost_shipments > 0) {
+                            $bag->lost_shipments--;
+                            $bag->save();
+                            $lost_shipment->delete();
+                        }
+                    }
+                }
+
+
+                if (in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                    $shipments++;
+                    $shipments_weight += $shipment->actual_weight;
+                    $quantity = $quantity + count($shipment->items);
+                } else {
+                    unset($shipment_ids[$key]);
+                }
+            }
+
+            $admin_id = $request->admin_id;
+            $hub = Admin::find($admin_id);
+
+            $bag_crated = AdminCargoManifestController::create_bag($request->seal_number, $request->origin_hub_id, $request->destination_hub_id, $shipments, $quantity, $shipments_weight, $request->actual_weight, $request->admin_id, $request->bag_type, 2, 1, $hub->default_hub_id, $shipment_ids, $open_box_ids, $via = 1, $completed = 0, $automate = 0);
+
+            return ['status' => 0, 'bag_created' => 'Bag Created with Bag Number: ' . $bag_crated->seal_number];
+        }
+    }
+
+    public function create_open_bag_store(Request $request)
+    {
+        $rules = [
+            'shipment_ids' => 'required',
+            'open_box_ids' => 'nullable',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+
+            $shipments = 0;
+            $quantity = 0;
+            $shipments_weight = 0;
+
+            $admin_id = $request->admin_id;
+            $hub = Admin::find($admin_id);
+
+            $shipment_ids = explode(',', $request->input('shipment_ids'));
+            $open_box_ids = explode(',', $request->input('open_box_ids'));
+            foreach ($shipment_ids as $key => $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if (!in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
+                    unset($shipment_ids[$key]);
+                }
+            }
+
+            $bag_numbers = '';
+            if (!empty($shipment_ids)) {
+                foreach ($shipment_ids as $shipment_id) {
+                    $shipment = Shipment::find($shipment_id);
+                    if (in_array($shipment->shipper_status_id, [2, 49, 55])) {
+                        $bag_type = 1;
+                        $destination = $shipment->consignee_city->hub_id;
+                        $origin = $hub->default_hub_id;
+                    } else {
+                        $bag_type = 2;
+                        if ($shipment->shipper_status_id == 20) {
+                            if ($shipment->return_address_id != null) {
+                                $destination = $shipment->return_address->city->hub_city->id;
+                            } else {
+                                $destination = $shipment->pickup_address->city->hub_city->id;
+                            }
+
+                            $origin = $shipment->consignee_city->hub_city->hub_id;
+                        } else {
+                            $destination = $shipment->pickup_address->city->hub_city->id;
+                            $origin = $hub->default_hub_id;
+                        }
+                    }
+
+                    $bag = new CargoManifestBag();
+                    $bag->seal_number = $shipment->tracking_number;
+                    $bag->origin_hub_id = $origin;
+                    $bag->destination_hub_id = $destination;
+                    $bag->shipments = 1;
+                    $bag->quantity = count($shipment->items);
+                    $bag->shipments_weight = $shipment->actual_weight;
+                    $bag->actual_weight = $shipment->actual_weight;
+                    $bag->created_by = $admin_id;
+                    $bag->type = $bag_type;
+                    $bag->transport_mode_id = 2;
+                    $bag->status_id = 1;
+                    $bag->open_bag = 1;
+                    $bag->completed = 0;
+                    $bag->current_hub_id = $hub->default_hub_id;
+                    $bag->save();
+
+                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id,$admin_id, NULL, NULL,2);
+
+                    $id = $bag->id;
+                    $bag_shipment = new CargoManifestBagShipments();
+
+                    $bag_shipment->cargo_manifest_bag_id = $id;
+                    $bag_shipment->shipment_id = $shipment_id;
+
+                    $bag_shipment->save();
+
+
+                    $shipper_status_id = NULL;
+                    $consignee_status_id = NULL;
+
+                    if ($bag_type == 1) {
+                        $shipper_status_id = 3;
+                        $consignee_status_id = 3;
+                    } else {
+                        $shipper_status_id = 21;
+                        $consignee_status_id = 21;
+
+                        if ($shipment->shipper_status_id != 20) {
+                            if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 5) {
+                                $shipper_status_id = 21;
+                                $consignee_status_id = 21;
+                            } else if ($shipment->booking_type_id == 2) {
+                                $shipper_status_id = 26;
+                                $consignee_status_id = 26;
+                            } else if ($shipment->booking_type_id == 3) {
+                                $shipper_status_id = 32;
+                                $consignee_status_id = 32;
+                            } else {
+                                $shipper_status_id = 21;
+                                $consignee_status_id = 21;
+                            }
+                        }
+                    }
+
+                    $shipment->shipper_status_id = $shipper_status_id;
+                    $shipment->consignee_status_id = $consignee_status_id;
+
+                    $shipment->save();
+
+
+                    if (in_array($shipment_id, $open_box_ids)) {
+                        $shipment->open_box = 1;
+                        $shipment->save();
+                        ShipmentOpenBoxJourneyController::add($shipment_id, 1, $admin_id);
+                    }
+
+                    ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin_id, $bag->id);
+
+                    if ($bag_numbers == '') {
+                        $bag_numbers = $bag->seal_number;
+                    } else {
+                        $bag_numbers = $bag_numbers . ', ' . $bag->seal_number;
+                    }
+                }
+
+                return ['status' => 0, 'massage' => 'Open Bag Created with Bag Numbers: ' . $bag_numbers];
+            } else {
+                return ['status' => 1, 'massage' => 'All Shipments have already been added to another Bag!'];
+            }
+        }
+    }
+
+    public function bag_details(Request $request) // scan bag to create manifest
+    {
+        $rules = [
+            'bag_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $bag = CargoManifestBag::where('seal_number', $request->bag_number);
+            $bag_destinations = $request->bag_destinations;
+
+            $admin_id = $request->admin_id;
+            $hub = Admin::find($admin_id);
+
+            if ($bag->exists()) {
+                $bag = $bag->latest()->first();
+
+                ShipmentScanningJourneyController::seal_number_add($bag->id, 1, $admin_id);
+
+                if (in_array($bag->status_id, [1, 3, 5])) {
+                    $origin_id = $hub->default_hub_id;
+                    $destination_hub_id = $bag->destination_hub_id;
+                    $mapping = V2JunctionMapping::where('origin_id', $origin_id)->where('destination_id', $destination_hub_id)->where('status', 1);
+
+                    $allowed = FALSE;
+
+                    if ($mapping->exists()) {
+                        $allowed = TRUE;
+                    } else if ($bag->junction_mapping_id != null) {
+                        $allowed = TRUE;
+                    }
+
+                    if ($allowed) {
+                        if (!CargoManifestDraftBags::where('bag_id', $bag->id)->exists()) {
+                            $bag->actual_weight = $bag->shipments_weight;
+                            $bag->update();
+                            $details = array();
+
+                            $origin = City::find($origin_id);
+                            $destination = $bag->destination_hub;
+
+                            $details['id'] = $bag->id;
+                            $details['bag_number'] = $bag->seal_number;
+                            $details['shipments'] = $bag->shipments;
+                            $details['origin'] = $origin->name;
+                            $details['destination'] = $destination->name;
+                            $details['bag_weight'] = $bag->shipments_weight;
+
+                            $draft_bags = CargoManifestDraftBags::where('added_by', $admin_id)->get();
+                            $bag_destinations = array();
+                            if(count($draft_bags) > 0){
+                                foreach ($draft_bags as $draft_bag){
+                                    if(!in_array($draft_bag->destination_id, $bag_destinations)){
+                                        $bag_destinations[] = $draft_bag->destination_id;
+                                    }
+                                }
+                            }
+                            if(is_array($bag_destinations)){
+                                if(!in_array($bag->destination_hub_id, $bag_destinations)){
+                                    $bag_destinations[] = $bag->destination_hub_id;
+                                }
+                            }
+                            else{
+                                $bag_destinations[] = $bag->destination_hub_id;
+                            }
+                            $total_bags = CargoManifestBag::whereIn('destination_hub_id', $bag_destinations)->whereIn('status_id', [1, 3, 5])->where('current_hub_id', $hub->default_hub_id)->count();
+                            $details['bag_destinations'] = $bag_destinations;
+                            $details['total_bags'] = $total_bags;
+
+
+                            CargoManifestDraftBags::create(['bag_id' => $bag->id, 'seal_number' => $bag->seal_number, 'shipments_count' => $bag->shipments, 'origin_id' => $origin->id, 'destination_id' => $destination->id, 'added_by' =>$admin_id, 'weight' => $bag->shipments_weight]);
+
+                            return ['status' => 0, 'message' => 'Bag has been added', 'details' => $details];
+                        } else {
+                            return ['status' => 1, 'message' => 'Bag Number has already been added by other admin'];
+                        }
+                    } else {
+                        return ['status' => 1, 'message' => 'Given Bag Number\'s does not have any mapping'];
+                    }
+                } else {
+                    return ['status' => 1, 'message' => 'Given Bag Number\'s has already been modified'];
+                }
+            } else {
+                return ['status' => 1, 'message' => 'No Bag with given Bag Number is present'];
+            }
+        }
+    }
+
+    public function cargo_details(Request $request)
+    {
+        $rules = [
+            'bag_ids' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $bags = explode(',', $request->bag_ids);
+            $bags = CargoManifestBag::whereIn('id', $bags);
+            $admin_id = $request->admin_id;
+            $hub = Admin::find($admin_id);
+
+            if ($bags->exists() && $bags->count() == count($request->bag_ids)) {
+                $bags = $bags->get();
+                $origin_id = $hub->default_hub_id;
+                $details = [];
+                foreach ($bags as $bag) {
+//                $details[$bag->destination_hub_id]['origin_id'] = $origin_id;
+                    if (!isset($details[$bag->destination_hub_id]["bag_ids"])) {
+                        $details[$bag->destination_hub_id]["bag_ids"] = array();
+                    }
+                    array_push($details[$bag->destination_hub_id]["bag_ids"], $bag->id);
+                    $details[$bag->destination_hub_id]["number_of_bags"] = isset($details[$bag->destination_hub_id]["number_of_bags"]) ? $details[$bag->destination_hub_id]["number_of_bags"] + 1 : 1;
+//                $details[$bag->destination_hub_id]['shipments'] = isset($details[$bag->destination_hub_id]["shipments"]) ? $details[$bag->destination_hub_id]["shipments"] + $bag->shipments : $bag->shipments;
+//                $details[$bag->destination_hub_id]["destination_id"] = $bag->destination_hub_id;
+                    $details[$bag->destination_hub_id]["destination"] = $bag->destination_hub->name;
+
+                    $mapping = V2JunctionMapping::where([['origin_id', $origin_id], ['destination_id', $bag->destination_hub_id], ['status', 1]]);
+                    if ($mapping->exists()) {
+                        $mapping = $mapping->first();
+                    } else if ($bag->junction_mapping_id != null) {
+                        $mapping = V2JunctionMapping::find($bag->junction_mapping_id);
+                    } else {
+                        return ['status' => 1, 'error' => 'One or More Bag does not have any mapping..'];
+                    }
+                    $details[$bag->destination_hub_id]["junctions"] = array();
+                    foreach ($mapping->junctions as $junction) {
+                        array_push($details[$bag->destination_hub_id]["junctions"], City::where('id', $junction->junction_id)->first()->name);
+                    }
+                    $details[$bag->destination_hub_id]["junctions"] = array_unique($details[$bag->destination_hub_id]["junctions"]);
+
+                    $details[$bag->destination_hub_id]['vehicles'] = array();
+                    foreach ($mapping->routes as $routes) {
+                        foreach ($routes->vehicles as $vehicles) {
+                            array_push($details[$bag->destination_hub_id]['vehicles'], $vehicles->vehicle_id);
+                        }
+                    }
+
+                }
+                $previous_flag = false;
+                $previous_array = array();
+                foreach ($details as $detail) {
+
+                    if ($previous_flag) {
+                        $previous_array = array_intersect($previous_array, $detail['vehicles']);
+                    } else {
+                        $previous_flag = true;
+                        $previous_array = $detail['vehicles'];
+                    }
+                }
+                $vehicles = Fleet::leftjoin('fleet_vendors as fv', 'fv.id', 'fleets.vendor_id')
+                    ->leftjoin('fleet_drivers as fd', 'fd.id', 'fleets.driver_id')
+                    ->select(['fleets.id as id', 'fv.name as vendor_name', 'fd.name as driver_name', 'fd.phone_no as driver_phone', 'fleets.reg_number as reg_number'])
+                    ->whereIn('fleets.id', $previous_array)
+                    ->get()
+                    ->toArray();
+                $data['vehicles'] = $vehicles;
+                $data['details'] = $details;
+                return ['status' => 0, 'message' => $data];
+
+            } else {
+                return ['status' => 1, 'message' => 'Bag Not Found..'];
+            }
+        }
+    }
+
+    public function store_manifest(Request $request)
+    {
+        $error_hubs = array();
+        $success_cargo_ids = array();
+        foreach ($request->bag_ids as $hub_id => $bag_ids_array) {
+            $bags = 0;
+            $bags_weight = 0;
+            $actual_weight = 0;
+            $shipments = 0;
+            $bag_ids = explode(',', $bag_ids_array);
+            foreach ($bag_ids as $key => $bag_id) {
+                $bag = CargoManifestBag::find($bag_id);
+
+                if (in_array($bag->status_id, [1, 3, 5])) {
+                    $bags++;
+                    $bags_weight += $bag->shipments_weight;
+                    $actual_weight += $bag->shipments_weight;
+                    $shipments += $bag->shipments;
+
+                } else {
+                    unset($bag_ids[$key]);
+                }
+            }
+
+            if (!empty($bag_ids)) {
+                $master_cargo = new CargoManifest();
+
+                $master_cargo->origin_hub_id = Auth::user()->default_hub_id;
+                $master_cargo->destination_hub_id = $hub_id;
+                $master_cargo->shipping_mode_id = $request->input('shipping_mode');
+                $master_cargo->transport_mode_id = 2;
+
+                $master_cargo->bags = $bags;
+                $master_cargo->shipments = $shipments;
+                $master_cargo->bags_weight = $bags_weight;
+                $master_cargo->actual_weight = $actual_weight;
+                $master_cargo->created_by = Auth::id();
+
+                $master_cargo->vehicle_seal_number = $request->vehicle_seal[$hub_id];
+
+                if($request->has('vehicle_type'))
+                {
+                    $master_cargo->vehicle_type = 1;
+                    $master_cargo->vehicle_id = $request->vehicle_number;
+                } else {
+                    $master_cargo->vehicle_type = 2;
+                    $master_cargo->vehicle_number = $request->vehicle_number_text;
+                }
+
+                $master_cargo->driver_name = $request->driver_name;
+                $master_cargo->driver_phone = $request->driver_phone;
+                $master_cargo->vendor_name = $request->vendor_name;
+                $master_cargo->route_name = $request->route_name;
+
+                $master_cargo->status_id = 1;
+                $master_cargo->save();
+
+                $master_cargo_id = $master_cargo->id;
+
+                foreach ($bag_ids as $bag_id) {
+                    $mater_cargo_bags = new ManifestBag();
+
+                    $mater_cargo_bags->cargo_manifest_id = $master_cargo_id;
+                    $mater_cargo_bags->cargo_manifest_bag_id = $bag_id;
+
+                    $mater_cargo_bags->save();
+
+                    $bag = CargoManifestBag::find($bag_id);
+
+                    if ($bag->status_id == 1) {
+                        $bag->status_id = 2;
+                    } else if ($bag->status_id == 3) {
+                        $bag->status_id = 4;
+                    } else if ($bag->status_id == 5) {
+                        $bag->status_id = 6;
+                        foreach ($bag->shipment as $shipment) {
+                            ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
+                            $shipment_table = Shipment::find($shipment->shipment_id);
+                            $shipment_table->shipper_status_id = 49;
+                            $shipment_table->consignee_status_id = 49;
+                            $shipment_table->update();
+
+                            MisroutedHistory::create([
+                                'shipment_id' => $shipment_table->id,
+                                'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                'old_consignee_name' => $shipment_table->consignee_name,
+                                'old_consignee_address' => $shipment_table->consignee_address,
+                                'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                'old_consignee_email' => $shipment_table->consignee_email,
+                                'new_consignee_city_id' => $shipment_table->consignee_city_id,
+                                'new_consignee_name' => $shipment_table->consignee_name,
+                                'new_consignee_address' => $shipment_table->consignee_address,
+                                'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                'new_consignee_email' => $shipment_table->consignee_email,
+                                'admin_id' => Auth::id()
+                            ]);
+                        }
+                    }
+
+                    if ($bag->junction_mapping_id == null) {
+                        $mapping = V2JunctionMapping::where([['origin_id', Auth::user()->default_hub_id], ['destination_id', $hub_id], ['status', 1]])->first();
+                        $bag->junction_mapping_id = $mapping->id;
+                        $master_cargo->junction_mapping_id = $mapping->id;
+                        $master_cargo->update();
+                    } else {
+                        $master_cargo->junction_mapping_id = $bag->junction_mapping_id;
+                        $master_cargo->update();
+                    }
+                    $bag->current_hub_id = Auth::user()->default_hub_id;
+                    $bag->update();
+
+                    CargoManifestBagJourneyController::add($bag->id, $bag->seal_number, $bag->status_id, Auth::id(), $master_cargo_id, 1,3);
+                }
+
+                $success_cargo_ids[$hub_id] = $master_cargo_id;
+
+            } else {
+                array_push($error_hubs, $hub_id);
+            }
+        }
+
+        if (count($error_hubs) > 0) {
+            $error = "Every Bag in following Hubs Is Already In Some Cargo Manifest. <br><ul>";
+            foreach ($error_hubs as $error_hub) {
+                $error .= "<li>" . City::find($error_hub)->name . "</li>";
+            }
+            $error .= "</ul>";
+        } else {
+            $error = FALSE;
+        }
+
+        if (count($success_cargo_ids) > 0) {
+            $success = "Cargo Manifest Created Successfully. <br><ul>";
+            foreach ($success_cargo_ids as $hub_id => $cargo_id) {
+                $success .= "<li>For " . City::find($hub_id)->name . " with cargo manifest id " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . "</li>";
+            }
+            $success .= "</ul>";
+        } else {
+            $success = FALSE;
+        }
+
+
+        foreach ($success_cargo_ids as $cargo_id) {
+            $cargo_array = array($cargo_id);
+            $cargo_array = implode(',', $cargo_array);
+            $path = self::print($cargo_array, 1);
+            $manifest = CargoManifest::find($cargo_id);
+            NotificationsController::send(148, $manifest->destination_hub_id, url('/') . '/' . 'reports/cargo_manifest_' . str_pad($manifest->id, 6, '0', STR_PAD_LEFT) . '.pdf');
+        }
+
+        if ($request->filled('submit_and_print_form')) {
+
+            $print = implode(',', $success_cargo_ids);
+
+        } else {
+            $print = FALSE;
+        }
+
+        CargoManifestDraftBags::where('added_by', Auth::id())->delete();
+
+        return redirect()->route('admin.cargo_manifest.create')->with(['success_html' => $success, 'error_html' => $error, 'print' => $print]);
     }
 
 }
