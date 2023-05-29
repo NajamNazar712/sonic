@@ -6842,6 +6842,19 @@ class APIController extends Controller
     }
 
     public function return_shipment_info(Request $request){
+
+
+        $validateshipment = Validator::make($request->all(), [
+            'tracking' => 'required',
+            'user_id'      => 'required',
+        ]);
+
+        if( $validateshipment->fails()){
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+        }
+
+
+        else{
         $return_statuses = array(25, 31, 38, 23);
         $tracking_number = $request->tracking;
         $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
@@ -6868,9 +6881,9 @@ class APIController extends Controller
         }
         else{
             return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
+             }
         }
     }
-
     public function shipper_received_shipments(Request $request){
 
         $validateshipment = Validator::make($request->all(), [
