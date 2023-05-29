@@ -6842,10 +6842,8 @@ class APIController extends Controller
     }
 
     public function return_shipment_info(Request $request){
-
-
         $validateshipment = Validator::make($request->all(), [
-            'tracking' => 'required',
+            'tracking'     => 'required',
             'user_id'      => 'required',
         ]);
 
