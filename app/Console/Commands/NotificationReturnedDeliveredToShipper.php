@@ -50,51 +50,34 @@ class NotificationReturnedDeliveredToShipper extends Command
     {
         $from =  Carbon::now()->startOfDay()->toDateTimeString();
         $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
-//        dd($from,$to);
 
-//         $users = GlobalSettings::where('type', 'returned_shipment_notification');
-
-//         if($users->exists()) {
-//             $users = $users->first();
-//             $current_users = $users->text;
-//             $c_user = explode(',', $current_users);
-//             $return_notes = ReturnNote::join('return_note_shipments as rnsh', 'rnsh.return_note_id', '=', 'return_notes.id')
-//                 ->join('shipments', 'shipments.id', '=', 'rnsh.shipment_id')
-//                 ->join('users as u', 'u.id', '=', 'shipments.user_id')
-//                 ->select('return_notes.id as return_id', 'rnsh.shipment_id', 'shipments.user_id', 'u.phone as phone_number', 'return_notes.shipments_count as total_shipments', 'u.email as email')
-//                 ->groupBy('return_notes.id')
-//                 ->whereIn('shipments.user_id', $c_user)
-//                 ->whereBetween('return_notes.updated_at', [$from, $to])
-
-// //            ->pluck('return_id')->toArray();
-//                 ->get();//
-
-//             ;
-//             NotificationsController::send(216, $return_notes);
-
-//         }
 
 //        $return_deliverd_to_shippers = ReturnDeliveredToShipperSms::join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
-//         ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
-//         ->select('return_delivered_to_shipper_sms.return_note_id as return_id', 'shipments.user_id', 'u.phone as phone_number',DB::raw('(select count(id) from return_delivered_to_shipper_sms where user_id = return_delivered_to_shipper_sms.user_id and return_note_id = return_delivered_to_shipper_sms.return_note_id  and status = 0 ) as shipment_count'))
-//         ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
-//         ->groupBy('return_delivered_to_shipper_sms.return_note_id')
-//        ->get();
-
-        $return_deliverd_to_shippers = ReturnDeliveredToShipperSms::join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+//            ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
+//            ->join('return_note_shipments', 'return_note_shipments.shipment_id', '=', 'shipments.id')
+//            ->select('return_delivered_to_shipper_sms.return_note_id as return_id', 'shipments.user_id', 'u.phone as phone_number'
+//                ,DB::raw('(select count(id) from return_delivered_to_shipper_sms
+//                 where return_delivered_to_shipper_sms.user_id = shipments.user_id
+//                 and return_delivered_to_shipper_sms.status = 0 ) as shipment_count')
+//            )
+//            ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
+//            ->groupBy('return_delivered_to_shipper_sms.return_note_id')
+//            ->get();
+        $return_deliverd_to_shippers = ReturnDeliveredToShipperSms::join('return_notes as rn','rn.id','=','return_delivered_to_shipper_sms.return_note_id')
             ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
-            ->join('return_note_shipments', 'return_note_shipments.shipment_id', '=', 'shipments.id')
-            ->select('return_delivered_to_shipper_sms.return_note_id as return_id', 'shipments.user_id', 'u.phone as phone_number'
-                ,DB::raw('(select count(id) from return_delivered_to_shipper_sms
-                 where return_delivered_to_shipper_sms.user_id = shipments.user_id 
-                 and return_delivered_to_shipper_sms.status = 0 ) as shipment_count')
-            )
+            ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+            ->where('return_delivered_to_shipper_sms.status', 0)
             ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
+            ->select('return_delivered_to_shipper_sms.return_note_id as return_id',
+                'return_delivered_to_shipper_sms.user_id as user_id','u.phone as phone_number',
+                DB::raw("(select count(return_note_id)
+            from return_delivered_to_shipper_sms
+            where status = 0
+            and  created_at >= '$from'
+            and  created_at <= '$to'
+            and return_note_id = rn.id) as shipment_count"))
             ->groupBy('return_delivered_to_shipper_sms.return_note_id')
             ->get();
-
-        dd($return_deliverd_to_shippers);
-
 
         NotificationsController::send(216, $return_deliverd_to_shippers);
 
