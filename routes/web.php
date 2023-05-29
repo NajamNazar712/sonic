@@ -3717,6 +3717,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('delivered', 'AdminShipmentHandoverController@handover_shipments_delivered')->name('delivered');
             Route::post('remaining', 'AdminShipmentHandoverController@handover_shipments_remaining')->name('remaining');
             Route::post('print', 'AdminShipmentHandoverController@handover_print')->name('print');
+            Route::post('pieces_list', 'AdminShipmentHandoverController@handover_shipments_pieces')->name('pieces_list');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
