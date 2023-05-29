@@ -6876,6 +6876,8 @@ class APIController extends Controller
         $shipments_list = $request->shipment_ids;
         $user           = $request->user_id;
         $user_type      = $request->account_type;
+
+        dd($request->all());
         $received_by    = '';
         $userDetials    = User::where('id', $user)->first();
         if($user_type == 2){
