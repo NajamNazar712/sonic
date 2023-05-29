@@ -904,7 +904,7 @@ class ShipperReturnController extends Controller
 
     public function return_sheet_receive_shipment_info(Request $request)
     {
-        $return_statuses = array(25, 31, 38);
+        $return_statuses = array(25, 31, 38 ,23);
         $tracking_number = $request->tracking;
         $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', session('user_id'));
         if($shipment->exists()){
