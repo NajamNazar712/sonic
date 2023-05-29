@@ -400,7 +400,7 @@ class APIController extends Controller
     public function shipment_book(Request $request)
     {
         /********************************NOTE********************************/
-        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+        /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
 
 
