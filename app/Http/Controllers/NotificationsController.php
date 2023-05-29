@@ -75,6 +75,7 @@ use App\Jobs\ProcessOTPSMS;
 use App\Jobs\ProcessOTPSMSITS;
 use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use App\Jobs\ProcessPushNotification;
+use App\ReturnDeliveredToShipperSms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -3312,14 +3313,32 @@ class NotificationsController extends Controller
 
                                 $body = str_replace('[' . $first_field . ']', $shipment_details,$body);
 
-                                $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
-                                    ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
-                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
-                                    ->whereIn('sj.shipper_status_id',[25,31,38])
-                                    ->where('s.user_id',$user_id)
-                                    ->whereBetween('sj.created_at',[$yesterday,$today])
-                                    ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
+//                                $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
+//                                    ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
+//                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
+//                                    ->whereIn('sj.shipper_status_id',[25,31,38])
+//                                    ->where('s.user_id',$user_id)
+//                                    ->whereBetween('sj.created_at',[$yesterday,$today])
+//                                    ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
+//                                    ->get();
+//
+                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
+                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
+                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+                                    ->where('return_delivered_to_shipper_sms.status', 0)
+                                    ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
+                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id'
+                                        'return_delivered_to_shipper_sms.user_id as user_id', 'u.phone as phone_number',
+                                        DB::raw("(select count(return_note_id)
+                                        from return_delivered_to_shipper_sms
+                                        and  created_at >= '$from'
+                                        and  created_at <= '$to'
+                                        and return_note_id = rn.id) as shipment_count"))
+                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
                                     ->get();
+
+
+
                                     $da = [];
 									$i = 0;
 									foreach($data1 as $key=>$value){
