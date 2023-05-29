@@ -45,6 +45,7 @@
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Rider Id</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Created By</th>
@@ -320,6 +321,7 @@
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider_id' ,name: 'riders.trax_id', class: 'align-middle rider_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'assigned_by' ,name: 'admins.name', class: 'align-middle assigned_by'},

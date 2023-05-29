@@ -20,10 +20,12 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Return Note Date</th>
+                        <th class="border-primary border-darken-1">Rider Id</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
                         <th class="border-primary border-darken-1">Update Via App</th>
                         <th class="border-primary border-darken-1">Update Via DBF</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -413,6 +415,7 @@
                     {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
                     {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'riderid', name: 'r.trax_id ', class: 'align-middle text-center riderid'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'return_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
