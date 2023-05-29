@@ -6873,17 +6873,16 @@ class APIController extends Controller
 
     public function shipper_received_shipments(Request $request){
 
-        $validator = Validator::make($request->all(), [
+        $validateshipment = Validator::make($request->all(), [
             'shipment_ids' => 'required',
             'user_id'      => 'required',
             'user_type'    => 'required',
         ]);
 
-        if( $validator->fails()){
-            return response()->json([
-                'Fields Required','shipment_ids' =>'Ex 111,222,333', 'user_id', 'account_type'
-            ]);
+        if( $validateshipment->fails()){
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
         }
+        
         else{
         $shipments_list = $request->shipment_ids;
         $user           = $request->user_id;
