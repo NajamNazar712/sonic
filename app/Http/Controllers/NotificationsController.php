@@ -3331,7 +3331,7 @@ class NotificationsController extends Controller
                                         'u.phone as phone_number',
                                         DB::raw("(select count(return_note_id)
                                         from return_delivered_to_shipper_sms
-                                        and  created_at >= '$yesterday'
+                                        Where  created_at >= '$yesterday'
                                         and  created_at <= '$today'
                                         and return_note_id = rn.id) as shipment_count"))
                                     ->groupBy('return_delivered_to_shipper_sms.return_note_id')
