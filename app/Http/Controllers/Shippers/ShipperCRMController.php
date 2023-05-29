@@ -49,9 +49,26 @@ class ShipperCRMController extends Controller
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $status = CrmRequestStatus::where('id', '!=', 3)->select('id', 'name')->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
-        $launched = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->count();
-        $in_process = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->count();
-        $closed = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->count();
+
+        $masp = [session('user_id')];
+        $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
+        
+        if(count($merged_account_sister_mapping) >  0){
+            $masp = array_merge($masp,$merged_account_sister_mapping);
+        }
+
+        $launched = CrmRequest::where('status_id',1)
+        ->whereIn('shipper_id', $masp)
+        ->count();
+        
+        $in_process = CrmRequest::where('status_id',2)
+        ->whereIn('shipper_id', $masp)
+        ->count();
+        
+        $closed = CrmRequest::where('status_id',4)
+        ->whereIn('shipper_id', $masp)
+        ->count();
+
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
         $merged_accounts = [];
         $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
@@ -779,16 +796,55 @@ class ShipperCRMController extends Controller
     }
 
     public function card_data(Request $request){
-        if ($request->get('from_date') && $request->get('to_date')) {
-            $from = $request->get('from_date');
-            $to = $request->get('to_date');
-            $card_data['launched'] = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
-            $card_data['in_process'] = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
-            $card_data['closed'] = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
+        
+        try {
+            $masp = [session('user_id')];
+            $merged_account_sister_mapping = MergedSisterAccountMapping::where('head_user_id',session('user_id'))->pluck('sister_user_id')->toArray();
+            
+            if(count($merged_account_sister_mapping) >  0){
+                $masp = array_merge($masp,$merged_account_sister_mapping);
+            }
+
+            $launched = CrmRequest::where('status_id',1);
+            $in_process = CrmRequest::where('status_id',2);
+            $closed = CrmRequest::where('status_id',4);
+            // dd($request->search_account_type);
+            if(isset($request->search_account_type) && count($request->search_account_type) > 0){
+                $launched = $launched->whereIn('shipper_id', $request->search_account_type);
+                $in_process = $in_process->whereIn('shipper_id', $request->search_account_type);
+                $closed = $closed->whereIn('shipper_id', $request->search_account_type);
+            } else {
+                $launched = $launched->whereIn('shipper_id', $masp);
+                $in_process = $in_process->whereIn('shipper_id', $masp);
+                $closed = $closed->whereIn('shipper_id', $masp);
+            }
+
+            if ($request->get('from_date') && $request->get('to_date')) {
+                $from = $request->get('from_date');
+                $to = $request->get('to_date');
+
+                $launched = $launched->whereBetween('created_at', [$from, $to]);
+                $in_process = $in_process->whereBetween('created_at', [$from, $to]);
+                $closed = $closed->whereBetween('created_at', [$from, $to]);
+
+            }
+            
+
+            $launched =  $launched->count();
+            $in_process =  $in_process->count();
+            $closed =  $closed->count();
+
+            $card_data['launched'] = $launched;
+            $card_data['in_process'] = $in_process;
+            $card_data['closed'] = $closed;
+
             return response()->json(['status' => 1, 'card_data' => $card_data]);
-        }else{
+
+        } catch (\Throwable $th) {
             return response()->json(['status' => 0]);
+            
         }
+     
     }
 
     public function bulk_claim_index(){

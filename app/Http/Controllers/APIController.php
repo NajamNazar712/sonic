@@ -195,7 +195,7 @@ class APIController extends Controller
         'destination_check' => 'Destination city not allowed, please contact your sales person!',
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
     ];
-
+    
     public static function phone_number($phone_number)
     {
         //Removing anything after Comma (,)
@@ -913,7 +913,8 @@ class APIController extends Controller
                 } else {
                     $consignee_email_address = null;
                 }
-                $information_display = $request->input('information_display');
+                // $information_display = $request->input('information_display');
+                $information_display = 1;
 
                 if ($request->filled('charges_mode_id')) {
                     $charges_mode_id = $request->input('charges_mode_id');
