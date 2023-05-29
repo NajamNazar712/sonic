@@ -6872,12 +6872,22 @@ class APIController extends Controller
     }
 
     public function shipper_received_shipments(Request $request){
-        if(!empty($request->shipment_ids)){
+
+        $validator = Validator::make($request->all(), [
+            'shipment_ids' => 'required',
+            'user_id'      => 'required',
+            'user_type'    => 'required',
+        ]);
+
+        if( $validator->fails()){
+            return response()->json([
+                'Fields Required','shipment_ids' =>'Ex 111,222,333', 'user_id', 'account_type'
+            ]);
+        }
+        else{
         $shipments_list = $request->shipment_ids;
         $user           = $request->user_id;
-        $user_type      = $request->account_type;
-
-        dd($request->all());
+        $user_type      = $request->user_type;
         $received_by    = '';
         $userDetials    = User::where('id', $user)->first();
         if($user_type == 2){
@@ -6886,7 +6896,7 @@ class APIController extends Controller
         foreach($shipments_list as $shipment_id){
            if(!empty($shipment_id)){
             $shipments = Shipment::where('tracking_number', $shipment_id)->first(); 
-            $return_note_find = ReturnSheet::whereIn('shipment_id', $shipments->id)->get();
+            // $return_note_find = ReturnSheet::whereIn('shipment_id', $shipments->id)->get();
             $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
             if($return_sheet->exists()){         
                 $return_sheet = $return_sheet->first();
@@ -6896,17 +6906,15 @@ class APIController extends Controller
                 $return_sheet->save();
                 }
             } 
+            else{
+                return response()->json([
+                    'status'  => 0, 
+                    'success' => 'Enter a Valid Shipment No'
+                ]);
+            }
         }
-        return response()->json([
-            'status'  => 1, 
-            'success' => 'Shipments Received Successfully'
-        ]);
-        }
-        return response()->json([
-            'status'  => 0, 
-            'success' => 'Shipment Not Found'
-        ]);
     }
+}
     public function return_shipments_list(){
         dd('this function return shipments list');
     }
