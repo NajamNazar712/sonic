@@ -193,6 +193,7 @@
                 }
                 , dataType: 'json'
                 , success: function(response) {
+                    $('#search_area').append('<option value="">Select</option>');
                     $.each(response, function(index, area) {
                         $('#search_area').append('<option value="' + area.id + '">' + area.name + '</option>');
                     });
