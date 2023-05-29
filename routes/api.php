@@ -96,13 +96,7 @@ Route::name('api.')->group(function () {
         Route::post('invoice', 'APIController@invoice')->name('invoice');
     });
     
-    Route::prefix('return')->name('return.')->group(function () {
-        Route::prefix('shipments')->name('shipments.')->group(function () {
-            Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
-            Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
-            Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
-        });
-    });
+   
  
 
 
@@ -315,6 +309,17 @@ Route::name('api.')->group(function () {
 
             });
             Route::get('employee_id', 'Rider\RiderAPIController@get_employee_id')->name('employee_id');
+
+
+
+            Route::prefix('return')->name('return.')->group(function () {
+                Route::prefix('shipments')->name('shipments.')->group(function () {
+                    Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
+                    Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
+                    Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
+                });
+            });
+
 
             Route::prefix('delivery_note')->name('delivery_note.')->group(function () {
                 Route::post('index', 'Rider\RiderAPIController@delivery_note_index')->name('index');
