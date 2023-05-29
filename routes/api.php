@@ -96,13 +96,13 @@ Route::name('api.')->group(function () {
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
-        Route::prefix('return')->name('return.')->group(function () {
-            Route::prefix('shipments')->name('shipments.')->group(function () {
-                Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
-                Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
-                Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
-            });
+          Route::prefix('return')->name('return.')->group(function () {
+        Route::prefix('shipments')->name('shipments.')->group(function () {
+            Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
+            Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
+            Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
         });
+    });
     });
     
   

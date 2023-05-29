@@ -6844,7 +6844,6 @@ class APIController extends Controller
     public function return_shipment_info(Request $request){
         $validateshipment = Validator::make($request->all(), [
             'tracking'     => 'required',
-            'user_id'      => 'required',
         ]);
 
         if( $validateshipment->fails()){
@@ -6882,49 +6881,64 @@ class APIController extends Controller
              }
         }
     }
+
     public function shipper_received_shipments(Request $request){
 
         $validateshipment = Validator::make($request->all(), [
             'shipment_ids' => 'required',
-            'user_id'      => 'required',
             'user_type'    => 'required',
         ]);
 
         if( $validateshipment->fails()){
-        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
         }
-        
         else{
-        $shipments_list = $request->shipment_ids;
-        $user           = $request->user_id;
-        $user_type      = $request->user_type;
-        $received_by    = '';
-        $userDetials    = User::where('id', $user)->first();
-        if($user_type == 2){
-            $received_by = ' (Substitute User)';
-        }
-        foreach($shipments_list as $shipment_id){
-           if(!empty($shipment_id)){
-            $shipments = Shipment::where('tracking_number', $shipment_id)->first(); 
-            // $return_note_find = ReturnSheet::whereIn('shipment_id', $shipments->id)->get();
-            $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
-            if($return_sheet->exists()){         
-                $return_sheet = $return_sheet->first();
-                $return_sheet->status_id = 1;
-                $return_sheet->received_at = Carbon::now();
-                $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
-                $return_sheet->save();
-                }
-            } 
-            else{
-                return response()->json([
-                    'status'  => 0, 
-                    'success' => 'Enter a Valid Shipment No'
-                ]);
+            
+            $shipments_list = $request->shipment_ids;
+            $user           = $request->user_id;
+            $user_type      = $request->user_type;
+            $received_by    = '';
+            $userDetials    = User::where('id', $user)->first();
+
+            if($user_type == 2)
+            {
+                $received_by = ' (Substitute User)';
             }
+ 
+            foreach($shipments_list as $shipment_id)
+            {
+                if(!empty($shipment_id))
+                {
+                    $shipments = Shipment::where('tracking_number', $shipment_id); 
+                    if($shipments->exists())
+                    {
+                        $shipments = $shipments->first();
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
+                        if($return_sheet->exists())
+                        {        
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->status_id = 1;
+                            $return_sheet->received_at = Carbon::now();
+                            $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
+                            $return_sheet->save();
+                        }
+
+                        return response()->json([
+                            'status'  => 1, 
+                            'success' => 'Shipement Received Successfully'
+                        ]);
+                    }
+                    else{
+                        return response()->json([
+                            'status'  => 0, 
+                            'error' => 'Enter a Valid Shipment No'
+                        ]);
+                    }
+                }
+            }   
         }
     }
-}
+
     public function return_shipments_list(){
         dd('this function return shipments list');
     }
