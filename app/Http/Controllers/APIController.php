@@ -6899,7 +6899,9 @@ class APIController extends Controller
             if($user_type == 2){
                 $received_by = ' (Substitute User)';
             }
+            $ships = [];
             foreach($shipments_list as $shipment_id){
+                $ships[] = $shipment_id;
                 if(!empty($shipment_id)){
                     $shipments = Shipment::where('tracking_number', $shipment_id); 
                     if($shipments->exists()){
@@ -6912,11 +6914,6 @@ class APIController extends Controller
                             $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
                             $return_sheet->save();
                         }
-
-                        return response()->json([
-                            'status'  => 1, 
-                            'success' => 'Shipement Received Successfully'
-                        ]);
                     }
                     else{
                         return response()->json([
@@ -6926,6 +6923,11 @@ class APIController extends Controller
                     }
                 }
             }   
+
+            return response()->json([
+                'status'  => 1, 
+                'success' => 'Shipement Received Successfully'
+            ]);
         }
     }
 
