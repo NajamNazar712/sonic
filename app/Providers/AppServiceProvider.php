@@ -46,10 +46,11 @@ class AppServiceProvider extends ServiceProvider
                 $settings = GlobalSettings::where('type', 'shipper_ticker');
                 $visit = DailyVisit::where('shipper_id', session('user_id'))->where('rated', 0);
 
-                $from = Carbon::now()->startOfDay()->toDateTimeString();
+                $from =  Carbon::now()->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
-                $shipper_return_notes = ReturnDeliveredToShipperSms::where('user_id',session('user_id'))->where('status',1);
+                $shipper_return_notes = ReturnDeliveredToShipperSms::where('user_id',session('user_id'))->where('status',1)
+                ->whereBetween('return_delivered_to_shipper_sms.created_at',[$from,$to]);
                 if($shipper_return_notes->exists()){
                     $shipper_return_notes = $shipper_return_notes->get();
 
