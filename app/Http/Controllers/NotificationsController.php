@@ -3223,7 +3223,10 @@ class NotificationsController extends Controller
                     }
 
                     $user_wise_shipments = array();
-                    $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id', 'shipments.tracking_number', 'shipments_journey.created_at', 'shipments_journey.received_or_refused_by', 'shipments_journey.reference_1_id');
+                    $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')
+                        ->whereIn('shipments.shipper_status_id', [25,31,38])
+                        ->whereIn('shipments_journey.shipper_status_id', [25,31,38])
+                        ->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id', 'shipments.tracking_number', 'shipments_journey.created_at', 'shipments_journey.received_or_refused_by', 'shipments_journey.reference_1_id');
 
                     if ($shipment_details->exists()) {
 
