@@ -1079,20 +1079,15 @@ class CRMDashboardController extends Controller
             } 
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+                $card_data['launched'] = self::origin($card_data['launched'],$origin);
             } 
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['launched'] = self::destination($card_data['launched'],$destination);
             } 
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['launched']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['launched']= self::zone($card_data['launched'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1120,20 +1115,15 @@ class CRMDashboardController extends Controller
             }
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+                $card_data['in_process'] = self::origin($card_data['in_process'],$origin);
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['in_process'] = self::destination($card_data['in_process'],$destination);
             }
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['in_process']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['in_process']= self::zone($card_data['in_process'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1159,21 +1149,16 @@ class CRMDashboardController extends Controller
                 $card_data['resolved']->whereBetween('created_at', [$from, $stop_date]);
             }
             if ($origin = $request->get('search_origin'))
-            {   
-                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+            {  
+                $card_data['resolved'] = self::origin($card_data['resolved'],$origin); 
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['resolved'] = self::destination($card_data['resolved'],$destination);
             }
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['resolved']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['resolved'] = self::zone($card_data['resolved'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1200,20 +1185,15 @@ class CRMDashboardController extends Controller
             }
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+                $card_data['closed'] = self::origin($card_data['closed'],$origin);
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['closed'] = self::destination($card_data['closed'],$destination);
             }
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['closed']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['closed']= self::zone($card_data['closed'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1240,20 +1220,15 @@ class CRMDashboardController extends Controller
             }
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+                $card_data['valid'] = self::origin($card_data['valid'],$origin);
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['valid'] = self::destination($card_data['valid'],$destination);
             }
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['valid']= self::zone($card_data['valid'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1280,20 +1255,15 @@ class CRMDashboardController extends Controller
             }
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $origin);
+                $card_data['in_valid'] = self::origin($card_data['in_valid'],$origin);
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $destination);
+                $card_data['in_valid'] = self::destination($card_data['in_valid'],$destination);
             }
             if ($zone = $request->get('search_zone'))
             {   
-                $card_data['in_valid']->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $zone);
+                $card_data['in_valid'] = self::zone($card_data['in_valid'],$zone);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {   
@@ -1337,6 +1307,25 @@ class CRMDashboardController extends Controller
         // }else{
         //     return response()->json(['status' => 0]);
         // }
+    }
+
+
+    static function destination($query,$id)
+    {
+       return  $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+       ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $id);
+    }
+    static function origin($query,$id)
+    {
+       return  $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+       ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+       ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $id);
+    }
+    static function zone($query,$id)
+    {
+       return  $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+        ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+        ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $id);
     }
 
 
