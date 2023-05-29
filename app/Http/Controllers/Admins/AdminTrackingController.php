@@ -630,8 +630,11 @@ class AdminTrackingController extends Controller
 
     public function quick_tracking_shipment_info(Request $request)
     {
+
         $tracking_no = $request->tracking;
-        if ($tracking_no != null) {
+        $bag_no = $request->bag;
+
+        if ($request->tracking && $tracking_no != null) {
             $shipment = Shipment::where('tracking_number', $tracking_no);
 
             if ($shipment->exists()) {
@@ -694,6 +697,45 @@ class AdminTrackingController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
+        }
+        elseif($request->bag && $bag_no != null)
+        {
+
+            $bag = CargoManifestBag::where('seal_number', $bag_no);
+
+            if($bag->exists())
+            {
+                $bag = $bag->first();
+                $details = array();
+                $details['bag_number'] = $bag->seal_number;
+                $details['origin'] = $bag->origin_hub->name;
+                $details['destination'] = $bag->destination_hub->name;
+                $details['bag_status'] = $bag->status->name;
+                $details['bag_type'] = $bag->type;
+                $details['pieces'] = $bag->quantity;
+                $details['number_of_shipments'] = $bag->shipments;
+                $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
+                if($manifest->exists())
+                {
+                    $manifest =  $manifest;
+                }else{
+                    $manifest = '-';
+                }
+                $details['manifest_id'] = $manifest->id;
+                $details['junction'] = $bag->junction_mapping_id;
+                $details['bag_created_at'] = Carbon::parse($bag->created_at)->toDateTimeString();
+                $details['bag_status_updated_at'] = Carbon::parse($bag->updated_at)->toDateTimeString();
+                if ($bag->current_hub != null && is_object($bag->current_hub)) {
+                    $bag = $bag->current_hub->name;
+                } else {
+                    $bag = '-';
+                }
+                $details['bag_status_hub'] = $bag;
+                return response()->json(['status' => 1, 'details' => $details]);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);
+            }
+
         }
     }
 

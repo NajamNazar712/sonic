@@ -17,10 +17,21 @@
 
                             <form action="#" id="quick_tracking_form">
                                 <div class="row justify-content-center mb-2">
-                                    <div class="col-3">
-                                        <fieldset>
+                                    <div class="row">
+                                        <div class="col-6">
+                                          <input type="checkbox" name="scan_btn" id="scan_btn" class="switchery scan_btn" data-size="sm" data-switchery="true">
+                                          <label class="mr-2 font-medium-3"><b>Scan By Bags</b></label>
+                                        </div>
+                                      
+                                        <div class="col-6 scan_tracking">
+                                          <fieldset>
                                             <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
-                                        </fieldset>
+                                          </fieldset>
+
+                                            <fieldset>
+                                              <input type="text" class="form-control" placeholder="Scan Bag Number" id="scan_bag">
+                                            </fieldset>
+                                        </div>
                                     </div>
                                     <div class="col-3">
                                         <fieldset>
@@ -34,7 +45,6 @@
 
                             <div id="single_div" class="d-none">
                                 <div class="row">
-                                {{--<div class="col-2"><div id="tracking">Tracking Number</div><div>202202000116</div></div>--}}
                                 <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -98,7 +108,8 @@
                                                 <p class="card-text destination">No Data</p>
                                             </div>
                                         </div>
-                                    </div></div>
+                                    </div>
+                                </div>
                                     
                                     
                             </div>
@@ -137,24 +148,132 @@
                                     </div></div>
                                     </div>
                             </div>
-                            <div id="multiple_div" class="d-none">
+
+
+
+                            <div id="bag_single_div" class="d-none">
+                                <div class="row">
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Bag Number</h4>
+                                                <p class="card-text bag">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                <div class="col-3"><div class="card text-center" id="status_card">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title">Origin</h4>
+                                                <p class="card-text origin">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <h4 class="card-title success">Destination</h4>
+                                                    <p class="card-text destination">No Data</p>
+                                                </div>
+                                            </div>
+                                        </div></div>
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Bag status</h4>
+                                                <p class="card-text bstatus">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Bag type</h4>
+                                                <p class="card-text btype">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Manifest ID</h4>
+                                                <p class="card-text mID">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Number of shipments</h4>
+                                                <p class="card-text nos">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Pieces</h4>
+                                                <p class="card-text pieces">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    
+                                    
+                            </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Junctions</h4>
+                                                <p class="card-text junction">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Bag created at</h4>
+                                                <p class="card-text bag_created">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                            <div class="card-content">
+                                                <div class="card-body">
+                                                    <h4 class="card-title success">Bag status updated at</h4>
+                                                    <p class="card-text bsupated_at">No Data</p>
+                                                </div>
+                                            </div>
+                                        </div></div>
+                                    <div class="col-3"><div class="card text-center">
+                                        <div class="card-content">
+                                            <div class="card-body">
+                                                <h4 class="card-title success">Status Hub</h4>
+                                                <p class="card-text shub">No Data</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                    </div>
+                            </div>
+                            <div id="bag_multiple_div" class="d-none">
                                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
-                                        <th class="border-primary border-darken-1">Tracking Number</th>
-                                        <th class="border-primary border-darken-1">Delivery Note ID</th>
-                                        <th class="border-primary border-darken-1">Case Nature ID</th>
-                                        <th class="border-primary border-darken-1">Status</th>
-                                        <th class="border-primary border-darken-1">Reason</th>
-                                        <th class="border-primary border-darken-1">Remarks</th>
-                                        <th class="border-primary border-darken-1">Status Date</th>
+                                        <th class="border-primary border-darken-1">Bag Number</th>
                                         <th class="border-primary border-darken-1">Origin</th>
                                         <th class="border-primary border-darken-1">Destination</th>
-                                        <th class="border-primary border-darken-1">Amount</th>
-                                        <th class="border-primary border-darken-1">Shipper Name</th>
-                                        <th class="border-primary border-darken-1">Consignee Name</th>
-                                        <th class="border-primary border-darken-1">Consignee Address</th>
+                                        <th class="border-primary border-darken-1">Bag Status</th>
+                                        <th class="border-primary border-darken-1">Bag Type</th>
+                                        <th class="border-primary border-darken-1">Manifest ID</th>
+                                        <th class="border-primary border-darken-1">Number Of Shipments</th>
+                                        <th class="border-primary border-darken-1">Pieces</th>
+                                        <th class="border-primary border-darken-1">Junction</th>
+                                        <th class="border-primary border-darken-1">Bag Created At</th>
+                                        <th class="border-primary border-darken-1">Bag Status Updated At</th>
+                                        <th class="border-primary border-darken-1">Status Hub</th>
                                     </tr>
                                     </thead>
                                 </table>
@@ -186,6 +305,17 @@
             font-size: 20px;
         }
         #single_div h4{
+            font-weight: bolder;
+            font-size: 18px;
+        }
+
+        /* #bag_single_div p.status{
+            font-weight: bold;
+        } */
+        #bag_single_div{
+            font-size: 20px;
+        }
+        #bag_single_div h4{
             font-weight: bolder;
             font-size: 18px;
         }
@@ -235,28 +365,11 @@
             font-weight: bold;
         }
 
-        .goldClass{
-            background-color: gold;
-        }
-        .yellowClass{
-            background-color: #86cd7c;
-        }
-        .greenClass{
-            background-color: springgreen;
-        }
-        .redClass{
-            background-color: red;
-            color:#fff;
-        }
-        .yellowClass{
-            background-color: yellow;
-        }
-        .cyanClass{
-            background-color: cyan;
-        }
-        .grey{
-            background-color: darkgrey;
-        }
+  
+
+        #scan_bag {
+            display: none;
+    }
 
     </style>
 @endsection
@@ -274,18 +387,25 @@
     <script type="text/javascript">
         $(document).ready(function () {
             var table;
+            var bag_table;
             var selection = true;
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
                 if (single_multiple_switch.checked === true) {
                    selection = true;
                    $('#multiple_div').addClass('d-none');
+                   $('#bag_multiple_div').addClass('d-none');
+
                    // $('#single_div').removeClass('d-none');
                     destroyDatatable();
                 } else if (single_multiple_switch.checked === false) {
                     selection = false;
                     $('#multiple_div').removeClass('d-none');
+                    $('#bag_multiple_div').removeClass('d-none');
+
                     $('#single_div').addClass('d-none');
+                    $('#bag_single_div').addClass('d-none');
+
                     // table.clear();
                     init();
 
@@ -295,6 +415,8 @@
             function destroyDatatable() {
                 table.clear();
                 table.destroy();
+                bag_table.clear();
+                bag_table.destroy();
             }
             function init() {
                 table = $('#datatable').DataTable({
@@ -349,10 +471,39 @@
                 });
             }
 
+            $('#scan_btn').change(function() {
+                if ($(this).is(':checked')) {
+                    $('#scan_bag').show();
+                    // $('#single_div').hide();
+                    // $('#multiple_div').hide();
+                    $('#scan_tracking').hide();
+                }else {
+                    $('#scan_tracking').show();
+                    // $('#bag_single_div').hide();
+                    // $('#bag_multiple_div').hide();
+                    $('#scan_bag').hide();
+                }
+            });
+
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
+
+            $('#scan_tracking').keypress(function (e) {
+                if (e.which == 13) {
+                    $('form#quick_tracking_form').submit();
+                }
+            });
+
+            $('#scan_bag').keypress(function (e) {
+                if (e.which == 13) {
+                    $('form#quick_tracking_form').submit();
+                }
+            });
+
             $('input#scan_tracking').focus();
+            $('input#bag_tracking').focus();
+
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
@@ -496,6 +647,120 @@
                                 // table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]).node().id = data.details.status_id;
                                 // table.draw(false);
                             }
+
+                            scan.val('');
+                            scan.attr('disabled', false);
+                            scan.focus();
+                        });
+
+                    }
+                }
+            });
+
+            $('#quick_tracking_form').on('submit',function (e) {
+                e.preventDefault();
+                var scan = $('#scan_bag');
+                var bag = scan.val();
+
+
+                if (bag != '') {
+                    scan.attr('disabled', true);
+                    if(selection === false){
+                        $('#bag_multiple_div').removeClass('d-none');
+                        if(bag_table.row().count() == 0) {
+                            $.ajax({
+                                url:'{{route('admin.quick_tracking.info')}}',
+                                type:'POST',
+                                data: {
+                                    'bag':bag,
+                                    '_token': '{!! csrf_token() !!}'
+                                }
+                            }).done(function (data) {
+
+                                if(data.status == 0){
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    scan_sound(2);
+                                }else{
+                                    var rowNo = bag_table.rows().count();
+
+                                    bag_table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    bag_table.draw(false);
+                                    scan_sound(1);
+                                }
+
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
+                            });
+                        } else {
+                            if(bag_table.columns('.tracking_numbers').data().eq(0).indexOf(parseInt(bag)) === -1){
+                                $.ajax({
+                                    url:'{{route('admin.quick_tracking.info')}}',
+                                    type:'POST',
+                                    data: {
+                                        'bag':bag,
+                                        '_token':'{!! csrf_token() !!}'
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        scan_sound(2);
+                                    }else{
+                                        var rowNo = bag_table.rows().count();
+
+                                        bag_table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                        bag_table.draw(false);
+                                        bag_table.order([0, 'desc']).draw();
+                                        scan_sound(1);
+                                    }
+
+                                    scan.val('');
+                                    scan.attr('disabled', false);
+                                    scan.focus();
+                                });
+                            }else{
+                                var error = 'Tracking Number already scanned!';
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan_sound(2);
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
+                            }
+                        }
+                    }
+                    else{
+                        $.ajax({
+                            url:'{{route('admin.quick_tracking.info')}}',
+                            type:'POST',
+                            data: {
+                                'bag':bag,
+                                '_token': '{!! csrf_token() !!}'
+                            }
+                        }).done(function (data) {
+
+                            if(data.status == 0){
+                                $('#bag_single_div').addClass('d-none');
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan_sound(2);
+                            }else{
+                                scan_sound(1);
+                                $('#bag_single_div').removeClass('d-none');
+
+                                $('#bag_single_div p.bag').text(data.details.bag_number);
+                                $('#bag_single_div p.origin').text(data.details.origin);
+                                $('#bag_single_div p.destination').text(data.details.destination);
+                                $('#bag_single_div p.bstatus').text(data.details.bag_status);
+                                $('#bag_single_div p.btype').text(data.details.bag_type);
+                                $('#bag_single_div p.mID').text(data.details.manifest_id);
+                                $('#bag_single_div p.nos').text(data.details.number_of_shipments);
+                                $('#bag_single_div p.pieces').text(data.details.pieces);
+                                $('#bag_single_div p.junction').text(data.details.junction);
+                                $('#bag_single_div p.bag_created').text(data.details.bag_created_at);
+                                $('#bag_single_div p.bsupated_at').text(data.details.bag_status_updated_at);
+                                $('#bag_single_div p.shub').text(data.details.bag_status_hub);
+
+                            }
+
 
                             scan.val('');
                             scan.attr('disabled', false);
