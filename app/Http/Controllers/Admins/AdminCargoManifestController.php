@@ -430,6 +430,42 @@ class AdminCargoManifestController extends Controller
                     }
                 },
             ])
+              ->addColumn('sub_station', function ($shipments) {
+                $check = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+                ->where('dlm.city_id', $shipments->destination_city_id)
+                ->select('dlm.city_id','delivery_location_mapping_keywords.keyword', 'dlm.area_name as area_name');
+
+                if($check->exists()){
+                 $check = $check->get();   
+                 $delivery_area = null;
+                    $msg_string = null;
+                    $str_arr = null;
+                    $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);                    
+                    foreach ($check as $nsa) {
+                        foreach ($str_arr as $arr_value) {
+                            if (strtolower($nsa->keyword) == strtolower($arr_value)) {
+                                $msg_string = $arr_value;
+                                $delivery_area = $nsa->area_name;
+                            }
+                        }
+                    }
+                }
+           
+//                 $delivery_area = null;
+//                 if ($msg_string != null) {
+//                     $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
+//                         ->where('delivery_location_mapping_keywords.keyword', $msg_string)
+//                         ->where('dlm.city_id', $shipments->destination_city_id)
+// //                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
+//                         ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
+
+//                     if ($found->exists()) {
+//                         $found = $found->first();
+//                         $delivery_area = $found->area_name;
+//                     }
+//                 }
+                return isset($delivery_area) ? $delivery_area : '-';
+            })
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('admin.tracking.index');
                 if ($shipments->star_status)
@@ -592,35 +628,8 @@ class AdminCargoManifestController extends Controller
             })
             ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dc.name, IF (shipments.shipper_status_id = 49, olddc.name, IF (shipments.shipper_status_id = 55, olddci.name, oc.name)))') . ' $1')
             ->orderColumn('ohc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), dhc.name, IF (shipments.shipper_status_id = 49, olddhc.name, IF (shipments.shipper_status_id = 55, olddhci.name, oc.name)))') . ' $1')
-            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1')
-            ->addColumn('sub_station', function ($shipments) {
-                $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
-                $msg_string = null;
-                $str_arr = null;
-                $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipments->consignee_address);
-                // $str_arr = preg_split("/[ ,]+/", $shipment->consignee_address);
-                foreach ($check as $nsa) {
-                    foreach ($str_arr as $arr_value) {
-                        if (strtolower($nsa) == strtolower($arr_value)) {
-                            $msg_string = $arr_value;
-                        }
-                    }
-                }
-                $delivery_area = null;
-                if ($msg_string != null) {
-                    $found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm', 'delivery_location_mapping_keywords.mapping_id', '=', 'dlm.id')
-                        ->where('delivery_location_mapping_keywords.keyword', $msg_string)
-                        ->where('dlm.city_id', $shipments->destination_city_id)
-//                        ->orderBy('delivery_location_mapping_keywords.created_at','desc')
-                        ->select('dlm.area_name as area_name', 'dlm.id', 'delivery_location_mapping_keywords.mapping_id');
-
-                    if ($found->exists()) {
-                        $found = $found->first();
-                        $delivery_area = $found->area_name;
-                    }
-                }
-                return isset($delivery_area) ? $delivery_area : '-';
-            });
+            ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 37), oc.name, dc.name)') . ' $1');
+          
 
         if ($shipment_type = $request->get('shipment_type')) {
             if ($shipment_type == 0) {
