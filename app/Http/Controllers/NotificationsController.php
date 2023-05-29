@@ -3326,13 +3326,13 @@ class NotificationsController extends Controller
                                     ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
                                     ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
                                     ->where('return_delivered_to_shipper_sms.status', 0)
-                                    ->whereBetween('return_delivered_to_shipper_sms.created_at', [$from, $to])
+                                    ->whereBetween('return_delivered_to_shipper_sms.created_at', [$yesterday,$today])
                                     ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
                                         'u.phone as phone_number',
                                         DB::raw("(select count(return_note_id)
                                         from return_delivered_to_shipper_sms
-                                        and  created_at >= '$from'
-                                        and  created_at <= '$to'
+                                        and  created_at >= '$yesterday'
+                                        and  created_at <= '$today'
                                         and return_note_id = rn.id) as shipment_count"))
                                     ->groupBy('return_delivered_to_shipper_sms.return_note_id')
                                     ->get();
