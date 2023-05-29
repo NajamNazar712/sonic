@@ -654,7 +654,7 @@ $roles = explode("," , $settings->text);
                                                 Deliveries</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(566, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(860, session('permissions')))
                                     <li><a class="menu-item"
                                             href="{{ route('admin.return.return_shipments.index') }}">Return
                                             Shipments</a></li>
@@ -1257,7 +1257,7 @@ $roles = explode("," , $settings->text);
                     @if (session('role_id') == 1 || in_array(862, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Rider Remarks</span></a>
                         </li>
-                    @endif                
+                    @endif                 
                 
                 </ul>
             </li>

@@ -913,7 +913,8 @@ class APIController extends Controller
                 } else {
                     $consignee_email_address = null;
                 }
-                $information_display = $request->input('information_display');
+                // $information_display = $request->input('information_display');
+                $information_display = 1;
 
                 if ($request->filled('charges_mode_id')) {
                     $charges_mode_id = $request->input('charges_mode_id');

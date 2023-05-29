@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRiderRemarkStatusesTable extends Migration
+class CreateSubStatusCallFindingsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateRiderRemarkStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('rider_remark_statuses', function (Blueprint $table) {
+        Schema::create('sub_status_call_findings', function (Blueprint $table) {
             $table->increments('id');
-            $table->text('name');
+            $table->string('remark');
             $table->timestamps();
         });
     }
@@ -27,6 +27,6 @@ class CreateRiderRemarkStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('rider_remark_statuses');
+        Schema::dropIfExists('sub_status_call_findings');
     }
 }

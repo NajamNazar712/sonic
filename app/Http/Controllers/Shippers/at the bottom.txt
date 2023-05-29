@@ -1211,17 +1211,6 @@ class ShipperShipmentBookController extends Controller
             if ($user_type != 4 && $type != 'pdf') {
                 $html .= '
                     <style>
-
-                        @media print {
-                            td.prominent{
-                                font-size:25px; 
-                                background-color:black !important; 
-                                color:white !important; 
-                                text-align:center; 
-                                font-weight: 900;
-                                position: relative;" 
-                              }
-                        }
                       @font-face {
                         font-family: "Fajer Noori Nastalique";
                         src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot') . '");
@@ -1238,32 +1227,11 @@ class ShipperShipmentBookController extends Controller
                       .urdu {
                         font-family: "Fajer Noori Nastalique";
                       }
-
-                        .prominent{
-                        font-size:25px; 
-                        background-color:black !important; 
-                        color:white; 
-                        text-align:center; 
-                        font-weight: 900;
-                        position: relative;" 
-                      }
-
                     </style>
                 ';
             } else {
                 $html .= '
                     <style>
-                        @media print {
-                            td.prominent{
-                                font-size:25px; 
-                                background-color:black !important; 
-                                color:white !important; 
-                                text-align:center; 
-                                font-weight: 900;
-                                position: relative;" 
-                            }
-                        }
-
                       @font-face {
                         font-family: "Fajer Noori Nastalique";
                         src: url("data:font/truetype;charset=utf-8;base64,' . base64_encode(file_get_contents(public_path('fonts/urdu/Fajer-Noori-Nastalique.ttf'))) . '") format("truetype");
@@ -1275,15 +1243,6 @@ class ShipperShipmentBookController extends Controller
                       .urdu {
                         font-family: "Fajer Noori Nastalique";
                         padding-bottom: .75rem !important;
-                      }
-
-                      .prominent{
-                        font-size:25px; 
-                        background-color:black !important; 
-                        color:white; 
-                        text-align:center; 
-                        font-weight: 900;
-                        position: relative;" 
                       }
                     </style>
                 ';
@@ -1300,8 +1259,6 @@ class ShipperShipmentBookController extends Controller
                       td.replacement span {
                         width: auto !important;
                       }
-
-                      
 
                       .border.twice {
                         border-width: 1px !important;
@@ -1520,10 +1477,10 @@ class ShipperShipmentBookController extends Controller
                         if ($shipment->business_category->id == 2) {
                             $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
                                     ';
-                        } 
-                        // else {
-                        //     $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>';
-                        // }
+                        } else {
+                            $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>
+                                    ';
+                        }
                     } else {
                         $table_start .= '
                                 <td rowspan="3" colspan="2" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
@@ -1538,62 +1495,62 @@ class ShipperShipmentBookController extends Controller
                         if ($shipment->business_category->id == 2) {
                             $table_start .= '<td class="color primary border twice-left"><strong>Service Type</strong></td>
                                     ';
-                        } 
-                        // else {
-                        //     $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>';
-                        // }
+                        } else {
+                            $table_start .= '<td class="color primary border twice-left"><strong>Service</strong></td>
+                                    ';
+                        }
 
 
                     }
- //here
-                    // if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
-                    //     if ($shipment->user_id == 10354 && $shipment->distribution_products->count() > 0) {
-                    //         $service_type = "Distribution";
-                    //     } else {
-                    //         $service_type = $shipment->booking_type->booking_type;
-                    //     }
-                    //     $table_start .= '
-                    //             <td><strong>' . $service_type . '</strong></td>
-                    // ';
-                    // } else if ($shipment->booking_type_id == 2) {
-                    //     if ($type != 'pdf') {
-                    //         $table_start .= '
-                    //             <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                    //     ';
-                    //     } else {
-                    //         $table_start .= '
-                    //             <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong></td>
-                    //     ';
-                    //     }
-                    // }
+
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
+                        if ($shipment->user_id == 10354 && $shipment->distribution_products->count() > 0) {
+                            $service_type = "Distribution";
+                        } else {
+                            $service_type = $shipment->booking_type->booking_type;
+                        }
+                        $table_start .= '
+                                <td><strong>' . $service_type . '</strong></td>
+                    ';
+                    } else if ($shipment->booking_type_id == 2) {
+                        if ($type != 'pdf') {
+                            $table_start .= '
+                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                        ';
+                        } else {
+                            $table_start .= '
+                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong></td>
+                        ';
+                        }
+                    }
 //                    else if ($shipment->booking_type_id == 3) {
 //                        $table_start .= '
 //                                <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
 //                    ';
 //                    }
-                    // else {
-                    //     $table_start .= '
-                    //             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    // ';
-                    // }
+                    else {
+                        $table_start .= '
+                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    ';
+                    }
 
                     if ($type != 'pdf') {
                         $table_start .= '
                                 <td class="color primary"><strong>Datetime</strong></td>
-                                <td  colspan="3" > ' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                                <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                               </tr>';
 
-                        // if ($shipment->business_category->id == 1) {
-                        //     $table_start .= '<tr>
-                        //             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                        //             <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
-                        //         ';
-                        // } else {
-                        //     $table_start .= '<tr>
-                        //             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                        //             <td><strong>International</strong></td>
-                        //         ';
-                        // }
+                        if ($shipment->business_category->id == 1) {
+                            $table_start .= '<tr>
+                                    <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                                    <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+                                ';
+                        } else {
+                            $table_start .= '<tr>
+                                    <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                                    <td><strong>International</strong></td>
+                                ';
+                        }
 
                         $origin = $return_address_id == NULL ? 'Origin' : 'Return';
                         $originstyle = $return_address_id == NULL ? '<td class="color primary border twice-bottom twice-left"><strong> ' . $origin . '</strong></td>' : '<td style="background-color:  #6e6e6e !important; color: white;" class="color border twice-bottom twice-left" ><strong> ' . $origin . '</strong></td>';
@@ -1601,7 +1558,7 @@ class ShipperShipmentBookController extends Controller
                         $origin_data = $return_address_id == NULL ? $shipment->pickup_address->city->name : $return_address_city;
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
-                                <td colspan="3" >' . $shipment->order_id . '</td>
+                                <td>' . $shipment->order_id . '</td>
                               </tr>
                               <tr>
                                 ' . $originstyle . '
@@ -1623,16 +1580,16 @@ class ShipperShipmentBookController extends Controller
                     } else {
                         $table_start .= '
                                 <td class="color primary"><strong>Order ID</strong></td>
-                                <td colspan="3">' . $shipment->order_id . '</td>
+                                <td>' . $shipment->order_id . '</td>
                               </tr>
                               <tr>';
-                        // if ($shipment->business_category->id == 1) {
-                        //     $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
-                        //         <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>';
-                        // } else {
-                        //     $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
-                        //             <td><strong>International</strong></td>';
-                        // }
+                        if ($shipment->business_category->id == 1) {
+                            $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
+                                <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>';
+                        } else {
+                            $table_start .= '<td class="color primary border twice-left"><strong>Shipping</strong></td>
+                                    <td><strong>International</strong></td>';
+                        }
 
 
                         $table_start .= '
@@ -1792,7 +1749,7 @@ class ShipperShipmentBookController extends Controller
                     if ($type != 'pdf') {
                         $table_end = '
                               <tr>
-                                <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s) </strong></td>
+                                <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s1) </strong></td>
                                 <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
                         if ($shipment->shipping_mode_id == 2 && $shipment->estimated_weight != null) {
                             $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
@@ -1871,52 +1828,19 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     if ($user_type != 4 && $type != 'pdf') {
-//here
-                    $shippingService   = '';        
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4 || $shipment->booking_type_id == 6) {
-                            if ($shipment->user_id == 10354 && $shipment->distribution_products->count() > 0) {
-                            $service_type = "Distribution";
-                        } else {
-                            $service_type = $shipment->booking_type->booking_type;
-                        }
-                        $shippingService .= '
-                            <td colspan="4" class="prominent" ><strong>' . $service_type . '</strong></td>
-                    ';
-                    } else if ($shipment->booking_type_id == 2) {
-                        if ($type != 'pdf') {
-                            $shippingService .= '
-                                <td colspan="4"  class="replacement prominent"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
-                        } else {
-                            $shippingService .= '
-                            <td colspan="4" class="replacement prominent"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong></td>';
-                        }
-                    }
-                    else {
-                        $shippingService .= '
-                        <td colspan="4" class="prominent"><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
-                    }
-                    
-                    $shippmentMode = '';
-                    if ($shipment->business_category->id == 1) {
-                        $shippmentMode .= '
-                        <td colspan="2" class="prominent"><strong>' . $shipment->shipping_mode->mode . '</strong></td>';
-                    } 
-                    else {
-                        $shippmentMode .= '
-                        <td colspan="2" class="prominent"><strong>International</strong></td>';
-                    }
-
                         $table_end .= '
                         </tr>
 
-                        <tr>
-                        <td colspan="1" style="font-size:13px;"><b>Shipping Mode</b></td>
-                        '.$shippmentMode.'
-                        <td colspan="1" style="font-size:13px;" class="text-center border twice-top"><b>Service</b></td>
-                        '.$shippingService.'
-                        </tr>
-                        
-                        <tr>
+                            <tr>
+                                <td colspan="1"><strong>Shipping Mode</strong></td>
+                                <td colspan="2" style="font-size:15px; background-color:black !important; color:white; text-align:center; font-weight: 900; position: relative;">Rush</td>
+                                <td colspan="1" class="text-center border twice-top">Service</td>
+                                <td colspan="4" style="font-size:15px; background-color:black !important; color:white; text-align:center; font-weight: 900; position: relative;">Regular</td>
+
+                            </tr>
+
+
+                              <tr>
                                 <td colspan="8" class="text-center border twice-top urdu h5" dir="rtl"><em>برائے مہربانی رائڈر / کورئیر کو کوئی اضافی پیسہ نہ دیں۔ اگر پارسل / پیکٹ خراب یا خراب حالت میں ہے تو ، براہ کرم اسے وصول نہ کریں۔</em></td>
                               </tr>
                               <tr>
@@ -2953,7 +2877,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
-            $spreadsheet[1][1] = 'Yes'; //Added Forcefully yes while the shipper insert no, 
+
             $excel_type = $request->excel_type;
 
             $column_count = null;
@@ -3013,7 +2937,7 @@ class ShipperShipmentBookController extends Controller
             }
             unset($spreadsheet[0]);
         }
-     
+
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
             $rows = array();
 
@@ -4231,37 +4155,40 @@ class ShipperShipmentBookController extends Controller
                             <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                                 <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
                             </td>
-                            <td class="color primary border twice-left"><strong>Service</strong></td>';
 
-            // if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-            //     $table_start .= '
-            //                 <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-            //         ';
-            // } else if ($shipment->booking_type_id == 2) {
-            //     $table_start .= '
-            //                 <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-            //         ';
-            // } else if ($shipment->booking_type_id == 3) {
-            //     $table_start .= '
-            //                 <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
-            //         ';
-            // } else {
-            //     $table_start .= '
-            //                 <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-            //         ';
-            // }
+                            <td class="color primary border twice-left"><strong>Service</strong></td>
+                ';
+
+            if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                $table_start .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    ';
+            } else if ($shipment->booking_type_id == 2) {
+                $table_start .= '
+                            <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                    ';
+            } else if ($shipment->booking_type_id == 3) {
+                $table_start .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
+                    ';
+            } else {
+                $table_start .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    ';
+            }
 
             $table_start .= '
                             <td class="color primary"><strong>Datetime</strong></td>
-                            <td colspan="3">  ' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>';
+                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
+          ';
 
             $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
-                            <td colspan="3">' . $shipment->order_id . '</td>
+                            <td>' . $shipment->order_id . '</td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
