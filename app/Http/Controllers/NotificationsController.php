@@ -3315,7 +3315,7 @@ class NotificationsController extends Controller
                                 $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
                                     ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
                                     ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
-                                    ->where('sj.shipper_status_id',25)
+                                    ->whereIn('sj.shipper_status_id',[25,31,38])
                                     ->where('s.user_id',$user_id)
                                     ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')

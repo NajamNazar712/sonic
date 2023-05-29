@@ -93,7 +93,7 @@ class NotificationReturnedDeliveredToShipper extends Command
             ->groupBy('return_delivered_to_shipper_sms.return_note_id')
             ->get();
 
-//        dd($return_deliverd_to_shippers);
+        dd($return_deliverd_to_shippers);
 
 
         NotificationsController::send(216, $return_deliverd_to_shippers);
