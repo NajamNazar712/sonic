@@ -6847,43 +6847,40 @@ class APIController extends Controller
         ]);
 
         if( $validateshipment->fails()){
-        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
         }
-
-
         else{
-        $return_statuses = array(25, 31, 38, 23);
-        $tracking_number = $request->tracking;
-        $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
-        if($shipment->exists()){
-            $shipment = $shipment->first();
-            if(in_array($shipment->shipper_status_id, $return_statuses)){
-                $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
-                if($return_sheet->exists()){
-                    $return_sheet = $return_sheet->first();
-                    if($return_sheet->status_id == 0){
-                        return response()->json(['status' => 1, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'shipment_status' => $shipment->status_shipper->name]);
+            $return_statuses = array(25, 31, 38, 23);
+            $tracking_number = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
+                if($shipment->exists()){
+                    $shipment = $shipment->first();
+                    if(in_array($shipment->shipper_status_id, $return_statuses)){
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            if($return_sheet->status_id == 0){
+                                return response()->json(['status' => 1, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'shipment_status' => $shipment->status_shipper->name]);
+                            }
+                            else{
+                                return response()->json(['status' => 0, 'error' => 'Shipment is already received with remarks ' . $return_sheet->remarks]);
+                            }
+                        }
+                        else{
+                            return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                        }
                     }
                     else{
-                        return response()->json(['status' => 0, 'error' => 'Shipment is already received with remarks ' . $return_sheet->remarks]);
+                        return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
                     }
                 }
-                else{
-                    return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
-                }
-            }
             else{
-                return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
             }
-        }
-        else{
-            return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
-             }
         }
     }
 
     public function shipper_received_shipments(Request $request){
-
         $validateshipment = Validator::make($request->all(), [
             'shipment_ids' => 'required',
             'user_type'    => 'required',
@@ -6893,29 +6890,22 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
         }
         else{
-            
             $shipments_list = $request->shipment_ids;
             $user           = $request->user_id;
             $user_type      = $request->user_type;
             $received_by    = '';
             $userDetials    = User::where('id', $user)->first();
 
-            if($user_type == 2)
-            {
+            if($user_type == 2){
                 $received_by = ' (Substitute User)';
             }
- 
-            foreach($shipments_list as $shipment_id)
-            {
-                if(!empty($shipment_id))
-                {
+            foreach($shipments_list as $shipment_id){
+                if(!empty($shipment_id)){
                     $shipments = Shipment::where('tracking_number', $shipment_id); 
-                    if($shipments->exists())
-                    {
+                    if($shipments->exists()){
                         $shipments = $shipments->first();
                         $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
-                        if($return_sheet->exists())
-                        {        
+                        if($return_sheet->exists()){        
                             $return_sheet = $return_sheet->first();
                             $return_sheet->status_id = 1;
                             $return_sheet->received_at = Carbon::now();
