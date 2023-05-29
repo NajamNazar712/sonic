@@ -6872,35 +6872,39 @@ class APIController extends Controller
     }
 
     public function shipper_received_shipments(Request $request){
-    
+        if(!empty($request->shipment_ids)){
         $shipments_list = $request->shipment_ids;
         $user           = $request->user_id;
         $user_type      = $request->account_type;
         $received_by    = '';
         $userDetials    = User::where('id', $user)->first();
-
         if($user_type == 2){
             $received_by = ' (Substitute User)';
         }
-
         foreach($shipments_list as $shipment_id){
+           if(!empty($shipment_id)){
             $shipments = Shipment::where('tracking_number', $shipment_id)->first(); 
+            $return_note_find = ReturnSheet::whereIn('shipment_id', $shipments->id)->get();
             $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
-            if($return_sheet->exists()){                $return_sheet = $return_sheet->first();
+            if($return_sheet->exists()){         
+                $return_sheet = $return_sheet->first();
                 $return_sheet->status_id = 1;
                 $return_sheet->received_at = Carbon::now();
                 $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
                 $return_sheet->save();
-
-            }
+                }
+            } 
         }
-            return response()->json([
-                'status'  => 1, 
-                'success' => 'Shipments Received Successfully'
-            ]);
-        
-}
-
+        return response()->json([
+            'status'  => 1, 
+            'success' => 'Shipments Received Successfully'
+        ]);
+        }
+        return response()->json([
+            'status'  => 0, 
+            'success' => 'Shipment Not Found'
+        ]);
+    }
     public function return_shipments_list(){
         dd('this function return shipments list');
     }
