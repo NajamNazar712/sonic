@@ -102,10 +102,9 @@ class AppServiceProvider extends ServiceProvider
                 if (count($return_notes) > 0) {
                       foreach($return_notes as $key => $note){
                         if(isset($key)){
-                            $shipper_return_note_ticker .= '  Total Shipments ' . $note['count'] . ' are returned back to you in safe and sound condition today under Return Note Number ' . $key . ', In case of any query regarding these shipments you may respond us back in 48 hours'. PHP_EOL;
+                            $shipper_return_note_ticker .= "(Total Shipments " . $note['count'] . " are returned back to you in safe and sound condition today under Return Note Number " . $key . ", In case of any query regarding these shipments you may respond us back in 48 hours)." .PHP_EOL.PHP_EOL;
                         }  
                     }
-                  
                     $view->with('shipper_return_note_ticker', $shipper_return_note_ticker);
   
                 }

@@ -3320,7 +3320,9 @@ class NotificationsController extends Controller
                                     ->where('s.user_id',$user_id)
                                     ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
+//                                    ->where('sj.reference_1_id','return_notes.id')
                                     ->get();
+//                                dd($data1);
 
 //                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
 //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
@@ -3358,6 +3360,7 @@ class NotificationsController extends Controller
                                 if (strpos($body, '[return_detail]') !== FALSE) {
                                     $body = str_replace('[return_detail]', $return_detail, $body);
                                 }
+//                                dd($body);
 
                                 self::email($subject, $body, $to);
 
