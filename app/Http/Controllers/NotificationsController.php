@@ -3321,7 +3321,7 @@ class NotificationsController extends Controller
                                     ->whereBetween('sj.created_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
                                     ->get();
-//
+
 //                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
 //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
 //                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
@@ -3336,8 +3336,6 @@ class NotificationsController extends Controller
 //                                        and return_note_id = rn.id) as shipment_count"))
 //                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
 //                                    ->get();
-
-
 
                                     $da = [];
 									$i = 0;
