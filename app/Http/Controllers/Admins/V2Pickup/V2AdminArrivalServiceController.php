@@ -75,6 +75,8 @@ class V2AdminArrivalServiceController extends Controller
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
 
+
+
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 }else if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -101,6 +103,8 @@ class V2AdminArrivalServiceController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['shipper'] = $shipment->user->name;
                     $details['amount'] = $shipment->amount;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
                     //$details['weight'] = floatval($shipment->actual_weight);
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);

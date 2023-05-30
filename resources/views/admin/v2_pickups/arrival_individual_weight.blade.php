@@ -79,7 +79,9 @@
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Weight (kg)</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">dasdas</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Destination Hub</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -271,7 +273,7 @@
 
             var pickup_requests = [];
             var not_picked_tracking_numbers  = [];
-            
+
             @if (session('print_shipment_ids'))
                 var url = '{!! route('admin.shipment.book.print_air_waybill') !!}';
 
@@ -371,9 +373,13 @@
                     {name: 'pickup_request_id', class: 'align-middle pickup_request_id', orderable: false, searchable: false},
                     {name: 'rider', class: 'align-middle rider', orderable: false, searchable: false},
                     {name: 'weight', class: 'align-middle actual_weight', orderable: false, searchable: false},
-                    {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
+                    {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false},
+                    {name: 'city', class: 'align-middle city', orderable: false, searchable: false},
+                    {name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
+
                 ],
                 rowCallback: function(row, data, index) {
+
                 },
                 initComplete: function() {
                     this.api().columns().every(function(column_id) {
@@ -501,20 +507,19 @@
             });
 
               function check_pickup_requests(tracking_number,rider_name){
-                console.log(rider_name)
                    var flag = true;
                    if(rider_name !== ''){
                     console.log(11);
                     for (not_picked_tracking_number in not_picked_tracking_numbers){
                         if (not_picked_tracking_number['tracking_number'] === tracking_number){
-                            flag = false; 
-                        
+                            flag = false;
+
                         }
                     }
                 }
                 else{
                      console.log(12);
-                         flag = false; 
+                         flag = false;
                 }
                 if (flag) {
                     let array = { 'tracking_number' : tracking_number,'rider':rider_name}
@@ -523,7 +528,7 @@
 
             }
 
-          
+
 
             var unassigned_pickup_request_ids = [];
             var unassigned_pickups = false;
@@ -589,13 +594,13 @@
                                                 unassigned_pickup_request_ids.push(int_pickup_request_id);
                                             }
                                             unassigned_pickups = true;
-                            
-                                        
+
+
                                         }
                                          if(data.details.rider_picked == false){
                                                 check_pickup_requests(data.details.tracking_number,data.details.rider);
                                         }
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button, data.details.city,data.details.hub]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -837,7 +842,7 @@
                                         unassigned_pickups = true;
                                     }
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button, data.details.city, data.details.hub]).draw().node();
                                     $(new_row).css('color', 'white');
                                     $(new_row).css('background-color', 'orange');
                                     new_row.id = data.details.id;
@@ -916,7 +921,7 @@
                         const table = document.createElement('table');
                         table.style.width = '100%';
                         table.style.textAlign = 'center'; // center the table
-                        table.style.fontSize = '18px'; 
+                        table.style.fontSize = '18px';
                         const header = table.createTHead();
                         const row = header.insertRow();
                         const cell1 = row.insertCell(0);
@@ -1046,7 +1051,7 @@
                                     return false;
                                 }
                             });
-                            
+
                             table.row(parent).remove();
                             table.draw(false);
 
@@ -1211,7 +1216,7 @@
                                         unassigned_pickups = true;
                                     }
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button, data.details.city, data.details.hub]).draw().node();
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();

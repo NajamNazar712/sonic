@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Bulk Arrival (Without Weight)
+                   Bulk Arrival (Without Weight)
                 </h1>
 
                 <div class="card">
@@ -46,6 +46,7 @@
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
