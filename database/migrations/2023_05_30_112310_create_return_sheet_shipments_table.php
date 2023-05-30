@@ -16,7 +16,8 @@ class CreateReturnSheetShipmentsTable extends Migration
         Schema::create('return_shipments_received_app', function (Blueprint $table) {
             $table->increments('id');
             $table->Integer('shipment_id')->index();
-            $table->enum('is_received', array('1'));
+            $table->Integer('return_sheet_id')->index();
+            $table->enum('scan_via', [1,2]);
             $table->timestamps();
         });
     }

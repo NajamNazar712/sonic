@@ -396,6 +396,7 @@
                                 shipment += '<div class="mt-4 border-primary">';
                                 shipment += '<div class="d-flex align-items-center bg-primary">';
                                 shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + '</div>';
+                                shipment += '<div class="mb-0 ml-1">  '+ details.received_img + '  </div>';
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 if(details.pod_file){
                               
@@ -406,6 +407,15 @@
                                     shipment += '<button class="btn btn-secondary d-sm-inline-block print" id=' + id + '>Print</button>';
 
                                 }
+
+                            if(details.received_img){
+                              shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block print" id=' + id + '>Print</button>';
+                              shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.received_img + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> received_img</a>';
+
+                            }
+
+
+
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';

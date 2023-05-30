@@ -6851,7 +6851,7 @@ class APIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
         }
         else{
-            $return_statuses = array(25, 31, 38, 23);
+            $return_statuses = array(25, 31, 38, 23, 28, 34);
             $tracking_number = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
                 if($shipment->exists()){
@@ -6916,9 +6916,9 @@ class APIController extends Controller
                             $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
                             $return_sheet->save();
 
-                            
                             $ReturnSheetShipments->shipment_id = $shipments->id;
-                            $ReturnSheetShipments->is_received = 1;
+                            $ReturnSheetShipments->scan_via = 2;
+                            $ReturnSheetShipments->return_sheet_id = $return_sheet->id;
                             $ReturnSheetShipments->save();
                         }
                        

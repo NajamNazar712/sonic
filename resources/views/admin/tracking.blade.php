@@ -840,6 +840,7 @@
                                 {
                                     shipment += '<div class="mb-0 ml-1 mr-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + open_box_iocn + ccd_icon + on_hold_box_icon +'</div>';
                                 }
+                                shipment += '<div class="mb-0 ml-1">  '+ details.received_img + '  </div>';
 
                                 shipment += '<button class="btn btn-secondary ml-auto mr-1 mr-sm-1 add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
                                 @if (session('role_id') == 1 || in_array(262, session('permissions')))
