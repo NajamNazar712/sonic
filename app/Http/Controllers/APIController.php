@@ -400,7 +400,7 @@ class APIController extends Controller
     public function shipment_book(Request $request)
     {
         /********************************NOTE********************************/
-        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+        /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
 
 
@@ -5300,7 +5300,7 @@ class APIController extends Controller
                                     // check bill status
                                     if ($shipment_data->amount == $shipment_data->received_amount) {
                                         // Bill paid status
-                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no', $tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_number', $tracking_no)->first();
 
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5451,7 +5451,7 @@ class APIController extends Controller
                         // $blocked_shipments = array(17,20,21,22,23,24,25,44,47,48,50,57,60);
 
                         if ($shipment_data) {
-                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_no', $tracking_no)->first();
+                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_number', $tracking_no)->first();
 
                             if ($transaction_data) {
                                 if ($transaction_data->consumer_number == $request_data['consumer_number'] && $transaction_data->tran_auth_id == $request_data['tran_auth_id'] && $transaction_data->tran_date == $request_data['tran_date'] && $transaction_data->tran_time == $request_data['tran_time']) {
@@ -5492,7 +5492,7 @@ class APIController extends Controller
                                     $request_data['delivery_note_id'] = $delivery_note;
 
                                     $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
-                                    dd($upload_transaction->id);
+
 
                                     if ($upload_transaction) {
                                         $return_data['response_Code'] = "00";
