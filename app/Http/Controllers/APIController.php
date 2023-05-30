@@ -67,6 +67,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
@@ -6907,13 +6908,20 @@ class APIController extends Controller
                     if($shipments->exists()){
                         $shipments = $shipments->first();
                         $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
+                        $ReturnSheetShipments = new ReturnSheetShipments();
                         if($return_sheet->exists()){        
                             $return_sheet = $return_sheet->first();
                             $return_sheet->status_id = 1;
                             $return_sheet->received_at = Carbon::now();
                             $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
                             $return_sheet->save();
+
+                            
+                            $ReturnSheetShipments->shipment_id = $shipments->id;
+                            $ReturnSheetShipments->is_received = 1;
+                            $ReturnSheetShipments->save();
                         }
+                       
                     }
                     else{
                         return response()->json([
@@ -6923,7 +6931,6 @@ class APIController extends Controller
                     }
                 }
             }   
-
             return response()->json([
                 'status'  => 1, 
                 'success' => 'Shipement Received Successfully'
