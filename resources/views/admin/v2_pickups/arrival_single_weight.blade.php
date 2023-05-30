@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                   Bulk Arrival (Without Weight)
+                  Bulk Arrival (Without Weight)
                 </h1>
 
                 <div class="card">
@@ -43,10 +43,11 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Destination Hub</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Pickup Request ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
-                                    <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -368,6 +369,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'city', class: 'align-middle city', orderable: false, searchable: false},
+                    {name: 'hub', class: 'align-middle hub', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
                     {name: 'pickup_request_id', class: 'align-middle pickup_request_id', orderable: false, searchable: false},
                     {name: 'rider', class: 'align-middle rider', orderable: false, searchable: false},
@@ -549,7 +552,7 @@
                                             }
                                             unassigned_pickups = true;
                                         }
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub,data.details.shipper, data.details.pickup_request_id, data.details.rider,remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -779,7 +782,7 @@
                                         unassigned_pickups = true;
                                     }
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub, data.details.shipper, data.details.pickup_request_id, data.details.rider,remove_button]).draw().node();
                                     $(new_row).css('color', 'white');
                                     $(new_row).css('background-color', 'orange');
                                     new_row.id = data.details.id;
@@ -1117,7 +1120,7 @@
                                         unassigned_pickups = true;
                                     }
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.city,data.details.hub,data.details.shipper, data.details.pickup_request_id, data.details.rider,remove_button]).draw().node();
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
