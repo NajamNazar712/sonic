@@ -13,7 +13,7 @@ class CreateReturnSheetShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('return_shipments_received_app', function (Blueprint $table) {
+        Schema::create('return_shipments_received', function (Blueprint $table) {
             $table->increments('id');
             $table->Integer('shipment_id')->index();
             $table->Integer('return_sheet_id')->index();
