@@ -3353,7 +3353,7 @@ class NotificationsController extends Controller
 									
 										$shipment_ids = implode(',',$val['shipment_id']);
 										$count = $val['count'];
-										$return_detail.= PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ,".PHP_EOL."---".PHP_EOL;
+										$return_detail.= PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ".PHP_EOL."---".PHP_EOL;
 										
 									}
 
