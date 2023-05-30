@@ -2835,7 +2835,7 @@ class ReturnController extends Controller
 
                         $users = GlobalSettings::where('type', 'returned_shipment_notification');
 
-                        if($users->exists()) {
+                        if($users->exists()) { 
                             $users = $users->first();
                             $current_users = $users->text;
                             $c_user = explode(',', $current_users);
