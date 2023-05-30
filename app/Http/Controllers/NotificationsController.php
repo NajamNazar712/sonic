@@ -3319,6 +3319,7 @@ class NotificationsController extends Controller
                                     ->whereIn('sj.shipper_status_id',[25,31,38])
                                     ->where('s.user_id',$user_id)
                                     ->whereBetween('sj.created_at',[$yesterday,$today])
+                                    ->whereBetween('return_notes.updated_at',[$yesterday,$today])
                                     ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
 //                                    ->where('sj.reference_1_id','return_notes.id')
                                     ->get();
