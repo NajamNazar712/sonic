@@ -254,6 +254,7 @@
                             head.push('Return Note No.');
                             head.push('Status');
                             head.push('Hub');
+                            head.push('Rider Id');
                             head.push('Rider');
                             head.push('No. Of Shipments');
                             head.push('Created By');
@@ -270,6 +271,7 @@
                                 row.push(values.return_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
+                                row.push(values.rider_id);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
                                 row.push(values.assigned_by);

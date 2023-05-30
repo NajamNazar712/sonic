@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Deliveries
+       Return Deliveries
     </h1>
 
     <div class="card">
@@ -320,6 +320,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Return Note Data');
+                            head.push('Rider Id');
                             head.push('Rider Name');
                             head.push('Total Shipment');
                             head.push('Update Via App');
@@ -335,6 +336,7 @@
                                 row.push(values.city);
                                 row.push(values.zone);
                                 row.push(values.created_at);
+                                row.push(values.riderid);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
                                 row.push(values.shipments_rider_updated);
@@ -346,9 +348,9 @@
                                 update_via_dbf_count+=values.shipments_dbf_updated
                             });
 
-
                             footer.push('');
                             footer.push('Total');
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
