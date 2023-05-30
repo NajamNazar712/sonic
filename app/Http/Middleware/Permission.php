@@ -1439,6 +1439,8 @@ class Permission
 
             'crm.bulk_claim.index' => 19,
 
+            'setting.sms_notification_return_delivered_to_shipper.index' => 861,
+
             
         ]
     ];

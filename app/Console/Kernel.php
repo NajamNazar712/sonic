@@ -475,7 +475,7 @@ class Kernel extends ConsoleKernel
 
 		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
-
+		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

@@ -1834,6 +1834,13 @@ $roles = explode("," , $settings->text);
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
                                     @endif
+                                        @if (session('role_id') == 1 || in_array(861, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.index') }}">
+                                                    SMS Notification Return Delivered to shipper
+                                                </a>
+                                            </li>
+                                        @endif
                                 </ul>
 
                             </li>
@@ -2655,13 +2662,7 @@ $roles = explode("," , $settings->text);
                                     Territories</a></li>
                         @endif
 <!--                         add side bar-->
-                            @if (session('role_id') == 1 || in_array(698, session('permissions')))
-                                <li><a class="menu-item"
-                                       href="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.index') }}">
-                                        SMS Notification Return Delivered to shipper
-                                        </a>
-                                </li>
-                            @endif
+
 
                     </ul>
                 </li>

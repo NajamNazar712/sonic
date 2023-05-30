@@ -3183,17 +3183,17 @@ class NotificationsController extends Controller
                         $rdts_time = 0;
                     }
 
-                    $yesterday1 = Carbon::yesterday();
+                    $yesterday = Carbon::yesterday();
 
-                    $yesterday1->hour = $rdts_time;
+                    $yesterday->hour = $rdts_time;
 
 
-                    $today1 = Carbon::today();
+                    $today = Carbon::today();
 
-                    $today1->hour = $rdts_time;
+                    $today->hour = $rdts_time;
 
-                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
-                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
+//                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
+//                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
 
                     $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name',''];
 
