@@ -1705,7 +1705,7 @@ $roles = explode("," , $settings->text);
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
 
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846,861], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
