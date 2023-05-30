@@ -145,9 +145,36 @@
                                                 <p class="card-text consignee_address">No Data</p>
                                             </div>
                                         </div>
-                                    </div></div>
+                                    </div>
+                                </div>
                                     </div>
                             </div>
+
+                            <div id="multiple_div" class="d-none">
+                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                    <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Tracking Number</th>
+                                        <th class="border-primary border-darken-1">Delivery Note ID</th>
+                                        <th class="border-primary border-darken-1">Case Nature ID</th>
+                                        <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Reason</th>
+                                        <th class="border-primary border-darken-1">Remarks</th>
+                                        <th class="border-primary border-darken-1">Status Date</th>
+                                        <th class="border-primary border-darken-1">Origin</th>
+                                        <th class="border-primary border-darken-1">Destination</th>
+                                        <th class="border-primary border-darken-1">Amount</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
+                                        <th class="border-primary border-darken-1">Consignee Name</th>
+                                        <th class="border-primary border-darken-1">Consignee Address</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                            </div>
+
+                
+
 
 
 
@@ -229,7 +256,8 @@
                                                 <p class="card-text junction">No Data</p>
                                             </div>
                                         </div>
-                                    </div></div>
+                                    </div>
+                                </div>
                                     <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -255,10 +283,25 @@
                                         </div>
                                     </div>
                                 </div>
-                                    </div>
+                                </div>
                             </div>
+
+                            <div class="modal fade" id="junctions" role="dialog" aria-labelledby="junctions" aria-hidden="true">
+                                <div class="modal-dialog modal-sm" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        </div>
+                                        <div class="modal-body text-center">
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div id="bag_multiple_div" class="d-none">
-                                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <table class="table table-bordered datatable" id="datatable-2" style="z-index: 3;">
                                     <thead>
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No.</th>
@@ -364,12 +407,20 @@
             font-size: 18px;
             font-weight: bold;
         }
+        .junction{
+            padding: 10px;
+            width: 100%;
+        }
 
-  
 
         #scan_bag {
             display: none;
     }
+
+    #bag_multiple_div {
+            display: none;
+    }
+
 
     </style>
 @endsection
@@ -385,39 +436,50 @@
 
 
     <script type="text/javascript">
+    
         $(document).ready(function () {
             var table;
             var bag_table;
             var selection = true;
+            var isSingleMode = true; 
+            
+
             $('.single_multiple_switch').on('change',function(){
                 var single_multiple_switch = document.querySelector('input.single_multiple_switch');
-                if (single_multiple_switch.checked === true) {
+                isSingleMode = single_multiple_switch.checked;
+
+                if (isSingleMode === true) {
                    selection = true;
                    $('#multiple_div').addClass('d-none');
                    $('#bag_multiple_div').addClass('d-none');
 
-                   // $('#single_div').removeClass('d-none');
                     destroyDatatable();
-                } else if (single_multiple_switch.checked === false) {
+                } else if (isSingleMode === false) {
+
                     selection = false;
                     $('#multiple_div').removeClass('d-none');
                     $('#bag_multiple_div').removeClass('d-none');
 
                     $('#single_div').addClass('d-none');
                     $('#bag_single_div').addClass('d-none');
-
-                    // table.clear();
                     init();
+                    initMultiple();
 
                 }
             });
 
             function destroyDatatable() {
-                table.clear();
-                table.destroy();
-                bag_table.clear();
-                bag_table.destroy();
-            }
+                if (typeof table !== 'undefined') {
+                    table.clear();
+                    table.destroy();
+                    table = undefined;
+                }
+                if (typeof bag_table !== 'undefined') {
+                    bag_table.clear();
+                    bag_table.destroy();
+                    bag_table = undefined;
+                }
+}
             function init() {
                 table = $('#datatable').DataTable({
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -427,7 +489,7 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    scrollX: true,
+                    scrollX: false,
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -470,18 +532,110 @@
                     }
                 });
             }
+            
+                $(document).on('click', '#junction', function() {
+                                    
+                    $('#junctions .modal-body').html('');
+                           var data = bag_table.row($(this).closest('tr')).data();
+
+                            var head = '';
+                            var junctions = '';
+                            var date = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Junction(s)</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                               
+                            if (data[9] !== undefined && data[9].length > 0) {
+                                junctions = data[9].join(',');
+                            } else {
+                                junctions = (data[9] !== undefined) ? 'None' : '';
+                            }
+
+                            
+                            $('#junctions .modal-header').html(head);
+                            $('#junctions .modal-body').html(junctions);
+
+                            $('#junctions').modal('show');
+                        
+                        
+                });
+
+            function initMultiple() {
+                bag_table = $('#datatable-2').DataTable({
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons:[{
+                        extend: 'excel',
+                        title: 'Quick Tracking (Bag)',
+                        className: 'btn btn-primary mb-1',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
+                    scrollX: false,
+                    paging:false,
+                    ordering:[0, 'desc'],
+                    columns: [
+                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
+                        {name: 'bag_number', class: 'align-middle bag_numbers', orderable: false},
+                        {name: 'origin', class: 'align-middle origin', orderable: false},
+                        {name: 'destination', class: 'align-middle destination', orderable: false},
+                        {name: 'bag_status', class: 'align-middle bag_status', orderable: false},
+                        {name: 'bag_type', class: 'align-middle bag_type', orderable: false},
+                        {name: 'pieces', class: 'align-middle pieces', orderable: false},
+                        {name: 'number_of_shipments', class: 'align-middle number_of_shipments', orderable: false},
+                        {name: 'manifest_id', class: 'align-middle manifest_id', orderable: false},
+                        {name: 'junction', class: 'align-middle junction', orderable: false},
+                        {name: 'bag_created_at', class: 'align-middle bag_created_at', orderable: false},
+                        {name: 'bag_status_updated_at', class: 'align-middle bag_status_updated_at', orderable: false},
+                        {name: 'bag_status_hub', class: 'align-middle bag_status_hub', orderable: false}
+
+
+                    ],
+                    rowCallback: function(row, data, index) {
+                        var info = bag_table.page.info();
+                        console.log(data)
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                        if (data[9] !== undefined && data[9].length > 0) {
+                            $('td:eq(9)', row).html("<button class='btn btn-sm btn-outline-info align-middle' id='junction'>" + data[9].length + "</button>");
+                        } else {
+                            $('td:eq(9)', row).html("0");
+                        }
+
+                        if (data[5] === 1) {
+                            $('td:eq(5)', row).html("Normal");
+                        } else {
+                            $('td:eq(5)', row).html("Return");
+                        }
+
+                    },
+                    initMultipleComplete: function() {
+
+                    }
+                });
+            }
 
             $('#scan_btn').change(function() {
                 if ($(this).is(':checked')) {
                     $('#scan_bag').show();
-                    // $('#single_div').hide();
-                    // $('#multiple_div').hide();
+                    $('#multiple_div').hide();
+                    $('#bag_multiple_div').show();
                     $('#scan_tracking').hide();
+                    $('#single_div').hide();
+                    $('#bag_single_div').show();
+
+                    
+
                 }else {
                     $('#scan_tracking').show();
-                    // $('#bag_single_div').hide();
-                    // $('#bag_multiple_div').hide();
+                    $('#multiple_div').show();
+                    $('#bag_multiple_div').hide();
                     $('#scan_bag').hide();
+                    $('#bag_single_div').hide();
+                    $('#single_div').show();
+
+
+
                 }
             });
 
@@ -502,7 +656,9 @@
             });
 
             $('input#scan_tracking').focus();
-            $('input#bag_tracking').focus();
+
+           
+
 
             $('#quick_tracking_form').on('submit',function (e) {
                 e.preventDefault();
@@ -683,7 +839,7 @@
                                 }else{
                                     var rowNo = bag_table.rows().count();
 
-                                    bag_table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                    bag_table.row.add([rowNo+1,parseInt(data.details.bag_number),data.details.origin,data.details.destination,data.details.bag_status,data.details.bag_type,data.details.manifest_id,data.details.number_of_shipments,data.details.pieces,data.details.junction,data.details.bag_created_at,data.details.bag_status_updated_at,data.details.bag_status_hub]).node().id = data.details.manifest_id;
                                     bag_table.draw(false);
                                     scan_sound(1);
                                 }
@@ -708,7 +864,7 @@
                                     }else{
                                         var rowNo = bag_table.rows().count();
 
-                                        bag_table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.delivery_note_id,data.details.complaint,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination,data.details.amount,data.details.shipper,data.details.consignee_name,data.details.consignee_address]).node().id = data.details.status_id;
+                                        bag_table.row.add([rowNo+1,parseInt(data.details.bag_number),data.details.origin,data.details.destination,data.details.bag_status,data.details.bag_type,data.details.manifest_id,data.details.number_of_shipments,data.details.pieces,data.details.junction,data.details.bag_created_at,data.details.bag_status_updated_at,data.details.bag_status_hub]).node().id = data.details.manifest_id;
                                         bag_table.draw(false);
                                         bag_table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -743,18 +899,39 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 scan_sound(2);
                             }else{
+
+                                
                                 scan_sound(1);
+                                var junctions = '';
+                                $.each(data.details.junction, function(index, value) {
+                                    junctions += value;
+                                    if (index !== data.details.junction.length - 1) {
+                                        junctions += ',';
+                                    }
+                                });
                                 $('#bag_single_div').removeClass('d-none');
 
                                 $('#bag_single_div p.bag').text(data.details.bag_number);
                                 $('#bag_single_div p.origin').text(data.details.origin);
                                 $('#bag_single_div p.destination').text(data.details.destination);
                                 $('#bag_single_div p.bstatus').text(data.details.bag_status);
-                                $('#bag_single_div p.btype').text(data.details.bag_type);
+                                if (data.details.bag_type === 1)
+                                {
+                                    $('#bag_single_div p.btype').text('Normal');
+
+                                }else{
+                                    $('#bag_single_div p.btype').text('Return');
+
+                                }
                                 $('#bag_single_div p.mID').text(data.details.manifest_id);
                                 $('#bag_single_div p.nos').text(data.details.number_of_shipments);
                                 $('#bag_single_div p.pieces').text(data.details.pieces);
-                                $('#bag_single_div p.junction').text(data.details.junction);
+
+                                if (junctions.length > 0) {
+                                    $('#bag_single_div p.junction').text(junctions);
+                                } else {
+                                    $('#bag_single_div p.junction').text('0');
+                                }
                                 $('#bag_single_div p.bag_created').text(data.details.bag_created_at);
                                 $('#bag_single_div p.bsupated_at').text(data.details.bag_status_updated_at);
                                 $('#bag_single_div p.shub').text(data.details.bag_status_hub);

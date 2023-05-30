@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
@@ -722,7 +723,8 @@ class AdminTrackingController extends Controller
                     $manifest = '-';
                 }
                 $details['manifest_id'] = $manifest->id;
-                $details['junction'] = $bag->junction_mapping_id;
+                $junction = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->get();
+                $details['junction'] = $junction->pluck('city.name')->toArray();
                 $details['bag_created_at'] = Carbon::parse($bag->created_at)->toDateTimeString();
                 $details['bag_status_updated_at'] = Carbon::parse($bag->updated_at)->toDateTimeString();
                 if ($bag->current_hub != null && is_object($bag->current_hub)) {
@@ -732,9 +734,11 @@ class AdminTrackingController extends Controller
                 }
                 $details['bag_status_hub'] = $bag;
                 return response()->json(['status' => 1, 'details' => $details]);
-            }else{
-                return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);
             }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Bag Number not found']);
+            }
+            
 
         }
     }
