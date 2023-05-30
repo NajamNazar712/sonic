@@ -408,14 +408,6 @@
 
                                 }
 
-                            if(details.received_img){
-                              shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block print" id=' + id + '>Print</button>';
-                              shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.received_img + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> received_img</a>';
-
-                            }
-
-
-
                                 shipment += '</div>';
 
                                 shipment += '<div class="p-1">';
