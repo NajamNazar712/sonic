@@ -191,7 +191,7 @@
                                 <div class="col-3"><div class="card text-center" id="status_card">
                                         <div class="card-content">
                                             <div class="card-body">
-                                                <h4 class="card-title">Origin</h4>
+                                                <h4 class="card-title success">Origin</h4>
                                                 <p class="card-text origin">No Data</p>
                                             </div>
                                         </div>
