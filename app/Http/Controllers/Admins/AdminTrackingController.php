@@ -891,7 +891,7 @@ class AdminTrackingController extends Controller
 
                         $received_shipments = ReturnSheetShipments::where('shipment_id',$shipment->id);
                         if($received_shipments->exists()){
-                        $details['received_img'] =  '<img src="' . asset('img/received.png').' ">';
+                        $details['received_img'] =  '<img src="' . asset('img/shipement_received.png').' ">';
                         }else{
                             $details['received_img'] ="";
                         }
