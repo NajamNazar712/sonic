@@ -123,6 +123,9 @@
                                     <th class="border-primary border-darken-1">Transited Date</th>
                                     <th class="border-primary border-darken-1">Transited By</th>
                                     <th class="border-primary border-darken-1">Seal Updated By</th>
+                                    <th class="border-primary border-darken-1">Remarks</th>
+                                    <th class="border-primary border-darken-1">Remarks Added By</th>
+                                    <th class="border-primary border-darken-1">Remarks Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -310,6 +313,9 @@
                             head.push('Manifest Created At');
                             head.push('Transited By');
                             head.push('Seal Updated By');
+                            head.push('Remarks');
+                            head.push('Remarks Added By');
+                            head.push('Remarks Updated At');
 
 
                             $.each(result.data, function(index, values) {
@@ -332,6 +338,9 @@
                                 row.push(values.manifest_created_at);
                                 row.push(values.transitted_by);
                                 row.push(values.updated_by);
+                                row.push(values.remarks);
+                                row.push(values.remarks_added_by);
+                                row.push(values.remarks_updated_at);
 
 
                                 body.push(row);
@@ -401,6 +410,9 @@
                     {data: 'transitted_date', name: 'cargo_manifest_bags.created_at', class: 'align-middle transitted_date'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
+                    {data: 'remarks', name: 'cargo_manifest_bags.remarks', class: 'align-middle remarks'},
+                    {data: 'remarks_added_by', name: 'remarks_added.name', class: 'align-middle remarks_added_by'},
+                    {data: 'remarks_updated_at', name: 'cargo_manifest_bags.remarks_updated_at', class: 'align-middle remarks_updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
