@@ -25,6 +25,7 @@ class Permission
             'dispute.resolve' => 4,
             'dispute.update' => 3,
             'dispute.update.submit' => 3,
+            'dispute.shipments.index' => 702,
 
             'accounts.pending' => 5,
             'accounts.pending.ajax' => 5,
@@ -814,7 +815,6 @@ class Permission
             'settings.debriefing_break_time.store' => 674,
             'settings.debriefing_role_setting.index' => 858,
             'settings.debriefing_role_setting.update' => 858,
-
             'settings.return_note_restriction_bypass.index' => 192,
             'settings.cod_cap_zones.index' => 197,
             'settings.cod_cap_zones.update' => 197,
@@ -1151,6 +1151,9 @@ class Permission
 
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
+            
+            'human_resource.employee_confirmation.index' => 783,
+            'human_resource.employee_confirmation.list' => 783,
 
             'human_resource.fuel_allocation.index' => 831,
             'human_resource.fuel_allocation.list' => 831,
@@ -1344,6 +1347,11 @@ class Permission
     		'settings.auto_delivery_note_verification.index' => 836,
 			'reports.revenue_report_by_invoice.index' => 839,
 			'return.return_confirm_otp.index' => 849,
+            'return.return_shipments.index'=> 860,
+            'delivery.delivery_shipments.index'=> 859,
+        
+            'management.riders.rider_remarks.index'=>862,
+ 			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1417,7 +1425,7 @@ class Permission
             'dispute.rebook.shipment.info' => 7,
             'dispute.rebook.shipment.update' => 7,
             
-            'dispute.shipments.index' => 702,
+
 
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,
@@ -1436,6 +1444,7 @@ class Permission
             'reports.weight_reconciliation.list' => 8,
 
             'crm.bulk_claim.index' => 19,
+
 
             
         ]

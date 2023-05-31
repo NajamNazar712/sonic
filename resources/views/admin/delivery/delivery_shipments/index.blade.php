@@ -14,21 +14,25 @@
 
 
             <div class="row mb-2 justify-content-center">
-
-                    <div class="col-4 form-group">
-                        <select name="scan_delivery_note[]" id="scan_delivery_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
-                            @foreach($delivery_notes_id as $delivery_note_id)
-                            <option value="{{$delivery_note_id->id}}">{{$delivery_note_id->id}}</option>
-                            @endforeach
-                        </select>
-                        
-                    </div>
-                    <div class="col-2 mb-3">
-                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
-                    </div>
+                <div class="col-4 form-group">
+                    <select name="rider" id="rider" class="form-control select2" data-msg-required="Atleast One Rider or Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->riderID}}">{{$rider->rider}}</option>
+                        @endforeach
+                    </select>
+                    
                 </div>
-                
-
+                <div class="col-4 form-group">
+                    <select name="scan_delivery_note[]" id="scan_delivery_note" class="form-control select2" multiple="multiple" data-msg-required="Atleast One Delivery Note ID Is Required" data-rule-required="true" required="required">
+                        @foreach($delivery_notes_id as $delivery_note_id)
+                        <option value="{{$delivery_note_id->id}}">{{$delivery_note_id->id}}</option>
+                        @endforeach
+                    </select>
+                    
+                </div>
+                <div class="col-2 mb-3">
+                    <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                </div>
             </div>
 
 
@@ -38,7 +42,7 @@
                     <th class="border-primary border-darken-1">S No.</th>
                     <th class="border-primary border-darken-1">Delivery Note No.</th>
                     <th class="border-primary border-darken-1">Rider ID</th>
-                    <th class="border-primary border-darken-1">Rider Name</th>
+                    <th class="border-primary border-darken-1">Rider</th>
                     <th class="border-primary border-darken-1">Tracking Number</th>
                     <th class="border-primary border-darken-1">Created At</th>
                 </tr>
@@ -144,6 +148,27 @@
                     }
                 });
         }
+        $('#rider').on('change', function() {
+            var rider_id = $(this).val();
+            $.ajax({
+                url: '{!! route('admin.delivery.delivery_shipments.notes') !!}',
+                method: 'GET',
+                data: {
+                    'rider_id': rider_id,
+                }
+            })
+            .done(function(data) {
+                console.log(data);
+                $("#scan_delivery_note").empty();
+                let options = "";
+                data.receive_notes_ids.forEach(p => {
+                    options += `<option value="${p.id}">${p.delivery_note_id_padded}</option>`;
+                })
+                $('#scan_delivery_note').append(options);
+                
+            });
+            
+        });
         jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
@@ -197,7 +222,8 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Deliveries Note Shipment',
+                        className: 'd-none',
+                        title: 'Delivery Note Shipments',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
                 ],
@@ -207,6 +233,7 @@
                     data: function (d) {
                         
                         d.delivery_note_number = $('#scan_delivery_note').val();
+                        d.rider_id = $('#rider').val();
                     }
                 },
                 rowId: 'delivery_notes.id',
@@ -225,7 +252,7 @@
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
                     {data: 'riderID', name: 'riders.id', class: 'align-middle riderID'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number', name: 'sh.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle created_at'},
 
                   
@@ -233,6 +260,9 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                
+                    if(data)
+                        $(".buttons-excel").removeClass("d-none");
                 },
 
                 // drawCallback: function (settings) {
@@ -254,8 +284,9 @@
           
             $('#search_filter_btn').on('click',function () {
                 let delivery_note = $('#scan_delivery_note').val()
-                if(delivery_note.length == 0 ){
-                    var error = "Please add one delivery note at least";
+                let rider = $('#rider').val()
+                if(delivery_note.length == 0 && rider == ""){
+                    var error = "Please select rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -265,10 +296,16 @@
 
 
             $('#scan_delivery_note').select2({
-            placeholder: 'Select Note ID'
-            , width: '100%'
-            , allowClear: true
-        })
+                placeholder: 'Select Note ID(s)'
+                , width: '100%'
+                , allowClear: true
+            })
+
+            $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
+                placeholder: 'Select Rider*'
+                , width: '100%'
+                , allowClear: true
+            })
             
        
 
