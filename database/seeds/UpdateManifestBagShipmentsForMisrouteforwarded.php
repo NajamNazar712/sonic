@@ -14,7 +14,7 @@ class UpdateManifestBagShipmentsForMisrouteforwarded extends Seeder
      */
     public function run()
     {
-        $shipment_ids = array(23996315,24001497,24049073,23998203,23970950,23848970,23959661,23783648,23894761,23919991,24013273,23809283,23919513,23956153,23936152,24014560,23715936,23903634,23900538,23994032,23936399,23794787);
+        $shipment_ids = array(24962683,24972834,24975867,24976601,24981518);
 
         foreach ($shipment_ids as $shipment_id) {
 

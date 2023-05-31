@@ -1151,6 +1151,9 @@ class Permission
 
             'human_resource.adjustment.index' => 717,
             'human_resource.adjustment.list' => 717,
+            
+            'human_resource.employee_confirmation.index' => 783,
+            'human_resource.employee_confirmation.list' => 783,
 
             'human_resource.fuel_allocation.index' => 831,
             'human_resource.fuel_allocation.list' => 831,
