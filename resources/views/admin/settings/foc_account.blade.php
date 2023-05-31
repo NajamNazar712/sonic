@@ -29,7 +29,6 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -55,9 +54,7 @@
 
     <script>
         $(document).ready(function() {
-            
 
-            
             $('#shippers_select').select2({
                 placeholder:'Shippers',
                 width:'100%',

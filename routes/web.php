@@ -3014,6 +3014,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        /*for shipper side*/
+        Route::prefix('mms_report')->name('mms_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@mms_report_store')->name('store');
+        /*shipper side end*/
+        });
+
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
