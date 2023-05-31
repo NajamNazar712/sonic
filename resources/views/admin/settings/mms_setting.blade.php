@@ -17,6 +17,24 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
+                            <div class="row justify-content-center">
+                                <div class="col-6">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" novalidate="novalidate" action="{{ route('admin.settings.mms_report.store') }}">
+                                        {{ csrf_field() }}
+                                        <div class="row mb-2 justify-content-center">
+                                            <div class="col-12 form-group">
+                                                <select name="users[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
+                                                    @foreach($users as $user)
+                                                        <option value="{{$user->id}}">{{$user->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </form>
+
+                                </div>
+                            </div>
 
                         </div>
                     </div>

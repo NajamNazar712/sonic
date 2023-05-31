@@ -11,10 +11,8 @@ class MmsSettingSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('global_settings')->insert([
-            'setting_value' => 0,
-            'type' => 'mms_setting',
-            'text' => '',
-        ]);
+        DB::table('global_settings')->insert(array(
+            array('id' => 117, 'setting_value' =>  0 , 'type' => "mms_setting", 'text' => '1091,3324', 'created_at'=> \Carbon\Carbon::now()),
+        ));
     }
 }

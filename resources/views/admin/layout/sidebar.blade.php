@@ -1735,13 +1735,13 @@ $roles = explode("," , $settings->text);
                                                 Accounts</a>
                                         </li>
                                     @endif
-
-                                       {{-- @if (session('role_id') == 1 || in_array(868, session('permissions')))
+{{--
+                                     @if (session('role_id') == 1 || in_array(868, session('permissions')))
                                             <li><a class="menu-item"
-                                                   href="{{ route('admin.settings.mms_setting.index') }}">FOC
-                                                    Accounts</a>
+                                                   href="{{ route('admin.settings.mms_setting.index') }}">MMS
+                                                    Setting</a>
                                             </li>
-                                        @endif--}}
+                                        @endif--}}{{----}}
 
                                     @if (session('role_id') == 1 || in_array(558, session('permissions')))
                                         <li><a class="menu-item"
