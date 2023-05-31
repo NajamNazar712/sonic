@@ -172,7 +172,7 @@ class LeadManagementController extends Controller
             ->leftjoin('admins as ub', 'ub.id', '=', 'leads.updated_by')
             ->leftjoin('service_list as sl', 'sl.id', '=', 'leads.service_id')
             ->leftjoin('lead_reasons as lsr', 'lsr.id', '=', 'leads.reason')
-            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time');
+            ->select('leads.id as lead_id', 'leads.id as leadid', 'leads.contact_person', 'leads.phone_number', 'leads.email_address', 'leads.requested_date', 'leads.message', 'leads.status_id', 'ls.name as status', 'ub.name as updated_by', 'sp.name as sale_person', 'rp.name as reference_person', 'c.name as city', 't.name as territory', 'at.name as area', 'leads.sale_person_updated_at', 'lr.name as lead_reference', 'leads.updated_at', 'sl.name as service', 'leads.brand as brand', 'leads.company as company', 'lsr.name as reason_id','leads.sale_person_updated_at as sale_person_tagged_time', 'leads.call_status as call_status');
 
         if (session('role_id') != 1) {
             $leads = $leads->whereIn('c.hub_id', session('hubs'));
@@ -263,13 +263,22 @@ class LeadManagementController extends Controller
                 if (session('role_id') == 1 || in_array(420, session('permissions'))) {
                     $dropdown .= '<button type="button"  class="dropdown-item forward_lead" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Forward Lead</div></button>';
                 }
-
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
+                if ((session('role_id') == 1 || in_array(420, session('permissions'))) && $lead->call_status == 'no') {
+                    $dropdown .= '<button type="button"  class="dropdown-item call_status" data-id = '.$lead->lead_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make A Call</div></button>';
+
+                }if((session('role_id') == 1 || in_array(420, session('permissions'))) && $lead->call_status == 'yes'){
+                    $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = '.$lead->lead_id.' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
+                }
+
+                
                 if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id ,[9, 12]))))) {
                     $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 }
+
+                
 
                 return $dropdown;
             })->make(true);
@@ -871,9 +880,10 @@ class LeadManagementController extends Controller
 
             return $e->getMessage();
         }
+    }
 
-
-
-
+    public function call_status_change(Request $request)
+    {
+        dd($request->all());
     }
 }
