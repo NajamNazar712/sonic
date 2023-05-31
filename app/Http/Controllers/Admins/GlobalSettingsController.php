@@ -1915,7 +1915,7 @@ class GlobalSettingsController extends Controller
     /*for mms setting controller*/
     public function mms_report_index()
     {
-        $shippers = User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+        $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
         $settings = GlobalSettings::where('type', 'mms_setting');
         $mms_setting_tags = array();
         if ($settings->exists())
@@ -1924,16 +1924,16 @@ class GlobalSettingsController extends Controller
 
             $mms_setting_tags = array_map('intval',explode(',' , $settings->text));
         }
-        return view('admin.settings.mms_setting')->with(['shippers' => $shippers , 'mms_setting_tags' =>$mms_setting_tags]);
+        return view('admin.settings.mms_setting')->with(['users' => $users , 'mms_setting_tags' =>$mms_setting_tags]);
     }
 
     public function mms_report_store(Request $request)
 
     {
-        if ($request->has('shippers')) {
+        if ($request->has('users')) {
 
-            if (count($request->shippers) > 0) {
-                $shippers = implode(',', $request->shippers);
+            if (count($request->users) > 0) {
+                $users = implode(',', $request->users);
 
                 $settings = GlobalSettings::where('type', 'mms_setting');
 
@@ -1945,7 +1945,7 @@ class GlobalSettingsController extends Controller
                     $settings->type = 'mms_setting';
                     $settings->setting_value = 0;
                 }
-                $settings->text = $shippers;
+                $settings->text = $users;
                 $settings->save();
             }
             return redirect()->back()->with('success', 'Settings Updated!');
