@@ -97,6 +97,8 @@ use App\Http\Models\SaleTierTagHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
+use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
@@ -9374,6 +9376,11 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
+                    
+                    // if (session('role_id') == 1 || in_array(session('id'), in_array(241, session('permissions')))) {
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Substitute Acoounts</div></button>';
+                    // }add
+
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                     if (session('role_id') == 1 || in_array(149, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
@@ -12768,5 +12775,72 @@ class AdminDashboardController extends Controller
             return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
         }
     }
+
+    public function substitute_accounts_view($id)
+    {
+        return view('admin.accounts.substitute_account_management.index')->with(['shipper_id' => $id]);
+    }
+
+    public function substitute_accounts_list(Request $request,$id) {
+
+        $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction')
+        ->where('substitute_users.user_id', $id);
+
+        $datatables = Datatables::of($substitute_users)
+        ->editColumn('status', function ($substitute_user) {
+            return (($substitute_user->status) ? 'Enabled' : 'Disabled');
+        })
+        ->editColumn('restriction', function ($substitute_user) {
+            return (($substitute_user->restriction) ? 'Enabled' : 'Disabled');
+        })
+        ->addColumn('action', function($substitute_user) {
+            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+            $dropdown = '
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            $dropdown .= $edit_button;
+
+            if ($substitute_user->status) {
+                $dropdown .= $disable_button;
+            }
+            else {
+                $dropdown .= $enable_button;
+            }
+
+            $dropdown .= '
+                </div>
+            </div>
+            ';
+
+            return $dropdown;
+        })
+        ->filterColumn('status', function($query, $keyword) {
+            $keyword = strtolower($keyword);
+
+            if ($keyword != '') {
+                $query->where('substitute_users.status', '=', $keyword);
+            }
+            else {
+                $query->whereRaw('FALSE');
+            }
+        });
+
+        return $datatables->make(true);
+    }
+
+    public function substitute_accounts_add(Request $request)
+    {
+        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
+
+        return view('admin.accounts.substitute_account_management.add.index')->with(['permissions' => $permissions]);
+        // return redirect()->route('admin.accounts.substitute_account_management.add.index')->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been added!']);
+    }
+
 }
 

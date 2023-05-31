@@ -732,6 +732,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('account/info', 'Admins\AdminDashboardController@get_account_info')->name('info');
         });
 
+        Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function () {
+            Route::get('{id}', 'Admins\AdminDashboardController@substitute_accounts_view')->name('index');
+            Route::get('list/{id}', 'Admins\AdminDashboardController@substitute_accounts_list')->name('list');
+            // Route::get('{id}/add', 'Admins\AdminDashboardController@substitute_accounts_add')->name('add.submit');
+            // Route::post('{id}/edit', 'Admins\AdminDashboardController@substitute_accounts_edit')->name('edit.submit');
+            // Route::post('{id}/enable_disable', 'Admins\AdminDashboardController@substitute_accounts_enable_disable')->name('enable_disable');
+        });
+
+        // Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function () {
+        //     Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
+        //     Route::get('list', 'Shippers\ShipperSubstituteAccountManagementController@list')->name('list');
+        //     Route::get('email', 'Shippers\ShipperSubstituteAccountManagementController@email')->name('email');
+        //     Route::post('status', 'Shippers\ShipperSubstituteAccountManagementController@status')->name('status');
+    
+        //     Route::prefix('add')->name('add.')->group(function () {
+        //         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@add_index')->name('index');
+        //         Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@add_store')->name('store');
+        //     });
+    
+        //     Route::prefix('update/{id}')->name('update.')->group(function () {
+        //         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@update_index')->name('index');
+        //         Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@update_store')->name('store');
+        //     });
+        // });
+
         Route::prefix('merged_account')->name('merged_account.')->group(function () {
             Route::get('', 'Admins\AdminDashboardController@merged_accounts_index')->name('index');
             Route::get('list', 'Admins\AdminDashboardController@merged_accounts_list')->name('list');
