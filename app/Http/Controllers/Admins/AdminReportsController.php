@@ -167,8 +167,18 @@ class AdminReportsController extends Controller
             ->leftjoin('adjustment_logs as adjustment', function ($join) {
                 $join->on('adjustment.shipment_id', '=', 'cr.shipment_id')
                     ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
-            })
-            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id', 'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment']);
+                })
+            ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
+            ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 
+            'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 
+            'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 
+            'h.name as hub', 'shipments.amount', 'journey.created_at as last_status_date', 'shipments.consignee_name as name', 'shipments.booking_type_id', 
+            'shipments.created_at', 'usi.poc', 'u.id as account_no', 'sm.mode as shipping_mode', 'shipments.order_id as order_id', 
+            'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 
+            'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id',
+             'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 
+             'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 
+             'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status']);
 
         $type = $request->get('search_types');
 
@@ -334,7 +344,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $datatable->whereBetween('journey.created_at', [$from, $to]);
         }
         if ($status_id = $request->get('search_shipment_status')) {
             //            dd($status_id);

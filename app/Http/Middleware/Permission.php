@@ -25,6 +25,7 @@ class Permission
             'dispute.resolve' => 4,
             'dispute.update' => 3,
             'dispute.update.submit' => 3,
+            'dispute.shipments.index' => 702,
 
             'accounts.pending' => 5,
             'accounts.pending.ajax' => 5,
@@ -1350,7 +1351,7 @@ class Permission
             'delivery.delivery_shipments.index'=> 859,
         
             'management.riders.rider_remarks.index'=>862,
-
+ 			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
@@ -1424,7 +1425,7 @@ class Permission
             'dispute.rebook.shipment.info' => 7,
             'dispute.rebook.shipment.update' => 7,
             
-            'dispute.shipments.index' => 702,
+
 
             'reports.qsr.index' => 8,
             'reports.qsr.list' => 8,
@@ -1443,6 +1444,7 @@ class Permission
             'reports.weight_reconciliation.list' => 8,
 
             'crm.bulk_claim.index' => 19,
+
 
             
         ]

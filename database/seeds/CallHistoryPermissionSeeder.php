@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Seeder;
 
-class ModulePermissionForRiderComments extends Seeder
+class CallHistoryPermissionSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -12,7 +12,7 @@ class ModulePermissionForRiderComments extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 862, 'name' => 'Rider Remarks', 'module_id' => 33),
-        )); 
+            array('id' => 867, 'name' => 'Tracking Call History', 'module_id' => 19),
+        ));
     }
 }
