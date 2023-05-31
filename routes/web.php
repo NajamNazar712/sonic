@@ -735,9 +735,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function () {
             Route::get('{id}', 'Admins\AdminDashboardController@substitute_accounts_view')->name('index');
             Route::get('list/{id}', 'Admins\AdminDashboardController@substitute_accounts_list')->name('list');
-            // Route::get('{id}/add', 'Admins\AdminDashboardController@substitute_accounts_add')->name('add.submit');
-            // Route::post('{id}/edit', 'Admins\AdminDashboardController@substitute_accounts_edit')->name('edit.submit');
-            // Route::post('{id}/enable_disable', 'Admins\AdminDashboardController@substitute_accounts_enable_disable')->name('enable_disable');
+            Route::get('check_email/{id?}', 'Admins\AdminDashboardController@substitute_accounts_email')->name('check_email');
+            Route::get('add/{id}', 'Admins\AdminDashboardController@substitute_accounts_add_index')->name('add.index');
+            Route::post('add/store/{id}', 'Admins\AdminDashboardController@substitute_accounts_add_store')->name('add.store');
+            Route::post('status', 'Admins\AdminDashboardController@substitute_accounts_status')->name('status');
+            Route::get('update/{shipper_id}/{id}', 'Admins\AdminDashboardController@substitute_accounts_update_index')->name('update.index');
+            Route::post('update/store/{shipper_id}/{id}', 'Admins\AdminDashboardController@substitute_accounts_update_store')->name('update.store');
+
+            // Route::prefix('add')->name('add.')->group(function () {
+            //     Route::get('', 'Admins\AdminDashboardController@substitute_accounts_add_index')->name('index');
+            //     // Route::post('', 'Admins\AdminDashboardController@substitute_accounts_add_store')->name('store');
+            // });
         });
 
         // Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function () {

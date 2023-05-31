@@ -99,6 +99,7 @@ use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\SubstituteUserModulePermission;
 use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\SubstituteUserPermission;
 use App\Http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
@@ -12835,13 +12836,129 @@ class AdminDashboardController extends Controller
 
         return $datatables->make(true);
     }
+    public function substitute_accounts_email(Request $request,$id = null) {
+        dd($id);
+        if ($request->filled('email')) {
+            $email = SubstituteUser::where('email', $request->input('email'));
+  
+            if ($id) {
+                $email = $email->where('id', '!=', $id);
+            }
 
-    public function substitute_accounts_add(Request $request)
-    {
-        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
+            if (!$email->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+          return 'false';
+        }
+    }
 
-        return view('admin.accounts.substitute_account_management.add.index')->with(['permissions' => $permissions]);
-        // return redirect()->route('admin.accounts.substitute_account_management.add.index')->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been added!']);
+    public function substitute_accounts_add_index($shipper_id) {
+        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
+        return view('admin.accounts.substitute_account_management.add.index')->with(['shipper_id' => $shipper_id,'permissions' => $permissions]);
+    }
+  
+    public function substitute_accounts_add_store(Request $request,$id) {
+        
+        $substitute_user = new SubstituteUser();
+
+        $substitute_user->user_id = $id;
+        $substitute_user->name = $request->input('name');
+        $substitute_user->email = $request->input('email');
+        $substitute_user->phone_number = $request->input('phone_number');
+        $substitute_user->cnic = $request->input('cnic');
+        $substitute_user->password = bcrypt($request->input('password'));
+        $substitute_user->restriction = $request->input('restriction');
+        $substitute_user->is_created_by_admin = 1;
+        $substitute_user->created_by_admin_id = Auth::id();
+        $substitute_user->save();
+
+        if ($request->has('permission_ids')) {
+            foreach($request->input('permission_ids') as $permission_id) {
+            $substitute_user_permission = new SubstituteUserPermission();
+
+            $substitute_user_permission->substitute_user_id = $substitute_user->id;
+            $substitute_user_permission->permission_id = $permission_id;
+
+            $substitute_user_permission->save();
+            }
+        }
+
+        return redirect()->route('admin.accounts.substitute_account_management.index',$id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been added!','shipper_id' => $id]);
+    }
+
+    public function substitute_accounts_status(Request $request) {
+        $substitute_user = SubstituteUser::find($request->id);
+
+        if ($substitute_user) {
+            $substitute_user->status = $request->status;
+
+            $substitute_user->save();
+
+            if ($request->status) {
+            return ['status' => 0, 'success' => 'Substitute User has been enabled'];
+            }
+            else {
+            return ['status' => 0, 'success' => 'Substitute User has been disabled'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Substitute User with given ID is present'];
+        }
+    }
+
+    public function substitute_accounts_update_index($shipper_id , $id) {
+
+        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
+        $substitute_user = SubstituteUser::find($id);
+
+        $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
+
+        return view('admin.accounts.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions, 'shipper_id' => $shipper_id , "id" => $id]);
+    }
+  
+    public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
+        
+        $substitute_user = SubstituteUser::find($id);
+        $substitute_user->user_id = $shipper_id;
+        $substitute_user->name = $request->input('name');
+        $substitute_user->email = $request->input('email');
+        $substitute_user->phone_number = $request->input('phone_number');
+        $substitute_user->cnic = $request->input('cnic');
+        $substitute_user->restriction = $request->input('restriction');
+
+        if ($request->filled('password')) {
+        $substitute_user->password = bcrypt($request->input('password'));
+        }
+       
+        $substitute_user->save();
+
+        if ($request->has('permission_ids')) {
+        $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
+
+        $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
+        $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
+
+        SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
+
+        foreach($new_permission_ids as $permission_id) {
+            $substitute_user_permission = new SubstituteUserPermission();
+
+            $substitute_user_permission->substitute_user_id = $id;
+            $substitute_user_permission->permission_id = $permission_id;
+
+            $substitute_user_permission->save();
+        }
+        }
+        else {
+            SubstituteUserPermission::where('substitute_user_id', $id)->delete();
+        }
+
+        return redirect()->route('admin.accounts.substitute_account_management.index',$shipper_id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been updated!' , 'shipper_id' => $id]);
     }
 
 }

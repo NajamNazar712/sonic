@@ -66,7 +66,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.substitute_account_management.list') }}',
+                        url: "{{ route("admin.accounts.substitute_account_management.list","$shipper_id") }}",
                         data: params,
                         success: function (result) {
                             head = [];
@@ -110,7 +110,7 @@
 					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',
 					action: function (e, dt, node, config) {
-						
+						window.location = '{{ route('admin.accounts.substitute_account_management.add.index', ["id" => $shipper_id]) }}';
 					}
 				},{
                     extend: 'excel',
@@ -193,13 +193,13 @@
 				var id = parseInt($(this).parents('tr').attr('id'));
 
 				if ($(this).hasClass('edit')) {
-					var link = '{{ route('cod.substitute_account_management.update.index', ["id" => 0]) }}';
+					var link = '{{ route('admin.accounts.substitute_account_management.update.index', ["shipper_id" => $shipper_id, "id" => 0]) }}';
 
 					window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
 				}
 				else if ($(this).hasClass('enable')) {
 					$.ajax({
-						url: '{!! route('cod.substitute_account_management.status') !!}',
+						url: '{!! route('admin.accounts.substitute_account_management.status') !!}',
 						method: 'POST',
 						data: {
 							'id': id,
@@ -220,7 +220,7 @@
 				}
 				else if ($(this).hasClass('disable')) {
 					$.ajax({
-						url: '{!! route('cod.substitute_account_management.status') !!}',
+						url: '{!! route('admin.accounts.substitute_account_management.status') !!}',
 						method: 'POST',
 						data: {
 							'id': id,
