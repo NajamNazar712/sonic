@@ -207,7 +207,7 @@
                                 <div class="col-3"><div class="card text-center">
                                         <div class="card-content">
                                             <div class="card-body">
-                                                <h4 class="card-title success">Bag status</h4>
+                                                <h4 class="card-title">Bag status</h4>
                                                 <p class="card-text bstatus">No Data</p>
                                             </div>
                                         </div>
@@ -352,9 +352,9 @@
             font-size: 18px;
         }
 
-        /* #bag_single_div p.status{
+        #bag_single_div p.bstatus{
             font-weight: bold;
-        } */
+        }
         #bag_single_div{
             font-size: 20px;
         }
@@ -407,19 +407,19 @@
             font-size: 18px;
             font-weight: bold;
         }
+
         .junctionC{
             padding: 10px;
             width: 100%;
         }
 
-
         #scan_bag {
             display: none;
-    }
+        }
 
-    #bag_multiple_div {
-            display: none;
-    }
+        #bag_multiple_div {
+                display: none;
+        }
 
 
     </style>
