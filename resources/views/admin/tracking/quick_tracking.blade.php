@@ -253,7 +253,7 @@
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <h4 class="card-title success">Junctions</h4>
-                                                <p class="card-text junction">No Data</p>
+                                                <p class="card-text junctionC">No Data</p>
                                             </div>
                                         </div>
                                     </div>
@@ -407,7 +407,7 @@
             font-size: 18px;
             font-weight: bold;
         }
-        .junction{
+        .junctionC{
             padding: 10px;
             width: 100%;
         }
@@ -536,29 +536,28 @@
                 $(document).on('click', '#junction', function() {
                                     
                     $('#junctions .modal-body').html('');
-                           var data = bag_table.row($(this).closest('tr')).data();
+                    var data = bag_table.row($(this).closest('tr')).data();
 
-                            var head = '';
-                            var junctions = '';
-                            var date = '';
+                    var head = '';
+                    var junctions = '';
+                    var date = '';
 
-                            head = '<h4 class="modal-title" id="shipments_title">Junction(s)</h4>' +
-                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
-                                '<span aria-hidden="true">×</span>\n' +
-                                '</button>';
+                    head = '<h4 class="modal-title" id="shipments_title">Junction(s)</h4>' +
+                            '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                            '<span aria-hidden="true">×</span>\n' +
+                            '</button>';
 
                                
-                            if (data[9] !== undefined && data[9].length > 0) {
-                                junctions = data[9].join(',');
-                            } else {
-                                junctions = (data[9] !== undefined) ? 'None' : '';
-                            }
+                    if (data[9] !== undefined && data[9].length > 0) {
+                        junctions = data[9].join(',');
+                    } else {
+                        junctions = (data[9] !== undefined) ? 'None' : '';
+                    }
 
                             
-                            $('#junctions .modal-header').html(head);
-                            $('#junctions .modal-body').html(junctions);
-
-                            $('#junctions').modal('show');
+                    $('#junctions .modal-header').html(head);
+                    $('#junctions .modal-body').html(junctions);
+                    $('#junctions').modal('show');
                         
                         
                 });
@@ -594,7 +593,6 @@
                     ],
                     rowCallback: function(row, data, index) {
                         var info = bag_table.page.info();
-                        console.log(data)
                         $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                         if (data[9] !== undefined && data[9].length > 0) {
                             $('td:eq(9)', row).html("<button class='btn btn-sm btn-outline-info align-middle' id='junction'>" + data[9].length + "</button>");
@@ -928,9 +926,9 @@
                                 $('#bag_single_div p.pieces').text(data.details.pieces);
 
                                 if (junctions.length > 0) {
-                                    $('#bag_single_div p.junction').text(junctions);
+                                    $('#bag_single_div p.junctionC').text(junctions);
                                 } else {
-                                    $('#bag_single_div p.junction').text('0');
+                                    $('#bag_single_div p.junctionC').text('-');
                                 }
                                 $('#bag_single_div p.bag_created').text(data.details.bag_created_at);
                                 $('#bag_single_div p.bsupated_at').text(data.details.bag_status_updated_at);
