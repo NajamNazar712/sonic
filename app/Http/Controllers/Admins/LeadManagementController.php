@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AreaTerritory;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\Lead\LeadLog;
-use App\Http\Models\Admin\Lead\LeadRemark;
-use App\Http\Models\Admin\Lead\LeadStatus;
-use App\Http\Models\Admin\Lead\PamLead;
-use App\Http\Models\Admin\Lead\PamLeadItem;
-use App\Http\Models\Admin\LeadReference;
-use App\Http\Models\Admin\Territory;
-use App\Http\Models\City;
-use App\Models\Admin\Lead\LeadReason;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\Lead\LeadNotification;
-use App\Http\Models\Admin\Lead\LeadTagging;
-use Illuminate\Support\Facades\Storage;
-use Yajra\Datatables\Datatables;
 use DB;
 use Auth;
 use Exception;
+use Carbon\Carbon;
+use App\Http\Models\City;
+use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
+use Yajra\Datatables\Datatables;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\Admin\Territory;
+use App\Models\Admin\Lead\LeadReason;
+use App\Http\Models\Admin\Lead\LeadLog;
+use App\Http\Models\Admin\Lead\PamLead;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\AreaTerritory;
+use App\Http\Models\Admin\LeadReference;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\Lead\LeadRemark;
+use App\Http\Models\Admin\Lead\LeadStatus;
+use App\Http\Models\Admin\Lead\LeadTagging;
+use App\Http\Models\Admin\Lead\PamLeadItem;
+use App\Http\Models\Admin\Lead\LeadNotification;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Models\Admin\Lead\LeadCallStatusLog;
 
 class LeadManagementController extends Controller
 {
@@ -266,10 +268,10 @@ class LeadManagementController extends Controller
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
-                if ((session('role_id') == 1 || in_array(420, session('permissions'))) && $lead->call_status == 'no') {
+                if ((session('role_id') == 1 || in_array(420, session('permissions')) || in_array(419, session('permissions')) || in_array(696, session('permissions'))) && $lead->call_status == 'no') {
                     $dropdown .= '<button type="button"  class="dropdown-item call_status" data-id = '.$lead->lead_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make A Call</div></button>';
 
-                }if((session('role_id') == 1 || in_array(420, session('permissions'))) && $lead->call_status == 'yes'){
+                }if((session('role_id') == 1 || in_array(420, session('permissions'))|| in_array(419, session('permissions')) || in_array(696, session('permissions'))) && $lead->call_status == 'yes'){
                     $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = '.$lead->lead_id.' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
                 }
 
@@ -884,6 +886,64 @@ class LeadManagementController extends Controller
 
     public function call_status_change(Request $request)
     {
-        dd($request->all());
+            $validations = [
+                'id' => 'required',
+            ];
+
+            $validate = Validator::make($request->all(), $validations);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+            } else {
+                $id = $request->id;
+                $lead = Lead::find($id);
+
+
+                $lead_status  = LeadStatus::where('id', $lead->status_id);
+
+
+                if($lead_status->exists()){
+                    $lead_status = $lead->status->name;
+                }else{
+                    $lead_status = '-';
+                }
+
+                if($lead->call_status == 'no')
+                {
+                    $lead->call_status = 'yes';
+
+                    $log = new LeadCallStatusLog();
+
+                    $log->lead_id = $lead->id;
+                    $log->admin = Auth::id();
+                    $log->ip = $request->ip();
+                    $log->lead_status  = $lead_status;
+                    $log->call_status = 'yes';
+                    $log->created_at = Carbon::now();
+
+                    $lead->save();
+                    $log->save();
+
+                    return response()->json(['status' => 1]);
+                }else{
+                    $log = new LeadCallStatusLog();
+
+                    $lead->call_status = 'no';
+
+                    $log->lead_id = $lead->id;
+                    $log->admin = Auth::id();
+                    $log->ip = $request->ip();
+                    $log->lead_status  = $lead_status;
+                    $log->call_status = 'no';
+                    $log->created_at = Carbon::now();
+
+                    $lead->save();
+                    $log->save();
+                
+                    return response()->json(['status' => 1]);
+
+                }
+            
+            }
     }
 }
