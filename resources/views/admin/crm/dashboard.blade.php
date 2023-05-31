@@ -197,7 +197,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" >
+                                            <input type="text" name="from_date"  class="form-control bg-primary border-primary white rounded-right"  id="from_date" placeholder="Date From" >
                                         </div>
                 
                                     </div>
@@ -209,7 +209,7 @@
                                                 <span class="la la-calendar-o"></span>
                                             </span>
                                             </div>
-                                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >
+                                            <input type="text" name="to_date"  class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" >
                                         </div>
                                     </div>
                 
@@ -349,8 +349,11 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p></h3>
-                                                        <span>Closure Rate (In_progress)</span>
+                                                        <h3 class="text-white">
+                                                                <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p>
+                                                            {{-- (<span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}%</span>) --}}
+                                                        </h3>
+                                                        <span>Closure Rate</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -366,8 +369,8 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="dormant" class="d-inline">{{$leads['dormant']}} </p>(100%)</h3>
-                                                        <span>Ratio (In_progress)</span>
+                                                        <h3 class="text-white"><p id="in_process_ratio" class="d-inline">{{$crm['in_process_ratio']}} </p>(<span id="in_process_ratio_percentage">{{$crm['in_process_ratio_percentage']}}%</span>)</h3>
+                                                        <span>Ratio</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -993,6 +996,10 @@
                         $('#valid').text(data.card_data.valid);
                         $('#in_valid').text(data.card_data.in_valid);
                         $('#in_valid_percentage').text(data.card_data.in_valid_percentage);
+                        $('#closed_rate').text(data.card_data.closed_rate);
+                        $('#closed_rate_percentage').text(data.card_data.closed_rate_percentage);
+                        $('#in_process_ratio').text(data.card_data.in_process_ratio);
+                        $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);
                     }else{
                         $('#launched').text(0);
                         $('#in_process').text(0);
@@ -1001,7 +1008,10 @@
                         $('#valid').text(0);
                         $('#in_valid').text(0);
                         $('#in_valid_percentage').text(0);
-
+                        $('#closed_rate').text(0);
+                        $('#closed_rate_percentage').text(0);
+                        $('#in_process_ratio').text(0);
+                        $('#in_process_ratio_percentage').text(0);
                     }
                 });
             }
@@ -1446,12 +1456,14 @@
 
                 ],
                 rowCallback: function(row, data, index) {
-                    $('td:eq(0)', row).addClass('select-checkbox');
+                    if (data.crm_request_status_id != 4) 
+                    {
+                        $('td:eq(0)', row).addClass('select-checkbox');
 
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
-
+                        if ($.inArray(data.id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }    
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
