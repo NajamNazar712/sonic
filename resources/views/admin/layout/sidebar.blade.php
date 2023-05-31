@@ -1735,13 +1735,6 @@ $roles = explode("," , $settings->text);
                                                 Accounts</a>
                                         </li>
                                     @endif
-{{--
-                                     @if (session('role_id') == 1 || in_array(868, session('permissions')))
-                                            <li><a class="menu-item"
-                                                   href="{{ route('admin.settings.mms_setting.index') }}">MMS
-                                                    Setting</a>
-                                            </li>
-                                        @endif--}}{{----}}
 
                                     @if (session('role_id') == 1 || in_array(558, session('permissions')))
                                         <li><a class="menu-item"
@@ -1850,6 +1843,12 @@ $roles = explode("," , $settings->text);
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
                                     @endif
+
+                                        @if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS
+                                                    Setting</a> </li>
+                                        @endif
                                 </ul>
 
                             </li>

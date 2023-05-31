@@ -37,7 +37,7 @@ class MMSReportController extends Controller
         $shippers = explode(',',$shippers->text);
         $shippers = User::whereIn('id',$shippers)->select('id','name')->get();
 
-//        dd($shippers);
+
 
         return view('admin.reports.mms')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
     }

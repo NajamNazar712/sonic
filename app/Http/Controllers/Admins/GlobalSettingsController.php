@@ -1915,14 +1915,12 @@ class GlobalSettingsController extends Controller
     /*for mms setting controller*/
     public function mms_report_index()
     {
-
         $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
         $settings = GlobalSettings::where('type', 'mms_setting');
         $mms_setting_tags = array();
         if ($settings->exists())
         {
             $settings = $settings->first();
-
             $mms_setting_tags = array_map('intval',explode(',' , $settings->text));
         }
         return view('admin.settings.mms_setting')->with(['users' => $users , 'mms_setting_tags' =>$mms_setting_tags]);
