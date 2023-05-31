@@ -715,14 +715,20 @@ class AdminTrackingController extends Controller
                 $details['bag_type'] = $bag->type;
                 $details['pieces'] = $bag->quantity;
                 $details['number_of_shipments'] = $bag->shipments;
-                $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id)->latest()->first();
-                if($manifest->exists())
+                $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
+                if ($manifest !== null)
                 {
-                    $manifest =  $manifest;
+                    if($manifest->exists())
+                    {
+                        $manifest =  $manifest->latest()->first()->id;
+                    }else{
+                        $manifest = '-';
+                    }
                 }else{
                     $manifest = '-';
+
                 }
-                $details['manifest_id'] = $manifest->id;
+                $details['manifest_id'] = $manifest;
                 $junction = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->get();
                 $details['junction'] = $junction->pluck('city.name')->toArray();
                 $details['bag_created_at'] = Carbon::parse($bag->created_at)->toDateTimeString();
