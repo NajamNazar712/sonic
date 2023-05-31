@@ -1744,7 +1744,52 @@
                                 shipment += '</div>';
 
 
+
+
+
+                                let manifest_data = (details.manifest_history) ? details.manifest_history : [];
+                                let manifest_bag_latest = (manifest_data.manifest_bag_latest) ? manifest_data.manifest_bag_latest : [];
+                                let cargo_manifest = (manifest_bag_latest.cargo_manifest) ? manifest_bag_latest.cargo_manifest : [];
+
+                                if(manifest_data) {
+                                    let manifest_data_created_at = (manifest_data.created_at) ? manifest_data.created_at  : '-'
+                                    let vehicle_number = (cargo_manifest.vehicle_number) ? cargo_manifest.vehicle_number : '-';
+                                    let vendor_name = (cargo_manifest.vehicle_number) ? cargo_manifest.vendor_name : '-';
+                                    let manifest_id = (manifest_bag_latest.id) ? manifest_bag_latest.id : '-'
+                                    let cargo_manifest_bag_id = (manifest_data.cargo_manifest_bag_id) ? manifest_data.cargo_manifest_bag_id : '-'
+
+
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Manifest History</u></h4>';
+                                    shipment += '<div class="border table-responsive">';
+                                    shipment += '<table class="table table-sm table-borderless datatable minifest_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Manifest No#</strong></th>';
+                                    shipment += '<th><strong>Bag No#</strong></th>';
+                                    shipment += '<th><strong>Vehicle</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+
+                                    shipment += '<tr>';
+                                    shipment += '<td>' + manifest_data_created_at + '</td>';
+                                    shipment += '<td>' + manifest_id + '</td>';
+                                    shipment += '<td>' +  cargo_manifest_bag_id + '</td>';
+                                    shipment += `<td> ${vehicle_number} <br> ${vendor_name} </td>`
+                                    shipment += '</tr>';
+
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
                                 shipment += '</div>';
+
 
                                 $('#tracking').append(shipment);
                             });
@@ -1779,6 +1824,20 @@
                                     {name: 'remarks', class: 'align-middle remarks'}
                                 ]
                             });
+
+                            $('#tracking table.datatable.minifest_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'created_at', class: 'align-middle created_at'},
+                                    {name: 'manifest_no', class: 'align-middle manifest_no'},
+                                    {name: 'bag_no', class: 'align-middle bag_no'},
+                                    {name: 'vehicle', class: 'align-middle vehicle'},
+                                ]
+                            });
+
+
                         }
                     });
             }
