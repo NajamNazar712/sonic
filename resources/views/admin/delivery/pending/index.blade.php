@@ -149,6 +149,12 @@
         .selectize-control .selectize-input .item {
             word-break: break-all;
         }
+        
+        .green-row {
+            /* background-color: #90ee90; */
+        }
+
+
     </style>
 @endsection
 
@@ -347,6 +353,9 @@
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                      if(data.status == "Shipment - Re-Attempt"){
+                    $(row).addClass('green-row');                
+                }
             },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());

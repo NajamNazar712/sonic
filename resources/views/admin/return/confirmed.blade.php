@@ -66,6 +66,8 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Rider Trax Id</th>
+                        <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Return Pending for</th>
                         <th class="border-primary border-darken-1">Return Confirmed By</th>
                         <th class="border-primary border-darken-1">Reason</th>
@@ -73,6 +75,7 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
+
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -230,6 +233,8 @@
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Status');
+                            head.push('Rider Trax Id');
+                            head.push('Rider Name');
                             head.push('Return Pending For');
                             head.push('Return Confirmed By');
                             head.push('Reason');
@@ -260,6 +265,8 @@
                                 row.push(values.mode);
                                 row.push(values.service_type);
                                 row.push(values.status);
+                                row.push(values.rider_id);
+                                row.push(values.rider_name);
                                 row.push(values.return_pending_for);
                                 row.push(values.return_confirmed_by);
                                 row.push(values.reason);
@@ -480,7 +487,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[24, 'desc']],
+                order: [[25, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -501,6 +508,8 @@
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'rider_id', name: 'rider.trax_id', class: 'align-middle rider_id'},
+                    {data: 'rider_name', name: 'rider.name', class: 'align-middle rider_name'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
                     {data: 'return_confirmed_by', name: 'cb.name', class: 'align-middle return_confirmed_by', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},

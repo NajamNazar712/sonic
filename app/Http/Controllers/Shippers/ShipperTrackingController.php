@@ -12,6 +12,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -59,8 +60,6 @@ class ShipperTrackingController extends Controller
             }
             $case_nature = $row;
         }
-
-
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
@@ -126,6 +125,12 @@ class ShipperTrackingController extends Controller
                         if($shipment->pod_image()->exists()){
                             $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
                           
+                        }
+                        $received_shipments = ReturnSheetShipments::where('shipment_id',$shipment->id);
+                        if($received_shipments->exists()){
+                        $details['received_img'] =  '<img src="' . asset('img/shipement_received.png').' ">';
+                        }else{
+                            $details['received_img'] ="";
                         }
 
                         $shipper = $shipment->user;

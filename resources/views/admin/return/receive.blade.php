@@ -47,6 +47,7 @@
                         <th class="border-primary border-darken-1">Areas</th>
 
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Trax ID</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
@@ -204,6 +205,7 @@
                             head.push('Hub');
                             head.push('Area');
                             head.push('Rider');
+                            head.push('Rider Trax ID');
                             head.push('No. Of Shipments');
                             head.push('No. Of Pending Shipments');
                             head.push('Assigned By');
@@ -218,6 +220,7 @@
                                 row.push(values.hub);
                                 row.push(values.area);
                                 row.push(values.rider);
+                                row.push(values.rider_trax_id);
                                 row.push(values.shipments_count);
                                 row.push(values.shipments_unverified_count);
                                 row.push(values.assignee);
@@ -268,6 +271,7 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'shipments_unverified_link' ,name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center',orderable: false, searchable: false},

@@ -2874,7 +2874,7 @@ class ShipperShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
         if (isset($spreadsheet)) {
-
+            $spreadsheet[1][1] = 'Yes'; //Added Forcefully yes while the shipper insert no, 
             $excel_type = $request->excel_type;
 
             $column_count = null;
@@ -2934,7 +2934,7 @@ class ShipperShipmentBookController extends Controller
             }
             unset($spreadsheet[0]);
         }
-
+     
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
             $rows = array();
 
@@ -3047,15 +3047,19 @@ class ShipperShipmentBookController extends Controller
 //                    }
 //                }
 
-                $rules['parcel_value'] = [
-                    'nullable',
-                    'integer',
-                    'min:1',
-                    'digits_between:1,20' ,
-                    Rule::requiredIf(function () use ($row) {
-                        return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
-                    })
-                ];
+                if(in_array($row['service_type_id'],[1,2]))
+                {
+                    $rules['parcel_value'] = [
+                        'nullable',
+                        'integer',
+                        'min:1',
+                        'digits_between:1,20' ,
+                        Rule::requiredIf(function () use ($row) {
+                            return $row['amount'] == 0 && ($row['service_type_id'] == 1 || $row['service_type_id'] == 2 );
+                        })
+                    ];
+                }
+
 
                 $validate = Validator::make($row, $rules, $messages);
 
