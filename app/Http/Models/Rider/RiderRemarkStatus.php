@@ -2,13 +2,14 @@
 
 namespace App\Http\Models\Rider;
 
-use App\Http\Models\Admin\RiderRemark;
 use Illuminate\Database\Eloquent\Model;
 
 class RiderRemarkStatus extends Model
 {
-    public function rider_remark()
+    protected $table = 'rider_remark_statuses';
+    
+    public function rider_remarks()
     {
-        return $this->belongsTo('App\Http\Models\RiderRemark', 'rider_remarks_status_id', 'id');
+        return $this->belongsTo('App\Http\Models\Rider\RiderRemark', 'id','rider_remarks_status_id');
     }
 }
