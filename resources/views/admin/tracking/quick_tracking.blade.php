@@ -18,9 +18,9 @@
                             <form action="#" id="quick_tracking_form">
                                 <div class="row justify-content-center mb-2">
                                     <div class="row">
-                                        <div class="col-6">
+                                        <div class="col-6 btn_scn">
+                                          <label class="mr-10 font-medium-3"><b>Scan By Bags</b></label>
                                           <input type="checkbox" name="scan_btn" id="scan_btn" class="switchery scan_btn" data-size="sm" data-switchery="true">
-                                          <label class="mr-2 font-medium-3"><b>Scan By Bags</b></label>
                                         </div>
                                       
                                         <div class="col-6 scan_tracking">
@@ -419,6 +419,9 @@
 
         #bag_multiple_div {
                 display: none;
+        }
+        .btn_scn{
+            margin-top: 7px;
         }
 
 
