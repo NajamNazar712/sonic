@@ -657,6 +657,7 @@
             });
 
             $('input#scan_tracking').focus();
+            $('input#scan_bag').focus();
 
            
 
@@ -850,7 +851,7 @@
                                 scan.focus();
                             });
                         } else {
-                            if(bag_table.columns('.tracking_numbers').data().eq(0).indexOf(parseInt(bag)) === -1){
+                            if(bag_table.columns('.bag_numbers').data().eq(0).indexOf(parseInt(bag)) === -1){
                                 $.ajax({
                                     url:'{{route('admin.quick_tracking.info')}}',
                                     type:'POST',
@@ -876,7 +877,7 @@
                                     scan.focus();
                                 });
                             }else{
-                                var error = 'Tracking Number already scanned!';
+                                var error = 'Bag Number already scanned!';
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 scan_sound(2);
                                 scan.val('');
