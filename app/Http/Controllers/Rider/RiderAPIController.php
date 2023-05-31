@@ -148,6 +148,7 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\ReturnDeliveredToShipperSms;
 
 class RiderAPIController extends Controller
 {
@@ -9294,6 +9295,25 @@ class RiderAPIController extends Controller
                                 $shipment->save();
                                 ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                 ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $request->return_note_id, NULL, 1, $received_by, $rider_id);
+
+                                $users = GlobalSettings::where('type', 'returned_shipment_notification');
+                                if($users->exists()) {
+                                    $users = $users->first();
+                                    $current_users = $users->text;
+                                    $c_user = explode(',', $current_users);
+
+                                    if(in_array($shipment->user_id,$c_user)){
+                                        $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id'=>$request->return_note_id,'user_id' => $shipment->user_id,'shipment_id' => $shipment->id,'status' => 0]);
+                                        if(!$return_delivered_to_shipper->exists()){
+                                            $return_delivered = new ReturnDeliveredToShipperSms();
+                                            $return_delivered->return_note_id = $request->return_note_id;
+                                            $return_delivered->user_id = $shipment->user_id;
+                                            $return_delivered->shipment_id = $shipment->id;
+                                            $return_delivered->status = 0;
+                                            $return_delivered->save();
+                                        }
+                                    }
+                                }
                             }
                             $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                             if (!$rider_return_note_status->exists()) {
