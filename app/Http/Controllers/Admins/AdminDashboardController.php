@@ -12783,8 +12783,10 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_list(Request $request,$id) {
 
-        $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction')
-        ->where('substitute_users.user_id', $id);
+        $substitute_users = SubstituteUser::join('admins','admins.id','substitute_users.created_by_admin_id')
+        ->select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction', 'admins.name as created_by')
+        ->where('substitute_users.user_id', $id)
+        ->where('substitute_users.is_created_by_admin',1);
 
         $datatables = Datatables::of($substitute_users)
         ->editColumn('status', function ($substitute_user) {

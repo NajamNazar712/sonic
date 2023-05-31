@@ -26,6 +26,7 @@
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Restriction</th>
+										<th class="border-primary border-darken-1">Created By</th>
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
@@ -74,6 +75,7 @@
                             head.push('Phone Number');
                             head.push('Email');
                             head.push('CNIC');
+                            head.push('Created By');
                             head.push('Created Datetime');
                             head.push('Updated Datetime');
                             head.push('Status');
@@ -87,6 +89,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.email);
                                 row.push(values.cnic);
+                                row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.updated_at);
                                 row.push(values.status);
@@ -111,7 +114,7 @@
 					}
 				},{
                     extend: 'excel',
-                    title: 'Substitute Accounts',
+                    title: 'Substitute Accounts Created By admin',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
@@ -133,6 +136,7 @@
 					{data: 'email', name: 'substitute_users.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'substitute_users.cnic', class: 'align-middle cnic'},
 					{data: 'restriction', name: 'substitute_users.restriction', class: 'align-middle restriction'},
+					{data: 'created_by', name: 'admins.name', class: 'align-middle created_by'},
 					{data: 'created_at', name: 'substitute_users.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'substitute_users.updated_at', class: 'align-middle updated_at'},
 					{data: 'status', name: 'status', class: 'align-middle status'},
