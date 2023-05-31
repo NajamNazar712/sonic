@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\HandoverShipmentPiece;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Models\City;
@@ -48,11 +50,11 @@ class AdminShipmentHandoverController extends Controller
     }
 
     public function arrival_bulk_shipment_details(Request $request){
-        $shipment = Shipment::where('tracking_number', $request->tracking_number);
-        if ($shipment->exists()) {
-            $shipment = $shipment->first();
-            $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
-            if($handover_shipment->exists()){
+      $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+      if ($shipment->exists() && $shipment->pieces === 1) {
+        $shipment = $shipment->first();
+        $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
+        if($handover_shipment->exists()){
                 return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
             }
             $details = array();
@@ -88,8 +90,8 @@ class AdminShipmentHandoverController extends Controller
                             ->where('delivery_location_mapping_keywords.keyword',$msg_string)
                             ->where('dlm.city_id',$shipment->consignee_city_id)
                             ->where('status',1);
-                if($found->exists()){
-                    $found = $found->first();
+                            if($found->exists()){
+                              $found = $found->first();
                     $delivery_area = $found->id;
                     if($request->delivery_location_mapping != null){
                       if($request->delivery_location_mapping != $delivery_area){
@@ -116,7 +118,22 @@ class AdminShipmentHandoverController extends Controller
             
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
 
-        } else {
+        } 
+        
+        else if ($shipment->exists() && $shipment->pieces > 1) 
+        {
+          $details = array();
+          $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+          $details['id'] = $shipment->id;
+          $details['tracking_number'] = $shipment->tracking_number;
+          $details['pieces_count'] = $shipment->pieces;
+          $details['pieces_tracking_numbers'] = $shipment_pieces;
+          ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+          return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+       }
+       
+      else {
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
         }
     }
@@ -709,13 +726,15 @@ class AdminShipmentHandoverController extends Controller
     public function handover_shipments_pieces(Request $request){
         $handover_id = $request->input('id');
         $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->where('status',1)->get();
-        $shipments = array();
+        $shipments = [];
         if($handover_shipments->count() != 0){
             foreach ($handover_shipments as $handover_shipment){
-                $shipment = Shipment::find($handover_shipment->shipment_id);
+                $shipment = Shipment::where('id', $handover_shipment->shipment_id)->where('pieces', '>', 1)->first();
+                if ($shipment) {
                 $tracking_number['tracking_number'][] = $shipment->tracking_number;
                 $pieces['pieces'][] = $shipment->pieces;
                 $shipper_status['shipper_status'][] = ShipmentStatus::find($shipment->shipper_status_id)->name;
+                }
             }
             return ['status' => 0, 'success' => 'Handover Note Shipments', 'tracking_number' => $tracking_number, 'pieces' => $pieces, 'shipper_status' => $shipper_status];
         }
@@ -725,5 +744,26 @@ class AdminShipmentHandoverController extends Controller
             return ['status' => 0, 'success' => 'No Handover Note Shipments', 'shipments' => FALSE];
         }
 
+      }
+
+      public function add_handover_shipments_pieces(Request $request){
+          // $shipment_pieces = new HandoverShipmentPiece();
+          // $shipment_pieces['pieces_id'] = $request->pieces_id;
+          // $shipment_pieces['shipment_id'] = $request->shipment_id;
+          // $shipment_pieces['tracking_number'] = $request->tracking_number;
+          // $shipment_pieces->save();
+          // $shipment_id = $request->shipment_id;
+          // $tracking_number = $request->tracking_number;
+          // $pieces_id = $request->pieces_id;
+
+          // foreach($pieces_id as $pieces_ids){
+          //     $shipment_pieces = new HandoverShipmentPiece();
+          //     $shipment_pieces->pieces_id = $pieces_ids;
+          //     $shipment_pieces->shipment_id = $shipment_id;
+          //     $shipment_pieces->tracking_number = $tracking_number;
+          //     $shipment_pieces->save();
+          // }
+
+          // return ['status' => 1];
       }
 }

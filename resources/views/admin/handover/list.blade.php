@@ -567,51 +567,66 @@
 
             // For Shipment Pieces Modal
             $('#datatable tbody').on('click', 'tr td.shipment_pieces button', function() {
-    var id = parseInt($(this).parents('tr').attr('id'));
-    $('#shipment_pieces .modal-body').html('');
-    $('#shipments').modal('show');
+            var id = parseInt($(this).parents('tr').attr('id'));
+            $('#shipment_pieces .modal-body').html('');
+            $('#shipment_pieces').modal('show');
 
-    $.ajax({
-        url: '{!! route('admin.handover.list.pieces_list') !!}',
-        method: 'POST',
-        data: {
-            '_token': '{{ csrf_token() }}',
-            'id': id
-        }
-    }).done(function(data) {
-        if (data) {
-            var trackingNumbers = '';
-            var shipmentPieces = '';
-            var shipperStatus = '';
+            $.ajax({
+                url: '{!! route('admin.handover.list.pieces_list') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'id': id
+                }
+            }).done(function(data) 
+                {
+                if (data) {
+                    var trackingNumbers = '';
+                    var shipmentPieces = '';
+                    var shipperStatus = '';
+                    var shipmentsHtml = '';
 
-            // Extract the arrays from the nested objects
-            var trackingNumberArray = data.tracking_number.tracking_number;
-            console.log(trackingNumberArray);
-            var piecesArray = data.pieces.pieces;
-            var shipperStatusArray = data.shipper_status.shipper_status;
+                    // Extract the arrays from the nested objects
+                    var trackingNumberArray = data.tracking_number.tracking_number;
+                    var piecesArray = data.pieces.pieces;
+                    // var shipperStatusArray = data.shipper_status.shipper_status;
+                    var shipperStatusArray = data.shipper_status.shipper_status;
 
-            // Iterate over the arrays and build the HTML strings
-            $.each(trackingNumberArray, function(index, trackingNumber) {
-                trackingNumbers += '<p>' + trackingNumber + '</p><br>';
+                    // Iterate over the arrays
+                    for (var i = 0; i < trackingNumberArray.length; i++) {
+                        var trackingNumber = trackingNumberArray[i];
+                        var pieces = piecesArray[i];
+                        var shipperStatus = shipperStatusArray[i];
+
+                        var shipmentHtml =
+                            '<tr>' +
+                            '<td>' + trackingNumber + '</td>' +
+                            '<td>' + pieces + '</td>' +
+                            '<td>' + shipperStatus + '</td>' +
+                            '</tr>';
+
+                        shipmentsHtml += shipmentHtml;
+                    }
+
+                    // Update the modal body with the extracted data
+                        var tableHtml =
+                        '<table class="table">' +
+                        '<thead>' +
+                        '<tr>' +
+                        '<th>Tracking Number</th>' +
+                        '<th>Shipment Pieces</th>' +
+                        '<th>Pieces Received Status</th>' +
+                        '</tr>' +
+                        '</thead>' +
+                        '<tbody>' +
+                        shipmentsHtml +
+                        '</tbody>' +
+                        '</table>';
+
+                    $('#shipment_pieces .modal-body').html(tableHtml);
+                    }
+                });
             });
-
-            $.each(piecesArray, function(index, pieces) {
-                shipmentPieces += '<p>' + pieces + '</p><br>';
-            });
-
-            $.each(shipperStatusArray, function(index, shipperStatus) {
-                shipperStatus += '<p>' + shipperStatus + '</p><br>';
-            });
-
-            // Update the modal body with the extracted data
-            $('#shipment_pieces .modal-body').html(
-                '<p><strong>Tracking Numbers:</strong></p>' + trackingNumbers +
-                '<p><strong>Shipment Pieces:</strong></p>' + shipmentPieces +
-                '<p><strong>Shipper Status:</strong></p>' + shipperStatus
-            );
-        }
-    });
-});
 
         });
 
