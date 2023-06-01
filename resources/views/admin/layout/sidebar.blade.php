@@ -1,10 +1,10 @@
 @php
-$settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
-$roles = [];
-if(isset($settings))
-{
-$roles = explode("," , $settings->text);
-}
+    $settings = App\Http\Models\Admin\GlobalSettings::where('type', 'debriefing_role_setting')->first();
+    $roles = [];
+    if(isset($settings))
+    {
+        $roles = explode("," , $settings->text);
+    }
 @endphp
 <div class="main-menu menu-fixed menu-light menu-accordion menu-bordered menu-shadow" data-scroll-to-active="true">
     <div class="main-menu-content">
@@ -445,34 +445,7 @@ $roles = explode("," , $settings->text);
             @endif
 
 
-            @if (in_array(session('role_id'), [1]) ||
-                    count(array_intersect(
-                            [
-                                32,
-                                33,
-                                35,
-                                36,
-                                40,
-                                105,
-                                44,
-                                47,
-                                48,
-                                49,
-                                126,
-                                262,
-                                441,
-                                464,
-                                495,
-                                496,
-                                497,
-                                531,
-                                566,
-                                675,
-                                757,
-                                758,
-                                815,
-                            ],
-                            session('permissions'))) !== 0)
+            @if (in_array(session('role_id'), [1]) || count(array_intersect([32,33,35,36,40,105,44,47,48,49,126,262,441,464,495,496,497,531,566,675,757,758,815,], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-motorcycle"></i>Last Mile</span></a>
                     <ul class="menu-content">
@@ -1257,81 +1230,17 @@ $roles = explode("," , $settings->text);
                     @if (session('role_id') == 1 || in_array(862, session('permissions')))
                         <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Rider Remarks</span></a>
                         </li>
-                    @endif                 
+                    @endif     
+                    
+                    @if (session('role_id') == 1 || in_array(862, session('permissions')))
+                        <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Shipment Receiver Details</span></a>
+                        </li>
+                    @endif
                 
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 ||
-                    count(array_intersect(
-                            [
-                                64,
-                                65,
-                                66,
-                                67,
-                                68,
-                                69,
-                                70,
-                                71,
-                                72,
-                                73,
-                                74,
-                                75,
-                                113,
-                                138,
-                                148,
-                                153,
-                                156,
-                                169,
-                                170,
-                                172,
-                                176,
-                                200,
-                                210,
-                                258,
-                                259,
-                                263,
-                                264,
-                                275,
-                                300,
-                                301,
-                                319,
-                                327,
-                                328,
-                                337,
-                                356,
-                                401,
-                                437,
-                                444,
-                                472,
-                                476,
-                                493,
-                                502,
-                                524,
-                                532,
-                                555,
-                                613,
-                                614,
-                                624,
-                                642,
-                                647,
-                                653,
-                                679,
-                                673,
-                                676,
-                                688,
-                                705,
-                                717,
-                                780,
-                                784,
-                                786,
-                                793,
-                                794,
-                                823,
-                                824,
-                                839,
-                            ],
-                            session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">

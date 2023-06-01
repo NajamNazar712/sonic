@@ -742,28 +742,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('update/{shipper_id}/{id}', 'Admins\AdminDashboardController@substitute_accounts_update_index')->name('update.index');
             Route::post('update/store/{shipper_id}/{id}', 'Admins\AdminDashboardController@substitute_accounts_update_store')->name('update.store');
 
-            // Route::prefix('add')->name('add.')->group(function () {
-            //     Route::get('', 'Admins\AdminDashboardController@substitute_accounts_add_index')->name('index');
-            //     // Route::post('', 'Admins\AdminDashboardController@substitute_accounts_add_store')->name('store');
-            // });
+            
         });
-
-        // Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function () {
-        //     Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
-        //     Route::get('list', 'Shippers\ShipperSubstituteAccountManagementController@list')->name('list');
-        //     Route::get('email', 'Shippers\ShipperSubstituteAccountManagementController@email')->name('email');
-        //     Route::post('status', 'Shippers\ShipperSubstituteAccountManagementController@status')->name('status');
-    
-        //     Route::prefix('add')->name('add.')->group(function () {
-        //         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@add_index')->name('index');
-        //         Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@add_store')->name('store');
-        //     });
-    
-        //     Route::prefix('update/{id}')->name('update.')->group(function () {
-        //         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@update_index')->name('index');
-        //         Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@update_store')->name('store');
-        //     });
-        // });
 
         Route::prefix('merged_account')->name('merged_account.')->group(function () {
             Route::get('', 'Admins\AdminDashboardController@merged_accounts_index')->name('index');
