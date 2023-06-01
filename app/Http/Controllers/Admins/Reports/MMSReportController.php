@@ -33,10 +33,8 @@ class MMSReportController extends Controller
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
 
         $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
-
         $shippers = explode(',',$shippers->text);
         $shippers = User::whereIn('id',$shippers)->select('id','name')->get();
-
 
 
         return view('admin.reports.mms')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
