@@ -1147,7 +1147,8 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Reason');
-                            head.push('Remarks Count');
+                            head.push('Call Findings');
+                            head.push('Remarks');
                             head.push('Shipper Remarks');
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
@@ -1188,6 +1189,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks_excel);
+                                row.push(values.remarks);
                                 row.push(values.shipper_remarks);
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);

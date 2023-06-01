@@ -278,11 +278,11 @@ class ReturnController extends Controller
                 }
             })
             
-            ->addColumn('remarks',function ($shipper){
-                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
-                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
-                return $btn;
-            })
+            // ->addColumn('remarks',function ($shipper){
+            //     $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
+            //     $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
+            //     return $btn;
+            // })
 
             ->addColumn('remarks_excel',function ($shipper){
                 $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
