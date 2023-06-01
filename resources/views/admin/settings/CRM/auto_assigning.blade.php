@@ -21,10 +21,18 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
+
                                     <th class="border-primary border-darken-1">Agent</th>
-                                    <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Case Nature</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px">Zone</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Hub</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Case Nature</th>
+                                    <th class="border-primary border-darken-1" style="width: 200px" >Case Nature Type</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Bus Segments</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper Key</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper Non Key</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipment Status</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Created At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -36,36 +44,11 @@
         </div>
         <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Assign Agent</h4>
                 </div>
-                <form method="post" id="crm_agent_assign" action="{{route('admin.settings.auto_assigning.submit')}}">
-                    @csrf
-
-                <div class="modal-body">
-                    <div class="form-group">
-                        <select name="admin_id" id="agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <select name="zone_id" id="zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            @foreach($zones as $zone)
-                                <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </form>
 
             </div>
         </div>
@@ -79,32 +62,32 @@
                 <div class="modal-header">
                     <h4 class="modal-title" id="">Edit Agent</h4>
                 </div>
-                <form method="post" id="crm_agent_edit" action="{{route('admin.settings.auto_assigning.update')}}">
-                    @csrf
+{{--                <form method="post" id="crm_agent_edit" action="{{route('admin.settings.auto_assigning.update')}}">--}}
+{{--                    @csrf--}}
 
-                <div class="modal-body">
-                    <input type="hidden" name="crm_agent_id" id="crm_agent_id">
-                    <div class="form-group">
-                        <select name="admin_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">
-                            @foreach($agents as $agent)
-                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
-                            @foreach($zones as $zone)
-                                <option value="{{ $zone->id }}" > {{ $zone->name }} </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <input type="hidden" id="edit_case_nature_id" name="case_nature_id">
-                </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
-                </div>
-            </form>
+{{--                <div class="modal-body">--}}
+{{--                    <input type="hidden" name="crm_agent_id" id="crm_agent_id">--}}
+{{--                    <div class="form-group">--}}
+{{--                        <select name="admin_id" id="edit_agent_id" class="form-control select2" data-rule-required="true" data-msg-required="Agent is required">--}}
+{{--                            @foreach($agents as $agent)--}}
+{{--                                <option value="{{ $agent->id }}" > {{ $agent->name }} </option>--}}
+{{--                            @endforeach--}}
+{{--                        </select>--}}
+{{--                    </div>--}}
+{{--                    <div class="form-group">--}}
+{{--                        <select name="zone_id" id="edit_zone_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">--}}
+{{--                            @foreach($zones as $zone)--}}
+{{--                                <option value="{{ $zone->id }}" > {{ $zone->name }} </option>--}}
+{{--                            @endforeach--}}
+{{--                        </select>--}}
+{{--                    </div>--}}
+{{--                    <input type="hidden" id="edit_case_nature_id" name="case_nature_id">--}}
+{{--                </div>--}}
+{{--                <div class="modal-footer">--}}
+{{--                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Assign</button>--}}
+{{--                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>--}}
+{{--                </div>--}}
+{{--            </form>--}}
 
             </div>
         </div>
@@ -137,18 +120,8 @@
                 $('#zone_id').val('').trigger('change.select2');
                 // $('#case_nature_id').val('').trigger('change.select2');
             });
-            $('#agent_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Agent",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
-            });
-            $('#zone_id').prepend('<option selected></option>').select2({
-                width:'100%',
-                placeholder:"Select Zone",
-                allowClear:true,
-                dropdownParent:$('#crm_agent_assign')
-            });
+
+
             // $('#case_nature_id').prepend('<option selected></option>').select2({
             //     width:'100%',
             //     placeholder:"Select Case Nature",
@@ -183,8 +156,7 @@
                         className: 'btn btn-primary bulk_internal_comment',
                         enabled: true,
                         action: function (e, dt, node, config) {
-                            $('#AssignAgentModal').modal('show');
-                            
+                            window.location.href = "{{route('admin.settings.auto_assigning.add')}}"
                         }
                     },
                     @endif
@@ -195,18 +167,26 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
+                scrollX: true,
                 language: {
                     processing: data_table_loader
                 },
                 ajax: '{{ route('admin.settings.auto_assigning.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
-                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'case_nature', name: 'case_nature', class: 'align-middle case_nature'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone', orderable: false, searchable: false},
+                    {data: 'hub', name: 'z.name', class: 'align-middle hub', orderable: false, searchable: false,},
+                    {data: 'case_nature', name: 'case_nature', class: 'align-middle case_nature', orderable: false, searchable: false,},
+                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type', orderable: false, searchable: false,},
+                    {data: 'business_segment', name: 'business_segment', class: 'align-middle business_segment', orderable: false, searchable: false,},
+                    {data: 'shipper_key', name: 'shipper_key', class: 'align-middle shipper_key', orderable: false, searchable: false,},
+                    {data: 'shipper_non_key', name: 'shipper_non_key', class: 'align-middle shipper_non_key', orderable: false, searchable: false,},
+                    {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status', orderable: false, searchable: false,},
                     {data: 'status', name: 'crm_agents.status', class: 'align-middle status'},
+                    {data: 'created_at', name: 'crm_agent_auto_assigns.created_at', class: 'align-middle created_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -231,7 +211,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')|| $(header).is('.zone')|| $(header).is('.hub')|| $(header).is('.case_nature_type')|| $(header).is('.business_segment')|| $(header).is('.shipper_key')|| $(header).is('.shipper_non_key')|| $(header).is('.shipment_status')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){

@@ -3139,6 +3139,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('update', 'Admins\GlobalSettingsController@crm_auto_assigning_update')->name('update');
             Route::post('delete', 'Admins\GlobalSettingsController@crm_auto_assigning_delete')->name('delete');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@crm_auto_assigning_enable_disable')->name('enable_disable');
+            Route::post('get_hub', 'Admins\GlobalSettingsController@get_hub')->name('get_hub');
+            Route::post('case_nature_type', 'Admins\GlobalSettingsController@case_nature_type')->name('case_nature_type');
+            Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
+
         });
 
         Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {
