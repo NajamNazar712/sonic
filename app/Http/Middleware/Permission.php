@@ -757,6 +757,8 @@ class Permission
             'crm.escalate' => 353,
             'crm.consignee_info.index' => 363,
             'crm.consignee_info.list' => 363,
+            'crm.dashboard.index' => 869,
+            'crm.dashboard.list' => 869,
 
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,

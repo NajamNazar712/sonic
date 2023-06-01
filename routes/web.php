@@ -3679,12 +3679,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\CRMDashboardController@crm_dashboard_index')->name('index');
             Route::post('list', 'Admins\CRMDashboardController@crm_dashboard_list')->name('list');
             Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
-
-            // Route::post('tag', 'Admins\CRMDashboardController@bulk_admin_tag')->name('tag');
-            // Route::post('un_tag', 'Admins\CRMDashboardController@admin_un_tag')->name('un_tag');
-            // Route::post('special_request_tag', 'Admins\CRMDashboardController@special_request_tag')->name('special_request_tag');
-            
-            // Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
         });
 
     });

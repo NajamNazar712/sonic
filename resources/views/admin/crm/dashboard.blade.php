@@ -21,7 +21,7 @@
                                         <div class="card-body">
                                             <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
                                                 <div class="row justify-content-center">
-                                                    <input type="hidden" name="search_statistics_div" id="search_statistics_div"
+                                                    <input type="hidden" name="search_request_div" id="search_request_div"
                                                            value="">
                                                     <div class="form-group col">
                                                         <input type="text" name="from_date"
@@ -73,7 +73,8 @@
                             </div> --}}
                             <form id="search_form" class="card-body card-dashboard" novalidate="novalidate">
                                 <div class="row mb-2 justify-content-center">
-
+                                    <input type="hidden" name="search_request_div" id="search_request_div"
+                                     value="">
                                     <div class="col-4">
                                         <fieldset class="form-group">
                                             <select name="search_destination" id="search_destination" class="form-control select2">
@@ -128,16 +129,17 @@
                                             </select>
                                         </fieldset>
                                     </div>
-                
-                                    <div class="col-4">
-                                        <fieldset class="form-group">
-                                            <select name="search_agent" id="search_agent" class="form-control select2">
-                                                @foreach($agents as $agent)
-                                                    <option value="{{$agent->id}}">{{$agent->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-                                    </div>
+                                    @if( session('role_id') == 1 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90]))
+                                        <div class="col-4">
+                                            <fieldset class="form-group">
+                                                <select name="search_agent" id="search_agent" class="form-control select2">
+                                                    @foreach($agents as $agent)
+                                                        <option value="{{$agent->id}}">{{$agent->name}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
+                                    @endif
                                     <div class="col-4">
                                         <fieldset class="form-group">
                                             <select name="shipment_status" id="shipment_status" class="form-control select2">
@@ -222,7 +224,7 @@
                                 </div>
                             </form>
                             <div class="row justify-content-center">
-                                <div class="col-3" id="total_leads_div">
+                                <div class="col-3" id="launch_div">
                                     <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -262,7 +264,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="received_leads_div">
+                                <div class="col-3" id="resolved_div">
                                     <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -281,7 +283,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="in_process_activation_div">
+                                <div class="col-3" id="closed_div">
                                     <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -303,7 +305,7 @@
             
                             </div>
                             <div class="row justify-content-center">
-                                <div class="col-3" id="dormant_div">
+                                <div class="col-3" id="valid_div">
                                     <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -320,7 +322,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="dormant_div">
+                                <div class="col-3" id="in_valid_div">
                                     <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -984,7 +986,6 @@
                         'from_date': from_date,
                         'to_date': to_date,
                         'agent_id': agent_id,
-
                     }
                 }).done(function (data) {
                     if(data.status){
@@ -1258,7 +1259,7 @@
                         }
                     },
                     @endif
-                        @if (session('role_id') == 1 || session('role_id') == 6 || in_array(179, session('permissions')))
+                        @if (session('role_id') == 1 ||  session('role_id') == 6 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90, 179])))
                     {
                         text: 'Assign Agent',
                         className: 'btn btn-primary assign',
@@ -1399,6 +1400,7 @@
                         d.avg_tat = $('#avg_tat').val();
                         d.from_date = $('input[name="from_date_formatted"]').val();
                         d.to_date = $('input[name="to_date_formatted"]').val();
+                        d.search_request = $('#search_request_div').val();
                     }
                 },
                 rowId: 'id',
@@ -2243,6 +2245,33 @@
                     });
                 
             }
+
+            $('#launch_div').on('click', function () {
+                $('#search_request_div').val(1);
+                table.draw();
+            });
+            $('#in_process_div').on('click', function () {
+                $('#search_request_div').val(2);
+                table.draw();
+            });
+            $('#resolved_div').on('click', function () {
+                $('#search_request_div').val(3);
+                table.draw();
+            });
+            $('#closed_div').on('click', function () {
+                $('#search_request_div').val(4);
+                table.draw();
+            });
+            $('#valid_div').on('click', function () {
+                $('#search_request_div').val(6);
+                table.draw();
+            });
+            $('#in_valid_div').on('click', function () {
+                $('#search_request_div').val(7);
+                table.draw();
+            });
+            
+
 
             $('#star_shippers_filter').on('click',function () {
                 $('#star_shippers_filter').val(1);
