@@ -5007,25 +5007,7 @@ class GlobalSettingsController extends Controller
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
                 if (session('role_id') == 1 || in_array(618, session('permissions'))) {
-                    if ($roles->id == 1 || $roles->id == 2) {
-                        $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                    ';
 
-                        if ($roles->status == 1) {
-
-                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                        } else {
-
-                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                        }
-                        $dropdown .= '</div>
-                    </div>
-                        ';
-
-                        return $dropdown;
-                    } else {
                         $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
@@ -5045,7 +5027,7 @@ class GlobalSettingsController extends Controller
           ';
 
                         return $dropdown;
-                    }
+
                 } else {
                     return '';
                 }
