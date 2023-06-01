@@ -124,8 +124,6 @@
                                     <th class="border-primary border-darken-1">Transited By</th>
                                     <th class="border-primary border-darken-1">Seal Updated By</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
-                                    <th class="border-primary border-darken-1">Remarks Added By</th>
-                                    <th class="border-primary border-darken-1">Remarks Updated At</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
@@ -202,6 +200,19 @@
     </div>
     <div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="short_received_shipments" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="remarks_info" role="dialog" aria-labelledby="remarks_info" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                 </div>
@@ -314,8 +325,6 @@
                             head.push('Transited By');
                             head.push('Seal Updated By');
                             head.push('Remarks');
-                            head.push('Remarks Added By');
-                            head.push('Remarks Updated At');
 
 
                             $.each(result.data, function(index, values) {
@@ -339,8 +348,6 @@
                                 row.push(values.transitted_by);
                                 row.push(values.updated_by);
                                 row.push(values.remarks);
-                                row.push(values.remarks_added_by);
-                                row.push(values.remarks_updated_at);
 
 
                                 body.push(row);
@@ -411,8 +418,6 @@
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'updated_by', name: 'ah.name', class: 'align-middle updated_by'},
                     {data: 'remarks', name: 'cargo_manifest_bags.remarks', class: 'align-middle remarks'},
-                    {data: 'remarks_added_by', name: 'remarks_added.name', class: 'align-middle remarks_added_by'},
-                    {data: 'remarks_updated_at', name: 'cargo_manifest_bags.remarks_updated_at', class: 'align-middle remarks_updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', searchable: false, orderable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -815,6 +820,74 @@
 			 $('#search_filter_btn').on('click',function () {
                 table.draw(true);
             });
+
+
+            $('#datatable tbody').on('click', 'tr td.remarks button', function() {
+
+                var bag_id =  $(this).attr('ref');
+
+                if(bag_id){
+                    $('#remarks_info .modal-body').html('');
+
+                    $.ajax({
+                        url: '{!! route('admin.cargo_manifest.remarks_info') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'bag_id': bag_id
+                        }
+                    })
+                        .done(function(data) {
+
+                            var head = '';
+                            var remarks = '';
+                            var remarks_data = '';
+
+                            head = '<h4 class="modal-title" id="shipments_title">Remarks Info</h4>' +
+                                '<button type="button" class="close" data-dismiss="modal" aria-label="Close">' +
+                                '<span aria-hidden="true">×</span>\n' +
+                                '</button>';
+
+                            remarks +=`<table class="table table-bordered">
+                                            <thead>
+                                                  <tr>
+                                                    <th>Bag ID</th>
+                                                    <th>Remarks</th>
+                                                    <th>Added By</th>
+                                                    <th>Peices Count</th>
+                                                    <th>Created at</th>
+                                                    <th>Updated at</th>
+                                                  </tr>
+                                          </thead>
+                                            <tbody id="remarks_data">
+                                            </tbody>
+                                        </table>
+                                    `;
+                                $.each(data, function(index,value) {
+                                    remarks_data+=`
+                                        <tr>
+                                                <td>${value.bag_id}</td>
+                                                <td>${value.remarks}</td>
+                                                <td>${value.added_by_name}</td>
+                                                <td>${value.pieces_count}</td>
+                                                <td>${value.created_at}</td>
+                                                <td>${value.updated_at}</td>
+                                        </tr>`;
+                                });
+
+
+
+                            $('#remarks_info .modal-header').html(head);
+                            $('#remarks_info .modal-body').html(remarks);
+                            $('#remarks_info .modal-body #remarks_data').html(remarks_data);
+
+                            $('#remarks_info').modal('show');
+
+                        });
+                }
+
+            });
+
         });
     </script>
 @endsection

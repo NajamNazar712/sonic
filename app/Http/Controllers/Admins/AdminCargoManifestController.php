@@ -20,6 +20,7 @@ use App\Http\Controllers\CargoManifestBagJourneyController;
 use App\Http\Controllers\ShipmentOpenBoxJourneyController;
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\CargoManifestBagRemarks;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\Fleet;
 use App\Http\Models\Admin\MasterCargo\BagShipment;
@@ -1624,13 +1625,16 @@ class AdminCargoManifestController extends Controller
                 $bag = CargoManifestBag::find($bag_id);
                 $cargo_manifest_draft_bag = CargoManifestDraftBags::where('bag_id',$bag_id);
                 if($cargo_manifest_draft_bag->exists()){
-                    $cargo_manifest_draft_bag = $cargo_manifest_draft_bag->first();
-                    $bag->remarks = $cargo_manifest_draft_bag->remarks;
-                    $bag->remarks_added_by = $cargo_manifest_draft_bag->remarks_added_by;
-                    $bag->remarks_created_at = $cargo_manifest_draft_bag->remarks_created_at;
-                    $bag->remarks_updated_at = $cargo_manifest_draft_bag->remarks_updated_at;
-                    $bag->pieces_count = $cargo_manifest_draft_bag->pieces_count;
-                    $bag->save();
+                    $cargo_manifest_draft_bag = $cargo_manifest_draft_bag->latest()->first();
+
+                    $cargo_manifest_bag_remarks = new CargoManifestBagRemarks();
+                    $cargo_manifest_bag_remarks->bag_id = $bag_id;
+                    $cargo_manifest_bag_remarks->remarks = $cargo_manifest_draft_bag->remarks;
+                    $cargo_manifest_bag_remarks->added_by = $cargo_manifest_draft_bag->remarks_added_by;
+                    $cargo_manifest_bag_remarks->created_at = $cargo_manifest_draft_bag->remarks_created_at;
+                    $cargo_manifest_bag_remarks->updated_at = $cargo_manifest_draft_bag->remarks_updated_at;
+                    $cargo_manifest_bag_remarks->pieces_count = $cargo_manifest_draft_bag->pieces_count;
+                    $cargo_manifest_bag_remarks->save();
                 }
 
                 if (in_array($bag->status_id, [1, 3, 5])) {
@@ -2130,8 +2134,9 @@ class AdminCargoManifestController extends Controller
             ->leftjoin('admins as ah', 'cargo_manifest_bags.updated_by', '=', 'ah.id')
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
             ->join('cargo_manifest_bag_statuses as bs', 'cargo_manifest_bags.status_id', '=', 'bs.id')
-            ->leftjoin('admins as remarks_added', 'remarks_added.id', '=', 'cargo_manifest_bags.remarks_added_by')
-            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity', 'tm.name as transport_mode', 'cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type', 'cargo_manifest_bags.seal_number', 'bs.name as status', 'sm.mode as shipping_mode', 'cm.id as manifest_id', 'cargo_manifest_bags.seal_number', 'cm.created_at as manifest_created_at', 'cargo_manifest_bags.origin_hub_id as origin_hub_id', 'cargo_manifest_bags.destination_hub_id as destination_hub_id', 'cm.id as manifest', 'ah.name as updated_by', 'cargo_manifest_bags.created_at as transitted_date', 'cargo_manifest_bags.short_received_shipments as short_received_shipments', 'cargo_manifest_bags.short_received_shipments as short_shipments', 'cargo_manifest_bags.received_shipments', 'cmbj.created_at as status_updated_at', 'status_editor.name as status_updated_by', 'sedh.name as status_location','cargo_manifest_bags.remarks','remarks_added.name as remarks_added_by','cargo_manifest_bags.remarks_created_at','cargo_manifest_bags.remarks_updated_at')
+            ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id as status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'cargo_manifest_bags.quantity', 'tm.name as transport_mode', 'cargo_manifest_bags.shipments_weight', 'cargo_manifest_bags.actual_weight', 'cargo_manifest_bags.shipments as bag_shipments', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type', 'cargo_manifest_bags.seal_number', 'bs.name as status', 'sm.mode as shipping_mode', 'cm.id as manifest_id', 'cargo_manifest_bags.seal_number', 'cm.created_at as manifest_created_at', 'cargo_manifest_bags.origin_hub_id as origin_hub_id', 'cargo_manifest_bags.destination_hub_id as destination_hub_id', 'cm.id as manifest', 'ah.name as updated_by', 'cargo_manifest_bags.created_at as transitted_date', 'cargo_manifest_bags.short_received_shipments as short_received_shipments', 'cargo_manifest_bags.short_received_shipments as short_shipments', 'cargo_manifest_bags.received_shipments', 'cmbj.created_at as status_updated_at', 'status_editor.name as status_updated_by', 'sedh.name as status_location',
+                DB::raw('(select count(id) from cargo_manifest_bag_remarks where bag_id = cargo_manifest_bags.id) as remarks')
+            )
             ->where(function ($query) {
                 $query->where('cargo_manifest_bags.shipments', '!=', DB::raw('(select(received_shipments) from cargo_manifest_bags as cmb where cmb.id =cargo_manifest_bags.id)'))
                     ->orWhere('cargo_manifest_bags.completed', 0);
@@ -2221,6 +2226,14 @@ class AdminCargoManifestController extends Controller
                     }
                 }
                 return $vehicle_data;
+            })
+            ->editColumn('remarks', function ($remarks) {
+                if(!empty($remarks->remarks)) {
+                    return "<button ref='$remarks->id' class='btn btn-sm btn-outline-info align-middle remarks'>" . $remarks->remarks . "</button>";
+                }else{
+                    return  '-';
+                }
+
             })
             ->filterColumn('vehicles', function ($query, $keyword) {
                 $fleet = Fleet::where('reg_number', $keyword)->first();
@@ -3380,6 +3393,23 @@ class AdminCargoManifestController extends Controller
         $ids = explode(',', $request->ids);
         CargoManifestDraftBags::whereIn('id',$ids)->update(['added_by'=>$request->user_id]);
         return back()->with(['success' => 'Bag Transfered Successfully']);
+    }
+
+    public function remarks_info(Request $request)
+    {
+        if ($request->bag_id) {
+            $remarks = CargoManifestBagRemarks::join('admins as a','a.id','cargo_manifest_bag_remarks.added_by')
+                ->where('bag_id',$request->bag_id)->select('cargo_manifest_bag_remarks.*','a.name as added_by_name')
+                ->orderby('cargo_manifest_bag_remarks.id','desc');
+            if ($remarks->exists()) {
+                $remarks = $remarks->get();
+                return $remarks;
+            }else{
+                return [];
+            }
+        }else{
+            return [];
+        }
     }
 
 }
