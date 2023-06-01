@@ -5975,7 +5975,9 @@ class ReturnController extends Controller
         $rider_name = Rider::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $hub_name =City::where('hub',1)->where('status',1)->select('id','name')->get();
-       return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name,'shipment_status'=>$shipment_status]);
+        $today = Carbon::now()->endOfDay();
+        $sevenDays = Carbon::now()->subDays(7)->startOfDay();
+       return view('admin.return.return_confirm_otp')->with(['rider_name'=>$rider_name,'hub_name'=>$hub_name,'shipment_status'=>$shipment_status,'today' => $today, 'sevenDays' => $sevenDays]);
     }
     public function return_confirm_otp_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
