@@ -1148,6 +1148,7 @@
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks Count');
+                            head.push('Shipments Remarks');
                             head.push('Shipper Remarks');
                             head.push('OSA Estimated Charges');
                             head.push('Arrival Date');
@@ -1188,6 +1189,7 @@
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks_excel);
+                                row.push(values.shipment_remarks);
                                 row.push(values.shipper_remarks);
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
@@ -1739,7 +1741,7 @@
                     { data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     { data: 'status', name: 'status', class: 'align-middle status'},
                     { data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    { data: 'remarks', name: 'sscf.remark', class: 'align-middle text-center remarks'},
+                    { data: 'remarks', name: 'sscf.remark', class: 'align-middle text-center call_findings'},
                     { data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks' },
                     { data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks' },
                     { data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges' },
