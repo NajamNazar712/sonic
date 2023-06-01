@@ -12837,7 +12837,7 @@ class AdminDashboardController extends Controller
         return $datatables->make(true);
     }
     public function substitute_accounts_email(Request $request,$id = null) {
-        dd($id);
+        // dd($id);
         if ($request->filled('email')) {
             $email = SubstituteUser::where('email', $request->input('email'));
   
