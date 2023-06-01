@@ -119,7 +119,8 @@
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
-                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Call Findings</th>
+                            <th class="border-primary border-darken-1">Shipment Remarks</th>
                             <th class="border-primary border-darken-1">Shipper Remarks</th>
                             <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
@@ -1739,6 +1740,7 @@
                     { data: 'status', name: 'status', class: 'align-middle status'},
                     { data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     { data: 'remarks', name: 'sscf.remark', class: 'align-middle text-center remarks'},
+                    { data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks' },
                     { data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks' },
                     { data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges' },
                     { data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival' },
