@@ -5125,10 +5125,6 @@ class GlobalSettingsController extends Controller
         $hubs = City::whereIn('zone_id',$zn)->get(); 
         $case_nature_type = $selected_agent->case_nature_types->pluck('case_nature_type_id')->toArray();
         $case_nature_types = CrmRequestCaseNatureType::whereIn('id', $case_nature_type)->get();
-        // foreach($case_nature_types as $cn)
-        // {
-        //     dd($case_nature_type, $cn, in_array($cn->id , $case_nature_type) ? 'selected' : '');
-        // }
         $case_natures = CrmRequestCaseNature::all();
         $segments = Segment::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
