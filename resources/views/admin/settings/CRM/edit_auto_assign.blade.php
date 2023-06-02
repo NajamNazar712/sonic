@@ -249,7 +249,7 @@
                 placeholder:"Select Agent",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
-            }).val({{ $selected_agent->pluck('agent_id')->toJson() }}).trigger('change');
+            }).val({{ $selected_agent->agent_id }}).trigger('change');
 
             $('#case_nature_id').select2({
                 width:'100%',
