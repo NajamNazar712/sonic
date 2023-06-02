@@ -50,7 +50,6 @@ class CRMDashboardController extends Controller
         $case_natures = CrmRequestCaseNature::select('id', 'name')->get();
         $case_nature_types = CrmRequestCaseNatureType::select('id', 'type')->get();
         $crm_request_statuses = CrmRequestStatus::select('id', 'name')->get();
-        // $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $channels = CrmRequestChannel::select('id', 'channel')->get();
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id',3)->get();
@@ -63,9 +62,6 @@ class CRMDashboardController extends Controller
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
-        $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
-        // $case_natures = DB::connection('reports')->table('crm_request_case_nature')->select('id', 'name')->get();
-        // $case_nature_types = DB::connection('reports')->table('crm_request_case_nature_types')->select('id', 'type')->get();
         $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $shipment_status = ShipmentStatus::select('id','name')->get();
@@ -80,7 +76,7 @@ class CRMDashboardController extends Controller
         if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
         {
             $crm_feedback = CrmRequestFeedback::
-            // whereBetween('created_at',[$thirtyDays,$today])->
+            whereBetween('created_at',[$thirtyDays,$today])->
             pluck('crm_request_id');
 
             $crm['total'] = CrmRequest::get();
@@ -91,31 +87,31 @@ class CRMDashboardController extends Controller
             //End For Closer Rate
 
             $crm['launched'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 1);
             $crm['in_process'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 2);
             $crm['resolved'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 3);
             $crm['closed'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4);
             $crm['closed_rate_avg'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4);
             $crm['valid'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 6);
             $crm['in_valid'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7);
            
         }else
         {
             $crm_feedback = CrmRequestFeedback::
-            // whereBetween('created_at',[$thirtyDays,$today])->
+            whereBetween('created_at',[$thirtyDays,$today])->
             pluck('crm_request_id');
 
             // dd(auth()->user()->id);
@@ -127,50 +123,49 @@ class CRMDashboardController extends Controller
             //End For Closer Rate
 
             $crm['launched'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 1)->where('agent_id',auth()->user()->id);
             $crm['in_process'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 2)->where('agent_id',auth()->user()->id);
             $crm['resolved'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 3)->where('agent_id',auth()->user()->id);
             $crm['closed'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4)->where('agent_id',auth()->user()->id);
             $crm['closed_rate_avg'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4)->where('agent_id',auth()->user()->id);
             $crm['valid'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 6)->where('agent_id',auth()->user()->id);
             $crm['in_valid'] = CrmRequest::
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7)->where('agent_id',auth()->user()->id);
             $crm_feedback = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->where('agent_id',auth()->user()->id)->pluck('crm_request_id');
         }
 
-        if (session('role_id') != 1) {
-            //$crm['launched'] = $crm['launched']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            //Ask Nabeel Bhai
-            // $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            // $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            // $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            // $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-            // $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        }
-        if (session('department_id') == 7) {
-            if (!in_array(session('id'), session('sale_users_bypass')) && session('role_id') != 44 && session('role_id') != 60) {
-                // $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
-                // $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
-                // $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
-                // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->where('leads.sale_person_id', Auth::id());
-                // $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
-                // $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
-                // $leads['dormant'] = $leads['dormant']->where('leads.sale_person_id', Auth::id());
-            }
-        } 
+        // if (session('role_id') != 1) {
+        //     //$crm['launched'] = $crm['launched']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        //     // $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
+        // }
+        // if (session('department_id') == 7) {
+        //     if (!in_array(session('id'), session('sale_users_bypass')) && session('role_id') != 44 && session('role_id') != 60) {
+        //         // $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
+        //         // $leads['dormant'] = $leads['dormant']->where('leads.sale_person_id', Auth::id());
+        //     }
+        // } 
 
 
         $crm['total'] = $crm['total']->count();
@@ -182,28 +177,17 @@ class CRMDashboardController extends Controller
         $crm['in_valid'] = $crm['in_valid']->count();
         
         $shipments = Shipment::where('shipper_status_id',2)->
-        // whereBetween('created_at', [$thirtyDays, $today])->
+        whereBetween('created_at', [$thirtyDays, $today])->
         count();
         
-        
-        // $crm['closed_rate_avg'] = $crm['closed_rate_avg']->where('crm_requests.status_id',4)->sum('crm_requests.status_id');
-        // $crm['in_process_avg'] = $crm['in_process_avg']->where('crm_requests.status_id',2)->sum('crm_requests.status_id');
-        // dd($crm['total'],$crm_total);
+       
         $crm['closed_rate'] = $crm_total !== 0 ? $crm['closed']/$crm_total : 0;
         $crm['in_process_ratio'] = $shipments !== 0 ? $crm_total/$shipments : 0;
-
-        // $crm['in_process_percentage'] = "0";
-        // $crm['resolved_percentage'] = "0";
-        // $crm['closed_percentage'] = "0";
-        // $crm['valid_percentage'] = "0";
+        
         $crm['in_valid_percentage'] = "0";
         $crm['closed_rate_percentage'] = "0";
         $crm['in_process_ratio_percentage'] = "0";
         if ($crm['total'] > 0) {
-            // $crm['in_process_percentage'] = round(($crm['in_process'] / $crm['total']) * 100, 2);
-            // $crm['resolved_percentage'] = round(($crm['resolved_percentage'] / $crm['total']) * 100, 2);
-            // $crm['closed_percentage'] = round(($crm['closed'] / $crm['total']) * 100, 2);
-            // $crm['valid_percentage'] = round(($crm['valid'] / $crm['total']) * 100, 2);
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
             $crm['closed_rate_percentage'] = $crm_total !== 0 ? round(($crm['closed_rate'] / $crm_total) * 100, 2)  : 0;
             $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm_total / $shipments) * 100, 2) : 0;
@@ -225,13 +209,10 @@ class CRMDashboardController extends Controller
 
         $cities = City::where('status', 1)->select('id', 'name')->get();
 
-        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name', 'admins.id'])->where('status', 1)->where('ar.department_id', 7)->get();
-
-
         $dates['current'] = Carbon::now();
         $dates['old_date'] = Carbon::now()->subDays(58);
 
-        return view('admin.crm.dashboard')->with(['shippers' => $shippers, 'case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'leads' => $leads,'dates' => $dates,'cities' => $cities, 'sale_name' => $salesperson ,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
+        return view('admin.crm.dashboard')->with(['case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
     }
 
     public function crm_dashboard_list(Request $request){
@@ -241,6 +222,8 @@ class CRMDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),660);
         }
 
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
         $dashboard_list = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
         ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
         ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -316,24 +299,13 @@ class CRMDashboardController extends Controller
         ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
         ->leftjoin('shipping_modes as sm','sm.id','=','s.shipping_mode_id')
         ->leftjoin('admins as ad1','spt.admin_id','=','ad1.id')
-        
         ->leftjoin('users as us','us.id','=','s.user_id')
         ->leftjoin('segments as seg','us.segment_id','seg.id')
         ->leftjoin('sale_tier_tags as stt','stt.user_id', '=','s.user_id')
         ->leftjoin('admins as ad2','ad2.id','=','stt.kam')
-        // ->leftJoin('shipments_journey as sj1', function ($join) {
-        //     $join->on('sj1.shipment_id', '=', 'crm_requests.shipment_id')
-        //         ->where(
-        //             'sj1.id',
-        //             '=',
-        //             DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id and shipments_journey.shipper_status_id = 2)')
-        //         );
-        // })
-        // ->leftjoin('sub_category_segments as seg_sub', 'seg_sub.id', '=', 'us.sub_segment_id')
         ->leftjoin('admins as a1', 'a1.id', '=', 'crm_requests.agent_id')
         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
         ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value','crs.name as crm_request_status','crs.id as crm_request_status_id')
-        // ->where('crm_requests.status_id', 2)
         ->groupBy('crm_requests.id');
             $current_date = Carbon::now();
         if ((!in_array(session('role_id'), [1, 4, 6])) && (!in_array(179, session('permissions')) && !in_array(201, session('permissions')))) {
@@ -634,18 +606,18 @@ class CRMDashboardController extends Controller
                         $sub_query->where('crm_requests.launched_by', '=', 0)
                             ->where('a.name', 'like', '%' . $keyword . '%');
                     })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 1)
-                                ->where('u.name', 'like', '%' . $keyword . '%');
-                        })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 2)
-                                ->where('su.name', 'like', '%' . $keyword . '%');
-                        })
-                        ->orWhere(function ($sub_query) use ($keyword) {
-                            $sub_query->where('crm_requests.launched_by', '=', 3)
-                                ->where('cu.name', 'like', '%' . $keyword . '%');
-                        });
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 1)
+                            ->where('u.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 2)
+                            ->where('su.name', 'like', '%' . $keyword . '%');
+                    })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('crm_requests.launched_by', '=', 3)
+                            ->where('cu.name', 'like', '%' . $keyword . '%');
+                    });
 
                 }
                 else {
@@ -784,19 +756,6 @@ class CRMDashboardController extends Controller
                 }
             })
             ->orderColumn('tagged_to_operation', DB::raw('IF (crt.crm_request_tagging_type_id = 5, at.name, "")') . ' $1')
-            // ->addColumn('action', function($requests) {
-            //     $route = route('admin.crm.request.details', ['id' => $requests->id]);
-            //         $dropdown = '
-            //     <div class="btn-group">
-            //         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-            //         <div class="dropdown-menu dropdown-menu-sm">';
-            //         $dropdown .= '<button onclick="window.open(\'' . $route . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>';
-            //         $dropdown .= '</div>
-            //     </div>
-            //     ';
-
-            //         return $dropdown;
-            // })
             ->addColumn('responsible_hub', function ($requests) {
                 $responsible_hub = "";
                 $status = $requests->shipment_status_id;
@@ -944,7 +903,7 @@ class CRMDashboardController extends Controller
         if ($agent = $request->get('search_agent')) {
             $datatables->where('a1.id', '=', $agent);
         }
-        if ($shipment_status = $request->get('shipment_status')) {
+        if ($shipment_status = $request->get('search_shipment_status')) {
             $datatables->where('s.shipper_status_id', '=', $shipment_status);
         }
         if ($avg_tat = $request->get('avg_tat')) {
@@ -954,6 +913,10 @@ class CRMDashboardController extends Controller
             $from = $request->get('from_date');
             $to = $request->get('to_date');
             $datatables->whereBetween('crm_requests.created_at', [$from, $to]);
+        }
+        else
+        {
+            $datatables->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
         }
         if ($search_request = $request->get('search_request')) {
             if ($search_request == 1) {
@@ -980,137 +943,17 @@ class CRMDashboardController extends Controller
         return $datatables->make(true);
     }
 
-    // public function bulk_admin_tag(Request $request){
-        
-    //     if(count($request->crm_request_ids) > 0){
-    //         $tagged_hub = null;
-    //         if($request->tagged_hub != null){
-    //             $tagged_hub = $request->tagged_hub;
-    //         }
-    //         foreach($request->crm_request_ids as $crm_request_id){
-    //             $crm_request = CrmRequest::where('id', $crm_request_id)->first();
-    //             if($request->crm_request_tagging_type_id == 1){
-    //                 $name = AdminDepartment::where('id', $request->tagged_id)->first();
-    //             }
-    //             else if($request->crm_request_tagging_type_id == 2){
-    //                 $name = Admin::where('id', $request->tagged_id)->first();
-    //             }
-    //             $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
-    //             if(!empty($tagged_crm_request)){
-    //                 if($tagged_crm_request['tagged_id'] != $request->tagged_id) {
-                        
-    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
-
-    //                     CrmRequestTagging::create([
-    //                         'crm_request_id' => $crm_request_id,
-    //                         'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-    //                         'tagged_id' => $request->tagged_id,
-    //                         'hub_id' => $tagged_hub
-    //                     ]);
-    //                     // CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
-    //                     //     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-    //                     //     'tagged_id' => $request->tagged_id,
-    //                     //     'hub_id' => $tagged_hub
-    //                     // ]);
-
-    //                     CrmRequestTaggingHistory::create([
-    //                         'crm_request_id' => $crm_request_id,
-    //                         'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-    //                         'tagged_id' => $request->tagged_id,
-    //                         'agent_id' => Auth::id(),
-    //                         'hub_id' => $tagged_hub
-    //                     ]);
-
-    //                     NotificationsController::send(31,$crm_request_id);
-    //                 }
-    //             }
-    //             else{
-    //                 CrmRequestTagging::create([
-    //                     'crm_request_id' => $crm_request_id,
-    //                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-    //                     'tagged_id' => $request->tagged_id,
-    //                     'hub_id' => $tagged_hub
-    //                 ]);
-
-    //                 CrmRequestTaggingHistory::create([
-    //                     'crm_request_id' => $crm_request_id,
-    //                     'crm_request_tagging_type_id' => $request->crm_request_tagging_type_id,
-    //                     'tagged_id' => $request->tagged_id,
-    //                     'agent_id' => Auth::id(),
-    //                     'hub_id' => $tagged_hub
-    //                 ]);
-    //                 NotificationsController::send(31,$crm_request_id);
-    //             }
-    //         }
-            
-    //         return ['status' => 0, 'success' => 'Request(s) successfully tagged to ' . $name['name']];
-    //     }
-    // }
-    // public function admin_un_tag(Request $request){
-        
-    //     if($request->multiple == 1){
-    //         if(count($request->crm_request_ids) > 0){
-    //             foreach($request->crm_request_ids as $crm_request_id){
-    //                 $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
-    //                 if($check_previous){
-    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
-                       
-    //                     CrmRequestTagging::create([
-    //                         'crm_request_id' => $crm_request_id,
-    //                         'crm_request_tagging_type_id' => 3,
-    //                         'tagged_id' => null
-    //                     ]);
-    //                     CrmRequestTagging::where('crm_request_id', $crm_request_id)->update([
-    //                     ]);
-    //                     CrmRequestTaggingHistory::create([
-    //                         'crm_request_id' => $crm_request_id,
-    //                         'crm_request_tagging_type_id' => 3,
-    //                         'tagged_id' => null,
-    //                         'agent_id' => Auth::id()
-    //                     ]);
-    //                 }
-    //             }
-    //         }
-    //         return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
-    //     }
-    //     else{
-    //         $crm_request_id = $request->crm_request_id;
-    //         $check_previous = CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->first();
-    //         if($check_previous){
-    //             CrmRequestTagging::where('crm_request_id', $crm_request_id)->whereNotIn('crm_request_tagging_type_id', [4,5])->delete();
-    //                     CrmRequestTagging::create([
-    //                         'crm_request_id' => $crm_request_id,
-    //                         'crm_request_tagging_type_id' => 3,
-    //                         'tagged_id' => null
-    //                     ]);
-
-               
-    //             CrmRequestTaggingHistory::create([
-    //                 'crm_request_id' => $crm_request_id,
-    //                 'crm_request_tagging_type_id' => 3,
-    //                 'tagged_id' => null,
-    //                 'agent_id' => Auth::id()
-    //             ]);
-    //         }
-    //         return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
-    //     }
-    // }
     public function card_data(Request $request){
-        // dd($request->all());
-        // if ($request->get('agent_id')) {
-            // $from = $request->get('from_date');
-            // $to = $request->get('to_date');
-            // $card_data['launched'] = CrmRequest::where('status_id',1)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
-            // $card_data['in_process'] = CrmRequest::where('status_id',2)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
-            // $card_data['closed'] = CrmRequest::where('status_id',4)->where('shipper_id', session('user_id'))->whereBetween('created_at', [$from, $to])->count();
-            
-            $card_data['total'] = CrmRequest::get();
-            // whereBetween('created_at', [$thirtyDays, $today])
-            // ->get();
+            $today = Carbon::now()->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+
+            $card_data['total'] = CrmRequest::
+            whereBetween('created_at', [$thirtyDays, $today])
+            ->get();
 
             //Launched
             $card_data['launched'] = CrmRequest::where('crm_requests.status_id', 1);
-            // whereBetween('created_at', [$thirtyDays, $today])->
+            // whereBetween('created_at', [$thirtyDays, $today]);
             if($agent_id = $request->get('agent_id'))
             {
                 $card_data['launched'] = self::agent($card_data['launched'],$agent_id);
@@ -1118,6 +961,10 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
                 $card_data['launched'] = self::dates($card_data['launched'],$from,$to);
+            }
+            else
+            {
+                $card_data['launched']->whereBetween('created_at', [$thirtyDays, $today]);
             } 
             if ($origin = $request->get('search_origin'))
             {   
@@ -1140,7 +987,7 @@ class CRMDashboardController extends Controller
                 // dd($search_case_nature_type);
                 $card_data['launched'] = self::case_nature_type($card_data['launched'],$search_case_nature_type);
             }
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['launched'] = self::shipment_status($card_data['launched'],$shipment_status);
             }
@@ -1159,6 +1006,10 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
                 $card_data['in_process'] = self::dates($card_data['in_process'],$from,$to);
+            }
+            else
+            {
+                $card_data['in_process']->whereBetween('created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
@@ -1180,7 +1031,7 @@ class CRMDashboardController extends Controller
             {   
                 $card_data['in_process'] = self::case_nature_type($card_data['in_process'],$search_case_nature_type);
             }     
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['in_process'] = self::shipment_status($card_data['in_process'],$shipment_status);
             }
@@ -1199,6 +1050,10 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {
                 $card_data['resolved'] = self::dates($card_data['resolved'],$from,$to);
+            }
+            else
+            {
+                $card_data['resolved']->whereBetween('created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {  
@@ -1220,7 +1075,7 @@ class CRMDashboardController extends Controller
             {   
                 $card_data['resolved'] = self::case_nature_type($card_data['resolved'],$search_case_nature_type);
             } 
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['resolved'] = self::shipment_status($card_data['resolved'],$shipment_status);
             }
@@ -1242,11 +1097,15 @@ class CRMDashboardController extends Controller
                 $card_data['closed'] = self::dates($card_data['closed'],$from,$to);
 
                 $card_feedback = CrmRequestFeedback::
-                // whereBetween('created_at',[$thirtyDays,$today])->
+                whereBetween('created_at',[$thirtyDays,$today])->
                 pluck('crm_request_id');
 
                 $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
                 $card_data['closed_rate'] = $card_total !== 0 ?  $card_data['closed']->count()/$card_total : 0;
+            }
+            else
+            {
+                $card_data['closed']->whereBetween('created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
@@ -1268,7 +1127,7 @@ class CRMDashboardController extends Controller
             {   
                 $card_data['closed'] = self::case_nature_type($card_data['closed'],$search_case_nature_type);
             }    
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['closed'] = self::shipment_status($card_data['closed'],$shipment_status);
             }
@@ -1287,6 +1146,10 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
                 $card_data['valid'] = self::dates($card_data['valid'],$from,$to);
+            }
+            else
+            {
+                $card_data['valid']->whereBetween('created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
@@ -1308,7 +1171,7 @@ class CRMDashboardController extends Controller
             {   
                 $card_data['valid'] = self::case_nature_type($card_data['valid'],$search_case_nature_type);
             }    
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['valid'] = self::shipment_status($card_data['valid'],$shipment_status);
             }
@@ -1327,6 +1190,10 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
                 $card_data['in_valid'] = self::dates($card_data['in_valid'],$from,$to);
+            }
+            else
+            {
+                $card_data['in_valid']->whereBetween('created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
@@ -1348,7 +1215,7 @@ class CRMDashboardController extends Controller
             {   
                $card_data['in_valid'] = self::case_nature_type($card_data['in_valid'],$search_case_nature_type);
             }    
-            if ($shipment_status = $request->get('shipment_status'))
+            if ($shipment_status = $request->get('search_shipment_status'))
             {   
                 $card_data['in_valid'] = self::shipment_status($card_data['in_valid'],$shipment_status);
             } 
@@ -1372,25 +1239,19 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
                 
+                $today = Carbon::now()->endOfDay();
+                $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
                 $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
-                // $count =  $card_data['closed_rate_filter']->whereBetween('created_at', [$from, $stop_date])->count();
-                // $card_data['closed_rate_avg'] = $card_data['closed_rate_avg']->sum('crm_requests.status_id');
-                // $card_data['closed_rate'] = $count !== 0 ? $card_data['closed_rate_avg'] / $count : 0;
                 $card_feedback = CrmRequestFeedback::
-                // whereBetween('created_at',[$thirtyDays,$today])->
+                whereBetween('created_at',[$thirtyDays,$today])->
                 pluck('crm_request_id');
                 $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
                 $shipments = Shipment::where('shipper_status_id',2)->whereBetween('created_at', [$from, $stop_date])->count();
-                // dd($card_total,$shipments);
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
             }
             
             $card_data['total'] = $card_data['total']->count();
             if ($card_data['total'] > 0) {
-                // $crm['in_process_percentage'] = round(($crm['in_process'] / $crm['total']) * 100, 2);
-                // $crm['resolved_percentage'] = round(($crm['resolved_percentage'] / $crm['total']) * 100, 2);
-                // $crm['closed_percentage'] = round(($crm['closed'] / $crm['total']) * 100, 2);
-                // $crm['valid_percentage'] = round(($crm['valid'] / $crm['total']) * 100, 2);
                 $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
                 $card_data['closed_rate_percentage'] = $card_total !== 0
                 ? round(($card_data['closed_rate'] / $card_total) * 100, 2)

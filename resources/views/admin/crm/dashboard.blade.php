@@ -142,7 +142,7 @@
                                     @endif
                                     <div class="col-4">
                                         <fieldset class="form-group">
-                                            <select name="shipment_status" id="shipment_status" class="form-control select2">
+                                            <select name="shipment_status" id="search_shipment_status" class="form-control select2">
                                                 @foreach($shipment_status as $status)
                                                 <option value="{{$status->id}}">{{$status->name}}</option>
                                                 @endforeach
@@ -160,13 +160,7 @@
                                     </div>
     {{--             
                                     <div class="col-4">
-                                        <fieldset class="form-group">
-                                            <select name="shipment_status" id="shipment_status" class="form-control select2" multiple="multiple" >
-                                                @foreach($shipment_status as $status)
-                                                    <option value="{{$status->id}}">{{$status->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
+                                       
                                     </div> --}}
                 
                                     {{-- <div class="col-4">
@@ -917,7 +911,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#shipment_status').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipment_status').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipment Status',
                 width:'100%',
                 allowClear:true
@@ -962,7 +956,7 @@
                 var search_zone = $('#search_zone').val();
                 var search_case_nature = $('#search_case_nature').val();
                 var search_case_nature_type = $('#search_case_nature_type').val();
-                var shipment_status = $('#shipment_status').val();
+                var shipment_status = $('#search_shipment_status').val();
                 var avg_tat = $('#avg_tat').val();
                 var agent_id = $('#search_agent').val();
                 // var from_date = $('input[name="from_date"]').val();
@@ -1396,7 +1390,7 @@
                         d.search_case_nature = $('#search_case_nature').val();
                         d.search_case_nature_type = $('#search_case_nature_type').val();
                         d.search_agent = $('#search_agent').val();
-                        d.shipment_status = $('#shipment_status').val();
+                        d.search_shipment_status = $('#search_shipment_status').val();
                         d.avg_tat = $('#avg_tat').val();
                         d.from_date = $('input[name="from_date_formatted"]').val();
                         d.to_date = $('input[name="to_date_formatted"]').val();
@@ -1435,9 +1429,6 @@
                     {data: 'launched_by_name', name: 'launched_by_name', class: 'align-middle name'},
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'tagged', name: 'crt.crm_request_tagging_type_id', class: 'align-middle tagged'},
-                    // {data: 'tagged_to_manual', name: 'tagged_to_manual', class: 'align-middle tagged_to_manual'},
-                  /*  {data: 'special_request', name: 'sar.admin_id', class: 'align-middle special_request'},*/
-                    // {data: 'tagged_date', name: 'crth.created_at', class: 'align-middle tagged_date'},
                     {data: 'tagged_to_kae', name: 'tagged_to_kae', class: 'align-middle tagged_to_kae'},
                     {data: 'tagged_to_operation', name: 'tagged_to_operation', class: 'align-middle tagged_to_operation'},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
@@ -1445,8 +1436,6 @@
                     {data: 'agent_assigned_date', name: 'resa.created_at', class: 'align-middle agent_assigned_date'},
                     {data: 'agent_assigned_by', name: 'resby.name', class: 'align-middle agent_assigned_by'},
                     {data: 'address', name: 'crm_requests.address', class: 'align-middle address'},
-                    // {data: 'address_latitude', name: 'crm_requests.address_latitude', class: 'align-middle address_latitude'},
-                    // {data: 'address_longitude', name: 'crm_requests.address_longitude', class: 'align-middle address_longitude'},
                     {data: 'valid_date', name: 'res.created_at', class: 'align-middle valid_date'},
                     {data: 'current_tat', name: 'current_tat', class: 'align-middle current_tat', orderable: false, searchable: false},
                     {data: 'arrival_today', name: 'sj.updated_at', class: 'align-middle arrival_today', orderable: false, searchable: false},
@@ -1460,6 +1449,7 @@
                 rowCallback: function(row, data, index) {
                     if (data.crm_request_status_id != 4) 
                     {
+                        console.log(data);
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.id, selected_rows) !== -1) {
@@ -1477,6 +1467,7 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var shipment_status = '<select name="shipment_status" id="shipment_status" class="select2 form-control"></select>';
+                    var crm_request_status = '<select name="crm_request_status" id="crm_request_status" class="select2 form-control"></select>';
                     var case_nature = '<select name="case_nature" id="case_nature" class="select2 form-control"></select>';
                     var channel = '<select name="channel" id="channel" class="select2 form-control"></select>';
                     var case_nature_type = '<select name="case_nature_type" id="case_nature_type" class="select2 form-control"></select>';
@@ -1501,15 +1492,21 @@
                         }
                         else if ($(header).is('.case_nature')) {
                             $(case_nature).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
+                            .on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                         }
                         else if ($(header).is('.shipment_status')) {
                             $(shipment_status).appendTo($(search))
-                                .on('change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
+                            .on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                        }
+                        else if ($(header).is('.crm_request_status')) {
+                            $(crm_request_status).appendTo($(search))
+                            .on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                         }
                         else if ($(header).is('.zone')) {
                             $(zones).appendTo($(search))
@@ -1624,14 +1621,13 @@
                         return obj;
                     });
 
-                    // $('#shipment_status').prepend('<option value="" selected></option>').select2({
-                    //     data:data4,
-                    //     placeholder: "Select Status",
-                    //     width:'100%',
-                    //     containerCssClass: 'select-xs',
-                    //     dropdownCssClass: 'form-control-sm p-0'
-                    // });
-
+                    $('#shipment_status').prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Shipment Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     $('#added_by').prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Launched By Type",
                         width:'100%',
@@ -1660,11 +1656,30 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
+                    var data6 = $.map({!! $crm_request_statuses !!}, function (obj) {
+                        obj.id = obj.id;
+                       
 
+                        return obj;
+                    });
+
+                    var data6 = $.map({!! $crm_request_statuses !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+                    console.log(data6);
+                    $('#crm_request_status').prepend('<option value="" selected></option>').select2({
+                        data:data6,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
-            table.on( 'select', function ( e, dt, type, indexes ) {
+            table.on('select', function ( e, dt, type, indexes ) {
                 var count = table.rows( { selected: true } ).count();
                 var lblcount= document.getElementById('count');
                 lblcount.textContent =count +' Row(s) selected';
