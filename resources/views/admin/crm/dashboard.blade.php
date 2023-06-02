@@ -1259,7 +1259,7 @@
                         }
                     },
                     @endif
-                        @if (session('role_id') == 1 ||  session('role_id') == 6 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90, 179])))
+                        @if (session('role_id') == 1 ||  session('role_id') == 6 || in_array(session('permissions'), [32, 6, 37, 51, 83, 90, 179]))
                     {
                         text: 'Assign Agent',
                         className: 'btn btn-primary assign',
