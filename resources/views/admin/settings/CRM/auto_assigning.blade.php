@@ -349,4 +349,9 @@
                 });
         });
     </script>
+    <style>
+        #datatable tbody ul{
+            margin-left: -20px;
+        }
+    </style>
 @endsection
