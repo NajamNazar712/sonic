@@ -1188,8 +1188,8 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.reason);
-                                row.push(values.remarks_excel);
-                                row.push(values.remarks);
+                                row.push(values.remarks_excel); //Remarks Count
+                                row.push(values.shipment_remarks_excel);
                                 row.push(values.shipper_remarks);
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
@@ -1710,7 +1710,7 @@
                 },
                 rowId: 'shId',
                 order: [
-                    [23, 'desc']
+                    [24, 'desc']
                 ],
                 columns: [{
                         data: 'shId',

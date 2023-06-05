@@ -278,11 +278,12 @@ class ReturnController extends Controller
                 }
             })
             
-            // ->addColumn('remarks',function ($shipper){
-            //     $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
-            //     $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
-            //     return $btn;
-            // })
+            //Remarks Count Button in table column
+            ->addColumn('remarks',function ($shipper){
+                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
+                $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
+                return $btn;
+            })
 
             //for shipment counts in excel
             ->addColumn('remarks_excel',function ($shipper){
@@ -351,6 +352,11 @@ class ReturnController extends Controller
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<textarea style="width:200px;" placeholder="Enter Remarks" class="form-control form-control-sm" rows="4" cols="100">'.$shipments->remarks.'</textarea>';
                 return $remark;
+            })
+
+             //for shipment remarks in excel
+             ->addColumn('shipment_remarks_excel',function ($shipments){
+                return $shipments->remarks;
             })
             ->addColumn('reattemp_status_remarks',function ($shipments){
                 $reattempt_remarks_col = ReattemptShipmentStatusRemarks::where('shipment_id',$shipments->shId);
