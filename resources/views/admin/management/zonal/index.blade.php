@@ -51,6 +51,29 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="duplicate_zone" data-backdrop="static" role="dialog" aria-labelledby="duplicate_zone" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<form id="duplicate_zone_form" method="POST" action="{{ route('admin.management.zonal.duplicate_zone') }}" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+										@csrf
+										<div class="modal-content">
+											<div class="modal-header bg-primary">
+												<h4 class="modal-title white">Duplicate Zone</h4>
+											</div>
+											<div class="modal-body text-center form-group">
+												<input type="hidden" name="role_id" id="role_id">
+												<input type="text" name="zone" id="zone" class="form-control" placeholder="Enter Zone*" data-rule-required="true">
+											<br>
+												<input type="text" name="charges" id="charges" class="form-control" placeholder="Enter Charges*" data-rule-required="true">
+											</div>
+											<div class="modal-footer">
+												<button type="submit" class="btn btn-primary">Create</button>
+												<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+											</div>
+										</div>
+									</form>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -359,7 +382,27 @@
                             }
                         });
 					}
+
+					if ($(this).hasClass('duplicate_zone')) {
+					$('#view_cities .modal-body').html('');
+					var id = parseInt($(this).parents('tr').attr('id'));
+
+					$('#role_id').val(id);
+					$('#duplicate_zone').modal('show');
+					}
+				
 				@endif
+				$('#duplicate_zone_form').validate({
+				ignore: [],
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('.form-group'));
+				},
+				submitHandler: function(form) {
+                    form.submit();
+				}
+			});
 
 				if ($(this).hasClass('view_cities')) {
 					$('#view_cities .modal-body').html('');

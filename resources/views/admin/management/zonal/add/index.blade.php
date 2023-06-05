@@ -189,6 +189,12 @@
 					form.submit();
 				}
 			});
+			
+			$('input[name^="city_class"]').each(function() {
+                if ($(this).val() === '3') {
+                    $(this).iCheck('check');
+                }
+            });
 		});
 	</script>
 @endsection

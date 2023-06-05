@@ -58,6 +58,7 @@ class AdminZonalManagementController extends Controller
                 $active = '<button type="button" class="dropdown-item activate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Activate Zone</div></button>';
                 $inactive = '<button type="button" class="dropdown-item deactivate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Deactivate Zone</div></button>';
                 $view_cities_button = '<button type="button" class="dropdown-item view_cities"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Cities</div></button>';
+                $duplicate_zone = '<button type="button" class="dropdown-item duplicate_zone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">Duplicate Zone</div></button>';
 
                 $dropdown = '
                 <div class="btn-group">
@@ -76,6 +77,7 @@ class AdminZonalManagementController extends Controller
                 }
 
                 $dropdown .= $view_cities_button;
+                $dropdown .= $duplicate_zone;
 
                 $dropdown .= '
                   </div>
@@ -253,5 +255,15 @@ class AdminZonalManagementController extends Controller
         $zone->save();
 
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
+    }
+
+    public function duplicate_zone(Request $request) {
+        dd('asd');
+        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
+        $zone = Zone::find($request);
+        $zone_class_cities = ZoneClassCity::where(['zone_id' => $request, 'zone_classification_id' => 1])->pluck('class', 'city_id');
+        $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $request, 'zone_classification_id' => 2])->pluck('class', 'city_id');
+
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor]);
     }
 }
