@@ -284,6 +284,7 @@ class ReturnController extends Controller
             //     return $btn;
             // })
 
+            //for shipment counts in excel
             ->addColumn('remarks_excel',function ($shipper){
                 $status_count = StatusRemark::where('shipment_id',$shipper->shId)->count();
                 return $status_count;

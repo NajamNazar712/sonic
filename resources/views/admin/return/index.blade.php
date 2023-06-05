@@ -120,7 +120,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Call Findings</th>
-                            <th class="border-primary border-darken-1">Shipment Remarks</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipper Remarks</th>
                             <th class="border-primary border-darken-1">OSA Estimated Charges</th>
                             <th class="border-primary border-darken-1">Arrival Date</th>
