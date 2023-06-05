@@ -268,10 +268,10 @@ class LeadManagementController extends Controller
 //                $dropdown .= '<button type="button"  class="dropdown-item add_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
                 $dropdown .= '<button onclick="window.open(\'' . route('admin.leads.view_remarks', ['id' => $lead->lead_id]) . '\')" type="button" class="dropdown-item view_remarks" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Remarks</div></button>';
 
-                if ((session('role_id') == 1 || in_array(420, session('permissions')) || in_array(419, session('permissions')) || in_array(696, session('permissions'))) && $lead->call_status == 'no') {
+                if ((session('role_id') == 1 || in_array(870, session('permissions'))) && $lead->call_status == 'no') {
                     $dropdown .= '<button type="button"  class="dropdown-item call_status" data-id = '.$lead->lead_id.'><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make A Call</div></button>';
 
-                }if((session('role_id') == 1 || in_array(420, session('permissions'))|| in_array(419, session('permissions')) || in_array(696, session('permissions'))) && $lead->call_status == 'yes'){
+                }if((session('role_id') == 1 || in_array(871, session('permissions'))) && $lead->call_status == 'yes'){
                     $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = '.$lead->lead_id.' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
                 }
 
