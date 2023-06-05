@@ -210,6 +210,7 @@
                             options+=`<option value='${field.id}' ${selected} >${field.name}<option>`;
                         });
                         $('#hub_id').append(options).trigger('change');
+                        hb = [];
                     }
                 })
             }
@@ -234,6 +235,7 @@
                             options+=`<option value='${field.id}' ${selected}>${field.type}<option>`;
                         });
                         $('#case_nature_type_id').append(options);
+                        cnt = [];
                     }
                 })
             }
