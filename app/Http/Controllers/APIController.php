@@ -240,6 +240,15 @@ class APIController extends Controller
 
 
     public function get_shipment_details(Request $req){
+
+        $validator = Validator::make($req->all(), [
+            'trackingID'       => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validator->errors()]);
+        }
+
         $Shipment = new Shipment();
         $shipmentDetails = $Shipment->where('tracking_number',$req->trackingID)
         ->join('cities','shipments.consignee_city_id','cities.id')
@@ -252,9 +261,18 @@ class APIController extends Controller
         'cities.name as city_name',
         'cities.name as city_name'
         )->first();
-        return response()->json([
-            'data' => $shipmentDetails,
-        ]);
+
+        if(!empty($shipmentDetails)){
+            return response()->json([
+                'data' => $shipmentDetails,
+            ]);
+        }
+
+        else{
+            return response()->json([
+                'message' => 'Shipment Not Found',
+            ]); 
+        }
     }
 
 
