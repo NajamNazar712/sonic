@@ -4986,9 +4986,10 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_index()
     {
+        $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning')->first();
         $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,1])->get(); //37,28 role
         ActivityTrailController::createActivityTrailLog(Auth::id(), 469);
-        return view('admin.settings.CRM.auto_assigning')->with(['agents'=>$agents]);
+        return view('admin.settings.CRM.auto_assigning')->with(['agents'=>$agents,'settings'=>$settings]);
 
     }
 
@@ -8133,6 +8134,7 @@ class GlobalSettingsController extends Controller
         }
     }
     public function add_auto_assign_agent(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 661);
         $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,1])->get(); //37,28 role
         $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
         $case_natures = CrmRequestCaseNature::all();
@@ -8141,5 +8143,21 @@ class GlobalSettingsController extends Controller
         $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
         $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
         return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones,'case_natures'=>$case_natures,'segments'=>$segments,'shipper_key'=>$shipper_key,'shipper_non_key'=>$shipper_non_key,'shipment_status'=>$shipment_status]);
+    }
+    public function global_status(Request $request){
+            $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $id = ($settings->setting_value == 1) ? 0 : 1;
+                $settings->setting_value = $id;
+                $settings->save();
+                if($settings->setting_value == 1){
+                    return redirect()->back()->with('success', 'Auto Assigning Agents Functionality Enabled!');
+                }else{
+                    return redirect()->back()->with('success', 'Auto Assigning Agents Functionality Disabled!');
+                }
+
+            }
+            return redirect()->back()->with('error', 'Settings Not Found');
     }
 }

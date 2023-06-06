@@ -1249,6 +1249,9 @@ class Permission
 
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
+            'settings.auto_assigning.add' => 617,
+            'settings.auto_assigning.edit' => 618,
+            'settings.auto_assigning.global_status' => 872,
 
             'settings.reattempt_percentage.index' => 659,
 

@@ -152,7 +152,7 @@
                     @if (session('role_id') == 1 || in_array(617, session('permissions')))
                     
                     {
-                        text: '<i class="la la-plus"></i> ADD',
+                        text: 'Add',
                         className: 'btn btn-primary bulk_internal_comment',
                         enabled: true,
                         action: function (e, dt, node, config) {
@@ -160,6 +160,26 @@
                         }
                     },
                     @endif
+                    @if ((session('role_id') == 1 || in_array(872, session('permissions'))) && !empty($settings))
+                        {
+                            @if($settings->setting_value == 0)
+                            text: '<i class="la la-check-circle"></i> Mark Enable',
+                            className: 'btn btn-success ',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                            }
+                            @else
+                            text: '<i class="la la-times-circle"></i> Mark Disable',
+                            className: 'btn btn-danger ',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                window.location.href = "{{route('admin.settings.auto_assigning.global_status') }}"
+                            }
+                            @endif
+                        },
+                    @endif
+
                     'reset'
                     ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],

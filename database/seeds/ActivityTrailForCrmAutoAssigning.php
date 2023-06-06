@@ -11,6 +11,10 @@ class ActivityTrailForCrmAutoAssigning extends Seeder
      */
     public function run()
     {
+        DB::table('module_permissions')->insert(array(
+            array('id' => 872, 'name' => 'CRM - Auto Assigning Global Permission', 'module_id' => 14),
+        ));
+
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 661, 'screen_name' => 'CRM - Auto Assigning - ADD', 'action'=> 'View'),
           

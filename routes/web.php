@@ -3143,6 +3143,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('get_hub', 'Admins\GlobalSettingsController@get_hub')->name('get_hub');
             Route::post('case_nature_type', 'Admins\GlobalSettingsController@case_nature_type')->name('case_nature_type');
             Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
+            Route::get('global_status', 'Admins\GlobalSettingsController@global_status')->name('global_status');
 
         });
 
