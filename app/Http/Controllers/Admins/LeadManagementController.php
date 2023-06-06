@@ -275,7 +275,6 @@ class LeadManagementController extends Controller
                     $dropdown .= '<button type="button"  class="dropdown-item call_status"  data-id = '.$lead->lead_id.' ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">End A Call</div></button>';
                 }
 
-                
                 if ((session('role_id') == 1 || (in_array(696, session('permissions')) && (!in_array($lead->status_id ,[9, 12]))))) {
                     $dropdown .= '<button type="button"  class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                 }

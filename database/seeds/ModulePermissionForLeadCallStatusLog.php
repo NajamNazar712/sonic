@@ -16,15 +16,13 @@ class ModulePermissionForLeadCallStatusLog extends Seeder
             array('id' => 871, 'name' => 'Leads Call Status (End A Call) - Action', 'module_id' => 25),
         ));
 
-
-
         $permission_id = array(870, 871);
             
         for($i=0;$i<count($permission_id);$i++) {
 
             if($permission_id[$i]==870)
             {
-                $roles = array(4,13,29,32,37,50,51,53,73,74,83,90,100,103,117);
+                $roles = array(4,6,12,13,15,16,22,27,29,32,35,37,41,44,45,50,51,53,56,58,60,64,73,74,83,90,92,93,99,100,103,107,117,120);
 
                 for($j=0;$j<count($roles);$j++)
                 {
@@ -36,7 +34,8 @@ class ModulePermissionForLeadCallStatusLog extends Seeder
             }
             elseif($permission_id[$i]==871)
             {
-                $roles = array(4,13,29,32,37,50,51,53,73,74,83,90,100,103,117);
+                
+                $roles = array(4,6,12,13,15,16,22,27,29,32,35,37,41,44,45,50,51,53,56,58,60,64,73,74,83,90,92,93,99,100,103,107,117,120);
 
                 for($j=0;$j<count($roles);$j++)
                 {
