@@ -4987,7 +4987,7 @@ class GlobalSettingsController extends Controller
     public function crm_auto_assigning_index()
     {
         $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning')->first();
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,1])->get(); //37,28 role
+        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
         ActivityTrailController::createActivityTrailLog(Auth::id(), 469);
         return view('admin.settings.CRM.auto_assigning')->with(['agents'=>$agents,'settings'=>$settings]);
 
@@ -5124,7 +5124,7 @@ class GlobalSettingsController extends Controller
             $selected_agent = $selected_agent->first();
 
             $zn = $selected_agent->zones->pluck('zone_id')->toArray();
-            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28, 1])->get(); //37,28 role
+            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
             $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
             $hubs = City::whereIn('zone_id', $zn)->get();
 
