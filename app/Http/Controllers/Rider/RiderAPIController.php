@@ -12446,7 +12446,10 @@ class RiderAPIController extends Controller
                             ->skip(1)
                             ->first();
                     }
-
+                    else {
+                        $shipment_reattempt = NULL;
+                    }
+                    
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
@@ -12457,7 +12460,7 @@ class RiderAPIController extends Controller
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
-                    $deliveries['shipment_reattempt'] = $shipment_reattempt['shipper_status_id'] == 13 ? 1 : 0;
+                    $deliveries['shipment_reattempt'] = ($shipment_reattempt && $shipment_reattempt->shipper_status_id == 13) ? 1 : 0;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;

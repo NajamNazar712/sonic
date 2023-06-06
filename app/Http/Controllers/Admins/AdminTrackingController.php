@@ -28,6 +28,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\ShipmentPosition;
 use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -940,6 +941,13 @@ class AdminTrackingController extends Controller
                             $details['ccd'] = 1;
                         } else {
                             $details['ccd'] = 0;
+                        }
+
+                        $received_shipments = ReturnSheetShipments::where('shipment_id',$shipment->id);
+                        if($received_shipments->exists()){
+                        $details['received_img'] =  '<img src="' . asset('img/shipement_received.png').' ">';
+                        }else{
+                            $details['received_img'] ="";
                         }
 
                         $shipper = $shipment->user;

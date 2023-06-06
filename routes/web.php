@@ -1512,6 +1512,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('note/submit', 'Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
+
             Route::get('', 'Admins\ReturnController@return_receive_deliveries_view')->name('index');
             Route::get('list', 'Admins\ReturnController@return_receive_deliveries_list')->name('list');
             Route::get('{id}/update', 'Admins\ReturnController@return_receive_update')->name('update');
@@ -3356,6 +3357,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_role_setting_update')->name('update');
 
         });
+        
+        Route::prefix('sms_notification_return_delivered_to_shipper')->name('sms_notification_return_delivered_to_shipper.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_update')->name('update');
+        });
+
 
         Route::prefix('omni')->name('omni.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
@@ -3543,6 +3550,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
