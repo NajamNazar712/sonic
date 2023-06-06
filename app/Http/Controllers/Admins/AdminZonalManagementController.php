@@ -51,14 +51,15 @@ class AdminZonalManagementController extends Controller
             ->addColumn('action', function($zone) {
                 if($zone->business_category_id == 1){
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $duplicate_zone = '<button type="button" class="dropdown-item duplicate_zone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">Duplicate Zone</div></button>';
                 }
                 else{
                     $edit_button = '<button type="button" class="dropdown-item international_edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $duplicate_zone ='';
                 }
                 $active = '<button type="button" class="dropdown-item activate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Activate Zone</div></button>';
                 $inactive = '<button type="button" class="dropdown-item deactivate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Deactivate Zone</div></button>';
                 $view_cities_button = '<button type="button" class="dropdown-item view_cities"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Cities</div></button>';
-                $duplicate_zone = '<button type="button" class="dropdown-item duplicate_zone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">Duplicate Zone</div></button>';
 
                 $dropdown = '
                 <div class="btn-group">
@@ -75,7 +76,7 @@ class AdminZonalManagementController extends Controller
                         $dropdown .= $active;
                     }
                 }
-
+                
                 $dropdown .= $view_cities_button;
                 $dropdown .= $duplicate_zone;
 
