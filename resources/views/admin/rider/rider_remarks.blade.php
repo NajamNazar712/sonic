@@ -2,445 +2,790 @@
 @section('title','Rider Remarks')
 
 @section('content')
-    <h1 class="mb-1">
-        Rider Remarks    
-    </h1>
+<h1 class="mb-1">
+    Rider Remarks
+</h1>
 
-    <div class="card">
-        <div class="card-content" aria-expanded="true">
-            <div class="card-body">
-                @include('admin.inc.messages')
+<div class="card">
+    <div class="card-content" aria-expanded="true">
+        <div class="card-body">
+            @include('admin.inc.messages')
 
+            <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                <div class="col-3 mt-1">
+                    <div class="form-group input-group ">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                        </div>
+                        <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Select From Date">
+                    </div>
+                </div>
 
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
+                <div class="col-3 mt-1">
+                    <div class="form-group input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                        </div>
+                        <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Select To Date">
+                    </div>
+                </div>
+                
+                <div class="col-3 mt-1">
+                    <select name="search_remark" id="search_remark" class="form-control select2 col-4">
+                        @foreach($remarks as $remark)
+                        <option value="{{$remark->id}}">{{'R-00'.$remark->id}}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Trax ID</th>
-                        <th class="border-primary border-darken-1">City</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Created At</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
-                        <th class="border-primary border-darken-1">Updated At</th>
+                <div class="col-3 mt-1">
+                    <select name="search_rider_status" id="search_rider_status" class="form-control select2 col-4">
+                        @foreach($rider_statuses as $rider_status)
+                        <option value="{{$rider_status->id}}">{{$rider_status->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div class="col-3 mt-1">
+                    <select name="search_rider" id="search_rider" class="form-control select2 col-4">
+                        @foreach($riders as $rider)
+                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
 
-                    </tr>
-                    </thead>
-                </table>
+                <div class="col-3 mt-1">
+                    <select name="search_city" id="search_city" class="form-control select2 col-4">
+                        @foreach($cities as $city)
+                        <option value="{{$city->id}}">{{$city->name}}</option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div class="col-2 mt-1">
+                    <div class="form-group">
+                        <button type="button" id="search_filter_btn" class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
+                            Search
+                        </button>
+                    </div>
+                </div>
 
+            </form>
+
+        </div>
+
+        <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+            <thead>
+                <tr role="row" class="bg-primary white">
+
+                    <th class="border-primary border-darken-1">S. No.</th>
+                    <th class="border-primary border-darken-1">Rider Remarks ID</th>
+                    <th class="border-primary border-darken-1">Rider Name</th>
+                    <th class="border-primary border-darken-1">Trax ID</th>
+                    <th class="border-primary border-darken-1">City</th>
+                    <th class="border-primary border-darken-1">Hub</th>
+                    <th class="border-primary border-darken-1">Zone</th>
+                    <th class="border-primary border-darken-1">Rider Remarks</th>
+                    <th class="border-primary border-darken-1">Initial Response</th>
+                    <th class="border-primary border-darken-1">Final Response</th>
+                    <th class="border-primary border-darken-1">Created At</th>
+                    <th class="border-primary border-darken-1">Status</th>
+                    <th class="border-primary border-darken-1">Updated By</th>
+                    <th class="border-primary border-darken-1">Updated At</th>
+                    <th class="border-primary border-darken-1">Action</th>
+                    
+                </tr>
+            </thead>
+        </table>
+
+    </div>
+</div>
+</div>
+
+<div class="modal fade text-left" id="rider_remarks" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Initial Response</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <form id="rider_remarks" action="" method="post">
+                    <div class="row mb-2">
+                        <div class="col-12 form-group">
+                            <textarea id="initial_response" name="initial_response" class="form-control" rows="4" placeholder="Enter A Response *"></textarea>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <button id="" type="submit" class="btn btn-primary btn-block">Add Response</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!--Shipments popup -->
-    {{-- <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+<div class="modal fade text-left" id="rider_remarks_final" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Final Response</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <form id="rider_remarks" action="" method="post">
+                    <div class="row mb-2">
+                        <div class="col-12 form-group">
+                            <textarea id="final_response" name="final_response" class="form-control" rows="4" placeholder="Enter A Response *"></textarea>
+                            <div class="invalid-feedback_final"></div>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+                        </div>
+                    </div>
+
+                    <div class="row justify-content-center">
+                        <div class="col-12">
+                            <button id="" type="submit" class="btn btn-primary btn-block">Add Response</button>
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
-    </div> --}}
-    <!--Shipments popup -->
+    </div>
+</div>
+
+
 
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+<style>
+    table.dataTable {
+        font-size: 12px;
+    }
 
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
+    table.dataTable thead tr th {
+        padding-left: 0.5em;
+        white-space: normal;
+        word-wrap: break-word;
+    }
 
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
+    table.dataTable thead tr th:before,
+    table.dataTable thead tr th:after {
+        height: 20px;
+        margin-bottom: -10px;
+        bottom: 50% !important;
+    }
 
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
+    table.dataTable tbody tr td {
+        padding-left: 0.5em;
+        padding-right: 0.5em;
+    }
 
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
+    table.dataTable tbody tr td.select-checkbox:before {
+        top: 50%;
+        border-color: #64a0d2;
+    }
 
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
+    table.dataTable tbody tr.selected td.select-checkbox:after {
+        top: 50%;
+        text-shadow: none;
+    }
 
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
+    .btn-group .dropdown-menu .dropdown-item {
+        white-space: normal;
+    }
 
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
+    #toast-bottom-center.toast-container {
+        text-align: center;
+    }
 
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
+    #toast-bottom-center.toast-container .toast {
+        display: table;
+        width: auto !important;
+        text-align: left;
+    }
 
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
+    .invalid-feedback{
+        text-align: start !important;
+        font-size: 15px;
+    }
+
+    .invalid-feedback_final{
+        text-align: start !important;
+        font-size: 15px;
+
+    }
+
+    .hidden {
+        display: none;
+    }
+
+</style>
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
-            type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function() {
 
-    {{-- <script type="text/javascript">
-        $(document).ready(function () {
-            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
-                if (this.context.length) {
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        success: function (result) {
-                            head = [];
-
-                            head.push('S.No');
-                            head.push('Request Note No.');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Rider');
-                            head.push('Rider Type');
-                            head.push('Route');
-                            head.push('No. Of Shipments');
-                            // head.push('Total COD');
-                            head.push('Requested At');
-                            head.push('Last Updated By');
-                            head.push('Last Updated (Date)');
-
-                            $.each(result.data, function (index, values) {
-                                row = [];
-                                row.push(index + 1);
-                                row.push(values.request_note_id_padded);
-                                row.push(values.hub);
-                                row.push(values.zone_name);
-                                row.push(values.rider);
-                                row.push(values.rt);
-                                row.push(values.route);
-                                row.push(values.shipments_count);
-                                // row.push(values.amount);
-                                row.push(values.date);
-                                row.push(values.admin_name);
-                                row.push(values.updated_at);
-                                body.push(row);
-                            });
-                        },
-                        url: '{{ route('admin.return.rider_request.list') }}',
-                        data: params,
-                        async: false
-                    });
-
-                    return {body: body, header: head};
+        var search_date_to = $('#search_form #search_date_to').pickadate({
+            firstDay: 1
+            , clear: ''
+            , selectYears: true
+            , selectMonths: true
+            , formatSubmit: 'yyyy-mm-dd'
+            , hiddenSuffix: '_formatted'
+            , onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
                 }
-            });
+            }
+        });
 
-            var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '500px',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        title: 'Pending Return Note Requests',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
-                    'reset'
-                ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: true,
-                language: {
-                    processing: data_table_loader
-                },
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.return.rider_request.list') }}',
-                    data: function (d) {
-                        d.return_note_number = $('#scan_return_note').val();
-                        d.search_tracking = $('#search_tracking').val();
+        var search_date_from = $('#search_form #search_date_from').pickadate({
+            firstDay: 1
+            , clear: ''
+            , selectYears: true
+            , selectMonths: true
+            , formatSubmit: 'yyyy-mm-dd'
+            , hiddenSuffix: '_formatted'
+            , onSet: function(context) {
+                if (context.select) {
+                    $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                }
+            }
+        });
+
+        $('#search_rider_status').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Status'
+            , allowClear: true
+        })
+
+
+        $('#search_city').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Cities'
+            , allowClear: true
+        })
+
+
+        $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Riders'
+            , allowClear: true
+        })
+
+        $('#search_remark').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%'
+            , placeholder: 'Remark ID'
+            , allowClear: true
+        })
+
+
+        $('#search_filter_btn').on('click', function() {
+            table.draw(true);
+        });
+
+
+        $('body').on('click', '.rider_remarks_btn', function(event) {
+            var id = $(this).attr('data-id');
+            var status_value = $(this).attr('data-value');
+
+            event.preventDefault();
+
+            $.ajax({
+                url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                , method: 'POST'
+                , data: {
+                    '_token': '{{ csrf_token() }}'
+                    , 'id': id
+                    , 'status_value': status_value,
+
+
+                }
+                , success: function(data) {
+                    if (data.status == 1) {
+                        table.draw();
+                        toastr.success(data.success, 'Status Has Been Changed!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
                     }
-                },
-                rowId: 'request_note_id',
-                order: [[9, 'desc']],
-                columns: [
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
-                        render: function (data, type, row) {
-                            return '';
-                        }
-                    },
-                    {data: 'request_note_id_padded', name: 'rider_return_note_requests.id', class: 'align-middle request_note'},
-                    {data: 'hub', name: 'c.name', class: 'align-middle hub'},
-                    {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {data: 'rider', name: 'r.name', class: 'align-middle rider'},
-                    {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
-                    {data: 'route', name: 'route', class: 'align-middle route', orderable: false},
-                    {data: 'shipments_count_link',name: 'return_notes.shipments_count',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},
-                    // {data: 'amount', name: 'rider_return_note_requests.total_cod_amount', class: 'align-middle amount'},
-                    {data: 'date', name: 'rider_return_note_requests.created_at', class: 'align-middle date'},
-                    {data: 'admin_name', name: 'ad.name', class: 'align-middle admin_name'},
-                    {data: 'updated_at', name: 'rider_return_note_requests.updated_at', class: 'align-middle updated_at'},
-                    {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
-                ],
-                rowCallback: function (row, data, index) {
-                    var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                drawCallback: function (settings) {
-                    var api = new $.fn.dataTable.Api(settings);
-                    var data = api.rows({page: 'current'}).data();
-                },
-                initComplete: function () {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    this.api().columns().every(function (column_id) {
-                        var column = this;
-                        var header = column.header();
+                }
+                , error: function(xhr, status, error) {
+                    toastr.error('An error occurred while processing the request.', 'Error!', {
+                        positionClass: 'toast-top-center'
+                        , containerId: 'toast-top-center'
+                    });
+                }
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipments_count_link')) {
-                            $(td).appendTo($(search));
-                        }  else {
-                            var current = $(input).appendTo($(search)).on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
 
-                            if (column.search()) {
-                                current.val(column.search());
+            });
+        });
+
+        $('body').on('click', '.initial_response', function(event) {
+            var id = $(this).attr('data-id');
+            $('#rider_remarks').modal('show');
+            var toastrShown = false; 
+
+                $('#rider_remarks').on('submit', function(event) {
+                    event.preventDefault();
+                    let initial_response = $("#initial_response").val();
+                    $.ajax({
+                        url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                        , method: 'POST'
+                        , data: {
+                            '_token': '{{ csrf_token() }}'
+                            , 'id': id
+                            , 'initial_response': initial_response
+                        , }
+                        , success: function(data) {
+                            if (data.status == 1) {
+                                $('#rider_remarks').modal('hide');
+                                $('#rider_remarks').on('hidden.bs.modal', function() {
+                                    $(this).find('form').trigger('reset');
+                                    $('#initial_response').removeClass('is-invalid'); 
+                                    $('.invalid-feedback').removeClass('text-danger').html(''); 
+                                })
+                                table.draw();
+
+                                if (!toastrShown) { // Check if success toastr has been shown
+                                response = 'Initial Response Has Been Added';
+                                toastr.success(response, 'Success!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+
+                                toastrShown = true; 
+                            }
+                            } else {
+                                var initialResponseField = $('#initial_response');
+                                if (initialResponseField.val().trim() === '') {
+                                    initialResponseField.addClass('is-invalid');
+                                    var errorElement = initialResponseField.next('.invalid-feedback');
+                                    errorElement.addClass('text-danger').html('Initial Response is required');
+                                } else {
+                                    var error = "Please Fill To Submit A Response";
+                                    toastr.error(error, 'Error!', {
+                                        positionClass: 'toast-top-center'
+                                        , containerId: 'toast-top-center'
+                                    });
+                                }
                             }
                         }
-                    });
-                    this.api().table().columns.adjust();
-                }
-            });
+                        , error: function(xhr, status, error) {
+                            console.log(xhr)
+                            toastr.error('An error occurred while processing the request.', 'Error!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                        }
+                    })
 
-            $('#otp_input').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'mask': '999999'
-            });
+                });
+        });
 
-            /*$('body').on('click', '.printreturnnote', function () {
-                var returnnote = $(this).parents('tr').attr('id');
-                print(returnnote);
-            });
-            $('body').on('click', '.printTempDNCC', function () {
-                var note_id = $(this).parents('tr').attr('id');
-                var temporary = 'temporary';
-                printTemp(note_id, temporary);
-            });
-            $('body').on('click', '.printUndeliveredDNCC', function () {
-                var note_id = $(this).parents('tr').attr('id');
-                printUndelivered(note_id);
-            });
-            $('body').on('keyup change', '#otp_input', function () {
-                if ($(this).val().length === 6) {
-                    $('#otp_submit').attr('disabled', false);
-                } else {
-                    $('#otp_submit').attr('disabled', true);
-                }
-            });*/
+        $('body').on('click', '.final_response', function(event) {
+            var id = $(this).attr('data-id');
+            $('#rider_remarks_final').modal('show');
 
 
-            var route = '{!! route('admin.tracking.index') !!}';
-
-            $('#datatable tbody').on('click', 'tr td.shipments_count_link button', function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#shipments_modal .modal-body').html('');
-                $('#shipments_modal').modal('show');
-
+            toastrShown = false; 
+            $('#rider_remarks_final').on('submit', function(event) {
+                event.preventDefault();
+                let final_response = $("#final_response").val();
                 $.ajax({
-                    url: '{!! route('admin.return.rider_request.shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'request_note_id': id
+                    url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                    , method: 'POST'
+                    , data: {
+                        '_token': '{{ csrf_token() }}'
+                        , 'id': id
+                        , 'final_response': final_response
+                    , }
+                    , success: function(data) {
+                        if (data.status == 1) {
+                            $('#rider_remarks_final').modal('hide');
+                            $('#rider_remarks_final').on('hidden.bs.modal', function() {
+                                $(this).find('form').trigger('reset');
+                                $('#final_response').removeClass('is-invalid'); 
+                                $('.invalid-feedback_final').removeClass('text-danger').html(''); 
+                            })
+                            table.draw();
+
+                            if(!toastrShown){
+                            var response = 'Final Response Has Been Added'
+                            toastr.success(response, 'Success!', {
+                                positionClass: 'toast-top-center'
+                                , containerId: 'toast-top-center'
+                            });
+                            toastrShown = true; // Set the flag to indicate success toastr has been shown
+                        }
+                        } else {
+                            var initialResponseField = $('#final_response');
+                            if (initialResponseField.val().trim() === '') {
+                                initialResponseField.addClass('is-invalid');
+                                var errorElement = initialResponseField.next('.invalid-feedback_final');
+                                errorElement.addClass('text-danger').html('Final Response is required');
+                            } else {
+                                var error = "Please Fill To Submit A Response";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center'
+                                    , containerId: 'toast-top-center'
+                                });
+                            }
+                        }
+                    }
+                    , error: function(xhr, status, error) {
+                        toastr.error('An error occurred while processing the request.', 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
                     }
                 })
-                    .done(function (data) {
-                        if (data) {
-                            var html = '';
-
-                            if (data.shipments) {
-                                $.each(data.shipments, function (index, tracking_number) {
-                                    html += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
 
             });
-
-            $('#otp_submit').on('click', function () {
-                otp_verification();
-            });
-
-            $('#otp_input').keypress(function (event) {
-                if (event.keyCode == 13) {
-                    otp_verification();
-                }
-            });
-
-            function reassign_rider() {
-                var rider = $('#riders').val();
-                if (rider) {
-                    swal({
-                        text: 'Are you sure, you want to Reassign rider?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            $.ajax({
-                                url: '{!! route('admin.return.receive.reassign_rider') !!}',
-                                method: 'post',
-                                data: {
-                                    '_token': '{{ csrf_token() }}',
-                                    'rider': rider,
-                                    'oper_id': $('#operation_rider_id').val(),
-                                    'return_note_id': $('#return_note_id').val()
-                                }
-                            })
-                                .done(function (data) {
-                                    if (data.status == 0) {
-                                        toastr.success(data.success, 'Success!', {
-                                            positionClass: 'toast-bottom-center',
-                                            containerId: 'toast-bottom-center'
-                                        });
-                                    } else {
-                                        toastr.error(data.error, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-                                    }
-                                    table.draw(true);
-                                    $('#reassign_modal').modal('hide');
-                                });
-                        }
-                    });
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            }
-
-            function otp_generation() {
-                var rider = $('#riders').val();
-                // if (rider) {
-                //     $('#OtpModal').modal('show');
-                //     $.ajax({
-                //         url: '{!! route('admin.delivery.note.otp.generate') !!}',
-                //         method: 'POST',
-                //         data: {
-                //             'rider': rider,
-                //             '_token': '{{ csrf_token() }}'
-                //         }
-                //     }).done(function (data) {
-                //         $('#otp_input').focus();
-                //     });
-                // } else {
-                //     var error = "Rider not selected!";
-                //     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                // }
-            }
-
-            function otp_verification() {
-                var otp = $('#otp_input').val();
-                var rider = $('#riders').val();
-                if (rider) {
-                    // if (otp.length == 6) {
-                    //     $.ajax({
-                    //         url: '{!! route('admin.delivery.note.otp.verify') !!}',
-                    //         type: 'POST',
-                    //         data: {
-                    //             'rider': rider,
-                    //             'otp': otp,
-                    //             '_token': '{{ csrf_token() }}'
-                    //         }
-                    //     }).done(function (data) {
-                    //         $('#otp_input').val('');
-                    //         $('#otp_submit').attr('disabled', true);
-                    //         if (data.status === 0) {
-                    //             toastr.error(data.error, 'Error!', {
-                    //                 positionClass: 'toast-top-center',
-                    //                 containerId: 'toast-top-center'
-                    //             });
-                    //         } else {
-                    //             $('#OtpModal').modal('hide');
-                    //             reassign_rider();
-                    //         }
-                    //     });
-                    // }
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                }
-
-            }
-
         });
-    </script> --}}
+
+        $('body').on('click', '.rider_remarks_btn_1', function(event) {
+            var id = $(this).attr('data-id');
+            var status_value_2 = $(this).attr('data-value');
+
+            event.preventDefault();
+
+            $.ajax({
+                url: '{!! route('admin.management.riders.rider_remarks.post') !!}'
+                , method: 'POST'
+                , data: {
+                    '_token': '{{ csrf_token() }}'
+                    , 'id': id
+                    , 'status_value_2': status_value_2,
+
+
+                }
+                , success: function(data) {
+                    if (data.status == 1) {
+                        table.draw();
+                        toastr.success(data.success, 'Status Has Been Changed!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    } else {
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center'
+                            , containerId: 'toast-top-center'
+                        });
+                    }
+                }
+                , error: function(xhr, status, error) {
+                    toastr.error('An error occurred while processing the request.', 'Error!', {
+                        positionClass: 'toast-top-center'
+                        , containerId: 'toast-top-center'
+                    });
+                }
+
+
+            });
+        });
+
+        function updateButtonStatus() {
+            $('.rider_remarks_btn').each(function() {
+                var row = $(this).closest('tr');
+                var rowData = table.row(row).data();
+
+                if (rowData['response'] == '' || rowData['response'] == null) {
+                    $(this).prop('disabled', true).addClass('hidden');
+                } else {
+                    $(this).prop('disabled', false).removeClass('hidden');
+                }
+            });
+        }
+        updateButtonStatus();
+
+
+
+        function updateFinalButtonStatus() {
+            $('.rider_remarks_btn_1').each(function() {
+                var row = $(this).closest('tr');
+                var rowData = table.row(row).data();
+
+                if (rowData['response_2'] == '' || rowData['response_2'] == null) {
+                    $(this).prop('disabled', true).addClass('hidden');
+                } else {
+                    $(this).prop('disabled', false).removeClass('hidden');
+                }
+            });
+        }
+        updateFinalButtonStatus();
+        jQuery.fn.DataTable.Api.register('buttons.exportData()', function(options) {
+            if (this.context.length) {
+                body = [];
+                var params = table.ajax.params();
+                params.start = 0;
+                params.length = -1;
+                params.excel = true;
+                var jsonResult = $.ajax({
+                    success: function(result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Rider Remarks ID');
+                        head.push('Rider Name');
+                        head.push('Trax ID');
+                        head.push('City');
+                        head.push('Hub');
+                        head.push('Zone');
+                        head.push('Rider Remarks');
+                        head.push('Initial Response');
+                        head.push('Final Response');
+                        head.push('Created At');
+                        head.push('Status');
+                        head.push('Updated By');
+                        head.push('Updated At');
+
+                        $.each(result.data, function(index, values) {
+                            row = [];
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.rider_name);
+                            row.push(values.traxID);
+                            row.push(values.city_name);
+                            row.push(values.hub);
+                            row.push(values.zone_name);
+                            row.push(values.rider_remarks);
+                            row.push(values.response);
+                            row.push(values.response_2);
+                            row.push(values.created_at);
+                            row.push(values.status);
+                            row.push(values.admin_name);
+                            row.push(values.updated_at);
+                            body.push(row);
+                        });
+                    }
+                    , url: '{{ route('admin.management.riders.rider_remarks.list') }}'
+                    , data: params
+                    , async: false
+                });
+
+                return {
+                    body: body
+                    , header: head
+                };
+            }
+        });
+
+        var table = $('#datatable').DataTable({
+            dom: '<"d-inline-block"l><"pull-right"B>tipr'
+            , scrollX: true
+            , scrollY: '500px'
+            , buttons: [{
+                    extend: 'excel'
+                    , title: 'Rider Remarks'
+                    , text: '<i class="la la-file-excel-o"></i> Excel'
+                , }
+                , 'reset'
+            ]
+            , lengthMenu: [
+                [50, 100, 500, 1000, -1]
+                , [50, 100, 500, 1000, 'All']
+            ]
+            , pageLength: 50
+            , pagingType: 'full_numbers'
+            , processing: true
+            , language: {
+                processing: data_table_loader
+            }
+            , serverSide: true
+            , ajax: {
+                url: '{{ route('admin.management.riders.rider_remarks.list') }}'
+                , data: function(d) {
+                    d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                    d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    d.search_city = $('#search_city').val();
+                    d.search_rider = $('#search_rider').val();
+                    d.search_remark = $('#search_remark').val();
+                    d.search_rider_status = $('#search_rider_status').val();
+
+                }
+            }
+            , rowId: 'rider_remarks.id'
+            , order: [
+                [13, 'desc']
+            ]
+            , columns: [{
+                    orderable: false
+                    , searchable: false
+                    , name: 'serial_number'
+                    , class: 'align-middle serial_number'
+                    , targets: 0
+                    , render: function(data, type, row) {
+                        return '';
+                    }
+                }
+                , {
+                    data: 'id'
+                    , name: 'rider_remarks.id'
+                    , class: 'align-middle id'
+                }
+                , {
+                    data: 'rider_name'
+                    , name: 'r.name'
+                    , class: 'align-middle rider_name'
+                }
+                , {
+                    data: 'traxID'
+                    , name: 'r.trax_id'
+                    , class: 'align-middle traxID'
+                }
+                , {
+                    data: 'city_name'
+                    , name: 'city.name'
+                    , class: 'align-middle city_name'
+                }
+                , {
+                    data: 'hub'
+                    , name: 'c.name'
+                    , class: 'align-middle hub'
+                }
+                , {
+                    data: 'zone_name'
+                    , name: 'z.name'
+                    , class: 'align-middle zone_name'
+                }
+                , {
+                    data: 'rider_remarks'
+                    , name: 'rider_remarks.rider_remarks'
+                    , class: 'align-middle rider_remarks'
+                }
+                , {
+                    data: 'response'
+                    , name: 'rrr.response'
+                    , class: 'align-middle response'
+                }
+                , {
+                    data: 'response_2'
+                    , name: 'rrr_2.response'
+                    , class: 'align-middle response_2'
+                }
+                , {
+                    data: 'created_at'
+                    , name: 'rider_remarks.created_at'
+                    , class: 'align-middle created_at text-center'
+                   
+                }
+                , {
+                    data: 'status'
+                    , name: 'rider_remarks.rider_remarks_status_id'
+                    , class: 'align-middle status'
+                }
+                , {
+                    data: 'admin_name'
+                    , name: 'ad.name'
+                    , class: 'align-middle admin_name'
+                }
+                , {
+                    data: 'updated_at'
+                    , name: 'rider_remarks.updated_at'
+                    , class: 'align-middle updated_at'
+                }
+                , {
+                    data: 'action'
+                    , name: 'action'
+                    , class: 'align-middle action'
+                    , orderable: false
+                    , searchable: false
+                }
+            ]
+            , rowCallback: function(row, data, index) {
+                var info = table.page.info();
+                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+            }
+            , drawCallback: function(settings) {
+                var api = new $.fn.dataTable.Api(settings);
+                var data = api.rows({
+                    page: 'current'
+                }).data();
+            }
+            , initComplete: function() {
+                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                this.api().columns().every(function(column_id) {
+                    var column = this;
+                    var header = column.header();
+
+                    if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        $(td).appendTo($(search));
+                    }else if($(header).is('.status')){
+                        $(drop_select).appendTo($(search))
+                        .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
+                    } else {
+                        var current = $(input).appendTo($(search)).on('change', function() {
+                            column.search($(this).val(), false, false, true).draw();
+                        }).wrap(td).after(icon);
+
+                        if (column.search()) {
+                            current.val(column.search());
+                        }
+                    }
+
+                    var data = $.map({!! $rider_statuses !!}, function (obj) {
+                        obj.text = obj.name;
+                        console.log(obj)
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                });
+                this.api().table().columns.adjust();
+            }
+        });
+
+        table.on('draw', function() {
+            updateButtonStatus();
+            updateFinalButtonStatus();
+        });
+        
+        
+    });
+
+</script>
 @endsection

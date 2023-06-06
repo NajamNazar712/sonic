@@ -311,7 +311,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['shipper_name','button','trax_logo','link'];
         }
         else if ($id == 39) {
-            $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at'];
+            $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at','shipments_count','return_notes_id','return_detail'];
         }else if ($id == 40) {
             $details['fields'] = ['rider_name','delivery_note_id','password'];
         }
@@ -808,6 +808,10 @@ class AdminNotificationsController extends Controller
         else if ($id == 214)
         {
             $details['fields'] = ['link'];
+        }
+        else if ($id == 216)
+        {
+            $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
         }
 
         return $details;

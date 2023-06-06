@@ -994,8 +994,6 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-
                     $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                     if ($handover_shipments->exists()) {
                         $handover_shipments = $handover_shipments->first();
@@ -1015,9 +1013,6 @@ class DeliveryController extends Controller
                 }
 
                 foreach ($valid_shipments as $index => $shipment) {
-
-                    NotificationsController::send(10, $note->id, $shipment);
-                    NotificationsController::send(11, $note->id, $shipment);
 
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
                     $dbf_otp = mt_rand(100000, 999999);
@@ -1050,6 +1045,10 @@ class DeliveryController extends Controller
                         $shipment_otp->otp = null;
                         $shipment_otp->save();
                     }
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                    NotificationsController::send(10, $note->id, $shipment);
+                    NotificationsController::send(11, $note->id, $shipment);
+
                 }
                 $process_one_link['shipment_ids'] = $valid_shipments;
                 $process_one_link['delivery_note_id'] = $note->id;
@@ -1116,7 +1115,18 @@ class DeliveryController extends Controller
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id',  'oc.name as hub','riders.trax_id as rider_trax_id', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated_at','ad.name as updated_by','delivery_notes.special_rider','delivery_notes.special_rider_name','delivery_notes.special_rider_phone','delivery_notes.delivered_shipments as delivered_shipments',DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'),'oc.business_category_id as business_category','z.name as zone_name', 'riders.operation_rider_id', 'riders.rider_type_id','rider_types.name as rt','delivery_notes.created_via_app as created_via'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 
+            'oc.name as hub','riders.trax_id as rider_trax_id', 'riders.name as rider', 'routes.code as route', 
+            'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 
+            'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 
+            'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.pending_status', 
+            'delivery_notes.created_at', 'delivery_notes.last_updated_at', 'ad.name as updated_by', 
+            'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
+            'delivery_notes.delivered_shipments as delivered_shipments', 
+            DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id 
+            WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'), 
+            'oc.business_category_id as business_category', 'z.name as zone_name', 'riders.operation_rider_id', 
+            'riders.rider_type_id', 'rider_types.name as rt', 'delivery_notes.created_via_app as created_via', 'riders.trax_id as rider_trax_id'])
             ->where('delivery_notes.status', 0);
 
 

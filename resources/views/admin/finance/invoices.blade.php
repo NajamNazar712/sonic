@@ -537,7 +537,6 @@
 									head.push('Shipper Account ID');
 									head.push('Shipper');
 									head.push('Sales Person');
-									head.push('Invoice No.');
 									head.push('City');
 									head.push('Total Charges');
 									head.push('Total GST');
