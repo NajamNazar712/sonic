@@ -258,12 +258,22 @@ class AdminZonalManagementController extends Controller
     }
 
     public function duplicate_zone(Request $request) {
-        dd('asd');
-        $cities = City::where('status', 1)->where('business_category_id', 1)->get();
-        $zone = Zone::find($request);
-        $zone_class_cities = ZoneClassCity::where(['zone_id' => $request, 'zone_classification_id' => 1])->pluck('class', 'city_id');
-        $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $request, 'zone_classification_id' => 2])->pluck('class', 'city_id');
+        $id = $request->input('zone_id');
+        $zone_class_cities = ZoneClassCity::where('zone_id', $id)->get();
+           
+        $new_zone = new Zone();
+        $new_zone->name = $request->zone_name;
+        $new_zone->gst = $request->zone_charges;
+        $new_zone->status = 1;
+        $new_zone->business_category_id = 1;
+        $new_zone->save();
 
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor]);
+        // get all the rows of input zone_id (which you want to duplicate) and create new rows with new id 
+        foreach ($zone_class_cities as $oldRecord) {
+            $newRecord = $oldRecord->replicate();
+            $newRecord->zone_id = $new_zone->id;
+            $newRecord->save();
+        }
+            return redirect()->back()->with(['success' => 'Zone: ' . $request->input('zone_name') . ' has been added!']); 
     }
 }

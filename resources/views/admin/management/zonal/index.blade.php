@@ -51,7 +51,6 @@
 									</div>
 								</div>
 							</div>
-
 							<div class="modal fade" id="duplicate_zone" data-backdrop="static" role="dialog" aria-labelledby="duplicate_zone" aria-hidden="true">
 								<div class="modal-dialog modal-sm" role="document">
 									<form id="duplicate_zone_form" method="POST" action="{{ route('admin.management.zonal.duplicate_zone') }}" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
@@ -60,11 +59,13 @@
 											<div class="modal-header bg-primary">
 												<h4 class="modal-title white">Duplicate Zone</h4>
 											</div>
-											<div class="modal-body text-center form-group">
-												<input type="hidden" name="role_id" id="role_id">
-												<input type="text" name="zone" id="zone" class="form-control" placeholder="Enter Zone*" data-rule-required="true">
-											<br>
-												<input type="text" name="charges" id="charges" class="form-control" placeholder="Enter Charges*" data-rule-required="true">
+											<div class="modal-body">
+												<input type="hidden" name="zone_id" id="zone_id">
+												<input type="text" name="zone_name" id="zone_name" class="form-control" placeholder="Enter Zone*" data-rule-required="true">
+												
+											</div>
+											<div class="modal-body">
+												<input type="text" name="zone_charges" id="zone_charges" class="form-control" placeholder="Enter Charges*" data-rule-required="true">
 											</div>
 											<div class="modal-footer">
 												<button type="submit" class="btn btn-primary">Create</button>
@@ -74,6 +75,7 @@
 									</form>
 								</div>
 							</div>
+
 						</div>
 					</div>
 				</div>
@@ -102,8 +104,13 @@
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+	<script src="{{ asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js') }}"
+        type="text/javascript"></script>
 	<script>
 		$(document).ready(function() {
+
+
 			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -266,6 +273,8 @@
 				}
 			});
 
+			
+
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
@@ -383,26 +392,45 @@
                         });
 					}
 
-					if ($(this).hasClass('duplicate_zone')) {
-					$('#view_cities .modal-body').html('');
-					var id = parseInt($(this).parents('tr').attr('id'));
-
-					$('#role_id').val(id);
-					$('#duplicate_zone').modal('show');
-					}
+					
 				
 				@endif
-				$('#duplicate_zone_form').validate({
-				ignore: [],
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('.form-group'));
-				},
-				submitHandler: function(form) {
-                    form.submit();
-				}
-			});
+
+				if ($(this).hasClass('duplicate_zone')) {
+						// $('#duplicate_zone .modal-body').html('');
+						var id = parseInt($(this).parents('tr').attr('id'));
+
+						$('#zone_id').val(id);
+						$('#duplicate_zone').modal('show');
+					}
+				
+						$('#duplicate_zone_form').validate({
+						ignore: [],
+						errorClass: 'danger',
+						successClass: 'success',
+						errorPlacement: function(error, element) {
+							error.addClass('w-100').appendTo(element.parents('.form-group'));
+						},
+						submitHandler: function(form) {
+							form.submit();
+						}
+					});
+
+					$('#zone_charges').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'rightAlign': false,
+						'digits': 2,
+						'min': 0.00,
+						'max': 1000000.00
+					});
+
+					$('#duplicate_zone').on('hide.bs.modal', function(e) {
+					$('#zone_name').val('');
+					$('#zone_charges').val('');
+					});
+
 
 				if ($(this).hasClass('view_cities')) {
 					$('#view_cities .modal-body').html('');
