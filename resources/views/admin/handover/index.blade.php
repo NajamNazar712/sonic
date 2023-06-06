@@ -140,18 +140,6 @@
                             </tr>
                             </thead>
                         </table>
-                        
-                        <div class="row justify-content-center">
-                            <div class="form-group col-5">
-                                <input type="text" name="scan_piece_tracking_number" id="scan_piece_tracking_number" class="form-control scan_piece_tracking_number" placeholder="Scan Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required" disabled="disabled">
-                            </div>
-                        </div>
-                        <div class="row justify-content-center">
-                            <div class="form-group col-5">
-                                <input type="text" name="pieces_weight" id="pieces_weight" class="form-control pieces_weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,100000]" data-msg-range="Weight needs to be from 0.01 to 100000" disabled="disabled">
-                            </div>
-                        </div>
-
                         <div class="form-group">
                             <button type="submit" class="btn btn-primary piece_confirm" id="piece_confirm" disabled="disabled">Confirm</button>
                         </div>
@@ -282,7 +270,6 @@
                 'allowPlus': false
             });
            
-            var shipment_ids = [];
             var shipment_piece_ids = [];
             var all_shipment_piece_ids = [];
            
@@ -366,7 +353,7 @@
                                             $('#ShipmentPiecesModal').modal('show');
                                         }
                                         else{
-                                            toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                            // toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                         }
                                     }
                                     else{
@@ -385,7 +372,7 @@
                                 else {
                                     $('#add_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!!!!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }
@@ -610,7 +597,7 @@
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     scan_sound(1);
-                                    // shipment_ids.push(data.details.id);
+                                    shipment_ids.push(data.details.id);
                                     if(all_shipment_item_ids.length == 0){
                                         all_shipment_piece_ids = shipment_piece_ids;
                                     }
