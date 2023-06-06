@@ -517,7 +517,7 @@ if (flag == true) {
                         <input type="text" name="additional_charges[`+y+`]"
                         onkeydown="inputValidate()"
                         class="form-control input-filtered "
-                        placeholder="Additional Charges" data-rule-required="true" data-msg-required="This field is required" min="1">
+                        placeholder="Additional Charges" min="1">
                     </td>
                     <td> 
                         <div class="form-group">
