@@ -1941,6 +1941,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
     });
+
+
+   
+
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
