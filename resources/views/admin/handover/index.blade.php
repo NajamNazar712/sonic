@@ -626,10 +626,6 @@
                                         containerId: 'toast-bottom-center'
                                     });
                                     $('#ShipmentPiecesModal').modal('hide');
-
-
-                    // Pass the formData array to the add_shipment_form function
-                    // add_shipment_form(formData);
                 }
             });
 
