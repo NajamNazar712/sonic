@@ -98,6 +98,7 @@ class AdminZonalManagementController extends Controller
     }
 
     public function add_store(Request $request) {
+        // dd('asdf');
         $zone = New Zone();
 
         $zone->name = $request->name;
@@ -277,4 +278,25 @@ class AdminZonalManagementController extends Controller
         }
             return redirect()->back()->with(['success' => 'Zone: ' . $request->input('zone_name') . ' has been added!']); 
     }
+
+    public function check_zone_name(Request $request) {
+        
+        if ($request->filled('name')) {
+          $name = Zone::where('name', $request->input('name'));
+  
+          if ($request->has('id')) {
+            $name = $name->where('id', '!=', $request->input('id'));
+          }
+  
+          if (!$name->exists()) {
+            return 'true';
+          }
+          else {
+            return 'false';
+          }
+        }
+        else {
+          return 'false';
+        }
+      }
 }

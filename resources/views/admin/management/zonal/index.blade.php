@@ -60,12 +60,16 @@
 												<h4 class="modal-title white">Duplicate Zone</h4>
 											</div>
 											<div class="modal-body">
-												<input type="hidden" name="zone_id" id="zone_id">
-												<input type="text" name="zone_name" id="zone_name" class="form-control" placeholder="Enter Zone*" data-rule-required="true">
+												<div class="form-group">
+													<input type="hidden" name="zone_id" id="zone_id">
+													{{-- <input type="text" name="zone_name" id="zone_name" class="form-control" placeholder="Enter Zone*" data-rule-required="true"> --}}
+													<input type="text" name="zone_name" id="zone_name" class="form-control subject" placeholder="Enter Zone*" data-rule-required="true" 
+													data-rule-remote="{{ route("admin.management.zonal.check_zone_name") }}" data-msg-remote="Zone Name must be unique">
+												</div>
 												
-											</div>
-											<div class="modal-body">
-												<input type="text" name="zone_charges" id="zone_charges" class="form-control" placeholder="Enter Charges*" data-rule-required="true">
+												<div class="form-group">
+													<input type="text" name="zone_charges" id="zone_charges" class="form-control" placeholder="Enter Charges*" data-rule-required="true">
+												</div>
 											</div>
 											<div class="modal-footer">
 												<button type="submit" class="btn btn-primary">Create</button>
@@ -404,32 +408,33 @@
 						$('#duplicate_zone').modal('show');
 					}
 				
-						$('#duplicate_zone_form').validate({
-						ignore: [],
-						errorClass: 'danger',
-						successClass: 'success',
-						errorPlacement: function(error, element) {
-							error.addClass('w-100').appendTo(element.parents('.form-group'));
-						},
-						submitHandler: function(form) {
-							form.submit();
-						}
-					});
+				$('#duplicate_zone_form').validate({
+					ignore: [],
+					errorClass: 'danger',
+					successClass: 'success',
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parents('.form-group'));
+					},
+					submitHandler: function(form) {
+						form.submit();
+					}
+				});
 
-					$('#zone_charges').inputmask({
-						'alias': 'decimal',
-						'allowMinus': false,
-						'allowPlus': false,
-						'rightAlign': false,
-						'digits': 2,
-						'min': 0.00,
-						'max': 1000000.00
-					});
+				$('#zone_charges').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'rightAlign': false,
+					'digits': 2,
+					'min': 0.00,
+					'max': 1000000.00
+				});
 
-					$('#duplicate_zone').on('hide.bs.modal', function(e) {
-					$('#zone_name').val('');
-					$('#zone_charges').val('');
-					});
+				$('#duplicate_zone').on('hide.bs.modal', function(e) {
+				$('#zone_name').val('');
+				$('#zone_charges').val('');
+				});
+				
 
 
 				if ($(this).hasClass('view_cities')) {

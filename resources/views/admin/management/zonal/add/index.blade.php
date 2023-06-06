@@ -24,7 +24,8 @@
 									<div class="col-8">
 										<div class="form-group">
 											<label>Name</label>
-											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" 
+											data-rule-remote="{{ route("admin.management.zonal.check_zone_name") }}" data-msg-remote="Zone Name must be unique" data-msg-required="Name is required">
 										</div>
 									</div>
 
@@ -66,7 +67,7 @@
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" checked>
 															<label for="city_class_{{ $city->id }}">Class D</label>
 														</fieldset>
 													</div>
@@ -78,7 +79,7 @@
 									</div>
 
 									<div class="col-12 col-lg-6 mt-2 mt-lg-0" style="margin-top: 100px">
-										<h3 class="form-section mb-2">Overland/Detain</h3>
+										<h3 class="form-section mb-2">Saver Plus/Swift</h3>
 
 										@foreach($cities as $city)
 											<div class="form-group">
@@ -104,7 +105,7 @@
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" checked>
 															<label for="city_class{{ $city->id }}">Class D</label>
 														</fieldset>
 													</div>
@@ -190,11 +191,11 @@
 				}
 			});
 			
-			$('input[name^="city_class"]').each(function() {
-                if ($(this).val() === '3') {
-                    $(this).iCheck('check');
-                }
-            });
+			// $('input[name^="city_class"]').each(function() {
+            //     if ($(this).val() === '3') {
+            //         $(this).iCheck('check');
+            //     }
+            // });
 		});
 	</script>
 @endsection
