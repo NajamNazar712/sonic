@@ -66,15 +66,31 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
+        // dd(1);
         $attempt = Auth::guard('web')->attempt($this->credentials($request), $request->filled('remember'));
+
+        
+        // dd($request->all());
+
+
 
         if ($attempt) {
             session(['user_type' => 1]);
+            session(['special_dashboard_user' => 0]);
         }
         else {
             $attempt = Auth::guard('substitute_users')->attempt($this->credentials($request), $request->filled('remember'));
+            
 
             if ($attempt) {
+                $user_info = SubstituteUser::where('email',$request->email)->first();
+                if($user_info->is_created_by_admin == 1)
+                {
+                    session(['special_dashboard_user' => 1]);
+                }
+                else{
+                    session(['special_dashboard_user' => 0]);
+                }
                 session(['user_type' => 2]);
             }
         }
