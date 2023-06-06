@@ -119,7 +119,7 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function add_index() {
-      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
+      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7, 20, 21, 22])->get();
 
       return view('client.substitute_account_management.add.index')->with(['permissions' => $permissions]);
     }

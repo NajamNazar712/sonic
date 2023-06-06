@@ -184,8 +184,18 @@ class ShipperDashboardController extends Controller
             }*/
             $shipper_payment = null;
 
+            dd(session('special_dashboard_user'));
+
+            if(session('special_dashboard_user'))
+            {
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+            }
+            else{
+                return view('client.welcome.special_substituteuser')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+            }
+
             
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+            
         }
     }
     public function opt_verify(Request $request){
