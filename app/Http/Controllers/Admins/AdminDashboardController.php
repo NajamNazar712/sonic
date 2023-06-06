@@ -13059,7 +13059,7 @@ class AdminDashboardController extends Controller
             'shipment_receiver_details.tracking_number as tracking_id',
             'shipment_receiver_details.receiver_name as receiverName',
             'shipment_receiver_details.receiver_cnic as receiverCnic',
-            'shipment_receiver_details.receiver_relationship as relationship',
+            'shipment_receiver_details.receiver_relationship as relationship'
             )->get();
         
             
