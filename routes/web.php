@@ -872,6 +872,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('/assign_locations_view', 'Admins\AdminDashboardController@assign_locations_view')->name('assign_locations_view');
             Route::post('/set_pickup_route', 'Admins\AdminDashboardController@set_as_pickup_route')->name('set_pickup_route');
         });
+
+
+        Route::prefix('shipment_received')->name('shipment_received.')->group(function () {
+            Route::get('', 'Admins\AdminDashboardController@shipment_received_details')->name('index');
+            Route::post('excel_upload', 'Admins\AdminDashboardController@shipment_received_excel_upload')->name('excel_upload');
+            Route::get('list', 'Admins\AdminDashboardController@shipment_received_details_list')->name('list');
+        });
+
+
+
+
+        
         Route::prefix('rider')->name('rider.')->group(function () {
             // Route::get('','Admins\AdminDashboardController@riderView')->name('index');
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');

@@ -184,6 +184,13 @@ use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
+
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Http\Models\Admin\ShipementReceiveDetails;
+
 use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
@@ -12962,6 +12969,113 @@ class AdminDashboardController extends Controller
 
         return redirect()->route('admin.accounts.substitute_account_management.index',$shipper_id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been updated!' , 'shipper_id' => $id]);
     }
+
+
+    public function shipment_received_details(){
+       return view('admin.management.shipment_received.index');
+    }
+
+    public function shipment_received_excel_upload(Request $request){
+        // dd($request->all());
+        if ($file = $request->file('receiver_detials')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();     
+            $header = ['Tracking No', 'Receiver Name', 'Receiver Cnic', 'Receiver Relationship'];
+        }
+        
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        $rows = array();
+        if (isset($spreadsheet)) {
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[] = $value;
+                }
+
+                $rows[] = $row;
+            }
+            unset($spreadsheet);
+        }
+        
+        $invalid_shipment = [];
+        $valid_shipment   = [];
+        foreach ($rows as $key => $row) {
+            $shipment = Shipment::where('tracking_number',$row[0])->first();
+            if(empty($shipment)){
+                $shipment_details   = [$row[0],$row[1],$row[2],$row[3]];
+                $invalid_shipment[] = $shipment_details;  
+            }
+            else{
+                $valid_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
+            }
+        }
+        if(collect($invalid_shipment)->isEmpty()){
+            if(collect($valid_shipment)->isNotEmpty()){
+                foreach ($valid_shipment as $valid) {
+                    $receiving_detials = new ShipementReceiveDetails();
+                    $receiving_detials->shipment_id            = $valid[1];
+                    $receiving_detials->tracking_number        = $valid[0];
+                    $receiving_detials->receiver_name          = $valid[2];
+                    $receiving_detials->receiver_cnic          = $valid[3];
+                    $receiving_detials->receiver_relationship  = $valid[4];
+                    $receiving_detials->received_by            = Auth::id();
+                    $receiving_detials->save();
+                }
+            return redirect()->back()->with(['success' => 'Upload Successfully']);
+            }
+            else{
+                return redirect()->back()->with(['error' => 'Fill Out the Sheet Correctly', 'invalid_shipment' =>$invalid_shipment]);
+            }
+        }
+        else{
+            return redirect()->back()->with(['error' => 'Shipment not found', 'invalid_shipment' =>$invalid_shipment]);
+        }
+    }
+
+    public function shipment_received_details_list(){
+        $receiving_detials = new ShipementReceiveDetails();
+        $all_received = $receiving_detials::join('admins','shipment_receiver_details.received_by','admins.id')
+        ->select(
+            'admins.name as Admin',
+            'shipment_receiver_details.tracking_number as tracking_id',
+            'shipment_receiver_details.receiver_name as receiverName',
+            'shipment_receiver_details.receiver_cnic as receiverCnic',
+            'shipment_receiver_details.receiver_relationship as relationship',
+            )->get();
+        
+            
+        $datatable = Datatables::of($operation_incoming_delivered_returned)
+            ->editColumn('count_link', function ($shipments) use ($from, $to, $service_type_id, $hub) {
+                if ($shipments->count > 0) {
+                    $route = route('admin.operation_forecasting.incoming.shipments_list');
+                    return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' target='_blank'>$shipments->count</a></u>";
+                } else {
+                    return 0;
+                }
+            });
+        return $datatable->make(true);
+    }
+
+
 
 }
 
