@@ -5145,6 +5145,8 @@ class AdminReportsController extends Controller
                 ->where('ss.id', '=', $status);
         }
 
+        $from_to_ids = FALSE;
+
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
@@ -5159,6 +5161,22 @@ class AdminReportsController extends Controller
                     );
             })
                 ->whereBetween('sj.created_at', [$from, $to]);
+
+                $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
+                if ($from_id->exists()) {
+                    $from_id = $from_id->first()->id;
+        
+                    $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+        
+                    if ($to_id->exists()) {
+                        $to_id = $to_id->first()->id;
+
+                        $from_to_ids = TRUE;
+        
+                        $count->where('sj.id', '>=', $from_id)
+                            ->where('sj.id', '<=', $to_id);
+                    }
+                }
         }
 
         if ($search_business_category = $request->get('search_business_category')) {
@@ -5498,6 +5516,11 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
+
+            if ($from_to_ids) {
+                $datatable->where('sj.id', '>=', $from_id)
+                    ->where('sj.id', '<=', $to_id);
+            }
         }
 
         if (!($request->get('search_date_from') && $request->get('search_date_to')) && !($request->get('dr_search_date_from') && $request->get('dr_search_date_to'))) {
