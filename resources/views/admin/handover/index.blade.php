@@ -610,7 +610,7 @@
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
                                     scan_sound(1);
-                                    shipment_ids.push(data.details.id);
+                                    // shipment_ids.push(data.details.id);
                                     if(all_shipment_item_ids.length == 0){
                                         all_shipment_piece_ids = shipment_piece_ids;
                                     }

@@ -49,6 +49,8 @@ class AdminShipmentHandoverController extends Controller
         echo $output;
     }
 
+
+    //admin.handover.create.shipment_details
     public function arrival_bulk_shipment_details(Request $request){
       $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
       if ($shipment->exists() && $shipment->pieces === 1) {
@@ -165,7 +167,9 @@ class AdminShipmentHandoverController extends Controller
       }
 }
 
+//admin.handover.create.store
     public function bulk_handover_submit(Request $request){
+      dd($request->all());
         $shipment_ids = explode(',', $request->shipment_ids);
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
