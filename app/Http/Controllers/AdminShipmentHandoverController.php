@@ -57,7 +57,7 @@ class AdminShipmentHandoverController extends Controller
         $shipment = $shipment->first();
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
         if($handover_shipment->exists()){
-                return ['status' => 1, 'errors' => 'Shipment is already in another Handover Note'];
+                return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
             }
             $details = array();
 
@@ -97,21 +97,21 @@ class AdminShipmentHandoverController extends Controller
                     $delivery_area = $found->id;
                     if($request->delivery_location_mapping != null){
                       if($request->delivery_location_mapping != $delivery_area){
-                            return ['status' => 1, 'errorss' => 'Delivery Location is different'];
+                            return ['status' => 1, 'error' => 'Delivery Location is different'];
                       }
                     }
                 }
                 else{
                     $delivery_area = 0;
                     if($request->delivery_location_mapping != $delivery_area){
-                      return ['status' => 1, 'errorsss' => 'Delivery Location is different'];
+                      return ['status' => 1, 'error' => 'Delivery Location is different'];
                     }
                 }
             }else{
               $delivery_area = 0;
               if($request->delivery_location_mapping != null){
                 if($request->delivery_location_mapping != $delivery_area){
-                  return ['status' => 1, 'errorsssss' => 'Delivery Location is different'];
+                  return ['status' => 1, 'error' => 'Delivery Location is different'];
                 }
               }
             }

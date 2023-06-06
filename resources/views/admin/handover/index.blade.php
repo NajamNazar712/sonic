@@ -326,7 +326,7 @@
                                     }
                                 }
                                 //Open Modal if Shipment Pieces are greater than 1 
-                                if(data.status == 3){
+                                else if(data.status == 3){
                                     $('#scan_piece_tracking_number').prop('disabled', true);
                                     $('#pieces_weight').prop('disabled', true);
                                     $('#piece_confirm').prop('disabled', true);
