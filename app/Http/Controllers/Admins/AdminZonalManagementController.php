@@ -263,7 +263,7 @@ class AdminZonalManagementController extends Controller
         $zone_class_cities = ZoneClassCity::where('zone_id', $id)->get();
            
         $new_zone = new Zone();
-        $new_zone->name = $request->zone_name;
+        $new_zone->name = $request->name;
         $new_zone->gst = $request->zone_charges;
         $new_zone->status = 1;
         $new_zone->business_category_id = 1;
@@ -275,10 +275,11 @@ class AdminZonalManagementController extends Controller
             $newRecord->zone_id = $new_zone->id;
             $newRecord->save();
         }
-            return redirect()->back()->with(['success' => 'Zone: ' . $request->input('zone_name') . ' has been added!']); 
+            return redirect()->back()->with(['success' => 'Zone: ' . $request->input('name') . ' has been added!']); 
     }
 
     public function check_zone_name(Request $request, $id) {
+        
         if ($request->filled('name')) {
           $name = Zone::where('name', $request->input('name'));
   

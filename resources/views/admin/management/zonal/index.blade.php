@@ -63,8 +63,8 @@
 												<div class="form-group">
 													<input type="hidden" name="zone_id" id="zone_id">
 													{{-- <input type="text" name="zone_name" id="zone_name" class="form-control" placeholder="Enter Zone*" data-rule-required="true"> --}}
-													<input type="text" name="zone_name" id="zone_name" class="form-control subject" placeholder="Enter Zone*" data-rule-required="true" 
-													data-rule-remote="{{ route("admin.management.zonal.check_zone_name") }}" data-msg-remote="Zone Name must be unique">
+													<input type="text" name="name" id="name" class="form-control subject" placeholder="Enter Zone*" data-rule-required="true" 
+													data-rule-remote="{{ route("admin.management.zonal.check_zone_name",0) }}" data-msg-remote="Zone Name Already Exist">
 												</div>
 												
 												<div class="form-group">
@@ -431,7 +431,7 @@
 				});
 
 				$('#duplicate_zone').on('hide.bs.modal', function(e) {
-				$('#zone_name').val('');
+				$('#name').val('');
 				$('#zone_charges').val('');
 				});
 				
