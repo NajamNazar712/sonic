@@ -184,13 +184,12 @@ use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
-
 use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Models\Admin\ShipementReceiveDetails;
-
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
@@ -12846,7 +12845,6 @@ class AdminDashboardController extends Controller
         return $datatables->make(true);
     }
     public function substitute_accounts_email(Request $request,$id = null) {
-        // dd($id);
         if ($request->filled('email')) {
             $email = SubstituteUser::where('email', $request->input('email'));
   
@@ -12867,12 +12865,20 @@ class AdminDashboardController extends Controller
     }
 
     public function substitute_accounts_add_index($shipper_id) {
+
         $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
-        return view('admin.accounts.substitute_account_management.add.index')->with(['shipper_id' => $shipper_id,'permissions' => $permissions]);
+
+        $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
+        $sister_accounts = MergedSisterAccount::join('users','users.id','merged_sister_accounts.user_id')
+        ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
+        ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
+        ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
+        
+        return view('admin.accounts.substitute_account_management.add.index')->with(['shipper_id' => $shipper_id,'permissions' => $permissions , 'sister_accounts' => $sister_accounts]);
     }
   
     public function substitute_accounts_add_store(Request $request,$id) {
-        
+
         $substitute_user = new SubstituteUser();
 
         $substitute_user->user_id = $id;
@@ -12885,6 +12891,22 @@ class AdminDashboardController extends Controller
         $substitute_user->is_created_by_admin = 1;
         $substitute_user->created_by_admin_id = Auth::id();
         $substitute_user->save();
+
+        if ($request->has('account_ids')) {
+            
+            foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
+                foreach($account_ids as  $account_id) {
+                    $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
+    
+                    $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
+                    $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
+                    $Substitute_user_merge_sister_account_mapping->head_user_id = $id;
+                    $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
+        
+                    $Substitute_user_merge_sister_account_mapping->save();
+                }
+            }
+        }
 
         if ($request->has('permission_ids')) {
             foreach($request->input('permission_ids') as $permission_id) {
@@ -12921,17 +12943,25 @@ class AdminDashboardController extends Controller
     }
 
     public function substitute_accounts_update_index($shipper_id , $id) {
-
+        
         $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
         $substitute_user = SubstituteUser::find($id);
 
+        $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
+        $sister_accounts = MergedSisterAccount::join('users','users.id','merged_sister_accounts.user_id')
+        ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
+        ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
+        ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
+        
+        $merged_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->pluck('sister_user_id')->toArray();
+
         $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
 
-        return view('admin.accounts.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions, 'shipper_id' => $shipper_id , "id" => $id]);
+        return view('admin.accounts.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions, 'shipper_id' => $shipper_id , "id" => $id, 'sister_accounts' => $sister_accounts , 'merged_accounts' => $merged_accounts]);
     }
   
     public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
-        
+
         $substitute_user = SubstituteUser::find($id);
         $substitute_user->user_id = $shipper_id;
         $substitute_user->name = $request->input('name');
@@ -12945,6 +12975,24 @@ class AdminDashboardController extends Controller
         }
        
         $substitute_user->save();
+
+        if ($request->has('account_ids')) {
+
+            SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->delete();
+
+            foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
+                foreach($account_ids as  $account_id) {
+                    $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
+    
+                    $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
+                    $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
+                    $Substitute_user_merge_sister_account_mapping->head_user_id = $shipper_id;
+                    $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
+        
+                    $Substitute_user_merge_sister_account_mapping->save();
+                }
+            }
+        }
 
         if ($request->has('permission_ids')) {
         $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();

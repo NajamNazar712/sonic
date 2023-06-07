@@ -56,7 +56,22 @@
 											<option value="0">Disable</option>
 										</select>
 									</div>
-
+									
+									<div class="col-12">
+										<h4 class="mb-2">Merge Accounts</h4>
+										{{-- $sister_accounts --}}
+										@if (count($sister_accounts) > 0)
+											@foreach($sister_accounts as $accounts)
+												<fieldset class="d-inline-block m-1">
+													<input type="checkbox" id="account_{{ $accounts->user_id }}" class="permission" name="account_ids[{{$accounts->merged_head_id}}][]" value="{{ $accounts->user_id }}">
+													<label for="account_{{ $accounts->user_id }}">{{ $accounts->name }}</label>
+												</fieldset>
+											@endforeach
+										@else
+												<h6 class="ml-2 font-weight-bold"> No Merged Account Found </h6>
+										@endif
+									</div>
+										
 									<div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 
@@ -83,7 +98,6 @@
 											<button type="submit" class="btn btn-primary">Add</button>
 										</div>
 									</div>
-								</form>
 							</form>
 						</div>
 					</div>

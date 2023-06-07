@@ -28,7 +28,7 @@ class ShipperSubstituteAccountManagementController extends Controller
 
     public function list() {
       $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction')
-      ->where('substitute_users.user_id', session('user_id'));
+      ->where('substitute_users.user_id', session('user_id'))->where('substitute_users.is_created_by_admin','!=',1);
 
       $datatables = Datatables::of($substitute_users)
       ->editColumn('status', function ($substitute_user) {

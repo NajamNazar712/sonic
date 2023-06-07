@@ -68,6 +68,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('ledger/list', 'Shippers\ShipperDashboardController@ledger_list')->name('ledger.list');
 
     Route::get('/welcome', 'Shippers\ShipperDashboardController@welcome_index')->name('welcome');
+    Route::get('/welcome/list', 'Shippers\ShipperDashboardController@welcome_list')->name('welcome.list');
+    Route::post('/welcome/data', 'Shippers\ShipperDashboardController@welcome_data')->name('welcome.data');
     Route::post('otp_verify', 'Shippers\ShipperDashboardController@opt_verify')->name('opt_verify');
     Route::get('opt_verify_close', 'Shippers\ShipperDashboardController@opt_verify_close')->name('opt_verify_close');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');

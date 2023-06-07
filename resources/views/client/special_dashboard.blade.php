@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Report - Summary')
+@section('title', 'Welcome')
 
 @section('content')
 
@@ -11,7 +11,7 @@
                 <div class="row mb-2 justify-content-center">
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="search_user" id="search_user" class="form-control select2">
+                            <select name="search_user" id="search_user" class="form-control select2" multiple="multiple">
                                 <option value="{{$user->id}}">{{$user->name}}</option>
                                 @foreach($sister_users as $sister_user)
                                     <option value="{{$sister_user->id}}">{{$sister_user->name}}</option>
@@ -323,6 +323,8 @@
             $('#search_user').select2({
                 placeholder:'Select User',
                 width:'100%',
+                allowClear:true,
+                
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Origin City',
@@ -396,7 +398,7 @@
                     params.start = 0;
                     params.length = -1;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.reports.summary.list') }}',
+                        url: '{{ route('cod.welcome.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -475,7 +477,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url: '{{ route('cod.reports.summary.list') }}',
+                    url: '{{ route('cod.welcome.list') }}',
                     data: function (d) {
                         d.search_user = $('#search_user').val();
                         d.search_origin = $('#search_origin').val();
@@ -567,7 +569,7 @@
                 var user = $('#search_user').val();
                 var destination = $('#search_destination').val();
                 $.ajax({
-                    url: '{!! route('cod.reports.summary.data') !!}',
+                    url: '{!! route('cod.welcome.data') !!}',
                     method: 'post',
                     data: {
                         '_token': '{{ csrf_token() }}',
