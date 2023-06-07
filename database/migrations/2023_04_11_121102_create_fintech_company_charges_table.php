@@ -19,8 +19,11 @@ class CreateFintechCompanyChargesTable extends Migration
             $table->string('range_up');
             $table->string('range_down');
             $table->string('charges');
+            $table->Integer('charges_is_percentage');
             $table->string('additional_charges')->nullable();
+            $table->Integer('additional_charges_is_percentage');
             $table->string('fed_tax');
+            $table->Integer('fed_tax_is_percentage');
             $table->timestamps();
         });
     }
