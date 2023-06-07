@@ -278,13 +278,12 @@ class AdminZonalManagementController extends Controller
             return redirect()->back()->with(['success' => 'Zone: ' . $request->input('zone_name') . ' has been added!']); 
     }
 
-    public function check_zone_name(Request $request) {
-        
+    public function check_zone_name(Request $request, $id) {
         if ($request->filled('name')) {
           $name = Zone::where('name', $request->input('name'));
   
-          if ($request->has('id')) {
-            $name = $name->where('id', '!=', $request->input('id'));
+          if ($id) {
+            $name = $name->where('id', '!=', $id);
           }
   
           if (!$name->exists()) {

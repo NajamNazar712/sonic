@@ -26,7 +26,7 @@
 											<label>Name</label>
 											{{-- <input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $zone->name }}"> --}}
 											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" 
-											data-rule-remote="{{ route("admin.management.zonal.check_zone_name") }}" data-msg-remote="Zone Name must be unique" data-msg-required="Name is required" value="{{ $zone->name }}">
+											data-rule-remote="{{ route('admin.management.zonal.check_zone_name',$zone->id) }}" data-msg-remote="Zone Name must be unique" data-msg-required="Name is required" value="{{ $zone->name }}">
 										</div>
 									</div>
 

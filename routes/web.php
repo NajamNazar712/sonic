@@ -945,7 +945,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
             Route::post('duplicate_zone', 'Admins\AdminZonalManagementController@duplicate_zone')->name('duplicate_zone');
-            Route::get('check_zone_name{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
+            Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
