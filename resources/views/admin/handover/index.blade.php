@@ -581,18 +581,44 @@
                 submitHandler: function (form) {
                     var shipment_id = $('#piece_shipment_id').val();
                     var tracking_number = $(form).find('input.scan_piece_tracking_number').val();
-                    var pieces_id = shipment_piece_ids;
                     var weight = $(form).find('input.pieces_weight').val();
-
-                    toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
+                        // url: '{!! route('admin.v2_pickups.arrival.bulk.piece.shipment_details') !!}',
+                        method: 'POST',
+                        data: {
+                            'tracking_number': tracking_number,
+                            'weight':weight,
+                            '_token': '{{ csrf_token() }}'
+                        },
+                        timeout: 5000,
+                        error: function (data) {
+                            form.reset();
+                            $('#add_shipment_form button.add').prop('disabled', false);
+                            scan_sound(2);
+                            toastr.error('Couldn\'t connect to server, check internet connection and re-enter!', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        },
+                        success: function (data) {
                             form.reset();
                             remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
 
-                            var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, tracking_number, shipment_id, pieces_id, weight, remove_button]).draw().node();
+                            if (data.status == 0) {
+                                var id = data.details.id;
+
+                                var index = $.inArray(id, shipment_ids);
+
+                                if (index === -1) {
+                                    if(data.details.rider_assigned == true){
+                                        var int_pickup_request_id = data.details.pickup_request_id_unpadded;
+                                        remove_button += '<input type="hidden" value="'+ int_pickup_request_id +'" class="remove_pickup_request">';
+                                        var pickup_index = $.inArray(int_pickup_request_id, unassigned_pickup_request_ids);
+                                        if(pickup_index === -1){
+                                            unassigned_pickup_request_ids.push(int_pickup_request_id);
+                                        }
+                                        unassigned_pickups = true;
+                                    }
+                                    var rowNo = table.rows().count();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.pickup_request_id, data.details.rider, data.details.weight, remove_button]).draw().node();
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();
@@ -612,7 +638,16 @@
                                         positionClass: 'toast-bottom-center',
                                         containerId: 'toast-bottom-center'
                                     });
-                                    $('#ShipmentPiecesModal').modal('hide');
+                                }
+                                $('#ShipmentPiecesModal').modal('hide');
+                            }
+                            else{
+                                $('#add_shipment_form button.add').prop('disabled', false);
+                                scan_sound(2);
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+                        }
+                    });
                 }
             });
 
