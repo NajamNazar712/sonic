@@ -56,6 +56,7 @@ use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\ShipmentReplacementParcelImage;
@@ -66,6 +67,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
@@ -6840,4 +6842,107 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
+
+    public function return_shipment_info(Request $request){
+        $validateshipment = Validator::make($request->all(), [
+            'tracking'     => 'required',
+        ]);
+
+        if( $validateshipment->fails()){
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+        }
+        else{
+            $return_statuses = array(25, 31, 38, 23, 28, 34);
+            $tracking_number = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
+                if($shipment->exists()){
+                    $shipment = $shipment->first();
+                    if(in_array($shipment->shipper_status_id, $return_statuses)){
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            if($return_sheet->status_id == 0){
+                                return response()->json(['status' => 1, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'shipment_status' => $shipment->status_shipper->name]);
+                            }
+                            else{
+                                return response()->json(['status' => 0, 'error' => 'Shipment is already received with remarks ' . $return_sheet->remarks]);
+                            }
+                        }
+                        else{
+                            return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                    }
+                }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
+            }
+        }
+    }
+
+    public function shipper_received_shipments(Request $request){
+        $validateshipment = Validator::make($request->all(), [
+            'shipment_ids' => 'required',
+            'user_type'    => 'required',
+        ]);
+
+        if( $validateshipment->fails()){
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+        }
+        else{
+            $shipments_list = $request->shipment_ids;
+            $user           = $request->user_id;
+            $user_type      = $request->user_type;
+            $received_by    = '';
+            $userDetials    = User::where('id', $user)->first();
+
+            if($user_type == 2){
+                $received_by = ' (Substitute User)';
+            }
+            $ships = [];
+            foreach($shipments_list as $shipment_id){
+                $ships[] = $shipment_id;
+                if(!empty($shipment_id)){
+                    $shipments = Shipment::where('tracking_number', $shipment_id); 
+                    if($shipments->exists()){
+                        $shipments = $shipments->first();
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
+                        $ReturnSheetShipments = new ReturnSheetShipments();
+                        if($return_sheet->exists()){        
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->status_id = 1;
+                            $return_sheet->received_at = Carbon::now();
+                            $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
+                            $return_sheet->save();
+
+                            $ReturnSheetShipments->shipment_id = $shipments->id;
+                            $ReturnSheetShipments->scan_via = 2;
+                            $ReturnSheetShipments->return_sheet_id = $return_sheet->id;
+                            $ReturnSheetShipments->save();
+                        }
+                       
+                    }
+                    else{
+                        return response()->json([
+                            'status'  => 0, 
+                            'error' => 'Enter a Valid Shipment No'
+                        ]);
+                    }
+                }
+            }   
+            return response()->json([
+                'status'  => 1, 
+                'success' => 'Shipement Received Successfully'
+            ]);
+        }
+    }
+
+    public function return_shipments_list(){
+        dd('this function return shipments list');
+    }
+
+
+
 }

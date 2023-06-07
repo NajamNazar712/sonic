@@ -18,6 +18,7 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\PendingCashCollectionAgingReport;
 use App\Http\Models\Admin\Retail\RetailShipperInfo;
 use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\AppNotification;
 use App\Http\Models\Commission\SalesCommission;
@@ -30,6 +31,7 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\ReturnNoteRequest;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
 use App\Http\Models\EmployeeNotificationHistory;
@@ -73,6 +75,7 @@ use App\Jobs\ProcessOTPSMS;
 use App\Jobs\ProcessOTPSMSITS;
 use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
 use App\Jobs\ProcessPushNotification;
+//use App\ReturnDeliveredToShipperSms;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -108,11 +111,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use App\Mail\Notifications;
 use App\Jobs\ProcessOTPSMSForBotSMS;
-
 use App\Jobs\ProcessSMS;
 use Maatwebsite\Excel\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
-
+use App\ReturnDeliveredToShipperSms;
 class NotificationsController extends Controller
 {
     static private function sms($body, $to, $otp = NULL)
@@ -240,7 +242,7 @@ class NotificationsController extends Controller
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL)
     {
-        
+
         $notification = Notification::find($id);
 
         if ($notification) {
@@ -464,6 +466,7 @@ class NotificationsController extends Controller
                         $details['weight'] = $shipment->actual_weight;
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['amount'] = $shipment->amount;
+                        $details['return_notes_id'] = $shipment->return_notes_id;
 
                         if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 2) {
                             foreach ($shipment->items as $item) {
@@ -3184,11 +3187,15 @@ class NotificationsController extends Controller
 
                     $yesterday->hour = $rdts_time;
 
+
                     $today = Carbon::today();
 
                     $today->hour = $rdts_time;
 
-                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name'];
+//                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
+//                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
+
+                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name',''];
 
                     $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By', 'returned_at' => 'Returned At'];
 
@@ -3217,7 +3224,10 @@ class NotificationsController extends Controller
                     }
 
                     $user_wise_shipments = array();
-                    $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')->where('shipments.shipper_status_id', 25)->where('shipments_journey.shipper_status_id', 25)->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id', 'shipments.tracking_number', 'shipments_journey.created_at', 'shipments_journey.received_or_refused_by', 'shipments_journey.reference_1_id');
+                    $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')
+                        ->whereIn('shipments.shipper_status_id', [25,31,38])
+                        ->whereIn('shipments_journey.shipper_status_id', [25,31,38])
+                        ->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id', 'shipments.tracking_number', 'shipments_journey.created_at', 'shipments_journey.received_or_refused_by', 'shipments_journey.reference_1_id');
 
                     if ($shipment_details->exists()) {
 
@@ -3301,7 +3311,57 @@ class NotificationsController extends Controller
                                     }
                                 }
 
-                                $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+                                $body = str_replace('[' . $first_field . ']', $shipment_details,$body);
+
+                                $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
+                                    ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
+                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
+                                    ->whereIn('sj.shipper_status_id',[25,31,38])
+                                    ->where('s.user_id',$user_id)
+                                    ->whereBetween('sj.created_at',[$yesterday,$today])
+                                    ->whereBetween('return_notes.updated_at',[$yesterday,$today])
+                                    ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
+//                                    ->where('sj.reference_1_id','return_notes.id')
+                                    ->get();
+//                                dd($data1);
+
+//                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
+//                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
+//                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
+////                                    ->where('return_delivered_to_shipper_sms.status', 0)
+//                                    ->whereBetween('return_delivered_to_shipper_sms.created_at',[$yesterday,$today])
+//                                    ->select('return_delivered_to_shipper_sms.return_note_id as return_note_id','shipments.id as shipment_id','return_delivered_to_shipper_sms.user_id as user_id',
+//                                        'u.phone as phone_number',
+//                                        DB::raw("(select count(return_note_id)
+//                                        from return_delivered_to_shipper_sms
+//                                        Where  created_at >= '$yesterday'
+//                                        and  created_at <= '$today'
+//                                        and return_note_id = rn.id) as shipment_count"))
+//                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
+//                                    ->get();
+
+                                    $da = [];
+									$i = 0;
+									foreach($data1 as $key=>$value){
+										
+										$da[$value->return_note_id]['shipment_id'][$i] = isset($da[$value->return_note_id]['shipment_id'][$i]) ? $da[$value->return_note_id]['shipment_id'][$i]  : $value->shipment_id ;
+										$da[$value->return_note_id]['count'] = isset($da[$value->return_note_id]['count']) ? $da[$value->return_note_id]['count']+=1  : 1 ;
+									
+										$i++;
+									}
+									$return_detail = "";
+									foreach($da as $key=>$val){
+									
+										$shipment_ids = implode(',',$val['shipment_id']);
+										$count = $val['count'];
+										$return_detail.= PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ".PHP_EOL."---".PHP_EOL;
+										
+									}
+
+                                if (strpos($body, '[return_detail]') !== FALSE) {
+                                    $body = str_replace('[return_detail]', $return_detail, $body);
+                                }
+//                                dd($body);
 
                                 self::email($subject, $body, $to);
 
@@ -7821,9 +7881,8 @@ class NotificationsController extends Controller
 
                     foreach ($shipment_fields as $key => $field) {
                         if (strpos($body, '[' . $key . ']') !== FALSE) {
-                            
-                            if ($shipment['consignee_name']) 
-                            {
+
+                            if ($shipment['consignee_name']) {
                                 $first_name = explode(' ', trim($shipment['consignee_name']));
                                 $shipment['consignee_name'] = $first_name[0];
                             }
@@ -7908,7 +7967,6 @@ class NotificationsController extends Controller
 
                     self::sms_otp($body, $to, $name, $otp, 1);
                 } else if ($id == 139) {
-
                     $yesterday = Carbon::yesterday();
                     $today = Carbon::today();
 
@@ -9129,6 +9187,7 @@ class NotificationsController extends Controller
                         $body = str_replace('[consignee]', $shipment->consignee_name, $body);
                     }
 
+
                     if (strpos($body, '[tracking_number]') !== FALSE) {
                         $body = str_replace('[tracking_number]', $shipment->tracking_number, $body);
                     }
@@ -10156,25 +10215,54 @@ class NotificationsController extends Controller
                     $cc = ["muhammad.waqas@trax.pk", "danish.zahid@trax.pk"];
 
                     self::email($subject, $body, $to, $cc);
-                }
+                } else if ($id == 215) {
 
-                else if( $id == 215){
-                // dd('hiiii');
-                    
                     $details = $reference_1_id;
                     $temp_emails = $reference_2_id;
                     $subject = $notification->subject;
                     $body = $notification->body;
 
                     if (strpos($body, '[preview]') !== FALSE) {
-                        $body = str_replace('[preview]', $details, $body);  
-                    }
-                    
-                    foreach($temp_emails as $temp_email)
-                    {
-                        self::email($subject, $body, $temp_email);
+                        $body = str_replace('[preview]', $details, $body);
                     }
 
+                    foreach ($temp_emails as $temp_email) {
+                        self::email($subject, $body, $temp_email);
+                    }
+                } // Today work has been done
+
+                else if ($id == 216) {
+
+                    foreach ($reference_1_id as $key => $return_note) {
+
+                        $old_body = $body;
+
+                        if (strpos($old_body, '[return_notes_id]') !== FALSE) {
+                            $old_body = str_replace('[return_notes_id]', $return_note->return_id, $old_body);
+                        }
+
+                        if (strpos($old_body, '[shipments_count]') !== FALSE) {
+//                            dd($old_body,$return_note->shipment_count);
+                            $old_body = str_replace('[shipments_count]', $return_note->shipment_count, $old_body);
+                        }
+                        $to = $return_note['phone_number'];
+
+                        self::sms($old_body, $to);
+                        // $notify[$key] = [
+                        //     'return_note_id'=>$return_noted->return_id,
+                        //     'user_id'=>$return_noted->user_id,
+                        //     'shipment_count'=>$return_noted->total_shipments,
+                        //     'status'=>1,
+                        //     'created_at'=>Carbon::now(),
+                        //     'updated_at'=>Carbon::now(),
+
+                        // ];
+
+                    }
+
+                    // $user_ids = $reference_1_id->pluck('user_id')->toArray();
+                    // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
+                    // ReturnDeliveredToShipperSms::insert($notify);
                 }
 
             }
