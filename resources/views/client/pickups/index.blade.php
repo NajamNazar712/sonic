@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Pickups History
+        Pickups Request History
         <span class="pull-right">Pickup Helpline No. 0348-1115858</span>
     </h1>
 

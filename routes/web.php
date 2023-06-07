@@ -538,6 +538,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::post('cancel', 'Shippers\ShipperPickupController@cancel')->name('cancel');
         Route::post('renew', 'Shippers\ShipperPickupController@renew')->name('renew');
         Route::get('view_details', 'Shippers\ShipperPickupController@view_details')->name('view_details');
+        Route::get('add_pickup', 'Shippers\ShipperPickupController@add_pickup')->name('add_pickup');
+        Route::get('get_pickup_address', 'Shippers\ShipperPickupController@get_pickup_address')->name('get_pickup_address');
+
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function () {

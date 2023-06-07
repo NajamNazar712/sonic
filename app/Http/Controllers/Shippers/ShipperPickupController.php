@@ -7,6 +7,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\Shipment;
+use App\Http\Models\City;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
@@ -15,6 +16,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\DB;
 
@@ -342,8 +344,7 @@ class ShipperPickupController extends Controller
         }
     }
 
-    public
-    function add_remarks(Request $request)
+    public function add_remarks(Request $request)
     {
         $pickups_attempt = V2PickupRequestAttempt::where('pickup_request_id', $request->pickup_request_id);
         if ($pickups_attempt->exists()) {
@@ -355,5 +356,26 @@ class ShipperPickupController extends Controller
         } else {
             return ['status' => 0, 'error' => 'Pickup request is not attempted yet'];
         }
+    }
+
+    public function add_pickup()
+    {
+        // dd(auth()->user()->id);
+        // $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,1])->get(); //37,28 role
+        // $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
+        // $case_natures = CrmRequestCaseNature::all();
+        // $segments = Segment::all();
+        $cities = UserShippingInfo::join('cities as c','c.id','=','user_shipping_infos.city_id')->select('c.id', 'c.name')->where('c.status','=',1)
+        ->where('c.pickup','=',1)
+        ->where('user_shipping_infos.user_id',auth()->user()->id)->distinct()->get();
+        // $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
+        // $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        return view('client.pickups.add_pickup')->with(['cities' => $cities]);
+    }
+    public function get_pickup_address(Request $request)
+    {
+        $cityId = $request->input('city_id');
+        $areas = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
+        return response()->json($areas);
     }
 }

@@ -114,7 +114,12 @@
             @endif
 
             @if (session('user_type') == 1 || in_array(12, session('permissions')))
-                <li class=" nav-item"><a href="{{ route('cod.pickup.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cubes"></i>Pickup</span></a></li>
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-cubes"></i>Pickup</span></a>
+                    <ul class="menu-content">
+                        <li><a href="{{ route('cod.pickup.index') }}">Pickup Request History</a></li>
+                        <li><a href="{{ route('cod.pickup.add_pickup') }}">Add Pickup Request</a></li>
+                    </ul>
+                </li>
             @endif
 
             @if (session('user_type') == 1 || in_array(5, session('permissions')))
