@@ -3750,14 +3750,48 @@ class GlobalSettingsController extends Controller
                 $FintechSetup->updated_by    = Auth::id();
                 $FintechSetup->save();
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        $charges            =  $req->charges[$i];
+                        $additional_charges =  $req->additional_charges[$i];
+                        $fed_charges        =  $req->fed_tax[$i];
+
+                            if (strpos($charges, '%') !== false) {
+                                $charges_type = 1;
+                                $fintech_charges = str_replace('%', '', $charges);
+                            }
+                            else{
+                                $charges_type = 0;
+                                $fintech_charges = $req->charges[$i];
+                            }
+
+                            if (strpos($additional_charges, '%') !== false) {
+                                $additional_type = 1;
+                                $add_charges = str_replace('%', '', $additional_charges);
+                            }
+                            else{
+                                $additional_type = 0;
+                                $add_charges = $req->additional_charges[$i];
+                            }
+
+                            if (strpos($fed_charges, '%') !== false) {
+                                $fed_type = 1;
+                                $fedd_charges = str_replace('%', '', $fed_charges);
+                            }
+                            else{
+                                $fed_type = 0;
+                                $fedd_charges =  $req->fed_tax[$i];
+                            }
+
                         if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
                             $FintechSetupValues =  new FintechCompanyCharges();
-                            $FintechSetupValues->company_Id          = $FintechSetup->id;
-                            $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
-                            $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
-                            $FintechSetupValues->charges             = $req->charges[$i];
-                            $FintechSetupValues->additional_charges  = $req->additional_charges[$i];
-                            $FintechSetupValues->fed_tax             = $req->fed_tax[$i];
+                            $FintechSetupValues->company_Id                        = $FintechSetup->id;
+                            $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges                           = $fintech_charges;
+                            $FintechSetupValues->charges_is_percentage             = $charges_type;
+                            $FintechSetupValues->additional_charges                = $add_charges;
+                            $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
+                            $FintechSetupValues->fed_tax                           = $fedd_charges;
+                            $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
                             $FintechSetupValues->save(); 
                         }
                     }
@@ -3784,30 +3818,98 @@ class GlobalSettingsController extends Controller
     }
 
     public function setup_fintech_charges_edit_save(Request $req){
+
            DB::beginTransaction();
            try{ 
                 if(!empty($req->fintech_range_up)){
                     for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        $charges            =  $req->charges[$i];
+                        $additional_charges =  $req->additional_charges[$i];
+                        $fed_charges        =  $req->fed_tax[$i];
+
+                            if (strpos($charges, '%') !== false) {
+                                $charges_type = 1;
+                                $fintech_charges = str_replace('%', '', $charges);
+                            }
+                            else{
+                                $charges_type = 0;
+                                $fintech_charges = $req->charges[$i];
+                            }
+
+                            if (strpos($additional_charges, '%') !== false) {
+                                $additional_type = 1;
+                                $add_charges = str_replace('%', '', $additional_charges);
+                            }
+                            else{
+                                $additional_type = 0;
+                                $add_charges = $req->additional_charges[$i];
+                            }
+
+                            if (strpos($fed_charges, '%') !== false) {
+                                $fed_type = 1;
+                                $fedd_charges = str_replace('%', '', $fed_charges);
+                            }
+                            else{
+                                $fed_type = 0;
+                                $fedd_charges =  $req->fed_tax[$i];
+                            }
                         if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
                             $FintechSetupValues =  new FintechCompanyCharges();
-                            $FintechSetupValues->company_Id          = $req->company_id;
-                            $FintechSetupValues->range_up            = $req->fintech_range_up[$i];
-                            $FintechSetupValues->range_down          = $req->fintech_range_down[$i];
-                            $FintechSetupValues->charges             = $req->charges[$i];
-                            $FintechSetupValues->additional_charges  = $req->additional_charges[$i];
-                            $FintechSetupValues->fed_tax             = $req->fed_tax[$i];
+                            $FintechSetupValues->company_Id                        = $req->company_id;
+                            $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges                           = $fintech_charges;
+                            $FintechSetupValues->charges_is_percentage             = $charges_type;
+                            $FintechSetupValues->additional_charges                = $add_charges;
+                            $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
+                            $FintechSetupValues->fed_tax                           = $fedd_charges;
+                            $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
                             $FintechSetupValues->save(); 
                         }
                     }
                 }
                 for($j = 0; $j < count($req->IndexID); $j++){
+
+                    $charges            =  $req->charges_edit[$j];
+                    $additional_charges =  $req->additional_charges_edit[$j];
+                    $fed_charges        =  $req->fed_tax_edit[$j];
+
+                        if (strpos($charges, '%') !== false) {
+                            $charges_type = 1;
+                            $fintech_charges = str_replace('%', '', $charges);
+                        }
+                        else{
+                            $charges_type = 0;
+                            $fintech_charges = $req->fed_tax_edit[$j];
+                        }
+
+                        if (strpos($additional_charges, '%') !== false) {
+                            $additional_type = 1;
+                            $add_charges = str_replace('%', '', $additional_charges);
+                        }
+                        else{
+                            $additional_type = 0;
+                            $add_charges = $req->additional_charges_edit[$j];
+                        }
+
+                        if (strpos($fed_charges, '%') !== false) {
+                            $fed_type = 1;
+                            $fedd_charges = str_replace('%', '', $fed_charges);
+                        }
+                        else{
+                            $fed_type = 0;
+                            $fedd_charges =  $req->fed_tax_edit[$j];
+                        }
                         $FintechSetupValues =  new FintechCompanyCharges();
                         $FintechSetupValues::where('id',$req->IndexID[$j])->update([
-                            'range_up'            => $req->fintech_range_up_edit[$j],
-                            'range_down'          => $req->fintech_range_down_edit[$j],
-                            'charges'             => $req->charges_edit[$j],
-                            'additional_charges'  => $req->additional_charges_edit[$j],
-                            'fed_tax'             => $req->fed_tax_edit[$j],
+                            'range_up'                          => $req->fintech_range_up_edit[$j],
+                            'range_down'                        => $req->fintech_range_down_edit[$j],
+                            'charges'                           => $fintech_charges ,
+                            'charges_is_percentage'             => $charges_type,
+                            'additional_charges'                => $add_charges,
+                            'additional_charges_is_percentage'  => $additional_type,
+                            'fed_tax'                           => $fedd_charges,
+                            'fed_tax_is_percentage'             => $fed_type,
                         ]);
                 }
                 $FintechSetup =  new FintechCompany();
