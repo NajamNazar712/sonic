@@ -455,7 +455,7 @@ function inputValidate(){
                                         </div>
                                     </td>
                                     <td style="width:1%">
-                                        <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger"><i class="la la-trash"></i></button>
+                                        <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btn-sm"><i class="la la-trash"></i></button>
                                     </td>            
                                 </tr> `;
                     $('#row_append_body').append(html);
@@ -525,10 +525,8 @@ if (flag == true) {
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required" min="1">
                         </div>
                     </td>           
-                    <td>
-                        <div class="col mb-1">
-                            <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btm-sm"><i class="la la-trash"></i></button>
-                        </div>
+                    <td style="width:1%">
+                    <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btn-sm"><i class="la la-trash"></i></button>
                     </td>   
                                
                 </tr>`;

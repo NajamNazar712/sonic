@@ -507,68 +507,89 @@ public function payfast_payment(Request $request){
     dd($request->all());
 }
 
-public function add_fintech_charges(Request $req){        
-    $UserFintectCharges = new UserFintectCharges();
-    $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
-    $standard_fintech_charges = standard_fintech_charges::all();
-    if($req->checkboxval == 'false'){
-        $UserFintectCharges::where('user_id',$req->userID)->update([
-            'status'  => 2,
-            'updated_by'       => session('id')
-        ]); 
 
-        return response()->json([
-            'status'  => '200',
-            'message' => 'Fintech Charges Updated Successfully!',
-        ]);
-    }
-        if(empty($req->fintechCharges)){
-            if(!empty($values)){
-                return response()->json([
-                    'status'    => '200',
-                    'data'      => $values,
-                    'standard'  => $standard_fintech_charges,
-                ]);
-            } 
-                else{
-                    return response()->json([
-                        'status'   => '404',
-                        'standard' => $standard_fintech_charges,
-                    ]);
-                }
-           }
-           else{
-            if($req->checkboxval == 'true'){ 
-            try{
-                $value =  $UserFintectCharges::where('user_id',$req->userID)->first();
-                if(!empty($value->user_id)){
-                    $UserFintectCharges::where('user_id',$req->userID)->update([
-                        'fintech_charges'  => $req->fintechCharges,
-                        'status'           => '1',
-                        'updated_by'       => session('id')
-                    ]); 
-                }
-                else{
-                    // dd(Auth::id());
-                    $UserFintectCharges->user_id            = $req->userID;
-                    $UserFintectCharges->fintech_charges    = $req->fintechCharges;
-                    $UserFintectCharges->added_by           = session('id');
-                    $UserFintectCharges->updated_by         = session('id');
-                    $UserFintectCharges->save();
-                }
-                return response()->json([
-                    'status'  => '200',
-                    'message' => 'Fintech Charges Updated Successfully!',
-                ]);
-            }
-            catch(exception $e){
-                return response()->json([
-                    'message' => 'Charges Not Set',
-                ]); 
-                }  
-            }
+    public function user_fintech_charges(Request $req){
+        $UserFintectCharges = new UserFintectCharges();
+        $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
+        if(!empty($values)){
+            return response()->json([
+                'status' => '200',
+                'data'   => $values,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => '404',
+                'data'   => '',
+            ]);
         }
     }
+
+    public function add_fintech_charges(Request $req){
+    $UserFintectCharges = new UserFintectCharges();
+    $standard_fintech_charges = standard_fintech_charges::find(1);
+
+        if(!empty($standard_fintech_charges)){
+            if($standard_fintech_charges->standard_fintech_charges > $req->fintechCharges){
+                return response()->json([
+                    'status'  => '401',
+                    'message' => 'Shipper Fintech Charges Should be Greater then standard Fintech charges',
+                ]);
+            }
+            else{
+                if($req->checkboxval == 'false'){
+                    $UserFintectCharges::where('user_id',$req->userID)->update([
+                        'status'     => 2,
+                        'updated_by' => session('id')
+                    ]); 
+
+                    return response()->json([
+                        'status'  => '200',
+                        'message' => 'Fintech Charges Updated Successfully!',
+                    ]);
+                }
+                if($req->checkboxval == 'true'){
+                    try{
+                        $value =  $UserFintectCharges::where('user_id',$req->userID)->first();
+                        if(!empty($value->user_id)){
+                            $UserFintectCharges::where('user_id',$req->userID)->update([
+                                'fintech_charges'  => $req->fintechCharges,
+                                'status'           => '1',
+                                'updated_by'       => session('id')
+                            ]); 
+                        }
+                        else{
+                            $UserFintectCharges->user_id            = $req->userID;
+                            $UserFintectCharges->fintech_charges    = $req->fintechCharges;
+                            $UserFintectCharges->added_by           = session('id');
+                            $UserFintectCharges->updated_by         = session('id');
+                            $UserFintectCharges->save();
+                        }
+                            return response()->json([
+                                'status'  => '200',
+                                'message' => 'Fintech Charges Updated Successfully!',
+                            ]);
+                    }
+                    catch(exception $e){
+                        return response()->json([
+                            'message' => 'Charges Not Set',
+                        ]); 
+                    }  
+                }
+            }
+        }
+        else{
+            return response()->json([
+                'status'  => '401',
+                'message' => 'First Set Standard Fintech Charges then user Charges',
+            ]);
+        }
+    }
+    
+
+
+
+
     public function statistics_search(Request $request)
     {
         $graph = array();
