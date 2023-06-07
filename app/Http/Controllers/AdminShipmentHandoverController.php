@@ -52,9 +52,11 @@ class AdminShipmentHandoverController extends Controller
 
     //admin.handover.create.shipment_details
     public function arrival_bulk_shipment_details(Request $request){
-      $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
-      if ($shipment->exists() && $shipment->pieces === 1) {
+      $shipment = Shipment::where('tracking_number', $request->tracking_number);
+      
+      if ($shipment->exists()) {
         $shipment = $shipment->first();
+        $shipment_pieces1 = $shipment->pieces;
         $handover_shipment = HandoverShipments::where('shipment_id', $shipment->id)->whereIn('status', [1,3]);
         if($handover_shipment->exists()){
                 return ['status' => 1, 'error' => 'Shipment is already in another Handover Note'];
@@ -118,23 +120,19 @@ class AdminShipmentHandoverController extends Controller
 
             $details['delivery_area'] = $delivery_area;
             
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
-
-        } 
+            if($shipment_pieces1 === 1)
+            {
         
-        else if ($shipment->exists() && $shipment->pieces > 1) 
-        {
-          $details = array();
-          $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-          $details['id'] = $shipment->id;
-          $details['tracking_number'] = $shipment->tracking_number;
-          $details['pieces_count'] = $shipment->pieces;
-          $details['pieces_tracking_numbers'] = $shipment_pieces;
-          ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
-          return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
-       }
-       
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+            }
+            elseif($shipment_pieces1 > 1)
+            {
+              $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+              $details['pieces_count'] = $shipment->pieces;
+              ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+              return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+            }
+        }  
       else {
             return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
         }
