@@ -98,7 +98,6 @@ class AdminZonalManagementController extends Controller
     }
 
     public function add_store(Request $request) {
-        // dd('asdf');
         $zone = New Zone();
 
         $zone->name = $request->name;
