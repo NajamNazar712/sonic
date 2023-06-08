@@ -1846,7 +1846,7 @@ $roles = explode("," , $settings->text);
 
                                         @if (session('role_id') == 1 || in_array(868, session('permissions')))
                                             <li><a class="menu-item"
-                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS
+                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS Report
                                                     Setting</a> </li>
                                         @endif
                                 </ul>
