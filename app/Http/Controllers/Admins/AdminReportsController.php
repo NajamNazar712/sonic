@@ -103,6 +103,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 138);
         }
+        
         $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -169,6 +170,8 @@ class AdminReportsController extends Controller
                     ->where('adjustment.created_at', '=', DB::raw('(select max(created_at) from adjustment_logs where adjustment_logs.shipment_id = cr.shipment_id and adjustment_logs.adjustment_type_id IN (4,6,7,8,9,10,11) )'));
                 })
             ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
+            ->leftjoin('bag_statuses as bs', 'bs.id', '=', 'cmb.status_id')
+
             ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 
             'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 
             'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 
@@ -178,7 +181,7 @@ class AdminReportsController extends Controller
             'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id',
              'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 
              'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 
-             'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status']);
+             'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status']);
 
         $type = $request->get('search_types');
 
@@ -8061,6 +8064,7 @@ class AdminReportsController extends Controller
 
     public function last_mile_status_data($from, $to, $destination, $hub, $zone, $rider)
     {
+
         $min_id = 106116005;
         $data = array();
         $from = Carbon::parse($from)->toDateString();
@@ -8113,14 +8117,15 @@ class AdminReportsController extends Controller
                 $start_time = '00:00:01';
                 $end_time = '09:00:00';
             }
-            $start_time = Carbon::parse($start_time)->toTimeString();
-            $end_time = Carbon::parse($end_time)->toTimeString();
+
+            $from_start = Carbon::parse($from . ' ' . $start_time)->toDateTimeString();
+            $to_end = Carbon::parse($to . ' ' . $end_time)->toDateTimeString();
 
             $time_array = array();
 
             $total_status_updated = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->where('id','>', $min_id);
-            $total_status_updated = $total_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $total_status_updated = $total_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $total_status_updated = $total_status_updated->whereBetween('created_at', [$from_start, $to_end]);
+
             if ($destination != null) {
                 $total_status_updated = $total_status_updated->where('city_id', $destination);
             }
@@ -8137,8 +8142,7 @@ class AdminReportsController extends Controller
             $total_status_updated_count = $total_status_updated->distinct('shipment_id')->count('shipment_id');
 
             $out_for_delivery = DB::connection('reports')->table('shipments_journey')->where('shipper_status_id', 5)->where('id','>', $min_id);
-            $out_for_delivery = $out_for_delivery->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $out_for_delivery = $out_for_delivery->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $out_for_delivery = $out_for_delivery->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $out_for_delivery = $out_for_delivery->where('city_id', $destination);
             }
@@ -8158,8 +8162,7 @@ class AdminReportsController extends Controller
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
             $bolt_status_updated = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNotNull('rider_id')->where('id','>', $min_id);
-            $bolt_status_updated = $bolt_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $bolt_status_updated = $bolt_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $bolt_status_updated = $bolt_status_updated->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $bolt_status_updated = $bolt_status_updated->where('city_id', $destination);
             }
@@ -8183,8 +8186,7 @@ class AdminReportsController extends Controller
                 $out_for_delivery_percentage = ($total_status_updated_count / $out_for_delivery_count) * 100;
             }
             $sonic_status_updated = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivery_note_status)->where('verification', 1)->whereNull('rider_id')->where('id','>', $min_id);
-            $sonic_status_updated = $sonic_status_updated->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $sonic_status_updated = $sonic_status_updated->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $sonic_status_updated = $sonic_status_updated->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $sonic_status_updated = $sonic_status_updated->where('city_id', $destination);
             }
@@ -8205,8 +8207,7 @@ class AdminReportsController extends Controller
             }
 
             $bolt_status_undelivered = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNotNull('rider_id')->where('id','>', $min_id);
-            $bolt_status_undelivered = $bolt_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $bolt_status_undelivered = $bolt_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $bolt_status_undelivered = $bolt_status_undelivered->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $bolt_status_undelivered = $bolt_status_undelivered->where('city_id', $destination);
             }
@@ -8223,8 +8224,7 @@ class AdminReportsController extends Controller
 
 
             $bolt_status_delivered = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNotNull('rider_id')->where('id','>', $min_id);
-            $bolt_status_delivered = $bolt_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $bolt_status_delivered = $bolt_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $bolt_status_delivered = $bolt_status_delivered->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $bolt_status_delivered = $bolt_status_delivered->where('city_id', $destination);
             }
@@ -8241,8 +8241,7 @@ class AdminReportsController extends Controller
 
 
             $sonic_status_undelivered = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $undelivered_status)->where('verification', 1)->whereNull('rider_id')->where('id','>', $min_id);
-            $sonic_status_undelivered = $sonic_status_undelivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $sonic_status_undelivered = $sonic_status_undelivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $sonic_status_undelivered = $sonic_status_undelivered->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $sonic_status_undelivered = $sonic_status_undelivered->where('city_id', $destination);
             }
@@ -8258,8 +8257,7 @@ class AdminReportsController extends Controller
             $sonic_status_undelivered_count = $sonic_status_undelivered->distinct('shipment_id')->count('shipment_id');
 
             $sonic_status_delivered = DB::connection('reports')->table('shipments_journey')->whereNotNull('reference_1_id')->whereIn('shipper_status_id', $delivered_status)->where('verification', 1)->whereNull('rider_id')->where('id','>', $min_id);
-            $sonic_status_delivered = $sonic_status_delivered->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to);
-            $sonic_status_delivered = $sonic_status_delivered->whereTime('created_at', '>=', $start_time)->whereTime('created_at', '<=', $end_time);
+            $sonic_status_delivered = $sonic_status_delivered->whereBetween('created_at', [$from_start, $to_end]);
             if ($destination != null) {
                 $sonic_status_delivered = $sonic_status_delivered->where('city_id', $destination);
             }
