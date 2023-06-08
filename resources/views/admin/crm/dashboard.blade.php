@@ -283,7 +283,7 @@
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="icon-clock text-white font-large-2 float-left"></i>
+                                                        <i class="icon-close text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="closed" class="d-inline">{{$crm['closed']}}</p>
@@ -300,12 +300,12 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-3" id="valid_div">
-                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                        <i class="la la-thumbs-o-up text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         {{-- <h3 class="text-white"><p id="valid" class="d-inline">0 </p></h3> --}}
@@ -318,12 +318,12 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="in_valid_div">
-                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                        <i class="la la-thumbs-o-down text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         {{-- <h3 class="text-white"><p id="in_valid" class="d-inline">0 </p>
@@ -342,12 +342,12 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="dormant_div">
-                                    <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
@@ -362,12 +362,12 @@
                                     </div>
                                 </div>
                                 <div class="col-3" id="dormant_div">
-                                    <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                    <div class="card bg-gradient-directional-destination pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
                                                 <div class="media d-flex">
                                                     <div class="align-self-center">
-                                                        <i class="la la-hourglass text-white font-large-2 float-left"></i>
+                                                        <i class="la la-calculator text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white"><p id="in_process_ratio" class="d-inline">{{$crm['in_process_ratio']}} </p>(<span id="in_process_ratio_percentage">{{$crm['in_process_ratio_percentage']}}</span>%)</h3>
