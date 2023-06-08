@@ -3314,7 +3314,7 @@ class AdminCargoManifestController extends Controller
 
         return Datatables::of($draft)
             ->editColumn('remarks',function ($shipments){
-                $remarks = '<textarea type="text" id="remarks" ref="'.$shipments->bag_id.'" class="form-control form-control-sm remarks">'.$shipments->remarks.'</textarea>';
+                $remarks = '<textarea maxlength="250" type="text" id="remarks" ref="'.$shipments->bag_id.'" class="form-control form-control-sm remarks">'.$shipments->remarks.'</textarea>';
                 return $remarks;
             })
             ->addColumn('action', function ($shipments) {
