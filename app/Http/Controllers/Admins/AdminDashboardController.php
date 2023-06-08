@@ -9386,9 +9386,9 @@ class AdminDashboardController extends Controller
                         }
                     }
                     
-                    // if (session('role_id') == 1 || in_array(session('id'), in_array(241, session('permissions')))) {
+                    if (session('role_id') == 1 || in_array(session('id'), in_array(873, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
-                    // }add
+                    }
 
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                     if (session('role_id') == 1 || in_array(149, session('permissions'))) {
@@ -12787,6 +12787,7 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_view($id)
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 662);
         return view('admin.accounts.substitute_account_management.index')->with(['shipper_id' => $id]);
     }
 
@@ -12879,6 +12880,8 @@ class AdminDashboardController extends Controller
   
     public function substitute_accounts_add_store(Request $request,$id) {
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
+
         $substitute_user = new SubstituteUser();
 
         $substitute_user->user_id = $id;
@@ -12961,6 +12964,8 @@ class AdminDashboardController extends Controller
     }
   
     public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
 
         $substitute_user = SubstituteUser::find($id);
         $substitute_user->user_id = $shipper_id;
@@ -13092,18 +13097,11 @@ class AdminDashboardController extends Controller
             if(empty($shipment)){
                 $invalid_shipment[] = [$row[0],$row[1],$row[2],$row[3]];
             }
-            // else if()
-            // {
-
-            //     $already_exist_shipment[] = [$row[0],$row[1],$row[2],$row[3]];
-            // }
             else{
-                // dd(2);
                 $valid_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
             }
             
         }
-        dd($invalid_shipment);
         if(collect($invalid_shipment)->isEmpty()){
             if(collect($valid_shipment)->isNotEmpty()){
                 foreach ($valid_shipment as $valid) {

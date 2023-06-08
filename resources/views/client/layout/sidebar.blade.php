@@ -160,11 +160,21 @@
                             @endif
                         @endif
 
-                        @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]))
+                        @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]) && !session('special_dashboard_user'))
                             <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
                         @endif
 
+                        @if (session('special_dashboard_user'))
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.special_dashboard.index') }}">MMS</a></li>
+                        @endif
+
 {{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
+                    </ul>
+                </li>
+            @elseif (session('special_dashboard_user'))
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('cod.reports.special_dashboard.index') }}">MMS</a></li>
                     </ul>
                 </li>
             @endif

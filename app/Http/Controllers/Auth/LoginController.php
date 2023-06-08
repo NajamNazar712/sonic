@@ -26,6 +26,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Admin\NpsSurvey;
 use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 class LoginController extends Controller
 {
@@ -76,21 +77,11 @@ class LoginController extends Controller
 
         if ($attempt) {
             session(['user_type' => 1]);
-            session(['special_dashboard_user' => 0]);
         }
         else {
             $attempt = Auth::guard('substitute_users')->attempt($this->credentials($request), $request->filled('remember'));
-            
 
             if ($attempt) {
-                $user_info = SubstituteUser::where('email',$request->email)->first();
-                if($user_info->is_created_by_admin == 1)
-                {
-                    session(['special_dashboard_user' => 1]);
-                }
-                else{
-                    session(['special_dashboard_user' => 0]);
-                }
                 session(['user_type' => 2]);
             }
         }
@@ -332,6 +323,20 @@ class LoginController extends Controller
             if(!$nps_shipper_rattings->exists() && $skip_count <2 && $hours>=24) {
                 session(['nps_survey' => $nps->id]);
             }
+        }
+
+        $user_info = SubstituteUser::where('email',$request->email)->first();
+        if($user_info->is_created_by_admin == 1)
+        {
+            session(['special_dashboard_user' => 1]);
+            
+            $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info->id)->pluck('sister_user_id')->toArray();
+
+            session(['special_dashboard_sister_user' => $sister_accounts]);
+        }
+        else{
+            session(['special_dashboard_user' => 0]);
+            session(['special_dashboard_sister_user' => []]);
         }
 
         return redirect()->route('cod.welcome');

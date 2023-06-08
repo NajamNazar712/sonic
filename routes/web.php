@@ -386,6 +386,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('mms')->name('mms.')->group(function () {
             Route::get('', 'Shippers\ShipperReportsController@mms_index')->name('index');
             Route::post('list', 'Shippers\ShipperReportsController@mms_list')->name('list');
+
+            
+        });
+        Route::prefix('special_dashboard')->name('special_dashboard.')->group(function () {
+            // dd(1);
+            Route::get('mms', 'Shippers\ShipperReportsController@special_dashboard_mms_index')->name('index');
+            Route::post('list', 'Shippers\ShipperReportsController@special_dashboard_mms_list')->name('list');
         });
 
 
