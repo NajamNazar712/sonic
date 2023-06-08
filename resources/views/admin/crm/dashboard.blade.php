@@ -351,8 +351,8 @@
                                                     </div>
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
-                                                                <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p>
-                                                            (<span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}</span>%)
+                                                                {{-- <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p> --}}
+                                                            <span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}</span>%
                                                         </h3>
                                                         <span>Closure Rate</span>
                                                     </div>
@@ -370,7 +370,7 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
-                                                        <h3 class="text-white"><p id="in_process_ratio" class="d-inline">{{$crm['in_process_ratio']}} </p>(<span id="in_process_ratio_percentage">{{$crm['in_process_ratio_percentage']}}%</span>)</h3>
+                                                        <h3 class="text-white"><p id="in_process_ratio" class="d-inline">{{$crm['in_process_ratio']}} </p>(<span id="in_process_ratio_percentage">{{$crm['in_process_ratio_percentage']}}</span>%)</h3>
                                                         <span>Ratio</span>
                                                     </div>
                                                 </div>

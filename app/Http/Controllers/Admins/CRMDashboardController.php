@@ -189,8 +189,8 @@ class CRMDashboardController extends Controller
         $crm['in_process_ratio_percentage'] = "0";
         if ($crm['total'] > 0) {
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
-            $crm['closed_rate_percentage'] = $crm_total !== 0 ? round(($crm['closed_rate'] / $crm_total) * 100, 2)  : 0;
-            $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm_total / $shipments) * 100, 2) : 0;
+            $crm['closed_rate_percentage'] = $crm_total !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
+            $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
         }
        
         $leads['in_process_for_activation'] = "3";
@@ -1109,7 +1109,9 @@ class CRMDashboardController extends Controller
                 $card_total = $card_data['total']->filter(function ($item) use ($from, $to, $card_feedback) {
                     return $item->created_at >= $from && $item->created_at <= $to && !in_array($item->id, $card_feedback);
                 })->count();
+                //dd(  $card_data['closed']->count(),$card_total);
                 $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+                //dd( $card_data['closed_rate']);
             } else {
                 $thirtyDaysAgo = now()->subDays(30);
                 $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
@@ -1275,18 +1277,20 @@ class CRMDashboardController extends Controller
                 $card_feedback = CrmRequestFeedback::
                 whereBetween('created_at',[$from,$to])->
                 pluck('crm_request_id');
-                $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->whereBetween('created_at',[$from, $stop_date])->count();
+                $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
                 $shipments = Shipment::where('shipper_status_id',2)->whereBetween('created_at', [$from, $stop_date])->count();
+                
+
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
-                // dd($card_data['total']->count());
                 $card_data['total'] = $card_data['total']->count();
                 if ($card_data['total'] > 0) {
+                    // dd($card_data['closed_rate'],$card_total);
                     $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
                     $card_data['closed_rate_percentage'] = $card_total !== 0
-                    ? round(($card_data['closed_rate'] / $card_total) * 100, 2)
+                    ? round(($card_data['closed_rate']) * 100, 2)
                     : 0;
                     $card_data['in_process_ratio_percentage'] = $shipments !== 0
-                    ? round(($card_total / $shipments) * 100, 2)
+                    ? round(($card_data['in_process_ratio']) * 100, 2)
                     : 0;
                 }
             }
@@ -1298,8 +1302,9 @@ class CRMDashboardController extends Controller
             $card_data['closed'] = number_format($card_data['closed']);
             $card_data['valid'] = number_format($card_data['valid']);
             $card_data['in_valid'] = number_format($card_data['in_valid']);
-            $card_data['closed_rate'] = number_format($card_data['closed_rate']);
-            // $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
+            $card_data['closed_rate'] = $card_data['closed_rate'];
+            $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
+            $card_data['in_process_ratio_percentage'] = $card_data['in_process_ratio_percentage'];
 
             return response()->json(['status' => 1, 'card_data' => $card_data]);
         // }else{
