@@ -125,7 +125,7 @@ class AdminShipmentHandoverController extends Controller
         
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
             }
-            elseif($shipment_pieces1 > 1)
+            else if($shipment_pieces1 > 1)
             {
               $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
               $details['pieces_count'] = $shipment->pieces;
@@ -138,36 +138,53 @@ class AdminShipmentHandoverController extends Controller
         }
     }
 
-    public function arrival_bulk_shipment_details_receive(Request $request){
+    //receive
+    public function handover_receive_index(){
+      return view('admin.handover.receive');
+    }
 
+    public function arrival_bulk_shipment_details_receive(Request $request){
       $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
       if ($shipment->exists()) {
-          $shipment = $shipment->first();
+        $shipment = $shipment->first();
+        $shipment_pieces = $shipment->pieces;
           $handover_shipments = HandoverShipments::where('shipment_id',$shipment->id)->whereIn('status', [1,3]);
-          if($handover_shipments->exists()){
-            $details = array();
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['shipper'] = $shipment->user->name;
-            $details['phone_number'] = $shipment->user->phone;
-            $details['pickup_date'] = $shipment->pickup_date;
-            $details['special_instructions'] = $shipment->special_instructions;
+          $details = array();
+          $details['id'] = $shipment->id;
+          $details['tracking_number'] = $shipment->tracking_number;
+          $details['shipper'] = $shipment->user->name;
+          $details['phone_number'] = $shipment->user->phone;
+          $details['pickup_date'] = $shipment->pickup_date;
+          $details['special_instructions'] = $shipment->special_instructions;
+
+          if($handover_shipments->exists() && $shipment_pieces == 1){
             ShipmentScanningJourneyController::add($shipment->id,27,1,Auth::id(),NULL,NULL);
             return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
-          else {
+
+          else if($shipment_pieces > 1)
+            {
+              $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+              $details['pieces_count'] = $shipment->pieces;
+              ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
+              return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+            }
+
+          else 
+          {
             return ['status' => 1, 'error' => 'Shipment not in Handover / not ready to update!'];
           }
+
          }
-         else {
-          return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+      else {
+      return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
       }
 }
 
 //admin.handover.create.store
     public function bulk_handover_submit(Request $request){
-      dd($request->all());
+      
         $shipment_ids = explode(',', $request->shipment_ids);
         // $hub_id = explode(',', $request->hub);
         $total= count($shipment_ids);
@@ -200,10 +217,7 @@ class AdminShipmentHandoverController extends Controller
 
     }
 
-//receive
-    public function handover_receive_index(){
-         return view('admin.handover.receive');
-    }
+
     public function bulk_handover_submit_receive(Request $request){
         $shipment_ids = explode(',', $request->shipment_ids);
         $handover_ids = array();
@@ -267,12 +281,17 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
         ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
-        ->select(['handovers.id','handovers.id as handover_id','a.name as created_by','ad.name as received_by','hr.name as from','hor.name as to','c.name as hub',
-        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status','handovers.received as received_shipments',
+        
+        ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
+        'hr.name as from','hor.name as to','c.name as hub',
+        'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
+        'handovers.received as received_shipments',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
-        DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),'s.pieces as shipment_pieces'
-      
-      ]);
+        DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
+        DB::raw('SUM(s.pieces) as shipment_pieces'),
+      ])
+      ->orderBy('handovers.id', 'DESC')
+      ->groupBy('hss.handover_id');
 
         $datatable = Datatables::of($handover_list)
 
@@ -301,14 +320,10 @@ class AdminShipmentHandoverController extends Controller
         })
 
         ->editColumn('shipment_pieces', function($handover_list) {
-          if ($handover_list->shipment_count != 0 && $handover_list->shipment_pieces > 1) {
-            $shipment_count = Handover::join('handover_shipments as hss', 'hss.handover_id', '=', 'handovers.id')
-                ->join('shipments as s', 's.id', '=', 'hss.shipment_id')
-                ->where('s.pieces', '>', 1)
-                ->count();
-            return '<button class="btn btn-sm btn-outline-info align-middle">' . $shipment_count . '</button>';
+          if ($handover_list->shipment_pieces > 0) {
+            return '<button class="btn btn-sm btn-outline-info shipment_pieces align-middle">' . $handover_list->shipment_pieces . '</button>';
         } else {
-            return 0;
+            return '-';
         }
         });
 
@@ -725,20 +740,21 @@ class AdminShipmentHandoverController extends Controller
         }
     }
 
+    // for Pieces Modal
     public function handover_shipments_pieces(Request $request){
         $handover_id = $request->input('id');
-        $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->where('status',1)->get();
+        $handover_shipments = HandoverShipments::where('handover_id', $handover_id)->get();
         $shipments = [];
         if($handover_shipments->count() != 0){
             foreach ($handover_shipments as $handover_shipment){
-                $shipment = Shipment::where('id', $handover_shipment->shipment_id)->where('pieces', '>', 1)->first();
+                $shipment = Shipment::where('id', $handover_shipment->shipment_id)
+                ->first();
                 if ($shipment) {
                 $tracking_number['tracking_number'][] = $shipment->tracking_number;
                 $pieces['pieces'][] = $shipment->pieces;
-                $shipper_status['shipper_status'][] = ShipmentStatus::find($shipment->shipper_status_id)->name;
                 }
             }
-            return ['status' => 0, 'success' => 'Handover Note Shipments', 'tracking_number' => $tracking_number, 'pieces' => $pieces, 'shipper_status' => $shipper_status];
+            return ['status' => 0, 'success' => 'Handover Note Shipments', 'tracking_number' => $tracking_number, 'pieces' => $pieces];
         }
 
         else
@@ -748,24 +764,4 @@ class AdminShipmentHandoverController extends Controller
 
       }
 
-      public function add_handover_shipments_pieces(Request $request){
-          // $shipment_pieces = new HandoverShipmentPiece();
-          // $shipment_pieces['pieces_id'] = $request->pieces_id;
-          // $shipment_pieces['shipment_id'] = $request->shipment_id;
-          // $shipment_pieces['tracking_number'] = $request->tracking_number;
-          // $shipment_pieces->save();
-          // $shipment_id = $request->shipment_id;
-          // $tracking_number = $request->tracking_number;
-          // $pieces_id = $request->pieces_id;
-
-          // foreach($pieces_id as $pieces_ids){
-          //     $shipment_pieces = new HandoverShipmentPiece();
-          //     $shipment_pieces->pieces_id = $pieces_ids;
-          //     $shipment_pieces->shipment_id = $shipment_id;
-          //     $shipment_pieces->tracking_number = $tracking_number;
-          //     $shipment_pieces->save();
-          // }
-
-          // return ['status' => 1];
-      }
 }

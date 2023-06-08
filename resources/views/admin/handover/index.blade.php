@@ -349,8 +349,9 @@
                                         id = data.details.id;
                                         var index = $.inArray(id, shipment_ids);
                                         if (index === -1) {
+                                            var piece_remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
                                             var rowNo = table.rows().count();
-                                            table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, remove_button]).node().id = data.details.id;
+                                            table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.phone_number, data.details.pickup_date,data.details.special_instructions, piece_remove_button]).node().id = data.details.id;
                                             table.draw(false);
                                             table.order([0, 'desc']).draw();
                                             scan_sound(1);
@@ -362,7 +363,7 @@
                                 else {
                                     $('#add_shipment_form button.add').prop('disabled', false);
                                     scan_sound(2);
-                                    toastr.error(data.error, 'Error!!!!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }
                             });
                     }

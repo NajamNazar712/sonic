@@ -589,20 +589,16 @@
                     // Extract the arrays from the nested objects
                     var trackingNumberArray = data.tracking_number.tracking_number;
                     var piecesArray = data.pieces.pieces;
-                    // var shipperStatusArray = data.shipper_status.shipper_status;
-                    var shipperStatusArray = data.shipper_status.shipper_status;
 
                     // Iterate over the arrays
                     for (var i = 0; i < trackingNumberArray.length; i++) {
                         var trackingNumber = trackingNumberArray[i];
                         var pieces = piecesArray[i];
-                        var shipperStatus = shipperStatusArray[i];
 
                         var shipmentHtml =
                             '<tr>' +
                             '<td>' + trackingNumber + '</td>' +
                             '<td>' + pieces + '</td>' +
-                            '<td>' + shipperStatus + '</td>' +
                             '</tr>';
 
                         shipmentsHtml += shipmentHtml;
@@ -615,7 +611,6 @@
                         '<tr>' +
                         '<th>Tracking Number</th>' +
                         '<th>Shipment Pieces</th>' +
-                        '<th>Pieces Received Status</th>' +
                         '</tr>' +
                         '</thead>' +
                         '<tbody>' +
