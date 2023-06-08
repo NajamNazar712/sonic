@@ -168,7 +168,7 @@
                     </ul>
                 </li>
             @endif
-            @if (session('user_type') == 1 || in_array(10, session('permissions')))
+            @if (session('user_type') == 1 || session('special_dashboard_user') || in_array(10, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
             @endif
 

@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Subsitute Accounts')
+@section('title', 'Special Dashboard Accounts')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Substitute Accounts
+					Special Dashboard Accounts
 				</h1>
 
 				<div class="card">

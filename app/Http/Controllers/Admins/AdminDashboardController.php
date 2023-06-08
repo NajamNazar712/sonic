@@ -9387,7 +9387,7 @@ class AdminDashboardController extends Controller
                     }
                     
                     // if (session('role_id') == 1 || in_array(session('id'), in_array(241, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Substitute Acoounts</div></button>';
+                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
                     // }add
 
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
@@ -13044,7 +13044,6 @@ class AdminDashboardController extends Controller
 
     public function shipment_received_excel_upload(Request $request){
         
-        // dd($request->all());
         if ($file = $request->file('receiver_detials')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -13086,16 +13085,25 @@ class AdminDashboardController extends Controller
         
         $invalid_shipment = [];
         $valid_shipment   = [];
+        
         foreach ($rows as $key => $row) {
             $shipment = Shipment::where('tracking_number',$row[0])->first();
+            
             if(empty($shipment)){
-                $shipment_details   = [$row[0],$row[1],$row[2],$row[3]];
-                $invalid_shipment[] = $shipment_details;  
+                $invalid_shipment[] = [$row[0],$row[1],$row[2],$row[3]];
             }
+            // else if()
+            // {
+
+            //     $already_exist_shipment[] = [$row[0],$row[1],$row[2],$row[3]];
+            // }
             else{
+                // dd(2);
                 $valid_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
             }
+            
         }
+        dd($invalid_shipment);
         if(collect($invalid_shipment)->isEmpty()){
             if(collect($valid_shipment)->isNotEmpty()){
                 foreach ($valid_shipment as $valid) {
