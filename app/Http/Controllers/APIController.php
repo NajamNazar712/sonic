@@ -56,6 +56,7 @@ use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Rider;
 use App\Http\Models\SelfCollectionShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\ReturnSheet;
 use App\Http\Models\ShipmentOrderDate;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\ShipmentReplacementParcelImage;
@@ -66,6 +67,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\Shopify\ShopifyInvoiceSetting;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
@@ -195,7 +197,7 @@ class APIController extends Controller
         'destination_check' => 'Destination city not allowed, please contact your sales person!',
         'destination_return_check' => 'Return city not allowed, please contact your sales person!',
     ];
-
+    
     public static function phone_number($phone_number)
     {
         //Removing anything after Comma (,)
@@ -400,7 +402,7 @@ class APIController extends Controller
     public function shipment_book(Request $request)
     {
         /********************************NOTE********************************/
-        /*This API is also using from Trax App Booking Form, Please Concern with Mobile Team also Before Adding any required Parameter*/
+        /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
 
 
@@ -913,7 +915,8 @@ class APIController extends Controller
                 } else {
                     $consignee_email_address = null;
                 }
-                $information_display = $request->input('information_display');
+                // $information_display = $request->input('information_display');
+                $information_display = 1;
 
                 if ($request->filled('charges_mode_id')) {
                     $charges_mode_id = $request->input('charges_mode_id');
@@ -5300,7 +5303,7 @@ class APIController extends Controller
                                     // check bill status
                                     if ($shipment_data->amount == $shipment_data->received_amount) {
                                         // Bill paid status
-                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_no', $tracking_no)->first();
+                                        $transaction_data = OneLinkOutForDeliveryShipmentPayment::with('shipment_data')->where('tracking_number', $tracking_no)->first();
 
                                         $return_data['response_Code'] = "06";
                                         $return_data['bill_status'] = "P";
@@ -5451,7 +5454,7 @@ class APIController extends Controller
                         // $blocked_shipments = array(17,20,21,22,23,24,25,44,47,48,50,57,60);
 
                         if ($shipment_data) {
-                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_no', $tracking_no)->first();
+                            $transaction_data = OneLinkOutForDeliveryShipmentPayment::where('tracking_number', $tracking_no)->first();
 
                             if ($transaction_data) {
                                 if ($transaction_data->consumer_number == $request_data['consumer_number'] && $transaction_data->tran_auth_id == $request_data['tran_auth_id'] && $transaction_data->tran_date == $request_data['tran_date'] && $transaction_data->tran_time == $request_data['tran_time']) {
@@ -5492,7 +5495,7 @@ class APIController extends Controller
                                     $request_data['delivery_note_id'] = $delivery_note;
 
                                     $upload_transaction = OneLinkOutForDeliveryShipmentPayment::create($request_data);
-                                    dd($upload_transaction->id);
+
 
                                     if ($upload_transaction) {
                                         $return_data['response_Code'] = "00";
@@ -6839,4 +6842,107 @@ class APIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
         }
     }
+
+    public function return_shipment_info(Request $request){
+        $validateshipment = Validator::make($request->all(), [
+            'tracking'     => 'required',
+        ]);
+
+        if( $validateshipment->fails()){
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+        }
+        else{
+            $return_statuses = array(25, 31, 38, 23, 28, 34);
+            $tracking_number = $request->tracking;
+            $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', $request->user_id); 
+                if($shipment->exists()){
+                    $shipment = $shipment->first();
+                    if(in_array($shipment->shipper_status_id, $return_statuses)){
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipment->id);
+                        if($return_sheet->exists()){
+                            $return_sheet = $return_sheet->first();
+                            if($return_sheet->status_id == 0){
+                                return response()->json(['status' => 1, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $shipment->consignee_city->name, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'shipment_status' => $shipment->status_shipper->name]);
+                            }
+                            else{
+                                return response()->json(['status' => 0, 'error' => 'Shipment is already received with remarks ' . $return_sheet->remarks]);
+                            }
+                        }
+                        else{
+                            return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                        }
+                    }
+                    else{
+                        return response()->json(['status' => 0, 'error' => 'Shipment is not ready to be received!']);
+                    }
+                }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Shipment with given Tracking Number not Found!']);
+            }
+        }
+    }
+
+    public function shipper_received_shipments(Request $request){
+        $validateshipment = Validator::make($request->all(), [
+            'shipment_ids' => 'required',
+            'user_type'    => 'required',
+        ]);
+
+        if( $validateshipment->fails()){
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validateshipment->errors()]);
+        }
+        else{
+            $shipments_list = $request->shipment_ids;
+            $user           = $request->user_id;
+            $user_type      = $request->user_type;
+            $received_by    = '';
+            $userDetials    = User::where('id', $user)->first();
+
+            if($user_type == 2){
+                $received_by = ' (Substitute User)';
+            }
+            $ships = [];
+            foreach($shipments_list as $shipment_id){
+                $ships[] = $shipment_id;
+                if(!empty($shipment_id)){
+                    $shipments = Shipment::where('tracking_number', $shipment_id); 
+                    if($shipments->exists()){
+                        $shipments = $shipments->first();
+                        $return_sheet = ReturnSheet::where('shipment_id', $shipments->id);
+                        $ReturnSheetShipments = new ReturnSheetShipments();
+                        if($return_sheet->exists()){        
+                            $return_sheet = $return_sheet->first();
+                            $return_sheet->status_id = 1;
+                            $return_sheet->received_at = Carbon::now();
+                            $return_sheet->remarks = 'Received By ' . $userDetials->name . $received_by;
+                            $return_sheet->save();
+
+                            $ReturnSheetShipments->shipment_id = $shipments->id;
+                            $ReturnSheetShipments->scan_via = 2;
+                            $ReturnSheetShipments->return_sheet_id = $return_sheet->id;
+                            $ReturnSheetShipments->save();
+                        }
+                       
+                    }
+                    else{
+                        return response()->json([
+                            'status'  => 0, 
+                            'error' => 'Enter a Valid Shipment No'
+                        ]);
+                    }
+                }
+            }   
+            return response()->json([
+                'status'  => 1, 
+                'success' => 'Shipement Received Successfully'
+            ]);
+        }
+    }
+
+    public function return_shipments_list(){
+        dd('this function return shipments list');
+    }
+
+
+
 }

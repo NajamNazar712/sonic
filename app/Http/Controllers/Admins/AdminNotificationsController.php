@@ -311,7 +311,7 @@ class AdminNotificationsController extends Controller
             $details['fields'] = ['shipper_name','button','trax_logo','link'];
         }
         else if ($id == 39) {
-            $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at'];
+            $details['fields'] = ['company_name','tracking_number', 'status_updated_at', 'receiver_name','returned_at','shipments_count','return_notes_id','return_detail'];
         }else if ($id == 40) {
             $details['fields'] = ['rider_name','delivery_note_id','password'];
         }
@@ -809,24 +809,33 @@ class AdminNotificationsController extends Controller
         {
             $details['fields'] = ['link'];
         }
+        else if ($id == 216)
+        {
+            $details['fields'] = ['shipments_count','tracking_number','return_notes_id'];
+        }
 
         return $details;
     }
 
-    public function edit(Request $request) {
+    public function edit(Request $request)
+    {
         $notification = Notification::find($request->get('id'));
-
-        if ($notification) {
-            if ($notification->type_id == 1) {
+        
+        if ($notification) 
+        {
+            if ($notification->type_id == 1) 
+            {
                 $notification->subject = $request->get('subject');
             }
 
             $notification->body = $request->get('body');
+
             $notification->updated_by = Auth::id();
 
             $notification->save();
 
             return ['status' => 0, 'success' => 'Notification has been edited'];
+
         }
         else {
             return ['status' => 1, 'error' => 'No Notication with given ID is present'];

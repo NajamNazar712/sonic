@@ -44,7 +44,7 @@
                                     </div>
                                     <input type="text" name="from_date"
                                         class="form-control bg-primary border-primary white rounded-right" id="from_date"
-                                        placeholder="Date(From)">
+                                        placeholder="Date (From)" data-value="{{$today}}">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -57,7 +57,7 @@
                                     </div>
                                     <input type="text" name="to_date"
                                         class="form-control bg-primary border-primary white rounded-right" id="to_date"
-                                        placeholder="Date(To)">
+                                        placeholder="Date (To)" data-value="{{$today}}">
                                 </div>
                             </div>
 
@@ -83,8 +83,11 @@
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Last Status</th>
+                            <th class="border-primary border-darken-1">Last Status Date</th>
                             <th class="border-primary border-darken-1">Current Status</th>
-                            <th class="border-primary border-darken-1">Status Date</th>
+                            <th class="border-primary border-darken-1">Current Status Date</th>
+                            <th class="border-primary border-darken-1">RCP Reason</th>
+                            <th class="border-primary border-darken-1">RCP Count</th>
                             <th class="border-primary border-darken-1">OTP Status</th>
                         </tr>
                     </thead>
@@ -180,33 +183,48 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            var sevenDays = '{{ $sevenDays }}';
+            var today = '{{ $today }}';
             var start_of_year = '{{ Carbon\Carbon::now()->subMonth(2) }}';
-            $('#from_date').pickadate({
+           
+             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
+                // min: new Date(thirtydays),
+                max : new Date(today),
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $(
-                            '#search_form #from_date').pickadate('picker').get('select'));
-                    }
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(7, 'days');
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                    to_date.pickadate('picker').set('max', new Date(current.toDate()),{muted:true});
+                    to_date.pickadate('picker').set('select', new Date(current.toDate()),{muted:true});
                 }
             });
-            $('#to_date').pickadate({
+            var to_date = $('#to_date').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
+                max : new Date(today),
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $(
-                            '#search_form #to_date').pickadate('picker').get('select'));
-                    }
+                    // var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    // from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
 
@@ -265,8 +283,11 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Last Status');
+                            head.push('Last Status Date');
                             head.push('Current Status');
-                            head.push('Status Date');
+                            head.push('Current Status Date');
+                            head.push('RCP Reason');
+                            head.push('RCP Count');
                             head.push('OTP Status');
 
                             $.each(result.data, function(index, values) {
@@ -280,8 +301,11 @@
                                 row.push(values.destination);
                                 row.push(values.hubname);
                                 row.push(values.last_status);
+                                row.push(values.last_status_date);
                                 row.push(values.current_status);
                                 row.push(values.date);
+                                row.push(values.reason);
+                                row.push(values.rcp_count);
                                 row.push(values.otp_entered);
                                 body.push(row);
                             });
@@ -316,7 +340,7 @@
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
-
+                deferLoading: 0,
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.return.return_confirm_otp.list') }}',
@@ -343,14 +367,16 @@
                     {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
                     {data: 'hubname',name: 'hub.name',class: 'align-middle hub'},
                     {data: 'last_status',class: 'align-middle last_status'},
+                    {data: 'last_status_date',name: 'ls.updated_at',class: 'align-middle date'},
                     {data: 'current_status',class: 'align-middle current_status'},
                     {data: 'date',name: 'sj.updated_at',class: 'align-middle date'},
+                    {data: 'reason',name: 'ssr.name',class: 'align-middle date'},
+                    {data: 'rcp_count',class: 'align-middle date'},
                     {data: 'otp_entered',name: 'otp_entered',class: 'align-middle otp_entered'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    //console.log(data);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')

@@ -44,6 +44,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Pending Shipments</th>
@@ -200,6 +201,7 @@
                             head.push('S.No');
                             head.push('Return Note No.');
                             head.push('Hub');
+                            head.push('Rider ID');
                             head.push('Rider');
                             head.push('No. Of Shipments');
                             head.push('No. Of Pending Shipments');
@@ -213,6 +215,7 @@
                                 row.push(index + 1);
                                 row.push(values.return_note_id_padded);
                                 row.push(values.hub);
+                                row.push(values.rider_trax_id);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
                                 row.push(values.shipments_unverified_count);
@@ -262,6 +265,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     // { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},

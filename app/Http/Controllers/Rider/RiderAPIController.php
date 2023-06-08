@@ -2,151 +2,153 @@
 
 namespace App\Http\Controllers\Rider;
 
-use App\Http\Controllers\AdminAPIController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\Retail\RetailRatesCalculationController;
-use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
-use App\Http\Controllers\Admins\DeliveryController;
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\EmployeeAttendanceController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Retail\RetailShipmentBookController;
-use App\Http\Controllers\ShipmentOpenBoxJourneyController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\Admin\ChangeShipmentAmountLog;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\DeliveryRelation;
-use App\Http\Models\Admin\GlobalSettings;
-//use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\Admin\Retail\RetailCashDeposit;
-use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
-use App\Http\Models\Admin\Retail\RetailPaymentMode;
-use App\Http\Models\Admin\Retail\RetailShipment;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailShippingMode;
-use App\Http\Models\Admin\Retail\RetailTraxBox;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\RetailPickupNote;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\RiderCategoryByPass;
-use App\Http\Models\Admin\RiderType;
-use App\Http\Models\Admin\ShipmentOnHold;
-use App\Http\Models\AppNotification;
-use App\Http\Models\BanksList;
-use App\Http\Models\BusinessCategory;
+use DB;
+use Validator;
+use Carbon\Carbon;
+use GuzzleHttp\Client;
 use App\Http\Models\City;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\ConsigneeLocation;
-use App\Http\Models\ConsigneeShipmentLocation;
-use App\Http\Models\CRM\CrmComments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\DeliveryNoteRequests;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\EmployeeNotificationHistory;
-use App\Http\Models\EmployeeShift;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeAttachment;
-use App\Http\Models\HR\EmployeeAttendanceAdjustment;
-use App\Http\Models\HR\EmployeeBankInformation;
-use App\Http\Models\HR\EmployeeBloodGroup;
-use App\Http\Models\HR\EmployeeDesignation;
-use App\Http\Models\HR\EmployeeDomicile;
-use App\Http\Models\HR\EmployeeEducationalBackground;
-use App\Http\Models\HR\EmployeeEmployementHistory;
-use App\Http\Models\HR\EmployeeGender;
-use App\Http\Models\HR\EmployeeLeave;
-use App\Http\Models\HR\EmployeeMaritalStatus;
-use App\Http\Models\HR\EmployeeMedicalInformation;
-use App\Http\Models\HR\EmployeeNationality;
-use App\http\Models\HR\EmployeeNature;
-use App\Http\Models\HR\EmployeePayslip;
-use App\Http\Models\HR\EmployeeRelationship;
-use App\Http\Models\HR\EmployeeReligion;
-use App\Http\Models\HR\LeaveType;
-use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\InterceptReBookRequestHistory;
-use App\Http\Models\MisroutedHistory;
-use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Zone;
+use App\RiderLocationLog;
+use App\Http\Models\Rider;
+use App\Http\Models\Route;
+use App\RiderMainCategory;
+use App\Http\Models\Product;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
 use App\Http\Models\PayslipPdf;
 use App\Http\Models\PickupNote;
-use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
+use App\Http\Models\RiderPickup;
+use App\Http\Models\ShipmentOtp;
+use App\RiderDeliveryNoteStatus;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\HR\LeaveType;
+use App\Http\Models\ShipmentItem;
+//use App\Http\Models\Admin\OneLink\OneLinkPaymentTransaction;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\PickupRequest;
-use App\Http\Models\Product;
-use App\Http\Models\ReportingLocation;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Models\Rider;
-use App\Http\Models\Rider\RiderDeliveryActionLog;
-use App\Http\Models\Rider\RiderDeliveryNoteRequest;
-use App\Http\Models\Rider\RiderIncentiveDelivery;
-use App\Http\Models\Rider\RiderIncentivePickup;
-use App\Http\Models\Rider\RiderRequest;
-use App\Http\Models\Rider\RiderReturnDelivery;
-use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
-use App\Http\Models\Rider\RiderReturnNoteStatus;
-use App\Http\Models\Rider\RidersIncentive;
-use App\Http\Models\Rider\RiderTickerImage;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\RiderDelivery;
-use App\Http\Models\RiderPickup;
-use App\Http\Models\RiderPickupActionLog;
-use App\Http\Models\RiderPickupInvalidLog;
-use App\Http\Models\Route;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentDistributionProduct;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentOpenBox;
-use App\Http\Models\ShipmentOtp;
-use App\Http\Models\ShipmentOtpVerification;
 use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentStatus;
-use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
-use App\Http\Models\WarehouseStockRequest;
-use App\Http\Models\Zone;
-use App\Jobs\ProcessAgentCallMonitoring;
-use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
-use App\Jobs\ProcessOneLinkExpireDeliveryNote;
-use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
-use App\Http\Models\Rider\RiderReturnNoteRequest;
-use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
-use App\RiderDeliveryNoteStatus;
-use App\RiderLocationLog;
-use App\RiderMainCategory;
-use Barryvdh\Snappy\Facades\SnappyPdf;
-use Carbon\Carbon;
-use DB;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\RequestException;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\RiderType;
+use App\Http\Models\AppNotification;
+use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\ShipmentOpenBox;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\BusinessCategory;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\MisroutedHistory;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\ConsigneeLocation;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\HR\EmployeeGender;
+use App\http\Models\HR\EmployeeNature;
+use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\ReportingLocation;
+use App\Http\Models\Rider\RiderRemark;
+use Barryvdh\Snappy\Facades\SnappyPdf;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\HR\EmployeePayslip;
+use App\Http\Models\Rider\RiderRequest;
 use Illuminate\Support\Facades\Storage;
-use Validator;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\HR\EmployeeDomicile;
+use App\Http\Models\HR\EmployeeReligion;
+use App\Jobs\ProcessAgentCallMonitoring;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ShipmentOnHold;
+use App\Http\Models\DeliveryNoteRequests;
+use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\HR\EmployeeAttachment;
+use App\Http\Models\HR\EmployeeBloodGroup;
+use App\Http\Models\Rider\RidersIncentive;
+use App\Http\Models\RiderPickupInvalidLog;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\WarehouseStockRequest;
+use GuzzleHttp\Exception\RequestException;
+use App\Http\Models\Admin\DeliveryRelation;
+use App\Http\Models\Admin\RetailPickupNote;
+use App\Http\Models\HR\EmployeeDesignation;
+use App\Http\Models\HR\EmployeeNationality;
+use App\Http\Models\Rider\RiderTickerImage;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Controllers\AdminAPIController;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\HR\EmployeeRelationship;
+use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\ShipmentOtpVerification;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\HR\EmployeeMaritalStatus;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V2Pickup\V2PickupRequest;
+use App\Http\Models\Admin\RiderCategoryByPass;
+use App\Http\Models\ConsigneeShipmentLocation;
+use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Jobs\ProcessOneLinkExpireDeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\Retail\RetailTraxBox;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\HR\EmployeeBankInformation;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\Rider\RiderIncentivePickup;
+use App\Http\Models\Admin\Retail\RetailShipment;
+use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\Rider\RiderReturnNoteStatus;
+use App\Http\Models\ShipmentDistributionProduct;
+use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Rider\RiderDeliveryActionLog;
+use App\Http\Models\Rider\RiderIncentiveDelivery;
+use App\Http\Models\Rider\RiderReturnNoteRequest;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\Admin\ChangeShipmentAmountLog;
+use App\Http\Models\Admin\Retail\RetailTraxCenter;
+use App\Http\Models\HR\EmployeeEmployementHistory;
+use App\Http\Models\HR\EmployeeMedicalInformation;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Controllers\Admins\DeliveryController;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\Admin\Retail\RetailPaymentMode;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Rider\RiderDeliveryNoteRequest;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\Retail\RetailShippingMode;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\V2Pickup\V2RiderPickupActionLog;
+use App\Http\Models\HR\EmployeeEducationalBackground;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminPickupsController;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Models\Rider\RiderReturnDeliveryActionLog;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
+use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
+use App\Http\Controllers\Retail\RetailShipmentBookController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
+use App\Http\Controllers\Retail\RetailRatesCalculationController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\ReturnDeliveredToShipperSms;
 
 class RiderAPIController extends Controller
 {
@@ -215,7 +217,8 @@ class RiderAPIController extends Controller
         }
     }
 
-    static public function rider_pickup_invalid_logs($rider_id, $pickup_request_id, $pickup_note_id, $shipment_id, $status_id){
+    static public function rider_pickup_invalid_logs($rider_id, $pickup_request_id, $pickup_note_id, $shipment_id, $status_id)
+    {
         $rider_pickup_invalid_logs = new RiderPickupInvalidLog();
         $rider_pickup_invalid_logs->rider_id = $rider_id;
         $rider_pickup_invalid_logs->pickup_request_id = $pickup_request_id;
@@ -560,7 +563,7 @@ class RiderAPIController extends Controller
         $start_date = Carbon::parse($start_date);
         $end_date = Carbon::parse($end_date);
         $dates = [];
-        for($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
+        for ($date = $start_date->copy(); $date->lte($end_date); $date->addDay()) {
             $dates[] = $date->format('Y-m-d');
         }
 
@@ -603,7 +606,6 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Location Marked Successfully']);
         }
-
     }
 
     public function pickup_summary(Request $request)
@@ -694,8 +696,7 @@ class RiderAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        }
-        else {
+        } else {
             $rider_id = $request->rider_id;
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
@@ -757,7 +758,6 @@ class RiderAPIController extends Controller
                 $rider_pickup->save();
 
                 PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
-
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -842,7 +842,6 @@ class RiderAPIController extends Controller
                 $rider_pickup->save();
 
                 PickupNoteRequest::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->update(['status' => 1]);
-
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -1033,7 +1032,6 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-
                 } else {
                     $deliveries['ordering'] = 4;
                 }
@@ -1146,8 +1144,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                    {
+                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -1172,9 +1169,9 @@ class RiderAPIController extends Controller
                             $received_by .= ' | ' . $request->cnic;
                         }
 
-//                if($request->has('receiver_name')){
-//                    $rider_delivery->receiver_name = $request->receiver_name;
-//                }
+                        //                if($request->has('receiver_name')){
+                        //                    $rider_delivery->receiver_name = $request->receiver_name;
+                        //                }
 
                         $shipment = Shipment::find($request->shipment_id);
 
@@ -1246,13 +1243,11 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 14;
 
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-
                                 } else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-
                                 }
                             } else {
                                 $shipment->shipper_status_id = 14;
@@ -1311,7 +1306,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is marked as delivered already';
                 }
-
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -1446,7 +1440,6 @@ class RiderAPIController extends Controller
                 $message = 'Shipment is already marked as Delivered';
             }
             return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -1641,7 +1634,6 @@ class RiderAPIController extends Controller
                         }
                     }
                 }
-
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -2012,7 +2004,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -2061,10 +2052,8 @@ class RiderAPIController extends Controller
                     $rider_request = $rider_request->first();
                     if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($rider_request->phone_no == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($rider_request->cnic == $request->input('cnic')) {
                         $message = "CNIC Already Exist";
                     }
@@ -2076,14 +2065,11 @@ class RiderAPIController extends Controller
                         $rider = $rider->first();
                         if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic')) {
                             $message = "Phone Number & CNIC Already Exists";
-
                         } else if ($rider->phone == $request->phone_number) {
                             $message = "Phone Number Already Exist";
-
                         } else if ($rider->cnic == $request->input('cnic')) {
                             $message = "CNIC Already Exist";
                         }
-
                     } else {
                         try {
                             $rider_request = new RiderRequest();
@@ -2168,8 +2154,7 @@ class RiderAPIController extends Controller
         if ($from_date == null && $delivery_note_id == null && $tracking_no == null) {
             return response()->json(["status" => 1, "message" => "Please provide parameter(s)"]);
         } else {
-            $rider_deliveries = DeliveryNote::
-            join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            $rider_deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
                 ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
                 ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
                 ->leftjoin('admins as ccb', 'delivery_notes.cash_collected_by', '=', 'ccb.id')
@@ -2205,8 +2190,6 @@ class RiderAPIController extends Controller
                 return response()->json(["status" => 1, "message" => "No deliveries found!"]);
             }
         }
-
-
     }
 
     public function cities(Request $request)
@@ -2386,7 +2369,6 @@ class RiderAPIController extends Controller
                             }
                         }
                     }
-
                 } else {
                     $deliveries['ordering'] = 4;
                 }
@@ -2554,7 +2536,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -2602,8 +2583,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
                 if (!RiderReturnDelivery::where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                    if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) {
-                        {
+                    if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) { {
 
                             $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -2850,7 +2830,6 @@ class RiderAPIController extends Controller
                 $message = 'Shipment is already marked as Undelivered';
             }
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -2933,8 +2912,6 @@ class RiderAPIController extends Controller
                 return response()->json(["status" => 1, "message" => "No return deliveries found!"]);
             }
         }
-
-
     }
 
     public function scan_shipment_detail(Request $request)
@@ -3002,7 +2979,6 @@ class RiderAPIController extends Controller
                     if ($rider_settings->setting_value != 0 && $rider_settings->setting_value != null) {
                         $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
                     }
-
                 }
                 if ($rider_cut_off_time != null) {
                     if (Carbon::now() > $rider_cut_off_time) {
@@ -3079,7 +3055,6 @@ class RiderAPIController extends Controller
                         }
                         self::retail_pickup_assign($pickup_request_id, $rider_id);
                     }
-
                 }
                 if (count($allowed_pickup_requests) > 0) {
                     $pickup_note = V2PickupNote::where('rider_id', $rider_id)->where('status', 0);
@@ -3090,7 +3065,6 @@ class RiderAPIController extends Controller
                             $pickup_note->pickups += $pickups;
 
                             $pickup_note->save();
-
                         }
                         $pickup_note_id = $pickup_note->id;
                     } else {
@@ -3146,7 +3120,7 @@ class RiderAPIController extends Controller
     public function rider_wallet(Request $request)
     {
         $rules = [
-//            'delivery_note_ids' => ['required', 'array', 'min:1', 'exists:delivery_notes,id']
+            //            'delivery_note_ids' => ['required', 'array', 'min:1', 'exists:delivery_notes,id']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -3158,8 +3132,7 @@ class RiderAPIController extends Controller
         } else {
             $rider_id = $request->rider_id;
 
-            $delivery_notes = DeliveryNote::
-            join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            $delivery_notes = DeliveryNote::join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
                 ->select(['delivery_notes.id as delivery_note_id', 'delivery_notes.received_cod_amount as amount'])
                 ->where('delivery_notes.cash_collection_status', 0)
                 ->where('delivery_notes.status', '!=', 4)
@@ -3216,13 +3189,19 @@ class RiderAPIController extends Controller
                 $shipment_details = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
                     ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
-                            ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and shipments_journey.rider_id is not null)'));
+                            ->where(
+                                'shipments_journey.id',
+                                '=',
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = delivery_note_shipments.shipment_id and reference_1_id = delivery_note_shipments.delivery_note_id and shipments_journey.shipper_status_id != 5 and shipments_journey.rider_id is not null)')
+                            );
                     })
                     ->join('rider_deliveries', function ($join) {
                         $join->on('delivery_note_shipments.shipment_id', '=', 'rider_deliveries.shipment_id')
-                            ->where('rider_deliveries.id', '=',
-                                DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)'));
+                            ->where(
+                                'rider_deliveries.id',
+                                '=',
+                                DB::raw('(select max(id) from rider_deliveries as rrd where rrd.shipment_id = delivery_note_shipments.shipment_id AND rrd.delivery_note_id = delivery_note_shipments.delivery_note_id)')
+                            );
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -3258,19 +3237,24 @@ class RiderAPIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => "No Details Found"]);
                 }
-
             } else if ($request->has('return_note_id')) {
                 $return_note_id = $request->return_note_id;
                 $shipment_details = ReturnNoteShipment::join('shipments as s', 's.id', '=', 'return_note_shipments.shipment_id')
                     ->join('shipments_journey', function ($join) {
                         $join->on('shipments_journey.shipment_id', '=', 'return_note_shipments.shipment_id')
-                            ->where('shipments_journey.id', '=',
-                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23 and shipments_journey.rider_id is not null)'));
+                            ->where(
+                                'shipments_journey.id',
+                                '=',
+                                DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = return_note_shipments.shipment_id and reference_1_id = return_note_shipments.return_note_id and shipments_journey.shipper_status_id != 23 and shipments_journey.rider_id is not null)')
+                            );
                     })
                     ->join('rider_return_deliveries', function ($join) {
                         $join->on('return_note_shipments.shipment_id', '=', 'rider_return_deliveries.shipment_id')
-                            ->where('rider_return_deliveries.id', '=',
-                                DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)'));
+                            ->where(
+                                'rider_return_deliveries.id',
+                                '=',
+                                DB::raw('(select max(id) from rider_return_deliveries as rrd where rrd.shipment_id = return_note_shipments.shipment_id AND rrd.return_note_id = return_note_shipments.return_note_id)')
+                            );
                     })
                     ->leftjoin('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
                     ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -3304,7 +3288,6 @@ class RiderAPIController extends Controller
                 } else {
                     return response()->json(['status' => 1, 'message' => "No Details Found"]);
                 }
-
             } else {
                 return response()->json(['status' => 1, 'message' => "No Parameter Provided"]);
             }
@@ -3314,12 +3297,12 @@ class RiderAPIController extends Controller
     public function pickups_history_v2(Request $request)
     {
         $rider_id = $request->rider_id;
-        $from_date = explode(" ",$request->get('from_date'))[0]." 06:00:00";
+        $from_date = explode(" ", $request->get('from_date'))[0] . " 06:00:00";
         $to_date = $request->get('to_date');
-        if($to_date == null){
+        if ($to_date == null) {
             $to_date = strval(Carbon::parse($from_date)->addDay());
-        }else{
-            $to = explode(" ",$request->get('to_date'))[0]." 06:00:00";
+        } else {
+            $to = explode(" ", $request->get('to_date'))[0] . " 06:00:00";
             $to_date = strval(Carbon::parse($to)->addDay());
         }
         $pickup_request_id = $request->get('pickup_request_id');
@@ -3333,10 +3316,13 @@ class RiderAPIController extends Controller
                 ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
                 ->leftjoin('shipments_journey as total_s', function ($join) {
                     $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
-                        ->where('total_s.id', '=',
-                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+                        ->where(
+                            'total_s.id',
+                            '=',
+                            DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)')
+                        );
                 })
-            ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipments'), DB::raw('count(total_s.id) as rider_picked'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from_date . '" and "' . $to_date . '") as arrived'), 'v2_pickup_notes.created_at as created_at')
+                ->select('v2_pickup_notes.id as pickup_note_id', DB::raw('(SELECT SUM(vprs.booked) FROM v2_pickup_note_requests AS vpnr LEFT JOIN v2_pickup_requests AS vprs ON vprs.id = vpnr.pickup_request_id WHERE vpnr.pickup_note_id = v2_pickup_notes.id ) as total_shipments'), DB::raw('count(total_s.id) as rider_picked'), DB::raw('(SELECT COUNT(vpnr2.shipment_id) FROM v2_pickup_received_shipments AS vpnr2 WHERE vpnr2.pickup_note_id = v2_pickup_notes.id AND vpnr2.pickup_note_id is not null and vpnr2.created_at between "' . $from_date . '" and "' . $to_date . '") as arrived'), 'v2_pickup_notes.created_at as created_at')
                 ->groupBy('v2_pickup_notes.id')
                 ->where('v2_pickup_notes.rider_id', '=', $rider_id)
                 ->where('v2_pickup_notes.status', 1);
@@ -3426,8 +3412,6 @@ class RiderAPIController extends Controller
                 return response()->json(["status" => 1, "message" => "No deliveries found!"]);
             }
         }
-
-
     }
 
     public function return_history_v2(Request $request)
@@ -3483,8 +3467,6 @@ class RiderAPIController extends Controller
                 return response()->json(["status" => 1, "message" => "No return deliveries found!"]);
             }
         }
-
-
     }
 
     public function shipment_undelivered_v2(Request $request)
@@ -3582,7 +3564,7 @@ class RiderAPIController extends Controller
                                     $rider_delivery->distance_from_current_to_actual = 0;
                                 }
                             }
-                            if($request->has('otp_entered') && $request->status_reason_id == 8){
+                            if ($request->has('otp_entered') && $request->status_reason_id == 8) {
                                 $rider_delivery->otp_entered = $request->otp_entered;
                             }
                             $rider_delivery->save();
@@ -3625,7 +3607,7 @@ class RiderAPIController extends Controller
                                 }
 
                                 ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id);
-                                if($request->shipper_status_id != 7){
+                                if ($request->shipper_status_id != 7) {
                                     NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
@@ -3665,7 +3647,6 @@ class RiderAPIController extends Controller
                 $message = 'Shipment is already marked as Delivered';
             }
             return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -3953,7 +3934,6 @@ class RiderAPIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -4119,7 +4099,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -4174,10 +4153,10 @@ class RiderAPIController extends Controller
                 foreach ($return_note_shipments as $return_note_shipment) {
                     $reason_mandatory_shippers = ReturnReasonMandatoryShipper::pluck('shipper_id')->toArray();
                     $shipment_data = $return_note_shipment->shipment;
-                    if($shipment_data->return_address_id){
+                    if ($shipment_data->return_address_id) {
                         $pickup_address = $shipment_data->return_address;
                         $address_id = $shipment_data->return_address_id;
-                    }else{
+                    } else {
                         $pickup_address = $shipment_data->pickup_address;
                         $address_id = $shipment_data->pickup_address_id;
                     }
@@ -4276,7 +4255,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -4404,7 +4382,6 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
-
     }
 
     public function attendance_details(Request $request)
@@ -4497,24 +4474,24 @@ class RiderAPIController extends Controller
         $banks = BanksList::select('id', 'name')->where('status', 1)->get();
         $rider_type = RiderType::select('id', 'name')->get();
         $staff_categories = StaffCategory::select('id', 'name')->get();
-        $shifts = EmployeeShift::where('id' ,'!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
+        $shifts = EmployeeShift::where('id', '!=', 1)->select('id', 'name', 'start_time', 'end_time')->get();
         $category = RiderCategory::all();
         $main_category = RiderMainCategory::all();
         $employee_nature = EmployeeNature::select('id', 'name')->get();
         $replacement_employees = Employee::select('id', 'trax_id', 'name')->where('employee_type_id', 2)->whereNotNull('trax_id')->get();
         $shift_data = array();
-        foreach($shifts as $shift){
+        foreach ($shifts as $shift) {
             $datum = array();
             $datum['id'] = $shift->id;
-            $datum['name'] = $shift->name. ' ('.$shift->start_time.' - '. $shift->end_time.') ';
+            $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
             $shift_data[] = $datum;
         }
 
         $replacement_employee_data = array();
-        foreach($replacement_employees as $replacement_employee){
+        foreach ($replacement_employees as $replacement_employee) {
             $datum = array();
             $datum['id'] = $replacement_employee->id;
-            $datum['name'] = $replacement_employee->trax_id.' | '.$replacement_employee->name;
+            $datum['name'] = $replacement_employee->trax_id . ' | ' . $replacement_employee->name;
             $replacement_employee_data[] = $datum;
         }
         return response()->json(['status' => 0, "cities" => $cities, "designation" => $designation, "domicile" => $domicile, "marital_status" => $marital_status, "nationality" => $nationality, "religion" => $religion, "gender" => $gender, "zone" => $zone, "department" => $department, "hub" => $hub, "blood_group" => $blood_group, "relationships" => $relationships, 'banks' => $banks, 'rider_type' => $rider_type, 'staff_categories' => $staff_categories, 'shifts' => $shift_data, 'rider_sub_category' => $category, 'rider_main_category' => $main_category, 'employee_nature' => $employee_nature, 'replacement_employees' => $replacement_employee_data]);
@@ -4588,10 +4565,8 @@ class RiderAPIController extends Controller
                     $rider_request = $rider_request->first();
                     if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($rider_request->phone_no == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($rider_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
@@ -4599,10 +4574,8 @@ class RiderAPIController extends Controller
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
@@ -4614,14 +4587,11 @@ class RiderAPIController extends Controller
                         $rider = $rider->first();
                         if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
                             $message = "Phone Number & CNIC Already Exists";
-
                         } else if ($rider->phone == $request->phone_number) {
                             $message = "Phone Number Already Exist";
-
                         } else if ($rider->cnic == $request->input('cnic_no')) {
                             $message = "CNIC Already Exist";
                         }
-
                     } else {
                         try {
                             $rider_request = new RiderRequest();
@@ -5140,7 +5110,6 @@ class RiderAPIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -5172,10 +5141,8 @@ class RiderAPIController extends Controller
                 $rider_request = $rider_request->first();
                 if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
                     $message = "Phone Number & CNIC Already Exists";
-
                 } else if ($rider_request->phone_no == $request->input('phone_number')) {
                     $message = "Phone Number Already Exist";
-
                 } else if ($rider_request->cnic == $request->input('cnic_no')) {
                     $message = "CNIC Already Exist";
                 }
@@ -5185,10 +5152,8 @@ class RiderAPIController extends Controller
                 $employee = $employee->first();
                 if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                     $message = "Phone Number & CNIC Already Exists";
-
                 } else if ($employee->phone_number == $request->input('phone_number')) {
                     $message = "Phone Number Already Exist";
-
                 } else if ($employee->cnic == $request->input('cnic_no')) {
                     $message = "CNIC Already Exist";
                 }
@@ -5198,10 +5163,8 @@ class RiderAPIController extends Controller
                 $rider = $rider->first();
                 if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
                     $message = "Phone Number & CNIC Already Exists";
-
                 } else if ($rider->phone == $request->phone_number) {
                     $message = "Phone Number Already Exist";
-
                 } else if ($rider->cnic == $request->input('cnic_no')) {
                     $message = "CNIC Already Exist";
                 }
@@ -5436,7 +5399,6 @@ class RiderAPIController extends Controller
                 }
 
                 $attachments->cnic = implode(',', $cnic_array);
-
             }
 
             if ($request->hasFile('photo_1') || $request->hasFile('photo_2') || $request->hasFile('photo_3') || $request->hasFile('photo_4')) {
@@ -6220,7 +6182,7 @@ class RiderAPIController extends Controller
                 $attachments->cheque = implode(',', $cheque_array);
             }
 
-            if($request->has('attachment_update')){
+            if ($request->has('attachment_update')) {
                 $employees->attachment_update = $request->attachment_update;
                 $employees->save();
             }
@@ -6688,7 +6650,6 @@ class RiderAPIController extends Controller
                     return response()->json(['status' => 0, 'data' => $experience_certificate_array]);
                 }
             }
-
         }
     }
 
@@ -6848,7 +6809,6 @@ class RiderAPIController extends Controller
                     }
                 }
             }
-
         }
         return response()->json(['status' => 0, 'message' => 'Attachment Has Been Deleted']);
     }
@@ -7022,7 +6982,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -7151,7 +7110,7 @@ class RiderAPIController extends Controller
                             }
                         }
                         $deliveries['try_n_buy_items'] = $product;
-                        $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
+                        $deliveries['try_and_buy_fees'] = (float)$shipment_data->try_and_buy_fees;
                     }
                     if ($shipment_status_count > 1) {
                         $deliveries['rcp'] = 1;
@@ -7227,7 +7186,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -7275,8 +7233,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                    {
+                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -7301,9 +7258,9 @@ class RiderAPIController extends Controller
                             $received_by .= ' | ' . $request->cnic;
                         }
 
-//                if($request->has('receiver_name')){
-//                    $rider_delivery->receiver_name = $request->receiver_name;
-//                }
+                        //                if($request->has('receiver_name')){
+                        //                    $rider_delivery->receiver_name = $request->receiver_name;
+                        //                }
 
                         $shipment = Shipment::find($request->shipment_id);
 
@@ -7375,10 +7332,10 @@ class RiderAPIController extends Controller
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
                                 $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 } else {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                     ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
@@ -7390,13 +7347,11 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 14;
 
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-
                                 } else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-
                                 }
                             } else {
                                 $shipment->shipper_status_id = 14;
@@ -7456,7 +7411,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is marked as delivered already';
                 }
-
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -7479,7 +7433,6 @@ class RiderAPIController extends Controller
         } else {
             return response()->json(["status" => 1, "message" => "Incentives Not Found found!"]);
         }
-
     }
 
     public function retail_index(Request $request)
@@ -7664,7 +7617,7 @@ class RiderAPIController extends Controller
         $retail_shipment->gst = $gst;
         $retail_shipment->total_charges = $total_charges;
         $retail_shipment->weight_charges = $request->weight_charges;
-//        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
+        //        $retail_shipment->cash_handling_charges = $request->cash_handling_charges;
         $retail_shipment->fuel_surcharge = $request->fuel_surcharge;
         $retail_shipment->shipper_account_no = $shipper_info->id;
         $retail_shipment->weight = $estimated_weight;
@@ -7691,7 +7644,6 @@ class RiderAPIController extends Controller
             $cash_deposit->total_cn = 1;
             $cash_deposit->total_cash = $total_charges;
             $cash_deposit->save();
-
         }
 
         $cash_deposit_shipment = new RetailCashDepositShipment();
@@ -7705,7 +7657,6 @@ class RiderAPIController extends Controller
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
-
     }
 
     public function retail_shipment_store_v2(Request $request)
@@ -7885,7 +7836,6 @@ class RiderAPIController extends Controller
             $cash_deposit->total_cn = 1;
             $cash_deposit->total_cash = $amount;
             $cash_deposit->save();
-
         }
 
         $cash_deposit_shipment = new RetailCashDepositShipment();
@@ -7899,13 +7849,13 @@ class RiderAPIController extends Controller
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
-
     }
 
-    public function retail_shipment_calculate_rates(Request $request){
+    public function retail_shipment_calculate_rates(Request $request)
+    {
         $pickup_address_id = $request->pickup_address_id;
         $pickup_address = RetailTraxCenter::where('pickup_address_id', $pickup_address_id);
-        if($pickup_address->exists()) {
+        if ($pickup_address->exists()) {
             $pickup_address = $pickup_address->first();
             $pickup_city_id = $pickup_address->pickup_address->city_id;
             $discount =  $pickup_address->discount;
@@ -7918,19 +7868,20 @@ class RiderAPIController extends Controller
             }
 
             $packaging = ($request->packaging_amount != null) ?  intval($request->packaging_amount) : 0;
-        
-            $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '',$request->insurance_amount) : 0;
-            if($insurance_amount > 0 ){
-                $insurance_amount = round(intval($insurance_amount) * $insurance / 100,2);
+
+            $insurance_amount = ($request->insurance_amount != null) ?  str_replace(',', '', $request->insurance_amount) : 0;
+            if ($insurance_amount > 0) {
+                $insurance_amount = round(intval($insurance_amount) * $insurance / 100, 2);
             }
-        
-            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, $packaging);
+
+            $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight, $insurance_amount, $packaging);
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid Pickup Address"]);
     }
 
-    public function delivery_in_route(Request $request){
+    public function delivery_in_route(Request $request)
+    {
         $rules = [
             'shipment_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipments,id']
         ];
@@ -7943,7 +7894,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $shipment = Shipment::where('id', $request->shipment_id);
-            if($shipment->exists()){
+            if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $shipment->delivery_in_route = 1;
                 $shipment->save();
@@ -7951,10 +7902,10 @@ class RiderAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'Delivery In-Route Failed']);
         }
-
     }
 
-    public function pickup_in_route(Request $request){
+    public function pickup_in_route(Request $request)
+    {
         $rules = [
             'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id']
         ];
@@ -7967,7 +7918,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $pickup_request = V2PickupRequest::where('id', $request->pickup_request_id);
-            if($pickup_request->exists()){
+            if ($pickup_request->exists()) {
                 $pickup_request = $pickup_request->first();
                 $pickup_request->pickup_in_route = 1;
                 $pickup_request->save();
@@ -7975,7 +7926,6 @@ class RiderAPIController extends Controller
             }
             return response()->json(['status' => 1, 'message' => 'Pickup In-Route Failed']);
         }
-
     }
 
     public function shipment_delivered_v3(Request $request)
@@ -8009,8 +7959,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                    {
+                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -8035,9 +7984,9 @@ class RiderAPIController extends Controller
                             $received_by .= ' | ' . $request->cnic;
                         }
 
-//                if($request->has('receiver_name')){
-//                    $rider_delivery->receiver_name = $request->receiver_name;
-//                }
+                        //                if($request->has('receiver_name')){
+                        //                    $rider_delivery->receiver_name = $request->receiver_name;
+                        //                }
 
                         $shipment = Shipment::find($request->shipment_id);
 
@@ -8120,10 +8069,10 @@ class RiderAPIController extends Controller
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
                                 $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 } else {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                     ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
@@ -8135,13 +8084,11 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 14;
 
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-
                                 } else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-
                                 }
                             } else {
                                 $shipment->shipper_status_id = 14;
@@ -8201,7 +8148,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is marked as delivered already';
                 }
-
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -8309,13 +8255,13 @@ class RiderAPIController extends Controller
                                 $time = Carbon::now()->toDateString();
                                 if ($environment == 'production') {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time . '.' . $extension;
                                     Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
                                 } else {
                                     $extension = $request->file('audio')->getClientOriginalExtension();
-                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time .'.' . $extension;
+                                    $audio_path = 'rider_return_delivery_audio/' . $rider_return_delivery->id . '_' . $time . '.' . $extension;
                                     Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
                                     $rider_return_delivery->audio_path = $audio_path;
                                     $rider_return_delivery->save();
@@ -8324,7 +8270,7 @@ class RiderAPIController extends Controller
 
                             if (ReturnNote::where('id', $request->return_note_id)->exists()) {
 
-                                $shipment->shipper_status_id =$request->shipper_status_id;
+                                $shipment->shipper_status_id = $request->shipper_status_id;
                                 $shipment->consignee_status_id = $request->shipper_status_id;
                                 $shipment->save();
 
@@ -8362,9 +8308,9 @@ class RiderAPIController extends Controller
                             $undelivered_shipments_count = $updated_shipments->where('status', 1)->count();
 
                             if ($updated_shipments_count == 0) {
-                                if($total_shipments_count == $undelivered_shipments_count){
+                                if ($total_shipments_count == $undelivered_shipments_count) {
                                     $return_note_data->status = 1;
-                                }else{
+                                } else {
                                     $return_note_data->status = 3;
                                 }
                                 $return_note_data->updated_at = Carbon::now();
@@ -8383,7 +8329,6 @@ class RiderAPIController extends Controller
             }
 
             return response()->json(['status' => 0, 'message' => $message, 'return_note_id' => $request->return_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -8419,8 +8364,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
 
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                    {
+                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -8445,9 +8389,9 @@ class RiderAPIController extends Controller
                             $received_by .= ' | ' . $request->cnic;
                         }
 
-//                if($request->has('receiver_name')){
-//                    $rider_delivery->receiver_name = $request->receiver_name;
-//                }
+                        //                if($request->has('receiver_name')){
+                        //                    $rider_delivery->receiver_name = $request->receiver_name;
+                        //                }
 
                         $shipment = Shipment::find($request->shipment_id);
 
@@ -8538,10 +8482,10 @@ class RiderAPIController extends Controller
                                 $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
                                 $delivered_parcels = count($item_ids);
                                 if ($total_parcels == $delivered_parcels) {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                     ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 } else {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod,'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
                                     ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id);
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
@@ -8553,13 +8497,11 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 14;
 
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-
                                 } else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-
                                 }
                             } else {
                                 $shipment->shipper_status_id = 14;
@@ -8619,7 +8561,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is marked as delivered already';
                 }
-
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -8661,7 +8602,6 @@ class RiderAPIController extends Controller
             return response()->json(["status" => 0, "incentives" => $data]);
         }
         return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
-
     }
 
     public function rider_incentive_v3(Request $request)
@@ -8698,9 +8638,9 @@ class RiderAPIController extends Controller
             foreach ($rider_incentives as $rider_incentive) {
                 $datum = array();
                 $payable = DeliveryNote::where('rider_id', $rider_id)
-                    ->whereDate('created_at', date('Y-m-d',strtotime($rider_incentive->date)))
+                    ->whereDate('created_at', date('Y-m-d', strtotime($rider_incentive->date)))
                     ->sum('received_cod_amount');
-                $datum['created_at'] = date('Y/m/d',strtotime($rider_incentive->date));
+                $datum['created_at'] = date('Y/m/d', strtotime($rider_incentive->date));
                 $datum['pickup_shipments'] = $rider_incentive->pickup_shipments;
                 $datum['pickup_incentive'] = $rider_incentive->pickup_incentive;
                 $datum['delivery_shipments'] = $rider_incentive->delivery_shipments;
@@ -8713,7 +8653,6 @@ class RiderAPIController extends Controller
             return response()->json(["status" => 0, "incentives" => $data, "total_earned" => $total_earned, "total_payable" => $total_payable]);
         }
         return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
-
     }
 
     public function delivery_summary_multiple_v5(Request $request)
@@ -8787,7 +8726,7 @@ class RiderAPIController extends Controller
                     $refusal_otp = null;
                     $replacement_parcel_image = null;
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
-                    if($shipment_otp->exists()){
+                    if ($shipment_otp->exists()) {
                         $shipment_otp = $shipment_otp->first();
                         $refusal_otp = $shipment_otp->otp;
                     }
@@ -8832,13 +8771,12 @@ class RiderAPIController extends Controller
                             $products = $products->get();
                             foreach ($products as $product) {
                                 $qty = $product->items * $product->units_per_item;
-                                $per_unit_price = $product->price/$qty;
+                                $per_unit_price = $product->price / $qty;
                                 $items[] = ['pid' => $product->id, 'product_name' => $product->item->name, 'qty' => $qty, 'per_unit_price' => $per_unit_price];
                             }
                         }
                         $deliveries['distribution_items'] = $items;
-                    }
-                    elseif ($booking_type == 3) {
+                    } elseif ($booking_type == 3) {
                         $product = array();
                         $parcel = ShipmentItem::where('shipment_id', $shipment_id);
                         if ($parcel->exists()) {
@@ -8848,12 +8786,10 @@ class RiderAPIController extends Controller
                             }
                         }
                         $deliveries['try_n_buy_items'] = $product;
-                        $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
-                    }
-
-                    elseif($booking_type == 2){
+                        $deliveries['try_and_buy_fees'] = (float)$shipment_data->try_and_buy_fees;
+                    } elseif ($booking_type == 2) {
                         $replacement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
-                        if($replacement_parcel->exists()){
+                        if ($replacement_parcel->exists()) {
                             $replacement_parcel = $replacement_parcel->first();
                             $replacement_parcel_image = $replacement_parcel->picture_path;
                         }
@@ -8879,7 +8815,7 @@ class RiderAPIController extends Controller
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
-                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
@@ -8936,7 +8872,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -8988,8 +8923,7 @@ class RiderAPIController extends Controller
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                    {
+                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
                         $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -9014,14 +8948,14 @@ class RiderAPIController extends Controller
                         $cnic = str_replace('"', '', $request->cnic);
                         if ($cnic != "Empty") {
                             $rider_delivery->cnic = $cnic;
-                        }else{
+                        } else {
                             $cnic = NULL;
                         }
 
                         $relation = str_replace('"', '', $request->relation);
-                        if($relation != "Empty"){
+                        if ($relation != "Empty") {
                             $rider_delivery->relation = $relation;
-                        }else{
+                        } else {
                             $relation = NULL;
                         }
 
@@ -9121,8 +9055,7 @@ class RiderAPIController extends Controller
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                 }
-                            }
-                            elseif ($shipment->booking_type_id == 2) {
+                            } elseif ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
                                 $shipment->consignee_status_id = 30;
                                 $shipment->received_amount = $shipment->amount;
@@ -9132,8 +9065,7 @@ class RiderAPIController extends Controller
                                 NotificationsController::send(183, $details);
                                 NotificationsController::send(184, $details);
                                 $rider_delivery->rider_status_id = 30;
-                            }
-                            else if ($shipment->booking_type_id == 3) {
+                            } else if ($shipment->booking_type_id == 3) {
                                 $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
                                 $item_ids = explode(',', $res);
                                 $total_cod = 0;
@@ -9157,8 +9089,7 @@ class RiderAPIController extends Controller
                                     $rider_delivery->rider_status_id = 37;
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
-                            }
-                            else if ($shipment->booking_type_id == 4) {
+                            } else if ($shipment->booking_type_id == 4) {
                                 ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
 
                                 if ($shipment->charges_mode_id == 1) {
@@ -9166,16 +9097,13 @@ class RiderAPIController extends Controller
                                     $shipment->consignee_status_id = 14;
 
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-
                                 } else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-
                                 }
-                            }
-                            else {
+                            } else {
                                 $shipment->shipper_status_id = 14;
                                 $shipment->consignee_status_id = 14;
                                 $shipment->received_amount = $shipment->amount;
@@ -9232,11 +9160,11 @@ class RiderAPIController extends Controller
                         $delivery_note_data->save();
                         $rider_delivery->save();
 
-                        if($request->has('dbf_otp_entered')){
+                        if ($request->has('dbf_otp_entered')) {
                             $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
-                            if($shipment_verification->exists()){
+                            if ($shipment_verification->exists()) {
                                 $shipment_verification = $shipment_verification->first();
-                            }else{
+                            } else {
                                 $shipment_verification = new ShipmentOtpVerification();
                                 $shipment_verification->shipment_id = $shipment->id;
                             }
@@ -9248,7 +9176,6 @@ class RiderAPIController extends Controller
                 } else {
                     $message = 'Shipment is marked as delivered already';
                 }
-
             }
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
@@ -9284,8 +9211,7 @@ class RiderAPIController extends Controller
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             if (!Shipment::where('id', $request->shipment_id)->where('shipper_status_id', 25)->exists()) {
                 if (!RiderReturnDelivery::where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                    if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) {
-                        {
+                    if (ReturnNoteShipment::join('return_notes as rn', 'return_note_shipments.return_note_id', 'rn.id')->where('return_note_id', $request->return_note_id)->where('shipment_id', $request->shipment_id)->where('rn.rider_id', $rider_id)->exists()) { {
 
                             $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
@@ -9369,6 +9295,25 @@ class RiderAPIController extends Controller
                                 $shipment->save();
                                 ReturnNoteShipment::where('return_note_id', $request->return_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
                                 ShipmentsJourneyController::add($shipment->id, 25, 25, NULL, NULL, NULL, NULL, $request->return_note_id, NULL, 1, $received_by, $rider_id);
+
+                                $users = GlobalSettings::where('type', 'returned_shipment_notification');
+                                if($users->exists()) {
+                                    $users = $users->first();
+                                    $current_users = $users->text;
+                                    $c_user = explode(',', $current_users);
+
+                                    if(in_array($shipment->user_id,$c_user)){
+                                        $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id'=>$request->return_note_id,'user_id' => $shipment->user_id,'shipment_id' => $shipment->id,'status' => 0]);
+                                        if(!$return_delivered_to_shipper->exists()){
+                                            $return_delivered = new ReturnDeliveredToShipperSms();
+                                            $return_delivered->return_note_id = $request->return_note_id;
+                                            $return_delivered->user_id = $shipment->user_id;
+                                            $return_delivered->shipment_id = $shipment->id;
+                                            $return_delivered->status = 0;
+                                            $return_delivered->save();
+                                        }
+                                    }
+                                }
                             }
                             $rider_return_note_status = RiderReturnNoteStatus::where('return_note_id', $request->return_note_id);
                             if (!$rider_return_note_status->exists()) {
@@ -9491,10 +9436,8 @@ class RiderAPIController extends Controller
                     $rider_request = $rider_request->first();
                     if ($rider_request->phone_no == $request->input('phone_number') && $rider_request->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($rider_request->phone_no == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($rider_request->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
@@ -9502,10 +9445,8 @@ class RiderAPIController extends Controller
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
@@ -9517,14 +9458,11 @@ class RiderAPIController extends Controller
                         $rider = $rider->first();
                         if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
                             $message = "Phone Number & CNIC Already Exists";
-
                         } else if ($rider->phone == $request->phone_number) {
                             $message = "Phone Number Already Exist";
-
                         } else if ($rider->cnic == $request->input('cnic_no')) {
                             $message = "CNIC Already Exist";
                         }
-
                     } else {
                         try {
                             $rider_request = new RiderRequest();
@@ -9666,7 +9604,7 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $riders = Rider::find($rider_id);
-        if($riders){
+        if ($riders) {
             $response = array();
             $date = '-';
             $employee_shift = EmployeeShift::where('id', $riders->shift_id);
@@ -9675,32 +9613,29 @@ class RiderAPIController extends Controller
                 $shift_time = Carbon::createFromFormat('H:i:s', $employee_shift->start_time);
                 if ($shift_time->lt(Carbon::now())) {
                     $date = Carbon::now()->format("Y-m-d");
-                } else{
-                    if(Carbon::now()->format("l") == "Monday"){
+                } else {
+                    if (Carbon::now()->format("l") == "Monday") {
                         $date = Carbon::now()->subDays(2)->format("Y-m-d");
-                    }
-                    else{
+                    } else {
                         $date = Carbon::now()->subDays(1)->format("Y-m-d");
                     }
                     $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $rider_id)
                         ->where('employee_type', 2)->whereDate('attendance_date', $date)->orderBy('id', 'DESC');
-                    if($last_action_log->exists()){
+                    if ($last_action_log->exists()) {
                         $last_action_log = $last_action_log->first();
-                        if($last_action_log->action_id == 2){
+                        if ($last_action_log->action_id == 2) {
                             $date = Carbon::now()->format("Y-m-d");
                         }
                     }
-
                 }
             }
             $response["status"] = 0;
-            if ($employee_shift->exists()){
+            if ($employee_shift->exists()) {
                 $employee_shift = $employee_shift->first();
                 $response["shift_name"] = $employee_shift->name;
                 $response["start_time"] = $employee_shift->start_time;
                 $response["end_time"] = $employee_shift->end_time;
-            }
-            else{
+            } else {
                 $response["shift_name"] = "default";
                 $response["start_time"] = NULL;
                 $response["end_time"] = NULL;
@@ -9756,27 +9691,27 @@ class RiderAPIController extends Controller
                                 $clock_in = Carbon::parse($attendance->clock_in_datetime)->format("H:i:s");
                                 $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
                                 if ($time_diff > $shift->grace_time) {
-                                    $datum["status"] = 2;//Late
+                                    $datum["status"] = 2; //Late
                                 } else {
-                                    $datum["status"] = 1;//Present
+                                    $datum["status"] = 1; //Present
                                 }
                             } else {
-                                $datum["status"] = 2;//Late
+                                $datum["status"] = 2; //Late
                             }
                         } else {
                             $clock_in = Carbon::parse($attendance->clock_in)->format("H:i:s");
                             $time_diff = Carbon::parse($clock_in)->diffInMinutes(Carbon::parse($shift->start_time));
                             if ($time_diff > $shift->grace_time) {
-                                $datum["status"] = 2;//Late
+                                $datum["status"] = 2; //Late
                             } else {
-                                $datum["status"] = 1;//Present
+                                $datum["status"] = 1; //Present
                             }
                         }
                     } else {
                         $datum["status"] = 1;
                     }
                 } else {
-                    $datum["status"] = 3;//Absent
+                    $datum["status"] = 3; //Absent
                 }
                 $data[] = $datum;
             }
@@ -9858,7 +9793,6 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
-
     }
 
     public function attendance_details_v2(Request $request)
@@ -9909,12 +9843,11 @@ class RiderAPIController extends Controller
                 $payroll_month = Carbon::parse($payslip->payroll_month)->format('F Y');
                 $payroll_cut_off_date = Carbon::parse($payslip->payroll_cut_off_date)->toDateString();
                 $personal_contact = $riders->phone;
-                $payslip_pdf = PayslipPdf::where('payslip_id',$payslip->id);
+                $payslip_pdf = PayslipPdf::where('payslip_id', $payslip->id);
                 if ($payslip_pdf->exists()) {
                     $payslip_pdf = $payslip_pdf->first();
                     $file_url = $payslip_pdf->file_path;
-                }
-                else {
+                } else {
                     $basic_salary = ($payslip->basic_salary != NULL) ? number_format($payslip->basic_salary) : '-';
                     $house_rent = ($payslip->house_rent != NULL) ? number_format($payslip->house_rent) : '-';
                     $medical = ($payslip->medical != NULL) ? number_format($payslip->medical) : '-';
@@ -10251,7 +10184,7 @@ class RiderAPIController extends Controller
                       </html>';
 
                     $pdf = SnappyPDF::loadHTML($html);
-                    $filename = 'payslip_'. $payslip->id .  Carbon::now()->format('Uu')  . '-' . $payroll_month . '.pdf';
+                    $filename = 'payslip_' . $payslip->id .  Carbon::now()->format('Uu')  . '-' . $payroll_month . '.pdf';
                     $path = 'payslip_pdf/' . $filename;
                     $result = $pdf->download($filename);
                     Storage::disk('public')->put($path, $result);
@@ -10265,7 +10198,6 @@ class RiderAPIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => "Payslip not found"]);
             }
-
         }
     }
 
@@ -10285,13 +10217,13 @@ class RiderAPIController extends Controller
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($rider->exists()) {
                 $rider = $rider->first();
-                if($rider->status){
+                if ($rider->status) {
                     $pin = rand(100000, 999999);
                     $rider->reset_pin_otp = $pin;
                     $rider->save();
                     NotificationsController::send(158, $rider->id);
                     return response()->json(['status' => 0, 'message' => 'Otp has been sent to your registered number', 'otp' => $pin]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                 }
             } else {
@@ -10318,21 +10250,20 @@ class RiderAPIController extends Controller
             $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
             if ($rider->exists()) {
                 $rider = $rider->first();
-                if($request->input('otp') == $rider->reset_pin_otp){
+                if ($request->input('otp') == $rider->reset_pin_otp) {
                     $rider->pin = bcrypt($request->pin);
                     $rider->dummy_pin = $request->pin;
                     $rider->reset_pin_otp = NULL;
                     $rider->save();
 
-                    $employee = Employee::where('trax_id',$rider->trax_id)->where('trax_id','!=',null);
-                    if($employee->exists())
-                    {
+                    $employee = Employee::where('trax_id', $rider->trax_id)->where('trax_id', '!=', null);
+                    if ($employee->exists()) {
                         $employee = $employee->first();
                         $employee->pin = $request->pin;
                         $employee->update();
                     }
                     return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
-                }else {
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
                 }
             } else {
@@ -10489,7 +10420,6 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'User Not Found!', 'notification' => 1]);
             }
         }
-
     }
 
     public function signup_required_details(Request $request)
@@ -10560,10 +10490,8 @@ class RiderAPIController extends Controller
                     $employee = $employee->first();
                     if ($employee->phone_number == $request->input('phone_number') && $employee->cnic == $request->input('cnic_no')) {
                         $message = "Phone Number & CNIC Already Exists";
-
                     } else if ($employee->phone_number == $request->input('phone_number')) {
                         $message = "Phone Number Already Exist";
-
                     } else if ($employee->cnic == $request->input('cnic_no')) {
                         $message = "CNIC Already Exist";
                     }
@@ -10575,14 +10503,11 @@ class RiderAPIController extends Controller
                         $rider = $rider->first();
                         if ($rider->phone == $request->phone_number && $rider->cnic == $request->input('cnic_no')) {
                             $message = "Phone Number & CNIC Already Exists";
-
                         } else if ($rider->phone == $request->phone_number) {
                             $message = "Phone Number Already Exist";
-
                         } else if ($rider->cnic == $request->input('cnic_no')) {
                             $message = "CNIC Already Exist";
                         }
-
                     } else {
                         try {
                             $employee_request = new Employee();
@@ -10592,7 +10517,7 @@ class RiderAPIController extends Controller
                             $employee_request->cnic = $request->cnic_no;
                             $employee_request->phone_number = $request->phone_number;
                             $employee_request->employee_type_id = 2;
-//                            $employee_request->rider_request_id = $rider_request->id;
+                            //                            $employee_request->rider_request_id = $rider_request->id;
                             $employee_request->status_id = 2;
                             $employee_request->guardian_name = $request->guardian_name;
                             $employee_request->religion_id = $request->religion_id;
@@ -10620,7 +10545,7 @@ class RiderAPIController extends Controller
                             $employee_request->line_manager_id = $request->line_manager_id;
                             $employee_request->save();
 
-                            if($request->has("bank_id") && $request->has("account_title") && $request->has("iban")){
+                            if ($request->has("bank_id") && $request->has("account_title") && $request->has("iban")) {
                                 $employee_bank_info = new EmployeeBankInformation();
                                 $employee_bank_info->employee_id = $employee_request->id;
                                 $employee_bank_info->account_title = $request->account_title;
@@ -10655,7 +10580,7 @@ class RiderAPIController extends Controller
 
                             $response['status'] = 0;
                             $response['employee_id'] = $employee_request->id;
-                            $message = "Welcome to TRAX ".$request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
+                            $message = "Welcome to TRAX " . $request->name . "- Your Request have been received by Trax, and is pending for Approval from HR.";
                         } catch (Exception $ex) {
                             $response['message'] = $ex;
                         }
@@ -10742,7 +10667,7 @@ class RiderAPIController extends Controller
 
                         $response['status'] = 0;
                         $response['employee_id'] = $employee_request->id;
-                        $message = "Welcome to TRAX ".$employee_request->name. "- Your Request have been received by Trax, and is pending for Approval from HR.";
+                        $message = "Welcome to TRAX " . $employee_request->name . "- Your Request have been received by Trax, and is pending for Approval from HR.";
                     } catch (Exception $ex) {
                         $response['message'] = $ex;
                     }
@@ -10758,23 +10683,24 @@ class RiderAPIController extends Controller
         return response()->json($response);
     }
 
-    public function leave_index(Request $request){
+    public function leave_index(Request $request)
+    {
         return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $employee_id = $request->rider_employee;
         $employee = Employee::find($employee_id);
-        if($employee){
-            if($employee->line_manager_id == null){
+        if ($employee) {
+            if ($employee->line_manager_id == null) {
                 return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
             }
-                $data = array();
-                $data['trax_id'] = $employee->trax_id;
-                $data['name'] = $employee->name;
-                $data['designation'] = "Rider";
-                $data['department'] = "Operations";
-                $data['approver_email'] = $employee->line_manager->email;
-                $data['approver_name'] = $employee->line_manager->name;
-                $data['user_type'] = 0;
-                return response()->json(['status' => 0, 'data' => $data]);
+            $data = array();
+            $data['trax_id'] = $employee->trax_id;
+            $data['name'] = $employee->name;
+            $data['designation'] = "Rider";
+            $data['department'] = "Operations";
+            $data['approver_email'] = $employee->line_manager->email;
+            $data['approver_name'] = $employee->line_manager->name;
+            $data['user_type'] = 0;
+            return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "Rider not found"]);
     }
@@ -10799,43 +10725,42 @@ class RiderAPIController extends Controller
         } else {
             $employee = Employee::find($employee_id);
             if ($employee) {
-                    if ($request->has('leave_id')){
-                        $leave_request = EmployeeLeave::where('id', $request->leave_id);
-                        if($leave_request->exists()){
-                            $leave_request = $leave_request->first();
-                            $leave_request->from = $request->from;
-                            $leave_request->to = $request->to;
-                            $leave_request->applied_reason = $request->reason;
-                            $leave_request->save();
-                            $message = "Leave Request edited successfully";
-                        }else{
-                            return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
-                        }
-                    }else{
-                        $leave = EmployeeLeave::where('employee_id', $employee_id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
-                        if ($leave->exists()) {
-                            return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
-                        }
-                        $leave_request = new EmployeeLeave();
-                        $leave_request->employee_id = $employee_id;
-                        $leave_request->employee_type_id = 2;
-                        $leave_request->reporter_id = $employee->line_manager_id;
+                if ($request->has('leave_id')) {
+                    $leave_request = EmployeeLeave::where('id', $request->leave_id);
+                    if ($leave_request->exists()) {
+                        $leave_request = $leave_request->first();
                         $leave_request->from = $request->from;
                         $leave_request->to = $request->to;
                         $leave_request->applied_reason = $request->reason;
                         $leave_request->save();
-
-                        $user = Admin::where('employee_id',$leave_request->reporter_id)->first();
-                        NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
-                        NotificationsController::app_notification(12, $user->id, 1, $leave_request->id);
-                        $message = "Leave Request submitted successfully";
+                        $message = "Leave Request edited successfully";
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Invalid Leave Request ID']);
                     }
-                    return response()->json(['status' => 0, 'apply_message' => $message]);
-            } else {
-                    return response()->json(['status' => 1, 'message' => 'User Not Found']);
-                }
-        }
+                } else {
+                    $leave = EmployeeLeave::where('employee_id', $employee_id)->where('employee_type_id', 2)->whereIn('status', [1, 2]);
+                    if ($leave->exists()) {
+                        return response()->json(['status' => 1, 'message' => 'Leave Request Already Submitted & Pending for Approval']);
+                    }
+                    $leave_request = new EmployeeLeave();
+                    $leave_request->employee_id = $employee_id;
+                    $leave_request->employee_type_id = 2;
+                    $leave_request->reporter_id = $employee->line_manager_id;
+                    $leave_request->from = $request->from;
+                    $leave_request->to = $request->to;
+                    $leave_request->applied_reason = $request->reason;
+                    $leave_request->save();
 
+                    $user = Admin::where('employee_id', $leave_request->reporter_id)->first();
+                    NotificationsController::app_notification(11, $rider_id, 2, $leave_request->id);
+                    NotificationsController::app_notification(12, $user->id, 1, $leave_request->id);
+                    $message = "Leave Request submitted successfully";
+                }
+                return response()->json(['status' => 0, 'apply_message' => $message]);
+            } else {
+                return response()->json(['status' => 1, 'message' => 'User Not Found']);
+            }
+        }
     }
 
     public function employee_leave_list(Request $request)
@@ -10859,7 +10784,7 @@ class RiderAPIController extends Controller
                 $datum['rejected_reason'] = $employee_leave->rejected_reason;
                 $datum['status_id'] = $employee_leave->status_id;
                 $datum['status'] = $employee_leave->status;
-                if($employee_leave->to){
+                if ($employee_leave->to) {
                     $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
@@ -10869,7 +10794,7 @@ class RiderAPIController extends Controller
                         $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                     }
                     $datum['days_count'] = $diffDays;
-                }else{
+                } else {
                     $datum['days_count'] = 1;
                 }
                 $data[] = $datum;
@@ -10912,7 +10837,6 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'data' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
-
         }
     }
 
@@ -10940,7 +10864,7 @@ class RiderAPIController extends Controller
             if ($shift->exists()) {
                 $shift = $shift->first();
                 $shift_exists = 1;
-            }else{
+            } else {
                 return response()->json(['status' => 0, 'data' => $data]);
             }
 
@@ -10954,9 +10878,9 @@ class RiderAPIController extends Controller
                     ->whereDate('attendance_date', Carbon::parse($date)->format("Y-m-d"));
                 if ($attendance->exists()) {
                     $attendance = $attendance->first();
-                    if($attendance->leave_status == 2){
+                    if ($attendance->leave_status == 2) {
                         $datum["status"] = 4; //adjustment apply
-                    } else if($attendance->leave_status == 1) {
+                    } else if ($attendance->leave_status == 1) {
                         $datum["status"] = 5; //leave apply
                     } else {
                         if ($shift_exists == 1) {
@@ -10964,32 +10888,30 @@ class RiderAPIController extends Controller
                                 $clock_in_date = Carbon::parse($attendance->clock_in_datetime)->format("Y-m-d");
                                 $attendance_date = Carbon::parse($attendance->attendance_date)->format("Y-m-d");
                                 if ($attendance_date == $clock_in_date) {
-                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date.$shift->start_time)->addMinutes((int)$shift->grace_time);
+                                    $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $attendance->attendance_date . $shift->start_time)->addMinutes((int)$shift->grace_time);
                                     $clock_in = Carbon::parse($attendance->clock_in_datetime);
                                     $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
                                     if ($time_diff > 0) {
-                                        $datum["status"] = 2;//Late
+                                        $datum["status"] = 2; //Late
                                     } else {
-                                        $datum["status"] = 1;//Present
+                                        $datum["status"] = 1; //Present
                                     }
                                 } else {
-                                    $datum["status"] = 2;//Late
+                                    $datum["status"] = 2; //Late
                                 }
                             } else {
-                                $datum["status"] = 3;//Absent
+                                $datum["status"] = 3; //Absent
                             }
-                        }
-                        else {
+                        } else {
                             if ($attendance->clock_in_datetime) {
-                                $datum["status"] = 1;//Present
-                            }
-                            else{
-                                $datum["status"] = 3;//Absent
+                                $datum["status"] = 1; //Present
+                            } else {
+                                $datum["status"] = 3; //Absent
                             }
                         }
                     }
                 } else {
-                    $datum["status"] = 3;//Absent
+                    $datum["status"] = 3; //Absent
                 }
                 $data[] = $datum;
             }
@@ -11018,14 +10940,14 @@ class RiderAPIController extends Controller
     {
         return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
-        $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
+        $rider_profile = Rider::join('employees as e', 'riders.trax_id', '=', 'e.trax_id')
             ->select('e.id as employee_id', 'e.blood_group as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('riders.id', $rider_id);
         if ($rider_profile->exists()) {
             $rider_profile = $rider_profile->first();
-            if(!$rider_profile->blood_group_id || !$rider_profile->emergency_contact_no || !$rider_profile->emergency_contact_person){
+            if (!$rider_profile->blood_group_id || !$rider_profile->emergency_contact_no || !$rider_profile->emergency_contact_person) {
                 return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => "Profile already updated"]);
             }
         } else {
@@ -11038,7 +10960,7 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $blood_group_list = EmployeeBloodGroup::all();
-        $rider_profile = Rider::join('employees as e','riders.trax_id', '=', 'e.trax_id')
+        $rider_profile = Rider::join('employees as e', 'riders.trax_id', '=', 'e.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'e.blood_group')
             ->select('e.id as employee_id', 'bg.name as blood_group_name', 'bg.id as blood_group_id', 'e.emergency_contact as emergency_contact_no', 'e.emergency_contact_person as emergency_contact_person')
             ->where('riders.id', $rider_id);
@@ -11080,12 +11002,13 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function check_pin(Request $request){
+    public function check_pin(Request $request)
+    {
         return response()->json(['status' => 1, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
-            if($rider->reset_pin_status == 1){
+        if ($rider) {
+            if ($rider->reset_pin_status == 1) {
                 return response()->json(['status' => 0, 'pin_status' => 1]);
             }
             return response()->json(['status' => 0, 'pin_status' => 0]);
@@ -11093,11 +11016,12 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'pin_status' => 0]);
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
-            if($rider->reset_pin_status == 1){
+        if ($rider) {
+            if ($rider->reset_pin_status == 1) {
                 $rider->reset_pin_status = 0;
                 $rider->save();
                 return response()->json(['status' => 0, 'message' => "Logout Successfully"]);
@@ -11112,29 +11036,28 @@ class RiderAPIController extends Controller
         return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
+        if ($rider) {
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
                 $profile = $profile->first();
-                if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id){
+                if (!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id) {
                     return response()->json(['status' => 0, 'message' => "Please Update Your Profile"]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
         }
-
     }
 
     public function get_profile_v2(Request $request)
     {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
+        if ($rider) {
             $blood_group_list = EmployeeBloodGroup::all();
             $gender_list = EmployeeGender::all();
             $religion_list = EmployeeReligion::all();
@@ -11150,7 +11073,7 @@ class RiderAPIController extends Controller
             } else {
                 return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
         }
     }
@@ -11250,11 +11173,11 @@ class RiderAPIController extends Controller
 
     public function check_bolt_version(Request $request)
     {
-        $global_settings = GlobalSettings::where('type','bolt_updated_version')->select('setting_value as setting_value');
-        if($global_settings->exists()){
+        $global_settings = GlobalSettings::where('type', 'bolt_updated_version')->select('setting_value as setting_value');
+        if ($global_settings->exists()) {
             $global_settings = $global_settings->first();
             return response()->json(['status' => 0, 'app_version' => $global_settings->setting_value]);
-        }else{
+        } else {
             return response()->json(['status' => 0, 'app_version' => 24]);
         }
     }
@@ -11339,7 +11262,7 @@ class RiderAPIController extends Controller
                         }
                     }
 
-                    $rider_pickup->shipments = ($request->has('shipments'))? $request->shipments : null;
+                    $rider_pickup->shipments = ($request->has('shipments')) ? $request->shipments : null;
 
                     $rider_pickup->save();
 
@@ -11363,29 +11286,28 @@ class RiderAPIController extends Controller
                         $shipment_ids = explode(',', $request->shipment_ids);
                         $notification_shipments = array();
                         foreach ($shipment_ids as $shipment_id) {
-                            $shipment = Shipment::where('tracking_number',$shipment_id);
+                            $shipment = Shipment::where('tracking_number', $shipment_id);
                             if ($shipment->exists()) {
                                 $shipment = $shipment->first();
-                                if($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)){
+                                if ($shipment->shipper_status_id == 1 && in_array($shipment->id, $pickup_request_shipments)) {
                                     $shipment->shipper_status_id = 53;
                                     $shipment->consignee_status_id = 53;
                                     $shipment->save();
                                     ShipmentsJourneyController::add($shipment->id, 53, 53, NULL, NULL, NULL, NULL, $request->pickup_request_id, $request->pickup_note_id, 1, NULL, $rider_id);
-                                    $shipment_count+=1;
+                                    $shipment_count += 1;
                                     $notification_shipments[] = $shipment->id;
-                                }else{
-                                    self::rider_pickup_invalid_logs($rider_id,$request->pickup_request_id, $request->pickup_note_id,$shipment->id, 53);
+                                } else {
+                                    self::rider_pickup_invalid_logs($rider_id, $request->pickup_request_id, $request->pickup_note_id, $shipment->id, 53);
                                 }
                             }
                         }
                         $rider_pickup->shipments = $shipment_count;
                         $rider_pickup->save();
-                        if(count($notification_shipments) > 0){
+                        if (count($notification_shipments) > 0) {
                             NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
                         }
                     }
                 }
-
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
@@ -11406,7 +11328,7 @@ class RiderAPIController extends Controller
             'shipper_status_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status,id'],
             'status_reason_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipment_status_reason,id'],
             'remarks' => ['nullable', 'string', 'max:255'],
-            'remarks_id' => ['nullable','integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
+            'remarks_id' => ['nullable', 'integer', 'digits_between:1,10', 'exists:consignee_refused_reasons,id'],
             'picture' => ['required', 'mimes:png,jpeg,jpg'],
             'open_box' => ['required', 'integer'],
             'audio' => ['nullable', 'file'],
@@ -11427,9 +11349,9 @@ class RiderAPIController extends Controller
 
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
             $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
-            if($shipment_journey->exists()){
+            if ($shipment_journey->exists()) {
                 $shipment_journey = $shipment_journey->first();
-                if($shipment_journey->shipper_status_id == 5){
+                if ($shipment_journey->shipper_status_id == 5) {
                     if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                         if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
                             if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
@@ -11493,9 +11415,9 @@ class RiderAPIController extends Controller
                                             $rider_delivery->distance_from_current_to_actual = 0;
                                         }
                                     }
-                                    if($request->has('otp_entered') && $request->status_reason_id == 8){
+                                    if ($request->has('otp_entered') && $request->status_reason_id == 8) {
                                         $rider_delivery->otp_entered = $request->otp_entered;
-                                        if($request->otp_entered == 1){
+                                        if ($request->otp_entered == 1) {
                                             $rc_flag = true;
                                         }
                                     }
@@ -11531,18 +11453,18 @@ class RiderAPIController extends Controller
                                         $shipment->consignee_status_id = $request->shipper_status_id;
                                         $shipment->delivery_in_route = 0;
 
-                                        if(in_array($request->open_box,[1,2])){
+                                        if (in_array($request->open_box, [1, 2])) {
                                             $shipment->open_box = 1;
                                             $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
-                                            if($shipment_open_box->exists()){
+                                            if ($shipment_open_box->exists()) {
                                                 $shipment_open_box = $shipment_open_box->first();
-                                            }else{
+                                            } else {
                                                 $shipment_open_box = new ShipmentOpenBox();
                                                 $shipment_open_box->shipment_id = $shipment->id;
                                             }
                                             $shipment_open_box->open_box_type = $request->open_box;
                                             $shipment_open_box->save();
-                                        }else{
+                                        } else {
                                             $shipment->open_box = 0;
                                         }
                                         $shipment->save();
@@ -11557,8 +11479,8 @@ class RiderAPIController extends Controller
                                             $remarks_id = $request->remarks_id;
                                         }
 
-                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id,NULL,NULL, $remarks_id);
-                                        if($request->shipper_status_id != 7){
+                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
+                                        if ($request->shipper_status_id != 7) {
                                             NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                         }
                                         DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
@@ -11580,25 +11502,23 @@ class RiderAPIController extends Controller
                                     if ($updated_shipments_count == 0) {
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
-                                    dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+                                        dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
                                     }
 
 
 
-                                    if($rc_flag == true){
+                                    if ($rc_flag == true) {
                                         $otp_bypass = $this->otp_bypass($shipment->user_id);
-                                        if($otp_bypass){
+                                        if ($otp_bypass) {
                                             $this->auto_return_confirm($shipment->id);
-                                            ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id,NULL,NULL, $remarks_id);
-                                        }
-                                        else{
+                                            ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
+                                        } else {
                                             $arr['shipment_id'] = $request->shipment_id;
                                             $arr['delivery_note_id'] = $request->delivery_note_id;
                                             dispatch(new ProcessAgentCallMonitoring($arr));
                                         }
-
                                     }
-                                    if($rc_flag == false){
+                                    if ($rc_flag == false) {
                                         $arr['shipment_id'] = $request->shipment_id;
                                         $arr['delivery_note_id'] = $request->delivery_note_id;
                                         dispatch(new ProcessAgentCallMonitoring($arr));
@@ -11617,14 +11537,13 @@ class RiderAPIController extends Controller
                     } else {
                         $message = 'Shipment is already marked as Delivered';
                     }
-                } else{
+                } else {
                     $message = 'Shipment is not for Out for Delivery';
                 }
-            } else{
+            } else {
                 $message = 'Shipment is not for Out for Delivery';
             }
             return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
-
         }
     }
 
@@ -11632,10 +11551,10 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider){
-            if($request->has('device_token')){
+        if ($rider) {
+            if ($request->has('device_token')) {
                 EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
+                EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $rider->id)->delete();
                 $employee_device_token = new EmployeeDeviceToken();
                 $employee_device_token->employee_id = $rider->id;
                 $employee_device_token->employee_type_id = 2;
@@ -11647,18 +11566,17 @@ class RiderAPIController extends Controller
             $profile = Employee::where('trax_id', $rider->trax_id);
             if ($profile->exists()) {
                 $profile = $profile->first();
-                if(!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id){
+                if (!$profile->blood_group || !$profile->emergency_contact || !$profile->emergency_contact_person || !$profile->guardian_name || !$profile->mother_name  || !$profile->address  || !$profile->employee_gender_id || !$profile->religion_id || !$profile->marital_status_id || !$profile->date_of_birth || !$profile->shift_id || !$profile->domicile_id || !$profile->rider_main_category || !$profile->rider_sub_category || !$profile->nationality_id) {
                     return response()->json(['status' => 1, 'message' => "Please Update Your Profile"]);
-                }else{
+                } else {
                     return response()->json(['status' => 1, 'message' => "Profile already updated"]);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
             }
-        }else{
+        } else {
             return response()->json(['status' => 1, 'message' => "Profile Not Found"]);
         }
-
     }
 
     public function mark_attendance_v3(Request $request)
@@ -11678,10 +11596,10 @@ class RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $attendance_date = Carbon::createFromFormat('Y-m-d',$request->attendance_date);
+            $attendance_date = Carbon::createFromFormat('Y-m-d', $request->attendance_date);
             $last_action_log = EmployeeAttendanceActionLog::where('employee_id', $employee_id)
                 ->where('employee_type', 2)->whereDate('attendance_date', $attendance_date->format("Y-m-d"))->orderBy('id', 'DESC');
-            if($last_action_log->exists()){
+            if ($last_action_log->exists()) {
                 $last_action_log = $last_action_log->first();
                 if (($attendance_date->lt(Carbon::now()->format("Y-m-d")) && $last_action_log->action_id == 2) || $attendance_date->format('l') == "Sunday") {
                     $attendance_date = $attendance_date->addDays(1);
@@ -11702,7 +11620,7 @@ class RiderAPIController extends Controller
             }
             $location_status = $this->calculate_location_status($request->latitude, $request->longitude);
             if ($request->action == 1) {
-                if($rider_attendance->clock_in_datetime == null){
+                if ($rider_attendance->clock_in_datetime == null) {
                     $rider_attendance->clock_in_datetime = Carbon::now()->format("Y-m-d H:i:s");
                     $rider_attendance->clock_in_latitude = $request->latitude;
                     $rider_attendance->clock_in_longitude = $request->longitude;
@@ -11721,8 +11639,7 @@ class RiderAPIController extends Controller
                 $rider_attendance_action->save();
 
                 return response()->json(['status' => 0, 'message' => 'Clocked-In Successfully', 'response' => $rider_attendance_action, 'attendance_date' => Carbon::parse($attendance_date)->format("Y-m-d")]);
-            }
-            elseif ($request->action == 2) {
+            } elseif ($request->action == 2) {
                 $last_clockin_action = EmployeeAttendanceActionLog::where('employee_id', $employee_id)
                     ->where('employee_type', 2)->orderBy('id', 'DESC')->where('action_id', 1)->first();
                 $attendance_date = $last_clockin_action->attendance_date;
@@ -11747,7 +11664,6 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 1, 'message' => 'Failed']);
         }
-
     }
 
     public function login_v4(Request $request)
@@ -11806,9 +11722,9 @@ class RiderAPIController extends Controller
                             $information['api_token'] = $rider->api_token;
                             $information['cargo_user'] = 0;
                             $information['welcome_bit'] = 0;
-                            if(!$rider->first_login){
+                            if (!$rider->first_login) {
                                 $information['welcome_bit'] = 1;
-                                $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
+                                $information['welcome_message'] = "Welcome to TRAX " . $rider->name;
                             }
                             $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
                                 ->join('riders as r', 'e.id', 'r.employee_id')
@@ -11831,25 +11747,26 @@ class RiderAPIController extends Controller
                         return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
                     }
                 } else {
-                    if($rider->first_login == 0){
-                        return response()->json(['status' => 1, 'message' => "Dear ".$rider->name ."- Your request is in process and is pending for approval from HR."]);
-                    }else{
+                    if ($rider->first_login == 0) {
+                        return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for approval from HR."]);
+                    } else {
                         return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
                     }
                 }
             } else {
-                $employee = Employee::whereIn('request_status_id',[1,2])->where('employee_type_id',2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number',substr_replace($request->input('phone_number'), '-', 4, 0));
-                if($employee->exists()){
+                $employee = Employee::whereIn('request_status_id', [1, 2])->where('employee_type_id', 2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                if ($employee->exists()) {
                     $employee = $employee->first();
-                    return response()->json(['status' => 1, 'message' => "Dear ".$employee->name ."- Your request is in process and is pending for approval from HR."]);
-                }else{
+                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
+                } else {
                     return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
                 }
             }
         }
     }
 
-    public function validate_otp(Request $request){
+    public function validate_otp(Request $request)
+    {
         $rules = [
             'otp' => ['required', 'integer', 'digits:6'],
             'device_token' => ['nullable']
@@ -11875,9 +11792,9 @@ class RiderAPIController extends Controller
                 $information['api_token'] = $rider->api_token;
                 $information['cargo_user'] = 0;
 
-                if($request->has('device_token')){
+                if ($request->has('device_token')) {
                     EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                    EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id',$rider->id)->delete();
+                    EmployeeDeviceToken::where('employee_type_id', 2)->where('employee_id', $rider->id)->delete();
                     $employee_device_token = new EmployeeDeviceToken();
                     $employee_device_token->employee_id = $rider->id;
                     $employee_device_token->employee_type_id = 2;
@@ -11893,15 +11810,15 @@ class RiderAPIController extends Controller
                     $information['distance'] = $reporting_location->radius;
                     $information['lat'] = $reporting_location->lat;
                     $information['long'] = $reporting_location->long;
-                }else{
+                } else {
                     $information['distance'] = 0;
                     $information['lat'] = 0;
                     $information['long'] = 0;
                 }
                 $information['welcome_bit'] = 0;
-                if(!$rider->first_login){
+                if (!$rider->first_login) {
                     $information['welcome_bit'] = 1;
-                    $information['welcome_message'] = "Welcome to TRAX ".$rider->name;
+                    $information['welcome_message'] = "Welcome to TRAX " . $rider->name;
                 }
                 $rider->first_login = 1;
                 $rider->save();
@@ -11912,11 +11829,12 @@ class RiderAPIController extends Controller
         }
     }
 
-    public function adjustment_index(Request $request){
+    public function adjustment_index(Request $request)
+    {
         $employee_id = $request->rider_employee;
         $rider = Employee::find($employee_id);
-        if($rider){
-            if($rider->line_manager_id == null){
+        if ($rider) {
+            if ($rider->line_manager_id == null) {
                 return response()->json(['status' => 1, 'message' => "Department Head is not present!"]);
             }
             $data = array();
@@ -11930,7 +11848,6 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $data]);
         }
         return response()->json(['status' => 1, 'message' => "Rider not found"]);
-
     }
 
     public function adjustment_apply(Request $request)
@@ -11949,7 +11866,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider = Employee::find($employee_id);
-            if($rider) {
+            if ($rider) {
                 if ($rider->line_manager_id != null) {
 
                     $leave = EmployeeAttendanceAdjustment::where('employee_id', $employee_id)->where('employee_type_id', 2)->whereIn('status', [1, 2])->where('date', $request->date);
@@ -11965,27 +11882,23 @@ class RiderAPIController extends Controller
                     $leave_request->save();
                     $notify = false;
                     $user = Admin::find($rider->line_manager->admin->id);
-                    if($user)
-                    {
+                    if ($user) {
                         $user_id = $user->id;
                         $notify = true;
                     }
                     NotificationsController::app_notification(17, $rider_id, 2, $leave_request->id);
-                    if($notify) {
+                    if ($notify) {
                         NotificationsController::app_notification(18, $leave_request->reporter_id, 1, $leave_request->id);
                     }
                     $message = "Adjustment Request submitted successfully";
                     return response()->json(['status' => 0, 'apply_message' => $message]);
-
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Department Head Not Found']);
                 }
-            }
-            else {
+            } else {
                 return response()->json(['status' => 1, 'message' => 'User Not Found']);
             }
         }
-
     }
 
     public function employee_adjustment_list(Request $request)
@@ -12075,20 +11988,19 @@ class RiderAPIController extends Controller
                 ->where('department_id', 6)
                 ->where('employees.city_id', $hub_id->hub_id)
                 ->select(['employees.name', 'employees.trax_id', 'employees.id', 'h.name as hub']);
-            if($line_managers->exists()){
+            if ($line_managers->exists()) {
                 $line_managers = $line_managers->get();
                 $data = array();
-                foreach ($line_managers as $line_manager){
+                foreach ($line_managers as $line_manager) {
                     $datum = array();
                     $datum["id"] = $line_manager->id;
-                    $datum["name"] = $line_manager->name." "."(".$line_manager->trax_id. " | ".$line_manager->hub.")";
+                    $datum["name"] = $line_manager->name . " " . "(" . $line_manager->trax_id . " | " . $line_manager->hub . ")";
                     $data[] = $datum;
                 }
                 return response()->json(['status' => 0, 'line_managers' => $data]);
             }
             return response()->json(['status' => 1, 'message' => "No Line Manager Found"]);
         }
-
     }
 
     public function leave_index_v2(Request $request)
@@ -12120,7 +12032,7 @@ class RiderAPIController extends Controller
                 $data['user_type'] = 0;
                 $data['total_leaves'] = $employee->leave_count;
                 $availed_leaves = EmployeeLeave::where('employee_id', $employee->id)
-                ->whereIn('status', [2,4,6])->whereIn('leave_type', [1,2,3,4])->count(); 
+                    ->whereIn('status', [2, 4, 6])->whereIn('leave_type', [1, 2, 3, 4])->count();
                 $data['availed_leaves'] = $availed_leaves;
                 return response()->json(['status' => 0, 'data' => $data, 'leave_types' => $leave_types]);
             }
@@ -12255,7 +12167,7 @@ class RiderAPIController extends Controller
 
     public function employee_leave_list_v2(Request $request)
     {
-        if(!$request->has('rider_employee')){
+        if (!$request->has('rider_employee')) {
             return response()->json(['status' => 1, 'message' => "No Leave Found!"]);
         }
         $rider_employee = $request->rider_employee;
@@ -12278,7 +12190,7 @@ class RiderAPIController extends Controller
                 $datum['status'] = $employee_leave->status;
                 $datum['leave_type'] = $employee_leave->leave_type;
                 $datum['leave_type_id'] = $employee_leave->leave_type_id;
-                if($employee_leave->to){
+                if ($employee_leave->to) {
                     $working_days = $employee_leave->employee->department->working_days;
                     $start_date = Carbon::createFromFormat('Y-m-d', $employee_leave->from);
                     $end_date = Carbon::createFromFormat('Y-m-d', $employee_leave->to);
@@ -12288,7 +12200,7 @@ class RiderAPIController extends Controller
                         $diffDays = $start_date->diffInWeekdays($end_date, Carbon::setWeekendDays([Carbon::SATURDAY, Carbon::SUNDAY]));
                     }
                     $datum['days_count'] = $diffDays + 1;
-                }else{
+                } else {
                     $datum['days_count'] = 1;
                 }
                 $data[] = $datum;
@@ -12320,7 +12232,7 @@ class RiderAPIController extends Controller
 
             $rider_pickup_incentives = RiderIncentivePickup::where('rider_id', $rider_id)->whereDate('date', $from_date);
         }
-        if($rider_delivery_incentives->exists() || $rider_pickup_incentives->exists()){
+        if ($rider_delivery_incentives->exists() || $rider_pickup_incentives->exists()) {
             $data = array();
             $pickup_shipment = NULL;
             $pickup_incentive = NULL;
@@ -12330,7 +12242,7 @@ class RiderAPIController extends Controller
                 $rider_delivery_incentives = $rider_delivery_incentives->get();
                 foreach ($rider_delivery_incentives as $rider_delivery_incentive) {
                     $datum = array();
-                    $datum['date'] = date('Y/m/d',strtotime($rider_delivery_incentive->date));
+                    $datum['date'] = date('Y/m/d', strtotime($rider_delivery_incentive->date));
                     $datum['shipments'] = (string)$rider_delivery_incentive->shipments;
                     $datum['rate'] = (string)$rider_delivery_incentive->rate;
                     $datum['incentive'] = (string)$rider_delivery_incentive->incentive;
@@ -12346,7 +12258,7 @@ class RiderAPIController extends Controller
                 $rider_pickup_incentives = $rider_pickup_incentives->get();
                 foreach ($rider_pickup_incentives as $rider_pickup_incentive) {
                     $datum = array();
-                    $datum['date'] = date('Y/m/d',strtotime($rider_pickup_incentive->date));
+                    $datum['date'] = date('Y/m/d', strtotime($rider_pickup_incentive->date));
                     $datum['shipments'] = (string)$rider_pickup_incentive->shipments;
                     $datum['rate'] = (string)$rider_pickup_incentive->rate;
                     $datum['incentive'] = (string)$rider_pickup_incentive->incentive;
@@ -12359,48 +12271,43 @@ class RiderAPIController extends Controller
                 }
             }
             return response()->json(["status" => 0, "incentives" => $data, "delivered_count" => $delivered_shipment, "delivered_incentive" => $delivered_incentive, "pickup_incentive" => $pickup_incentive, "pickup_count" => $pickup_shipment]);
-        }
-        else{
+        } else {
             return response()->json(["status" => 1, "message" => "Incentives Not Found"]);
         }
-
     }
 
     public function delivery_summary_multiple_v6(Request $request)
     {
         $rider_id = $request->rider_id;
 
-
         $delivery_notes = DeliveryNote::where('rider_id', $rider_id)->where('status', 0)->where('pending_status', 0);
 
         if ($delivery_notes->exists()) {
             $delivery_notes = $delivery_notes->get();
             $delivery_otp = 0;
-            $settings = GlobalSettings::where('type','delivery_otp');
+            $settings = GlobalSettings::where('type', 'delivery_otp');
             $all_shippers = GlobalSettings::where('type', 'non_cod_otp_all_shippers');
-            if($settings->exists())
-            {
+            if ($settings->exists()) {
                 $settings = $settings->first();
                 $delivery_otp = $settings->setting_value;
             }
 
             if ($all_shippers->exists()) {
                 $all_shippers = $all_shippers->first();
-                if($all_shippers->setting_value == 1){
+                if ($all_shippers->setting_value == 1) {
                     $excluded_shippers = GlobalSettings::where('type', 'non_cod_otp_excluded_shippers');
                     if ($excluded_shippers->exists()) {
                         $excluded_shippers = $excluded_shippers->first();
                         $excluded_shippers = array_map('intval', explode(',', $excluded_shippers->text));
-                    } else{
+                    } else {
                         $excluded_shippers = [];
                     }
-                }
-                else{
+                } else {
                     $only_shippers = GlobalSettings::where('type', 'non_cod_otp_only_shippers');
                     if ($only_shippers->exists()) {
                         $only_shippers = $only_shippers->first();
                         $only_shippers = array_map('intval', explode(',', $only_shippers->text));
-                    } else{
+                    } else {
                         $only_shippers = [];
                     }
                 }
@@ -12468,7 +12375,7 @@ class RiderAPIController extends Controller
                     $refusal_otp = null;
                     $dbf_otp = null;
                     $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
-                    if($shipment_otp->exists()){
+                    if ($shipment_otp->exists()) {
                         $shipment_otp = $shipment_otp->first();
                         $refusal_otp = $shipment_otp->otp;
                         $dbf_otp = $shipment_otp->dbf_otp;
@@ -12521,13 +12428,12 @@ class RiderAPIController extends Controller
                             $products = $products->get();
                             foreach ($products as $product) {
                                 $qty = $product->items * $product->units_per_item;
-                                $per_unit_price = $product->price/$qty;
+                                $per_unit_price = $product->price / $qty;
                                 $items[] = ['pid' => $product->id, 'product_name' => $product->item->name, 'qty' => $qty, 'per_unit_price' => $per_unit_price];
                             }
                         }
                         $deliveries['distribution_items'] = $items;
-                    }
-                    elseif ($booking_type == 3) {
+                    } elseif ($booking_type == 3) {
                         $product = array();
                         $parcel = ShipmentItem::where('shipment_id', $shipment_id);
                         if ($parcel->exists()) {
@@ -12537,11 +12443,10 @@ class RiderAPIController extends Controller
                             }
                         }
                         $deliveries['try_n_buy_items'] = $product;
-                        $deliveries['try_and_buy_fees'] = (double)$shipment_data->try_and_buy_fees;
-                    }
-                    elseif($booking_type == 2){
+                        $deliveries['try_and_buy_fees'] = (float)$shipment_data->try_and_buy_fees;
+                    } elseif ($booking_type == 2) {
                         $replacement_parcel = ShipmentReplacementParcelImage::where('shipment_id', $shipment_id);
-                        if($replacement_parcel->exists()){
+                        if ($replacement_parcel->exists()) {
                             $replacement_parcel = $replacement_parcel->first();
                             $replacement_parcel_image = $replacement_parcel->picture_path;
                         }
@@ -12552,7 +12457,19 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
+                    
                     $deliveries['tracking_number'] = $tracking_number;
+
+                    if ($shipment_data->shipper_status_id == 5) {
+                        $shipment_reattempt = ShipmentsJourney::where('shipment_id', '=', $deliveries['shipment_id'])
+                            ->orderBy('id', 'desc')
+                            ->skip(1)
+                            ->first();
+                    }
+                    else {
+                        $shipment_reattempt = NULL;
+                    }
+                    
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
@@ -12563,30 +12480,31 @@ class RiderAPIController extends Controller
                     $deliveries['latitude'] = NULL;
                     $deliveries['longitude'] = NULL;
                     $deliveries['status'] = $status;
+                    $deliveries['shipment_reattempt'] = ($shipment_reattempt && $shipment_reattempt->shipper_status_id == 13) ? 1 : 0;
                     $deliveries['shipper'] = $shipper_name;
                     $deliveries['refusal_otp'] = (string)$refusal_otp;
                     $deliveries['dbf_otp'] = ($dbf_otp != null) ? (string)$dbf_otp : null;
                     $deliveries['ccd'] = ($payment_mode == 2) ? 1 : 0;
                     $deliveries['replacement_parcel_image'] = $replacement_parcel_image;
                     $deliveries['relation_list'] = $relation_lists;
-                    if($delivery_otp == 1){
-                        if($all_shippers->setting_value == 1){
-                            if(count($excluded_shippers) > 0){
-                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$excluded_shippers)) ? 1 : 0;
-                            } else{
+                    if ($delivery_otp == 1) {
+                        if ($all_shippers->setting_value == 1) {
+                            if (count($excluded_shippers) > 0) {
+                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id, $excluded_shippers)) ? 1 : 0;
+                            } else {
                                 $deliveries['delivery_otp'] = 0;
                             }
-                        } else{
-                            if(count($only_shippers) > 0){
-                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id,$only_shippers)) ? 0 : 1;
-                            } else{
+                        } else {
+                            if (count($only_shippers) > 0) {
+                                $deliveries['delivery_otp'] = (in_array($shipment_data->user_id, $only_shippers)) ? 0 : 1;
+                            } else {
                                 $deliveries['delivery_otp'] = 1;
                             }
                         }
-                    } else{
+                    } else {
                         $deliveries['delivery_otp'] = 1;
                     }
-                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id',$delivery_note->id);
+                    $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);
                     $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
@@ -12643,7 +12561,6 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-
                     } else {
                         $deliveries['ordering'] = 4;
                     }
@@ -12665,7 +12582,7 @@ class RiderAPIController extends Controller
     {
         $rider_id = $request->rider_id;
         $rider = Rider::find($rider_id);
-        if($rider->operation_rider_id == 1){
+        if ($rider->operation_rider_id == 1) {
             $hub_id = $request->rider_hub;
 
             $routes = Route::leftjoin('cities as c', 'routes.city_id', '=', 'c.id')
@@ -12675,25 +12592,24 @@ class RiderAPIController extends Controller
 
             $routes = $routes->select('routes.*')->get();
             $datetime = Carbon::createFromFormat('Y-m-d H:i:s', '2021-05-18 23:59:00');
-            if($hub_id == 202){
+            if ($hub_id == 202) {
                 $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
                     ->where('r.id', $rider_id)
-                    ->where('delivery_notes.cash_collection_status',0)
+                    ->where('delivery_notes.cash_collection_status', 0)
                     ->where('delivery_notes.total_cod_amount', '>', 0)
                     ->where('delivery_notes.status', '!=', 4)
                     ->whereDate('delivery_notes.created_at', '>', $datetime)
                     ->whereDate('delivery_notes.created_at', '<', Carbon::today())
-                    ->where('r.operation_rider_id',1);
-            }
-            else{
+                    ->where('r.operation_rider_id', 1);
+            } else {
                 $delivery_note = DeliveryNote::join('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
                     ->where('r.id', $rider_id)
-                    ->where('delivery_notes.dncc_status',0)
+                    ->where('delivery_notes.dncc_status', 0)
                     ->where('delivery_notes.total_cod_amount', '>', 0)
                     ->where('delivery_notes.status', '!=', 4)
                     ->whereDate('delivery_notes.created_at', '>', $datetime)
                     ->whereDate('delivery_notes.created_at', '<', Carbon::today())
-                    ->where('r.operation_rider_id',1);
+                    ->where('r.operation_rider_id', 1);
             }
 
 
@@ -12711,8 +12627,7 @@ class RiderAPIController extends Controller
                 $ccd_rider = $rider->ccd;
                 return response()->json(['status' => 0, 'ccd_rider' => $ccd_rider, 'routes' => $routes]);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'message' => "You are not allowed to create delivery note from bolt"]);
         }
     }
@@ -12787,11 +12702,9 @@ class RiderAPIController extends Controller
                                 $is_open_box = 1;
                             } else {
                                 $is_open_box = 0;
-
                             }
                         } else {
                             $is_open_box = 0;
-
                         }
                         $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
                         if ($on_hold_shipment->exists()) {
@@ -12846,7 +12759,6 @@ class RiderAPIController extends Controller
                                     } else {
                                         return response()->json(['status' => 1, 'message' => 'Shipment Not found!']);
                                     }
-
                                 } else if ($shipment->shipper_status_id == 55) {
                                     $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
                                     if ($request_history->exists()) {
@@ -12857,7 +12769,6 @@ class RiderAPIController extends Controller
                                     } else {
                                         return response()->json(['status' => 1, 'message' => 'Shipment Not found!']);
                                     }
-
                                 }
 
                                 if ($request->has('hub_id')) {
@@ -12938,11 +12849,9 @@ class RiderAPIController extends Controller
                                             $ccd_shipment = 1;
                                         }
                                         return response()->json(['status' => 0, 'shipment_details' => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'crm_row' => $complaint_row, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment], 'message' => $success_message]);
-
                                     } else {
                                         return response()->json(['status' => 1, 'message' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id]);
                                     }
-
                                 } else {
                                     if (!$request->has('pieces_confirm')) {
                                         if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
@@ -13024,7 +12933,6 @@ class RiderAPIController extends Controller
                                 }
                             } else {
                                 return response()->json(['status' => 1, 'message' => 'This Shipment is already in an unverified delivery note!']);
-
                             }
                         } else {
                             return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
@@ -13096,16 +13004,13 @@ class RiderAPIController extends Controller
                     } else {
                         return response()->json(['status' => 1, 'message' => 'Rider not found!']);
                     }
-                }
-                else{
+                } else {
                     return response()->json(['status' => 0, 'generate_message' => "Otp Generated"]);
                 }
-            }
-            else{
+            } else {
                 return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
             }
-        }
-        else{
+        } else {
             return response()->json(['status' => 0, 'verified_message' => 'Otp Verified']);
         }
     }
@@ -13196,12 +13101,12 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'create_message' => 'Delivery note Request has been created successfully & Pending for approval']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
-
             }
         }
     }
 
-    public function generate_otp_for_consignee(Request $request){
+    public function generate_otp_for_consignee(Request $request)
+    {
         $rules = [
             'latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
@@ -13218,13 +13123,12 @@ class RiderAPIController extends Controller
             $rider_id = $request->rider_id;
             $shipment_id = $request->shipment_id;
             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today());
-            if(!$shipment_otp->exists()){
+            if (!$shipment_otp->exists()) {
                 $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
                 $otp = mt_rand(100000, 999999);
-                if($shipment_otp->exists()){
+                if ($shipment_otp->exists()) {
                     $shipment_otp = $shipment_otp->first();
-                }
-                else{
+                } else {
                     $shipment_otp = new ShipmentOtp();
                     $shipment_otp->shipment_id = $shipment_id;
                 }
@@ -13235,7 +13139,7 @@ class RiderAPIController extends Controller
                 $shipment_otp->save();
                 NotificationsController::send(192, $rider_id, $shipment_id);
                 return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
-            }else{
+            } else {
                 return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
             }
         }
@@ -13282,64 +13186,57 @@ class RiderAPIController extends Controller
         }
     }*/
 
-    public function otp_bypass($user_id){
+    public function otp_bypass($user_id)
+    {
         $otp_bypass = false;
         $only_shippers = array();
         $excluded_shippers = array();
         $otp_bypass_setting = GlobalSettings::where('type', 'otp_refusal_bypass');
-        if($otp_bypass_setting->exists()){
+        if ($otp_bypass_setting->exists()) {
             $otp_bypass_setting = $otp_bypass_setting->first();
             $otp_bypass = $otp_bypass_setting->setting_value;
         }
-        if($otp_bypass){
+        if ($otp_bypass) {
             $all_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_all_shippers');
-            if($all_shipper_settings->exists()){
+            if ($all_shipper_settings->exists()) {
                 $all_shipper_settings = $all_shipper_settings->first();
                 $all_shippers = $all_shipper_settings->setting_value;
 
-                if($all_shippers){
+                if ($all_shippers) {
                     $excluded_shipper_settings = GlobalSettings::where('type', 'otp_refusal_bypass_exclude_shippers');
-                    if($excluded_shipper_settings->exists()){
+                    if ($excluded_shipper_settings->exists()) {
                         $excluded_shipper_settings = $excluded_shipper_settings->first();
-                        if($excluded_shipper_settings->setting_value){
+                        if ($excluded_shipper_settings->setting_value) {
                             $excluded_shippers = array_map('intval', explode(',', $excluded_shipper_settings->text));
                             return (in_array($user_id, $excluded_shippers)) ? false : true;
-                        }
-                        else{
+                        } else {
                             return true;
                         }
-
-                    }
-                    else{
+                    } else {
                         return true;
                     }
-                }
-                else{
+                } else {
                     $only_shippers_setting = GlobalSettings::where('type', 'otp_refusal_bypass_only_shippers');
-                    if($only_shippers_setting->exists()){
+                    if ($only_shippers_setting->exists()) {
                         $only_shippers_setting = $only_shippers_setting->first();
-                        if($only_shippers_setting->setting_value){
+                        if ($only_shippers_setting->setting_value) {
                             $only_shippers = array_map('intval', explode(',', $only_shippers_setting->text));
                             return (in_array($user_id, $only_shippers)) ? true : false;
-                        }
-                        else{
+                        } else {
                             return true;
                         }
-
-                    }
-                    else{
+                    } else {
                         return true;
                     }
                 }
-
             }
-        }
-        else{
+        } else {
             return false;
         }
     }
 
-    public function auto_return_confirm($shipment_id){
+    public function auto_return_confirm($shipment_id)
+    {
         $shipment = Shipment::find($shipment_id);
 
         $shipment->shipper_status_id = 20;
@@ -13353,10 +13250,8 @@ class RiderAPIController extends Controller
                 if ($shipment->packaging_material_request != 1) {
 
                     AdminFinanceController::add_payment($shipment_id, 1);
-
                 }
-            }
-            else {
+            } else {
                 ShipmentChargesController::walk_in_return($shipment_id);
 
                 $shipment->walk_in_status = 2;
@@ -13367,9 +13262,9 @@ class RiderAPIController extends Controller
             }
         }
         $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
-        if($return_assign_shipment->exists()){
+        if ($return_assign_shipment->exists()) {
 
-            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+            $return_assign_shipment = $return_assign_shipment->latest()->first();
             $return_assign_shipment->status = 0;
             $return_assign_shipment->save();
 
@@ -13429,10 +13324,10 @@ class RiderAPIController extends Controller
                     $destination_id = $shipment->pickup_address->city_id;
                 }
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
-                $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
+                $destination_id = $destination_id->hub_id; //first it was origin now for return its destination
                 // if ($role_id == 1 || in_array($destination_id, $admin_hubs)) {
                 if ($destination_id == $rider_hub) {
-                    $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
+                    $origin = $shipment->consignee_city->hub_id; //let's suppose consignee city is origin now
                     if (!$request->has('hub_id')) {
                         if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $return_note_statuses))) {
                             if ($shipment->return_address_id != NULL) {
@@ -13512,258 +13407,251 @@ class RiderAPIController extends Controller
                                 }
                             }
                             return response()->json(['status' => 0, "shipment_details" => ['shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row, 'shipper_id' => $shipment->user_id]]);
-
                         } else
                             if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses))) {
-                                if ($shipment->return_address_id != NULL) {
-                                    $destination_city_id = $shipment->return_address->city_id;
-                                } else {
-                                    $destination_city_id = $shipment->pickup_address->city_id;
-                                }
-
-                                $destination_city = City::find($destination_city_id);
-                                if ($destination_city->id == $destination_city->hub_id) {
-                                    $destination = $destination_city->name;
-                                    $hub = $destination_city->id;
-                                } else {
-                                    $hubid = $destination_city->hub_id;
-                                    $destinationHub = City::find($hubid);
-                                    $destination = $destinationHub->name;
-                                    $hub = $destinationHub->id;
-                                }
-
-                                $service = $shipment->booking_type->booking_type;
-                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                                if ($shipment_journey->exists()) {
-                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                                    if ($status_id != '') {
-                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                        $status = $status_name->name;
-                                    } else {
-                                        $status = ' - ';
-                                    }
-                                }
-                                // if ($shipment->booking_type_id != 4) {
-                                //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
-
-                                //     if ($settings->exists()) {
-                                //         $settings = $settings->first();
-                                //         $role_ids = array_map('intval', explode(',', $settings->text));
-                                //         array_push($role_ids, 1);
-                                //         if (!in_array($role_id, $role_ids)) {
-                                //             if (!$shipment->packaging_material_request) {
-                                //                 $shipper_payable = 0;
-                                //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                //                 if ($pending_payment->exists()) {
-                                //                     $pending_payment = $pending_payment->first();
-
-                                //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                //                     if ($pending_payment_shipments->exists()) {
-                                //                         $pending_payment_shipments = $pending_payment_shipments->get();
-                                //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                //                             $shipper_payable += $pending_payment_shipment->payable;
-                                //                         }
-                                //                     }
-                                //                 }
-                                //                 if ($shipper_payable < 0) {
-                                //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
-                                //                 }
-                                //             }
-                                //         }
-                                //     }
-                                // }
-                                $crm_row = 0;
-                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
-                                    $crm_row = 1;
-                                }
-                                if (!$request->has('pieces_confirm')) {
-                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
-                                        $details = array();
-                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-                                        $details['id'] = $shipment->id;
-                                        $details['shipper_id'] = $shipment->user_id;
-                                        $details['tracking_number'] = $shipment->tracking_number;
-                                        $details['pieces_count'] = $shipment->pieces;
-                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
-                                    }
-                                }
-                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
-
+                            if ($shipment->return_address_id != NULL) {
+                                $destination_city_id = $shipment->return_address->city_id;
                             } else {
-                                return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
+                                $destination_city_id = $shipment->pickup_address->city_id;
                             }
-                    } 
-                    else if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
-                            $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
-                            if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
-                                if ($shipment->return_address_id != NULL) {
-                                    $destination_city_id = $shipment->return_address->city_id;
+
+                            $destination_city = City::find($destination_city_id);
+                            if ($destination_city->id == $destination_city->hub_id) {
+                                $destination = $destination_city->name;
+                                $hub = $destination_city->id;
+                            } else {
+                                $hubid = $destination_city->hub_id;
+                                $destinationHub = City::find($hubid);
+                                $destination = $destinationHub->name;
+                                $hub = $destinationHub->id;
+                            }
+
+                            $service = $shipment->booking_type->booking_type;
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                            if ($shipment_journey->exists()) {
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                if ($status_id != '') {
+                                    $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                    $status = $status_name->name;
                                 } else {
-                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                    $status = ' - ';
                                 }
+                            }
+                            // if ($shipment->booking_type_id != 4) {
+                            //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
 
-                                $destination_city = City::find($destination_city_id);
-                                if ($destination_city->id == $destination_city->hub_id) {
-                                    $destination = $destination_city->name;
-                                    $hub = $destination_city->id;
-                                } else {
-                                    $hubid = $destination_city->hub_id;
-                                    $destinationHub = City::find($hubid);
-                                    $destination = $destinationHub->name;
-                                    $hub = $destinationHub->id;
+                            //     if ($settings->exists()) {
+                            //         $settings = $settings->first();
+                            //         $role_ids = array_map('intval', explode(',', $settings->text));
+                            //         array_push($role_ids, 1);
+                            //         if (!in_array($role_id, $role_ids)) {
+                            //             if (!$shipment->packaging_material_request) {
+                            //                 $shipper_payable = 0;
+                            //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                            //                 if ($pending_payment->exists()) {
+                            //                     $pending_payment = $pending_payment->first();
+
+                            //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                            //                     if ($pending_payment_shipments->exists()) {
+                            //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                            //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                            //                             $shipper_payable += $pending_payment_shipment->payable;
+                            //                         }
+                            //                     }
+                            //                 }
+                            //                 if ($shipper_payable < 0) {
+                            //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                            //                 }
+                            //             }
+                            //         }
+                            //     }
+                            // }
+                            $crm_row = 0;
+                            if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                $crm_row = 1;
+                            }
+                            if (!$request->has('pieces_confirm')) {
+                                if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                    $details = array();
+                                    $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                    $details['id'] = $shipment->id;
+                                    $details['shipper_id'] = $shipment->user_id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['pieces_count'] = $shipment->pieces;
+                                    $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                    return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
                                 }
-                                $service = $shipment->booking_type->booking_type;
-                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                                if ($shipment_journey->exists()) {
-                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                                    if ($status_id != '') {
-                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                        $status = $status_name->name;
-                                    } else {
-                                        $status = ' - ';
-                                    }
-                                }
-                                // if ($shipment->booking_type_id != 4) {
-                                //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
-                                //     if ($settings->exists()) {
-                                //         $settings = $settings->first();
-                                //         $role_ids = array_map('intval', explode(',', $settings->text));
-                                //         array_push($role_ids, 1);
-                                //         if (!in_array($role_id, $role_ids)) {
-                                //             if (!$shipment->packaging_material_request) {
-                                //                 $shipper_payable = 0;
-                                //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                //                 if ($pending_payment->exists()) {
-                                //                     $pending_payment = $pending_payment->first();
-
-                                //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                //                     if ($pending_payment_shipments->exists()) {
-                                //                         $pending_payment_shipments = $pending_payment_shipments->get();
-                                //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                //                             $shipper_payable += $pending_payment_shipment->payable;
-                                //                         }
-                                //                     }
-                                //                 }
-                                //                 if ($shipper_payable < 0) {
-                                //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
-                                //                 }
-                                //             }
-                                //         }
-                                //     }
-                                // }
-                                $crm_row = 0;
-                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
-                                    $crm_row = 1;
-                                }
-                                if (!$request->has('pieces_confirm')) {
-                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
-                                        $details = array();
-                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-                                        $details['id'] = $shipment->id;
-                                        $details['tracking_number'] = $shipment->tracking_number;
-                                        $details['pieces_count'] = $shipment->pieces;
-                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
-                                    }
-                                }
-                                return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
-
-                            } else
-                                if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
-                                    if ($shipment->return_address_id != NULL) {
-                                        $destination_city_id = $shipment->return_address->city_id;
-                                    } else {
-                                        $destination_city_id = $shipment->pickup_address->city_id;
-                                    }
-                                    $destination_city = City::find($destination_city_id);
-                                    if ($destination_city->id == $destination_city->hub_id) {
-                                        $destination = $destination_city->name;
-                                        $hub = $destination_city->id;
-                                    } else {
-                                        $hubid = $destination_city->hub_id;
-                                        $destinationHub = City::find($hubid);
-                                        $destination = $destinationHub->name;
-                                        $hub = $destinationHub->id;
-                                    }
-
-                                    $service = $shipment->booking_type->booking_type;
-                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                                    if ($shipment_journey->exists()) {
-                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-                                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                                        if ($status_id != '') {
-                                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                            $status = $status_name->name;
-                                        } else {
-                                            $status = ' - ';
-                                        }
-                                    }
-                                    // if ($shipment->booking_type_id != 4) {
-                                    //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
-
-                                    //     if ($settings->exists()) {
-                                    //         $settings = $settings->first();
-                                    //         $role_ids = array_map('intval', explode(',', $settings->text));
-                                    //         array_push($role_ids, 1);
-                                    //         if (!in_array($role_id, $role_ids)) {
-                                    //             if (!$shipment->packaging_material_request) {
-                                    //                 $shipper_payable = 0;
-                                    //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
-                                    //                 if ($pending_payment->exists()) {
-                                    //                     $pending_payment = $pending_payment->first();
-
-                                    //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
-                                    //                     if ($pending_payment_shipments->exists()) {
-                                    //                         $pending_payment_shipments = $pending_payment_shipments->get();
-                                    //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
-                                    //                             $shipper_payable += $pending_payment_shipment->payable;
-                                    //                         }
-                                    //                     }
-                                    //                 }
-                                    //                 if ($shipper_payable < 0) {
-                                    //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
-                                    //                 }
-                                    //             }
-                                    //         }
-                                    //     }
-                                    // }
-                                    $crm_row = 0;
-                                    if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
-                                        $crm_row = 1;
-                                    }
-                                    if (!$request->has('pieces_confirm')) {
-                                        if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
-                                            $details = array();
-                                            $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-                                            $details['id'] = $shipment->id;
-                                            $details['tracking_number'] = $shipment->tracking_number;
-                                            $details['pieces_count'] = $shipment->pieces;
-                                            $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                            return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
-                                        }
-                                    }
-                                    return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
-
-                                } else {
-                                    return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
-                                }
+                            }
+                            return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
                         } else {
-                            return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);
+                            return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
                         }
+                    } else if ($request->has('hub_id') && ($destination_id == $request->hub_id)) {
+                        $same_city_statuses = array(20, 24, 27, 29, 30, 33, 35, 37, 42, 44, 45, 46, 47, 48, 60);
+                        if ($destination_id == $origin && (in_array($shipment->shipper_status_id, $same_city_statuses))) {
+                            if ($shipment->return_address_id != NULL) {
+                                $destination_city_id = $shipment->return_address->city_id;
+                            } else {
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                            }
+
+                            $destination_city = City::find($destination_city_id);
+                            if ($destination_city->id == $destination_city->hub_id) {
+                                $destination = $destination_city->name;
+                                $hub = $destination_city->id;
+                            } else {
+                                $hubid = $destination_city->hub_id;
+                                $destinationHub = City::find($hubid);
+                                $destination = $destinationHub->name;
+                                $hub = $destinationHub->id;
+                            }
+                            $service = $shipment->booking_type->booking_type;
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                            if ($shipment_journey->exists()) {
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                if ($status_id != '') {
+                                    $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                    $status = $status_name->name;
+                                } else {
+                                    $status = ' - ';
+                                }
+                            }
+                            // if ($shipment->booking_type_id != 4) {
+                            //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+                            //     if ($settings->exists()) {
+                            //         $settings = $settings->first();
+                            //         $role_ids = array_map('intval', explode(',', $settings->text));
+                            //         array_push($role_ids, 1);
+                            //         if (!in_array($role_id, $role_ids)) {
+                            //             if (!$shipment->packaging_material_request) {
+                            //                 $shipper_payable = 0;
+                            //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                            //                 if ($pending_payment->exists()) {
+                            //                     $pending_payment = $pending_payment->first();
+
+                            //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                            //                     if ($pending_payment_shipments->exists()) {
+                            //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                            //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                            //                             $shipper_payable += $pending_payment_shipment->payable;
+                            //                         }
+                            //                     }
+                            //                 }
+                            //                 if ($shipper_payable < 0) {
+                            //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                            //                 }
+                            //             }
+                            //         }
+                            //     }
+                            // }
+                            $crm_row = 0;
+                            if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                $crm_row = 1;
+                            }
+                            if (!$request->has('pieces_confirm')) {
+                                if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                    $details = array();
+                                    $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                    $details['id'] = $shipment->id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['pieces_count'] = $shipment->pieces;
+                                    $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                    return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
+                                }
+                            }
+                            return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+                        } else
+                                if ($destination_id != $origin && (in_array($shipment->shipper_status_id, $different_city_statuses_2))) {
+                            if ($shipment->return_address_id != NULL) {
+                                $destination_city_id = $shipment->return_address->city_id;
+                            } else {
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                            }
+                            $destination_city = City::find($destination_city_id);
+                            if ($destination_city->id == $destination_city->hub_id) {
+                                $destination = $destination_city->name;
+                                $hub = $destination_city->id;
+                            } else {
+                                $hubid = $destination_city->hub_id;
+                                $destinationHub = City::find($hubid);
+                                $destination = $destinationHub->name;
+                                $hub = $destinationHub->id;
+                            }
+
+                            $service = $shipment->booking_type->booking_type;
+                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                            if ($shipment_journey->exists()) {
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                if ($status_id != '') {
+                                    $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                    $status = $status_name->name;
+                                } else {
+                                    $status = ' - ';
+                                }
+                            }
+                            // if ($shipment->booking_type_id != 4) {
+                            //     $settings = GlobalSettings::where('type', 'return_note_restriction_bypass');
+
+                            //     if ($settings->exists()) {
+                            //         $settings = $settings->first();
+                            //         $role_ids = array_map('intval', explode(',', $settings->text));
+                            //         array_push($role_ids, 1);
+                            //         if (!in_array($role_id, $role_ids)) {
+                            //             if (!$shipment->packaging_material_request) {
+                            //                 $shipper_payable = 0;
+                            //                 $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+                            //                 if ($pending_payment->exists()) {
+                            //                     $pending_payment = $pending_payment->first();
+
+                            //                     $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id);
+                            //                     if ($pending_payment_shipments->exists()) {
+                            //                         $pending_payment_shipments = $pending_payment_shipments->get();
+                            //                         foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                            //                             $shipper_payable += $pending_payment_shipment->payable;
+                            //                         }
+                            //                     }
+                            //                 }
+                            //                 if ($shipper_payable < 0) {
+                            //                     return response()->json(['status' => 1, 'message' => 'Shipper with Negative Balance, Contact Sales Team!']);
+                            //                 }
+                            //             }
+                            //         }
+                            //     }
+                            // }
+                            $crm_row = 0;
+                            if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                $crm_row = 1;
+                            }
+                            if (!$request->has('pieces_confirm')) {
+                                if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                    $details = array();
+                                    $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                    $details['id'] = $shipment->id;
+                                    $details['tracking_number'] = $shipment->tracking_number;
+                                    $details['pieces_count'] = $shipment->pieces;
+                                    $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                    return response()->json(['status' => 0, 'message' => 'Shipment Piece(s) found!', 'details' => $details, 'pieces_found' => 1]);
+                                }
+                            }
+                            return response()->json(['status' => 0, "shipment_details" => ['shipper_id' => $shipment->user_id, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => ($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'crm_row' => $crm_row]]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Return Shipment not arrived at origin center yet.']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Different hub, scan shipments of same hub!.']);
+                    }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
                 }
             } else {
                 return response()->json(['status' => 1, 'message' => 'No Shipment with given Tracking Number is present, Check tracking!']);
             }
-
-
         }
     }
 
@@ -13862,13 +13750,12 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 0, 'create_message' => 'Return note Request has been created successfully & Pending for approval']);
             } else {
                 return response()->json(['status' => 1, 'message' => 'All the Shipment(s) are not ready for return yet or already in another return note, please check tracking!']);
-
             }
         }
     }
 
     public function retail_shipment_store_v3(Request $request)
-    {  
+    {
         $rider_id = $request->rider_id;
         $setting = GlobalSettings::where('type', 'retail_store')->first();
         $user_id = $setting->setting_value;
@@ -13888,7 +13775,7 @@ class RiderAPIController extends Controller
         $special_instructions = NULL;
 
 
-        $retail_type = RetailTraxCenter::where('pickup_address_id',$pickup_address_id)->first();
+        $retail_type = RetailTraxCenter::where('pickup_address_id', $pickup_address_id)->first();
         $discount = $retail_type->discount;
         $insurance = $retail_type->insurance;
 
@@ -13914,7 +13801,7 @@ class RiderAPIController extends Controller
         $gst = $gst * $total_charges_without_gst;
         $total_charges = $total_charges_without_gst + $gst;*/
 
-          if ($request->volumetric_weight == 1) {
+        if ($request->volumetric_weight == 1) {
             $estimated_weight = (($request->input('length') * $request->input('breadth') * $request->input('height')) / 5000);
             $length = $request->length;
             $breadth = $request->breadth;
@@ -13946,7 +13833,7 @@ class RiderAPIController extends Controller
         }
         $payment_mode_id = 1;
         $try_and_buy_charges = NULL;
-        
+
 
         $pieces_quantity = $request->input('pieces');
         $business_category_id = $request->input('business_category_id');
@@ -14045,7 +13932,7 @@ class RiderAPIController extends Controller
         $retail_shipment->charges_with_discount = $rates['charges_with_discount'];
         $retail_shipment->discount = $rates['discount_amount'];
         $retail_shipment->packaging_charges = $rates['packaging_charges'];
-        $retail_shipment->insurance_charges = $rates['insurance_amount'];        
+        $retail_shipment->insurance_charges = $rates['insurance_amount'];
         $retail_shipment->total_charges_without_gst = $rates['charges_without_gst'];
         $retail_shipment->weight_charges = $rates['charges_without_gst'];
         $retail_shipment->gst = $rates['gst_charges'];
@@ -14069,7 +13956,6 @@ class RiderAPIController extends Controller
             $cash_deposit->total_cn = 1;
             $cash_deposit->total_cash = $amount;
             $cash_deposit->save();
-
         }
 
         $cash_deposit_shipment = new RetailCashDepositShipment();
@@ -14083,8 +13969,87 @@ class RiderAPIController extends Controller
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
 
         return response()->json(['status' => 0, 'message' => 'Shipment Booked with Tracking Number: ' . $tracking_number]);
-
     }
 
+    public function rider_remarks(Request $request)
+    {
+          $rules = [
+            'rider_remarks' => [
+                'required', 'string']
+        ];
 
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
+            
+            if(!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()){
+                $rider_remark = new RiderRemark;
+                $rider_remark->rider_id = $request->rider_id;
+                $rider_remark->rider_remarks = $request->rider_remarks;
+                $rider_remark->save();
+                return response()->json(['status' => 0, 'message' => 'Remarks Has Been Added']);
+            }else{
+                return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
+            }
+        }   
+           
+    }
+    public function rider_remark_list(Request $request)
+    {
+        $rider = $request->rider_id;
+
+        $rider_remarks = RiderRemark::leftJoin('riders as r', 'r.id', '=', 'rider_remarks.rider_id')
+            ->leftJoin('admins as ad', 'ad.id', '=', 'rider_remarks.updated_by')
+            ->leftJoin('cities as city', 'r.city_id', '=', 'city.id')
+            ->leftJoin('cities as c', 'city.hub_id', '=', 'c.id')
+            ->leftJoin('zones as z', 'city.zone_id', '=', 'z.id')
+            ->leftJoin('rider_remarks_response as rrr', function ($join) {
+                $join->on('rrr.rider_remarks_id', '=', 'rider_remarks.id')
+                    ->where('rrr.type', '=', 1)
+                    ->whereRaw('rrr.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 1)');
+            })
+            ->leftJoin('rider_remarks_response as rrr_2', function ($join) {
+                $join->on('rrr_2.rider_remarks_id', '=', 'rider_remarks.id')
+                    ->where('rrr_2.type', '=', 2)
+                    ->whereRaw('rrr_2.id = (SELECT MAX(id) FROM rider_remarks_response WHERE rider_remarks_id = rider_remarks.id AND type = 2)');
+            })
+            ->leftJoin('rider_remark_statuses as rrs', 'rrs.id', '=', 'rider_remarks.rider_remarks_status_id')
+
+            ->where('rider_remarks.rider_id', '=', $rider)
+
+            ->select([
+                'rider_remarks.id as id',
+                'r.name as rider_name',
+                'r.id as rider_id',
+                'r.trax_id as traxID',
+                'city.id as city_id',
+                'city.name as city_name',
+                'c.name as hub',
+                'z.name as zone_name',
+                'rider_remarks.created_at as created_at',
+                'rrs.name as status',
+                'rider_remarks.updated_by as updated_by',
+                'rider_remarks.updated_at as updated_at',
+                'rider_remarks.rider_remarks as rider_remarks',
+                'rrr.response as initial_response',
+                'rrr_2.response as final_response',
+                'rider_remarks.id as rider_remarks_id',
+                'ad.name as admin_name'
+            ])
+            ->orderBy('rider_remarks.updated_at', 'desc')
+            ->get();
+
+
+        if (!$rider_remarks->isEmpty()) {
+            return response()->json(['status' => 0, 'data' => $rider_remarks]);
+        } else {
+            return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
+        }
+    }
 }

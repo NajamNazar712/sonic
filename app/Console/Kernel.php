@@ -142,6 +142,8 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\RiderFuelAllocationDeliveryNoteCalculation',
         'App\Console\Commands\VisionSoftApiExcel',
 		'App\Console\Commands\CreateInvoiceOriginWise',
+        'App\Console\Commands\InvalidEmailVisit',
+        'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         ];
 
     /**
@@ -164,6 +166,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
         $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
         $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
+        $schedule->command('email:invalidemailvisit')->dailyAt('6:00')->runInBackground();
         $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
         $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
         $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
@@ -468,11 +471,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
         $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
 
-        $schedule->command('auto:deliverynoteverification')->dailyAt('00:55')->runInBackground();
+        $auto_delivery_note_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
+        if ($auto_delivery_note_time->exists()) {
+            $auto_delivery_note_time = $auto_delivery_note_time->first();
+            $hour = $auto_delivery_note_time->text;
+            $schedule->command('auto:deliverynoteverification')->dailyAt($hour)->runInBackground();
+        }
+
 
 		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
-
+		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

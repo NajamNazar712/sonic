@@ -46,6 +46,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Business Category</th>
+                        <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
@@ -279,6 +280,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Business Category');
+                            head.push('Rider ID');
                             head.push('Rider');
                             head.push('Rider Type');
                             head.push('Rider Category');
@@ -302,6 +304,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.business_category);
+                                row.push(values.rider_trax_id);
                                 row.push(values.rider);
                                 row.push(values.rt);
                                 row.push(values.operation_rider_id);
@@ -374,6 +377,7 @@
                         name: 'oc.business_category_id',
                         class: 'align-middle business_category'
                     },
+                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
