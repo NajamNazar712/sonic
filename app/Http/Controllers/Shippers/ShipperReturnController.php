@@ -22,6 +22,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\ReturnSheet;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -905,7 +906,7 @@ class ShipperReturnController extends Controller
 
     public function return_sheet_receive_shipment_info(Request $request)
     {
-        $return_statuses = array(25, 31, 38);
+        $return_statuses = array(25, 31, 38 ,23, 28, 34);
         $tracking_number = $request->tracking;
         $shipment = Shipment::where('tracking_number', $tracking_number)->where('user_id', session('user_id'));
         if($shipment->exists()){
@@ -943,6 +944,7 @@ class ShipperReturnController extends Controller
         }
         $shipment_ids = explode(',', $request->shipment_ids);
         foreach($shipment_ids as $shipment_id){
+            $ReturnSheetShipments = new ReturnSheetShipments();
             $return_sheet = ReturnSheet::where('shipment_id', $shipment_id);
             if($return_sheet->exists()){
                 $return_sheet = $return_sheet->first();
@@ -950,6 +952,13 @@ class ShipperReturnController extends Controller
                 $return_sheet->received_at = Carbon::now();
                 $return_sheet->remarks = 'Received By ' . Auth::user()->name . $received_by;
                 $return_sheet->save();
+
+            
+                $ReturnSheetShipments->shipment_id = $shipment_id;
+                $ReturnSheetShipments->scan_via = 1;
+                $ReturnSheetShipments->return_sheet_id = $return_sheet->id;
+                $ReturnSheetShipments->save();
+
             }
         }
         return redirect()->route('cod.return.sheet.history.index')->with('success', 'Shipment Received Successfully!');

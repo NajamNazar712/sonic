@@ -32,15 +32,13 @@ class ProcessShipmentStatusWebhook implements ShouldQueue
      */
     public function handle()
     {
-        $data = array();
-        $data['url'] = $this->shipment['url'];
-        $data['tracking_number'] = $this->shipment['tracking_number'];
-        $data['status'] = $this->shipment['status'];
         $user_id = $this->shipment['user_id'];
         $tracking_number = $this->shipment['tracking_number'];
         $status = $this->shipment['status'];
         $url = $this->shipment['url'];
         $date = $this->shipment['date_time'];
-        ShipmentStatusWebhookController::webhook_dispatch($url, $user_id, $tracking_number, $status, $date);
+        $reason = $this->shipment['reason'];
+        $otp = $this->shipment['otp'];
+        ShipmentStatusWebhookController::webhook_dispatch($url, $user_id, $tracking_number, $status, $date, $reason, $otp);
     }
 }

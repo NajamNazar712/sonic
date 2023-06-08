@@ -35,9 +35,11 @@ class V2AdminArrivalServiceController extends Controller
         $this->middleware('Permission');
     }
     public function arrival_service_index(){
+
         return view('admin.v2_pickups.arrival_service_center.arrival_service');
     }
     public function arrival_service_details(Request $request){
+
         $shipment = Shipment::where('tracking_number',$request->tracking_number);
 
         if($shipment->exists()) {
@@ -46,9 +48,11 @@ class V2AdminArrivalServiceController extends Controller
 
             //todo: now checking canceled shipment arrival
             $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+
             if($user->shipper_status_id == 17)
             {
                 $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+
                 if($canceled_shipment)
                 {
                     return ['status' => 1, 'error' => 'Shipment is not allowed for arrival because shipper cancelled this shipment !'];
