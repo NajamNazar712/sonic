@@ -851,7 +851,7 @@
                             remarks +=`<table class="table table-bordered">
                                             <thead>
                                                   <tr>
-                                                    <th>Bag ID</th>
+                                                    <th>Bag Seal#</th>
                                                     <th>Remarks</th>
                                                     <th>Added By</th>
                                                     <th>Peices Count</th>
@@ -866,7 +866,7 @@
                                 $.each(data, function(index,value) {
                                     remarks_data+=`
                                         <tr>
-                                                <td>${value.bag_id}</td>
+                                                <td>${value.seal_number}</td>
                                                 <td>${value.remarks}</td>
                                                 <td>${value.added_by_name}</td>
                                                 <td>${value.pieces_count}</td>

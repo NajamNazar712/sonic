@@ -3399,7 +3399,12 @@ class AdminCargoManifestController extends Controller
     {
         if ($request->bag_id) {
             $remarks = CargoManifestBagRemarks::join('admins as a','a.id','cargo_manifest_bag_remarks.added_by')
-                ->where('bag_id',$request->bag_id)->select('cargo_manifest_bag_remarks.*','a.name as added_by_name')
+                ->leftjoin('cargo_manifest_bags as cmb','cmb.id','cargo_manifest_bag_remarks.bag_id')
+                ->where('cargo_manifest_bag_remarks.bag_id',$request->bag_id)
+                ->select(
+                    ['cargo_manifest_bag_remarks.*',
+                    'a.name as added_by_name',
+                    'cmb.seal_number'])
                 ->orderby('cargo_manifest_bag_remarks.id','desc');
             if ($remarks->exists()) {
                 $remarks = $remarks->get();
