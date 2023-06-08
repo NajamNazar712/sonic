@@ -75,9 +75,10 @@ class CRMDashboardController extends Controller
         
         if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
         {
-            $crm_feedback = CrmRequestFeedback::
-            whereBetween('created_at',[$thirtyDays,$today])->
-            pluck('crm_request_id');
+            $crm_feedback = CrmRequestFeedback::where('user_id','!=',null)
+            ->where('user_id','!=',null)
+            ->whereBetween('created_at',[$thirtyDays,$today])
+            ->pluck('crm_request_id');
 
             $crm['total'] = CrmRequest::get();
             // whereBetween('created_at', [$thirtyDays, $today]);
@@ -110,9 +111,9 @@ class CRMDashboardController extends Controller
            
         }else
         {
-            $crm_feedback = CrmRequestFeedback::
-            whereBetween('created_at',[$thirtyDays,$today])->
-            pluck('crm_request_id');
+            $crm_feedback = CrmRequestFeedback::where('user_id','!=',null)
+            ->whereBetween('created_at',[$thirtyDays,$today])
+            ->pluck('crm_request_id');
 
             // dd(auth()->user()->id);
             $crm['total'] = CrmRequest::get();
@@ -143,7 +144,7 @@ class CRMDashboardController extends Controller
             $crm['in_valid'] = CrmRequestStatusHistory::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7)->where('agent_id',auth()->user()->id);
-            $crm_feedback = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->where('agent_id',auth()->user()->id)->pluck('crm_request_id');
+            $crm_feedback = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->where('user_id',auth()->user()->id)->pluck('crm_request_id');
         }
 
         // if (session('role_id') != 1) {
@@ -224,9 +225,9 @@ class CRMDashboardController extends Controller
 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
-        $card_feedback = CrmRequestFeedback::
-        whereBetween('created_at',[$thirtyDays,$today])->
-        pluck('crm_request_id');
+        $card_feedback = CrmRequestFeedback::where('user_id','!=',null)
+        ->whereBetween('created_at',[$thirtyDays,$today])
+        ->pluck('crm_request_id');
         $dashboard_list = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
         ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
         ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -1104,7 +1105,8 @@ class CRMDashboardController extends Controller
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date'))) {
                 $card_data['closed'] = self::dates($card_data['closed'], $from, $to);
             
-                $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$from, $to])->pluck('crm_request_id')->toArray();
+                $card_feedback = CrmRequestFeedback::where('user_id','!=',null)
+                ->whereBetween('created_at', [$from, $to])->pluck('crm_request_id')->toArray();
             
                 $card_total = $card_data['total']->filter(function ($item) use ($from, $to, $card_feedback) {
                     return $item->created_at >= $from && $item->created_at <= $to && !in_array($item->id, $card_feedback);
@@ -1116,7 +1118,8 @@ class CRMDashboardController extends Controller
                 $thirtyDaysAgo = now()->subDays(30);
                 $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
             
-                $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$thirtyDaysAgo, now()])->pluck('crm_request_id')->toArray();
+                $card_feedback = CrmRequestFeedback::where('user_id','!=',null)
+                ->whereBetween('created_at', [$thirtyDaysAgo, now()])->pluck('crm_request_id')->toArray();
             
                 $card_total = $card_data['total']->filter(function ($item) use ($thirtyDaysAgo, $card_feedback) {
                     return $item->created_at >= $thirtyDaysAgo && $item->created_at <= now() && !in_array($item->id, $card_feedback);
@@ -1274,8 +1277,8 @@ class CRMDashboardController extends Controller
                 $today = Carbon::now()->endOfDay();
                 $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
                 $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
-                $card_feedback = CrmRequestFeedback::
-                whereBetween('created_at',[$from,$to])->
+                $card_feedback = CrmRequestFeedback::where('user_id','!=',null)
+                ->whereBetween('created_at',[$from,$to])->
                 pluck('crm_request_id');
                 $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
                 $shipments = Shipment::where('shipper_status_id',2)->whereBetween('created_at', [$from, $stop_date])->count();
