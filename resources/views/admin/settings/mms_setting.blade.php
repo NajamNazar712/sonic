@@ -89,7 +89,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update User Shippers.',
+                        text: 'Select Yes to update Shippers.',
                         icon: 'warning',
                         buttons: {
                             cancel: {
