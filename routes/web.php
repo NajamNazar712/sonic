@@ -1943,6 +1943,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
     });
+
+
+   
+
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
@@ -3017,6 +3021,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        /*for shipper side*/
+        // Routes: web.php
+        Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@mms_report_store')->name('store');
+        });
+
+
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
@@ -3902,6 +3914,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
+        Route::post('call_status', 'Admins\LeadManagementController@call_status_change')->name('call_status');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
