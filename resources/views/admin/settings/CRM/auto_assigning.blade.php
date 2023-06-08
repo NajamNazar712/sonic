@@ -3,6 +3,11 @@
 @section('title', 'Auto Assigning Agents')
 
 @section('content')
+    <style>
+        table.datatable tbody{
+            height: 500px;
+        }
+    </style>
     <div class="app-content content">
         <div class="content-wrapper">
             <div class="content-header row">
@@ -33,7 +38,7 @@
                                     <th class="border-primary border-darken-1" style="width: 150px" >Shipment Status</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created At</th>
-                                    <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
                             </table>
