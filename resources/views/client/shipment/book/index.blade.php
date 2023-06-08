@@ -148,11 +148,12 @@
 													<input type="email" name="new_return_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
 												</div>
 											</div>
-
 										@endif
-
-
-										@if($air_waybill != null)
+										<div id="info_display" style="pointer-events: none;" class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Show Information on Air Waybill</label>
+												<input type="checkbox"  name="information_display" class="switch hidden" id="information_display" checked="checked">
+										</div>
+										{{-- @if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
 												@if($air_waybill->information == 1)
@@ -166,10 +167,9 @@
 												<label class="d-block">Show Information on Air Waybill</label>
 												<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 											</div>
-										@endif
+										@endif --}}
 
 									</div>
-
 									<div id="consignee_header_div" class="col col_custom">
 										<h4 id="consignee_header_info" class="form-section mb-2 text-center">Consignee Information</h4>
 										<label for="consignee_info">Search By Phone No.</label>

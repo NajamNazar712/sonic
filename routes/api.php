@@ -96,7 +96,19 @@ Route::name('api.')->group(function () {
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
+          Route::prefix('return')->name('return.')->group(function () {
+        Route::prefix('shipments')->name('shipments.')->group(function () {
+            Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
+            Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
+            Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
+        });
     });
+    });
+    
+  
+ 
+
+
 
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
@@ -171,6 +183,13 @@ Route::name('api.')->group(function () {
                 Route::post('', 'Rider\RiderAPIController@get_rider_location')->name('get');
             });
 
+            Route::prefix('rider_remarks')->name('rider_remarks.')->group(function () {
+                Route::post('add', 'Rider\RiderAPIController@rider_remarks')->name('add');
+                Route::get('get', 'Rider\RiderAPIController@rider_remark_list')->name('list');
+
+            });
+
+      
             //Current
             Route::post('location_v2', 'Rider\RiderAPIController@get_rider_location_v2')->name('location_v2');
 
@@ -200,6 +219,9 @@ Route::name('api.')->group(function () {
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
             });
+
+           
+
 
 
             Route::prefix('history')->name('history.')->group(function () {

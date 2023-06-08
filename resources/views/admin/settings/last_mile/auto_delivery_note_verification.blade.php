@@ -40,6 +40,11 @@
 
                                         </div>
 
+                                        <div class="col-12">
+                                            <div class="col-12 form-group">
+                                                <input type="text" class="form-control input-lg td-input" id="timepicker" name="timepicker" value="{{$auto_verification_time}}">
+                                            </div>
+                                        </div>
 
                                         <div class="col-md-12 form-group">
                                             <button type="submit" class="col-md-4 btn btn-primary">Update</button>
@@ -58,6 +63,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/timedropper.min.css')}}">
     <style>
         .select2-container--classic .select2-selection--multiple .select2-selection__choice, .select2-container--default .select2-selection--multiple .select2-selection__choice {
             background-color: #64a0d2 !important;
@@ -75,10 +81,17 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/datedropper.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/timedropper.min.js')}}" type="text/javascript"></script>
+{{--    <script src="{{asset('app-assets/js/scripts/extensions/date-time-dropper.min.js')}}" type="text/javascript"></script>--}}
 
     <script>
         $(document).ready(function() {
-
+            $('#timepicker').timeDropper({
+                format: 'HH:mm',
+                meridians: true,
+                setCurrentTime: false
+            });
 
             $('#excluded_hubs').select2({
                 placeholder:'Select Excluded Hubs',
