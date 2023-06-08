@@ -1749,14 +1749,25 @@
 
                                 let manifest_data = (details.manifest_history) ? details.manifest_history : [];
                                 let manifest_bag_latest = (manifest_data.manifest_bag_latest) ? manifest_data.manifest_bag_latest : [];
+                                let cargo_manifest_bag = (manifest_data.bag) ? manifest_data.bag : [];
                                 let cargo_manifest = (manifest_bag_latest.cargo_manifest) ? manifest_bag_latest.cargo_manifest : [];
+                                let cargo_manifest_fleet = (cargo_manifest.fleet) ? cargo_manifest.fleet : [];
+                                let cargo_manifest_fleet_vendor = (cargo_manifest_fleet.vendor) ? cargo_manifest_fleet.vendor : [];
 
                                 if(manifest_data) {
                                     let manifest_data_created_at = (manifest_data.created_at) ? manifest_data.created_at  : '-'
+
                                     let vehicle_number = (cargo_manifest.vehicle_number) ? cargo_manifest.vehicle_number : '-';
-                                    let vendor_name = (cargo_manifest.vehicle_number) ? cargo_manifest.vendor_name : '-';
+                                    let vendor_name = (cargo_manifest.vendor_name) ? cargo_manifest.vendor_name : '-';
+
+
+                                    vehicle_number = (cargo_manifest_fleet.reg_number) ? cargo_manifest_fleet.reg_number : vehicle_number;
+                                    vendor_name = (cargo_manifest_fleet_vendor.name) ? cargo_manifest_fleet_vendor.name : vendor_name;
+
+
                                     let manifest_id = (manifest_bag_latest.id) ? manifest_bag_latest.id : '-'
                                     let cargo_manifest_bag_id = (manifest_data.cargo_manifest_bag_id) ? manifest_data.cargo_manifest_bag_id : '-'
+                                    let cargo_manifest_bag_seal = (cargo_manifest_bag.seal_number) ? cargo_manifest_bag.seal_number : '-'
 
 
                                     shipment += '<div class="col-12 mt-2">';
@@ -1767,7 +1778,7 @@
                                     shipment += '<tr role="row">';
                                     shipment += '<th><strong>Date / Time</strong></th>';
                                     shipment += '<th><strong>Manifest No#</strong></th>';
-                                    shipment += '<th><strong>Bag No#</strong></th>';
+                                    shipment += '<th><strong>Bag Seal#</strong></th>';
                                     shipment += '<th><strong>Vehicle</strong></th>';
                                     shipment += '</tr>';
                                     shipment += '</thead>';
@@ -1777,7 +1788,7 @@
                                     shipment += '<tr>';
                                     shipment += '<td>' + manifest_data_created_at + '</td>';
                                     shipment += '<td>' + manifest_id + '</td>';
-                                    shipment += '<td>' +  cargo_manifest_bag_id + '</td>';
+                                    shipment += '<td>' +  cargo_manifest_bag_seal + '</td>';
                                     shipment += `<td> ${vehicle_number} <br> ${vendor_name} </td>`
                                     shipment += '</tr>';
 
