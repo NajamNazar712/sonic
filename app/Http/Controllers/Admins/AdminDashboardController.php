@@ -12995,21 +12995,21 @@ class AdminDashboardController extends Controller
         }
 
         if ($request->has('permission_ids')) {
-        $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
+            $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
 
-        $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
-        $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
+            $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
+            $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
 
-        SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
+            SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
 
-        foreach($new_permission_ids as $permission_id) {
-            $substitute_user_permission = new SubstituteUserPermission();
+            foreach($new_permission_ids as $permission_id) {
+                $substitute_user_permission = new SubstituteUserPermission();
 
-            $substitute_user_permission->substitute_user_id = $id;
-            $substitute_user_permission->permission_id = $permission_id;
+                $substitute_user_permission->substitute_user_id = $id;
+                $substitute_user_permission->permission_id = $permission_id;
 
-            $substitute_user_permission->save();
-        }
+                $substitute_user_permission->save();
+            }
         }
         else {
             SubstituteUserPermission::where('substitute_user_id', $id)->delete();

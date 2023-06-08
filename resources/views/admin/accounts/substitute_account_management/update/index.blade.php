@@ -81,7 +81,7 @@
 										@endif
 									</div>
 
-									<div class="col-12">
+									{{-- <div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 
 										@foreach($permissions as $permission)
@@ -108,7 +108,7 @@
 										@endif
 											
 										@endforeach
-									</div>
+									</div> --}}
 
 									<div class="col-12">
 										<div class="form-group text-center">
