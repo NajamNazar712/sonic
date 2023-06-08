@@ -3016,7 +3016,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         /*for shipper side*/
         // Routes: web.php
-        Route::prefix('mms_report')->name('mms_report.')->group(function () {
+        Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@mms_report_store')->name('store');
         });

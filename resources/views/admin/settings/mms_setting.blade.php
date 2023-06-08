@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    MMS Setting
+                    MMS Report Setting
                 </h1>
 
                 <div class="card">
@@ -89,7 +89,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update User Shippers!',
+                        text: 'Select Yes to update User Shippers.',
                         icon: 'warning',
                         buttons: {
                             cancel: {
