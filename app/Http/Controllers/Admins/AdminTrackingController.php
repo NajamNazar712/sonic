@@ -1688,7 +1688,7 @@ class AdminTrackingController extends Controller
                             }
                         }
 
-                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::with('bag','manifestBag_latest','manifestBag_latest.cargo_manifest','manifestBag_latest.cargo_manifest.fleet.vendor')
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::with('bag','manifestBag_latest','manifestBag_latest.cargo_manifest','manifestBag_latest.cargo_manifest.fleet.driver')
                             ->where('shipment_id',$shipment->id);
 
                         if($cargo_manifest_bag_shipments->exists()){

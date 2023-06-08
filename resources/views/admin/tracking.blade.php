@@ -1744,28 +1744,25 @@
                                 shipment += '</div>';
 
 
-
-
-
                                 let manifest_data = (details.manifest_history) ? details.manifest_history : [];
                                 let manifest_bag_latest = (manifest_data.manifest_bag_latest) ? manifest_data.manifest_bag_latest : [];
                                 let cargo_manifest_bag = (manifest_data.bag) ? manifest_data.bag : [];
                                 let cargo_manifest = (manifest_bag_latest.cargo_manifest) ? manifest_bag_latest.cargo_manifest : [];
                                 let cargo_manifest_fleet = (cargo_manifest.fleet) ? cargo_manifest.fleet : [];
-                                let cargo_manifest_fleet_vendor = (cargo_manifest_fleet.vendor) ? cargo_manifest_fleet.vendor : [];
+                                let cargo_manifest_fleet_driver = (cargo_manifest_fleet.driver) ? cargo_manifest_fleet.driver : [];
 
                                 if(manifest_data) {
                                     let manifest_data_created_at = (manifest_data.created_at) ? manifest_data.created_at  : '-'
 
                                     let vehicle_number = (cargo_manifest.vehicle_number) ? cargo_manifest.vehicle_number : '-';
-                                    let vendor_name = (cargo_manifest.vendor_name) ? cargo_manifest.vendor_name : '-';
+                                    let driver_name = (cargo_manifest.driver_name) ? cargo_manifest.driver_name : '-';
 
 
                                     vehicle_number = (cargo_manifest_fleet.reg_number) ? cargo_manifest_fleet.reg_number : vehicle_number;
-                                    vendor_name = (cargo_manifest_fleet_vendor.name) ? cargo_manifest_fleet_vendor.name : vendor_name;
+                                    driver_name = (cargo_manifest_fleet_driver.name) ? cargo_manifest_fleet_driver.name : driver_name;
 
 
-                                    let manifest_id = (manifest_bag_latest.id) ? manifest_bag_latest.id : '-'
+                                    let cargo_manifest_id = (cargo_manifest.id) ? cargo_manifest.id : '-'
                                     let cargo_manifest_bag_id = (manifest_data.cargo_manifest_bag_id) ? manifest_data.cargo_manifest_bag_id : '-'
                                     let cargo_manifest_bag_seal = (cargo_manifest_bag.seal_number) ? cargo_manifest_bag.seal_number : '-'
 
@@ -1787,9 +1784,9 @@
 
                                     shipment += '<tr>';
                                     shipment += '<td>' + manifest_data_created_at + '</td>';
-                                    shipment += '<td>' + manifest_id + '</td>';
+                                    shipment += '<td>' + cargo_manifest_id + '</td>';
                                     shipment += '<td>' +  cargo_manifest_bag_seal + '</td>';
-                                    shipment += `<td> ${vehicle_number} <br> ${vendor_name} </td>`
+                                    shipment += `<td> ${vehicle_number} <br> ${driver_name} </td>`
                                     shipment += '</tr>';
 
 
