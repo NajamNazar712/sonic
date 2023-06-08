@@ -11211,8 +11211,6 @@ class AdminAPIController extends Controller
                                 }
                             }
 
-                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
-
                             $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                             if ($handover_shipments->exists()) {
                                 $handover_shipments = $handover_shipments->first();
@@ -11233,8 +11231,7 @@ class AdminAPIController extends Controller
                         }
 
                         foreach ($valid_shipments as $shipment) {
-                            NotificationsController::send(10, $note->id, $shipment);
-                            NotificationsController::send(11, $note->id, $shipment);
+
 
                             if (in_array($shipment, $notifications)) {
                                 $shipment_obj = Shipment::find($shipment);
@@ -11262,6 +11259,9 @@ class AdminAPIController extends Controller
                                     NotificationsController::send(12, $note->id, $shipment);
                                 }
                             }
+                            ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
+                            NotificationsController::send(10, $note->id, $shipment);
+                            NotificationsController::send(11, $note->id, $shipment);
                         }
                     }
                     NotificationsController::send(40, $note->id);

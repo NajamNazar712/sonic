@@ -143,6 +143,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\VisionSoftApiExcel',
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
+        'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         ];
 
     /**
@@ -480,7 +481,7 @@ class Kernel extends ConsoleKernel
 
 		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
 
-
+		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
     }
     /**
      * Register the commands for the application.

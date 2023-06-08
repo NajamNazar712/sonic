@@ -1512,6 +1512,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('note/submit', 'Admins\ReturnController@return_note_create')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
+
             Route::get('', 'Admins\ReturnController@return_receive_deliveries_view')->name('index');
             Route::get('list', 'Admins\ReturnController@return_receive_deliveries_list')->name('list');
             Route::get('{id}/update', 'Admins\ReturnController@return_receive_update')->name('update');
@@ -1940,6 +1941,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
     });
+
+
+   
+
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
@@ -3360,6 +3365,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@debriefing_role_setting_update')->name('update');
 
         });
+        
+        Route::prefix('sms_notification_return_delivered_to_shipper')->name('sms_notification_return_delivered_to_shipper.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_update')->name('update');
+        });
+
 
         Route::prefix('omni')->name('omni.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@omni_user_setting_index')->name('index');
@@ -3547,6 +3558,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('add', 'Admins\GlobalSettingsController@star_shippers_add')->name('add');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
+
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -3900,6 +3912,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
+        Route::post('call_status', 'Admins\LeadManagementController@call_status_change')->name('call_status');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');
