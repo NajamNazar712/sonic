@@ -137,10 +137,10 @@ class CRMDashboardController extends Controller
             $crm['closed_rate_avg'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 4)->where('agent_id',auth()->user()->id);
-            $crm['valid'] = CrmRequest::
+            $crm['valid'] = CrmRequestStatusHistory::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 6)->where('agent_id',auth()->user()->id);
-            $crm['in_valid'] = CrmRequest::
+            $crm['in_valid'] = CrmRequestStatusHistory::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7)->where('agent_id',auth()->user()->id);
             $crm_feedback = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->where('agent_id',auth()->user()->id)->pluck('crm_request_id');
@@ -224,6 +224,9 @@ class CRMDashboardController extends Controller
 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+        $card_feedback = CrmRequestFeedback::
+        whereBetween('created_at',[$thirtyDays,$today])->
+        pluck('crm_request_id');
         $dashboard_list = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
         ->leftjoin('crm_request_case_nature_types as crcnt', 'crcnt.id', '=', 'crm_requests.case_nature_type_id')
         ->leftjoin('crm_request_channels as crc', 'crc.id', '=', 'crm_requests.channel_id')
@@ -306,6 +309,7 @@ class CRMDashboardController extends Controller
         ->leftjoin('admins as a1', 'a1.id', '=', 'crm_requests.agent_id')
         ->leftjoin('crm_request_statuses as crs', 'crs.id', '=', 'crm_requests.status_id')
         ->select('sj.created_at as arrival','crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'cu.name as consignee_users', 'ru.name as retail_users', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','crm_requests.description as descr','at.name as tagged_admin', 'adp.name as tagged_department', 'crt.crm_request_tagging_type_id as crm_request_tagging_type_id', 'ss.name as status','ss.id as shipment_status_id', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'dh.name as hub', 'crt.crm_request_tagging_type_id as tagged_type', 'res.created_at as valid_date', 'ccs.comment as last_comment', 'ccs.created_at as last_comment_date', 'ccs.comment_by as last_comment_by', 'accs.name as last_comment_admin', 'uccs.name as last_comment_shipper', 'crm_requests.launched_by_id', 'res.created_at as agent_assigned_date', 'resby.name as agent_assigned_by', 'crth.created_at as tagged_date', 'z.name as zone','crsh.created_at as reopen_date','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','at.id as tagged_admin_id', 'crm_requests.case_nature_id','crm_requests.shipment_id','sts.status as star_status','crm_requests.updated_at as last_status_date','sm.mode as shipping_mode','ad1.name as sale_person','ad2.name as kae','seg.name as segment','sj.updated_at as arrival_date','s.updated_at as last_status_today','s.amount as cod_value','crs.name as crm_request_status','crs.id as crm_request_status_id')
+        ->whereNotIn('crm_requests.id', $card_feedback)
         ->whereNotIn('crs.id',[5])
         ->groupBy('crm_requests.id');
             $current_date = Carbon::now();
@@ -948,9 +952,10 @@ class CRMDashboardController extends Controller
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
 
-            $card_data['total'] = CrmRequest::
-            whereBetween('created_at', [$thirtyDays, $today])
-            ->get();
+            // $card_data['total'] = CrmRequest::
+            // // whereBetween('created_at', [$thirtyDays, $today])
+            // get();
+            $card_data['total'] = CrmRequest::get();
 
             //Launched
             $card_data['launched'] = CrmRequest::where('crm_requests.status_id', 1);
@@ -1093,21 +1098,45 @@ class CRMDashboardController extends Controller
             {
                 $card_data['closed'] = self::agent($card_data['closed'],$agent_id);
             }
-            if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
-            {   
-                $card_data['closed'] = self::dates($card_data['closed'],$from,$to);
+            
+           
 
-                $card_feedback = CrmRequestFeedback::
-                whereBetween('created_at',[$thirtyDays,$today])->
-                pluck('crm_request_id');
+            if (($from = $request->get('from_date')) && ($to = $request->get('to_date'))) {
+                $card_data['closed'] = self::dates($card_data['closed'], $from, $to);
+            
+                $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$from, $to])->pluck('crm_request_id')->toArray();
+            
+                $card_total = $card_data['total']->filter(function ($item) use ($from, $to, $card_feedback) {
+                    return $item->created_at >= $from && $item->created_at <= $to && !in_array($item->id, $card_feedback);
+                })->count();
+                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+            } else {
+                $thirtyDaysAgo = now()->subDays(30);
+                $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
+            
+                $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$thirtyDaysAgo, now()])->pluck('crm_request_id')->toArray();
+            
+                $card_total = $card_data['total']->filter(function ($item) use ($thirtyDaysAgo, $card_feedback) {
+                    return $item->created_at >= $thirtyDaysAgo && $item->created_at <= now() && !in_array($item->id, $card_feedback);
+                })->count();
+                $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
+            }
+            // if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
+            // {   
+            //     $card_data['closed'] = self::dates($card_data['closed'],$from,$to);
 
-                $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
-                $card_data['closed_rate'] = $card_total !== 0 ?  $card_data['closed']->count()/$card_total : 0;
-            }
-            else
-            {
-                $card_data['closed']->whereBetween('created_at', [$thirtyDays, $today]);
-            }
+            //     $card_feedback = CrmRequestFeedback::
+            //     whereBetween('created_at',[$from,$to])->
+            //     pluck('crm_request_id');
+
+            //     dd($card_data['total']->whereBetweem('created_at',[$from,$to])->count());
+            //     $card_total = $card_data['total']->whereBetweem('created_at',[$from,$to])->whereNotIn('id', $card_feedback)->count();
+            //     $card_data['closed_rate'] = $card_total !== 0 ?  $card_data['closed']->count()/$card_total : 0;
+            // }
+            // else
+            // {
+            //     $card_data['closed']->whereBetween('created_at', [$thirtyDays, $today]);
+            // }
             if ($origin = $request->get('search_origin'))
             {   
                 $card_data['closed'] = self::origin($card_data['closed'],$origin);
@@ -1138,7 +1167,7 @@ class CRMDashboardController extends Controller
             }  
 
             //Valid
-            $card_data['valid'] = CrmRequest::where('crm_requests.status_id', 6);
+            $card_data['valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 6);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
@@ -1182,7 +1211,7 @@ class CRMDashboardController extends Controller
             }  
 
             //InValid
-            $card_data['in_valid'] = CrmRequest::where('crm_requests.status_id', 7);
+            $card_data['in_valid'] = CrmRequestStatusHistory::where('crm_request_status_histories.status_id', 7);
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
@@ -1244,23 +1273,24 @@ class CRMDashboardController extends Controller
                 $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
                 $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
                 $card_feedback = CrmRequestFeedback::
-                whereBetween('created_at',[$thirtyDays,$today])->
+                whereBetween('created_at',[$from,$to])->
                 pluck('crm_request_id');
-                $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->count();
+                $card_total = $card_data['total']->whereNotIn('id', $card_feedback)->whereBetween('created_at',[$from, $stop_date])->count();
                 $shipments = Shipment::where('shipper_status_id',2)->whereBetween('created_at', [$from, $stop_date])->count();
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
+                // dd($card_data['total']->count());
+                $card_data['total'] = $card_data['total']->count();
+                if ($card_data['total'] > 0) {
+                    $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
+                    $card_data['closed_rate_percentage'] = $card_total !== 0
+                    ? round(($card_data['closed_rate'] / $card_total) * 100, 2)
+                    : 0;
+                    $card_data['in_process_ratio_percentage'] = $shipments !== 0
+                    ? round(($card_total / $shipments) * 100, 2)
+                    : 0;
+                }
             }
             
-            $card_data['total'] = $card_data['total']->count();
-            if ($card_data['total'] > 0) {
-                $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
-                $card_data['closed_rate_percentage'] = $card_total !== 0
-                ? round(($card_data['closed_rate'] / $card_total) * 100, 2)
-                : 0;
-                $card_data['in_process_ratio_percentage'] = $shipments !== 0
-                ? round(($card_total / $shipments) * 100, 2)
-                : 0;
-            }
 
             $card_data['launched'] = number_format($card_data['launched']);
             $card_data['in_process'] = number_format($card_data['in_process']);
@@ -1269,7 +1299,7 @@ class CRMDashboardController extends Controller
             $card_data['valid'] = number_format($card_data['valid']);
             $card_data['in_valid'] = number_format($card_data['in_valid']);
             $card_data['closed_rate'] = number_format($card_data['closed_rate']);
-            $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
+            // $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
 
             return response()->json(['status' => 1, 'card_data' => $card_data]);
         // }else{

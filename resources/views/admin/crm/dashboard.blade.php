@@ -308,6 +308,7 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
+                                                        {{-- <h3 class="text-white"><p id="valid" class="d-inline">0 </p></h3> --}}
                                                         <h3 class="text-white"><p id="valid" class="d-inline">{{$crm['valid']}} </p></h3>
                                                         <span>Valid</span>
                                                     </div>
@@ -325,6 +326,10 @@
                                                         <i class="la la-hourglass text-white font-large-2 float-left"></i>
                                                     </div>
                                                     <div class="media-body text-white text-right">
+                                                        {{-- <h3 class="text-white"><p id="in_valid" class="d-inline">0 </p>
+                                                            (<p id="in_valid_percentage"
+                                                            class="d-inline">0</p>
+                                                        %)</h3> --}}
                                                         <h3 class="text-white"><p id="in_valid" class="d-inline">{{$crm['in_valid']}} </p>
                                                             (<p id="in_valid_percentage"
                                                             class="d-inline">{{$crm['in_valid_percentage']}}</p>
@@ -347,7 +352,7 @@
                                                     <div class="media-body text-white text-right">
                                                         <h3 class="text-white">
                                                                 <p id="closed_rate" class="d-inline">{{$crm['closed_rate']}} </p>
-                                                            {{-- (<span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}%</span>) --}}
+                                                            (<span id="closed_rate_percentage">{{ $crm['closed_rate_percentage']}}</span>%)
                                                         </h3>
                                                         <span>Closure Rate</span>
                                                     </div>
@@ -941,6 +946,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
+                max: new Date(),
                 onSet: function(context) {
                     if (context.select) {
                         $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
@@ -1398,7 +1404,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[32, 'desc']],
+                order: [[31, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
