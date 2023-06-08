@@ -872,7 +872,7 @@ $roles = explode("," , $settings->text);
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-commenting-o"></i>CRM</span></a>
                     <ul class="menu-content">
-                        @if (session('role_id') == 1 || in_array(51,90,83,74,53,49,37,32,29,28,6, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(869, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.crm.dashboard.index') }}">CRM Dashboard</a></li>
                         @endif
                         @if (session('role_id') == 1 ||
