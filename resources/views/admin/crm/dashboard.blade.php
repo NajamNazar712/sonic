@@ -926,33 +926,42 @@
                 width:'100%',
                 allowClear:true
             });
-            var from_date = $('#from_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            var to_date = $('#to_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                max: new Date(),
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('max', $('#search_form #to_date').pickadate('picker').get('select'));
-                    }
-                }
-            });
+           // Initialize array to store selected dates
+var selectedDates = [];
+
+var from_date = $('#from_date').pickadate({
+    firstDay: 1,
+    clear: '',
+    selectYears: true,
+    selectMonths: true,
+    formatSubmit: 'yyyy-mm-dd',
+    hiddenSuffix: '_formatted',
+    onSet: function(context) {
+        if (context.select) {
+            var selectedDate = new Date(context.select);
+            selectedDates.push(selectedDate); // Add selected date to array
+            $('#to_date').pickadate('picker').set('disable', selectedDates);
+        }
+    }
+});
+
+var to_date = $('#to_date').pickadate({
+    firstDay: 1,
+    clear: '',
+    selectYears: true,
+    selectMonths: true,
+    formatSubmit: 'yyyy-mm-dd',
+    hiddenSuffix: '_formatted',
+    max: new Date(),
+    onSet: function(context) {
+        if (context.select) {
+            var selectedDate = new Date(context.select);
+            selectedDates.push(selectedDate); // Add selected date to array
+            $('#from_date').pickadate('picker').set('disable', selectedDates);
+        }
+    }
+});
+
             //endDropDown
 
             //Card Function
