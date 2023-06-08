@@ -299,7 +299,7 @@
             
                             </div>
                             <div class="row justify-content-center">
-                                <div class="col-3" id="valid_div">
+                                <div class="col-3" id="">
                                     <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -317,7 +317,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="in_valid_div">
+                                <div class="col-3" id="">
                                     <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -341,7 +341,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="dormant_div">
+                                <div class="col-3" id="">
                                     <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
@@ -361,7 +361,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="col-3" id="dormant_div">
+                                <div class="col-3" id="">
                                     <div class="card bg-gradient-directional-destination pull-up cursor-pointer">
                                         <div class="card-content">
                                             <div class="card-body">
