@@ -13020,10 +13020,30 @@ class AdminDashboardController extends Controller
 
 
     public function shipment_received_details(){
-       return view('admin.management.shipment_received.index');
+        $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
+        return view('admin.management.shipment_received.index');
+    }
+
+    public function shipment_received_details_list(Request $request)
+    {
+        $all_received = ShipementReceiveDetails::join('admins','shipment_receiver_details.received_by','admins.id')
+        ->select(
+            'shipment_receiver_details.tracking_number as tracking_id',
+            'shipment_receiver_details.receiver_name as receiverName',
+            'shipment_receiver_details.receiver_cnic as receiverCnic',
+            'shipment_receiver_details.receiver_relationship as relationship',
+            'shipment_receiver_details.created_at',
+            'admins.name as created_by'
+            );
+        
+            
+        $datatable = Datatables::of($all_received);
+
+        return $datatable->make(true);
     }
 
     public function shipment_received_excel_upload(Request $request){
+        
         // dd($request->all());
         if ($file = $request->file('receiver_detials')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -13098,32 +13118,6 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with(['error' => 'Shipment not found', 'invalid_shipment' =>$invalid_shipment]);
         }
     }
-
-    public function shipment_received_details_list(){
-        $receiving_detials = new ShipementReceiveDetails();
-        $all_received = $receiving_detials::join('admins','shipment_receiver_details.received_by','admins.id')
-        ->select(
-            'admins.name as Admin',
-            'shipment_receiver_details.tracking_number as tracking_id',
-            'shipment_receiver_details.receiver_name as receiverName',
-            'shipment_receiver_details.receiver_cnic as receiverCnic',
-            'shipment_receiver_details.receiver_relationship as relationship'
-            )->get();
-        
-            
-        $datatable = Datatables::of($operation_incoming_delivered_returned)
-            ->editColumn('count_link', function ($shipments) use ($from, $to, $service_type_id, $hub) {
-                if ($shipments->count > 0) {
-                    $route = route('admin.operation_forecasting.incoming.shipments_list');
-                    return "<u><a href='{$route}/$from/$to/$service_type_id/$hub/$shipments->shipper_status_id' target='_blank'>$shipments->count</a></u>";
-                } else {
-                    return 0;
-                }
-            });
-        return $datatable->make(true);
-    }
-
-
 
 }
 

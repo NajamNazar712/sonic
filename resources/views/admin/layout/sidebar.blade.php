@@ -1233,7 +1233,7 @@
                     @endif     
                     
                     @if (session('role_id') == 1 || in_array(862, session('permissions')))
-                        <li class=" nav-item"><a href="{{ route('admin.management.riders.rider_remarks.index') }}"><span class="menu-title">Shipment Receiver Details</span></a>
+                        <li class=" nav-item"><a href="{{ route('admin.management.shipment_received.index') }}"><span class="menu-title">Shipment Receiver Details</span></a>
                         </li>
                     @endif
                 
