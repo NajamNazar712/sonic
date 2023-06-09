@@ -242,7 +242,7 @@ class APIController extends Controller
     public function get_shipment_details(Request $req){
 
         $validator = Validator::make($req->all(), [
-            'trackingID'       => 'required',
+            'link'       => 'required',
         ]);
 
         if ($validator->fails()) {
@@ -250,26 +250,29 @@ class APIController extends Controller
         }
 
         $Shipment = new Shipment();
-        $shipmentDetails = $Shipment->where('tracking_number',$req->trackingID)
+        $shipmentDetails = $Shipment->where('trax_pay_transactions.link',$req->link)
         ->join('cities','shipments.consignee_city_id','cities.id')
+        ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
         ->select(
-        'shipments.tracking_number as TrankingID', 
-        'shipments.consignee_name as Name',
-        'shipments.consignee_address as Address',
-        'shipments.fintech_charges as fintech_amount',
-        'shipments.amount as codAmount',
+        'shipments.tracking_number as tracking_id', 
+        'shipments.consignee_name as name',
+        'shipments.consignee_address as address',
+        'trax_pay_transactions.fintech_amount as fintech_amount',
+        'trax_pay_transactions.cod_amount as codAmount',
         'cities.name as city_name',
         'cities.name as city_name'
         )->first();
 
         if(!empty($shipmentDetails)){
             return response()->json([
+                'status'  => '200',
                 'data' => $shipmentDetails,
             ]);
         }
 
         else{
             return response()->json([
+                'status'  => '404',
                 'message' => 'Shipment Not Found',
             ]); 
         }
@@ -6960,34 +6963,73 @@ class APIController extends Controller
     }
 
     public function fintech_payment_detials(Request $req){
+
       $shipments = Shipment::join('delivery_note_shipments','shipments.id','delivery_note_shipments.shipment_id')
       ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
-      ->where('shipments.tracking_number',$req->tracking_id)
+      ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
+      ->where('trax_pay_transactions.link',$req->link)
       ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id',
-               'shipments.amount as cod_amount','shipments.fintech_charges as fintech_amount',
-               'delivery_notes.id as delivery_note_id','shipments.id as shipment_id'
-               )->first();
+                'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
+                'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
 
         $user_id          = $shipments->shipper_id;
         $cod_Amount       = $shipments->cod_amount;
         $fintechCharges   = $shipments->fintech_amount;
         $delivery_note_id = $shipments->delivery_note_id;
         $shipment_id      = $shipments->shipment_id;
+        $trax_pay_id      = $shipments->trax_transaction_id;
 
         $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
         $standard_fintech_charges = new standard_fintech_charges();
-        $fed_chargess    = $standard_fintech_charges->first()->standard_fed_charges;
+        $standard = $standard_fintech_charges->first();     
 
-            if($userFintechCharges->exists()){
-                $fintect_charges = $userFintechCharges->first()->fintech_charges;
-            }
-            else{
-                $fintect_charges = $standard_fintech_charges->first()->standard_fintech_charges;
-            }
+        $fed_percentage    = $standard->standard_fed_charges;  //FED Pecentage
+
+        if($userFintechCharges->exists()){
+            $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges user
+        }
+        else{
+            $fintect_charges_percentage = $standard_fintech_charges->first()->standard_fintech_charges; // fintech charges standard
+        }
 
         $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
         ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
-        ->first();
+        ->first(); // select range of fintech company
+        
+
+        //Find Fintech Charges
+        if($select_range->charges_is_percentage == 1){
+            $company_chages = ($select_range->charges) / 100; // company charges
+            $total_company_charges = round($company_chages * $cod_Amount);
+        }
+        else{
+            $total_company_charges = $select_range->charges; // company charges
+        }
+
+        // Find FED 
+        if($select_range->fed_tax_is_percentage == 1){
+            $company_fed       = ($select_range->fed_tax) / 100; // company Fed
+            $total_company_fed = round($company_fed * $total_company_charges);
+        }
+        else{
+             $total_company_fed      = $select_range->fed_tax; // company Fed
+        }
+
+        //Find Addition Charges
+
+        if(!empty($select_range->additional_charges)){
+            if($select_range->additional_charges_is_percentage == 1){
+                $company_additional_charges   = ($select_range->additional_charges) / 100; // company Fed
+                $additional_charges = round($company_additional_charges * $total_company_charges);
+            }
+            else{
+                $additional_charges = $select_range->additional_charges; // company Fed
+            }
+        }
+        else{
+            $additional_charges = 0;
+        }
+        $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges; // total company charges 
 
         function calculatepercentage($total_amount,$charges,$fed){
             $percentage = round(($total_amount / 100) * $charges) ; 
@@ -6996,34 +7038,38 @@ class APIController extends Controller
             return  [$total,$tax];
         }
 
-        // Calcualtion company charges
-        $company_charges     = $select_range->charges;
-        $company_fed_charges = $select_range->fed_tax;
-
-        //fintech Compnay Charges
-        $total_company_amount = calculatepercentage($cod_Amount,$company_charges,$company_fed_charges);
-     
         //user or Stadard fintech Charges
-        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges,$fed_chargess);
+        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges_percentage,$fed_percentage);
 
-        //Total payable Fintech Charges 
-        $revenue = $req->fintech_charges - $total_company_amount[0];
+        //Total revenue
+        $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
         
-        $total_amount_received =  $cod_Amount + $fintechCharges;     
+        // return response()->json([
+        //     [
+        //         'cod'             => $cod_Amount, 
+        //         'conpany charges' => $total_company_charges, 
+        //         'company fed'     => $total_company_fed,        
+        //         'company addi'    => $additional_charges,
+        //         'total company'   => $total_company_fintech_charges,
+        //         'fintech %'       => $fintect_charges_percentage,
+        //         'Fed %'           => $fed_percentage,
+        //         'total fintech'   => $total_fintech_calculated[0],
+        //         'revenue'         => $revenue   
+        //     ]
+        // ]);
+
+        $total_amount_received =  $cod_Amount + $total_fintech_calculated[0];     
 
         $fintech_details = new FintechPaymentDetails();
-        $fintech_details->tracking_id             =  $req->tracking_id;
-        $fintech_details->delivery_note_id        =  $delivery_note_id;
+        $fintech_details->trax_pay_id             =  $trax_pay_id;
         $fintech_details->transaction_id          =  $req->transaction_id;
-        $fintech_details->cod_amount              =  $req->cod_amount;
-        // $fintech_details->fintech_amount          =  $req->fintech_charges;
-        // $fintech_details->fed_amount              =  $total_fintech_calculated[1]; //set
         $fintech_details->rider_tip               =  $req->tip;
         $fintech_details->rider_id                =  $shipments->rider;
         $fintech_details->fintech_company_id      =  $req->fintech_company;
-        $fintech_details->total_fintech_amount    =  $req->fintech_charges; //set
-        $fintech_details->fintech_company_charges =  $total_company_amount[0]; //set
-        $fintech_details->revenue                 =  $revenue;
+        $fintech_details->total_fintech_amount    =  $total_fintech_calculated[0];
+        $fintech_details->fintech_company_amount  =  $total_company_fintech_charges; //set
+        $fintech_details->revenue                 =  $revenue; //set
+
         $fintech_details->save();
 
         $shipment = Shipment::find($shipment_id);

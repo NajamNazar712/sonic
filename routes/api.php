@@ -106,7 +106,7 @@ Route::name('api.')->group(function () {
 
     Route::prefix('fintech')->name('fintech.')->group(function () {
         Route::post('shipment-details', 'APIController@get_shipment_details')->name('shipment-details');
-        Route::post('payment-detials', 'APIController@fintech_payment_detials')->name('payment-detials');
+        Route::post('payment-details', 'APIController@fintech_payment_detials')->name('payment-details');
     });
 
 

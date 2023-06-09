@@ -15,17 +15,14 @@ class CreateFintechPaymentDetailsTable extends Migration
     {
         Schema::create('fintech_payment_details', function (Blueprint $table) {
             $table->increments('id');
-            $table->bigInteger('tracking_id');
-            $table->bigInteger('delivery_note_id');
+            $table->bigInteger('trax_pay_id');
             $table->String('transaction_id');
             $table->Integer('cod_amount');
-            // $table->Integer('fintech_amount');
-            // $table->Integer('fed_amount');
             $table->Integer('rider_tip');
             $table->Integer('rider_id');
             $table->Integer('fintech_company_id');
             $table->Integer('total_fintech_amount');
-            $table->Integer('fintech_company_charges');
+            $table->Integer('fintech_company_amount');
             $table->Integer('revenue');
             $table->timestamps();
         });

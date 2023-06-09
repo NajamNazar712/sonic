@@ -12,6 +12,7 @@ use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\UserFintectCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Admin\shipmentFintechCharges;
+use App\Http\Models\Admin\TraxPayTransaction;
 use GuzzleHttp\Client;
 class CountFintechCharges implements ShouldQueue
 
@@ -100,14 +101,21 @@ class CountFintechCharges implements ShouldQueue
                     else{
                         $fintech_charges = $total_charges;
                     }
+
+                    $traxpaytransaction = new TraxPayTransaction();
+                    $traxpaytransaction::where('shipment_id',$valid_shipments_valuse)->update([
+                        'link'           => $this->payment_link,
+                        'cod_amount'     => $total_cod_amount,
+                        'fintech_amount' => $fintech_charges,
+                    ]);
+
                     $request_body  = array(
-                        'tracking_no'           => $customer_details->TrankingID,
                         'payment_link'          => $this->payment_link,
-                        'unique_key'            => $this->unique_key,
-                        'fintech'               => $fintech_charges,
-                        'fintech_company_id'    => $fintech_company_id,
+                        'unique_code'           => $this->unique_key,
+                        'pay_type_id'           => 1,
+                        'fintech_company'       => $fintech_company_id,
                         'cod_amount'            => $total_cod_amount,
-                        'current_status'        => 'Out for Delivery',
+                        'fintech_amount'        => $fintech_charges,
                     );
                 $client = new Client();
                 $response = $client->request('Post', $this->url, [

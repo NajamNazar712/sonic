@@ -1059,7 +1059,7 @@ class DeliveryController extends Controller
                             NotificationsController::send(135, $note->id, $shipment);
                         } else {
                               //When Admin Create Delivery Note
-                            $payment_detials = PayfastApiCall::ApiCall();   
+                            $payment_detials = PayfastApiCall::ApiCall($note->id,$shipment);   
                             $rand            = $payment_detials['unique_key'];
                             $payment_link    = $payment_detials['payment_link'];
                             $url             = $payment_detials['url'];

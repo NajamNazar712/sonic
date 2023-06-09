@@ -4,6 +4,7 @@ namespace App\Helpers;
 use App\PayFastTransactionDetials;
 use App\Http\Models\Shipment;
 use GuzzleHttp\Client;
+use App\Http\Models\Admin\TraxPayTransaction;
 class PayfastApiCall
 {
     /**
@@ -12,24 +13,30 @@ class PayfastApiCall
      * @param int $length
      * @return string
      */
-    public static function ApiCall()
+    public static function ApiCall($note_id,$shipment)
     {
+            $rand = rand(1111,9999).time();
+       
+            $tray_pay_tansaction = new TraxPayTransaction();
+            $tray_pay_tansaction->shipment_id      = $shipment;
+            $tray_pay_tansaction->delivery_note_id = $note_id;
+            $tray_pay_tansaction->unique_code      = $rand;
+            $tray_pay_tansaction->payment_name_id  = '1';
+            $tray_pay_tansaction->save();
+    
+    
+            $environment = config('app.env');
+            if($environment == 'production'){
+                $url          = "";
+                $payment_link = "";
+            }
+            else{
+                $url          = "http://127.0.0.1:8000/api/online-transaction-details";
+                $payment_link = "http://127.0.0.1:8000/pay/$rand";
+            }
+            $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
 
-        $environment = config('app.env');
-        if($environment == 'production'){
-            $rand = "";
-            $url          = "";
-            $payment_link = "";
-        }
-        else{
-            $rand = rand(111111,999999);
-            $url          = "http://192.168.0.210:8080/api/online-transaction-details";
-            $payment_link = "http://192.168.0.210:8080/Pay-Online/$rand";
-        }
-
-        $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
-
-        return   $payment_details;
+            return  $payment_details;
 
 
 

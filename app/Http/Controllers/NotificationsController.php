@@ -10210,7 +10210,7 @@ class NotificationsController extends Controller
                         }
 
                         // $to = $rider->phone;
-                        $to = '03122892602';
+                        $to = '03110127222';
                         self::sms($body, $to);
                     }       
                 }
