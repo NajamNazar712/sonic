@@ -10193,24 +10193,30 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 217) {
-                    $fintech_transaction = FintechPaymentDetails::find($reference_2_id);
+
+          
+                   $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                    ->join('shipments','trax_pay_transactions.shipment_id','shipments.id')
+                    ->select('trax_pay_transactions.cod_amount as Amont',
+                            'shipments.tracking_number as tracking_no',
+                            'fintech_payment_details.rider_tip as tip')
+                            ->where('trax_pay_transactions.id',$reference_2_id)->first();
                     $rider = Rider::find($reference_1_id);
                     if ($fintech_transaction && $rider) {
                         if (strpos($body, '[amount]') !== FALSE) {
-                            $body = str_replace('[amount]', $fintech_transaction->cod_amount, $body);
+                            $body = str_replace('[amount]', $fintech_transaction->Amont, $body);
                         }
                         if (strpos($body, '[tracking_number]') !== FALSE) {
-                            $body = str_replace('[tracking_number]', $fintech_transaction->tracking_id, $body);
+                            $body = str_replace('[tracking_number]', $fintech_transaction->tracking_no, $body);
                         }
                         if (strpos($body, '[tip]') !== FALSE) {
-                            $body = str_replace('[tip]', $fintech_transaction->rider_tip, $body);
+                            $body = str_replace('[tip]', $fintech_transaction->tip, $body);
                         }
                         if (strpos($body, '[rider]') !== FALSE) {
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
-
                         // $to = $rider->phone;
-                        $to = '03110127222';
+                        $to = '03353932386';
                         self::sms($body, $to);
                     }       
                 }

@@ -7076,8 +7076,10 @@ class APIController extends Controller
         $shipment->received_amount = $total_amount_received;
         $shipment->save();
 
+      
+
         NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
-        NotificationsController::send(217, $shipments->rider, $fintech_details->id);
+        NotificationsController::send(217, $shipments->rider, $trax_pay_id);
 
         return response()->json([
         [
