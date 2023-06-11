@@ -10193,8 +10193,6 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 217) {
-
-          
                    $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                     ->join('shipments','trax_pay_transactions.shipment_id','shipments.id')
                     ->select('trax_pay_transactions.cod_amount as Amont',
@@ -10216,7 +10214,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
                         // $to = $rider->phone;
-                        $to = '03353932386';
+                        $to = '03312324454';
                         self::sms($body, $to);
                     }       
                 }
