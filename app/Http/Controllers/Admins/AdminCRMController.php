@@ -1311,6 +1311,7 @@ class AdminCRMController extends Controller
                 $shipment_id = $requests->shipment_id;
                 $origin_hub = $requests->origin_hub;
                 $destination_hub = $requests->hub;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -1350,7 +1351,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -1365,6 +1366,7 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -1408,7 +1410,8 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                
+                elseif(in_array($status, $statusArray)){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -1997,6 +2000,7 @@ class AdminCRMController extends Controller
                 $shipment_id = $requests->shipment_id;
                 $origin_hub = $requests->origin_hub;
                 $destination_hub = $requests->hub;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -2036,7 +2040,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -2051,6 +2055,7 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -2094,7 +2099,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -2574,6 +2579,7 @@ class AdminCRMController extends Controller
                 $shipment_id = $requests->shipment_id;
                 $origin_hub = $requests->origin_hub;
                 $destination_hub = $requests->hub;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -2613,7 +2619,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -2628,6 +2634,7 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -2671,7 +2678,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -3020,6 +3027,7 @@ class AdminCRMController extends Controller
                 $shipment_id = $requests->shipment_id;
                 $origin_hub = $requests->origin_hub;
                 $destination_hub = $requests->hub;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -3059,7 +3067,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 || $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -3074,6 +3082,7 @@ class AdminCRMController extends Controller
 
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
+                $statusArray = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
                 $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
                     ->where('shipment_id',$shipment_id);
                 if($shipment_journey->exists()){
@@ -3117,7 +3126,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif($status == 4 ||  $status == 12 || $status == 20|| $status == 24 || $status == 11 || $status == 8){
+                elseif(in_array($status, $statusArray)){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
