@@ -1708,12 +1708,12 @@ $roles = explode("," , $settings->text);
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836,846], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836,846,861], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
 
-                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([149, 214, 228, 302, 313, 314, 318, 367, 388, 498, 580, 558, 646, 644, 660, 667, 668, 701, 716, 820, 826,846,861], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Shippers</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(149, session('permissions')))
@@ -1735,6 +1735,7 @@ $roles = explode("," , $settings->text);
                                                 Accounts</a>
                                         </li>
                                     @endif
+
                                     @if (session('role_id') == 1 || in_array(558, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.ccd_booking.index') }}">CCD
@@ -1842,6 +1843,18 @@ $roles = explode("," , $settings->text);
                                         <li><a class="menu-item"
                                                    href="{{ route('admin.settings.star_shippers.index') }}">Star Shippers</a></li>
                                     @endif
+                                        @if (session('role_id') == 1 || in_array(861, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.index') }}">
+                                                    SMS Notification Return Delivered to shipper
+                                                </a>
+                                            </li>
+                                        @endif
+										@if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS Report
+                                                    Setting</a> </li>
+                                        @endif
                                 </ul>
 
                             </li>
@@ -2662,8 +2675,8 @@ $roles = explode("," , $settings->text);
                                     href="{{ route('admin.settings.auto_tag_territories.index') }}">Auto Tag
                                     Territories</a></li>
                         @endif
+<!--                         add side bar-->
 
-                        
 
                     </ul>
                 </li>
