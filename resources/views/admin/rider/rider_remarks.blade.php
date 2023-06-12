@@ -116,7 +116,7 @@
                 </button>
             </div>
             <div class="modal-body text-center">
-                <form id="rider_remarks_form" action="" method="post">
+                <form id="rider_remarks" action="" method="post">
                     <div class="row mb-2">
                         <div class="col-12 form-group">
                             <textarea id="initial_response" name="initial_response" class="form-control" rows="4" placeholder="Enter A Response *"></textarea>
@@ -352,15 +352,12 @@
             });
         });
 
-        var idd = null;
         $('body').on('click', '.initial_response', function(event) {
-            idd = $(this).attr('data-id');
+            var id = $(this).attr('data-id');
             $('#rider_remarks').modal('show');
-            var toastrShown = false;    
-        });
+            var toastrShown = false; 
 
-
-        $('#rider_remarks_form').on('submit', function(event) {
+                $('#rider_remarks').on('submit', function(event) {
                     event.preventDefault();
                     let initial_response = $("#initial_response").val();
                     $.ajax({
@@ -368,7 +365,7 @@
                         , method: 'POST'
                         , data: {
                             '_token': '{{ csrf_token() }}'
-                            , 'id': idd
+                            , 'id': id
                             , 'initial_response': initial_response
                         , }
                         , success: function(data) {
@@ -415,18 +412,15 @@
                     })
 
                 });
-
-
-                var id2 = null
-        $('body').on('click', '.final_response', function(event) {
-             id2 = $(this).attr('data-id');
-            $('#rider_remarks_final').modal('show');
-
-            toastrShown = false; 
-           
         });
 
-        $('#rider_remarks_final').on('submit', function(event) {
+        $('body').on('click', '.final_response', function(event) {
+            var id = $(this).attr('data-id');
+            $('#rider_remarks_final').modal('show');
+
+
+            toastrShown = false; 
+            $('#rider_remarks_final').on('submit', function(event) {
                 event.preventDefault();
                 let final_response = $("#final_response").val();
                 $.ajax({
@@ -434,7 +428,7 @@
                     , method: 'POST'
                     , data: {
                         '_token': '{{ csrf_token() }}'
-                        , 'id': id2
+                        , 'id': id
                         , 'final_response': final_response
                     , }
                     , success: function(data) {
@@ -479,6 +473,7 @@
                 })
 
             });
+        });
 
         $('body').on('click', '.rider_remarks_btn_1', function(event) {
             var id = $(this).attr('data-id');
