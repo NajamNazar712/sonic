@@ -1498,6 +1498,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit/estimated_charges', 'Admins\ReturnController@update_estimated_charges')->name('edit.estimated_charges');
         Route::post('rcp_sms', 'Admins\ReturnController@manual_rcp_sms')->name('rcp_sms');
 
+
         Route::prefix('confirmed')->name('confirmed.')->group(function () {
             Route::post('revert', 'Admins\ReturnController@return_confirmed_revert')->name('revert');
             Route::post('revert/status', 'Admins\ReturnController@return_revert_status')->name('revert.status');
@@ -1587,6 +1588,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_confirm_otp_index')->name('index');
             Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
         });
+    });
+
+
+    Route::prefix('return_v2')->name('return_v2.')->group(function () {
+        Route::get('', 'Admins\ReturnV2Controller@return_v2')->name('return_v2');
+      
     });
     
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
