@@ -274,6 +274,7 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.bags.history.list') }}',
                     data: function (d) {
