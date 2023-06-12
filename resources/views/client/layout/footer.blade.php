@@ -14,7 +14,7 @@
   <!-- END MODERN JS-->
 
 
-@if (isset($ticker))
+@if (isset($ticker) || isset($shipper_return_note_ticker))
   <script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>
 
   <script type="text/javascript">

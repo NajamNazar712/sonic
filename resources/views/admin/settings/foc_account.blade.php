@@ -19,6 +19,7 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
+
                                     <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.foc_account.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
@@ -29,7 +30,6 @@
                                                     @endforeach
                                                 </select>
                                             </div>
-                                            
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
@@ -55,9 +55,7 @@
 
     <script>
         $(document).ready(function() {
-            
 
-            
             $('#shippers_select').select2({
                 placeholder:'Shippers',
                 width:'100%',

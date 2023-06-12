@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ReturnNote extends Model
 {
+    protected $table = 'return_notes';
     protected $fillable = [
         'hub_id','rider_id','route_id','shipments_count','admin_id','updated_by', 'created_via_app', 'status'
     ];

@@ -289,8 +289,9 @@ p.comment {
 }
 
 .marquee3k {
-	margin: 0 15px;
-	padding: 5px 0;
+	/*background-color: lightgreen;*/
+	margin: 15px 15px;
+	padding: 15px 0;
 	overflow: hidden;
 	border-left: 1px solid rgba(107, 111, 130, 0.075);
 	border-right: 1px solid rgba(107, 111, 130, 0.075);

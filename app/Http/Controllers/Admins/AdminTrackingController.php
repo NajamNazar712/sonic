@@ -9,6 +9,7 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBag;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
+use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
 use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
@@ -27,6 +28,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\ShipmentPosition;
 use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use App\Http\Models\City;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -630,8 +632,11 @@ class AdminTrackingController extends Controller
 
     public function quick_tracking_shipment_info(Request $request)
     {
+
         $tracking_no = $request->tracking;
-        if ($tracking_no != null) {
+        $bag_no = $request->bag;
+
+        if ($request->tracking && $tracking_no != null) {
             $shipment = Shipment::where('tracking_number', $tracking_no);
 
             if ($shipment->exists()) {
@@ -694,6 +699,54 @@ class AdminTrackingController extends Controller
             } else {
                 return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
             }
+        }
+        elseif($request->bag && $bag_no != null)
+        {
+
+            $bag = CargoManifestBag::where('seal_number', $bag_no);
+
+            if($bag->exists())
+            {
+                $bag = $bag->first();
+                $details = array();
+                $details['bag_number'] = $bag->seal_number;
+                $details['origin'] = $bag->origin_hub->name;
+                $details['destination'] = $bag->destination_hub->name;
+                $details['bag_status'] = $bag->status->name;
+                $details['bag_type'] = $bag->type;
+                $details['pieces'] = $bag->quantity;
+                $details['number_of_shipments'] = $bag->shipments;
+                $manifest = ManifestBag::where('cargo_manifest_bag_id', $bag->id);
+                if ($manifest !== null)
+                {
+                    if($manifest->exists())
+                    {
+                        $manifest =  $manifest->latest()->first()->id;
+                    }else{
+                        $manifest = '-';
+                    }
+                }else{
+                    $manifest = '-';
+
+                }
+                $details['manifest_id'] = $manifest;
+                $junction = V2Junctions::where('junction_mapping_id', $bag->junction_mapping_id)->get();
+                $details['junction'] = $junction->pluck('city.name')->toArray();
+                $details['bag_created_at'] = Carbon::parse($bag->created_at)->toDateTimeString();
+                $details['bag_status_updated_at'] = Carbon::parse($bag->updated_at)->toDateTimeString();
+                if ($bag->current_hub != null && is_object($bag->current_hub)) {
+                    $bag = $bag->current_hub->name;
+                } else {
+                    $bag = '-';
+                }
+                $details['bag_status_hub'] = $bag;
+                return response()->json(['status' => 1, 'details' => $details]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Bag Number not found']);
+            }
+            
+
         }
     }
 
@@ -888,6 +941,13 @@ class AdminTrackingController extends Controller
                             $details['ccd'] = 1;
                         } else {
                             $details['ccd'] = 0;
+                        }
+
+                        $received_shipments = ReturnSheetShipments::where('shipment_id',$shipment->id);
+                        if($received_shipments->exists()){
+                        $details['received_img'] =  '<img src="' . asset('img/shipement_received.png').' ">';
+                        }else{
+                            $details['received_img'] ="";
                         }
 
                         $shipper = $shipment->user;
@@ -1688,6 +1748,13 @@ class AdminTrackingController extends Controller
                             }
                         }
 
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::with('bag','manifestBag_latest','manifestBag_latest.cargo_manifest','manifestBag_latest.cargo_manifest.fleet.driver')
+                            ->where('shipment_id',$shipment->id);
+
+                        if($cargo_manifest_bag_shipments->exists()){
+                            $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                            $details['manifest_history']  = $cargo_manifest_bag_shipments;
+                        }
 
                         $tracking['shipments'][] = $details;
                     } else {
