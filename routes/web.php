@@ -1243,6 +1243,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
                 Route::get('list', 'Admins\Retail\RetailCashCollectionController@retail_list')->name('list');
+                Route::post('hbl_konnect_cash', 'Admins\Retail\RetailCashCollectionController@hbl_konnect_cash')->name('hbl_konnect_cash');
 
                 Route::prefix('pending')->name('pending.')->group(function () {
                     Route::post('shipments', 'Admins\Retail\RetailCashCollectionController@number_of_shipments')->name('shipments');
@@ -4355,6 +4356,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print', 'Retail\RetailCashDepositController@print')->name('print');
         Route::post('finalize_rncc', 'Retail\RetailCashDepositController@finalize_rncc')->name('finalize_rncc');
+        Route::post('hbl_konnect_cash', 'Retail\RetailCashDepositController@hbl_konnect_cash')->name('hbl_konnect_cash');
     });
 
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {

@@ -47,7 +47,9 @@
                                 <th class="border-primary border-darken-1">Retail Note</th>
                                 <th class="border-primary border-darken-1">Trax/Franchise</th>
                                 <th class="border-primary border-darken-1">Booking Code</th>
-                                <th class="border-primary border-darken-1">Cash</th>
+                                <th class="border-primary border-darken-1">Total</th>
+                                <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                                <th class="border-primary border-darken-1">Remaining/Cash</th>
                                 <th class="border-primary border-darken-1">Booking Date</th>
                                 <th class="border-primary border-darken-1">Status</th>
                             </tr>
@@ -78,6 +80,39 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+    {{-- HBL Konnect Cash  --}}
+    <div class="modal fade" id="hbl_konnect_modal" data-backdrop="static" role="dialog" aria-labelledby="hbl_konnect_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="hbl_konnect_modal_title">Total Transactions</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="hbl_konnect_modal-body text-center">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Amount</th>
+                            <th>Created At</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- HBL Konnect Cash end --}}
 
 @endsection
 @section('css')
@@ -154,7 +189,9 @@
                             head.push('Retail Note');
                             head.push('Trax Center/Franchise');
                             head.push('Booking Code');
-                            head.push('Cash');
+                            head.push('Total');
+                            head.push('KBH Konnect Amount');
+                            head.push('Remaining/Cash');
                             head.push('Booking Date');
                             head.push('Status');
 
@@ -167,6 +204,8 @@
                                 row.push(values.category);
                                 row.push(values.booking_code);
                                 row.push(values.total_cash);
+                                row.push(values.hbl_konnect_cash);//
+                                row.push(values.remaining_cash);//
                                 row.push(values.booking_date);
                                 row.push(values.status);
 
@@ -269,6 +308,8 @@
                     {data: 'category', name: 'retail_cash_deposits.category', class: 'align-middle text-center category'},
                     {data: 'booking_code', name: 'ru.id', class: 'align-middle text-center booking_code'},
                     {data: 'total_cash', name: 'retail_cash_deposits.total_cash', class: 'align-middle text-center total_cash'},
+                    {data: 'hbl_konnect_cash', name: 'retail_cash_deposits.total_cash', class: 'align-middle text-center hbl_konnect_cash'},//
+                    {data: 'remaining_cash', name: 'retail_cash_deposits.total_cash', class: 'align-middle text-center remaining_cash'},//
                     {data: 'booking_date', name: 'retail_cash_deposits.created_at', class: 'align-middle text-center booking_date'},
                     {data: 'status', name: 'retail_cash_deposits.status', class: 'align-middle text-center status'}
                 ],
@@ -293,7 +334,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.destination_arrival')) {
+                        if ($(header).is('.serial_number') || $(header).is('.destination_arrival') || $(header).is('.hbl_konnect_cash')) {
                             $(td).appendTo($(search));
                         } else if ($(header).is('.status')) {
                             $(drop_select).appendTo($(search))
@@ -404,7 +445,39 @@
 
             $('#search_filter_btn').on('click', function(){
                 table.draw(true);
-            })
+            });
+
+            $('#datatable tbody').on('click','tr td.hbl_konnect_cash button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('.hbl_konnect_modal-body table tbody').html('');
+
+                $.ajax({
+                    url: '{!! route('retail.cash_deposit.hbl_konnect_cash') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'retail_note_id': id
+                    }
+                }).done(function (data) {
+                    if (data) {
+                        var html = '';
+                        if (data.status == 1) {
+                            $.each(data.data, function (index, value) {
+                                html += `<tr>
+                                    <td>${value.transaction_id}</td>
+                                          <td>${value.amount}</td>
+                                                <td>${value.created_at}</td>
+
+                                                <tr>`
+
+                            });
+                        }
+                        console.log(html);
+                        $('.hbl_konnect_modal-body table tbody').html(html);
+                        $('#hbl_konnect_modal').modal('show');
+                    }
+                });
+            });
         });
     </script>
 @endsection
