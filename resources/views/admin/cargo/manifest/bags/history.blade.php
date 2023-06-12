@@ -72,16 +72,17 @@
                                     <div class="col-3 mt-1">
 
                                         <select name="search_origin" id="search_origin" class="form-control select2 col-4">
+                                            <option value="">Search origin</option>
                                             @foreach($hubs as $hub)
                                                 <option value="{{$hub->id}}">{{$hub->name}}</option>
                                             @endforeach
                                         </select>
                                     </div>
 
-
                                     <div class="col-3 mt-1">
 
                                         <select name="search_destination" id="search_destination" class="form-control select2 col-4">
+                                            <option value="">Search destination</option>
                                             @foreach($hubs as $hub)
                                                 <option value="{{$hub->id}}">{{$hub->name}}</option>
                                             @endforeach
@@ -96,9 +97,8 @@
                                             </button>
                                         </div>
                                     </div>
+
                                 </form>
-
-
                             </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -491,13 +491,26 @@
 
 
             $('#bag_type_search_form #bag_type').select2({
-                width: '125px',
-                placeholder: 'Bag Type'
-            }).bind('change', function() {
-                table.draw();
+                placeholder: 'bag type search',
+                width: '200px', // Set a fixed width for the text box
+                allowClear: false,
+                closeOnSelect: false,
             });
 
-            $('#tracking_number_search_form').bind('submit', function(e) {
+
+            $('#tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#bag_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+/*           $('#tracking_number_search_form').bind('submit', function(e) {
                 e.preventDefault();
 
                 length = $('#tracking_number_search_form #tracking_number').val().length;
@@ -505,9 +518,9 @@
                 if (length == 0 || length >= 12) {
                     table.draw();
                 }
-            });
+            });*/
 
-            $('#tracking_number_search_form #tracking_number').inputmask({
+           /* $('#tracking_number_search_form #tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -515,9 +528,9 @@
                 if (this.value.length == 0 || this.value.length >= 6) {
                     table.draw();
                 }
-            });
+            });*/
 
-            $('#bag_number_search_form').bind('submit', function(e) {
+           /* $('#bag_number_search_form').bind('submit', function(e) {
                 e.preventDefault();
 
                 table.draw();
@@ -529,21 +542,17 @@
                 'allowPlus': false
             }).bind('input', function() {
                 table.draw();
-            });
+            });*/
 
-            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Origin',
-                allowClear:true
-            }).bind('change', function() {
-                table.draw();
+            $('#search_origin').select2({
+                placeholder:'Search origin',
+                width:'100%',
+                allowClear:false
             });
-            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Destination',
-                allowClear:true
-            }).bind('change', function() {
-                table.draw();
+            $('#search_destination').select2({
+                placeholder:'Search destination',
+                width:'100%',
+                allowClear:false
             });
 
 
@@ -644,7 +653,12 @@
                         }
                     });
             });
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
+
         });
+
         $('#datatable tbody').on('click', '.manifest_id', function () {
             var manifest_id = table.row($(this).parents('tr')).data().manifest_id;
             console.log(manifest_id);
@@ -675,6 +689,5 @@
                     }
                 });
         });
-
     </script>
 @endsection

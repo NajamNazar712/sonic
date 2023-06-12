@@ -1317,7 +1317,6 @@ class AdminCargoManifestController extends Controller
             ->join('transport_modes as tm', 'cargo_manifest_bags.transport_mode_id', '=', 'tm.id')
             ->select('cargo_manifest_bags.id', 'cargo_manifest_bags.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_manifest_bags.shipments', 'tm.name as transport_mode', 'cargo_manifest_bags.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_manifest_bag_shipments` AS `bss` ON `s`.`id` = `bss`.`shipment_id` WHERE `bss`.`cargo_manifest_bag_id` = `cargo_manifest_bags`.`id`) AS `chargeable_weight`'), 'cargo_manifest_bags.actual_weight', 'a.name as transitted_by', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id', 'cargo_manifest_bags.type as bag_type', 'cargo_manifest_bags.seal_number', 'bs.name as status', 'cm.id as manifest_id', 'cargo_manifest_bags.junction_mapping_id as junction_mapping_id', 'cargo_manifest_bags.created_at as transitted_at', 'cm.id as manifest', 'sm.mode as shipping_mode', 'cargo_manifest_bags.short_received_shipments as short_received_shipments', 'cargo_manifest_bags.short_received_shipments as short_received', 'cargo_manifest_bags.lost_shipments as lost_shipments', 'cargo_manifest_bags.lost_shipments as ls', 'cargo_manifest_bags.received_at as received_at');
 
-
         if (session('role_id') != 1) {
             $bags = $bags->where(function ($query) {
                 $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'));
@@ -1394,8 +1393,20 @@ class AdminCargoManifestController extends Controller
                 ->where('s.tracking_number', '=', $tracking_number);
         }
 
-        if ($bag_number = $request->get('bag_number')) {
-            $datatables->where('cargo_manifest_bags.seal_number', '=', $bag_number);
+       if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
+
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
+            $datatables->whereBetween('cargo_manifest_bags.created_at', [$from, $stop_date]);
+        }
+
+        if ($search_origin = $request->get('search_origin')) {
+            $datatables = $datatables->where('oh.id', '=', $search_origin);
+        }
+
+        if ($search_destination = $request->get('search_destination')) {
+            $datatables = $datatables->where('dh.id', '=', $search_destination);
         }
 
         return $datatables->make(true);
