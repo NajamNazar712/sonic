@@ -261,9 +261,9 @@ class AdminPettyCashController extends Controller
                 }
                 PettyCashStatement::where('id', $petty_cash_statement_id)->update(['total_amount' => $total_amount]);
 
-                $shipment_id = $this->create_shipment($petty_cash->id);
-                $petty_cash->shipment_id = $shipment_id;
-                $petty_cash->save();
+                // $shipment_id = $this->create_shipment($petty_cash->id);
+                // $petty_cash->shipment_id = $shipment_id;
+                // $petty_cash->save();
                 return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created', 'print' => $shipment_id]);
 
             } else {
