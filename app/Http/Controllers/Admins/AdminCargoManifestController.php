@@ -1293,7 +1293,9 @@ class AdminCargoManifestController extends Controller
         $transport_mode = TransportMode::all();
         $bag_statuses = CargoManifestBagStatus::all();
         $shipping_mode = ShippingMode::all();
-        return view('admin.cargo.manifest.bags.history')->with(['bag_statuses' => $bag_statuses, 'transport_mode' => $transport_mode, 'shipping_mode' => $shipping_mode]);
+        $hubs = City::where('status','1')->where('business_category_id','1')
+            ->where('hub','1')->select('id','name')->get();
+        return view('admin.cargo.manifest.bags.history')->with(['bag_statuses' => $bag_statuses, 'transport_mode' => $transport_mode, 'shipping_mode' => $shipping_mode,'hubs'=>$hubs]);
     }
 
     public function history_list(Request $request)
