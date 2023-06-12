@@ -1113,6 +1113,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
             Route::post('add_remarks', 'Admins\V2Pickup\V2AdminPickupsController@add_remarks')->name('add_remarks');
             Route::post('all_remarks', 'Admins\V2Pickup\V2AdminPickupsController@all_remarks')->name('all_remarks');
+            
+            Route::get('add_pickup_request', 'Admins\V2Pickup\V2AdminPickupsController@add_pickup_request')->name('add_pickup_request');
+            Route::get('get_shipper_cities', 'Admins\V2Pickup\V2AdminPickupsController@get_shipper_cities')->name('get_shipper_cities');
+            Route::get('get_pickup_address', 'Admins\V2Pickup\V2AdminPickupsController@get_pickup_address')->name('get_pickup_address');
+            Route::get('history_pickup_request', 'Admins\V2Pickup\V2AdminPickupsController@history_pickup_request')->name('history_pickup_request');
         });
         // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {

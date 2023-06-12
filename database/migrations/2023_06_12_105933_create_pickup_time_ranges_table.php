@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateV3PickupRequestShipmentsTable extends Migration
+class CreatePickupTimeRangesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateV3PickupRequestShipmentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('v3_pickup_request_shipments', function (Blueprint $table) {
+        Schema::create('pickup_time_ranges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('pickup_request_id');
-            $table->integer('shipment_id');
-            $table->tinyInteger('status')->default(0);
+            $table->time('start_time');
+            $table->time('end_time');
+            $table->integer('status')->default(1)->index();
             $table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ class CreateV3PickupRequestShipmentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('v3_pickup_request_shipments');
+        Schema::dropIfExists('pickup_time_ranges');
     }
 }

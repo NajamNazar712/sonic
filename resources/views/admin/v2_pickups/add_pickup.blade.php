@@ -1,4 +1,4 @@
-@extends('client.layout.master')
+@extends('admin.layout.master')
 @section('title', 'Pickup Request')
 @section('content')
     <div class="app-content content">
@@ -39,11 +39,21 @@
                                 <div class="d-flex justify-content-center align-items-center vh-100">
                                     <div class="col-6">
                                         <div class="form-group">
+                                            <select name="shippers" id="shippers" class="form-control select2" required
+                                                data-rule-required="true" data-msg-required="Shippers is Required">
+                                                <option value=""> Select Shippers </option>
+                                                @foreach ($shippers as $shipper)
+                                                    <option value="{{ $shipper->id }}"> {{ $shipper->name }} </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-6">
+                                        <div class="form-group">
                                             <select name="cities" id="cities" class="form-control select2" required
                                                 data-rule-required="true" data-msg-required="City is Required">
-                                                @foreach ($cities as $city)
-                                                    <option value="{{ $city->id }}"> {{ $city->name }} </option>
-                                                @endforeach
                                             </select>
                                         </div>
                                     </div>
@@ -177,12 +187,53 @@
             allowClear: true,
             containerCssClass: 'text-center'
         });
-        $('#search_area').append('<option value="">Select Area</option>').select2({
-                width: '100%',
-                placeholder: 'Select Area',
-                allowClear: true,
-                containerCssClass: 'text-center'
+    $('#search_area').append('<option value="">Select Area</option>').select2({
+            width: '100%',
+            placeholder: 'Select Area',
+            allowClear: true,
+            containerCssClass: 'text-center'
+        });
+        $('#shippers').append('<option value="">Select Shippers</option>').select2({
+            width: '100%',
+            placeholder: 'Select Shippers',
+            allowClear: true,
+            containerCssClass: 'text-center'
+        });
+        $('#shippers').append('<option value="">Select Shippers</option>').select2({
+            width: '100%',
+            placeholder: 'Select Shippers',
+            allowClear: true,
+            containerCssClass: 'text-center'
+        }).bind('change', function() {;
+        var shipperId = $(this).val();
+        // alert(shipperId);
+        $('#cities').empty();
+        $('#cities').append('<option value="">Select Cities</option>').select2({
+            width: '100%',
+            placeholder: 'Select Cities',
+            allowClear: true,
+            containerCssClass: 'text-center'
+        });
+        $('#cities').prop('disabled', false);
+        if (shipperId) {
+        $.ajax({
+            url: '{{ route('admin.v2_pickups.pending.get_shipper_cities') }}',
+            type: 'GET',
+            data: {
+                shipperId: shipperId
+            },
+            dataType: 'json',
+            success: function(response) {
+            $.each(response, function(index, cities) {
+                $('#cities').append('<option value="' + cities.id + '">' + cities.name + '</option>');
             });
+            },
+            error: function(xhr, status, error) {
+            console.error(error);
+            }
+        });
+        }
+        });
         $('#cities').prepend('<option value="" selected="selected"></option>').select2({
             width: '100%',
             placeholder: 'Select Cities',
@@ -201,7 +252,7 @@
         $('#search_area').prop('disabled', false);
         if (cityId) {
         $.ajax({
-            url: '{{ route('cod.pickup.get_pickup_address') }}',
+            url: '{{ route('admin.v2_pickups.pending.get_pickup_address') }}',
             type: 'GET',
             data: {
             city_id: cityId

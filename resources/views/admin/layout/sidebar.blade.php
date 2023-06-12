@@ -262,6 +262,14 @@ $roles = explode("," , $settings->text);
                                     {{--                                        @endif --}}
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item"
+                                                href="{{ route('admin.v2_pickups.pending.add_pickup_request') }}">Add Pickup Request</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.v2_pickups.pending.history_pickup_request') }}">Pickup History Request</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                        <li><a class="menu-item"
                                                 href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))

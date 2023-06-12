@@ -375,7 +375,7 @@ class ShipperPickupController extends Controller
     public function get_pickup_address(Request $request)
     {
         $cityId = $request->input('city_id');
-        $areas = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
-        return response()->json($areas);
+        $pickup_address = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
+        return response()->json($pickup_address);
     }
 }
