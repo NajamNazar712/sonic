@@ -69,6 +69,7 @@ class AutoAssignCrmAgentNew extends Command
                         'dc.id as hub_id',
                         's.shipper_status_id as shipment_status_id',
                         'shipper.segment_id as business_segment_id',
+                        'shipper.sub_segment_id as sub_segment_id',
                         'shipper_key.user_id as shipper_key_id',
                         'shipper_non_key.user_id as shipper_non_key_id'
                     )
@@ -78,7 +79,7 @@ class AutoAssignCrmAgentNew extends Command
                     $crm_requests = $crm_requests->get();
                     foreach ($crm_requests as $value) {
 
-                        $crm_agent = CrmAgentAutoAssign::with('zones', 'hubs', 'case_natures', 'case_nature_types', 'business_types', 'shipper_keys', 'shipper_non_keys', 'shipment_statuses')
+                        $crm_agent =  CrmAgentAutoAssign::with('zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
                             ->select([
                                 'crm_agent_auto_assigns.id',
                                 'crm_agent_auto_assigns.agent_id',
@@ -109,6 +110,11 @@ class AutoAssignCrmAgentNew extends Command
                                 if (!empty($value->business_segment_id)) {
                                     $query->orWhereHas('business_types', function ($query) use ($value) {
                                         $query->where('business_segment_id', $value->business_segment_id);
+                                    });
+                                }
+                                if (!empty($value->sub_segment_id)) {
+                                    $query->orWhereHas('sub_business_types', function ($query) use ($value) {
+                                        $query->where('sub_segment_id', $value->sub_segment_id);
                                     });
                                 }
                                 if (!empty($value->shipper_key_id)) {

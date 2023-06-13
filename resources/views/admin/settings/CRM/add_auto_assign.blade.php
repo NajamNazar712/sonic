@@ -89,29 +89,8 @@
                                         </div>
                                     </div>
 
-
                                     <div class="row">
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Shipper Key</label>
-                                                <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($shipper_key as $cn)
-                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Shipper Non Key</label>
-                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($shipper_non_key as $cn)
-                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="form-group">
                                                 <label>Segments</label>
                                                 <select name="business_segment_id[]" id="business_segment_id" class="form-control select2" multiple="multiple"  >
@@ -121,6 +100,37 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Sub Segments</label>
+                                                <select name="sub_business_segment_id[]" disabled id="sub_business_segment_id" class="form-control select2" multiple="multiple"  >
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Shipper Key</label>
+                                                <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
+                                                    @foreach($shipper_key as $cn)
+                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Shipper Non Key</label>
+                                                <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
+                                                    @foreach($shipper_non_key as $cn)
+                                                        <option value="{{ $cn->id }}" > {{ $cn->name }} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+
                                     </div>
 
                                 <div class="text-right">
@@ -265,6 +275,33 @@
             $('#business_segment_id').select2({
                 width:'100%',
                 placeholder:"Select Segments",
+                allowClear:false,
+                dropdownParent:$('#crm_agent_assign')
+            }).bind('change', function() {
+                var business_segment_id = $(this).val();
+                $('#sub_business_segment_id').attr('disabled','disabled');
+                $('#sub_business_segment_id').empty();
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_sub_segments") !!}',
+                    method: 'POST',
+                    data: {
+                        'business_segment_id': business_segment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#sub_business_segment_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.sub_segment, function(index, field) {
+                            options+=`<option value='${field.id}' >${field.name}<option>`;
+                        });
+                        $('#sub_business_segment_id').append(options);
+                    }
+                })
+            });
+            $('#sub_business_segment_id').select2({
+                width:'100%',
+                placeholder:"Select Sub Segments",
                 allowClear:false,
                 dropdownParent:$('#crm_agent_assign')
             }).bind('change', function() {

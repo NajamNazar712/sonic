@@ -33,6 +33,7 @@
                                     <th class="border-primary border-darken-1" style="width: 150px" >Case Nature</th>
                                     <th class="border-primary border-darken-1" style="width: 200px" >Case Nature Type</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Bus Segments</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Sub Segments</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Shipper Key</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Shipper Non Key</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Shipment Status</th>
@@ -198,7 +199,7 @@
                 },
                 ajax: '{{ route('admin.settings.auto_assigning.list') }}',
                 rowId: 'id',
-                order: [[11, 'desc']],
+                order: [[12, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
@@ -207,6 +208,7 @@
                     {data: 'case_nature', name: 'case_nature', class: 'align-middle case_nature', orderable: false, searchable: false,},
                     {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type', orderable: false, searchable: false,},
                     {data: 'business_segment', name: 'business_segment', class: 'align-middle business_segment', orderable: false, searchable: false,},
+                    {data: 'sub_business_segment', name: 'sub_business_segment', class: 'align-middle sub_business_segment', orderable: false, searchable: false,},
                     {data: 'shipper_key', name: 'shipper_key', class: 'align-middle shipper_key', orderable: false, searchable: false,},
                     {data: 'shipper_non_key', name: 'shipper_non_key', class: 'align-middle shipper_non_key', orderable: false, searchable: false,},
                     {data: 'shipment_status', name: 'shipment_status', class: 'align-middle shipment_status', orderable: false, searchable: false,},
@@ -236,7 +238,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')|| $(header).is('.zone')|| $(header).is('.hub')|| $(header).is('.case_nature_type')|| $(header).is('.business_segment')|| $(header).is('.shipper_key')|| $(header).is('.shipper_non_key')|| $(header).is('.shipment_status')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action') || $(header).is('.case_nature')|| $(header).is('.zone')|| $(header).is('.hub')|| $(header).is('.case_nature_type')|| $(header).is('.business_segment')|| $(header).is('.shipper_key')|| $(header).is('.shipper_non_key')|| $(header).is('.shipment_status') || $(header).is('.sub_business_segment')) {
                             $(td).appendTo($(search));
                         }
                         else if($(header).is('.department')){

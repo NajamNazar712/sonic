@@ -21,6 +21,9 @@ class CrmAgentAutoAssign extends Model
     public function business_types() {
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignBusSeg', 'agent_id', 'agent_id');
     }
+    public function sub_business_types() {
+        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignSubSegment', 'agent_id', 'agent_id');
+    }
     public function shipper_keys() {
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignShipper', 'agent_id', 'agent_id');
     }

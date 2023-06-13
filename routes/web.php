@@ -3144,7 +3144,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('case_nature_type', 'Admins\GlobalSettingsController@case_nature_type')->name('case_nature_type');
             Route::get('add', 'Admins\GlobalSettingsController@add_auto_assign_agent')->name('add');
             Route::get('global_status', 'Admins\GlobalSettingsController@global_status')->name('global_status');
-
+            Route::post('get_sub_segments', 'Admins\GlobalSettingsController@get_sub_segments')->name('get_sub_segments');
         });
 
         Route::prefix('auto_tagging')->name('auto_tagging.')->group(function () {

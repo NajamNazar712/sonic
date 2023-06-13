@@ -17,23 +17,22 @@
                             @include('admin.inc.messages')
                             <form method="post" id="crm_agent_assign" action="{{route('admin.settings.auto_assigning.submit')}}">
                                 @csrf
+                                <input type="hidden" name="status" value="{{$selected_agent->status}}">
                                 <div class="row">
                                     <div class="col-6">
                                         <div class="form-group">
                                             <label>Agent*</label>
-                                            
                                             <select name="admin_id" id="agent_id" class="form-control select2" required data-rule-required="true" data-msg-required="Agent is required" disabled>
                                                 @foreach($agents as $agent)
-                                                <option value="{{ $agent->id }}" >
-                                                    {{ $agent->name }}
-                                                </option>                                                   
+                                                <option value="{{ $agent->id }}" >{{ $agent->name }}
+                                                </option>
                                                 @endforeach
                                                 </select>
                                                 <input type="hidden" name="id" value="{{ $selected_agent->agent_id }}" />
                                             </div>
                                         </div>
-                                        @php  $ss  = $selected_agent->shipment_statuses->pluck('shipment_status_id')->toArray();  @endphp
                                         <div class="col-6">
+                                            @php  $ss  = $selected_agent->shipment_statuses->pluck('shipment_status_id')->toArray();  @endphp
                                             <div class="form-group">
                                                 <label>Shipment Status</label>
                                                 <select name="shipment_status_id[]" id="shipment_status_id" class="form-control select2" multiple="multiple" >
@@ -61,10 +60,6 @@
                                                 </select>
                                             </div>
                                         </div>
-
-
-                                        
-
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Hub</label>
@@ -92,8 +87,6 @@
                                                 </select>
                                             </div>
                                         </div>
-
-
                                         <div class="col-6">
                                             <div class="form-group">
                                                 <label>Case Nature Type</label>
@@ -106,11 +99,36 @@
                                             </div>
                                         </div>
                                     </div>
+
+                                    @php  $bsk  = $selected_agent->business_types->pluck('business_segment_id')->toArray(); @endphp
+
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Segments</label>
+                                                <select name="business_segment_id[]" id="business_segment_id" class="form-control select2" multiple="multiple"  >
+                                                    @foreach($segments as $sg)
+                                                        <option value="{{ $sg->id }}" {{ in_array($sg->id, $bsk)  ? 'selected' : '' }}> {{ $sg->name }} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <div class="form-group">
+                                                <label>Sub Segments</label>
+                                                <select name="sub_business_segment_id[]" disabled id="sub_business_segment_id" class="form-control select2" multiple="multiple"  >
+                                                    @foreach($sub_segment as $ss)
+                                                        <option value="{{ $ss->id }}" > {{ $ss->name }} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
                                     @php  $sk  = $selected_agent->shipper_keys->pluck('shipper_key_id')->toArray(); @endphp
 
                                     <div class="row">
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper Key</label>
                                                 <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
@@ -123,7 +141,7 @@
 
                                         @php  $snk  = $selected_agent->shipper_non_keys->pluck('shipper_non_key_id')->toArray(); @endphp
 
-                                        <div class="col-4">
+                                        <div class="col-6">
                                             <div class="form-group">
                                                 <label>Shipper Non Key</label>
                                                 <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
@@ -131,19 +149,6 @@
                                                     <option value="{{ $cn->id }}" {{ in_array($cn->id, $snk)  ? 'selected' : '' }}>
                                                         {{ $cn->name }}
                                                     </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-
-                                        @php  $bsk  = $selected_agent->business_types->pluck('business_segment_id')->toArray(); @endphp
-
-                                        <div class="col-4">
-                                            <div class="form-group">
-                                                <label>Segments</label>
-                                                <select name="business_segment_id[]" id="business_segment_id" class="form-control select2" multiple="multiple"  >
-                                                    @foreach($segments as $sg)
-                                                        <option value="{{ $sg->id }}" {{ in_array($sg->id, $bsk)  ? 'selected' : '' }}> {{ $sg->name }} </option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -188,8 +193,12 @@
             let case_nature = $('#case_nature_id').val();
             getCaseNatureType(case_nature);
 
+            var bsi = $('#business_segment_id').val();
+            get_business_segment(bsi);
+
             var hb = @jSON($selected_agent->hubs->pluck('hub_id')->toArray());
             var cnt = @jSON($selected_agent->case_nature_types->pluck('case_nature_type_id')->toArray());
+            var sbs = @jSON($selected_agent->sub_business_types->pluck('sub_segment_id')->toArray());
 
             function getHubs(zone) {
                 $('#hub_id').attr('disabled','disabled');
@@ -239,6 +248,32 @@
                     }
                 })
             }
+
+            function get_business_segment(business_segment_id){
+                $('#sub_business_segment_id').attr('disabled','disabled');
+                $('#sub_business_segment_id').empty();
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_assigning.get_sub_segments") !!}',
+                    method: 'POST',
+                    data: {
+                        'business_segment_id': business_segment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        $('#sub_business_segment_id').removeAttr('disabled');
+                        let options = "";
+                        $.each(data.sub_segment, function(index, field) {
+                            let selected = (sbs.includes(field.id)) ? 'selected' : '';
+                            options+=`<option value='${field.id}' ${selected}>${field.name}<option>`;
+                        });
+                        $('#sub_business_segment_id').append(options);
+                    }
+                })
+            }
+
+
+
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 // $("agent_id").select2('val', '')
@@ -317,9 +352,20 @@
             }).bind('change', function() {
 
             });
+
             $('#business_segment_id').select2({
                 width:'100%',
                 placeholder:"Select Segments",
+                allowClear:false,
+                dropdownParent:$('#crm_agent_assign')
+            }).bind('change', function() {
+                var business_segment_id = $(this).val();
+                get_business_segment(business_segment_id);
+            });
+
+            $('#sub_business_segment_id').select2({
+                width:'100%',
+                placeholder:"Select Sub Segments",
                 allowClear:false,
                 dropdownParent:$('#crm_agent_assign')
             }).bind('change', function() {
