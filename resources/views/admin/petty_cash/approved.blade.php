@@ -63,7 +63,6 @@
                         <th class="border-primary border-darken-1">Finance Approved By</th>
                         <th class="border-primary border-darken-1">Finance Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">SDN Update Log</th>
                         <th class="border-primary border-darken-1"></th>
 
@@ -192,7 +191,7 @@
                             head.push('Finance Approved By');
                             head.push('Finance Approved At');
                             head.push('Status');
-                            head.push('Tracking Number');
+            
 
 
                             $.each(result.data, function(index, values) {
@@ -216,7 +215,7 @@
                                 row.push(values.finance_approved_by);
                                 row.push(values.finance_approved_at);
                                 row.push(values.status);
-                                row.push(values.tracking_number);
+                             
 
                                 body.push(row);
                             });
@@ -395,7 +394,6 @@
                     {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
                     {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'sdn_update_logs', name: '', class: 'text-center align-middle sdn_update_logs', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
