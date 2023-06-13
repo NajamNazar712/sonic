@@ -9385,9 +9385,15 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
-                    
-                    if (session('role_id') == 1 || in_array(session('id'), in_array(873, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
+
+                    $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+                    if($shippers){
+                        $shippers = explode(',', $shippers->text);
+                        
+                        if(in_array($result->id,$shippers))
+                        {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
+                        }
                     }
 
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';

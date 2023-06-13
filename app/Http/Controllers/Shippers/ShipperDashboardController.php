@@ -116,6 +116,7 @@ use App\Http\Models\Admin\PODImage;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\Admin\GlobalSettings;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -137,7 +138,11 @@ class ShipperDashboardController extends Controller
         $sales_person_data = array();
         if($shipper_id){
 
-            if(session('special_dashboard_user'))
+            $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+            $special_shippers = explode(',', $shippers->text);
+       
+
+            if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
                 $stats = array();
                 $today = Carbon::now()->endOfDay();
