@@ -227,6 +227,10 @@
 {{--                                    </div>--}}
                                     <div class="col mt-1">
                                         <div class="form-group">
+                                            <label>New Discount</label>
+                                            <input type="text" name="new_discount" id="new_discount" class="form-control form-control-sm" placeholder="New Discount">
+                                        </div>
+                                        <div class="form-group">
                                             <label>Charges</label>
                                             <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
                                         </div>
@@ -1098,7 +1102,6 @@
                     destination = $('#international_destination').val();
                 }
 
-                
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
                  length = $('#length').val();
@@ -1106,7 +1109,7 @@
                  height = $('#height').val();
                  insurance = $('#insurance_amount').val();
                  packaging = $('#packaging_amount').val();
-
+                var new_discount = $('#new_discount').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1148,6 +1151,7 @@
                             'insurance_amount': insurance,
                             'packaging_amount': packaging,
                             'height': height,
+                            'new_discount': new_discount,
                             '_token': '{{ csrf_token() }}'
                         }
                     })

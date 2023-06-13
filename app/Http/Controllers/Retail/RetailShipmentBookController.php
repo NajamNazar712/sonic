@@ -218,7 +218,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-
+//dd($request->all());
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -296,7 +296,14 @@ class RetailShipmentBookController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
-       
+        $rates1 = $rates;
+
+        if ($request->filled('new_discount') && $request->new_discount > 0) {
+            $rates['total_charges'] = $rates['total_charges'] - $request->new_discount;
+        }
+
+       dd($rates1,$rates);
+       die();
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
         }
@@ -452,6 +459,7 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
+        //$retail_shipment->new_discount = $request->new_discount;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
@@ -521,6 +529,11 @@ class RetailShipmentBookController extends Controller
         }
 
         $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
+
+        if ($request->filled('new_discount') && $request->new_discount > 0) {
+            $details['total_charges'] = $details['total_charges'] - $request->new_discount;
+        }
+
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
