@@ -321,7 +321,7 @@
                             head.push('Intercept');
                             head.push('On Hold for Self Collection');
                             head.push('Pending');
-                            head.push('Already Updated By Other Users');
+                            head.push('Already Updated');
                             head.push('Agent Category');
                             head.push('Unresponsive Return');
                             
