@@ -150,6 +150,9 @@
 						<th class="border-primary border-darken-1">Adjustments</th>
 						<th class="border-primary border-darken-1">Received Amount</th>
 						<th class="border-primary border-darken-1">Tax Amount</th>
+						<th class="border-primary border-darken-1">Sales Tax Withheld</th>
+						<th class="border-primary border-darken-1">Income Tax Withhold</th>
+						<th class="border-primary border-darken-1">Other deductions</th>
 						<th class="border-primary border-darken-1">Payment Type</th>
 						<th class="border-primary border-darken-1"></th>
 						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
@@ -555,6 +558,9 @@
 									head.push('Deposit Date');
 									head.push('Received Amount');
 									head.push('Tax Amount');
+									head.push('Sales Tax Withheld');
+									head.push('Income Tax Withhold');
+									head.push('Other deductions');
 									head.push('Payment Type');
 
 
@@ -585,6 +591,9 @@
 										row.push(values.deposit_date);
 										row.push(values.received_amount);
 										row.push(values.tax_amount);
+										row.push(values.sales_tax_withheld);
+										row.push(values.income_tax_withhold);
+										row.push(values.other_deductions);
 										row.push(values.payment_type);
 
 										body.push(row);
@@ -787,6 +796,9 @@
 							{data:'invoice_adjustment', name: 'invoice_adjustment', class: 'align-middle text-center invoice_adjustment', orderable: false, searchable: false},
 							{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
 							{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+							{data:'sales_tax_withheld', name: 'sales_tax_withheld', class: 'align-middle text-center sales_tax_withheld'},
+							{data:'income_tax_withhold', name: 'income_tax_withhold', class: 'align-middle text-center income_tax_withhold'},
+							{data:'other_deductions', name: 'other_deductions', class: 'align-middle text-center other_deductions'},
 							{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
 							{data:'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 						],
