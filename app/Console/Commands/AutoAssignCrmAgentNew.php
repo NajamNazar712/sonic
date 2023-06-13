@@ -168,38 +168,40 @@ class AutoAssignCrmAgentNew extends Command
 
                             });
                             $agents = $modifies_data->pluck('agent_id')->toArray();
-                            $agent_log = CrmAgentAutoLog::whereIn('agent_id', $agents)->orderBy('assinged_requests', 'asc');
-                            $current_agent = $agent_log->pluck('agent_id')->toArray();
+                            if(count($agents) > 0) {
+                                $agent_log = CrmAgentAutoLog::whereIn('agent_id', $agents)->orderBy('assinged_requests', 'asc');
+                                $current_agent = $agent_log->pluck('agent_id')->toArray();
 
-                            $difference = collect(array_diff($agents, $current_agent));
-                            if (count($difference) == 0) {
-                                if ($agent_log->exists()) {
-                                    $agent_log = $agent_log->first();
-                                    $agent_log->assinged_requests = $agent_log->assinged_requests + 1;
-                                    $agent_log->assigned_date = Carbon::today()->toDateString();
-                                    $agent_log->save();
+                                $difference = collect(array_diff($agents, $current_agent));
+                                if (count($difference) == 0) {
+                                    if ($agent_log->exists()) {
+                                        $agent_log = $agent_log->first();
+                                        $agent_log->assinged_requests = $agent_log->assinged_requests + 1;
+                                        $agent_log->assigned_date = Carbon::today()->toDateString();
+                                        $agent_log->save();
 
+                                    } else {
+                                        $agent_log = new CrmAgentAutoLog();
+                                        $agent_log->agent_id = $agents[0];
+                                        $agent_log->assinged_requests = 1;
+                                        $agent_log->assigned_date = Carbon::today()->toDateString();
+                                        $agent_log->save();
+                                    }
                                 } else {
                                     $agent_log = new CrmAgentAutoLog();
-                                    $agent_log->agent_id = $agents[0];
+                                    $agent_log->agent_id = $difference->first();
                                     $agent_log->assinged_requests = 1;
                                     $agent_log->assigned_date = Carbon::today()->toDateString();
                                     $agent_log->save();
                                 }
-                            } else {
-                                $agent_log = new CrmAgentAutoLog();
-                                $agent_log->agent_id = $difference->first();
-                                $agent_log->assinged_requests = 1;
-                                $agent_log->assigned_date = Carbon::today()->toDateString();
-                                $agent_log->save();
-                            }
 
-                            CrmRequestAgentHistory::create([
-                                'crm_request_id' => $value->id,
-                                'agent_id' => $agent_log->agent_id
-                            ]);
-                            $value->agent_id = $agent_log->agent_id;
-                            $value->save();
+                                CrmRequestAgentHistory::create([
+                                    'crm_request_id' => $value->id,
+                                    'agent_id' => $agent_log->agent_id
+                                ]);
+                                $value->agent_id = $agent_log->agent_id;
+                                $value->save();
+                            }
 
                         }
 
