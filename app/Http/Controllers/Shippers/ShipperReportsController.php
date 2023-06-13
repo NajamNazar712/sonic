@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
@@ -1192,8 +1193,8 @@ class ShipperReportsController extends Controller
     }
 
     public function mms_index()
-    {
-        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946, 14110, 19507, 14781])) {
+    {   
+        if (in_array(session('user_id'), session('mms_shippers'))) {
             $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
@@ -1207,7 +1208,8 @@ class ShipperReportsController extends Controller
     }
     public function mms_list(Request $request)
     {
-        if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946, 14110, 19507, 14781])) {
+
+        if (in_array(session('user_id'), session('mms_shippers'))) {
             $connection = 'reports';
             $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
             $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');

@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'FOC Account')
+@section('title', 'MMS Setting')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    FOC Account
+                    MMS Report Setting
                 </h1>
 
                 <div class="card">
@@ -19,22 +19,23 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-6">
-
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.foc_account.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" novalidate="novalidate" action="{{ route('admin.settings.mms_report.store') }}">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
-                                                    @foreach($shippers as $shipper)
-                                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                <select name="users[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
+                                                    @foreach($users as $user)
+                                                        <option value="{{$user->id}}">{{$user->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
                                         </div>
                                         <button type="submit" class="btn btn-primary">Update</button>
                                     </form>
+
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -57,7 +58,7 @@
         $(document).ready(function() {
 
             $('#shippers_select').select2({
-                placeholder:'Shippers',
+                placeholder:'Users',
                 width:'100%',
                 allowClear:true
             }).bind('select2:select', function () {
@@ -68,14 +69,14 @@
             });
 
             $('#shippers_select').on('select2:unselect', function () {
-               if($(this).val().length == 0){
-                   $('#settings_form').find('button[type=submit]').prop('disabled', true);
-               }
+                if($(this).val().length == 0){
+                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
+                }
             });
 
-            @if(count($foc_account_tags) > 0)
-                var ids = @json($foc_account_tags);
-                $('#shippers_select').val(ids).trigger('change');
+            @if(count($mms_setting_tags) > 0)
+            var ids = @json($mms_setting_tags);
+            $('#shippers_select').val(ids).trigger('change');
             @endif
 
             $('#settings_form').validate({
@@ -88,7 +89,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select Yes to update Shippers.',
                         icon: 'warning',
                         buttons: {
                             cancel: {

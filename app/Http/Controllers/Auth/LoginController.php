@@ -342,6 +342,16 @@ class LoginController extends Controller
                 session(['nps_survey' => $nps->id]);
             }
         }
+
+        $mms_shippers = array();
+        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
+        if ($setting) {
+            $mms_shippers = array_map('intval',explode(',' , $setting->text));
+          
+        }
+
+        session(['mms_shippers' => $mms_shippers]);
+
         return redirect()->route('cod.welcome');
     }
 

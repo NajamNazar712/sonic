@@ -159,9 +159,8 @@
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @endif
-
-                        @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]) && !session('special_dashboard_user'))
-                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
+                        @if (in_array(session('user_id'), session('mms_shippers')))
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
                         @endif
 
                         @if (session('special_dashboard_user'))
