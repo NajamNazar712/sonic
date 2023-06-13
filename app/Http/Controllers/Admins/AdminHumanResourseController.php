@@ -244,6 +244,9 @@ class AdminHumanResourseController extends Controller
                         } elseif ($employee->staff_category_id == 2) {
                             $global_setting = GlobalSettings::where('type', 'latest_intern_id');
                             $trax_id_prefix = 'Trax-I-';
+                        } elseif ($employee->staff_category_id == 3) {
+                            $global_setting = GlobalSettings::where('type', 'latest_contractual_id');
+                            $trax_id_prefix = 'Trax-C-';
                         } else {
                             return redirect()->back()->with('error', 'Invalid Staff Category');
                         }
@@ -1104,6 +1107,9 @@ class AdminHumanResourseController extends Controller
                             } elseif ($employee->staff_category_id == 2) {
                                 $global_setting = GlobalSettings::where('type', 'latest_intern_id');
                                 $trax_id_prefix = 'Trax-I-';
+                            } elseif ($employee->staff_category_id == 3) {
+                                $global_setting = GlobalSettings::where('type', 'latest_contractual_id');
+                                $trax_id_prefix = 'Trax-C-';
                             } else {
                                 return response()->json(['status' => 1, 'error' => 'Invalid Staff Category']);
                             }
@@ -1125,6 +1131,10 @@ class AdminHumanResourseController extends Controller
 
                     }
                     $employee->request_status_id = 3;
+                    if($employee->staff_category_id == 3){
+                        $employee->status_id = 3; // Set "Active No info" when contractual
+                        $employee->employee_type_id = 2; //Set probation intially
+                    }
                     $employee->save();
 
                     if ($employee->employee_type_id == 1) {
