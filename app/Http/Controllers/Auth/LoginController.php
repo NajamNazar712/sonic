@@ -318,6 +318,15 @@ class LoginController extends Controller
             }
         }
 
+        $mms_shippers = array();
+        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
+        if ($setting) {
+            $setting = explode(',', $setting->text);
+            $mms_shippers = User::whereIn('id', $setting)->pluck('id')->toArray();  
+        }
+
+        session(['mms_shippers' => $mms_shippers]);
+
         return redirect()->route('cod.welcome');
     }
 
