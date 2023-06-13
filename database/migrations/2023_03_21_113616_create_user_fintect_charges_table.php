@@ -17,7 +17,7 @@ class CreateUserFintectChargesTable extends Migration
             $table->increments('id');
             $table->Integer('user_id');
             $table->Integer('status')->default('1');
-            $table->string('fintech_charges');
+            $table->decimal('fintech_charges', 8, 2);
             $table->Integer('added_by');
             $table->Integer('updated_by');
             $table->timestamps();

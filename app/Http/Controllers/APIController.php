@@ -6968,7 +6968,7 @@ class APIController extends Controller
       ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
       ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
       ->where('trax_pay_transactions.link',$req->link)
-      ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id',
+      ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id','shipments.tracking_number as tracking_id',
                 'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
                 'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
 
@@ -6978,12 +6978,12 @@ class APIController extends Controller
         $delivery_note_id = $shipments->delivery_note_id;
         $shipment_id      = $shipments->shipment_id;
         $trax_pay_id      = $shipments->trax_transaction_id;
+        $tracking_no      = $shipments->tracking_id;
 
-        $userFintechCharges = UserFintectCharges::where('user_id',$user_id);
+        $userFintechCharges       = UserFintectCharges::where('user_id',$user_id)->where('status','1');
         $standard_fintech_charges = new standard_fintech_charges();
-        $standard = $standard_fintech_charges->first();     
-
-        $fed_percentage    = $standard->standard_fed_charges;  //FED Pecentage
+        $standard                 = $standard_fintech_charges->first();     
+        $fed_percentage           = $standard->standard_fed_charges;  //FED Pecentage
 
         if($userFintechCharges->exists()){
             $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges user
@@ -6996,11 +6996,10 @@ class APIController extends Controller
         ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
         ->first(); // select range of fintech company
         
-
         //Find Fintech Charges
         if($select_range->charges_is_percentage == 1){
             $company_chages = ($select_range->charges) / 100; // company charges
-            $total_company_charges = round($company_chages * $cod_Amount);
+            $total_company_charges = number_format($company_chages * $cod_Amount,2);
         }
         else{
             $total_company_charges = $select_range->charges; // company charges
@@ -7009,10 +7008,10 @@ class APIController extends Controller
         // Find FED 
         if($select_range->fed_tax_is_percentage == 1){
             $company_fed       = ($select_range->fed_tax) / 100; // company Fed
-            $total_company_fed = round($company_fed * $total_company_charges);
+            $total_company_fed = number_format($company_fed * $total_company_charges,2);
         }
         else{
-             $total_company_fed      = $select_range->fed_tax; // company Fed
+             $total_company_fed = $select_range->fed_tax; // company Fed
         }
 
         //Find Addition Charges
@@ -7020,7 +7019,7 @@ class APIController extends Controller
         if(!empty($select_range->additional_charges)){
             if($select_range->additional_charges_is_percentage == 1){
                 $company_additional_charges   = ($select_range->additional_charges) / 100; // company Fed
-                $additional_charges = round($company_additional_charges * $total_company_charges);
+                $additional_charges = number_format($company_additional_charges * $total_company_charges,2);
             }
             else{
                 $additional_charges = $select_range->additional_charges; // company Fed
@@ -7032,8 +7031,8 @@ class APIController extends Controller
         $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges; // total company charges 
 
         function calculatepercentage($total_amount,$charges,$fed){
-            $percentage = round(($total_amount / 100) * $charges) ; 
-            $tax = round(($percentage / 100)*$fed);
+            $percentage = number_format(($total_amount / 100) * $charges,2) ; 
+            $tax = number_format(($percentage / 100)*$fed,2);
             $total = $tax + $percentage;
             return  [$total,$tax];
         }
@@ -7081,10 +7080,11 @@ class APIController extends Controller
         NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
         NotificationsController::send(217, $shipments->rider, $trax_pay_id);
 
-        return response()->json([
+        return response()->json(
         [
-            'status' => 0, 
-            'message' => 'Successful Bill Payment']
-        ]);
+            'status'      => 200, 
+            'tracking_id' => $tracking_no
+        ]
+        );
     }
 }

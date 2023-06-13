@@ -2730,7 +2730,7 @@ function checkboxStatus() {
 
     function inputValidate() {
     $('#Save_fintech_charges input.fuel_factor').inputmask({
-        'alias': 'integer',
+       
         'allowMinus': true,
         'allowPlus': false,
         'max':100
@@ -2739,7 +2739,7 @@ function checkboxStatus() {
     $("input.input-filtered").on("input", function() {
         if (this.value === "" || this.value !== oldValue) {
             oldValue = this.value;
-            this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9.%]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
+            this.value = this.value.replace(/^\D+/g, '').replace(/[^0-9.%.]/g, '').replace(/(\..*)\./g, '$1').replace(/(\d+)(%.*)$/g, '$1%');
         }
     });
 }

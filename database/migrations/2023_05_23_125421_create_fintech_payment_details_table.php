@@ -18,12 +18,12 @@ class CreateFintechPaymentDetailsTable extends Migration
             $table->bigInteger('trax_pay_id');
             $table->String('transaction_id');
             $table->Integer('cod_amount');
-            $table->Integer('rider_tip');
+            $table->decimal('rider_tip', 8, 2);
             $table->Integer('rider_id');
             $table->Integer('fintech_company_id');
-            $table->Integer('total_fintech_amount');
-            $table->Integer('fintech_company_amount');
-            $table->Integer('revenue');
+            $table->decimal('total_fintech_amount', 8, 2);
+            $table->decimal('fintech_company_amount', 8, 2);
+            $table->decimal('revenue', 8, 2);
             $table->timestamps();
         });
     }

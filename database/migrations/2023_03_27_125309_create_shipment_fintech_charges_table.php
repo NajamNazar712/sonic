@@ -16,7 +16,7 @@ class CreateShipmentFintechChargesTable extends Migration
         Schema::create('shipment_fintech_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->Integer('shipment_id');
-            $table->string('fintech_charges');
+            $table->decimal('fintech_charges', 8, 2);
             $table->Integer('applied_to')->default('1');
             $table->timestamps();
         });

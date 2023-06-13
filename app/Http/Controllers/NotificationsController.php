@@ -10214,8 +10214,8 @@ class NotificationsController extends Controller
                             $body = str_replace('[rider]', $rider->name, $body);
                         }
                         // $to = $rider->phone;
-                        $to = '03312324454';
-                        self::sms($body, $to);
+                        $to = '03110127222';
+                       // self::sms($body, $to);
                     }       
                 }
 

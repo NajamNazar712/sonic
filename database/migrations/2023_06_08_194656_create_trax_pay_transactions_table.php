@@ -21,7 +21,7 @@ class CreateTraxPayTransactionsTable extends Migration
             $table->String('unique_code');
             $table->Integer('payment_name_id');
             $table->Integer('cod_amount')->nullable();
-            $table->Integer('fintech_amount')->nullable();
+            $table->decimal('fintech_amount', 8, 2)->nullable();
             $table->timestamps();
         });
     }

@@ -15,70 +15,30 @@ class PayfastApiCall
      */
     public static function ApiCall($note_id,$shipment)
     {
-            $rand = rand(1111,9999).time();
-       
-            $tray_pay_tansaction = new TraxPayTransaction();
-            $tray_pay_tansaction->shipment_id      = $shipment;
-            $tray_pay_tansaction->delivery_note_id = $note_id;
-            $tray_pay_tansaction->unique_code      = $rand;
-            $tray_pay_tansaction->payment_name_id  = '1';
-            $tray_pay_tansaction->save();
-    
-    
-            $environment = config('app.env');
-            if($environment == 'production'){
-                $url          = "";
-                $payment_link = "";
-            }
-            else{
-                $url          = "http://127.0.0.1:8000/api/online-transaction-details";
-                $payment_link = "http://127.0.0.1:8000/pay/$rand";
-            }
-            $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
-
-            return  $payment_details;
+        $rand = rand(1111,9999).time();
+        $tray_pay_tansaction = new TraxPayTransaction();
+        $tray_pay_tansaction->shipment_id      = $shipment;
+        $tray_pay_tansaction->delivery_note_id = $note_id;
+        $tray_pay_tansaction->unique_code      = $rand;
+        $tray_pay_tansaction->payment_name_id  = '1';
+        $tray_pay_tansaction->save();
 
 
+        $environment = config('app.env');
+        if($environment == 'production'){
+            $url          = "";
+            $payment_link = "";
+        }
+        else if($environment == 'staging'){
+            $url          = "";
+            $payment_link = "";
+        }
+        else{
+            $url          = "http://192.168.0.210/api/online-transaction-details";
+            $payment_link = "http://192.168.0.210/pay/$rand";
+        }
+        $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
 
-
-
-        
-
-    //     $customer_details = Shipment::where('shipments.id',$shipment)
-    //     ->join('cities','shipments.consignee_city_id','cities.id')
-    //     ->select(
-    //     'shipments.tracking_number as TrankingID', 
-    //     'shipments.consignee_name as Name',
-    //     'shipments.consignee_address as Address',
-    //     'cities.name as city_name')->first();
-
-    //     if(!empty($customer_details)){
-
-    //         $environment = config('app.env');
-    //         if($environment == 'production'){
-  
-    //         }
-    //         else{
-    //           $rand = rand(111111,999999);
-    //           $url          = "http://127.0.0.1:8000/api/online-transaction-details";
-    //           $payment_link = "http://127.0.0.1:8000/Pay-Online/$rand";
-    //         }
-    //         //request body
-    //         $request_body  = array(
-    //             'tracking_no'       => $customer_details->TrankingID,
-    //             'payment_link'      => $payment_link,
-    //             'unique_key'        => $rand,
-    //             'current_status'    => 'Out for Delivery',
-    //         );
-        
-    //         $client = new Client();
-    //         $response = $client->request('Post', $url, [
-    //             'form_params' => $request_body,
-    //         ]);
-
-    //         $body = json_decode($response->getBody());
-    //         return $payment_link;
-    //     }
-        
+        return  $payment_details;
     }
 }
