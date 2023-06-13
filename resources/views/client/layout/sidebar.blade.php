@@ -160,7 +160,7 @@
                             @endif
                         @endif
                         @if (in_array(session('user_id'), session('mms_shippers')))
-                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
                         @endif
 
 {{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
