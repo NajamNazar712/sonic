@@ -609,13 +609,13 @@
                             <input type="text" id="custom_remark" name="custom_remark" class="form-control" placeholder="Enter Other Text">
                         </div>
                         
-                        <div class="form-group text-left">
+                        {{-- <div class="form-group text-left">
                             <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true" 
                                 data-msg-required="Call To is required">
                                 <option value="1">Shippper</option>
                                 <option value="2">Consigneee</option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         <div class="form-group ml-1 ">
                             <button type="submit" name="add" id="btnReturn"
@@ -757,7 +757,7 @@
 
             // update_call_status_modal function
             $('#update_call_status_modal').on('shown.bs.modal', function () {
-                $('#call_to').val('').change();
+                // $('#call_to').val('').change();
                 $('#custom_remark').val('');
                 $('#sub_status_call_finding').val('').change();
                 $('#call_finding_dropdown').val('').change();
@@ -776,7 +776,7 @@
                     call_finding_id: $('#call_finding_dropdown').val(),
                     sub_status_call_finding_id: $('#sub_status_call_finding').val(),
                     custom_remark: $('#custom_remark').val(),
-                    call_to_id: $('#call_to').val(),
+                    // call_to_id: $('#call_to').val(),
                     '_token': '{{ csrf_token() }}'
                     };
                     // AJAX request
@@ -836,7 +836,7 @@
                         modalBody.html('');
 
                         var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
-                        tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Others</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                        tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Others</th><th>Status</th><th>User</th></tr></thead>';
                         tableHtml += '<tbody class="text-center">';
                         $.each(data, function(index, value) {
                             var updated_at = value.updated_at;
@@ -849,13 +849,13 @@
                             }
                             var status = value.status;
                             var updated_by = value.updated_by;
-                            var call_to_id = value.call_to_id;
-                            if(call_to_id ==1){
-                                call_to_id = 'Shipper'
-                            }
-                            else{
-                                call_to_id = 'Consignee'
-                            }
+                            // var call_to_id = value.call_to_id;
+                            // if(call_to_id ==1){
+                            //     call_to_id = 'Shipper'
+                            // }
+                            // else{
+                            //     call_to_id = 'Consignee'
+                            // }
                             var call_finding_id = value.call_finding_id;
                             if(call_finding_id ==1){
                                 call_finding_id = 'Un-responsive'
@@ -864,7 +864,7 @@
                                 call_finding_id = ''
                             }
 
-                            tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + call_to_id + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
+                            tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
                         });
 
                         tableHtml += '</tbody></table>';
@@ -930,13 +930,13 @@
                     dropdownParent: $('#update_call_status_form')
                 });
 
-            $('#call_to').prepend('<option value="" selected="selected"></option>')
-                .select2({
-                    width: '100%',
-                    placeholder: 'Select Call To',
-                    allowClear: true,
-                    dropdownParent: $('#update_call_status_form')
-                });
+            // $('#call_to').prepend('<option value="" selected="selected"></option>')
+            //     .select2({
+            //         width: '100%',
+            //         placeholder: 'Select Call To',
+            //         allowClear: true,
+            //         dropdownParent: $('#update_call_status_form')
+            //     });
             
             // update_call_status_modal Validations
 

@@ -157,6 +157,9 @@
                         <th class="border-primary border-darken-1">Intercept</th>
                         <th class="border-primary border-darken-1">On Hold For Self Collection</th>
                         <th class="border-primary border-darken-1">Pending</th>
+                        <th class="border-primary border-darken-1">Already Updated</th>
+                        <th class="border-primary border-darken-1">Agent Category</th>
+                        <th class="border-primary border-darken-1">Unresponsive Return</th>
                         <th class="border-primary border-darken-1">Productivity(%)</th>
                     </tr>
                     </thead>
@@ -318,6 +321,9 @@
                             head.push('Intercept');
                             head.push('On Hold for Self Collection');
                             head.push('Pending');
+                            head.push('Already Updated By Other Users');
+                            head.push('Agent Category');
+                            head.push('Unresponsive Return');
                             
                             head.push('Productivity(%)');
 
@@ -337,7 +343,9 @@
                                 row.push(values.intercept);
                                 row.push(values.on_hold_for_sc);
                                 row.push(values.pending);
-                                
+                                row.push(values.already_updated);
+                                row.push(values.agent_category); 
+                                row.push(values.unresponsive_return);
                                 row.push(values.productivity);
 
 
@@ -397,6 +405,9 @@
                     {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
                     {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'already_updated', orderable: false, searchable: false, name: 'already_updated', class: 'align-middle already_updated'}, 
+                    {data: 'agent_category', orderable: false, searchable: false, name: 'agent_category', class: 'align-middle agent_category'}, 
+                    {data: 'unresponsive_return', orderable: false, searchable: false, name: 'unresponsive_return', class: 'align-middle unresponsive_return'}, 
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
                 ],
