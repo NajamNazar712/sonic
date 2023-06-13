@@ -218,7 +218,7 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-//dd($request->all());
+
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -458,7 +458,7 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
-        //$retail_shipment->admin_discount = $request->admin_discount;
+        $retail_shipment->admin_discount = $request->admin_discount;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
