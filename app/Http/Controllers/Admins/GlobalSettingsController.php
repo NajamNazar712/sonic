@@ -8174,9 +8174,9 @@ class GlobalSettingsController extends Controller
                 $settings->setting_value = $id;
                 $settings->save();
                 if($settings->setting_value == 1){
-                    return redirect()->back()->with('success', 'Auto Assigning Agents Functionality Enabled!');
+                    return redirect()->back()->with('success', 'Auto Assigning Enabled Successfully');
                 }else{
-                    return redirect()->back()->with('success', 'Auto Assigning Agents Functionality Disabled!');
+                    return redirect()->back()->with('success', 'Auto Assigning Disabled Successfully');
                 }
 
             }

@@ -169,18 +169,68 @@
                     @if ((session('role_id') == 1 || in_array(872, session('permissions'))) && !empty($settings))
                         {
                             @if($settings->setting_value == 0)
-                            text: '<i class="la la-check-circle"></i> Mark Enable',
+                            text: '<i class="la la-check-circle"></i>Enable Auto Assigning',
                             className: 'btn btn-success ',
                             enabled: true,
                             action: function (e, dt, node, config) {
-                                window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+
+                                swal({
+                                    text: 'Are you sure, you want to Enable Auto Assigning ?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                                });
+
+
+
                             }
                             @else
-                            text: '<i class="la la-times-circle"></i> Mark Disable',
+                            text: '<i class="la la-times-circle"></i>Disable Auto Assigning',
                             className: 'btn btn-danger ',
                             enabled: true,
                             action: function (e, dt, node, config) {
-                                window.location.href = "{{route('admin.settings.auto_assigning.global_status') }}"
+
+                                swal({
+                                    text: 'Are you sure, you want to Disable Auto Assigning?',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function(confirm) {
+                                    window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                                });
+
                             }
                             @endif
                         },
@@ -278,27 +328,27 @@
             
             
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url:'{!! route("admin.settings.auto_assigning.data") !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#edit_agent_id').val(data.agent_id).change();
-                    $('#edit_zone_id').val(data.zone_id).change();
-                    if(data.case_nature_id != 4){
-                        $('#edit_case_nature_id').val(null).change();
-                    }else{
-                        $('#edit_case_nature_id').val(data.case_nature_id).change();
-                    }
-                    $('#crm_agent_id').val(data.crm_agent_id);
-                    
-                    $('#EditAgentModal').modal('show');
+                {{--var id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--$.ajax({--}}
+                {{--    url:'{!! route("admin.settings.auto_assigning.data") !!}',--}}
+                {{--    method: 'POST',--}}
+                {{--    data: {--}}
+                {{--        'id': id,--}}
+                {{--        '_token': '{{ csrf_token() }}'--}}
+                {{--    }--}}
+                {{--}).done(function (data) {--}}
+                {{--    $('#edit_agent_id').val(data.agent_id).change();--}}
+                {{--    $('#edit_zone_id').val(data.zone_id).change();--}}
+                {{--    if(data.case_nature_id != 4){--}}
+                {{--        $('#edit_case_nature_id').val(null).change();--}}
+                {{--    }else{--}}
+                {{--        $('#edit_case_nature_id').val(data.case_nature_id).change();--}}
+                {{--    }--}}
+                {{--    $('#crm_agent_id').val(data.crm_agent_id);--}}
 
-                })
+                {{--    $('#EditAgentModal').modal('show');--}}
+
+                {{--})--}}
                 
             });
 

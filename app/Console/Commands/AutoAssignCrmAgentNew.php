@@ -97,49 +97,77 @@ class AutoAssignCrmAgentNew extends Command
                                         $query->where('case_nature_id', $value->case_nature_id);
                                     });
                                 }
-                            })
-                            ->where(function ($query) use ($value) {
-                                if (!empty($value->hub_id)) {
-                                    $query->orWhereHas('hubs', function ($query) use ($value) {
-                                        $query->where('hub_id', $value->hub_id);
-                                    });
-                                }
-                                if (!empty($value->case_nature_type_id)) {
-                                    $query->orWhereHas('case_nature_types', function ($query) use ($value) {
-                                        $query->where('case_nature_type_id', $value->case_nature_type_id);
-                                    });
-                                }
-                                if (!empty($value->business_segment_id)) {
-                                    $query->orWhereHas('business_types', function ($query) use ($value) {
-                                        $query->where('business_segment_id', $value->business_segment_id);
-                                    });
-                                }
-                                if (!empty($value->sub_segment_id)) {
-                                    $query->orWhereHas('sub_business_types', function ($query) use ($value) {
-                                        $query->where('sub_segment_id', $value->sub_segment_id);
-                                    });
-                                }
-                                if (!empty($value->shipper_key_id)) {
-                                    $query->orWhereHas('shipper_keys', function ($query) use ($value) {
-                                        $query->where('shipper_key_id', $value->shipper_key_id);
-                                    });
-                                }
-                                if (!empty($value->shipper_non_key_id)) {
-                                    $query->orWhereHas('shipper_non_keys', function ($query) use ($value) {
-                                        $query->where('shipper_non_key_id', $value->shipper_non_key_id);
-                                    });
-                                }
-                                if (!empty($value->shipment_status_id)) {
-                                    $query->orWhereHas('shipment_statuses', function ($query) use ($value) {
-                                        $query->where('shipment_status_id', $value->shipment_status_id);
-                                    });
-                                }
                             });
 
 
                         if ($crm_agent->exists()) {
 
-                            $agents = $crm_agent->pluck('agent_id')->toArray();
+                            $modifies_data = $crm_agent->get()->filter(function ($val) use($value)  {
+                                $return  = 1;
+                                $hubs = isset($val->hubs) ?  $val->hubs->pluck('hub_id')->toArray() : [];
+                                $case_nature_type_id = isset($val->case_nature_types) ? $val->case_nature_types->pluck('case_nature_type_id')->toArray(): [];
+                                $business_types = isset($val->business_types) ? $val->business_types->pluck('business_segment_id')->toArray(): [];
+                                $sub_business_types = isset($val->sub_business_types) ? $val->sub_business_types->pluck('sub_segment_id')->toArray(): [];
+                                $shipper_keys = isset($val->shipper_keys) ? $val->shipper_keys->pluck('shipper_key_id')->toArray(): [];
+                                $shipper_non_keys = isset($val->shipper_non_keys) ? $val->shipper_non_keys->pluck('shipper_non_key_id')->toArray(): [];
+                                $shipment_statuses = isset($val->shipment_statuses) ? $val->shipment_statuses->pluck('shipment_status_id')->toArray(): [];
+
+                               if(count($hubs) > 0){
+                                   if (!empty($value->hub_id)) {
+                                       if(!in_array($value->hub_id,$hubs)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($case_nature_type_id) > 0){
+                                   if (!empty($value->case_nature_type_id)) {
+                                       if(!in_array($value->case_nature_type_id,$case_nature_type_id)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($business_types) > 0){
+                                   if (!empty($value->business_segment_id)) {
+                                       if(!in_array($value->business_segment_id,$business_types)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($sub_business_types) > 0){
+                                   if (!empty($value->sub_segment_id)) {
+                                       if(!in_array($value->sub_segment_id,$sub_business_types)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($shipper_keys) > 0){
+                                   if (!empty($value->shipper_key_id)) {
+                                       if(!in_array($value->shipper_key_id,$shipper_keys)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($shipper_non_keys) > 0){
+                                   if (!empty($value->shipper_non_key_id)) {
+                                       if(!in_array($value->shipper_non_key_id,$shipper_non_keys)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+                               if(count($shipment_statuses) > 0){
+                                   if (!empty($value->shipment_status_id)) {
+                                       if(!in_array($value->shipment_status_id,$shipment_statuses)){
+                                           $return = 0;
+                                       }
+                                   }
+                               }
+
+                               if($return == 1){
+                                   return  $val;
+                               }
+
+                            });
+                            $agents = $modifies_data->pluck('agent_id')->toArray();
                             $agent_log = CrmAgentAutoLog::whereIn('agent_id', $agents)->orderBy('assinged_requests', 'asc');
                             $current_agent = $agent_log->pluck('agent_id')->toArray();
 
