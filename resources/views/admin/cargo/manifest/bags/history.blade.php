@@ -491,7 +491,7 @@
 
 
             $('#bag_type_search_form #bag_type').select2({
-                placeholder: 'bag type search',
+                placeholder: 'Bag Type',
                 width: '200px', // Set a fixed width for the text box
                 allowClear: false,
                 closeOnSelect: false,
@@ -545,12 +545,12 @@
             });*/
 
             $('#search_origin').select2({
-                placeholder:'Search origin',
+                placeholder:'Search Origin',
                 width:'100%',
                 allowClear:false
             });
             $('#search_destination').select2({
-                placeholder:'Search destination',
+                placeholder:'Search Destination',
                 width:'100%',
                 allowClear:false
             });

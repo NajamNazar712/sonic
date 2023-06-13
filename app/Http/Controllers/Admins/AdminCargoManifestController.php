@@ -303,7 +303,6 @@ class AdminCargoManifestController extends Controller
 
     public function pending_bag_index()
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 398);
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $service_type = BookingType::all();
@@ -1393,6 +1392,10 @@ class AdminCargoManifestController extends Controller
                 ->where('s.tracking_number', '=', $tracking_number);
         }
 
+        if($bag_number = $request->get('bag_number'))
+            $datatables->where('cargo_manifest_bags.seal_number',$bag_number);
+
+
        if ($request->get('search_date_from') != null && $request->get('search_date_to') != null) {
 
             $from = $request->get('search_date_from');
@@ -2099,6 +2102,7 @@ class AdminCargoManifestController extends Controller
 
     public function manifest_list(Request $request)
     {
+
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 405);
         }
