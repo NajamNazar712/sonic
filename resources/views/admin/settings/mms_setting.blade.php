@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'mms setting')
+@section('title', 'MMS Setting')
 
 @section('content')
     <div class="app-content content">

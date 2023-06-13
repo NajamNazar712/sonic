@@ -321,8 +321,8 @@ class LoginController extends Controller
         $mms_shippers = array();
         $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
         if ($setting) {
-            $setting = explode(',', $setting->text);
-            $mms_shippers = User::whereIn('id', $setting)->pluck('id')->toArray();  
+            $mms_shippers = array_map('intval',explode(',' , $setting->text));
+          
         }
 
         session(['mms_shippers' => $mms_shippers]);
