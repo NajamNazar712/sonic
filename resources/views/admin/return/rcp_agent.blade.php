@@ -72,6 +72,7 @@
                 </div>
                 <div id="report_data">
                     <div class="row">
+                       
                         <div class="col-3">
                             <div class="card pull-up cursor-pointer">
                                 <div class="card-content border rounded" id="total_main">
@@ -106,6 +107,7 @@
                                 </div>
                             </div>
                         </div>
+                      
                         <div class="col-3">
                             <div class="card bg-gradient-directional-info pull-up cursor-pointer">
                                 <div class="card-content" id="rcp_reattempt_main">
@@ -123,6 +125,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-3" id="total_main">
+                            <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
+                                <div class="card-content">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-grid text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total">0</h3>
+                                                <span>Total Return Confirm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="col-3">
                             <div class="card bg-gradient-directional-success pull-up cursor-pointer">
                                 <div class="card-content" id="productivity_main">
@@ -179,6 +200,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
     <style>
+
+        
+        .bg-gradient-directional-booked_shipments {
+                    background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+                    background-repeat: repeat-x;
+                }
         table.dataTable {
             font-size: 12px;
         }
