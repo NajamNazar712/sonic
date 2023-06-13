@@ -1739,6 +1739,7 @@ $roles = explode("," , $settings->text);
                                                 Accounts</a>
                                         </li>
                                     @endif
+
                                     @if (session('role_id') == 1 || in_array(558, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.ccd_booking.index') }}">CCD
@@ -1852,6 +1853,11 @@ $roles = explode("," , $settings->text);
                                                     SMS Notification Return Delivered to shipper
                                                 </a>
                                             </li>
+                                        @endif
+										@if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS Report
+                                                    Setting</a> </li>
                                         @endif
                                 </ul>
 
