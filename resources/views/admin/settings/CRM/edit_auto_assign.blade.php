@@ -130,7 +130,7 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Shipper Key</label>
+                                                <label>Shipper with KAM</label>
                                                 <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($shipper_key as $cn)
                                                         <option value="{{ $cn->id }}" {{ in_array($cn->id, $sk)  ? 'selected' : '' }}>{{ $cn->name }}</option>
@@ -143,7 +143,7 @@
 
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Shipper Non Key</label>
+                                                <label>Shipper without KAM</label>
                                                 <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($shipper_non_key as $cn)
                                                     <option value="{{ $cn->id }}" {{ in_array($cn->id, $snk)  ? 'selected' : '' }}>
@@ -311,13 +311,13 @@
             });
             $('#shipper_non_key_id').select2({
                 width:'100%',
-                placeholder:"Shipper N-Key",
+                placeholder:"Shipper without KAM",
                 allowClear:false,
                 dropdownParent:$('#crm_agent_assign')
             });
             $('#shipper_key_id').select2({
                 width:'100%',
-                placeholder:"Shipper Key",
+                placeholder:"Shipper with KAM",
                 allowClear:false,
                 dropdownParent:$('#crm_agent_assign')
             }).bind('change', function() {
