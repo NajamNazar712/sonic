@@ -1208,14 +1208,8 @@ class ShipperReportsController extends Controller
     }
     public function mms_list(Request $request)
     {
-        $shippers = array();
-        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
-        if ($setting) {
-            $setting = explode(',', $setting->text);
-            $shippers = User::whereIn('id', $setting)->pluck('id')->toArray();
-        }
 
-        if (in_array(session('user_id'), $shippers)) {
+        if (in_array(session('user_id'), session('mms_shippers'))) {
             $connection = 'reports';
             $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
             $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
