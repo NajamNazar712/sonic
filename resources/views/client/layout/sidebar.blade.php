@@ -165,7 +165,7 @@
                         @endif
 
                         @if (session('special_dashboard_user'))
-                            <li><a class="menu-item" href="{{ route('cod.reports.mms.special_dashboard.index') }}">MMS</a></li>
+                            <li><a class="menu-item" href="{{ route('cod.reports.special_dashboard.index') }}">MMS</a></li>
                         @endif
 
 {{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
