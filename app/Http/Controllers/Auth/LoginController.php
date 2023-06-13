@@ -108,6 +108,7 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         $packaging_charges_check = TRUE;
+        $user_info = SubstituteUser::where('email',$request->email)->first();
 
         if (session('user_type') == 1) {
             if ($user->blacklist) {
@@ -176,8 +177,25 @@ class LoginController extends Controller
             }
 
             $shipper_user_id = $user->id;
+
+            session(['special_dashboard_user' => 0]);
+            session(['special_dashboard_sister_user' => []]);
         }
         else {
+
+            if($user_info->is_created_by_admin == 1)
+            {
+                session(['special_dashboard_user' => 1]);
+                
+                $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info->id)->pluck('sister_user_id')->toArray();
+
+                session(['special_dashboard_sister_user' => $sister_accounts]);
+            }
+            else{
+                session(['special_dashboard_user' => 0]);
+                session(['special_dashboard_sister_user' => []]);
+            }
+            
             $shipper = User::find($user->user_id);
 
             if ($shipper->blacklist) {
@@ -324,21 +342,6 @@ class LoginController extends Controller
                 session(['nps_survey' => $nps->id]);
             }
         }
-
-        $user_info = SubstituteUser::where('email',$request->email)->first();
-        if($user_info->is_created_by_admin == 1)
-        {
-            session(['special_dashboard_user' => 1]);
-            
-            $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info->id)->pluck('sister_user_id')->toArray();
-
-            session(['special_dashboard_sister_user' => $sister_accounts]);
-        }
-        else{
-            session(['special_dashboard_user' => 0]);
-            session(['special_dashboard_sister_user' => []]);
-        }
-
         return redirect()->route('cod.welcome');
     }
 
