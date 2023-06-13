@@ -12816,7 +12816,10 @@ class AdminDashboardController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            $dropdown .= $edit_button;
+            if (session('role_id') == 1 || in_array(664, session('permissions'))) {
+
+                $dropdown .= $edit_button;
+            }
 
             if ($substitute_user->status) {
                 $dropdown .= $disable_button;

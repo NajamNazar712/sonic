@@ -106,6 +106,7 @@
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				scrollX: true, scrollY: '500px',
+				@if (session('role_id') == 1 || count(array_intersect([663], session('permissions'))) !== 0)
 				buttons: [{
 					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',
@@ -118,6 +119,14 @@
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
+				@else
+					buttons: [{
+						extend: 'excel',
+						title: 'Substitute Accounts Created By admin',
+						className: 'btn btn-primary',
+						text: '<i class="la la-file-excel-o"></i> Excel',
+					}],
+				@endif
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
