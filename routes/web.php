@@ -1593,7 +1593,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('return_v2')->name('return_v2.')->group(function () {
         Route::get('', 'Admins\ReturnV2Controller@return_v2')->name('return_v2');
-      
+        Route::post('get_shipment_reason', 'Admins\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
     });
     
     Route::prefix('debriefing')->name('debriefing.')->group(function () {

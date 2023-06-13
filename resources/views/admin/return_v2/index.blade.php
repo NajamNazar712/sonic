@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Tracking')
+@section('title', 'RV')
 
 @section('content')
 	<div class="app-content content">
@@ -9,26 +9,173 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Tracking
+					RV
 				</h1>
 
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+                            <div class="border-primary">
+                                <div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290"></div>
+                                <div class="d-flex flex-wrap align-items-center bg-primary">
+                                <div class="text-center mb-0 ml-1 mr-1 font-medium-3 white">Virtual RCP Agent Screen</div>
+                            </div>
 
-							<form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="col-lg-4 col-md-4 col-sm-6">
+                            
+                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                                <div class="d-none">
                                     <div class="form-group">
-                                        <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                        <input type="hidden" name="tracking_numbers" class="tracking_numbers" value="202202000007">
                                     </div>
                                 </div>
-
-								<div class="form-group ml-1">
-									<button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
+                                
+								<div class="form-group mt-1">
+									<button type="submit" name="track" class="btn btn-primary" value="Track" style="width:150px">Get Ticket</button>
 								</div>
 							</form>
 
+
+                            <div class="p-1">
+                                <div class="row justify-content-between">
+                                  <div class="col-1">
+                                    <h6>Total Tickets</h6>
+                                    <div class="border table-responsive">
+                                      <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                          <tr>
+                                            <td class="text-center"><strong>50</strong></td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                              
+                                  <div class="col-11">
+                                    <div class="container">
+                                      <div class="row">
+                                        <div class="col-4 p-0">
+                                          <div class="p-0">
+                                            <h6>Re - Attempt Count</h6>
+                                            <div class="border table-responsive">
+                                              <table class="table table-sm table-borderless mb-0">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="text-center"><strong>50</strong></td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </div>
+                                        </div>
+                              
+                                        <div class="col-4 p-0">
+                                          <div class="p-0">
+                                            <h6>Refused On Call</h6>
+                                            <div class="border table-responsive">
+                                              <table class="table table-sm table-borderless mb-0">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="text-center"><strong>50</strong></td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </div>
+                                        </div>
+                              
+                                        <div class="col-4 p-0">
+                                          <div class="p-0">
+                                            <h6>Unresponsive</h6>
+                                            <div class="border table-responsive">
+                                              <table class="table table-sm table-borderless mb-0">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="text-center"><strong>50</strong></td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                              
+                                <div class="row justify-content-between">
+                                  <div class="col-2">
+                                    <h6 class="mt-2">Agent Employee ID</h6>
+                                    <div class="border table-responsive">
+                                      <table class="table table-sm table-borderless mb-0">
+                                        <tbody>
+                                          <tr>
+                                            <td><strong>TRAX-C-0001</strong></td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                              
+                                  <div class="col-10 justify-content-center">
+                                    <div class="container">
+                                      <div class="row d-flex justify-content-center">
+                                        <div class="col-2 p-0">
+                                          <div class="p-0">
+                                            {{-- <h6 class="text-center mt-2">Agent</h6>
+                                            <div class="border table-responsive">
+                                              <table class="table table-sm table-borderless mb-0">
+                                                <tbody>
+                                                  <tr>
+                                                    <td class="text-center agent"><strong>harry</strong></td>
+                                                  </tr>
+                                                </tbody>
+                                              </table>
+                                            </div> --}}
+                                          </div>
+                                        </div>
+                                        <div class="col-5 p-0">
+                                            <div class="p-0">
+                                              <h6 class="text-center mt-2">Agent</h6>
+                                              <div class="border table-responsive">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td class="text-center agent"><strong>harry</strong></td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          <div class="col-3 p-0">
+                                            <div class="p-0">
+                                              {{-- <h6 class="text-center mt-2">Agent</h6>
+                                              <div class="border table-responsive">
+                                                <table class="table table-sm table-borderless mb-0">
+                                                  <tbody>
+                                                    <tr>
+                                                      <td class="text-center agent"><strong>harry</strong></td>
+                                                    </tr>
+                                                  </tbody>
+                                                </table>
+                                              </div> --}}
+                                            </div>
+                                          </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  
+                                </div>
+                              
+                           
+                              
+
+                        </div>
+
+						
 							<div class="tracking" id="tracking">
 							</div>
 
@@ -521,6 +668,16 @@
         .tracking_numbers{
             width: 100% !important;
         }
+
+        #shipment_reason{
+            display: none;
+        }
+
+        #fake_status_remark{
+            width: 300px;
+        }
+
+
 	</style>
 @endsection
 
@@ -535,6 +692,7 @@
 	<script>
 		$(document).ready(function() {
 
+          
             $('#tracking').on('click', '.call_status', function () {
             var id = $(this).attr('id');
             var tracking = $(this).attr('data-tracking');
@@ -1060,7 +1218,6 @@
                                 }
 
                           
-                                shipment += '<div class="text-center mb-0 ml-1 mr-1 font-medium-3 white">Virtual RCP Agent Screen</div>';
                        
                                 shipment += '<div class="mb-0 ml-1">  '+ details.received_img + '  </div>';
 
@@ -1072,125 +1229,9 @@
 
                                 shipment += '</div>';
 
-                                shipment += '<div class="p-1">';
-shipment += '<div class="row justify-content-between">';
-
-shipment += '  <div class="col-1">';
-shipment += '    <h6>Total Tickets</h6>';
-shipment += '    <div class="border table-responsive">';
-shipment += '      <table class="table table-sm table-borderless mb-0">';
-shipment += '        <tbody>';
-shipment += '          <tr>';
-shipment += '            <td class="text-center"><strong>50</strong></td>';
-shipment += '          </tr>';
-shipment += '        </tbody>';
-shipment += '      </table>';
-shipment += '    </div>';
-shipment += '  </div>';
-
-shipment += '  <div class="col-11">'; // Use col-11 to occupy the remaining 11 columns
-
-shipment += '    <div class="container">';
-shipment += '      <div class="row">';
-
-shipment += '        <div class="col-4 p-0">';
-shipment += '          <div class="p-0">';
-shipment += '            <h6>Re - Attempt Count</h6>';
-shipment += '            <div class="border table-responsive">';
-shipment += '              <table class="table table-sm table-borderless mb-0">';
-shipment += '                <tbody>';
-shipment += '                  <tr>';
-shipment += '                    <td class="text-center"><strong>50</strong></td>';
-shipment += '                  </tr>';
-shipment += '                </tbody>';
-shipment += '              </table>';
-shipment += '            </div>';
-shipment += '          </div>';
-shipment += '        </div>';
-
-shipment += '        <div class="col-4 p-0">';
-shipment += '          <div class="p-0">';
-shipment += '            <h6>Refused On Call</h6>';
-shipment += '            <div class="border table-responsive">';
-shipment += '              <table class="table table-sm table-borderless mb-0">';
-shipment += '                <tbody>';
-shipment += '                  <tr>';
-shipment += '                    <td class="text-center"><strong>50</strong></td>';
-shipment += '                  </tr>';
-shipment += '                </tbody>';
-shipment += '              </table>';
-shipment += '            </div>';
-shipment += '          </div>';
-shipment += '        </div>';
-
-shipment += '        <div class="col-4 p-0">';
-shipment += '          <div class="p-0">';
-shipment += '            <h6>UnResponsive</h6>';
-shipment += '            <div class="border table-responsive">';
-shipment += '              <table class="table table-sm table-borderless mb-0">';
-shipment += '                <tbody>';
-shipment += '                  <tr>';
-shipment += '                    <td class="text-center"><strong>50</strong></td>';
-shipment += '                  </tr>';
-shipment += '                </tbody>';
-shipment += '              </table>';
-shipment += '            </div>';
-shipment += '          </div>';
-shipment += '        </div>';
-
-shipment += '      </div>';
-shipment += '    </div>';
-
-shipment += '  </div>';
-
-shipment += '</div>';
-shipment += '<div class="row justify-content-between">';
-
-shipment += '  <div class="col-1">';
-shipment += '    <h6>Total Tickets</h6>';
-shipment += '    <div class="border table-responsive">';
-shipment += '      <table class="table table-sm table-borderless mb-0">';
-shipment += '        <tbody>';
-shipment += '          <tr>';
-shipment += '            <td class="text-center"><strong>50</strong></td>';
-shipment += '          </tr>';
-shipment += '        </tbody>';
-shipment += '      </table>';
-shipment += '    </div>';
-shipment += '  </div>';
-
-shipment += '  <div class="col-11">'; // Use col-11 to occupy the remaining 11 columns
-
-shipment += '    <div class="container">';
-shipment += '      <div class="row">';
-
-shipment += '        <div class="col-12 p-0">';
-shipment += '          <div class="p-0">';
-shipment += '            <h6>Agent</h6>';
-shipment += '            <div class="border table-responsive">';
-shipment += '              <table class="table table-sm table-borderless mb-0">';
-shipment += '                <tbody>';
-shipment += '                  <tr>';
-shipment += '                    <td class="text-center"><strong>50</strong></td>';
-shipment += '                  </tr>';
-shipment += '                </tbody>';
-shipment += '              </table>';
-shipment += '            </div>';
-shipment += '          </div>';
-shipment += '        </div>';
 
 
-
-
-
-shipment += '      </div>';
-shipment += '    </div>';
-
-shipment += '  </div>';
-
-shipment += '</div>';
-shipment += '</div>';
-
+                                
                                 // shipment += '<div class="p-1">';
                                 // shipment += '<div class="row justify-content-between">';
 
@@ -1270,15 +1311,50 @@ shipment += '</div>';
                                 shipment += '</div>';
                                 shipment += '</div>';
 
+                                shipment += '<div class="row justify-content-between pl-1">'
+                                shipment += '  <div class="col-2 pr-0 pl-1">'
+                                shipment += '    <h6 class="mt-2"></h6>'
+                                shipment += '    <div class="border table-responsive">'
+                                shipment += '      <table class="table table-sm table-borderless mb-0">'
+                                shipment += '        <tbody>'
+                                shipment += '          <tr>'
+                                shipment += '            <td><strong>Tracking Number</strong></td>'
+                                shipment += '          </tr>'
+                                shipment += '        </tbody>'
+                                shipment += '      </table>'
+                                shipment += '    </div>'
+                                shipment += '  </div>'
+                                shipment += '  <div class="col-10 pl-0">'
+                                shipment += '    <div class="container">'
+                                shipment += '      <div class="row justify-content-center">'
+                                shipment += '        <div class="col-12 pl-0">'
+                                shipment += '          <div class="p-0">'
+                                shipment += '            <h6 class="text-center mt-2"></h6>'
+                                shipment += '            <div class="border table-responsive">'
+                                shipment += '              <table class="table table-sm table-borderless mb-0">'
+                                shipment += '                <tbody>'
+                                shipment += '                  <tr>'
+                                shipment += '                    <td class="text-center agent"><strong>202202000007</strong></td>'
+                                shipment += '                  </tr>'
+                                shipment += '                </tbody>'
+                                shipment += '              </table>'
+                                shipment += '            </div>'
+                                shipment += '          </div>'
+                                shipment += '        </div>'
+                                shipment += '      </div>'
+                                shipment += '    </div>'
+                                shipment += '  </div>'
+                                shipment += '</div>'
+
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
-                                shipment += '<h4><u>Consignee Information</u></h4>';
+                                shipment += '<h4><u>Shipper Information</u></h4>';
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Consignee</strong></td>';
                                 shipment += '<td>' + details.consignee.name + '</td>';
-                                shipment += '<td><strong>Destination</strong></td>';
+                                shipment += '<td><strong>Origin</strong></td>';
                                 shipment += '<td>' + details.consignee.destination + '</td>';
                                 
                                 shipment += '</tr>';
@@ -1295,13 +1371,7 @@ shipment += '</div>';
                                 
                                 shipment += '<td colspan="2"></td>';
                                 shipment += '</tr>';
-                                shipment += '<td><strong>Email</strong></td>';
-                                if (details.consignee.email) {
-                                    shipment += '<td colspan="3">' + details.consignee.email + '</td>';
-                                }
-                                else {
-                                    shipment += '<td colspan="3"></td>';
-                                }
+                              
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Address</strong></td>';
@@ -1312,6 +1382,47 @@ shipment += '</div>';
                                 shipment += '</div>';
                                 shipment += '</div>';
 
+
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
+
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
+                                shipment += '<h4><u>Consignee Information</u></h4>';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless mb-0">';
+                                shipment += '<tbody>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Consignee</strong></td>';
+                                shipment += '<td>' + details.consignee.name + '</td>';
+                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td>' + details.consignee.destination + '</td>';
+                                
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Phone No(s).</strong></td>';
+
+                                if (!details.consignee.phone_number_2) {
+                                    shipment += '<td>' + details.consignee.phone_number_1 + '</td>';
+                                }
+                                else {
+                                    shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
+                                }
+                                
+                                shipment += '<td colspan="2"></td>';
+                                shipment += '</tr>';
+                             
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Address</strong></td>';
+                                shipment += '<td colspan="3">' + details.consignee.address + '</td>';
+                                shipment += '</tr>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Order Information</u></h4>';
@@ -1392,41 +1503,28 @@ shipment += '</div>';
 
 
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4><u>Tracking History</u></h4>';
+                                    shipment += '<h4 class="text-center"><u>Tracking Information</u></h4>'
                                 shipment += '<div class="border table-responsive">';
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
-                                shipment += '<th><strong>Date / Time</strong></th>';
-                                shipment += '<th><strong>Status</strong></th>';
-                                shipment += '<th><strong>Details</strong></th>';
+                           
                                 shipment += '<th><strong>Reason</strong></th>';
+                                shipment += '<th><strong>Attempted Time</strong></th>';
+
                                 shipment += '<th><strong>Remarks</strong></th>';
-                                shipment += '<th><strong>User</strong></th>';
-                                shipment += '<th><strong>City</strong></th>';
-                                shipment += '<th><strong>Received/Refused By</strong></th>';
-                                shipment += '<th><strong>IP Address</strong></th>';
-                                shipment += '<th><strong>Rider</strong></th>';
+                            
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
-                                $.each(details.tracking_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        if(history.image_audio_location == undefined) {
-                                            shipment += '<td>-</td>';}
-                                        else
-                                            shipment += '<td>' + history.image_audio_location + '</td>';
-                                        shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                        shipment += '<td>' + history.remarks + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '<td>' + history.city + '</td>';
-                                        shipment += '<td>' + history.received_or_refused_by + '</td>';
-                                        shipment += '<td>' + history.ip + '</td>';
-                                        shipment += '<td>' + history.rider + '</td>';
-                                        shipment += '</tr>';
-                                });
+                                // $.each(details.tracking_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                     
+                                //         shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+                                //         shipment += '<td>' + history.remarks + '</td>';
+                                  
+                                //         shipment += '</tr>';
+                                // });
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -1434,324 +1532,479 @@ shipment += '</div>';
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                if ('payment_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Payment History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable payment_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
-                                    shipment += '<th><strong>Remarks</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
 
-                                    $.each(details.payment_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '<td>' + history.payable_remarks + '</td>';
-                                        shipment += '</tr>';
-                                    });
+                                
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                           
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
+                                shipment += '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
+                                shipment += '<option value="">Select Action</option>';
+                                shipment += '<option value="1">Un-Responsive</option>';
 
-                                if ('pickup_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Pickup History (V2)</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
+                                @foreach($shipment_statuses as $status)
+                                    shipment += '<option value="{{ $status->id }}" id="status">{{ $status->name }}</option>';
+                                @endforeach
+                                shipment += '</select></strong></th>';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>Reason</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
+                                shipment += '<th><strong><select class="form-control" id="shipment_reason" name="shipment_status">';
+                                shipment += '</select></strong></th>';
 
-                                    $.each(details.pickup_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.reason + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '</tr>';
-                                    });
+                                shipment += '<th><strong><textarea class="form-control form-control-sm" rows="2" placeholder="Remarks"></textarea></strong></th>'
+                            
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+                                // $.each(details.tracking_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                     
+                                //         shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+                                //         shipment += '<td>' + history.remarks + '</td>';
+                                  
+                                //         shipment += '</tr>';
+                                // });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
-                                if ('old_pickup_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Pickup History (V1)</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
 
-                                    $.each(details.old_pickup_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '</tr>';
-                                    });
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
-                                if ('handover_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Handover Shipment History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
+                                   
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                                shipment += '<td class="col-1">';
+                                shipment += '<label for="checkbox-id">Fake Status</label>';
+                                shipment += '<input type="checkbox" class="checkbox-class" id="checkbox-id">';
+                                shipment += '</td>';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Handover Id</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
 
-                                    $.each(details.handover_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.handover_id + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.created_at + '</td>';
-                                        shipment += '</tr>';
-                                    });
+                                shipment += '<th><strong><select class="form-control" id="fake_status_remark" name="fake_status_remark" disabled>';
+                                shipment += '<option value="">Select Fake Status Remarks</option>';
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                                @foreach($fake_status_remarks as $fsk)
+                                    shipment += '<option value="{{ $fsk->id }}" id="fsk">{{ $fsk->name }}</option>';
+                                @endforeach
+                                shipment += '</select></strong></th>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
 
-                                if ('amount_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Amount History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
+                            
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+                      
 
-                                    shipment += '<table class="table table-sm table-borderless datatable amount_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Old Amount</strong></th>';
-                                    shipment += '<th><strong>New Amount</strong></th>';
-                                    shipment += '<th><strong>Remarks</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
 
-                                    $.each(details.amount_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.old_amount + '</td>';
-                                        shipment += '<td>' + history.new_amount + '</td>';
-                                        shipment += '<td>' + history.remarks + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '</tr>';
-                                    });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
 
-                                if ('weight_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Weight History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable weight_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Old Weight</strong></th>';
-                                    shipment += '<th><strong>New Weight</strong></th>';
-                                    shipment += '<th><strong>User</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    $.each(details.weight_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.old_weight + '</td>';
-                                        shipment += '<td>' + history.new_weight + '</td>';
-                                        shipment += '<td>' + history.user + '</td>';
-                                        shipment += '</tr>';
-                                    });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                                   
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row justify-content-center">';
+                                shipment += '<a href="image.jpg" target="_blank" style="text-decoration: underline; margin-right: 50px;">View Image</a>';
+                                shipment += '<a href="audio.mp3" target="_blank" style="text-decoration: underline; margin-right: 50px;">Listen Audio</a>';
+                                shipment += '<a href="https://maps.google.com/?q=latitude,longitude" target="_blank" style="text-decoration: underline;">View Location</a>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
 
-                                if ('crm_requests' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>CRM History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable crm_requests_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>S.No</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>Created At</strong></th>';
-                                    shipment += '<th><strong>Created By</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
-                                    $count = 0;
-                                    $.each(details.crm_requests, function (index, crm_request) {
-                                        $count = $count + 1;
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + $count + '</td>';
-                                        if (crm_request.status_id === 1 || crm_request.status_id === 5) {
-                                            shipment += '<td>' + crm_request.status + '(<a class="btn btn-sm btn-outline-info align-middle" href="' + complain_route + crm_request.id + '" target="_blank">(' + crm_request.id + ')</a>)</td>';
-                                        }
-                                        else {
-                                            shipment += '<td>' + crm_request.status + '</td>';
-                                        }
-                                        shipment += '<td>' + crm_request.created_at + '</td>';
-                                        shipment += '<td>' + crm_request.created_by + '</td>';
-                                        shipment += '</tr>';
-                                    });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                            
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
+                      
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
+                                shipment += '</tbody>';
+                                shipment += '</table>';
 
-                                if ('open_box_journey' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Open Box History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable open_box_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Status</strong></th>';
-                                    shipment += '<th><strong>Created By</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    $.each(details.open_box_journey, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.status + '</td>';
-                                        shipment += '<td>' + history.created_by + '</td>';
-                                        shipment += '</tr>';
-                                    });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
 
-                                if ('quick_receiving_shipments_journeys' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Quick Receiving Shipment History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Delivery Note ID</strong></th>';
-                                    shipment += '<th><strong>Received By</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
 
-                                    $.each(details.quick_receiving_shipments_journeys, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.created_at + '</td>';
-                                        shipment += '<td>' + history.delivery_note_id + '</td>';
-                                        shipment += '<td>' + history.received_by + '</td>';
-                                        shipment += '</tr>';
-                                    });
+                                   
+                                shipment += '<div class="col-12 mt-2">';
+                                shipment += '<div class="border table-responsive">';
+                                shipment += '<h6 class="text-center" style="text-decoration: underline;" ><strong>Call History</strong></h6>';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
+                                shipment += '<thead>';
+                                shipment += '<tr role="row">';
+                                shipment += '<th>S.no</th>';
+                                shipment += '<th>Calling Date</th>';
+                                shipment += '<th>Calling Time</th>';
+                                shipment += '<th>Call Finding</th>';
+                                shipment += '<th>Un-responsive Findings</th>';
+                                shipment += '<th>Shipment Status</th>';
+                                shipment += '<th>Remarks</th>';
+                                shipment += '<th>Status</th>';
+                                shipment += '<th>User</th>';
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
+                                shipment += '</tr>';
+                                shipment += '</thead>';
+                                shipment += '<tbody>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
-                                if ('outstanding_history' in details) {
-                                    shipment += '<div class="col-12 mt-2">';
-                                    shipment += '<h4><u>Resolved Outstanding Shipment History</u></h4>';
-                                    shipment += '<div class="border table-responsive">';
+                                // You can add rows and data dynamically here using a loop or other means
 
-                                    shipment += '<table class="table table-sm table-borderless datatable resolved_outstanding_shipment">';
-                                    shipment += '<thead>';
-                                    shipment += '<tr role="row">';
-                                    shipment += '<th><strong>Date / Time</strong></th>';
-                                    shipment += '<th><strong>Resolved By</strong></th>';
-                                    shipment += '</tr>';
-                                    shipment += '</thead>';
-                                    shipment += '<tbody>';
+                                shipment += '</tbody>';
+                                shipment += '</table>';
+                                shipment += '</div>';
+                                shipment += '</div>';
 
-                                    $.each(details.outstanding_history, function (index, history) {
-                                        shipment += '<tr>';
-                                        shipment += '<td>' + history.date_time + '</td>';
-                                        shipment += '<td>' + history.resolved_by + '</td>';
-                                        shipment += '</tr>';
-                                    });
 
-                                    shipment += '</tbody>';
-                                    shipment += '</table>';
 
-                                    shipment += '</div>';
-                                    shipment += '</div>';
-                                }
+
+                                // if ('payment_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Payment History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable payment_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>User</strong></th>';
+                                //     shipment += '<th><strong>Remarks</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.payment_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.status + '</td>';
+                                //         shipment += '<td>' + history.user + '</td>';
+                                //         shipment += '<td>' + history.payable_remarks + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('pickup_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Pickup History (V2)</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>Reason</strong></th>';
+                                //     shipment += '<th><strong>User</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.pickup_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.status + '</td>';
+                                //         shipment += '<td>' + history.reason + '</td>';
+                                //         shipment += '<td>' + history.user + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+                                // if ('old_pickup_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Pickup History (V1)</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>User</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.old_pickup_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.status + '</td>';
+                                //         shipment += '<td>' + history.user + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+                                // if ('handover_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Handover Shipment History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Handover Id</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.handover_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.handover_id + '</td>';
+                                //         shipment += '<td>' + history.status + '</td>';
+                                //         shipment += '<td>' + history.created_at + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('amount_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Amount History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable amount_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Old Amount</strong></th>';
+                                //     shipment += '<th><strong>New Amount</strong></th>';
+                                //     shipment += '<th><strong>Remarks</strong></th>';
+                                //     shipment += '<th><strong>User</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.amount_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.old_amount + '</td>';
+                                //         shipment += '<td>' + history.new_amount + '</td>';
+                                //         shipment += '<td>' + history.remarks + '</td>';
+                                //         shipment += '<td>' + history.user + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('weight_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Weight History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable weight_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Old Weight</strong></th>';
+                                //     shipment += '<th><strong>New Weight</strong></th>';
+                                //     shipment += '<th><strong>User</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.weight_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.old_weight + '</td>';
+                                //         shipment += '<td>' + history.new_weight + '</td>';
+                                //         shipment += '<td>' + history.user + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('crm_requests' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>CRM History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable crm_requests_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>S.No</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>Created At</strong></th>';
+                                //     shipment += '<th><strong>Created By</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+                                //     $count = 0;
+                                //     $.each(details.crm_requests, function (index, crm_request) {
+                                //         $count = $count + 1;
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + $count + '</td>';
+                                //         if (crm_request.status_id === 1 || crm_request.status_id === 5) {
+                                //             shipment += '<td>' + crm_request.status + '(<a class="btn btn-sm btn-outline-info align-middle" href="' + complain_route + crm_request.id + '" target="_blank">(' + crm_request.id + ')</a>)</td>';
+                                //         }
+                                //         else {
+                                //             shipment += '<td>' + crm_request.status + '</td>';
+                                //         }
+                                //         shipment += '<td>' + crm_request.created_at + '</td>';
+                                //         shipment += '<td>' + crm_request.created_by + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('open_box_journey' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Open Box History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable open_box_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Status</strong></th>';
+                                //     shipment += '<th><strong>Created By</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.open_box_journey, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.status + '</td>';
+                                //         shipment += '<td>' + history.created_by + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+
+                                // if ('quick_receiving_shipments_journeys' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Quick Receiving Shipment History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable pickup_history">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Delivery Note ID</strong></th>';
+                                //     shipment += '<th><strong>Received By</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.quick_receiving_shipments_journeys, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.created_at + '</td>';
+                                //         shipment += '<td>' + history.delivery_note_id + '</td>';
+                                //         shipment += '<td>' + history.received_by + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
+                                // if ('outstanding_history' in details) {
+                                //     shipment += '<div class="col-12 mt-2">';
+                                //     shipment += '<h4><u>Resolved Outstanding Shipment History</u></h4>';
+                                //     shipment += '<div class="border table-responsive">';
+
+                                //     shipment += '<table class="table table-sm table-borderless datatable resolved_outstanding_shipment">';
+                                //     shipment += '<thead>';
+                                //     shipment += '<tr role="row">';
+                                //     shipment += '<th><strong>Date / Time</strong></th>';
+                                //     shipment += '<th><strong>Resolved By</strong></th>';
+                                //     shipment += '</tr>';
+                                //     shipment += '</thead>';
+                                //     shipment += '<tbody>';
+
+                                //     $.each(details.outstanding_history, function (index, history) {
+                                //         shipment += '<tr>';
+                                //         shipment += '<td>' + history.date_time + '</td>';
+                                //         shipment += '<td>' + history.resolved_by + '</td>';
+                                //         shipment += '</tr>';
+                                //     });
+
+                                //     shipment += '</tbody>';
+                                //     shipment += '</table>';
+
+                                //     shipment += '</div>';
+                                //     shipment += '</div>';
+                                // }
 
                                 shipment += '</div>';
                                 shipment += '</div>';
 
 
                                 shipment += '</div>';
+
+
+                                shipment += '<button class="btn btn-primary float-right" style="margin: 10px;">Submit</button>';
+
+
 
                                 $('#tracking').append(shipment);
                             });
@@ -1887,6 +2140,15 @@ shipment += '</div>';
                     });
             }
 
+
+            $(document).on('change','#checkbox-id', function() {
+                if ($(this).is(':checked')) {
+                    $('#fake_status_remark').prop('disabled', false)
+                }else{
+                    $('#fake_status_remark').prop('disabled', true)
+
+                }
+            });
 
             $('#tracking').on('click', '.add_request', function () {
                 id = $(this).attr('id');
@@ -2861,6 +3123,50 @@ shipment += '</div>';
 
         });
 
+
+
+        // ('#shipment_reason').hide();
+       
+        $(document).on('change', '#shipment_status', function() {
+                var id = $(this).val();
+                $.ajax({
+                    url: '{!! route('admin.return_v2.get_shipment_reason') !!}',
+                    method: 'POST',
+                    data: {
+                    '_token': '{{ csrf_token() }}',
+                    'id': id
+                    }
+                })
+                .done(function(data) {
+                    if (data.status == 1 && id == 20 || id == 15) {
+                    var options = '';
+                    options += '<option value="">Select Reason</option>';
+
+                    $.each(data.reasons, function(index, reason) {
+                        
+                        options += '<option value="' + reason.value + '">' + reason.name + '</option>';
+                    });
+                    $('#shipment_reason').html(options);
+                    $('#shipment_reason').show().click();
+
+                    } else if(data.status == 1 && id == 1) {
+                        var options = '';
+                        options += '<option value="">Select Reason</option>';
+
+                        $.each(data.unresponsive_reasons, function(index, reason) {
+                            
+                            options += '<option value="' + reason.id + '">' + reason.remark + '</option>';
+                        });
+                        $('#shipment_reason').html(options);
+                        $('#shipment_reason').show().click();
+                    }else{
+
+                        $('#shipment_reason').hide();
+                    }
+                });
+            });
+
+
         $('#tracking').on('click', '.replacement_booked_image', function () {
                 window.open($(this).data('link'), '_blank');
 
@@ -2870,6 +3176,7 @@ shipment += '</div>';
                 window.open($(this).data('link'), '_blank');
 
             });
+
 
 				{{--$.ajax({--}}
 				{{--url: '{!! route('admin.tracking.cargo_consignment_details') !!}',--}}
