@@ -66,6 +66,7 @@ use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\CRM\CRMCount;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\SpecialApprovalRequestAdmin;
 
@@ -11269,5 +11270,118 @@ class AdminReportsController extends Controller
 
    
         return response()->json(['status' => 1, 'data' => $shipments]);
+    }
+    public function quick_scanned_report_index()
+    {
+        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $shippers = User::whereIn('status', [3, 4])->get();
+
+        return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
+    }
+    public function quick_scanned_report_list(Request $request)
+    {
+        
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            // ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+        }
+        $quick_scanned = ShipmentScanningJourney::join('shippments as s','shipment_scanning_journeys.shipment_id','=','s.id')
+        ->join('shipments_journey as sj','sj.shipment_id','=','s.id')
+        ->join('shipment_scanning_screen_locations as sssl','shipment_scanning_journeys.location_id','=','sssl.id')
+        ->where('sssl.id','=',8); 
+
+        // DB::connection('reports')->table('v2_pickup_notes')
+        //     ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
+        //     ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+        //     ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+        //     ->join('cities as c', 'c.id', '=', 'pr.city_id')
+        //     ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+        //     ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
+        //     ->leftjoin('shipments_journey as arrsh', function ($join) {
+        //         $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
+        //             ->where('arrsh.id', '=',
+        //                 DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
+        //     })
+        //     ->leftjoin('shipments_journey as total_s', function ($join) {
+        //         $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
+        //             ->where('total_s.id', '=',
+        //                 DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
+        //     })
+            
+        //     ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+        //     ->where('v2_pickup_notes.status',1)
+        //     ->groupBy('v2_pickup_notes.id');
+        
+        $datatables = Datatables::of($rider_pickup)
+            ->addColumn('scanned_shipments_btn', function ($entry) {
+                $function = "scanned_shipments_popup('".$entry->id."')";
+                if ($entry->scanned_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('arrived_shipments_btn', function ($entry) {
+                $function = "arrived_shipments_popup('".$entry->id."')";
+                if ($entry->arrived_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            }) 
+            ->addColumn('without_scan_shipments_btn', function ($entry) {
+
+                $function = "without_scan_shipments_popup('".$entry->id."')";
+                if ($entry->arrived_shipments > 0) {
+
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('without_scan_shipments', function ($entry) {
+
+                if ($entry->arrived_shipments > 0) {
+
+                    return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
+                } else {
+                    return 0;
+                }
+            })
+            
+            ->addColumn('pickup_note_id_btn', function ($entry) {
+                if ($entry->pickup_note_id != null) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+                }
+                return '';
+            })
+            ->addColumn('pickup_note_btn', function ($entry) {
+                $function = "pickup_note('".$entry->id."')";
+                if ($entry->id > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->pickup_note_id) . '</button>';
+                } else {
+                    return 0;
+                }
+            });
+
+        // if($rider = $request->get('search_rider')){
+        //     $datatables = $datatables->where('r.id', '=', $rider);
+        // }
+        // if($user = $request->get('search_shipper')){
+        //     $datatables = $datatables->where('s.user_id', '=', $user);
+        // }
+        // if($hub = $request->get('search_hub')){
+        //     $datatables = $datatables->where('c.hub_id', '=', $hub);
+        // }
+        
+        // if ($request->get('search_from') && $request->get('search_to')) {
+        //     $from = $request->get('search_from');
+        //     $to = $request->get('search_to');
+        //     $datatables = $datatables->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
+        // }
+
+        return $datatables->make(true);
     }
 }
