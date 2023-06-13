@@ -548,6 +548,14 @@ class RetailAPIController extends Controller
             }
 
             $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, intval($packaging));
+
+            if($request->has('admin_discount'))
+            {
+                if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount;
+                }
+            }
+
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid User"]);
@@ -644,7 +652,14 @@ class RetailAPIController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
-       
+
+        if($request->has('admin_discount'))
+        {
+            if ($request->filled('admin_discount') && $request->admin_discount > 0)
+            {
+                $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount;
+            }
+        }
      
         $charges = $rates["total_charges"];
         if ($shipping_mode_check == 3) {

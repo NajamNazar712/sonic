@@ -228,7 +228,7 @@
                                     <div class="col mt-1">
                                         <div class="form-group">
                                             <label>New Discount</label>
-                                            <input type="text" name="new_discount" id="new_discount" class="form-control form-control-sm" placeholder="New Discount">
+                                            <input type="text" name="admin_discount" id="admin_discount" class="form-control form-control-sm" placeholder="New Discount">
                                         </div>
                                         <div class="form-group">
                                             <label>Charges</label>
@@ -531,7 +531,11 @@
         }
 
         $(document).ready(function () {
-
+            $('#admin_discount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
 
@@ -1109,7 +1113,7 @@
                  height = $('#height').val();
                  insurance = $('#insurance_amount').val();
                  packaging = $('#packaging_amount').val();
-                var new_discount = $('#new_discount').val();
+                var admin_discount = $('#admin_discount').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1151,7 +1155,7 @@
                             'insurance_amount': insurance,
                             'packaging_amount': packaging,
                             'height': height,
-                            'new_discount': new_discount,
+                            'admin_discount': admin_discount,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
