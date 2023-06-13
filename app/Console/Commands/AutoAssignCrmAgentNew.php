@@ -88,18 +88,20 @@ class AutoAssignCrmAgentNew extends Command
                             ])->where('crm_agent_auto_assigns.status', 1)
                             ->where(function ($query) use ($value) {
                                 if (!empty($value->zone_id)) {
-                                    $query->orWhereHas('zones', function ($query) use ($value) {
+                                    $query->WhereHas('zones', function ($query) use ($value) {
                                         $query->where('zone_id', $value->zone_id);
                                     });
                                 }
+                                if (!empty($value->case_nature_id)) {
+                                    $query->WhereHas('case_natures', function ($query) use ($value) {
+                                        $query->where('case_nature_id', $value->case_nature_id);
+                                    });
+                                }
+                            })
+                            ->where(function ($query) use ($value) {
                                 if (!empty($value->hub_id)) {
                                     $query->orWhereHas('hubs', function ($query) use ($value) {
                                         $query->where('hub_id', $value->hub_id);
-                                    });
-                                }
-                                if (!empty($value->case_nature_id)) {
-                                    $query->orWhereHas('case_natures', function ($query) use ($value) {
-                                        $query->where('case_nature_id', $value->case_nature_id);
                                     });
                                 }
                                 if (!empty($value->case_nature_type_id)) {
