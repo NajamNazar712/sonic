@@ -170,6 +170,12 @@
 {{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
                     </ul>
                 </li>
+            @elseif(session('special_dashboard_user') && in_array(session('user_id'), session('mms_shippers')))
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
+                    <ul class="menu-content">
+                            <li><a class="menu-item" href="{{ route('cod.reports.special_dashboard.index') }}">MMS Special Account Report</a></li>
+                    </ul>
+                </li>
             @endif
             @if (session('user_type') == 1 || session('special_dashboard_user') || in_array(10, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
