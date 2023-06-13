@@ -533,6 +533,11 @@ class RetailShipmentBookController extends Controller
             $details['total_charges'] = $details['total_charges'] - $request->admin_discount;
         }
 
+        if ($details['total_charges'] < 0)
+        {
+            return response()->json(['status' => 0, 'error' => 'Total charges cannot be negative !', 'details' => $details]);
+        }
+
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 

@@ -227,8 +227,8 @@
 {{--                                    </div>--}}
                                     <div class="col mt-1">
                                         <div class="form-group">
-                                            <label>New Discount</label>
-                                            <input type="text" name="admin_discount" id="admin_discount" class="form-control form-control-sm" placeholder="New Discount">
+                                            <label>Admin Discount</label>
+                                            <input type="text" name="admin_discount" id="admin_discount" class="form-control form-control-sm" placeholder="Admin Discount">
                                         </div>
                                         <div class="form-group">
                                             <label>Charges</label>
@@ -1160,17 +1160,38 @@
                         }
                     })
                         .done(function (data) {
-                            var total_charges = '';
-                            if(data.status){
+                            if (data.status === 1)
+                            {
+                                var total_charges = '';
 
-                                $('#charges').val(data.details.charges);
-                                $('#discount').val(data.details.discount_amount);
-                                $('#charges_with_discount').val(data.details.charges_with_discount);
-                                $('#gst').val(data.details.gst_charges);
-                                $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
 
-                                $('#total_charges').val(data.details.total_charges);
+                                    $('#charges').val(data.details.charges);
+                                    $('#discount').val(data.details.discount_amount);
+                                    $('#charges_with_discount').val(data.details.charges_with_discount);
+                                    $('#gst').val(data.details.gst_charges);
+                                    $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
+
+                                    $('#total_charges').val(data.details.total_charges);
+
                             }
+                            else
+                            {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+
+                                $('#charges').val('');
+                                $('#discount').val('');
+                                $('#charges_with_discount').val('');
+                                $('#gst').val('');
+                                $('#packaging_and_insurance_charges').val('');
+
+                                $('#total_charges').val('');
+
+                                $('#admin_discount').val('');
+                            }
+
                         });
                 }
                 else{
