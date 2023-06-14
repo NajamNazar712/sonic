@@ -556,6 +556,11 @@ class RetailAPIController extends Controller
                 }
             }
 
+            if ($rates['total_charges'] <= 0)
+            {
+                return response()->json(['status' => 1, 'error' => 'Total charges should be greater than zero !']);
+            }
+
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid User"]);
@@ -659,6 +664,11 @@ class RetailAPIController extends Controller
             {
                 $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount;
             }
+        }
+
+        if ($rates['total_charges'] <= 0)
+        {
+            return response()->json(['status' => 1, 'error' => 'Total charges should be greater than zero !']);
         }
      
         $charges = $rates["total_charges"];
@@ -773,6 +783,10 @@ class RetailAPIController extends Controller
         $retail_shipment->weight_charges = $rates['charges_without_gst'];
         $retail_shipment->gst = $rates['gst_charges'];
         $retail_shipment->retail_user_id = $retail_user_id;
+        if($request->has('admin_discount'))
+        {
+            $retail_shipment->admin_discount = $request->admin_discount;
+        }
         $retail_shipment->save();
 
 
