@@ -34,7 +34,7 @@
                                         <div class="col-6">
                                             @php  $ss  = $selected_agent->shipment_statuses->pluck('shipment_status_id')->toArray();  @endphp
                                             <div class="form-group">
-                                                <label>Shipment Status</label>
+                                                <label>Shipment Status &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="shipment_status_id[]" id="shipment_status_id" class="form-control select2" multiple="multiple" >
                                                     @foreach($shipment_status as $status)
                                                     <option value="{{ $status->id }}"  {{ (in_array($status->id,$ss)) ? 'selected' : ''  }} >
@@ -51,7 +51,7 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Zone*</label>
+                                                <label>Zone* &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="zone_id[]" id="zone_id" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                     <option value="" disabled>Select</option>
                                                     @foreach($zones as $zone)
@@ -62,7 +62,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Hub</label>
+                                                <label>Hub* &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="hub_id[]" id="hub_id"  class="form-control select2" multiple="multiple"  >
                                                     @foreach($hubs as $hub)
                                                     <option value="{{ $hub->id }}" > {{ $hub->name }} </option>
@@ -79,7 +79,7 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Case Nature*</label>
+                                                <label>Case Nature* &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="case_nature_id[]" id="case_nature_id" class="form-control select2" multiple="multiple" required data-rule-required="true" data-msg-required="This field is required">
                                                     @foreach($case_natures as $cn)
                                                         <option value="{{ $cn->id }}"  {{ in_array($cn->id, $cnh)  ? 'selected' : '' }}> {{ $cn->name }} </option>
@@ -89,7 +89,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Case Nature Type</label>
+                                                <label>Case Nature Type &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="case_nature_type_id[]" id="case_nature_type_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($case_nature_types as $case_nature_type)
                                                     <option value="{{ $case_nature_type->id }}"> {{ $case_nature_type->type }} </option>
@@ -105,7 +105,7 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Segments</label>
+                                                <label>Segments &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="business_segment_id[]" id="business_segment_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($segments as $sg)
                                                         <option value="{{ $sg->id }}" {{ in_array($sg->id, $bsk)  ? 'selected' : '' }}> {{ $sg->name }} </option>
@@ -115,7 +115,7 @@
                                         </div>
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Sub Segments</label>
+                                                <label>Sub Segments &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="sub_business_segment_id[]" disabled id="sub_business_segment_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($sub_segment as $ss)
                                                         <option value="{{ $ss->id }}" > {{ $ss->name }} </option>
@@ -130,7 +130,7 @@
                                     <div class="row">
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Shipper with KAM</label>
+                                                <label>Shipper with KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="shipper_key_id[]" id="shipper_key_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($shipper_key as $cn)
                                                         <option value="{{ $cn->id }}" {{ in_array($cn->id, $sk)  ? 'selected' : '' }}>{{ $cn->name }}</option>
@@ -143,7 +143,7 @@
 
                                         <div class="col-6">
                                             <div class="form-group">
-                                                <label>Shipper without KAM</label>
+                                                <label>Shipper without KAM &nbsp;(<input type="checkbox" class="checkAll"  >Select All)</label>
                                                 <select name="shipper_non_key_id[]" id="shipper_non_key_id" class="form-control select2" multiple="multiple"  >
                                                     @foreach($shipper_non_key as $cn)
                                                     <option value="{{ $cn->id }}" {{ in_array($cn->id, $snk)  ? 'selected' : '' }}>
@@ -220,6 +220,10 @@
                         });
                         $('#hub_id').append(options).trigger('change');
                         hb = [];
+
+                        $('#hub_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
                     }
                 })
             }
@@ -245,6 +249,10 @@
                         });
                         $('#case_nature_type_id').append(options);
                         cnt = [];
+
+                        $('#case_nature_type_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
                     }
                 })
             }
@@ -268,6 +276,10 @@
                             options+=`<option value='${field.id}' ${selected}>${field.name}<option>`;
                         });
                         $('#sub_business_segment_id').append(options);
+
+                        $('#sub_business_segment_id').find('option').filter(function() {
+                            return $.trim($(this).text()) === '';
+                        }).remove();
                     }
                 })
             }
@@ -393,10 +405,19 @@
                 submitHandler: function(form) {
                     $('#agent_id').prop('disabled', false);
                     form.submit();
-
-
                 }
+            });
 
+            $("#crm_agent_assign .checkAll").on('click',function (){
+                var nextSelect = $(this).closest('.form-group').find('select');
+                var options = $(nextSelect).find('option');
+                if($(this).is(':checked')) {
+                    options.prop("selected", "selected");
+                    $(nextSelect).trigger("change");
+                }else{
+                    options.prop("selected", false);
+                    $(nextSelect).trigger("change");
+                }
             });
         });
     </script>
