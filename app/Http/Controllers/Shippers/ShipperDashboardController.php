@@ -198,10 +198,9 @@ class ShipperDashboardController extends Controller
                 $stats['return'] = number_format($stats['return']->count());
                 $stats['in_process'] = number_format($stats['in_process']->count());
                 $cities = DB::connection('reports')->table('cities')->select(['id', 'name'])->get();
-                $sister_users = DB::connection('reports')->table('substitute_user_merge_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))->select('u.id', 'u.name')->get();
+                $sister_users = DB::connection('reports')->table('substitute_user_merge_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))->select('u.id', 'u.name')->get();
                 $user = DB::connection('reports')->table('users')->select('id', 'name')->where('id', session('user_id'))->first();
                 return view('client.special_dashboard')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
-                
             }
             else{
 

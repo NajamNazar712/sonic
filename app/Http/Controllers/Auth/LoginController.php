@@ -110,6 +110,8 @@ class LoginController extends Controller
         $packaging_charges_check = TRUE;
         $user_info = SubstituteUser::where('email',$request->email)->first();
 
+        session(['substitute_user_id' => $user_info->id]);
+
         if (session('user_type') == 1) {
             if ($user->blacklist) {
                 auth('web')->logout();

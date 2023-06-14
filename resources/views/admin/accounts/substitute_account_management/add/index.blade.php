@@ -52,7 +52,7 @@
 									</div>
 									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<select name="restriction" class="select2" id="restriction" data-rule-required="true" data-msg-required="Restriction is required">
-											<option value="1">Enable</option>
+											{{-- <option value="1">Enable</option> --}}
 											<option value="0">Disable</option>
 										</select>
 									</div>
@@ -72,7 +72,7 @@
 										@endif
 									</div>
 										
-									<div class="col-12">
+									{{-- <div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 
 										@foreach($permissions as $permission)
@@ -90,7 +90,7 @@
 											</fieldset>
 											@endif
 										@endforeach
-									</div>
+									</div> --}}
 
 
 									<div class="col-12">

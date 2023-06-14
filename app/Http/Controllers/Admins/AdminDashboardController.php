@@ -12920,16 +12920,29 @@ class AdminDashboardController extends Controller
             }
         }
 
-        if ($request->has('permission_ids')) {
-            foreach($request->input('permission_ids') as $permission_id) {
+        $new_permission_ids = [10,16,17,18,19];
+
+        SubstituteUserPermission::where('substitute_user_id', $id)->delete();
+
+        foreach($new_permission_ids as $permission_id) {
             $substitute_user_permission = new SubstituteUserPermission();
 
             $substitute_user_permission->substitute_user_id = $substitute_user->id;
             $substitute_user_permission->permission_id = $permission_id;
 
             $substitute_user_permission->save();
-            }
         }
+
+        // if ($request->has('permission_ids')) {
+        //     foreach($request->input('permission_ids') as $permission_id) {
+        //     $substitute_user_permission = new SubstituteUserPermission();
+
+        //     $substitute_user_permission->substitute_user_id = $substitute_user->id;
+        //     $substitute_user_permission->permission_id = $permission_id;
+
+        //     $substitute_user_permission->save();
+        //     }
+        // }
 
         return redirect()->route('admin.accounts.substitute_account_management.index',$id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been added!','shipper_id' => $id]);
     }
@@ -13008,26 +13021,26 @@ class AdminDashboardController extends Controller
             }
         }
 
-        if ($request->has('permission_ids')) {
-            $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
+        // if ($request->has('permission_ids')) {
+        //     $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
 
-            $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
-            $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
+        //     $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
+        //     $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
 
-            SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
+        //     SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
 
-            foreach($new_permission_ids as $permission_id) {
-                $substitute_user_permission = new SubstituteUserPermission();
+        //     foreach($new_permission_ids as $permission_id) {
+        //         $substitute_user_permission = new SubstituteUserPermission();
 
-                $substitute_user_permission->substitute_user_id = $id;
-                $substitute_user_permission->permission_id = $permission_id;
+        //         $substitute_user_permission->substitute_user_id = $id;
+        //         $substitute_user_permission->permission_id = $permission_id;
 
-                $substitute_user_permission->save();
-            }
-        }
-        else {
-            SubstituteUserPermission::where('substitute_user_id', $id)->delete();
-        }
+        //         $substitute_user_permission->save();
+        //     }
+        // }
+        // else {
+        //     SubstituteUserPermission::where('substitute_user_id', $id)->delete();
+        // }
 
         return redirect()->route('admin.accounts.substitute_account_management.index',$shipper_id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been updated!' , 'shipper_id' => $id]);
     }
