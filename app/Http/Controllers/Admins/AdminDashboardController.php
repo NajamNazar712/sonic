@@ -12876,7 +12876,7 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_add_index($shipper_id) {
 
-        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
+        $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
 
         $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
         $sister_accounts = MergedSisterAccount::join('users','users.id','merged_sister_accounts.user_id')
@@ -12956,7 +12956,7 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_update_index($shipper_id , $id) {
         
-        $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->where('status',1)->get();
+        $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
         $substitute_user = SubstituteUser::find($id);
 
         $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
@@ -13058,6 +13058,16 @@ class AdminDashboardController extends Controller
 
     public function shipment_received_excel_upload(Request $request){
         
+        $validations = [
+            'receiver_detials' => 'required',
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+
         if ($file = $request->file('receiver_detials')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
@@ -13166,7 +13176,7 @@ class AdminDashboardController extends Controller
                 
             }
 
-            return redirect()->back()->with(['success' => 'Upload Successfully']);
+            return redirect()->back()->with(['success' => 'Uploaded Successfully']);
 
         }
     }
