@@ -7063,17 +7063,17 @@ class APIController extends Controller
                 foreach ($validate->errors()->all() as $index => $error) {
                     $errors[$index]['error_code'] = 10;
                     $errors[$index]['error_text'] = 'Invalid Input.';
-                    if ($error == 'delivery note id is Required.') {
+                    if ($error == 'retail note id is Required.') {
                         $errors[$index]['error_code'] = 1;
-                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                        $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
                     }
-                    if ($error == 'delivery note id must be an Integer.') {
+                    if ($error == 'retail note id must be an Integer.') {
                         $errors[$index]['error_code'] = 2;
-                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                        $errors[$index]['error_text'] = 'retail note id must be an Integer.';
                     }
-                    if ($error == 'Given delivery note id is of Invalid ID.') {
+                    if ($error == 'Given retail note id is of Invalid ID.') {
                         $errors[$index]['error_code'] = 3;
-                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                        $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
                     }
                     if ($error == 'Collection Amount is Required.') {
                         $errors[$index]['error_code'] = 4;
@@ -7113,7 +7113,13 @@ class APIController extends Controller
                     $retail_note = RetailCashDeposit::where('id', $retail_note_id);
                     if ($retail_note->exists()) {
                         $retail_note = $retail_note->first();
+
+                        if($retail_note->status != 0)
+                        {
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                        }
                     }
+
                     $transaction_amount = $amount;
 
                     $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
