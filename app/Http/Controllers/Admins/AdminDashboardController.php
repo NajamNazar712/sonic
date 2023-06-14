@@ -13059,8 +13059,9 @@ class AdminDashboardController extends Controller
     public function shipment_received_excel_upload(Request $request){
         
         $validations = [
-            'receiver_details' => 'required',
+            'receivers_excel' => 'required',
         ];
+
         $validate = Validator::make($request->all(), $validations);
 
         if ($validate->fails()) {
@@ -13068,7 +13069,7 @@ class AdminDashboardController extends Controller
                 ->withErrors($validate);
         }
 
-        if ($file = $request->file('receiver_details')) {
+        if ($file = $request->file('receivers_excel')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();     
