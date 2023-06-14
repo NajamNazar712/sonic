@@ -14,22 +14,17 @@ class UpdatePettCashShipmentStatusSeeder extends Seeder
      */
     public function run()
     {
-        $settings = GlobalSettings::where('type','foc_account_tag');
-
-     
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            $user_ids = array_map('intval', explode(',', $settings->text));
-          
-            $shipments = Shipment::whereIn('user_id',$user_ids)->whereIn('shipper_status_id',[1,2])->get();
-           
+       
+            $shipments = Shipment::where('user_id',1690)->whereIn('shipper_status_id',[1,2])->where('special_instructions', 'like', '%Petty Cash Statement%')->get();
+        
+            if(count($shipments) > 0){
             foreach($shipments as $shipment){
                               
                 Shipment::where('id', $shipment->id)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
                 ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, NULL, NULL, 346, NULL, NULL, 1, NULL, NULL);
             }
-            
         }
-        
+            
     }
+        
 }
