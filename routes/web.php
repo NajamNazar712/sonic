@@ -1591,10 +1591,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 
-    Route::prefix('return_v2')->name('return_v2.')->group(function () {
-        Route::get('', 'Admins\ReturnV2Controller@return_v2')->name('return_v2');
-        Route::post('get_shipment_reason', 'Admins\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
-    });
+ 
     
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
         Route::prefix('supervisor')->name('supervisor.')->group(function () {
@@ -4421,4 +4418,19 @@ Route::prefix('retail')->name('retail.')->group(function () {
 
 
 
+});
+
+Route::prefix('agent')->name('agent.')->group(function () {
+
+    Route::get('/login', 'Auth\AgentLoginController@showLoginForm')->name('login');
+    Route::post('/login', 'Auth\AgentLoginController@login')->name('login.submit');
+    Route::get('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+
+    Route::prefix('dashboard')->name('dashboard.')->group(function () {
+        Route::get('', 'Agent\ReturnV2Controller@index')->name('index');
+        Route::post('get_shipment_reason', 'Agent\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
+        Route::post('getTicket', 'Agent\ReturnV2Controller@getTicket')->name('get_ticket');
+
+    });
 });

@@ -1,3 +1,5 @@
+
+
 @extends('admin.layout.master')
 
 @section('title', 'RV')
@@ -8,9 +10,7 @@
 			<div class="content-header row">
 			</div>
 			<div class="content-body">
-				<h1 class="mb-1">
-					RV
-				</h1>
+			
 
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
@@ -24,6 +24,12 @@
 
                             
                             <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
+                                {{-- <div class="d-none">
+                                    <div class="form-group">
+                                        <input type="hidden" name="auth_id" class="auth_id" value="{{ Auth::id() }}">
+                                    </div>
+                                </div> --}}
 
                                 <div class="d-none">
                                     <div class="form-group">
@@ -41,7 +47,7 @@
                                 <div class="row justify-content-between">
                                   <div class="col-1">
                                     <h6>Total Tickets</h6>
-                                    <div class="border table-responsive">
+                                    <div class="border table-responsive gray">
                                       <table class="table table-sm table-borderless mb-0">
                                         <tbody>
                                           <tr>
@@ -58,7 +64,7 @@
                                         <div class="col-4 p-0">
                                           <div class="p-0">
                                             <h6>Re - Attempt Count</h6>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive gray">
                                               <table class="table table-sm table-borderless mb-0">
                                                 <tbody>
                                                   <tr>
@@ -73,7 +79,7 @@
                                         <div class="col-4 p-0">
                                           <div class="p-0">
                                             <h6>Refused On Call</h6>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive gray">
                                               <table class="table table-sm table-borderless mb-0">
                                                 <tbody>
                                                   <tr>
@@ -88,7 +94,7 @@
                                         <div class="col-4 p-0">
                                           <div class="p-0">
                                             <h6>Unresponsive</h6>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive gray">
                                               <table class="table table-sm table-borderless mb-0">
                                                 <tbody>
                                                   <tr>
@@ -107,7 +113,7 @@
                                 <div class="row justify-content-between">
                                   <div class="col-2">
                                     <h6 class="mt-2">Agent Employee ID</h6>
-                                    <div class="border table-responsive">
+                                    <div class="border table-responsive gray">
                                       <table class="table table-sm table-borderless mb-0">
                                         <tbody>
                                           <tr>
@@ -124,7 +130,7 @@
                                         <div class="col-2 p-0">
                                           <div class="p-0">
                                             {{-- <h6 class="text-center mt-2">Agent</h6>
-                                            <div class="border table-responsive">
+                                            <div class="border table-responsive gray">
                                               <table class="table table-sm table-borderless mb-0">
                                                 <tbody>
                                                   <tr>
@@ -138,7 +144,7 @@
                                         <div class="col-5 p-0">
                                             <div class="p-0">
                                               <h6 class="text-center mt-2">Agent</h6>
-                                              <div class="border table-responsive">
+                                              <div class="border table-responsive gray">
                                                 <table class="table table-sm table-borderless mb-0">
                                                   <tbody>
                                                     <tr>
@@ -152,7 +158,7 @@
                                           <div class="col-3 p-0">
                                             <div class="p-0">
                                               {{-- <h6 class="text-center mt-2">Agent</h6>
-                                              <div class="border table-responsive">
+                                              <div class="border table-responsive gray">
                                                 <table class="table table-sm table-borderless mb-0">
                                                   <tbody>
                                                     <tr>
@@ -677,6 +683,10 @@
             width: 300px;
         }
 
+        .gray{
+            background-color: #E7E7E7
+        }
+
 
 	</style>
 @endsection
@@ -1150,15 +1160,16 @@
 
             function track(tracking_numbers) {
                 $.ajax({
-                    url: '{!! route('admin.tracking.track_v2') !!}',
+                    url: '{!! route('agent.dashboard.get_ticket') !!}',
                     method: 'POST',
                     data: {
+                        // 'auth_id': auth_id,
                         'tracking_numbers': tracking_numbers,
+
                         '_token': '{{ csrf_token() }}'
                     }
                 })
                     .done(function (data) {
-                        select[0].selectize.clear();
 
                         $('#tracking').html('');
 
@@ -1180,6 +1191,7 @@
                         }
 
                         if (data.shipments != undefined) {
+                            console.log(69)
                             $.each(data.shipments, function (index, details) {
 
                                 var id = details.shipment_id;
@@ -1237,7 +1249,7 @@
 
                                 // shipment += '<div class="col-1">';
                                 // shipment += '<h6>Total Tickets</h6>';
-                                // shipment += '<div class="border table-responsive">';
+                                // shipment += '<div class="border table-responsive gray">';
                                 // shipment += '<table class="table table-sm table-borderless mb-0">';
                                 // shipment += '<tbody>';
 
@@ -1260,7 +1272,7 @@
                                 // shipment += '<div class="col-4 p-0">';
                                 // shipment += '<div class="p-0">';
                                 // shipment += '<h6>Re - Attempt Count</h6>';
-                                // shipment += '<div class="border table-responsive">';
+                                // shipment += '<div class="border table-responsive gray">';
                                 // shipment += '<table class="table table-sm table-borderless mb-0">';
                                 // shipment += '<tbody>';
                                 // shipment += '<tr>';
@@ -1275,7 +1287,7 @@
                                 // shipment += '<div class="col-4 p-0">';
                                 // shipment += '<div class="p-0">';
                                 // shipment += '<h6>Refused On Call</h6>';
-                                // shipment += '<div class="border table-responsive">';
+                                // shipment += '<div class="border table-responsive gray">';
                                 // shipment += '<table class="table table-sm table-borderless mb-0">';
                                 // shipment += '<tbody>';
                                 // shipment += '<tr>';
@@ -1290,7 +1302,7 @@
                                 // shipment += '<div class="col-4 p-0">';
                                 // shipment += '<div class="p-0">';
                                 // shipment += '<h6>UnResponsive</h6>';
-                                // shipment += '<div class="border table-responsive">';
+                                // shipment += '<div class="border table-responsive gray">';
                                 // shipment += '<table class="table table-sm table-borderless mb-0">';
                                 // shipment += '<tbody>';
                                 // shipment += '<tr>';
@@ -1314,7 +1326,7 @@
                                 shipment += '<div class="row justify-content-between pl-1">'
                                 shipment += '  <div class="col-2 pr-0 pl-1">'
                                 shipment += '    <h6 class="mt-2"></h6>'
-                                shipment += '    <div class="border table-responsive">'
+                                shipment += '    <div class="border table-responsive gray">'
                                 shipment += '      <table class="table table-sm table-borderless mb-0">'
                                 shipment += '        <tbody>'
                                 shipment += '          <tr>'
@@ -1330,7 +1342,7 @@
                                 shipment += '        <div class="col-12 pl-0">'
                                 shipment += '          <div class="p-0">'
                                 shipment += '            <h6 class="text-center mt-2"></h6>'
-                                shipment += '            <div class="border table-responsive">'
+                                shipment += '            <div class="border table-responsive gray">'
                                 shipment += '              <table class="table table-sm table-borderless mb-0">'
                                 shipment += '                <tbody>'
                                 shipment += '                  <tr>'
@@ -1348,7 +1360,7 @@
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
                                 shipment += '<h4><u>Shipper Information</u></h4>';
-                                shipment += '<div class="border table-responsive">';
+                                shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
@@ -1390,7 +1402,7 @@
 
                                 shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-2">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
-                                shipment += '<div class="border table-responsive">';
+                                shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
@@ -1426,7 +1438,7 @@
 
                                 shipment += '<div class="col-12 mt-2">';
                                 shipment += '<h4><u>Order Information</u></h4>';
-                                shipment += '<div class="border table-responsive">';
+                                shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
                                 shipment += '<tbody>';
 
@@ -1504,7 +1516,7 @@
 
                                 shipment += '<div class="col-12 mt-2">';
                                     shipment += '<h4 class="text-center"><u>Tracking Information</u></h4>'
-                                shipment += '<div class="border table-responsive">';
+                                shipment += '<div class="border table-responsive gray">';
                                 shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
@@ -2007,6 +2019,9 @@
 
 
                                 $('#tracking').append(shipment);
+
+
+                                console.log(21)
                             });
                             scan_sound(1);
 
@@ -2043,38 +2058,6 @@
                     });
             }
 
-			@if (app('request')->has('tracking_number'))
-            track({{ app('request')->input('tracking_number') }});
-					@endif
-
-            var select = $('#track_form .tracking_numbers').selectize({
-                    placeholder: 'Tracking Number(s)*',
-                    delimiter: ',',
-                    createOnBlur: true,
-                    persist: false,
-                    plugins: ['remove_button'],
-                    onDropdownOpen: function (dropdown) {
-                        dropdown.remove();
-                    },
-                    onType: function (str) {
-                        var regex = /^[0-9,]+$/;
-
-                        if (!regex.test(str)) {
-                            select[0].selectize.setTextboxValue('');
-                        }
-                    },
-                    create: function (input) {
-                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                            return {
-                                value: input,
-                                text: input
-                            }
-                        }
-                        else {
-                            return false;
-                        }
-                    }
-                });
 
             $('#track_form').validate({
                 ignore: [],
@@ -2084,6 +2067,7 @@
                     error.addClass('w-100').appendTo(element.parents('form'));
                 },
                 submitHandler: function (form) {
+                    console.log(1)
                     track($(form).find('.tracking_numbers').val());
 
                     return false;
@@ -3125,17 +3109,17 @@
 
 
 
-        // ('#shipment_reason').hide();
+        // ('#shipment_reason').hide()
        
         $(document).on('change', '#shipment_status', function() {
                 var id = $(this).val();
                 $.ajax({
-                    url: '{!! route('admin.return_v2.get_shipment_reason') !!}',
+                    url: '{!! route('agent.dashboard.get_shipment_reason') !!}',
                     method: 'POST',
                     data: {
                     '_token': '{{ csrf_token() }}',
                     'id': id
-                    }
+                }
                 })
                 .done(function(data) {
                     if (data.status == 1 && id == 20 || id == 15) {
@@ -3149,7 +3133,7 @@
                     $('#shipment_reason').html(options);
                     $('#shipment_reason').show().click();
 
-                    } else if(data.status == 1 && id == 1) {
+                    }else if(data.status == 1 && id == 1) {
                         var options = '';
                         options += '<option value="">Select Reason</option>';
 
@@ -3160,7 +3144,6 @@
                         $('#shipment_reason').html(options);
                         $('#shipment_reason').show().click();
                     }else{
-
                         $('#shipment_reason').hide();
                     }
                 });

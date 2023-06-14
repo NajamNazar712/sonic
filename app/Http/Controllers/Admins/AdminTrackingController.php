@@ -96,7 +96,6 @@ class AdminTrackingController extends Controller
 
     public function track(Request $request)
     {
-
         $tracking_numbers = explode(',', $request->tracking_numbers);
 
         $tracking = array();
