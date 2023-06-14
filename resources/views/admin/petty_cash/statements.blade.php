@@ -87,8 +87,8 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
-                        <th class="border-primary border-darken-1">Station Approved By</th>
-                        <th class="border-primary border-darken-1">Station Approved At</th>
+                        {{-- <th class="border-primary border-darken-1">Station Approved By</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Station Approved At</th> --}}
                         <th class="border-primary border-darken-1">Operation Approved By</th>
                         <th class="border-primary border-darken-1">Operation Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -236,8 +236,8 @@
                             head.push('Total Amount');
                             head.push('Created By');
                             head.push('Created At');
-                            head.push('Station Approved By');
-                            head.push('Station Approved At');
+                            // head.push('Station Approved By');
+                            // head.push('Station Approved At');
                             head.push('Operation Approved By');
                             head.push('Operation Approved At');
                             head.push('Status');
@@ -259,8 +259,8 @@
                                 row.push(values.total_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.station_approved_by);
-                                row.push(values.station_approved_at);
+                                // row.push(values.station_approved_by);
+                                // row.push(values.station_approved_at);
                                 row.push(values.operation_approved_by);
                                 row.push(values.operation_approved_at);
                                 row.push(values.status);
@@ -280,85 +280,85 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
-                @if (session('role_id') == 1 || (in_array(190, session('permissions')) && session('department_id') == 6))
-                    {
-                        className: 'btn btn-primary station',
-                        text: 'Station Approved',
-                        enabled: false,
+                // @if (session('role_id') == 1 || (in_array(190, session('permissions')) && session('department_id') == 6))
+                //     {
+                //         className: 'btn btn-primary station',
+                //         text: 'Station Approved',
+                //         enabled: false,
 
-                        action: function (e, dt, node, config) {
-                            $('input:hidden[name=statement_ids]').val(selected_rows);
+                //         action: function (e, dt, node, config) {
+                //             $('input:hidden[name=statement_ids]').val(selected_rows);
 
-                            if(selected_rows.length === 0){
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                table.button('.check').disable();
-                                return false;
-                            }
-                            else if(selected_rows !== ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows,
-                                                'action': 'station'
-                                            }
-                                        }).done(function(data){
-                                            if(data.status == 0){
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                table.button('.finance').disable();
-                                                table.button('.station').disable();
-                                                table.button('.operation').disable();
-                                                table.button('.check').disable();
-                                                table.draw(true);
-                                                table.columns.adjust().draw();
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            else
-                                            {
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                            }
+                //             if(selected_rows.length === 0){
+                //                 table.button('.finance').disable();
+                //                 table.button('.station').disable();
+                //                 table.button('.operation').disable();
+                //                 table.button('.check').disable();
+                //                 return false;
+                //             }
+                //             else if(selected_rows !== ''){
+                //                 swal({
+                //                     title: 'Are You Sure?',
+                //                     icon: 'warning',
+                //                     buttons: {
+                //                         cancel: {
+                //                             text: 'No',
+                //                             value: null,
+                //                             visible: true,
+                //                             closeModal: true,
+                //                         },
+                //                         confirm: {
+                //                             text: 'Yes',
+                //                             value: true,
+                //                             visible: true,
+                //                             closeModal: true
+                //                         }
+                //                     },
+                //                     closeOnClickOutside: false,
+                //                     closeOnEsc: false,
+                //                     dangerMode: true
+                //                 }).then(function (confirm) {
+                //                     if (confirm) {
+                //                         $.ajax({
+                //                             url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
+                //                             method: 'POST',
+                //                             data: {
+                //                                 '_token': '{{ csrf_token() }}',
+                //                                 'statement_ids': selected_rows,
+                //                                 'action': 'station'
+                //                             }
+                //                         }).done(function(data){
+                //                             if(data.status == 0){
+                //                                 table.rows().deselect();
+                //                                 selected_rows = [];
+                //                                 table.button('.finance').disable();
+                //                                 table.button('.station').disable();
+                //                                 table.button('.operation').disable();
+                //                                 table.button('.check').disable();
+                //                                 table.draw(true);
+                //                                 table.columns.adjust().draw();
+                //                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                //                             }
+                //                             else
+                //                             {
+                //                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //                             }
 
-                                        });
-                                    }
-                                });
+                //                         });
+                //                     }
+                //                 });
 
-                            }else{
-                                var error = 'Statement ID Not Found, Please Try again!';
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                table.button('.check').disable();
-                            }
-                        }
-                    },
-                        @endif
+                //             }else{
+                //                 var error = 'Statement ID Not Found, Please Try again!';
+                //                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                //                 table.button('.finance').disable();
+                //                 table.button('.station').disable();
+                //                 table.button('.operation').disable();
+                //                 table.button('.check').disable();
+                //             }
+                //         }
+                //     },
+                //         @endif
 
                         @if (session('role_id') == 1 || (in_array(191, session('permissions')) &&  session('department_id') == 6))
                     {
@@ -705,8 +705,8 @@
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
-                    {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
+                    // {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
+                    // {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
                     {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
                     {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
