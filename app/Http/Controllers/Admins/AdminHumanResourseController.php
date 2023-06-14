@@ -268,6 +268,10 @@ class AdminHumanResourseController extends Controller
 
                 }
                 $employee->request_status_id = 3;
+                if($employee->staff_category_id == 3){
+                    $employee->status_id = 3; // Set "Active No info" when contractual
+                    $employee->confirmation_status = 2; //Set probation intially
+                }
                 if ($request->has('joining_date_formatted')) {
                     $employee->joining_date = $request->joining_date_formatted;
                 }
@@ -1133,7 +1137,7 @@ class AdminHumanResourseController extends Controller
                     $employee->request_status_id = 3;
                     if($employee->staff_category_id == 3){
                         $employee->status_id = 3; // Set "Active No info" when contractual
-                        $employee->employee_type_id = 2; //Set probation intially
+                        $employee->confirmation_status = 2; //Set probation intially
                     }
                     $employee->save();
 
