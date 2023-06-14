@@ -13099,21 +13099,61 @@ class AdminDashboardController extends Controller
         
         $invalid_shipment = [];
         $valid_shipment   = [];
+        $no_zero_cod_shipment = [];
+        $no_special_dashboard_shipper = [];
+        $shipment_not_delivered = [];
         
+        $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+        $shippers = explode(',', $shippers->text);
+        $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+
         foreach ($rows as $key => $row) {
             $shipment = Shipment::where('tracking_number',$row[0])->first();
             
-            if(empty($shipment)){
-                $invalid_shipment[] = [$row[0],$row[1],$row[2],$row[3]];
-            }
-            else{
-                $valid_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
-            }
-            
+                if(empty($shipment)){
+                    return redirect()->back()->with(['error' => 'Tracking no '.$row[0].' is Invalid']);
+                }
+                else{
+                    if(in_array($shipment->user_id,$special_dashboard_shippers))
+                    {
+                        if($shipment->shipper_status_id == 14)
+                        {
+                            if($shipment->amount == 0 )
+                            {
+                                $valid_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
+                            }
+                            else {
+                                $no_zero_cod_shipment[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
+                                return redirect()->back()->with(['error' => 'Tracking no '.$row[0].' has no zero cod amount']);
+                            }
+                        }
+                        else{
+                            $shipment_not_delivered[] = [$row[0],$shipment->id,$row[1],$row[2],$row[3]];
+                            return redirect()->back()->with(['error' => 'Tracking no '.$row[0].' is not delivered']);
+                        }
+                    }
+                    else{
+                        return redirect()->back()->with(['error' => 'Tracking no '.$row[0].' has No Special Dashboard Shipper Shipment']);
+                    }
+                }
         }
-        if(collect($invalid_shipment)->isEmpty()){
-            if(collect($valid_shipment)->isNotEmpty()){
-                foreach ($valid_shipment as $valid) {
+
+        if(count($valid_shipment) > 0)
+        {
+            foreach ($valid_shipment as $valid) {
+                $tracking_no = ShipementReceiveDetails::where('tracking_number',$valid[0])->first();
+
+                if($tracking_no)
+                {
+                    $tracking_no->shipment_id            = $valid[1];
+                    $tracking_no->tracking_number        = $valid[0];
+                    $tracking_no->receiver_name          = $valid[2];
+                    $tracking_no->receiver_cnic          = $valid[3];
+                    $tracking_no->receiver_relationship  = $valid[4];
+                    $tracking_no->received_by            = Auth::id();
+                    $tracking_no->update();
+                }
+                else{
                     $receiving_detials = new ShipementReceiveDetails();
                     $receiving_detials->shipment_id            = $valid[1];
                     $receiving_detials->tracking_number        = $valid[0];
@@ -13123,14 +13163,11 @@ class AdminDashboardController extends Controller
                     $receiving_detials->received_by            = Auth::id();
                     $receiving_detials->save();
                 }
+                
+            }
+
             return redirect()->back()->with(['success' => 'Upload Successfully']);
-            }
-            else{
-                return redirect()->back()->with(['error' => 'Fill Out the Sheet Correctly', 'invalid_shipment' =>$invalid_shipment]);
-            }
-        }
-        else{
-            return redirect()->back()->with(['error' => 'Shipment not found', 'invalid_shipment' =>$invalid_shipment]);
+
         }
     }
 

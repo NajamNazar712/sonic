@@ -63,33 +63,6 @@
         </div>
     </section>
 
-    <div class="modal fade" id="invalid_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="delivered_shipments_title">Invalide Shipments</h4>
-    
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered table-centered">
-                        <thead>
-                            <tr>
-                                <td>Tracking ID</td>
-                            </tr>
-                        </thead>
-                        <tbody id="tablebody"></tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 @endsection
 
 @section('css')
@@ -111,22 +84,8 @@
 
     <script type="text/javascript">
 
-        @if(isset($invalid_shipment))
-            var invalidShipment = @json($invalid_shipment);
-            for(let x of invalidShipment){
-                $("#tablebody").append(`
-                    <tr>
-                        <td>${x[0]}</td>
-                    </tr>
-                `);
-            }
-            $('#invalid_shipments').modal('show');
-        @endif
-        
-
-
         $(document).ready(function () {
-            
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
                     body = [];
