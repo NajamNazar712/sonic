@@ -1625,7 +1625,7 @@
                         }
                     });
 
-                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'}];
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'},{'id':5,'text':'Contractual'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,

@@ -506,6 +506,9 @@ class AdminHumanResourseController extends Controller
                 if ($keyword == 4) {
                     return $query->where('employees.staff_category_id', '=', 2);
                 }
+                if ($keyword == 5) {
+                    return $query->where('employees.staff_category_id', '=', 3);
+                }
 
                 return null;
             })
@@ -520,6 +523,8 @@ class AdminHumanResourseController extends Controller
 
                     if ($user->staff_category_id == 2) {
                         return "Intern";
+                    } else if ($user->staff_category_id == 3) {
+                        return "Contractual";
                     } else {
                         return "Staff";
                     }
