@@ -34,8 +34,8 @@
                                     <th class="border-primary border-darken-1" style="width: 200px" >Case Nature Type</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Bus Segments</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Sub Segments</th>
-                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper Key</th>
-                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper Non Key</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper With KAM</th>
+                                    <th class="border-primary border-darken-1" style="width: 150px" >Shipper Without KAM</th>
                                     <th class="border-primary border-darken-1" style="width: 150px" >Shipment Status</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Created At</th>
