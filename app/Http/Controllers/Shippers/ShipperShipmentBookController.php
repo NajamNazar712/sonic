@@ -147,9 +147,6 @@ class ShipperShipmentBookController extends Controller
         }
 
         $user_shipping_info->save();
-
-        self::shipper_address_area($city_id,$address,$user_shipping_info->id);
-
         return $user_shipping_info->id;
     }
 
@@ -247,7 +244,10 @@ class ShipperShipmentBookController extends Controller
             $shipment_coordinates->current_location_id = NULL;
             $shipment_coordinates->save();
         }
+
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
         self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+        self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         //Existing Coordinates
 //        if($pieces > 1){
@@ -3494,6 +3494,10 @@ class ShipperShipmentBookController extends Controller
 //                $user->save();
 //            }
 //        }
+
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        self::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+        self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
     }
@@ -7518,39 +7522,34 @@ class ShipperShipmentBookController extends Controller
     static function consignee_address_area_intercept($consignee_city_id,$consignee_address){
         $city_area_id = null;
         if(isset($consignee_city_id)){
+
             $check_dlmk =  DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword')
+                ->select('dlm.area_name as area_name','dlm.id','delivery_location_mapping_keywords.keyword','dlm.city_area_id')
                 ->where('dlm.city_id',$consignee_city_id)
-                ->pluck('keyword')
-                ->toArray();
+                ->get();
 
             $str_arr = null;
             $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $consignee_address);
-            $found_keyword = array();
+            $found_area_id = array();
             $result = array();
             foreach ($check_dlmk as $nsa) {
                 foreach ($str_arr as $arr_value) {
                     $arr_value = trim($arr_value);
-                    if (strtolower($nsa) == strtolower($arr_value)) {
-                        array_push($found_keyword,$arr_value);
+                    if (strtolower($nsa->keyword) == strtolower($arr_value)) {
+                        $found_area_id[$nsa->city_area_id] = isset($found_area_id[$nsa->city_area_id]) ?$found_area_id[$nsa->city_area_id] : $nsa->city_area_id;
                     }
                 }
             }
-            if($found_keyword) {
-                $data_found = DeliveryLocationMappingKeyword::join('delivery_location_mappings as dlm','delivery_location_mapping_keywords.mapping_id','=','dlm.id')
-                    ->leftjoin('city_areas as ca','ca.id','=','dlm.city_area_id')
-                    ->select('dlm.area_name as area_name','dlm.id','ca.id as city_area_id')
-                    ->whereIn('delivery_location_mapping_keywords.keyword',$found_keyword)
-                    ->where('dlm.city_id',$consignee_city_id)
-                    ->orderby('dlm.id','desc');
-                if ($data_found->exists()) {
-                    $data_found = $data_found->pluck('city_area_id')->toArray();
-                    $city_area = CityArea::whereIn('id',$data_found)->orderby('id','desc');
-                    if($city_area->exists()) {
-                        $city_area = $city_area->first();
-                        $city_area_id = $city_area->id;
-                    }
+            if($found_area_id) {
 
+                $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
+                $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
+                if ($area->exists()) {
+                    $area = $area->first();
+                    $city_area_id = $area->id;
+                }else if($default_area->exists()){
+                    $default_area = $default_area->first();
+                    $city_area_id = $default_area->id;
                 }
             }
 
