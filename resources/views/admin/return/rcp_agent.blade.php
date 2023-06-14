@@ -32,6 +32,15 @@
                                     </select>
                                 </fieldset>
                             </div>
+                            <div class="col-4">
+                                <fieldset class="form-group pb-1">
+                                    <select name="search_category" id="search_category" class="form-control select2" requireddata-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($categorys as $category)
+                                            <option value="{{$category->id}}">{{$category->name}}</option>
+                                        @endforeach
+                                    </select>
+                                </fieldset>
+                            </div>
                             {{-- <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_shipper" id="search_shipper" class="form-control select2" requireddata-rule-required="true" data-msg-required="Shipper is required">
@@ -126,7 +135,7 @@
                             </div>
                         </div>
 
-                        <div class="col-3" id="total_main">
+                        <div class="col-3" id=" ">
                             <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -135,8 +144,27 @@
                                                 <i class="icon-grid text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total">0</h3>
+                                                <h3 class="text-white" id="total_return_confirm">0</h3>
                                                 <span>Total Return Confirm</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
+                                <div class="card-content" id="">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_mark_for_self_collection">0</h3>
+                                                <span>Total Mark For Self Collection</span>
                                             </div>
                                         </div>
                                     </div>
@@ -161,6 +189,63 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
+                                <div class="card-content" id="">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_unresponsive_in_percent">0</h3>
+                                                <span> Unresponsive %</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
+                                <div class="card-content" id="">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-layers text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="unresponsive_return">0</h3>
+                                                <span class="font-13">Total Unresponsive</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-3">
+                            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
+                                <div class="card-content" id="">
+                                    <div class="card-body">
+                                        <div class="media d-flex">
+                                            <div class="align-self-center">
+                                                <i class="icon-check text-white font-large-2 float-left"></i>
+                                            </div>
+                                            <div class="media-body text-white text-right">
+                                                <h3 class="text-white" id="total_intercept">0</h3>
+                                                <span>Total Intercept</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+
                     </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -170,6 +255,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Agent Name</th>
                         <th class="border-primary border-darken-1">Start Time</th>
+                        <th class="border-primary border-darken-1">Agent Category</th>
                         <th class="border-primary border-darken-1">End Time</th>
                         <th class="border-primary border-darken-1">Total Assigning</th>
                         <th class="border-primary border-darken-1">Actual Productivity</th>
@@ -179,7 +265,6 @@
                         <th class="border-primary border-darken-1">On Hold For Self Collection</th>
                         <th class="border-primary border-darken-1">Pending</th>
                         <th class="border-primary border-darken-1">Already Updated</th>
-                        <th class="border-primary border-darken-1">Agent Category</th>
                         <th class="border-primary border-darken-1">Unresponsive Return</th>
                         <th class="border-primary border-darken-1">Productivity(%)</th>
                     </tr>
@@ -203,9 +288,50 @@
 
         
         .bg-gradient-directional-booked_shipments {
-                    background-image: linear-gradient(45deg, #5e187b, #ed86ff);
-                    background-repeat: repeat-x;
-                }
+            background-image: linear-gradient(45deg, #5e187b, #ed86ff);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-out_for_delivery {
+            background-image: linear-gradient(45deg, #ff9819, #fff824);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-pending_shipments {
+            background-image: linear-gradient(45deg, #39546d, #90929a);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-pending_confirmation {
+            background-image: linear-gradient(45deg, #6a1fa2, #ff4961);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-delivered {
+            background-image: linear-gradient(45deg, #076500, #11f118);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-return_confirm {
+            background-image: linear-gradient(45deg, #ff0c0c, #ff9191);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-pending_return {
+            background-image: linear-gradient(45deg, #7d491c, #e0b668de);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-return_delivered {
+            background-image: linear-gradient(45deg, #02c123, #99ff12d1);
+            background-repeat: repeat-x;
+        }
+
+        .bg-gradient-directional-cancelled_shipments {
+            background-image: linear-gradient(45deg, #ff6a00, #ffb74c);
+            background-repeat: repeat-x;
+        }
+
         table.dataTable {
             font-size: 12px;
         }
@@ -278,6 +404,11 @@
                 placeholder:"Select Hub",
                 allowClear:true,
             });
+            $('#search_category').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Category",
+                allowClear:true,
+            });
             // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
             //     width: '100%',
             //     placeholder: 'Select Shipper*',
@@ -339,6 +470,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Agent Name');
+                            head.push('Agent Category');
                             head.push('Start Time');
                             head.push('End Time');
                             head.push('Total Assigning');
@@ -349,7 +481,6 @@
                             head.push('On Hold for Self Collection');
                             head.push('Pending');
                             head.push('Already Updated');
-                            head.push('Agent Category');
                             head.push('Unresponsive Return');
                             
                             head.push('Productivity(%)');
@@ -361,6 +492,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.agent_name);
+                                row.push(values.agent_category); 
                                 row.push(values.start_time);
                                 row.push(values.end_time);
                                 row.push(values.total_assigning);
@@ -371,7 +503,6 @@
                                 row.push(values.on_hold_for_sc);
                                 row.push(values.pending);
                                 row.push(values.already_updated);
-                                row.push(values.agent_category); 
                                 row.push(values.unresponsive_return);
                                 row.push(values.productivity);
 
@@ -414,6 +545,7 @@
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();
+                        d.category = $('#search_category').val();
                         // d.shipper = $('#search_shipper').val();
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
@@ -423,6 +555,7 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
+                    {data: 'agent_category', orderable: false, searchable: false, name: 'agent_category', class: 'align-middle agent_category'}, 
                     {data: 'start_time', name: 'start_time', class: 'align-middle start_time'},
                     {data: 'end_time', name: 'end_time', class: 'align-middle end_time'},
                     {data: 'total_assigning', orderable: false, searchable: false, name: 'total_assigning', class: 'align-middle total_assigning'},
@@ -433,7 +566,6 @@
                     {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
                     {data: 'already_updated', orderable: false, searchable: false, name: 'already_updated', class: 'align-middle already_updated'}, 
-                    {data: 'agent_category', orderable: false, searchable: false, name: 'agent_category', class: 'align-middle agent_category'}, 
                     {data: 'unresponsive_return', orderable: false, searchable: false, name: 'unresponsive_return', class: 'align-middle unresponsive_return'}, 
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
@@ -443,24 +575,37 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     if(index == 0){
-
+                    console.log(data);
                     total_shipments = data.total_assigning;
                     completed_shipments = data.actual_productivity;
                     reattempt_shipments = data.reattempt;
+                    total_return_confirm = data.total_return_confirm;
+                    total_mark_for_self_collection = data.total_mark_for_self_collection;
+                    total_unresponsive_in_percent = data.total_unresponsive_in_percent;
+                    total_intercept = data.total_intercept;
+                    unresponsive_return = data.unresponsive_return;
                     }
                     else{
                     total_shipments += data.total_assigning;
                     completed_shipments += data.actual_productivity;
                     reattempt_shipments += data.reattempt;
+                    total_unresponsive_in_percent += data.total_unresponsive_in_percent;
+                    total_mark_for_self_collection += data.total_mark_for_self_collection;
+                    total_intercept += data.total_intercept;
+                    unresponsive_return += data.unresponsive_return;
 
                     }
                     
                     if(index == (info.end - 1)){
                     $('#total').text(total_shipments);
                         $('#completed').text(completed_shipments);
-                        $('#rcp_reattempt').text(reattempt_shipments);
-                        
                         $('#productivity').text(((completed_shipments/total_shipments)*100).toFixed(2));
+                        $('#total_return_confirm').text(total_return_confirm);
+                        $('#total_mark_for_self_collection').text(total_mark_for_self_collection);
+                        $('#total_intercept').text(total_intercept);
+                        $('#rcp_reattempt').text(reattempt_shipments);
+                        $('#unresponsive_return').text(unresponsive_return);
+                        $('#total_unresponsive_in_percent').text(((unresponsive_return/total_shipments)*100).toFixed(2));
                     }
                 },
                 initComplete: function() {
@@ -502,52 +647,10 @@
                         $('#completed').text(0);
                         $('#rcp_reattempt').text(0);
                         $('#productivity').text(0);
+                        $('#total_return_confirm').text(0);
                     table.draw(true);
-                    // get_rcp_cards_data();
                 }
             });
-           
-
-            // function get_rcp_cards_data() {
-            //     var from_date = $('#search_form input[name="from_date_formatted"]').val();
-            //     var to_date = $('#search_form input[name="to_date_formatted"]').val();
-            //     var hub = $('#search_origin').val();
-            //     var agent = $('#search_agent').val();
-            //     var hub = $('#search_hub').val();
-
-            //     var destination = $('#search_destination').val();
-            //     $.ajax({
-            //         url: '{!! route('admin.return.rcp_agent.data') !!}',
-            //         method: 'post',
-            //         data: {
-            //             '_token': '{{ csrf_token() }}',
-            //             'from_date': from_date,
-            //             'to_date': to_date,
-            //             'agent': agent,
-            //             'hub': hub,
-
-            //         }
-            //     }).done(function (data) {
-            //         if(data.status){
-            //             console.log(data.stats);
-            //             $('#total').text(data.stats.total);
-            //             $('#completed').text(data.stats.completed);
-            //             $('#rcp_reattempt').text(data.stats.rcp_reattempt);
-            //             $('#productivity').text(data.stats.productivity);
-
-            //         }else{  
-            //             $('#total').text(0);
-            //             $('#completed').text(0);
-            //             $('#rcp_reattempt').text(0);
-            //             $('#productivity').text(0);
-            //         }
-            //     });
-            // }
-
-           
-
-
-
         });
     </script>
 @endsection
