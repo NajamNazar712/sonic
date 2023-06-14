@@ -16,7 +16,7 @@ class CrmAgentAutoAssign extends Model
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignCaseNature', 'agent_id', 'agent_id');
     }
     public function case_nature_types() {
-        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignCNType', 'agent_id', 'agent_id');
+        return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignCnType', 'agent_id', 'agent_id');
     }
     public function business_types() {
         return $this->hasMany('App\Http\Models\Admin\CrmAgentAutoAssignBusSeg', 'agent_id', 'agent_id');
