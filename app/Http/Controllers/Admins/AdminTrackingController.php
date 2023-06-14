@@ -1748,6 +1748,13 @@ class AdminTrackingController extends Controller
                             }
                         }
 
+                        $cargo_manifest_bag_shipments = CargoManifestBagShipments::with('bag','manifestBag_latest','manifestBag_latest.cargo_manifest','manifestBag_latest.cargo_manifest.fleet.driver')
+                            ->where('shipment_id',$shipment->id);
+
+                        if($cargo_manifest_bag_shipments->exists()){
+                            $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                            $details['manifest_history']  = $cargo_manifest_bag_shipments;
+                        }
 
                         $tracking['shipments'][] = $details;
                     } else {

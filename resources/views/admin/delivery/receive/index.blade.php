@@ -48,7 +48,7 @@
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Rider Trax ID</th>
+<!--                        <th class="border-primary border-darken-1">Rider Trax ID</th>-->
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -382,7 +382,7 @@
                     },
                     {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
-                    {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider'},
+                   /* {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider'},*/
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
