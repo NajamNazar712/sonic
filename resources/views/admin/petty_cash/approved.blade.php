@@ -56,8 +56,8 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
-                        <th class="border-primary border-darken-1">Station Approved By</th>
-                        <th class="border-primary border-darken-1">Station Approved At</th>
+                        {{-- <th class="border-primary border-darken-1">Station Approved By</th>
+                        <th class="border-primary border-darken-1">Station Approved At</th> --}}
                         <th class="border-primary border-darken-1">Operation Approved By</th>
                         <th class="border-primary border-darken-1">Operation Approved At</th>
                         <th class="border-primary border-darken-1">Finance Approved By</th>
@@ -184,8 +184,8 @@
                             head.push('Amount');
                             head.push('Created By');
                             head.push('Created At');
-                            head.push('Station Approved By');
-                            head.push('Station Approved At');
+                            // head.push('Station Approved By');
+                            // head.push('Station Approved At');
                             head.push('Operation Approved By');
                             head.push('Operation Approved At');
                             head.push('Finance Approved By');
@@ -208,8 +208,8 @@
                                 row.push(values.total_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.station_approved_by);
-                                row.push(values.station_approved_at);
+                                // row.push(values.station_approved_by);
+                                // row.push(values.station_approved_at);
                                 row.push(values.operation_approved_by);
                                 row.push(values.operation_approved_at);
                                 row.push(values.finance_approved_by);
@@ -387,8 +387,8 @@
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
-                    {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
+                    // {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
+                    // {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
                     {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
                     {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
                     {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
