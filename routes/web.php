@@ -944,6 +944,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
             Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
             Route::post('status_update', 'Admins\AdminZonalManagementController@zonal_status_update')->name('status_update');
+            Route::post('duplicate_zone', 'Admins\AdminZonalManagementController@duplicate_zone')->name('duplicate_zone');
+            Route::get('check_zone_name/{id?}', 'Admins\AdminZonalManagementController@check_zone_name')->name('check_zone_name');
         });
 
         Route::prefix('territory')->name('territory.')->group(function () {
@@ -1866,6 +1868,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/update/seal_number', 'Admins\AdminCargoManifestController@update_seal_number')->name('update.seal_number');
         Route::post('/junctions', 'Admins\AdminCargoManifestController@junctions_info')->name('junctions_info');
         Route::post('/vehicle', 'Admins\AdminCargoManifestController@vehicle_info')->name('vehicle_info');
+        Route::post('/remarks_info', 'Admins\AdminCargoManifestController@remarks_info')->name('remarks_info');
         Route::post('/transitted_shipments', 'Admins\AdminCargoManifestController@transitted_shipments')->name('transitted_shipments');
         Route::post('short_received_shipments', 'Admins\AdminCargoManifestController@short_received_shipments')->name('short_received_shipments');
 
@@ -1941,6 +1944,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
         Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
     });
+
+
+   
+
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
@@ -3015,6 +3022,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        /*for shipper side*/
+        // Routes: web.php
+        Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@mms_report_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@mms_report_store')->name('store');
+        });
+
+
         Route::prefix('invoice_against_return_delivered_shipper')->name('invoice_against_return_delivered_shipper.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@invoice_against_return_delivered_shipper_store')->name('store');
@@ -3681,6 +3696,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\AdminCRMController@bulk_claim_submit')->name('submit');
             Route::post('shipment_details', 'Admins\AdminCRMController@bulk_claim_shipment_details')->name('shipment_details');
         });
+        Route::prefix('dashboard')->name('dashboard.')->group(function () {
+            Route::get('', 'Admins\CRMDashboardController@crm_dashboard_index')->name('index');
+            Route::post('list', 'Admins\CRMDashboardController@crm_dashboard_list')->name('list');
+            Route::post('card_data', 'Admins\CRMDashboardController@card_data')->name('card_data');
+        });
+
     });
 
     Route::prefix('intercept')->name('intercept.')->group(function () {
@@ -3718,6 +3739,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('fetch1', 'AdminShipmentHandoverController@handover_dropdown_val_fetch_to')->name('fetch1');
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
+            Route::post('shipments_pieces', 'AdminShipmentHandoverController@add_handover_shipments_pieces')->name('shipments_pieces');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
@@ -3731,6 +3753,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('delivered', 'AdminShipmentHandoverController@handover_shipments_delivered')->name('delivered');
             Route::post('remaining', 'AdminShipmentHandoverController@handover_shipments_remaining')->name('remaining');
             Route::post('print', 'AdminShipmentHandoverController@handover_print')->name('print');
+            Route::post('pieces_list', 'AdminShipmentHandoverController@handover_shipments_pieces')->name('pieces_list');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
@@ -3906,6 +3929,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add_status', 'Admins\LeadManagementController@add_status')->name('add_status');
         Route::post('add_bulk_status', 'Admins\LeadManagementController@add_bulk_status')->name('add_bulk_status');
         Route::post('tag_sale_person', 'Admins\LeadManagementController@tag_sale_person_forward_lead')->name('tag_sale_person');
+        Route::post('call_status', 'Admins\LeadManagementController@call_status_change')->name('call_status');
         Route::post('add_remarks', 'Admins\LeadManagementController@add_remarks')->name('add_remarks');
         Route::get('view_remarks/{id}', 'Admins\LeadManagementController@view_remarks_index')->name('view_remarks');
         Route::post('lead_statistics', 'Admins\LeadManagementController@lead_statistics')->name('lead_statistics');

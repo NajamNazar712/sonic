@@ -872,6 +872,9 @@ $roles = explode("," , $settings->text);
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-commenting-o"></i>CRM</span></a>
                     <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(869, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.crm.dashboard.index') }}">CRM Dashboard</a></li>
+                        @endif
                         @if (session('role_id') == 1 ||
                                 session('department_id') == 3 ||
                                 count(array_intersect([233, 234, 235, 236], session('permissions'))) !== 0)
@@ -906,6 +909,7 @@ $roles = explode("," , $settings->text);
                                 <li><a class="menu-item" href="{{ route('admin.crm.bulk_claim.index') }}">Bulk Claim
                                         Logging</a></li>
                             @endif
+                          
                         @endif
                     </ul>
                 </li>
@@ -1735,6 +1739,7 @@ $roles = explode("," , $settings->text);
                                                 Accounts</a>
                                         </li>
                                     @endif
+
                                     @if (session('role_id') == 1 || in_array(558, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.ccd_booking.index') }}">CCD
@@ -1848,6 +1853,11 @@ $roles = explode("," , $settings->text);
                                                     SMS Notification Return Delivered to shipper
                                                 </a>
                                             </li>
+                                        @endif
+										@if (session('role_id') == 1 || in_array(868, session('permissions')))
+                                            <li><a class="menu-item"
+                                                   href="{{ route('admin.settings.mms_report.index') }}">MMS Report
+                                                    Setting</a> </li>
                                         @endif
                                 </ul>
 
