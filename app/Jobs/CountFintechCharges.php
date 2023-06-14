@@ -58,14 +58,13 @@ class CountFintechCharges implements ShouldQueue
                             });
                         })->sum('amount');
                         $fintech_company = FintechCompany::where('id','1');
-                        
                     if($fintech_company->exists()){
                         $fintech_company_id = $fintech_company->first()->id;
                     }
                     else{
                         $fintech_company_id = '1';
                     }
-                        $user_fintech_charges = UserFintectCharges::where('user_id',$user_id->user_id)->where('status','1')->first();
+                        $user_fintech_charges     = UserFintectCharges::where('user_id',$user_id->user_id)->where('status','1')->first();
                         $standart_fintech_charges = standard_fintech_charges::where('id','1')->first();
                     if(!empty($user_fintech_charges)){
                         $charges            = $user_fintech_charges->fintech_charges;
@@ -75,15 +74,15 @@ class CountFintechCharges implements ShouldQueue
                         $charges_applicable = '1';
                     }  
                     else{
-                        $standard_charges       = ($total_cod_amount/100) * $standart_fintech_charges->standard_fintech_charges;
-                        $standard_charges_FED   = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;
-                        $total_charges          = number_format($standard_charges + $standard_charges_FED, 2) ;
-                        $charges_applicable     = '2';
+                        $standard_charges     = ($total_cod_amount/100) * $standart_fintech_charges->standard_fintech_charges;
+                        $standard_charges_FED = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;
+                        $total_charges        = number_format($standard_charges + $standard_charges_FED, 2) ;
+                        $charges_applicable   = '2';
                     }
                     Shipment::where('id', $user_id->id)->update([
                         'fintech_charges' => $total_charges
                     ]);
-                    $shipment_fintech_charges =  new shipmentFintechCharges();
+                    $shipment_fintech_charges                  =  new shipmentFintechCharges();
                     $shipment_fintech_charges->shipment_id     =  $user_id->id ;
                     $shipment_fintech_charges->fintech_charges =  $total_charges;
                     $shipment_fintech_charges->applied_to      =  $charges_applicable;
@@ -108,12 +107,12 @@ class CountFintechCharges implements ShouldQueue
                         'fintech_amount' => $fintech_charges,
                     ]);
                     $request_body  = array(
-                        'payment_link'          => $this->payment_link,
-                        'unique_code'           => $this->unique_key,
-                        'pay_type_id'           => 1,
-                        'fintech_company'       => $fintech_company_id,
-                        'cod_amount'            => $total_cod_amount,
-                        'fintech_amount'        => $fintech_charges,
+                        'payment_link'    => $this->payment_link,
+                        'unique_code'     => $this->unique_key,
+                        'pay_type_id'     => 1,
+                        'fintech_company' => $fintech_company_id,
+                        'cod_amount'      => $total_cod_amount,
+                        'fintech_amount'  => $fintech_charges,
                     );
                     $options = [
                         'form_params' => $request_body,
