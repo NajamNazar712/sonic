@@ -109,8 +109,9 @@ class LoginController extends Controller
     {
         $packaging_charges_check = TRUE;
         $user_info = SubstituteUser::where('email',$request->email)->first();
-
-        session(['substitute_user_id' => $user_info->id]);
+        $user_info_id = ($user_info) ? $user_info->id : NULL;  
+       
+        session(['substitute_user_id' => $user_info_id]);
 
         if (session('user_type') == 1) {
             if ($user->blacklist) {
@@ -185,11 +186,11 @@ class LoginController extends Controller
         }
         else {
 
-            if($user_info->is_created_by_admin == 1)
+            if($user_info_id && $user_info->is_created_by_admin == 1)
             {
                 session(['special_dashboard_user' => 1]);
                 
-                $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info->id)->pluck('sister_user_id')->toArray();
+                $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info_id)->pluck('sister_user_id')->toArray();
 
                 session(['special_dashboard_sister_user' => $sister_accounts]);
             }
