@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Auth;
 class CRMClaimAutoCloseController extends Controller
 {
     static public function check_shipment_claims($shipment_id){
-        $crm_request = CrmRequest::where('shipment_id', $shipment_id)->where('status_id', 2)->where('case_nature_id', 4);
+        $crm_request = CrmRequest::where('shipment_id', $shipment_id)->whereIn('status_id', [2,3])->where('case_nature_id', 4);
         if($crm_request->exists()){
             $crm_request = $crm_request->first();
             $crm_request->status_id = 4;

@@ -35,5 +35,7 @@ class NpsSurveyModulePermissionsSeeder extends Seeder
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance > Nps Survey Response Report', 'url'=>'admin.nps.response.report', 'permission_id' => 755),
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Quality Assurance > Nps Survey Consolidated Report', 'url'=>'admin.nps.consolidate.report', 'permission_id' => 756),
         ));
+
+
     }
 }

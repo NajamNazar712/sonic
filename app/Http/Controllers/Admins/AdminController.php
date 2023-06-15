@@ -16,6 +16,7 @@ class AdminController extends Controller
     }
 
     public function save_coordinates(Request $request) {
+
         session(['latitude' => $request->latitude, 'longitude' => $request->longitude]);
     }
 }

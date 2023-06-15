@@ -46,7 +46,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Employee Payslip Template.xlsx') }}?v=14_09_2021" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Employee Payslip Template.xlsx') }}?v=22_05_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>

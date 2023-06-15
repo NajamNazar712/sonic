@@ -7140,7 +7140,7 @@ class AdminFinanceController extends Controller
                                 $invoice_shipment->type = $pending_invoice_shipment->type;
                                 $invoice_shipment->charges = $pending_invoice_shipment->charges;
                                 $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                                $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
+                                $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
                                 $invoice_shipment->save();
 
@@ -7235,7 +7235,7 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->charges = $packaging_material_request->amount;
                             $invoice_shipment->gst = round($packaging_material_request->amount * $gst);
                             $invoice_amount = $packaging_material_request->amount + round($packaging_material_request->amount * $gst);
-                            $invoice_shipment->invoice_amount = round($invoice_amount);
+                            $invoice_shipment->invoice_amount = $invoice_amount;
 
                             $invoice_shipment->save();
 
@@ -7796,7 +7796,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -7807,7 +7807,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words($invoice->total_invoice_amount) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8395,7 +8395,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8406,7 +8406,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words() . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -10754,7 +10754,10 @@ class AdminFinanceController extends Controller
 
         $invoice = Invoice::leftjoin('users as u', 'invoices.user_id', '=', 'u.id')
             ->leftjoin('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('sale_person_tags as spt', 'spt.user_id', '=', 'u.id')
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.status','=',0);
+            })
             ->join('admins as sales_person', 'sales_person.id', '=', 'spt.admin_id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
@@ -10770,7 +10773,10 @@ class AdminFinanceController extends Controller
 
         $reim_invoice = InvoiceForReimbursement::join('users as u', 'invoice_for_reimbursements.user_id', '=', 'u.id')
             ->join('cities as c', 'u.city_id', '=', 'c.id')
-            ->join('sale_person_tags as spt', 'spt.user_id', '=', 'u.id')
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'u.id')
+                    ->where('spt.status','=',0);
+            })
             ->join('admins as sales_person', 'sales_person.id', '=', 'spt.admin_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoice_for_reimbursements.id as id', 'invoice_for_reimbursements.invoice_number as invoice_number', 'invoice_for_reimbursements.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoice_for_reimbursements.total_charges as total_charges', 'invoice_for_reimbursements.total_gst as total_gst', 'invoice_for_reimbursements.total_invoice_amount as total_invoice_amount', 'invoice_for_reimbursements.created_at as created_at', DB::raw('NULL as due_date'), DB::raw('NULL as received_date'), DB::raw('NULL as company_bank'), DB::raw('NULL as received_amount'), DB::raw('NULL as tax_amount'), DB::raw('NULL as deposit_date'), DB::raw('NULL as status'), DB::raw('NULL as status_id'), 'invoice_for_reimbursements.invoicing_date as invoicing_date', DB::raw('NULL as invoicing_cycle'), DB::raw('NULL as invoice_type'), 'invoice_for_reimbursements.payment_type as payment_type', DB::raw('1 as account_type'), DB::raw('NULL as is_id'), DB::raw('NULL as deposited_amount'),DB::raw('NULL as adjusted_amount'),'sts.status as star_status')
@@ -12516,7 +12522,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment->type = $pending_invoice_shipment->type;
             $invoice_shipment->charges = $pending_invoice_shipment->charges;
             $invoice_shipment->gst = $pending_invoice_shipment->gst;
-            $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
+            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
             $invoice_shipment->save();
 
