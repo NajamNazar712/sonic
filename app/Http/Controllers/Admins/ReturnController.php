@@ -6327,7 +6327,7 @@ class ReturnController extends Controller
         ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
         ->leftjoin('status_remarks as sr','sr.shipment_id','=','return_assigned_shipments.shipment_id')
 
-        // Filter the join condition for shipper_status_id = 2 (arrive at origin)
+        /// Filter the join condition for shipper_status_id = 2 (arrive at origin)
         ->leftjoin('shipments_journey as sjj', function($join) {
             $join->on('sjj.shipment_id', '=', 's.id')
                  ->where('sjj.shipper_status_id', '=', 2);
