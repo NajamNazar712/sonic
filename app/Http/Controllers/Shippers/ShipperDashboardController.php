@@ -864,8 +864,8 @@ class ShipperDashboardController extends Controller
     }
 
     public function getPickups(Request $request) {
-        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor'])
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 

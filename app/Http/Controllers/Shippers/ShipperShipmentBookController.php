@@ -2,22 +2,31 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\App\Http\Models\ConsigneeAddressArea;
 use App\ConsigneeAddressAreaIntercept;
+use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\ConsigneeInformationController;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Webhook\ShipmentStatusWebhookController;
-use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\BookingDestinationMappingKeyword;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Blacklist\BlacklistedConsignee;
 use App\Http\Models\Blacklist\BlacklistedConsigneeManuallyBlacklisted;
 use App\Http\Models\Blacklist\BlacklistSetting;
 use App\Http\Models\Blacklist\ConsigneeInformation;
+use App\Http\Models\BookingType;
 use App\Http\Models\ChargesModes;
+use App\Http\Models\City;
 use App\Http\Models\CityArea;
+use App\Http\Models\CityDelivery;
+use App\Http\Models\ConsigneeAddressArea;
 use App\Http\Models\ConsigneeInfo;
 use App\Http\Models\ConsigneeLocation;
 use App\Http\Models\ConsigneeShipmentLocation;
@@ -28,71 +37,49 @@ use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\DistributionProduct;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PaymentMode;
+use App\Http\Models\Product;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateDefaultRateOriginHub;
 use App\Http\Models\Rates\Corporate\CorporateRateDestinationHub;
 use App\Http\Models\Rates\Corporate\CorporateRateOriginHub;
 use App\Http\Models\Rates\RateDestinationHub;
 use App\Http\Models\Rates\RateOriginHub;
+use App\Http\Models\RateStatus;
 use App\Http\Models\SelfCollectionShipment;
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentDistributionProduct;
 use App\Http\Models\ShipmentInvoice;
 use App\Http\Models\ShipmentInvoiceItem;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOrderDate;
+use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsAirWaybillJourney;
 use App\Http\Models\ShipmentShipperReference;
 use App\Http\Models\Shipper\ShipperAirWaybillSettings;
-use App\Http\Models\SubstituteUserShipment;
-use App\Http\Models\ZoneClassCity;
-use App\Jobs\ProcessShipmentBookingDistributionDB;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\AdminPickupsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\ShipmentsAirWaybillJourneyController;
-use App\Http\Controllers\NotificationsController;
-
-use App\Http\Models\BookingType;
+use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\RateStatus;
-use App\Http\Models\City;
-use App\Http\Models\CityDelivery;
-use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
-use App\Http\Models\PaymentMode;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentItem;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\Retail\RetailFranchise;
-use App\Http\Models\Admin\Retail\RetailTraxCenter;
-use App\Http\Models\ShipmentDetail;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\Admin\BookingDestinationMapping;
-
+use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\ZoneClassCity;
 use App\Jobs\ProcessShipmentBookingDB;
 use App\Jobs\ProcessShipmentBookingDBPriority;
-
+use App\Jobs\ProcessShipmentBookingDistributionDB;
 use Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Session;
-
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-
-use Validator;
-use Illuminate\Validation\Rule;
-
-use SnappyPDF;
+use Carbon\Carbon;
 use DNS2D;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Session;
+use SnappyPDF;
+use Validator;
 
 class ShipperShipmentBookController extends Controller
 {
