@@ -70,6 +70,7 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Call Findings</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Assigned To</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Agent Status</th>
                         <th class="border-primary border-darken-1">Agent Status Date</th>
@@ -310,6 +311,7 @@
                     {data: 'reason', orderable: false, searchable: false, name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'call_findings', orderable: false, searchable: false, name: 'call_findings', class: 'align-middle call_findings'},
                     {data: 'arrival_date', orderable: false, searchable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
+                    {data: 'assigned_to', orderable: false, searchable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
                     {data: 'updated_by', orderable: false, searchable: false, name: 'updated_by', class: 'align-middle updated_by'},
                     {data: 'agent_status', orderable: false, searchable: false, name: 'agent_status', class: 'align-middle agent_status'},
                     {data: 'agent_status_date', orderable: false, searchable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
