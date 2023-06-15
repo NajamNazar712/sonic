@@ -6341,13 +6341,6 @@ class ReturnController extends Controller
         's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings',
         'return_assigned_shipments.updated_at as agent_status_date')->groupBy('tracking_number');
 
-        // ->select('s.tracking_number as agent_name','u.name as shipper_name','u.name as shipper_name','c.name as origin','consignee_city.name as consignee_city',
-        // 's.amount as collection_amount','ss.name as current_status', 'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
-        // 'a.id as agent_id','agent_return_confirmations.login_time as start_time',
-        // 'agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id',
-        // 'ras.shipment_id as shipment_id','a.name as updated_by', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
-        // 's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings','ras.updated_at as agent_status_date');
-
         $datatable = Datatables::of($agent_productivity)
 
         ->editColumn('call_findings', function ($agent_productivity){
