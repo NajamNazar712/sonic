@@ -225,6 +225,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
+        Route::post('call_status_history', 'Shippers\ShipperTrackingController@call_status_history')->name('call_status_history');
     });
     Route::prefix('order')->name('order.')->group(function () {
         Route::get('{order_id?}', 'Shippers\ShipperTrackingController@order_index')->name('index');
@@ -1967,6 +1968,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('upload', 'Admins\AdminTrackingController@shipment_position_upload')->name('upload');
             Route::get('list', 'Admins\AdminTrackingController@shipment_position_list')->name('list');
         });
+        
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {

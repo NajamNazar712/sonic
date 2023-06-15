@@ -92,7 +92,6 @@
                         <th class="border-primary border-darken-1">Operation Approved By</th>
                         <th class="border-primary border-darken-1">Operation Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Checked At</th>
                         <th class="border-primary border-darken-1">Checked By</th>
                         <th class="border-primary border-darken-1">SDN Update Log</th>
@@ -242,7 +241,6 @@
                             head.push('Operation Approved By');
                             head.push('Operation Approved At');
                             head.push('Status');
-                            head.push('Tracking Number');
                             head.push('Checked At');
                             head.push('Checked By');
 
@@ -266,7 +264,6 @@
                                 row.push(values.operation_approved_by);
                                 row.push(values.operation_approved_at);
                                 row.push(values.status);
-                                row.push(values.tracking_number);
                                 row.push(values.checked_at);
                                 row.push(values.checked_by);
 
@@ -713,7 +710,6 @@
                     {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
                     {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'checked_at', name: 'petty_cash_statements.checked_at', class: 'align-middle checked_at'},
                     {data: 'checked_by', name: 'petty_cash_statements.checked_by', class: 'align-middle checked_by'},
                     {data: 'sdn_update_logs', name: '', class: 'text-center align-middle sdn_update_logs', orderable: false, searchable: false},

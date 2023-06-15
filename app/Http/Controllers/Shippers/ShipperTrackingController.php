@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ShipmentScanningJourneyController;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\Admin\StatusRemark;
 use App\Http\Models\CRM\CrmRequestCaseNature;
 use App\Http\Models\CRM\CrmRequestCaseNatureType;
 use App\Http\Models\InternationalShipment;
@@ -744,6 +745,22 @@ class ShipperTrackingController extends Controller
 
 
         return $tracking;
+    }
+
+    public function call_status_history(Request $request)
+    {
+        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
+        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
+        ->leftJoin('admins','admins.id','status_remarks.updated_by')
+        ->where('status_remarks.shipment_id',$request->shipment_id)
+
+        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
+        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
+        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
+        'shipment_status.name as status', 'admins.name as updated_by')
+        ->orderBy('status_remarks.updated_at','desc')->limit(10)->get();
+        
+        return $shipment;
     }
 
 

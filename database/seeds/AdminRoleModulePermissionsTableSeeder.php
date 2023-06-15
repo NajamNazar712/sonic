@@ -13,7 +13,7 @@ class AdminRoleModulePermissionsTableSeeder extends Seeder
     {
         DB::table('admin_role_module_permissions')->truncate();
 
-        $permission_id = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,105,106,107,108,40,41,42,43,44,45,46,47,48,49,50,51,32,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,81,82,83,84,85,86,87,104,862,863,864,865,866);
+        $permission_id = array(1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,33,34,35,36,37,38,39,105,106,107,108,40,41,42,43,44,45,46,47,48,49,50,51,32,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,88,89,90,91,92,93,94,95,96,97,98,99,100,101,102,103,81,82,83,84,85,86,87,104);
 
         for($i=0;$i<count($permission_id);$i++) {
 
@@ -1314,71 +1314,7 @@ class AdminRoleModulePermissionsTableSeeder extends Seeder
 
             }
 
-            elseif($permission_id[$i]==862)
-            {
-                $roles = array(3,8,9,10,11,15,18,19,23,33,46,55,63,65,70,72,76,78,84,85,89,91,93,95,96,101,104,105,106,116,121,122,123);
-
-                for($j=0;$j<count($roles);$j++)
-                {
-                    DB::table('admin_role_module_permissions')->insert(array(
-                        array('role_id' => $roles[$j], 'permission_id' => $permission_id[$i])
-                    ));
-                }
-
-            }
-
-            elseif($permission_id[$i]==863)
-            {
-                $roles = array(9, 8, 105, 10, 3, 93);
-
-                for($j=0;$j<count($roles);$j++)
-                {
-                    DB::table('admin_role_module_permissions')->insert(array(
-                        array('role_id' => $roles[$j], 'permission_id' => $permission_id[$i])
-                    ));
-                }
-
-            }
-
-            elseif($permission_id[$i]==864)
-            {
-                $roles = array(9, 8, 105, 10, 3, 93);
-
-                for($j=0;$j<count($roles);$j++)
-                {
-                    DB::table('admin_role_module_permissions')->insert(array(
-                        array('role_id' => $roles[$j], 'permission_id' => $permission_id[$i])
-                    ));
-                }
-
-            }
-
-            elseif($permission_id[$i]==865)
-            {
-                $roles = array(9, 8, 105, 10, 3, 93);
-
-                for($j=0;$j<count($roles);$j++)
-                {
-                    DB::table('admin_role_module_permissions')->insert(array(
-                        array('role_id' => $roles[$j], 'permission_id' => $permission_id[$i])
-                    ));
-                }
-
-            }
-
-            elseif($permission_id[$i]==866)
-            {
-                $roles = array(9, 8, 105, 10, 3, 93);
-
-                for($j=0;$j<count($roles);$j++)
-                {
-                    DB::table('admin_role_module_permissions')->insert(array(
-                        array('role_id' => $roles[$j], 'permission_id' => $permission_id[$i])
-                    ));
-                }
-
-            }
-
+            
            
 
         }

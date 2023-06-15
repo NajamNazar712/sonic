@@ -48,18 +48,24 @@ class RiderFuelAllocationDeliveryNoteCalculation extends Command
         if($delivery_notes->exists()){
             $delivery_notes = $delivery_notes->get();
             foreach ($delivery_notes as $delivery_note){
-                $delivery_notes_details = ['delivery_note_id' => $delivery_note->id, 'dncc_amount' => $delivery_note->received_cod_amount];
+                if($delivery_note->received_cod_amount == null){
+                    $received_cod_amount = 0;
+                }
+                else{
+                    $received_cod_amount = $delivery_note->received_cod_amount;
+                }
+                $delivery_notes_details = ['delivery_note_id' => $delivery_note->id, 'dncc_amount' => $received_cod_amount];
                 if(array_key_exists($delivery_note->rider_id, $rider_wise_details)){
                     if(array_key_exists($delivery_note->hub_id, $rider_wise_details[$delivery_note->rider_id])){
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_count'] = $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_count'] + 1;
-                        $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] + $delivery_note->received_cod_amount;
+                        $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] + $received_cod_amount;
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes'][] = $delivery_notes_details;
                     }
                     else{
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['rider_id'] = $delivery_note->rider_id;
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['hub_id'] = $delivery_note->hub_id;
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_count'] = 1;
-                        $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $delivery_note->received_cod_amount;
+                        $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $received_cod_amount;
                         $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes'][] = $delivery_notes_details;
                     }
                 }
@@ -67,7 +73,7 @@ class RiderFuelAllocationDeliveryNoteCalculation extends Command
                     $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['rider_id'] = $delivery_note->rider_id;
                     $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['hub_id'] = $delivery_note->hub_id;
                     $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_count'] = 1;
-                    $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $delivery_note->received_cod_amount;
+                    $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes_dncc_amount'] = $received_cod_amount;
                     $rider_wise_details[$delivery_note->rider_id][$delivery_note->hub_id]['delivery_notes'][] = $delivery_notes_details;
                 }
             }

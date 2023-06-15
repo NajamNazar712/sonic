@@ -598,7 +598,6 @@
 
         $('#update_call_status_modal').modal('show');
     });
-        //End update_call_status_modal
 
         $('#update_call_status_modal').on('shown.bs.modal', function () {
                 $('#call_to').val('').change();
