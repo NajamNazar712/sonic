@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Arrival Projects/Shipper of Shipments
+                 Arrival Projects/Shipper of Shipments
                 </h1>
 
                 <div class="card">
@@ -86,6 +86,8 @@
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Tracking Number</th>
+                                    <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Destination Hub</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Weight (kg)</th>
                                     <th class="border-primary border-darken-1"></th>
@@ -328,6 +330,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number'},
                     {name: 'tracking_number', class: 'align-middle tracking_number', orderable: false, searchable: false},
+                    {name: 'city', class: 'align-middle actual_city', orderable: false, searchable: false},
+                    {name: 'hub', class: 'align-middle actual_hub', orderable: false, searchable: false},
                     {name: 'shipper', class: 'align-middle shipper', orderable: false, searchable: false},
                     {name: 'weight', class: 'align-middle actual_weight', orderable: false, searchable: false},
                     {name: 'remove', class: 'align-middle remove', sortable: false, orderable: false, searchable: false}
@@ -527,7 +531,7 @@
 
                                     if (index === -1) {
                                         var rowNo = table.rows().count();
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.weight, remove_button]).node().id = data.details.id;
+                                        table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub, data.details.shipper, data.details.weight,remove_button]).node().id = data.details.id;
                                         table.draw(false);
                                         table.order([0, 'desc']).draw();
                                         scan_sound(1);
@@ -760,7 +764,7 @@
 
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number,data.details.city, data.details.hub, data.details.shipper, data.details.weight, remove_button]).draw().node();
                                     $(new_row).css('color', 'white');
                                     $(new_row).css('background-color', 'orange');
                                     new_row.id = data.details.id;
@@ -1024,7 +1028,7 @@
 
                                 if (index === -1) {
                                     var rowNo = table.rows().count();
-                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper, data.details.weight, remove_button]).draw().node();
+                                    var new_row = table.row.add([rowNo + 1, data.details.tracking_number,data.details.city,data.details.hub , data.details.shipper, data.details.weight,remove_button]).draw().node();
                                     new_row.id = data.details.id;
                                     table.draw(false);
                                     table.order([0, 'desc']).draw();

@@ -294,7 +294,7 @@
                 let return_note = $('#scan_return_note').val()
                 let rider = $('#rider').val()
                 if(return_note.length == 0 && rider == ""){
-                    var error = "Please select at least one return note id OR rider";
+                    var error = "Please select rider";
 
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     return false;
@@ -310,7 +310,7 @@
             })
             
             $('#rider').prepend('<option value="" selected="selected">Select Rider</option>').select2({
-                placeholder: 'Select Rider'
+                placeholder: 'Select Rider*'
                 , width: '100%'
                 , allowClear: true
             })

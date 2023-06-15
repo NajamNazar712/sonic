@@ -269,6 +269,7 @@
                         <th class="border-primary border-darken-1">Reference Person</th>
                         <th class="border-primary border-darken-1">Lead Status</th>
                         <th class="border-primary border-darken-1">Lead Reason</th>
+                        <th class="border-primary border-darken-1">Call Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Updated AT</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -1049,6 +1050,7 @@
                             head.push('Reference Person');
                             head.push('Lead Status');
                             head.push('Reason');
+                            head.push('Call Status');
                             head.push('Updated By');
                             head.push('Updated At');
 
@@ -1076,6 +1078,7 @@
                                 row.push(values.reference_person);
                                 row.push(values.status);
                                 row.push(values.reason_id);
+                                row.push(values.call_status);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
 
@@ -1250,6 +1253,7 @@
                     {data: 'reference_person', name: 'rp.name', class: 'align-middle sale_person'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason_id', name: 'leads.reason', class: 'align-middle reason_id'},
+                    {data: 'call_status', name: 'leads.call_status', class: 'align-middle call_status'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'leads.updated_at', class: 'align-middle updated_at'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
@@ -1511,6 +1515,33 @@
                     }
                 }
             });
+            $('body').on('click', '.call_status', function () {
+                    var id = $(this).attr('data-id');
+
+                    $.ajax({
+                        url: '{!! route('admin.leads.call_status') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    })
+                    .done(function (data) {
+                        if (data.status == 1) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        table.draw();
+
+                    });
+                });
 
 
             $("#update_lead_status").prepend('<option value="" selected></option>').select2({

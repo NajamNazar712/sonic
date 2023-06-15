@@ -12,6 +12,7 @@ use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\SubstituteUserShipment;
+use App\Http\Models\Shipper\ReturnSheetShipments;
 use Cassandra\Session;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -27,6 +28,8 @@ use Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\ShipementReceiveDetails;
 
 class ShipperTrackingController extends Controller
 {
@@ -59,8 +62,6 @@ class ShipperTrackingController extends Controller
             }
             $case_nature = $row;
         }
-
-
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id',1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id',1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id',1)->get();
@@ -126,6 +127,12 @@ class ShipperTrackingController extends Controller
                         if($shipment->pod_image()->exists()){
                             $details['pod_file'] = asset('uploads/pod_images/' . $shipment->pod_image->pod_file);
                           
+                        }
+                        $received_shipments = ReturnSheetShipments::where('shipment_id',$shipment->id);
+                        if($received_shipments->exists()){
+                        $details['received_img'] =  '<img src="' . asset('img/shipement_received.png').' ">';
+                        }else{
+                            $details['received_img'] ="";
                         }
 
                         $shipper = $shipment->user;
@@ -315,17 +322,50 @@ class ShipperTrackingController extends Controller
                                     $journey_details['status_remarks'] = '';
                                 }
                                 $received_or_refused_by = '';
-                                if($journey->received_or_refused_by){
-                                    $received_or_refused_by = $journey->received_or_refused_by;
+
+                                $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+                                $shippers = explode(',', $shippers->text);
+                                $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+
+                                if(in_array($shipment->user_id,$special_dashboard_shippers))
+                                {
+                                    $receiver_details = ShipementReceiveDetails::where('tracking_number',$shipment->tracking_number)->first();
+                                    if($receiver_details)
+                                    {
+                                        if($journey->received_or_refused_by){
+                                            $received_or_refused_by = $receiver_details->receiver_name;
+                                        }
+                                        if($journey->cnic){
+                                            $received_or_refused_by .= "|".$receiver_details->receiver_cnic;
+                                        }
+                                        if($journey->relation){
+                                            $received_or_refused_by .= "|".$receiver_details->receiver_relationship;
+                                        }
+                                    }
+                                    else{
+                                        if($journey->received_or_refused_by){
+                                            $received_or_refused_by = $journey->received_or_refused_by;
+                                        }
+                                        if($journey->cnic){
+                                            $received_or_refused_by .= "|".$journey->cnic;
+                                        }
+                                        if($journey->relation){
+                                            $received_or_refused_by .= "|".$journey->relation;
+                                        }
+                                    }
                                 }
-                                if($journey->cnic){
-                                    $received_or_refused_by .= "|".$journey->cnic;
-                                }
-                                if($journey->relation){
-                                    $received_or_refused_by .= "|".$journey->relation;
+                                else{
+                                    if($journey->received_or_refused_by){
+                                        $received_or_refused_by = $journey->received_or_refused_by;
+                                    }
+                                    if($journey->cnic){
+                                        $received_or_refused_by .= "|".$journey->cnic;
+                                    }
+                                    if($journey->relation){
+                                        $received_or_refused_by .= "|".$journey->relation;
+                                    }
                                 }
                                 $journey_details['received_or_refused_by'] = $received_or_refused_by;
-//                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
                                 $details['tracking_history'][] = $journey_details;
                             }
@@ -610,6 +650,39 @@ class ShipperTrackingController extends Controller
                                     }
                                     
                                     $received_or_refused_by = '';
+
+                                    $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+                                $shippers = explode(',', $shippers->text);
+                                $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+
+                                if(in_array($shipment->user_id,$special_dashboard_shippers))
+                                {
+                                    $receiver_details = ShipementReceiveDetails::where('tracking_number',$shipment->tracking_number)->first();
+                                    if($receiver_details)
+                                    {
+                                        if($journey->received_or_refused_by){
+                                            $received_or_refused_by = $receiver_details->receiver_name;
+                                        }
+                                        if($journey->cnic){
+                                            $received_or_refused_by .= "|".$receiver_details->receiver_cnic;
+                                        }
+                                        if($journey->relation){
+                                            $received_or_refused_by .= "|".$receiver_details->receiver_relationship;
+                                        }
+                                    }
+                                    else{
+                                        if($journey->received_or_refused_by){
+                                            $received_or_refused_by = $journey->received_or_refused_by;
+                                        }
+                                        if($journey->cnic){
+                                            $received_or_refused_by .= "|".$journey->cnic;
+                                        }
+                                        if($journey->relation){
+                                            $received_or_refused_by .= "|".$journey->relation;
+                                        }
+                                    }
+                                }
+                                else{
                                     if($journey->received_or_refused_by){
                                         $received_or_refused_by = $journey->received_or_refused_by;
                                     }
@@ -619,8 +692,7 @@ class ShipperTrackingController extends Controller
                                     if($journey->relation){
                                         $received_or_refused_by .= "|".$journey->relation;
                                     }
-                                    $journey_details['received_or_refused_by'] = $received_or_refused_by;
-//                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                                }
 
                                     $details['tracking_history'][] = $journey_details;
                                 }
