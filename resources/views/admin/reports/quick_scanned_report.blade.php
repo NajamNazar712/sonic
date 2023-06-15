@@ -20,7 +20,7 @@
                                                     <span class="la la-calendar-o small-calender-icon"></span>
                                                 </span>
                                     </div>
-                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="Report From">
+                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-3">
@@ -30,7 +30,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="Report To">
+                                    <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="To" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-3">
@@ -42,6 +42,12 @@
                                     </select>
                                 </div>
                             </div>
+                            {{-- <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate"> --}}
+                                <div class="form-group">
+                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+                                </div>
+                            {{-- </form> --}}
+
                            <div class="col-3">
                                <div class="form-group">
                                    <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
@@ -147,8 +153,8 @@
                 placeholder: 'Search Rider',
                 allowClear:true
             });
-
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+           
+         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
                     body = [];
@@ -163,30 +169,33 @@
                         {
                             head = [];
                             head.push('S.No');
-                            head.push('City');
-                            head.push('Hub');
-                            head.push('Rider');
-                            head.push('Pickup Note ID');
-                            head.push('Pickup Request ID');
-                            head.push('Shipper Name');
-                            head.push('Vendor');
-                            head.push('Address');
+                            head.push('Tracking No.');
+                            head.push('Origin');
+                            head.push('Destination');
                             head.push('Status');
-                            head.push('Created At');
-
+                            head.push('Shipper Name');
+                            head.push('Arrival Date');
+                            head.push('Status Date Time');
+                            head.push('Status By');
+                            head.push('Last Scanned Location');
+                            head.push('Last Scanned City');
+                            head.push('Last Scanned By');
+                            head.push('Last Scanned At');
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.city);
-                                row.push(values.hub);
-                                row.push(values.rider);
-                                row.push(values.note_id);
-                                row.push(values.request_id);
-                                row.push(values.shipper_name);
-                                row.push(values.vendor);
-                                row.push(values.address);
+                                row.push(values.tracking_number);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.status);
-                                row.push(values.created_at);
+                                row.push(values.shipper_name);
+                                row.push(values.arrival_date);
+                                row.push(values.status_date_time);
+                                row.push(values.status_by);
+                                row.push(values.last_scanned_location);
+                                row.push(values.last_scanned_city);
+                                row.push(values.last_scanned_by);
+                                row.push(values.last_scanned_at);
                                 body.push(row);
                             });
                         },
@@ -196,7 +205,16 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            });
+            $('#track_form').bind('submit', function(e) {
+                e.preventDefault();
+                // alert("ad");
+                length = $('#track_form #tracking_number').val().length;
+
+                if (length == 0 || length >= 12) {
+                    table.draw();
+                }
+            });
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -226,14 +244,14 @@
                     }
                 }
             });
-
+            
             var table = $('#datatable').DataTable({
                 scrollX: false, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'App Efficiency Report',
+                        title: 'Quick Scanned Report',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o "></i> Excel',
                     },
@@ -241,9 +259,12 @@
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
-                processing: true,
+                processing: false,
+                deferLoading: 0,
                 language: {
+
                     processing: data_table_loader
+                    
                 },
                 serverSide: true,
                 ajax: {
@@ -252,22 +273,25 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.rider = $('select[name="rider"]').val();
+                        d.tracking_number = $('#tracking_number').val();
                     }
                 },
                 rowId: 'id',
                 order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'city', name: 'c.name', class: 'align-middle text_center city '},
-                    {data: 'hub', name: 'ci.name', class: 'align-middle text_center hub '},
-                    {data: 'rider', name: 'r.name', class: 'align-middle text_center rider '},
-                    {data: 'note_id', name: 'v2_rider_pickups.pickup_note_id', class: 'align-middle text_center note_id'},
-                    {data: 'request_id', name: 'v2_rider_pickups.pickup_request_id', class: 'align-middle text_center request_id'},
+                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle text_center tracking_number'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle text_center origin '},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle text_center destination '},
+                    {data: 'status', name: 'ss.name', class: 'align-middle text_center status'},
                     {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
-                    {data: 'vendor', name: 'usi.vendor', class: 'text_center align-middle vendor'},
-                    {data: 'address', name: 'usi.pickup_address', class: 'text_center align-middle address'},
-                    {data: 'status', name: 'vprs.id', class: 'text_center align-middle status'},
-                    {data: 'created_at', name: 'v2_rider_pickups.created_at', class: 'text_center align-middle created_at'},
+                    {data: 'arrival_date', name: 'sj.created_at', class: 'text_center align-middle arrival_date'},
+                    {data: 'status_date_time', name: 'sj.updated_at', class: 'text_center align-middle status_date_time'},
+                    {data: 'status_by', name: 'a.name', class: 'text_center align-middle status_by'},
+                    {data: 'last_scanned_location', name: 'sssl.name', class: 'text_center align-middle last_scanned_location'},
+                    {data: 'last_scanned_city', name: 'ahc.name', class: 'text_center align-middle last_scanned_city'},
+                    {data: 'last_scanned_by', name: 'ad.name', class: 'text_center align-middle last_scanned_by'},
+                    {data: 'last_scanned_at', name: 'shipment_scanning_journeys.updated_at', class: 'text_center align-middle last_scanned_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

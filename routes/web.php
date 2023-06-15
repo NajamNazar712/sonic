@@ -2764,7 +2764,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('quick_scanned_report')->name('quick_scanned_report.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
-            Route::post('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
+            Route::get('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
         });
     });
 

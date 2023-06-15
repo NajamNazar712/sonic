@@ -11287,11 +11287,78 @@ class AdminReportsController extends Controller
         {
             // ActivityTrailController::createActivityTrailLog(Auth::id(),198);
         }
-        $quick_scanned = ShipmentScanningJourney::join('shippments as s','shipment_scanning_journeys.shipment_id','=','s.id')
-        ->join('shipments_journey as sj','sj.shipment_id','=','s.id')
-        ->join('shipment_scanning_screen_locations as sssl','shipment_scanning_journeys.location_id','=','sssl.id')
-        ->where('sssl.id','=',8); 
-
+        
+        $quick_scanned = DB::connection('reports')->table('shipment_scanning_journeys')->join('shipments as s','s.id','=','shipment_scanning_journeys.shipment_id')->
+        join('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                 ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipment_scanning_journeys.shipment_id and shipments_journey.shipper_status_id = 2)'));
+        })
+        ->leftJoin('shipments_journey', function ($join) {
+            $join->on('shipments_journey.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
+                 ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipment_scanning_journeys.shipment_id)'));
+        })
+        ->leftJoin('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
+        ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+        ->join('users as u', 's.user_id', '=', 'u.id')
+        ->leftJoin('admins as a', 'sj.admin_id', '=', 'a.id')
+        ->leftJoin('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
+        ->leftJoin('admin_hubs as ah', 'ah.admin_id', '=', 'shipment_scanning_journeys.admin_id')
+        ->leftJoin('cities AS ahc', 'ah.hub_id', '=', 'ahc.id')
+        ->leftJoin('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+        ->where('sj.shipper_status_id', '=', 2)
+        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city')
+        ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
+    
+        
+        // $quick_scanned = ShipmentScanningJourney::
+        // join('shipments_journey as sj', function ($join) {
+        //     $join->on('sj.shipment_id', '=', 'shipments.id')
+        //         ->where(
+        //             'sj.created_at',
+        //             '=',
+        //             DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+        //         );
+        // })
+        // ->
+        // leftJoin('shipments_journey', function ($join) {
+        //     $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+        //         ->where(
+        //             'shipments_journey.created_at',
+        //             '=',
+        //             DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+        //         );
+        // })
+        // ->leftjoin('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
+        // ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        // ->leftjoin('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        // ->leftjoin('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        // ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+        // ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
+        // ->leftjoin('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
+        // ->leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'ad.id')
+        // ->leftjoin('cities AS ahc', 'ah.hub_id', '=', 'ahc.id')
+        // ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
+        // ->where('sj.shipper_status_id', '=', 2)
+        // ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by','sssl.name as last_scanned_location','ad.name as last_scanned_by','sssl.created_at as last_scanned_at','ahc.name as last_scanned_city')
+        // ->where('sssl.id', '=', 8);
+        
+        // $quick_scanned = ShipmentScanningJourney::join('shipments as s', 'shipment_scanning_journeys.shipment_id', '=', 's.id')
+        // ->join('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')//add where shipper_status_id,2
+        // ->join('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
+        // ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+        // ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        // ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+        // ->join('users as u', 's.user_id', '=', 'u.id')
+        // ->join('admins as a', 'sj.admin_id', '=', 'a.id')
+        // ->join('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
+        // ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+        // ->where('sj.shipper_status_id', '=', 2)
+        // ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by','sssl.name as last_scanned_location','ad.name as last_scanned_by','sssl.created_at as last_scanned_at')
+        // ->where('sssl.id', '=', 8);
+    
+        
         // DB::connection('reports')->table('v2_pickup_notes')
         //     ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
         //     ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
@@ -11314,61 +11381,59 @@ class AdminReportsController extends Controller
         //     ->where('v2_pickup_notes.status',1)
         //     ->groupBy('v2_pickup_notes.id');
         
-        $datatables = Datatables::of($rider_pickup)
-            ->addColumn('scanned_shipments_btn', function ($entry) {
-                $function = "scanned_shipments_popup('".$entry->id."')";
-                if ($entry->scanned_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('arrived_shipments_btn', function ($entry) {
-                $function = "arrived_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
-                } else {
-                    return 0;
-                }
-            }) 
-            ->addColumn('without_scan_shipments_btn', function ($entry) {
+        // $datatables = Datatables::of($rider_pickup)
+        //     ->addColumn('scanned_shipments_btn', function ($entry) {
+        //         $function = "scanned_shipments_popup('".$entry->id."')";
+        //         if ($entry->scanned_shipments > 0) {
+        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
+        //         } else {
+        //             return 0;
+        //         }
+        //     })
+        //     ->addColumn('arrived_shipments_btn', function ($entry) {
+        //         $function = "arrived_shipments_popup('".$entry->id."')";
+        //         if ($entry->arrived_shipments > 0) {
+        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+        //         } else {
+        //             return 0;
+        //         }
+        //     }) 
+        //     ->addColumn('without_scan_shipments_btn', function ($entry) {
 
-                $function = "without_scan_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
+        //         $function = "without_scan_shipments_popup('".$entry->id."')";
+        //         if ($entry->arrived_shipments > 0) {
 
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('without_scan_shipments', function ($entry) {
+        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
+        //         } else {
+        //             return 0;
+        //         }
+        //     })
+        //     ->addColumn('without_scan_shipments', function ($entry) {
 
-                if ($entry->arrived_shipments > 0) {
+        //         if ($entry->arrived_shipments > 0) {
 
-                    return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
-                } else {
-                    return 0;
-                }
-            })
+        //             return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
+        //         } else {
+        //             return 0;
+        //         }
+        //     })
             
-            ->addColumn('pickup_note_id_btn', function ($entry) {
-                if ($entry->pickup_note_id != null) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-                }
-                return '';
-            })
-            ->addColumn('pickup_note_btn', function ($entry) {
-                $function = "pickup_note('".$entry->id."')";
-                if ($entry->id > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->pickup_note_id) . '</button>';
-                } else {
-                    return 0;
-                }
-            });
+        //     ->addColumn('pickup_note_id_btn', function ($entry) {
+        //         if ($entry->pickup_note_id != null) {
+        //             return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+        //         }
+        //         return '';
+        //     })
+        //     ->addColumn('pickup_note_btn', function ($entry) {
+        //         $function = "pickup_note('".$entry->id."')";
+        //         if ($entry->id > 0) {
+        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->pickup_note_id) . '</button>';
+        //         } else {
+        //             return 0;
+        //         }
+        //     });
 
-        // if($rider = $request->get('search_rider')){
-        //     $datatables = $datatables->where('r.id', '=', $rider);
-        // }
+       
         // if($user = $request->get('search_shipper')){
         //     $datatables = $datatables->where('s.user_id', '=', $user);
         // }
@@ -11376,11 +11441,23 @@ class AdminReportsController extends Controller
         //     $datatables = $datatables->where('c.hub_id', '=', $hub);
         // }
         
-        // if ($request->get('search_from') && $request->get('search_to')) {
-        //     $from = $request->get('search_from');
-        //     $to = $request->get('search_to');
-        //     $datatables = $datatables->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
-        // }
+        $datatables = Datatables::of($quick_scanned)
+        ->addColumn('tracking_number_hyperlink', function ($requests) {
+            return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+        });
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables = $datatables->whereBetween('shipment_scanning_journeys.created_at', [$from,$to]);
+        }
+        if ($tracking_number = $request->get('tracking_number')) 
+        {
+            $datatables->where('s.tracking_number', '=', $tracking_number);
+        }
+        if($rider = $request->get('search_rider')){
+            $datatables = $datatables->where('shipment_scanning_journeys.admin_id', '=', $rider)->where('shipment_scanning_journeys.user_type',5);
+        }
 
         return $datatables->make(true);
     }
