@@ -369,7 +369,7 @@
                                 row.push(values.product_value);
                                 row.push(values.insurance_charges);
                                 row.push(values.discount_amount);
-                                row.push(values.discount_amount);
+                                row.push(values.admin_discount);
                                 row.push(values.packaging_charges);
                                 row.push(values.gst);
                                 row.push(values.total_charges);
