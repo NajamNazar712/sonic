@@ -13101,6 +13101,8 @@ class AdminDashboardController extends Controller
         if (isset($spreadsheet)) {
             $header_correct = TRUE;
 
+            $fields = [0 => 'tracking_number', 1 => 'receiver_name', 2 => 'receiver_cnic', 3 => 'receiver_relationship'];
+
             foreach ($spreadsheet[0] as $index => $header_value) {
                 if ($index == 1) {
                 } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
@@ -13116,18 +13118,22 @@ class AdminDashboardController extends Controller
             }
         }
 
-        $rows = array();
-        if (isset($spreadsheet)) {
-            foreach ($spreadsheet as $spreadsheet_row) {
-                $row = array();
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
 
-                foreach ($spreadsheet_row as $key => $value) {
-                    $row[] = $value;
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
                 }
 
-                $rows[] = $row;
+                unset($spreadsheet);
             }
-            unset($spreadsheet);
         }
         
         $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
