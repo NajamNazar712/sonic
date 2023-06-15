@@ -6375,7 +6375,6 @@ class ReturnController extends Controller
         ->leftjoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
         ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
         ->leftjoin('status_remarks as sr','sr.shipment_id','=','return_assigned_shipments.shipment_id')
-        ->leftjoin('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','return_assigned_shipments.id')
         
         //getting latest row of return_assigned_shipments.id to get updated by
         ->leftJoin('return_assigned_shipment_logs as rasl_latest', function ($join) {
@@ -6403,12 +6402,10 @@ class ReturnController extends Controller
         'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.name as user','updated_by_admin.name as admin'
         ,'rasl_latest.status as rasl_status')->groupBy('tracking_number');
 
-        // dd($agent_productivity->get());
         $datatable = Datatables::of($agent_productivity)
 
 
         ->addColumn('updated_by', function ($agent_productivity){
-            // dd($agent_productivity);
             if($agent_productivity->user != null){
                 return $agent_productivity->user;
             }
@@ -6470,7 +6467,7 @@ class ReturnController extends Controller
 
         if ($request->get('agent')) {
             $agent_ids = $request->get('agent');
-            $agent_productivity = $agent_productivity->whereIn('agent_id',$agent_ids);
+            $agent_productivity = $agent_productivity->whereIn('a.id',$agent_ids);
         }
         
         return $datatable->make(true);
