@@ -11273,19 +11273,19 @@ class AdminReportsController extends Controller
     }
     public function quick_scanned_report_index()
     {
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 667);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
         $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
         $shippers = User::whereIn('status', [3, 4])->get();
+        $shipment_status = ShipmentStatus::get();
 
-        return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
+        return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers,'shipment_status' => $shipment_status]);
     }
     public function quick_scanned_report_list(Request $request)
     {
-        dd($request->all());
         if($request->get('excel') && $request->get('excel') == true)
         {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),668);
         }
         
         $quick_scanned = DB::connection('reports')->table('shipment_scanning_journeys')->join('shipments as s','s.id','=','shipment_scanning_journeys.shipment_id')->
@@ -11321,10 +11321,9 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $datatables = $datatables->whereBetween('shipment_scanning_journeys.created_at', [$from,$to]);
         }
-        if ($tracking_number = $request->get('tracking_numbers')) 
+        if ($tracking_numbers = $request->get('tracking_numbers')) 
         {
-            
-            $datatables->where('s.tracking_number', '=', $tracking_number);
+            $datatables->whereIn('s.tracking_number',explode(',', $tracking_numbers));
         }
         if($rider = $request->get('rider')){
             $datatables->where('shipment_scanning_journeys.admin_id', '=', $rider)->where('shipment_scanning_journeys.user_type',5);

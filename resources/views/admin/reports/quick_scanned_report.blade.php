@@ -15,9 +15,7 @@
                        <div class="row">
                         <div class="col-3">
                             <div class="form-group">
-                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-
-                                {{-- <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number"> --}}
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*"  id="tracking_numbers" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                             </div>
                         </div>
                         <div class="col-3">
@@ -165,6 +163,12 @@
                 allowClear:true
             });
            
+            var shipment_status = @json($shipment_status);
+
+            var shipment_status_data = $.map(shipment_status, function (obj) {
+                obj.id = obj.id || obj.text;
+                return obj;
+            });
          jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -220,55 +224,34 @@
 
             
             var select = $('#track_form .tracking_numbers').selectize({
-                    placeholder: 'Tracking Number(s)*',
-                    delimiter: ',',
-                    createOnBlur: true,
-                    persist: false,
-                    plugins: ['remove_button'],
-                    onDropdownOpen: function (dropdown) {
-                        dropdown.remove();
-                    },
-                    onType: function (str) {
-                        var regex = /^[0-9,]+$/;
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
 
-                        if (!regex.test(str)) {
-                            select[0].selectize.setTextboxValue('');
-                        }
-                    },
-                    create: function (input) {
-                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
-                            return {
-                                value: input,
-                                text: input
-                            }
-                        }
-                        else {
-                            return false;
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
                         }
                     }
-                });
-
-            // $('#track_form').validate({
-            //     ignore: [],
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function (error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('form'));
-            //     },
-            //     submitHandler: function (form) {
-            //         track($(form).find('.tracking_numbers').val());
-
-            //         return false;
-            //     }
-            // });
-            // $('#track_form').bind('submit', function(e) {
-            //     e.preventDefault();
-            //     length = $('#track_form #tracking_number').val().length;
-
-            //     if (length == 0 || length >= 12) {
-            //         table.draw();
-            //     }
-            // });
+                    else {
+                        return false;
+                    }
+                }
+            });
+          
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -385,19 +368,22 @@
                             }
                         }
                     });
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    $('#status_select').select2({data: shipment_status_data, placeholder: 'Select Status'});
+
                     this.api().table().columns.adjust();
                 }
             });
 
             $('#track_form').bind('submit', function (e) {
                 e.preventDefault();
-                table.draw();
+                var tracking_numbers = $('#track_form .tracking_numbers').val();
+                var search_date_from = $('#track_form #search_date_from').val();
+                var search_date_to = $('#track_form #search_date_to').val();
+                var rider = $('#track_form #rider').val();
+                if (tracking_numbers != '' || (search_date_from != '' && search_date_to != '') || rider != '') {
+                    table.draw();
+                }
+               
             });
 
         });
