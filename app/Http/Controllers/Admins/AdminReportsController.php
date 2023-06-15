@@ -11455,8 +11455,8 @@ class AdminReportsController extends Controller
         {
             $datatables->where('s.tracking_number', '=', $tracking_number);
         }
-        if($rider = $request->get('search_rider')){
-            $datatables = $datatables->where('shipment_scanning_journeys.admin_id', '=', $rider)->where('shipment_scanning_journeys.user_type',5);
+        if($rider = $request->get('rider')){
+            $datatables->where('shipment_scanning_journeys.admin_id', '=', $rider)->where('shipment_scanning_journeys.user_type',5);
         }
 
         return $datatables->make(true);

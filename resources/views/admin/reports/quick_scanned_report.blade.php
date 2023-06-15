@@ -42,12 +42,9 @@
                                     </select>
                                 </div>
                             </div>
-                            {{-- <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate"> --}}
-                                <div class="form-group">
-                                    <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
-                                </div>
-                            {{-- </form> --}}
-
+                            <div class="form-group">
+                                <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+                            </div>
                            <div class="col-3">
                                <div class="form-group">
                                    <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
@@ -208,7 +205,6 @@
             });
             $('#track_form').bind('submit', function(e) {
                 e.preventDefault();
-                // alert("ad");
                 length = $('#track_form #tracking_number').val().length;
 
                 if (length == 0 || length >= 12) {
