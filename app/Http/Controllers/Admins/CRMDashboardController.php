@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -62,8 +63,8 @@ class CRMDashboardController extends Controller
         $hubs = City::where('hub', 1)->get();
         $zones = Zone::where('status', 1)->get();
         $closed_reason_statuses  = CrmClosedReasonStatus::all();
-        $statuses = DB::connection('reports')->table('crm_request_statuses')->select('id', 'name')->whereNotIn('id', [6, 7])->get();
-        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $statuses = CrmRequestStatus::select('id', 'name')->whereNotIn('id', [6, 7])->get();
+        $shipping_modes = ShippingMode::get(['id', 'mode']);
         $shipment_status = ShipmentStatus::select('id','name')->get();
         
 
@@ -71,20 +72,13 @@ class CRMDashboardController extends Controller
         // From Admin Leads 
         $today = Carbon::now()->endOfDay();
         $thirtyDays = Carbon::now()->subDays(1)->startOfDay();
-        $numberOfDays = $thirtyDays->diffInDays($today);
-        
+
+        $void_feedback_crm_request_ids = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->pluck('crm_request_id')->toArray();
+
         if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
         {
-            $crm_feedback = CrmRequestFeedback::
-            whereBetween('created_at',[$thirtyDays,$today])->
-            pluck('crm_request_id');
 
-            $crm['total'] = CrmRequest::get();
-            // whereBetween('created_at', [$thirtyDays, $today]);
-            
-            //For Closer Rate
-            $crm_total = $crm['total']->whereNotIn('id', $crm_feedback)->count();
-            //End For Closer Rate
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids)->count();
 
             $crm['launched'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
@@ -108,19 +102,10 @@ class CRMDashboardController extends Controller
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7);
            
-        }else
+        }
+        else
         {
-            $crm_feedback = CrmRequestFeedback::
-            whereBetween('created_at',[$thirtyDays,$today])->
-            pluck('crm_request_id');
-
-            // dd(auth()->user()->id);
-            $crm['total'] = CrmRequest::get();
-            // whereBetween('created_at', [$thirtyDays, $today]);
-
-            //For Closer Rate
-            $crm_total = $crm['total']->whereNotIn('id', $crm_feedback)->count();
-            //End For Closer Rate
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids)->count();
 
             $crm['launched'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
@@ -143,30 +128,7 @@ class CRMDashboardController extends Controller
             $crm['in_valid'] = CrmRequestStatusHistory::
             whereBetween('created_at', [$thirtyDays, $today])->
             where('status_id', 7)->where('agent_id',auth()->user()->id);
-            $crm_feedback = CrmRequestFeedback::whereBetween('created_at',[$thirtyDays,$today])->where('user_id',auth()->user()->id)->pluck('crm_request_id');
         }
-
-        // if (session('role_id') != 1) {
-        //     //$crm['launched'] = $crm['launched']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['received'] = $leads['received']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['in_process'] = $leads['in_process']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['dead_leads'] = $leads['dead_leads']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['accounts_activated'] = $leads['accounts_activated']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        //     // $leads['dormant'] = $leads['dormant']->join('cities as c', 'c.id', '=', 'leads.city_id')->whereIn('c.hub_id', session('hubs'));
-        // }
-        // if (session('department_id') == 7) {
-        //     if (!in_array(session('id'), session('sale_users_bypass')) && session('role_id') != 44 && session('role_id') != 60) {
-        //         // $leads['total'] = $leads['total']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['received'] = $leads['received']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['in_process'] = $leads['in_process']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['in_process_for_activation'] = $leads['in_process_for_activation']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['dead_leads'] = $leads['dead_leads']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['accounts_activated'] = $leads['accounts_activated']->where('leads.sale_person_id', Auth::id());
-        //         // $leads['dormant'] = $leads['dormant']->where('leads.sale_person_id', Auth::id());
-        //     }
-        // } 
-
 
         $crm['total'] = $crm['total']->count();
         $crm['launched'] = $crm['launched']->count();
@@ -181,21 +143,17 @@ class CRMDashboardController extends Controller
         count();
         
        
-        $crm['closed_rate'] = $crm_total !== 0 ? $crm['closed']/$crm_total : 0;
-        $crm['in_process_ratio'] = $shipments !== 0 ? $crm_total/$shipments : 0;
+        $crm['closed_rate'] = $crm['total'] !== 0 ? $crm['closed']/$crm['total'] : 0;
+        $crm['in_process_ratio'] = $shipments !== 0 ? $crm['total']/$shipments : 0;
         
         $crm['in_valid_percentage'] = "0";
         $crm['closed_rate_percentage'] = "0";
         $crm['in_process_ratio_percentage'] = "0";
         if ($crm['total'] > 0) {
             $crm['in_valid_percentage'] = round(($crm['in_valid'] / $crm['total']) * 100, 2);
-            $crm['closed_rate_percentage'] = $crm_total !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
+            $crm['closed_rate_percentage'] = $crm['total'] !== 0 ? round(($crm['closed_rate']) * 100, 2)  : 0;
             $crm['in_process_ratio_percentage'] =  $shipments !== 0 ? round(($crm['in_process_ratio']) * 100, 2) : 0;
         }
-       
-        $leads['in_process_for_activation'] = "3";
-        $leads['in_process_for_activation_percentage'] = "3";
-        $leads['dormant'] = "3";
 
         $crm['launched'] = number_format($crm['launched']);
         $crm['in_process'] = number_format($crm['in_process']);
@@ -206,11 +164,10 @@ class CRMDashboardController extends Controller
         $crm['closed_rate'] = number_format($crm['closed_rate']);
         $crm['in_process_ratio'] = number_format($crm['in_process_ratio']);
 
-
         $cities = City::where('status', 1)->select('id', 'name')->get();
 
         $dates['current'] = Carbon::now();
-        $dates['old_date'] = Carbon::now()->subDays(58);
+        $dates['old_date'] = Carbon::now()->subDays(1);
 
         return view('admin.crm.dashboard')->with(['case_natures' => $case_natures, 'case_nature_types' => $case_nature_types,'statuses' => $statuses, 'shipping_modes' => $shipping_modes, 'channels' => $channels, 'agents' => $agents, 'shipment_status' => $shipment_status, 'types' => $types, 'admins' => $admins, 'departments' => $departments, 'hubs' => $hubs, 'zones' => $zones, 'closed_reason_statuses' => $closed_reason_statuses,'dates' => $dates,'cities' => $cities,'crm_request_statuses' => $crm_request_statuses,'crm' => $crm]);
     }
