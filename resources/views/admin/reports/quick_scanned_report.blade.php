@@ -13,43 +13,49 @@
 
                     <form id="track_form" class="justify-content-center m-2"  novalidate="novalidate">
                        <div class="row">
-                            <div class="col-3">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                    <span class="la la-calendar-o small-calender-icon"></span>
-                                                </span>
-                                    </div>
-                                    <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::today() }}">
-                                </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+
+                                {{-- <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number"> --}}
                             </div>
-                            <div class="col-3">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <select name="rider" id="rider" class="form-control select2" >
+                                    @foreach($riders as $rider)
+                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+                       <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
-                                    </div>
-                                    <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="To" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
+                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::today() }}">
                             </div>
-                            <div class="col-3">
-                                <div class="form-group">
-                                    <select name="rider" id="rider" class="form-control select2" >
-                                        @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                        @endforeach
-                                    </select>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
                                 </div>
+                                <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_to" placeholder="To" data-value="{{ Carbon\Carbon::today() }}">
                             </div>
+                        </div> 
+                        <div class="col-12 d-flex justify-content-center">
                             <div class="form-group">
-                                <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+                                <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search">
+                                    <i class="la la-search"></i> Search
+                                </button>
                             </div>
-                           <div class="col-3">
-                               <div class="form-group">
-                                   <button type="submit" id="search_filter_btn" class="btn btn-outline-primary btn-min-width search"><i class="la la-search"></i> Search</button>
-                               </div>
-                           </div>
+                        </div>
                        </div>
                     </form>
 
@@ -85,7 +91,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <style>
         table.dataTable {
             font-size: 12px;
@@ -122,6 +128,11 @@
         .selectize-control {
             width: 100%;
         }
+     
+        .tracking_numbers{
+            width: 100% !important;
+        }
+
 
         /* .selectize-control .selectize-input {
              vertical-align: middle;
@@ -143,6 +154,9 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
@@ -203,14 +217,58 @@
                     return {body: body, header: head};
                 }
             });
-            $('#track_form').bind('submit', function(e) {
-                e.preventDefault();
-                length = $('#track_form #tracking_number').val().length;
 
-                if (length == 0 || length >= 12) {
-                    table.draw();
-                }
-            });
+            
+            var select = $('#track_form .tracking_numbers').selectize({
+                    placeholder: 'Tracking Number(s)*',
+                    delimiter: ',',
+                    createOnBlur: true,
+                    persist: false,
+                    plugins: ['remove_button'],
+                    onDropdownOpen: function (dropdown) {
+                        dropdown.remove();
+                    },
+                    onType: function (str) {
+                        var regex = /^[0-9,]+$/;
+
+                        if (!regex.test(str)) {
+                            select[0].selectize.setTextboxValue('');
+                        }
+                    },
+                    create: function (input) {
+                        if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                            return {
+                                value: input,
+                                text: input
+                            }
+                        }
+                        else {
+                            return false;
+                        }
+                    }
+                });
+
+            // $('#track_form').validate({
+            //     ignore: [],
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function (error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('form'));
+            //     },
+            //     submitHandler: function (form) {
+            //         track($(form).find('.tracking_numbers').val());
+
+            //         return false;
+            //     }
+            // });
+            // $('#track_form').bind('submit', function(e) {
+            //     e.preventDefault();
+            //     length = $('#track_form #tracking_number').val().length;
+
+            //     if (length == 0 || length >= 12) {
+            //         table.draw();
+            //     }
+            // });
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -258,9 +316,7 @@
                 processing: false,
                 deferLoading: 0,
                 language: {
-
                     processing: data_table_loader
-                    
                 },
                 serverSide: true,
                 ajax: {
@@ -269,7 +325,7 @@
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.rider = $('select[name="rider"]').val();
-                        d.tracking_number = $('#tracking_number').val();
+                        d.tracking_numbers = $('#tracking_numbers').val();
                     }
                 },
                 rowId: 'id',
