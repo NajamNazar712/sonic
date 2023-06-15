@@ -13095,7 +13095,7 @@ class AdminDashboardController extends Controller
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();     
-            $header = ['Tracking No', 'Receiver Name', 'Receiver Cnic', 'Receiver Relationship'];
+            $header = ['Tracking Number', 'Receiver Name', 'Receiver Cnic', 'Receiver Relationship'];
         }
         
         if (isset($spreadsheet)) {
