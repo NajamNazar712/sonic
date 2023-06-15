@@ -13,16 +13,17 @@ class CreateShipementReceiveDetailsTable extends Migration
      */
     public function up()
     {
-        Schema::create('shipment_receiver_details', function (Blueprint $table) {
-            $table->increments('id');
-            $table->bigInteger('shipment_id')->index();
-            $table->bigInteger('tracking_number')->index();
-            $table->String('receiver_name');
-            $table->String('receiver_cnic');
-            $table->String('receiver_relationship');
-            $table->Integer('received_by');
-            $table->timestamps();
-        });
+        Schema::dropIfExists('shipment_receiver_details');
+//        Schema::create('shipment_receiver_details', function (Blueprint $table) {
+//            $table->increments('id');
+//            $table->bigInteger('shipment_id')->index();
+//            $table->bigInteger('tracking_number')->index();
+//            $table->String('receiver_name');
+//            $table->String('receiver_cnic');
+//            $table->String('receiver_relationship');
+//            $table->Integer('received_by');
+//            $table->timestamps();
+//        });
     }
 
     /**
@@ -32,6 +33,6 @@ class CreateShipementReceiveDetailsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shipement_receive_details');
+//        Schema::dropIfExists('shipment_receiver_details');
     }
 }
