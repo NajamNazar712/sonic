@@ -228,6 +228,7 @@
                             head.push('Reason');
                             head.push('Call Findings');
                             head.push('Arrival Date');
+                            head.push('Assigned To');
                             head.push('Updated By');
                             head.push('Agent Status');
                             head.push('Agent Status Date');
@@ -251,6 +252,7 @@
                                 row.push(values.reason);
                                 row.push(values.call_findings);
                                 row.push(values.arrival_date);
+                                row.push(values.assigned_to);
                                 row.push(values.updated_by);
                                 row.push(values.agent_status);
                                 row.push(values.agent_status_date);
@@ -299,37 +301,37 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper_name', orderable: false, searchable: false, name: 'u.name', class: 'align-middle shipper_name'}, 
+                    {data: 'shipper_name', orderable: false, name: 'u.name', class: 'align-middle shipper_name'}, 
                     {data: 'origin', name: 'c.name', class: 'align-middle origin'},
                     {data: 'consignee_city', name: 'consignee_city.name', class: 'align-middle consignee_city'},
-                    {data: 'consignee_name', orderable: false, searchable: false, name: 's.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone_number', orderable: false, searchable: false, name: 's.consignee_phone_number_1', class: 'align-middle consignee_phone_number'},
-                    {data: 'consignee_address', orderable: false, searchable: false, name: 's.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'collection_amount', orderable: false, searchable: false, name: 's.amount', class: 'align-middle collection_amount'},
-                    {data: 'current_status', orderable: false, searchable: false, name: 'ss.name', class: 'align-middle current_status'},
-                    {data: 'current_status_date', orderable: false, searchable: false, name: 'sj.updated_at', class: 'align-middle current_status_date'},
-                    {data: 'reason', orderable: false, searchable: false, name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'call_findings', orderable: false, searchable: false, name: 'call_findings', class: 'align-middle call_findings'},
-                    {data: 'arrival_date', orderable: false, searchable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
-                    {data: 'assigned_to', orderable: false, searchable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
-                    {data: 'updated_by', orderable: false, searchable: false, name: 'updated_by', class: 'align-middle updated_by'},
-                    {data: 'agent_status', orderable: false, searchable: false, name: 'agent_status', class: 'align-middle agent_status'},
-                    {data: 'agent_status_date', orderable: false, searchable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
+                    {data: 'consignee_name', orderable: false, name: 's.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone_number', orderable: false, name: 's.consignee_phone_number_1', class: 'align-middle consignee_phone_number'},
+                    {data: 'consignee_address', orderable: false, name: 's.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'collection_amount', orderable: false, name: 's.amount', class: 'align-middle collection_amount'},
+                    {data: 'current_status', orderable: false, name: 'ss.name', class: 'align-middle current_status'},
+                    {data: 'current_status_date', orderable: false, name: 'sj.updated_at', class: 'align-middle current_status_date'},
+                    {data: 'reason', orderable: false, name: 'ssr.name', class: 'align-middle reason'},
+                    {data: 'call_findings', orderable: false, name: 'call_findings', class: 'align-middle call_findings'},
+                    {data: 'arrival_date', orderable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
+                    {data: 'assigned_to', orderable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
+                    {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
+                    {data: 'agent_status', orderable: false, name: 'agent_status', class: 'align-middle agent_status'},
+                    {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
+                // rowCallback: function(row, data, index) {
+                //     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    if(index == 0){
-                    // console.log(data);
-                    // on_hold_for_sc = data.on_hold_for_sc;
-                    }
-                    else{
-                    // on_hold_for_sc += data.on_hold_for_sc;
+                //     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                //     if(index == 0){
+                //     // console.log(data);
+                //     // on_hold_for_sc = data.on_hold_for_sc;
+                //     }
+                //     else{
+                //     // on_hold_for_sc += data.on_hold_for_sc;
 
-                    }
-                },
+                //     }
+                // },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 

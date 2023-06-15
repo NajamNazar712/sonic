@@ -6375,6 +6375,7 @@ class ReturnController extends Controller
         ->leftjoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
         ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
         ->leftjoin('status_remarks as sr','sr.shipment_id','=','return_assigned_shipments.shipment_id')
+        ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
         
         //getting latest row of return_assigned_shipments.id to get updated by
         ->leftJoin('return_assigned_shipment_logs as rasl_latest', function ($join) {
@@ -6398,7 +6399,7 @@ class ReturnController extends Controller
         'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
         'a.id as agent_id', 'return_assigned_shipments.shipment_id as shipment_id',
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
-        's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings',
+        's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
         'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.name as user','updated_by_admin.name as admin'
         ,'rasl_latest.status as rasl_status')->groupBy('tracking_number');
 
@@ -6417,14 +6418,14 @@ class ReturnController extends Controller
             }
         })
 
-        ->editColumn('call_findings', function ($agent_productivity){
-            if($agent_productivity->call_findings == 1){
-                return 'Unresponsive';
-            }
-            else{
-                return '-';
-            }
-        })
+        // ->editColumn('call_findings', function ($agent_productivity){
+        //     if($agent_productivity->call_findings == 1){
+        //         return 'Unresponsive';
+        //     }
+        //     else{
+        //         return '-';
+        //     }
+        // })
 
         ->addColumn('agent_status',function ($agent_productivity){
             $status = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as ras','ras.return_assign_shipment_id','return_assigned_shipments.id')
