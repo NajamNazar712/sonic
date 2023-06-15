@@ -11293,20 +11293,20 @@ class AdminReportsController extends Controller
             $join->on('sj.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                  ->where('sj.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipment_scanning_journeys.shipment_id and shipments_journey.shipper_status_id = 2)'));
         })
-        ->leftJoin('shipments_journey', function ($join) {
+        ->join('shipments_journey', function ($join) {
             $join->on('shipments_journey.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                  ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipment_scanning_journeys.shipment_id)'));
         })
-        ->leftJoin('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
+        ->join('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
         ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
         ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
-        ->leftJoin('admins as a', 'sj.admin_id', '=', 'a.id')
-        ->leftJoin('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
-        ->leftJoin('admin_hubs as ah', 'ah.admin_id', '=', 'shipment_scanning_journeys.admin_id')
-        ->leftJoin('cities AS ahc', 'ah.hub_id', '=', 'ahc.id')
-        ->leftJoin('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+        ->join('admins as a', 'sj.admin_id', '=', 'a.id')
+        ->join('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
+        ->join('admin_hubs as ah', 'ah.admin_id', '=', 'shipment_scanning_journeys.admin_id')
+        ->join('cities AS ahc', 'ah.hub_id', '=', 'ahc.id')
+        ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
         ->where('sj.shipper_status_id', '=', 2)
         ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city')
         ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
