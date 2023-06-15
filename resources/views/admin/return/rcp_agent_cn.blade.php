@@ -297,7 +297,7 @@
                 order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
+                    {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper_name', orderable: false, searchable: false, name: 'u.name', class: 'align-middle shipper_name'}, 
                     {data: 'origin', name: 'c.name', class: 'align-middle origin'},
                     {data: 'consignee_city', name: 'consignee_city.name', class: 'align-middle consignee_city'},

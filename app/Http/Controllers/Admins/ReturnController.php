@@ -6315,9 +6315,9 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),452);
         }
         
-        $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
-        ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
-        ->leftjoin('shipments as s','s.id','=','ras.shipment_id')
+        $agent_productivity = ReturnAssignedShipments::join('admins as a','a.id','=','return_assigned_shipments.admin_id')
+        // ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+        ->leftjoin('shipments as s','s.id','=','return_assigned_shipments.shipment_id')
         ->leftjoin('users as u','u.id','=','s.user_id')
         ->leftjoin('user_shipping_infos as usi','usi.user_id','=','u.id')
         ->leftjoin('cities as c','c.id','=','usi.city_id')
@@ -6325,7 +6325,7 @@ class ReturnController extends Controller
         ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
         ->leftjoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
         ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
-        ->leftjoin('status_remarks as sr','sr.shipment_id','=','ras.shipment_id')
+        ->leftjoin('status_remarks as sr','sr.shipment_id','=','return_assigned_shipments.shipment_id')
 
         // Filter the join condition for shipper_status_id = 2 (arrive at origin)
         ->leftjoin('shipments_journey as sjj', function($join) {
@@ -6333,12 +6333,20 @@ class ReturnController extends Controller
                  ->where('sjj.shipper_status_id', '=', 2);
         })
 
-        ->select('s.tracking_number as agent_name','u.name as shipper_name','u.name as shipper_name','c.name as origin','consignee_city.name as consignee_city',
-        's.amount as collection_amount','ss.name as current_status', 'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
-        'a.id as agent_id','agent_return_confirmations.login_time as start_time',
-        'agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id',
-        'ras.shipment_id as shipment_id','a.name as updated_by', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
-        's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings','ras.updated_at as agent_status_date');
+        ->select('s.tracking_number as tracking_number','u.name as shipper_name','c.name as origin',
+        'consignee_city.name as consignee_city','s.amount as collection_amount','ss.name as current_status', 
+        'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
+        'a.id as agent_id','return_assigned_shipments.admin_id', 'return_assigned_shipments.shipment_id as shipment_id',
+        'a.name as updated_by', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
+        's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings',
+        'return_assigned_shipments.updated_at as agent_status_date')->groupBy('tracking_number');
+
+        // ->select('s.tracking_number as agent_name','u.name as shipper_name','u.name as shipper_name','c.name as origin','consignee_city.name as consignee_city',
+        // 's.amount as collection_amount','ss.name as current_status', 'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
+        // 'a.id as agent_id','agent_return_confirmations.login_time as start_time',
+        // 'agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id',
+        // 'ras.shipment_id as shipment_id','a.name as updated_by', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
+        // 's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings','ras.updated_at as agent_status_date');
 
         $datatable = Datatables::of($agent_productivity)
 
@@ -6387,12 +6395,12 @@ class ReturnController extends Controller
         if ($request->get('from_date') && $request->get('to_date')) {
         $from = $request->get('from_date');
         $to = $request->get('to_date');
-        $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
+        $agent_productivity = $agent_productivity->whereBetween('return_assigned_shipments.updated_at',[$from,$to]);
         }
 
         if ($request->get('agent')) {
             $agent_ids = $request->get('agent');
-            $agent_productivity = $agent_productivity->whereIn('agent_return_confirmations.admin_id',$agent_ids);
+            $agent_productivity = $agent_productivity->whereIn('return_assigned_shipments.admin_id',$agent_ids);
         }
         
         return $datatable->make(true);
