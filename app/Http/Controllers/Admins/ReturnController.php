@@ -6401,7 +6401,7 @@ class ReturnController extends Controller
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
         's.consignee_phone_number_1 as consignee_phone_number','sr.call_finding_id as call_findings',
         'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.name as user','updated_by_admin.name as admin'
-        ,'rasl.status as rasl_status')->groupBy('tracking_number');
+        ,'rasl_latest.status as rasl_status')->groupBy('tracking_number');
 
         // dd($agent_productivity->get());
         $datatable = Datatables::of($agent_productivity)
