@@ -1464,7 +1464,6 @@ var to_date = $('#to_date').pickadate({
                 rowCallback: function(row, data, index) {
                     if (data.crm_request_status_id != 4) 
                     {
-                        console.log(data);
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.id, selected_rows) !== -1) {
@@ -1683,7 +1682,6 @@ var to_date = $('#to_date').pickadate({
 
                         return obj;
                     });
-                    console.log(data6);
                     $('#crm_request_status').prepend('<option value="" selected></option>').select2({
                         data:data6,
                         placeholder: "Select Status",
