@@ -70,7 +70,7 @@ class CRMDashboardController extends Controller
 
         // From Admin Leads 
         $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+        $thirtyDays = Carbon::now()->subDays(1)->startOfDay();
         $numberOfDays = $thirtyDays->diffInDays($today);
         
         if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
