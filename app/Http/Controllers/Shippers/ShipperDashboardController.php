@@ -69,6 +69,7 @@ use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
@@ -117,6 +118,7 @@ use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
 use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -583,11 +585,13 @@ class ShipperDashboardController extends Controller
         $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
         if($get_merged_head_id){
             $merged_head_id =  $get_merged_head_id->merged_head_id;
+            
+            $merged_user_id =  $get_merged_head_id->user_id;
 
-            $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
-                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
-                ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
+            $merged_accounts = SubstituteUserMergeSisterAccountMapping::leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')
+                ->where('substitute_user_id', Auth::id())
                 ->where('merged_head_id', $merged_head_id)
+                ->select('u.id as id', 'u.name as name')
                 ->get();
         }
 //        END

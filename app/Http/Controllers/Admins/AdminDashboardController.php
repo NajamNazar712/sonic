@@ -13002,10 +13002,10 @@ class AdminDashboardController extends Controller
         }
        
         $substitute_user->save();
+        SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->delete();
 
         if ($request->has('account_ids')) {
 
-            SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->delete();
 
             foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
                 foreach($account_ids as  $account_id) {
