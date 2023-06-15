@@ -13142,8 +13142,7 @@ class AdminDashboardController extends Controller
 
         foreach ($rows as $key => $row) {
             $row_id = $key + 2;
-            dd($rows);
-            
+
             $validate = Validator::make($row, $rules, $messages);
 
             $validate->setAttributeNames($names);
@@ -13157,60 +13156,62 @@ class AdminDashboardController extends Controller
                     }
                 }
             }
-            
-            
-            $shipment = Shipment::where('tracking_number',$row['tracking_number'])->first();
-                if(empty($shipment)){
-                    return redirect()->back()->with(['error' => 'Tracking Number '.$row['tracking_number'].' is Invalid']);
-                }
-                else{
-                    if(in_array($shipment->user_id,$special_dashboard_shippers))
-                    {
-                        if($shipment->shipper_status_id == 14)
-                        {
-                            if($shipment->amount != 0 )
-                            {
-                                return redirect()->back()->with(['error' => 'Tracking Number '.$row['tracking_number'].' has no zero cod amount']);
-                            }
-                        }
-                        else{
-                            return redirect()->back()->with(['error' => 'Tracking Number '.$row['tracking_number'].' is not delivered']);
-                        }
-                    }
-                    else{
-                        return redirect()->back()->with(['error' => 'Tracking Number '.$row['tracking_number'].' has No Special Dashboard Shipper Shipment']);
-                    }
-                }
         }
 
-        foreach ($rows as $key => $row) {
-                $receive_details = ShipementReceiveDetails::where('tracking_number', $row['tracking_number'])->first();
-
-                $shipment = Shipment::where('tracking_number',$row['tracking_number'])->first();
-                if($receive_details)
-                {   
-                    $receive_details->shipment_id            = $shipment->id;
-                    $receive_details->tracking_number        = $row['tracking_number'];
-                    $receive_details->receiver_name          = $row['receiver_name'];
-                    $receive_details->receiver_cnic          = $row['receiver_cnic'];
-                    $receive_details->receiver_relationship  = $row['receiver_relationship'];
-                    $receive_details->received_by            = Auth::id();
-                    $receive_details->update();
+        if (empty($errors)) {
+            foreach ($rows as $key => $row) {
+                $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
+                if (empty($shipment)) {
+                    return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' is Invalid']);
+                } else {
+                    if (in_array($shipment->user_id, $special_dashboard_shippers)) {
+                        if ($shipment->shipper_status_id == 14) {
+                            if ($shipment->amount != 0) {
+                                return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' has no zero cod amount']);
+                            }
+                        } else {
+                            return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' is not delivered']);
+                        }
+                    } else {
+                        return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' has No Special Dashboard Shipper Shipment']);
+                    }
                 }
-                else{
-                    $receive_details = new ShipementReceiveDetails();
-                    $receive_details->shipment_id            = $shipment->id;
-                    $receive_details->tracking_number        = $row['tracking_number'];
-                    $receive_details->receiver_name          = $row['receiver_name'];
-                    $receive_details->receiver_cnic          = $row['receiver_cnic'];
-                    $receive_details->receiver_relationship  = $row['receiver_relationship'];
-                    $receive_details->received_by            = Auth::id();
-                    $receive_details->save();
-                }
-                
             }
 
+            foreach ($rows as $key => $row) {
+                $receive_details = ShipementReceiveDetails::where('tracking_number', $row['tracking_number'])->first();
+
+                $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
+                if ($receive_details) {
+                    $receive_details->shipment_id = $shipment->id;
+                    $receive_details->tracking_number = $row['tracking_number'];
+                    $receive_details->receiver_name = $row['receiver_name'];
+                    $receive_details->receiver_cnic = $row['receiver_cnic'];
+                    $receive_details->receiver_relationship = $row['receiver_relationship'];
+                    $receive_details->received_by = Auth::id();
+                    $receive_details->update();
+                } else {
+                    $receive_details = new ShipementReceiveDetails();
+                    $receive_details->shipment_id = $shipment->id;
+                    $receive_details->tracking_number = $row['tracking_number'];
+                    $receive_details->receiver_name = $row['receiver_name'];
+                    $receive_details->receiver_cnic = $row['receiver_cnic'];
+                    $receive_details->receiver_relationship = $row['receiver_relationship'];
+                    $receive_details->received_by = Auth::id();
+                    $receive_details->save();
+                }
+
+            }
             return redirect()->back()->with(['success' => 'Uploaded Successfully']);
+        }
+        else{
+            $errors = array_map(function ($row, $errors) {
+                return $row . ':' . PHP_EOL . implode(' | ', $errors);
+            }, array_keys($errors), $errors);
+
+            return redirect()->back()->withErrors($errors);
+        }
+
     }
 
 }
