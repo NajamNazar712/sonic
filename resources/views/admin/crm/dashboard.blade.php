@@ -966,64 +966,64 @@ var to_date = $('#to_date').pickadate({
 
             //Card Function
             function get_summary_cards_data() {
-                var search_origin = $('#search_origin').val();
-                var search_destination = $('#search_destination').val();
-                var search_zone = $('#search_zone').val();
-                var search_case_nature = $('#search_case_nature').val();
-                var search_case_nature_type = $('#search_case_nature_type').val();
-                var shipment_status = $('#search_shipment_status').val();
-                var avg_tat = $('#avg_tat').val();
-                var agent_id = $('#search_agent').val();
-                // var from_date = $('input[name="from_date"]').val();
-                // var to_date = $('input[name="to_date"]').val();
-                var from_date = $('input[name="from_date_formatted"]').val();
-                var to_date = $('input[name="to_date_formatted"]').val();
-        
-               
-                $.ajax({
-                    url: '{!! route('admin.crm.dashboard.card_data') !!}',
-                    method: 'post',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'search_origin': search_origin,
-                        'search_destination': search_destination,
-                        'search_zone': search_zone,
-                        'search_case_nature': search_case_nature,
-                        'search_case_nature_type': search_case_nature_type,
-                        'shipment_status': shipment_status,
-                        'avg_tat': avg_tat,
-                        'from_date': from_date,
-                        'to_date': to_date,
-                        'agent_id': agent_id,
-                    }
-                }).done(function (data) {
-                    if(data.status){
-                        console.log(data.card_data);
-                        $('#launched').text(data.card_data.launched);
-                        $('#in_process').text(data.card_data.in_process);
-                        $('#resolved').text(data.card_data.resolved);
-                        $('#closed').text(data.card_data.closed);
-                        $('#valid').text(data.card_data.valid);
-                        $('#in_valid').text(data.card_data.in_valid);
-                        $('#in_valid_percentage').text(data.card_data.in_valid_percentage);
-                        $('#closed_rate').text(data.card_data.closed_rate);
-                        $('#closed_rate_percentage').text(data.card_data.closed_rate_percentage);
-                        $('#in_process_ratio').text(data.card_data.in_process_ratio);
-                        $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);
-                    }else{
-                        $('#launched').text(0);
-                        $('#in_process').text(0);
-                        $('#resolved').text(0);
-                        $('#closed').text(0);
-                        $('#valid').text(0);
-                        $('#in_valid').text(0);
-                        $('#in_valid_percentage').text(0);
-                        $('#closed_rate').text(0);
-                        $('#closed_rate_percentage').text(0);
-                        $('#in_process_ratio').text(0);
-                        $('#in_process_ratio_percentage').text(0);
-                    }
-                });
+                {{--var search_origin = $('#search_origin').val();--}}
+                {{--var search_destination = $('#search_destination').val();--}}
+                {{--var search_zone = $('#search_zone').val();--}}
+                {{--var search_case_nature = $('#search_case_nature').val();--}}
+                {{--var search_case_nature_type = $('#search_case_nature_type').val();--}}
+                {{--var shipment_status = $('#search_shipment_status').val();--}}
+                {{--var avg_tat = $('#avg_tat').val();--}}
+                {{--var agent_id = $('#search_agent').val();--}}
+                {{--// var from_date = $('input[name="from_date"]').val();--}}
+                {{--// var to_date = $('input[name="to_date"]').val();--}}
+                {{--var from_date = $('input[name="from_date_formatted"]').val();--}}
+                {{--var to_date = $('input[name="to_date_formatted"]').val();--}}
+
+
+                {{--$.ajax({--}}
+                {{--    url: '{!! route('admin.crm.dashboard.card_data') !!}',--}}
+                {{--    method: 'post',--}}
+                {{--    data: {--}}
+                {{--        '_token': '{{ csrf_token() }}',--}}
+                {{--        'search_origin': search_origin,--}}
+                {{--        'search_destination': search_destination,--}}
+                {{--        'search_zone': search_zone,--}}
+                {{--        'search_case_nature': search_case_nature,--}}
+                {{--        'search_case_nature_type': search_case_nature_type,--}}
+                {{--        'shipment_status': shipment_status,--}}
+                {{--        'avg_tat': avg_tat,--}}
+                {{--        'from_date': from_date,--}}
+                {{--        'to_date': to_date,--}}
+                {{--        'agent_id': agent_id,--}}
+                {{--    }--}}
+                {{--}).done(function (data) {--}}
+                {{--    if(data.status){--}}
+                {{--        console.log(data.card_data);--}}
+                {{--        $('#launched').text(data.card_data.launched);--}}
+                {{--        $('#in_process').text(data.card_data.in_process);--}}
+                {{--        $('#resolved').text(data.card_data.resolved);--}}
+                {{--        $('#closed').text(data.card_data.closed);--}}
+                {{--        $('#valid').text(data.card_data.valid);--}}
+                {{--        $('#in_valid').text(data.card_data.in_valid);--}}
+                {{--        $('#in_valid_percentage').text(data.card_data.in_valid_percentage);--}}
+                {{--        $('#closed_rate').text(data.card_data.closed_rate);--}}
+                {{--        $('#closed_rate_percentage').text(data.card_data.closed_rate_percentage);--}}
+                {{--        $('#in_process_ratio').text(data.card_data.in_process_ratio);--}}
+                {{--        $('#in_process_ratio_percentage').text(data.card_data.in_process_ratio_percentage);--}}
+                {{--    }else{--}}
+                {{--        $('#launched').text(0);--}}
+                {{--        $('#in_process').text(0);--}}
+                {{--        $('#resolved').text(0);--}}
+                {{--        $('#closed').text(0);--}}
+                {{--        $('#valid').text(0);--}}
+                {{--        $('#in_valid').text(0);--}}
+                {{--        $('#in_valid_percentage').text(0);--}}
+                {{--        $('#closed_rate').text(0);--}}
+                {{--        $('#closed_rate_percentage').text(0);--}}
+                {{--        $('#in_process_ratio').text(0);--}}
+                {{--        $('#in_process_ratio_percentage').text(0);--}}
+                {{--    }--}}
+                {{--});--}}
             }
             //end Card Function
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {

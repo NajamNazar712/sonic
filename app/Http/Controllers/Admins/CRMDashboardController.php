@@ -907,7 +907,7 @@ class CRMDashboardController extends Controller
 
     public function card_data(Request $request){
             $today = Carbon::now()->endOfDay();
-            $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+            $thirtyDays = Carbon::now()->subDays(1)->startOfDay();
 
             // $card_data['total'] = CrmRequest::
             // // whereBetween('created_at', [$thirtyDays, $today])
