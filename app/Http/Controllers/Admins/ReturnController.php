@@ -5025,15 +5025,17 @@ class ReturnController extends Controller
         ->leftjoin('users as u','u.id','=','s.user_id')
         ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time',
         'agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id',
-        'ras.shipment_id as shipment_id', 'e.staff_category_id as agent_category' ,'u.id as shipper_id');
+        'ras.shipment_id as shipment_id', 'e.staff_category_id as agent_category' ,'u.id as shipper_id')->orderby('ras.id','desc');
         
         $datatable = Datatables::of($agent_productivity)
 
         ->addColumn('already_updated',function ($agent_productivity){
             // dd($agent_productivity->shipper_id, $agent_productivity->shipment_id);
             // dd($agent_productivity->agent_id);
-            $already_updated = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            $already_updated = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.assigned_by',$agent_productivity->shipper_id)
+            // ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             // dd($already_updated);
             return $already_updated;
