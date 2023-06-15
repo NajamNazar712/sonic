@@ -227,8 +227,20 @@
 {{--                                    </div>--}}
                                     <div class="col mt-1">
                                         <div class="form-group">
-                                            <label>Admin Discount</label>
-                                            <input type="text" name="admin_discount" id="admin_discount" class="form-control form-control-sm" placeholder="Admin Discount">
+                                            <div class="row">
+                                               <div class="col-md-7">
+                                                   <label>Admin Discount</label>
+                                                   <input type="text" name="admin_discount" id="admin_discount"
+                                                          class="form-control form-control-sm" placeholder="Admin Discount">
+                                               </div>
+                                                <div class="col-md-5 align-self-end">
+                                                    <label for="" class="">Flat</label>
+                                                    <input type="checkbox" id="admin_discount_type" name="admin_discount_type" class="switchery"
+                                                           data-size="sm" data-switchery="true">
+                                                    <label for="" class="">%</label>
+                                                    <input id="admin_discount_type1" value="0" name="admin_discount_type1" hidden>
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="form-group">
                                             <label>Charges</label>
@@ -428,6 +440,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
+
         #tiles{
             position: relative;
             z-index: 1;
@@ -907,6 +920,22 @@
                 }
             });
 
+            var toggleValue = false;
+            $('#admin_discount_type').change( function () {
+                console.log('clicked');
+                toggleValue = !toggleValue;
+                if(toggleValue)
+                {
+                   $('#admin_discount_type1').val("1");
+                   console.log(toggleValue);
+                }
+                else
+                {
+                    $('#admin_discount_type1').val("0");
+                    console.log(toggleValue);
+                }
+            });
+
             var shipment_ids = [];
             $('#book').on('click', function () {
                var validator = $('#booking_form').valid();
@@ -1114,6 +1143,7 @@
                  insurance = $('#insurance_amount').val();
                  packaging = $('#packaging_amount').val();
                 var admin_discount = $('#admin_discount').val();
+                var admin_discount_type = $('#admin_discount_type1').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1156,6 +1186,7 @@
                             'packaging_amount': packaging,
                             'height': height,
                             'admin_discount': admin_discount,
+                            'admin_discount_type1': admin_discount_type,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -1384,10 +1415,6 @@
                 $('#consignee_table').html('');   
 
             });
-
-
-
-           
         });
     </script>
 @endsection
