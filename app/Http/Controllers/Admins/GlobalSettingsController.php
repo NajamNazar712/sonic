@@ -46,6 +46,7 @@ use App\Http\Models\Admin\RouteManagement;
 use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\FintechPaymentType;
 use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Admin\SalePersonTargetDelete;
 use App\Http\Models\Admin\SalePersonTargetSegment;
@@ -3671,10 +3672,9 @@ class GlobalSettingsController extends Controller
 
     public function setup_fintech_charges_show(){
 
-        $shipments_id    = '1';
-        $payment_option  = 'EasiPaisa';
-        $items           = 'Test';
-        return view('admin.settings.fintech.form');
+        $fintech_payment_type = new FintechPaymentType();
+        $payment_type = $fintech_payment_type::all();
+        return view('admin.settings.fintech.form',compact('payment_type'));
     }
 
     public function setup_fintech_charges_list(){
@@ -3792,6 +3792,7 @@ class GlobalSettingsController extends Controller
                             $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
                             $FintechSetupValues->fed_tax                           = $fedd_charges;
                             $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
+                            $FintechSetupValues->payment_type_id                   = $req->payment_type[$i];
                             $FintechSetupValues->save(); 
                         }
                     }
@@ -3811,14 +3812,15 @@ class GlobalSettingsController extends Controller
     public function setup_fintech_charges_edit($id){
         $fintechsetupValues =  new FintechCompanyCharges();
         $FintechSetup =  new FintechCompany();
-
+        $fintech_payment_type = new FintechPaymentType();
+        $payment_type = $fintech_payment_type::all();
         $fintech_company_name = $FintechSetup::where('id',$id)->first();
         $fintechvalues = $fintechsetupValues::where('company_Id',$id)->get();
-        return view('admin.settings.fintech.form',compact('fintechvalues','fintech_company_name'));
+        return view('admin.settings.fintech.form',compact('fintechvalues','fintech_company_name','payment_type'));
     }
 
     public function setup_fintech_charges_edit_save(Request $req){
-
+        // dd($req->all());
            DB::beginTransaction();
            try{ 
                 if(!empty($req->fintech_range_up)){
@@ -3864,6 +3866,7 @@ class GlobalSettingsController extends Controller
                             $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
                             $FintechSetupValues->fed_tax                           = $fedd_charges;
                             $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
+                            $FintechSetupValues->payment_type_id                   = $req->fintech_payment_type[$i];
                             $FintechSetupValues->save(); 
                         }
                     }
@@ -3880,7 +3883,7 @@ class GlobalSettingsController extends Controller
                         }
                         else{
                             $charges_type = 0;
-                            $fintech_charges = $req->fed_tax_edit[$j];
+                            $fintech_charges = $req->charges_edit[$j];
                         }
 
                         if (strpos($additional_charges, '%') !== false) {
@@ -3910,6 +3913,7 @@ class GlobalSettingsController extends Controller
                             'additional_charges_is_percentage'  => $additional_type,
                             'fed_tax'                           => $fedd_charges,
                             'fed_tax_is_percentage'             => $fed_type,
+                            'payment_type_id'                   => $req->payment_type[$j]
                         ]);
                 }
                 $FintechSetup =  new FintechCompany();

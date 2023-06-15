@@ -6897,9 +6897,9 @@ class APIController extends Controller
         ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
         ->where('trax_pay_transactions.link',$req->link)
         ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id','shipments.tracking_number as tracking_id',
-                 'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
-                 'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
-        // params
+                'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
+                'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
+        // parameters
         $user_id          = $shipments->shipper_id;
         $cod_Amount       = $shipments->cod_amount;
         $fintechCharges   = $shipments->fintech_amount;
@@ -6919,11 +6919,24 @@ class APIController extends Controller
         else{
             $fintect_charges_percentage = $standard_fintech_charges->first()->standard_fintech_charges; // fintech charges from standard
         }
+        // Payfast Return the payment type after the transaction
+        // 3 return for account payment which is equal to 2 in fintech_payment_types table
+        // 4 return for wallet which is equal to 3 in fintech_payment_types table
+        // 7 return for card which is equal to 1 in fintech_payment_types table
 
+            if($req->payment_type == 7){
+                $type = 1;
+            }
+            else if($req->payment_type == 4){
+                $type = 2;
+            }
+            else{
+                $type = 3;
+            }
         // select range of fintech company according to cod amount
         $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
         ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
-        ->first(); 
+        ->where('payment_type_id',$type)->first(); 
         
         //Calculate Fintech Charges
         if($select_range->charges_is_percentage == 1){
@@ -6981,7 +6994,6 @@ class APIController extends Controller
                 // 'total fintech'   => $total_fintech_calculated[0],
                 // 'revenue'         => $revenue   
         //  ]);
-
         //total amount received   
         $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
 

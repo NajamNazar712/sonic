@@ -63,6 +63,7 @@ table {
                                                         <th class="center"><label>Charges</label></th>
                                                         <th class="center"><label>Additional Charges</label></th>
                                                         <th class="center"><label>Federal Excise Duty Tax</label></th>
+                                                        <th class="center"><label>Type</label></th>
                                                         <th class="center"><label></label></th>
                                                       
                                                     </tr>
@@ -93,7 +94,7 @@ table {
                                                             <input type="text" name="charges_edit[]"
                                                             onkeydown="inputValidate()"
                                                             class="form-control input-filtered"
-                                                            value ="@if(!empty($fintechvalues))@if($charges->charges_is_percentage == 1){{$charges->charges.'%'}}@else{{$charges->charges}}@endif  @endif"
+                                                            value="@if(!empty($fintechvalues))@if($charges->charges_is_percentage == 1){{$charges->charges.'%'}}@else{{$charges->charges}}@endif @endif"
                                                             placeholder="Charges*" data-rule-required="true"data-msg-required="This field is required">
                                                         </div>    
                                                     </td>
@@ -114,6 +115,16 @@ table {
                                                             value ="@if(!empty($fintechvalues))@if($charges->fed_tax_is_percentage == 1){{$charges->fed_tax.'%'}}@else{{$charges->fed_tax}}@endif @endif"
                                                             placeholder="Federal Excise Duty Tax*"data-rule-required="false"data-msg-required="This field is required">
                                                         </div>     
+                                                    </td>
+                                                    <td> 
+                                                        <div class="form-group">
+                                                            <select name="payment_type[]"  class="form-control" required>
+                                                                <option selected disabled >Select</option>
+                                                                @foreach($payment_type as $rows)
+                                                                    <option value="{{$rows->id}}" @if($charges->payment_type_id == $rows->id) {{'selected'}}  @endif>{{$rows->payment_types}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     </td> 
                                                     <td></td> 
                                                 </tr>
@@ -160,6 +171,7 @@ table {
                                                 <th class="center"><label>Charges</label></th>
                                                 <th class="center"><label>Additional Charges</label></th>
                                                 <th class="center"><label>Federal Excise Duty Tax</label></th>
+                                                <th class="center"><label>Type</label></th>
                                                 <th class="center"> </th>
                                             </tr>
                                           </thead>
@@ -220,6 +232,19 @@ table {
                                                     data-msg-required="This field is Required">
                                                     </div>
                                                 </td> 
+                                               
+
+                                                <td> 
+                                                    <div class="form-group">
+                                                        <select name="payment_type[]"  class="form-control" required>
+                                                            <option selected disabled >Select</option>
+                                                            @foreach($payment_type as $rows)
+                                                                <option value="{{$rows->id}}" >{{$rows->payment_types}}</option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+                                                </td> 
+
                                                 <td></td>
                                             </tr>    
 
@@ -454,6 +479,16 @@ function inputValidate(){
                                             data-msg-required="This field is required"  >
                                         </div>
                                     </td>
+                                    <td> 
+                                        <div class="form-group">
+                                            <select name="payment_type[]" class="form-control" required>
+                                                <option selected disabled >Select</option>
+                                                @foreach($payment_type as $rows)
+                                                    <option value="{{$rows->id}}" >{{$rows->payment_types}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </td> 
                                     <td style="width:1%">
                                         <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btn-sm"><i class="la la-trash"></i></button>
                                     </td>            
@@ -524,7 +559,18 @@ if (flag == true) {
                             class="form-control input-filtered "
                             placeholder="Charges*" data-rule-required="true" data-msg-required="This field is required">
                         </div>
-                    </td>           
+                    </td>          
+                    
+                    <td> 
+                        <div class="form-group">
+                            <select name="fintech_payment_type[`+y+`]"  class="form-control" required>
+                                <option selected disabled >Select</option>
+                                @foreach($payment_type as $rows)
+                                    <option value="{{$rows->id}}">{{$rows->payment_types}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </td> 
                     <td style="width:1%">
                     <button type="button" onclick="$(this).closest('tr').remove();" class="btn btn-outline-danger btn-sm"><i class="la la-trash"></i></button>
                     </td>   

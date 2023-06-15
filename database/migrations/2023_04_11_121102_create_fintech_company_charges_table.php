@@ -24,6 +24,7 @@ class CreateFintechCompanyChargesTable extends Migration
             $table->Integer('additional_charges_is_percentage');
             $table->string('fed_tax');
             $table->Integer('fed_tax_is_percentage');
+            $table->Integer('payment_type_id');
             $table->timestamps();
         });
     }
