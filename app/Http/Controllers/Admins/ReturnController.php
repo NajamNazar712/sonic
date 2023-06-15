@@ -5021,11 +5021,23 @@ class ReturnController extends Controller
         $agent_productivity = AgentReturnConfirmation::join('admins as a','a.id','=','agent_return_confirmations.admin_id')
         ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
         ->leftjoin('employees as e','e.id','=','a.employee_id')
+        ->leftjoin('shipments as s','s.id','=','ras.shipment_id')
+        ->leftjoin('users as u','u.id','=','s.user_id')
         ->select('a.name as agent_name','a.id as agent_id','agent_return_confirmations.login_time as start_time',
         'agent_return_confirmations.logout_time as end_time','agent_return_confirmations.current_date', 'agent_return_confirmations.admin_id',
-        'ras.shipment_id as shipment_id', 'e.staff_category_id as agent_category');
-
+        'ras.shipment_id as shipment_id', 'e.staff_category_id as agent_category' ,'u.id as shipper_id');
+        
         $datatable = Datatables::of($agent_productivity)
+
+        ->addColumn('already_updated',function ($agent_productivity){
+            // dd($agent_productivity->shipper_id, $agent_productivity->shipment_id);
+            // dd($agent_productivity->agent_id);
+            $already_updated = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->where('rasl.assigned_by',$agent_productivity->shipper_id)
+            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            // dd($already_updated);
+            return $already_updated;
+        })
 
         ->addColumn('total_assigning', function ($agent_productivity){
             $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
@@ -5067,13 +5079,7 @@ class ReturnController extends Controller
             }
         })
 
-        ->addColumn('already_updated',function ($agent_productivity){
-            $already_updated = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
-            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-            // dd($already_updated);
-            return $already_updated;
-        })
+        
 
         ->addColumn('total_return_confirm',function ($agent_productivity){
             $total_return_confirm = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
