@@ -33,7 +33,7 @@
         
                                             <div class="col ml-auto">
                                                 <div class="form-group text-right">
-                                                    <a href="{{ asset('file/shipment receive details.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                                    <a href="{{ asset('file/shipment receive details.xlsx') }}?v=15_06_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                                 </div>
                                             </div>
                                         </div>
