@@ -18,7 +18,7 @@ class CreateShipementReceiveDetailsTable extends Migration
             $table->bigInteger('shipment_id')->index();
             $table->bigInteger('tracking_number')->index();
             $table->String('receiver_name');
-            $table->bigInteger('receiver_cnic');
+            $table->String('receiver_cnic');
             $table->String('receiver_relationship');
             $table->Integer('received_by');
             $table->timestamps();
