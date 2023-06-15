@@ -424,6 +424,30 @@
             margin-top: 7px;
         }
 
+        .goldClass{	
+            background-color: gold;	
+        }	
+        .yellowClass{	
+            background-color: #86cd7c;	
+        }	
+        .greenClass{	
+            background-color: springgreen;	
+        }	
+        .redClass{	
+            background-color: red;	
+            color:#fff;	
+        }	
+        .yellowClass{	
+            background-color: yellow;	
+        }	
+        .cyanClass{	
+            background-color: cyan;	
+        }	
+        .grey{	
+            background-color: darkgrey;	
+        }
+
+
 
     </style>
 @endsection
@@ -492,7 +516,7 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    scrollX: false,
+                    scrollX: true,
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
@@ -574,7 +598,7 @@
                         className: 'btn btn-primary mb-1',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-                    scrollX: false,
+                    scrollX: true,
                     paging:false,
                     ordering:[0, 'desc'],
                     columns: [
