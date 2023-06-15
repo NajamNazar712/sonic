@@ -13136,6 +13136,7 @@ class AdminDashboardController extends Controller
 
         foreach ($rows as $key => $row) {
             $row_id = $key + 2;
+            dd($rows);
             
             $validate = Validator::make($row, $rules, $messages);
 
