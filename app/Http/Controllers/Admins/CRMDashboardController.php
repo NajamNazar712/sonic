@@ -78,7 +78,7 @@ class CRMDashboardController extends Controller
         if(in_array(session('role_id'),[1,32,6,37,51,83,90]))
         {
 
-            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids)->count();
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids);
 
             $crm['launched'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
@@ -105,7 +105,7 @@ class CRMDashboardController extends Controller
         }
         else
         {
-            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids)->count();
+            $crm['total'] = CrmRequest::whereBetween('created_at', [$thirtyDays, $today])->whereNotIn('id', $void_feedback_crm_request_ids);
 
             $crm['launched'] = CrmRequest::
             whereBetween('created_at', [$thirtyDays, $today])->
