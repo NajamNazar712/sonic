@@ -660,9 +660,15 @@ class RetailAPIController extends Controller
 
         if($request->has('admin_discount'))
         {
-            if ($request->filled('admin_discount') && $request->admin_discount > 0)
-            {
-                $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount;
+            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+                {
+                    $rates['total_charges'] = ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
+                }
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+                {
+                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount; // todo: for flat
+                }
             }
         }
 
@@ -786,13 +792,22 @@ class RetailAPIController extends Controller
         if($request->has('admin_discount'))
         {
             $retail_shipment->admin_discount = $request->admin_discount;
+
+            if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+            {
+                $retail_shipment->admin_discount_type = 1; // todo: for %
+            }
+            elseif ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+            {
+                $retail_shipment->admin_discount_type = 0; // todo: for flat
+            }
         }
         $retail_shipment->save();
 
 
         $date = Carbon::today()->toDateString();
         $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $category)->where('retail_user_id', $retail_user_id);
-        ;
+
         if ($cash_deposit->exists()) {
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;

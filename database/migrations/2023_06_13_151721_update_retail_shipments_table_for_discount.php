@@ -14,7 +14,8 @@ class UpdateRetailShipmentsTableForDiscount extends Migration
     public function up()
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
-            $table->boolean('admin_discount')->nullable();
+            $table->integer('admin_discount')->nullable();
+            $table->integer('admin_discount_type')->nullable();
         });
     }
 
@@ -27,6 +28,7 @@ class UpdateRetailShipmentsTableForDiscount extends Migration
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
             $table->dropColumn('admin_discount');
+            $table->dropColumn('admin_discount_type');
         });
     }
 }
