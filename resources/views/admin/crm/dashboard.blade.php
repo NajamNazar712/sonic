@@ -927,42 +927,42 @@
                 allowClear:true
             });
            // Initialize array to store selected dates
-var selectedDates = [];
+            var max = '{{ Carbon\Carbon::now() }}';
 
-var from_date = $('#from_date').pickadate({
-    firstDay: 1,
-    clear: '',
-    selectYears: true,
-    selectMonths: true,
-    formatSubmit: 'yyyy-mm-dd',
-    hiddenSuffix: '_formatted',
-    onSet: function(context) {
-        if (context.select) {
-            var selectedDate = new Date(context.select);
-            selectedDates.push(selectedDate); // Add selected date to array
-            $('#to_date').pickadate('picker').set('disable', selectedDates);
-        }
-    }
-});
-
-var to_date = $('#to_date').pickadate({
-    firstDay: 1,
-    clear: '',
-    selectYears: true,
-    selectMonths: true,
-    formatSubmit: 'yyyy-mm-dd',
-    hiddenSuffix: '_formatted',
-    max: new Date(),
-    onSet: function(context) {
-        if (context.select) {
-            var selectedDate = new Date(context.select);
-            selectedDates.push(selectedDate); // Add selected date to array
-            $('#from_date').pickadate('picker').set('disable', selectedDates);
-        }
-    }
-});
-
-            //endDropDown
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                max: max,
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
+                }
+            });
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                max: max,
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
+                }
+            });
 
             //Card Function
             function get_summary_cards_data() {
@@ -974,8 +974,6 @@ var to_date = $('#to_date').pickadate({
                 var shipment_status = $('#search_shipment_status').val();
                 var avg_tat = $('#avg_tat').val();
                 var agent_id = $('#search_agent').val();
-                // var from_date = $('input[name="from_date"]').val();
-                // var to_date = $('input[name="to_date"]').val();
                 var from_date = $('input[name="from_date_formatted"]').val();
                 var to_date = $('input[name="to_date_formatted"]').val();
 
