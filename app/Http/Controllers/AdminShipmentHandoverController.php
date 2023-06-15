@@ -281,7 +281,6 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
         ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
-        
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.name as from','hor.name as to','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
@@ -328,9 +327,7 @@ class AdminShipmentHandoverController extends Controller
         });
 
         if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('handover_shipments as hsh', 'hsh.handover_id', '=', 'handovers.id')
-            ->join('shipments as s', 'hsh.shipment_id', '=', 's.id')
-            ->where('s.tracking_number', '=', $tracking_number);
+            $datatable->where('s.tracking_number', '=', $tracking_number);
         }
 
         if ($hub = $request->get('search_hub')) {
