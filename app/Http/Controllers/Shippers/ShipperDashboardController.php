@@ -587,12 +587,10 @@ class ShipperDashboardController extends Controller
             $merged_head_id =  $get_merged_head_id->merged_head_id;
             
             $merged_user_id =  $get_merged_head_id->user_id;
-
             $merged_accounts = SubstituteUserMergeSisterAccountMapping::leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')
-                ->where('substitute_user_id', Auth::id())
-                ->where('merged_head_id', $merged_head_id)
-                ->select('u.id as id', 'u.name as name')
-                ->get();
+            ->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))
+            ->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))
+            ->select('u.id', 'u.name')->get();
         }
 //        END
 
