@@ -222,13 +222,14 @@
                             head.push('Consignee Phone');
                             head.push('Address');
                             head.push('Collection Amount');
-                            head.push('Status');
+                            head.push('Current Status');
+                            head.push('Current Status Date');
                             head.push('Reason');
                             head.push('Call Findings');
                             head.push('Arrival Date');
-                            head.push('Status Date');
                             head.push('Updated By');
-                            head.push('Current Status');
+                            head.push('Agent Status');
+                            head.push('Agent Status Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -237,12 +238,21 @@
 
                                 row.push(index + 1);
                                 row.push(values.agent_name);
-                                row.push(values.agent_category); 
-                                row.push(values.start_time);
-                                row.push(values.end_time);
-                                row.push(values.total_assigning);
-                                row.push(values.actual_productivity);
-
+                                row.push(values.shipper_name); 
+                                row.push(values.origin);
+                                row.push(values.consignee_city);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_phone_number);
+                                row.push(values.consignee_address);
+                                row.push(values.collection_amount);
+                                row.push(values.current_status);
+                                row.push(values.current_status_date);
+                                row.push(values.reason);
+                                row.push(values.call_findings);
+                                row.push(values.arrival_date);
+                                row.push(values.updated_by);
+                                row.push(values.agent_status);
+                                row.push(values.agent_status_date);
 
                                 body.push(row);
                             });
@@ -262,7 +272,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'RCP Agent Productivity',
+                        title: 'RCP Agent Productivity Shipment Wise',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },'reset'
