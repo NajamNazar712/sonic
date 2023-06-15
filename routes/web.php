@@ -1564,6 +1564,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
             Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
         });
+
+        Route::prefix('rcp_agent_cn')->name('rcp_agent_cn.')->group(function () {
+            Route::get('', 'Admins\ReturnController@rcp_agent_cn_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@rcp_agent_cn_list')->name('list');
+        });
+        
         Route::prefix('revert')->name('revert.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
             Route::post('shipment_details', 'Admins\ReturnController@return_revert_shipment_details')->name('shipment_details');

@@ -1352,6 +1352,7 @@ class Permission
         
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+            'return.rcp_agent_cn.index' => 876,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

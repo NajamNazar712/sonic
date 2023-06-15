@@ -35,7 +35,7 @@
                             <div class="col-4">
                                 <fieldset class="form-group pb-1">
                                     <select name="search_category" id="search_category" class="form-control select2" requireddata-rule-required="true" data-msg-required="This field is required">
-                                        @foreach($categorys as $category)
+                                        @foreach($categories as $category)
                                             <option value="{{$category->id}}">{{$category->name}}</option>
                                         @endforeach
                                     </select>
@@ -163,7 +163,7 @@
                                                 <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                             </div>
                                             <div class="media-body text-white text-right">
-                                                <h3 class="text-white" id="total_mark_for_self_collection">0</h3>
+                                                <h3 class="text-white" id="on_hold_for_sc">0</h3>
                                                 <span>Total Mark For Self Collection</span>
                                             </div>
                                         </div>
@@ -254,8 +254,8 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Agent Name</th>
-                        <th class="border-primary border-darken-1">Start Time</th>
                         <th class="border-primary border-darken-1">Agent Category</th>
+                        <th class="border-primary border-darken-1">Start Time</th>
                         <th class="border-primary border-darken-1">End Time</th>
                         <th class="border-primary border-darken-1">Total Assigning</th>
                         <th class="border-primary border-darken-1">Actual Productivity</th>
@@ -482,7 +482,6 @@
                             head.push('Pending');
                             head.push('Already Updated');
                             head.push('Unresponsive Return');
-                            
                             head.push('Productivity(%)');
 
 
@@ -551,21 +550,21 @@
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
-                    {data: 'agent_category', orderable: false, searchable: false, name: 'agent_category', class: 'align-middle agent_category'}, 
+                    {data: 'agent_category', orderable: false, name: 'e.staff_category_id', class: 'align-middle agent_category'}, 
                     {data: 'start_time', name: 'start_time', class: 'align-middle start_time'},
                     {data: 'end_time', name: 'end_time', class: 'align-middle end_time'},
                     {data: 'total_assigning', orderable: false, searchable: false, name: 'total_assigning', class: 'align-middle total_assigning'},
                     {data: 'actual_productivity', orderable: false, searchable: false, name: 'actual_productivity', class: 'align-middle actual_productivity'},
                     {data: 'reattempt', orderable: false, searchable: false, name: 'reattempt', class: 'align-middle reattempt'},
                     {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
-                    {data: 'intercept', orderable: false, searchable: false, name: 'shipments.intercept', class: 'align-middle intercept'},
-                    {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
+                    {data: 'intercept', orderable: false, searchable: false, name: '', class: 'align-middle intercept'},
+                    {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'on_hold_for_sc', class: 'align-middle pending'},
                     {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
-                    {data: 'already_updated', orderable: false, searchable: false, name: 'already_updated', class: 'align-middle already_updated'}, 
+                    {data: 'already_updated', orderable: false, searchable: false, name: '', class: 'align-middle already_updated'}, 
                     {data: 'unresponsive_return', orderable: false, searchable: false, name: 'unresponsive_return', class: 'align-middle unresponsive_return'}, 
                     {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
 
@@ -575,7 +574,6 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     if(index == 0){
-                    console.log(data);
                     total_shipments = data.total_assigning;
                     completed_shipments = data.actual_productivity;
                     reattempt_shipments = data.reattempt;
@@ -584,6 +582,7 @@
                     total_unresponsive_in_percent = data.total_unresponsive_in_percent;
                     total_intercept = data.total_intercept;
                     unresponsive_return = data.unresponsive_return;
+                    on_hold_for_sc = data.on_hold_for_sc;
                     }
                     else{
                     total_shipments += data.total_assigning;
@@ -593,6 +592,7 @@
                     total_mark_for_self_collection += data.total_mark_for_self_collection;
                     total_intercept += data.total_intercept;
                     unresponsive_return += data.unresponsive_return;
+                    on_hold_for_sc += data.on_hold_for_sc;
 
                     }
                     
@@ -606,34 +606,37 @@
                         $('#rcp_reattempt').text(reattempt_shipments);
                         $('#unresponsive_return').text(unresponsive_return);
                         $('#total_unresponsive_in_percent').text(((unresponsive_return/total_shipments)*100).toFixed(2));
+                        $('#on_hold_for_sc').text(on_hold_for_sc);
                     }
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
+                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                this.api().columns().every(function(column_id) {
+                    var column = this;
+                    var header = column.header();
+                    //for removing search filter from columns
+                    if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') 
+                    || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') 
+                    || $(header).is('.productivity')  || $(header).is('.un_assigned') || $(header).is('.already_updated') || $(header).is('.unresponsive_return') ) {
+                        $(td).appendTo($(search));
+                    }
+                    
+                    else {
+                        var current = $(input).appendTo($(search)).on('change', function() {
+                            column.search($(this).val(), false, false, true).draw();
+                        }).wrap(td).after(icon);
 
-                        if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') || $(header).is('.productivity')  || $(header).is('.un_assigned')) {
-                            $(td).appendTo($(search));
+                        if (column.search()) {
+                            current.val(column.search());
                         }
-                      
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
+                    }
+                });
 
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-
-                    this.api().table().columns.adjust();
+                this.api().table().columns.adjust();
                 }
             });
             $('#search_form').validate({
