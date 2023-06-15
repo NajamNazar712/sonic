@@ -6330,7 +6330,7 @@ class ReturnController extends Controller
         // Filter the join condition for shipper_status_id = 2 (arrive at origin)
         ->leftjoin('shipments_journey as sjj', function($join) {
             $join->on('sjj.shipment_id', '=', 's.id')
-                 ->where('sjj.shipper_status_id', '=', 2); // 
+                 ->where('sjj.shipper_status_id', '=', 2);
         })
 
         ->select('s.tracking_number as agent_name','u.name as shipper_name','u.name as shipper_name','c.name as origin','consignee_city.name as consignee_city',
@@ -6352,7 +6352,6 @@ class ReturnController extends Controller
         })
 
         ->addColumn('agent_status',function ($agent_productivity){
-            // $shipment_id = ReturnAssignedShipments::leftjoin('return_assigned_shipments as ras','ras.id','return_assigned_shipment_logs.return_assign_shipment_id')
             $status = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as ras','ras.return_assign_shipment_id','return_assigned_shipments.id')
             ->where('return_assigned_shipments.shipment_id',$agent_productivity->shipment_id)
             ->select('ras.status')->orderby('ras.id','desc')->first();
@@ -6376,9 +6375,6 @@ class ReturnController extends Controller
             return '-';
         })
 
-
-
-        
         ->editColumn('agent_category',function($agent_productivity){
             if ($agent_productivity->agent_category == 1) {
                 return 'Staff';
@@ -6386,32 +6382,19 @@ class ReturnController extends Controller
             else{
                 return 'Intern';
             }
-        })
+        });
 
-         
-         ->addColumn('on_hold_for_sc', function ($agent_productivity){
-            $on_hold_for_sc = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->where('rasl.status',7)
-            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+        if ($request->get('from_date') && $request->get('to_date')) {
+        $from = $request->get('from_date');
+        $to = $request->get('to_date');
+        $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
+        }
 
-            return $on_hold_for_sc;
-         });
-
-
-             if ($request->get('from_date') && $request->get('to_date')) {
-                $from = $request->get('from_date');
-                $to = $request->get('to_date');
-                $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
-            }
-
-            if ($request->get('agent')) {
-                $agent_ids = $request->get('agent');
-                $agent_productivity = $agent_productivity->whereIn('agent_return_confirmations.admin_id',$agent_ids);
-            }
-
-
-            
-            return $datatable->make(true);
+        if ($request->get('agent')) {
+            $agent_ids = $request->get('agent');
+            $agent_productivity = $agent_productivity->whereIn('agent_return_confirmations.admin_id',$agent_ids);
+        }
+        
+        return $datatable->make(true);
     }
 }
