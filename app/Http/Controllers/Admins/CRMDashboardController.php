@@ -1066,11 +1066,9 @@ class CRMDashboardController extends Controller
                 $card_total = $card_data['total']->filter(function ($item) use ($from, $to, $card_feedback) {
                     return $item->created_at >= $from && $item->created_at <= $to && !in_array($item->id, $card_feedback);
                 })->count();
-                //dd(  $card_data['closed']->count(),$card_total);
                 $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
-                //dd( $card_data['closed_rate']);
             } else {
-                $thirtyDaysAgo = now()->subDays(30);
+                $thirtyDaysAgo = now()->subDays(1);
                 $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
             
                 $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$thirtyDaysAgo, now()])->pluck('crm_request_id')->toArray();
@@ -1080,22 +1078,7 @@ class CRMDashboardController extends Controller
                 })->count();
                 $card_data['closed_rate'] = $card_total !== 0 ? $card_data['closed']->count() / $card_total : 0;
             }
-            // if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
-            // {   
-            //     $card_data['closed'] = self::dates($card_data['closed'],$from,$to);
 
-            //     $card_feedback = CrmRequestFeedback::
-            //     whereBetween('created_at',[$from,$to])->
-            //     pluck('crm_request_id');
-
-            //     dd($card_data['total']->whereBetweem('created_at',[$from,$to])->count());
-            //     $card_total = $card_data['total']->whereBetweem('created_at',[$from,$to])->whereNotIn('id', $card_feedback)->count();
-            //     $card_data['closed_rate'] = $card_total !== 0 ?  $card_data['closed']->count()/$card_total : 0;
-            // }
-            // else
-            // {
-            //     $card_data['closed']->whereBetween('created_at', [$thirtyDays, $today]);
-            // }
             if ($origin = $request->get('search_origin'))
             {   
                 $card_data['closed'] = self::origin($card_data['closed'],$origin);
@@ -1226,10 +1209,7 @@ class CRMDashboardController extends Controller
             
 
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
-            {   
-                
-                $today = Carbon::now()->endOfDay();
-                $thirtyDays = Carbon::now()->subDays(30)->startOfDay();
+            {
                 $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
                 $card_feedback = CrmRequestFeedback::
                 whereBetween('created_at',[$from,$to])->
@@ -1259,9 +1239,7 @@ class CRMDashboardController extends Controller
             $card_data['closed'] = number_format($card_data['closed']);
             $card_data['valid'] = number_format($card_data['valid']);
             $card_data['in_valid'] = number_format($card_data['in_valid']);
-            $card_data['closed_rate'] = $card_data['closed_rate'];
             $card_data['in_process_ratio'] = number_format($card_data['in_process_ratio']);
-            $card_data['in_process_ratio_percentage'] = $card_data['in_process_ratio_percentage'];
 
             return response()->json(['status' => 1, 'card_data' => $card_data]);
         // }else{
