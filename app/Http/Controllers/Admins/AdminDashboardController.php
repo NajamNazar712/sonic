@@ -13087,7 +13087,7 @@ class AdminDashboardController extends Controller
         $rules = [
             'tracking_number' => ['required', 'between:1,255'],
             'receiver_name' => ['required', 'between:1,100'],
-            'receiver_cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]$'],
+            'receiver_cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]$/'],
             'receiver_relationship' => ['required', 'between:1,100'],
         ];
 
