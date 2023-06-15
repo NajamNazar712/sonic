@@ -24,21 +24,20 @@ class MMSReportController extends Controller
     public function index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 566);
-        $shippers = DB::connection('reports')->table('users')->whereIn('id', [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104, 20040, 22343, 22395, 22230, 22946, 14110, 19507, 14781])->whereIn('status', [3, 4])->select('id', 'name')->get();
-        /*dd($shippers->toArray());*/
+        $shippers_ids = array();
+        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
+        if ($setting) {
+            $shippers_ids = explode(',', $setting->text);
+        }
+
+         $shippers = User::whereIn('id', $shippers_ids)->select('id', 'name')->get();
+
         $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
         $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
         $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
         $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
         $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
 
-        $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
-        if($shippers){
-            $shippers = explode(',', $shippers->text);
-
-            $shippers = User::whereIn('id', $shippers)->select('id', 'name')->get();
-        }
-      
         return view('admin.reports.mms')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
     }
     public function list(Request $request)
