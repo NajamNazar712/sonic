@@ -19,8 +19,8 @@ class SpecialDashboardUserModulePermissionsSeeder extends Seeder
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 662, 'screen_name' => 'Special Dashboard Accounts', 'action'=> 'View'),
-            array('id' => 663, 'screen_name' => 'Special Dashboard Accounts', 'action'=> 'Add'),
-            array('id' => 664, 'screen_name' => 'Special Dashboard Accounts', 'action'=> 'Edit'),
+            array('id' => 663, 'screen_name' => 'Special Dashboard Accounts', 'action'=> 'Excel Download'),
+            array('id' => 664, 'screen_name' => 'Special Dashboard Accounts - Add', 'action'=> 'View'),
         ));
     }
 }

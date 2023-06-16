@@ -12799,6 +12799,9 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_list(Request $request,$id) {
 
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
+        }
         $substitute_users = SubstituteUser::join('admins','admins.id','substitute_users.created_by_admin_id')
         ->select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction', 'admins.name as created_by')
         ->where('substitute_users.user_id', $id)
@@ -12822,7 +12825,7 @@ class AdminDashboardController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(664, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(875, session('permissions'))) {
 
                 $dropdown .= $edit_button;
             }
@@ -12876,6 +12879,7 @@ class AdminDashboardController extends Controller
 
     public function substitute_accounts_add_index($shipper_id) {
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
         $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
 
         $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
@@ -12888,8 +12892,6 @@ class AdminDashboardController extends Controller
     }
   
     public function substitute_accounts_add_store(Request $request,$id) {
-
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
 
         $substitute_user = new SubstituteUser();
 
