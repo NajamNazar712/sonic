@@ -1868,9 +1868,8 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                     else {
-                        $shipment_type .= '<td colspan="4" class="replacement border twice-top twice-bottom twice-right prominent><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                        $shipment_type .= '<td colspan="4" class="border twice-top twice-bottom twice-right prominent">'. $shipment->booking_type->booking_type .'</td>';
                     }
-
 
                     if ($shipment->business_category->id == 1) {
                             $shipment_mode .= '<td colspan="2" class="border twice-top twice-bottom twice-right prominent">' . $shipment->shipping_mode->mode . '</td>';
@@ -1878,14 +1877,13 @@ class ShipperShipmentBookController extends Controller
                     else {
                             $shipment_mode .= '<td colspan="2" class="border twice-top twice-bottom twice-right prominent">International</td>';
                     }
-
                     //HERE 
                     $table_end .= '
                     <tr>
                         <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-right"><strong>Shipping Mode</strong></td>
                         '.$shipment_mode.' 
                         <td colspan="1" style="font-size:13px;" class="color primary border twice-top twice-bottom twice-left" style="height: 20px;"> Service </td>
-                        '.$shipment_type.' 
+                        '.$shipment_type.'
                     </tr>
                     
                     ';
