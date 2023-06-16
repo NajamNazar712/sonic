@@ -5057,6 +5057,8 @@ class ReturnController extends Controller
             $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl', 'rasl.return_assign_shipment_id', '=', 'return_assigned_shipments.id')
                 ->where('return_assigned_shipments.admin_id', $agent_productivity->agent_id)
                 ->whereDate('rasl.created_at', $agent_productivity->current_date)
+
+                //checking if agent has unassigned shipment to agent
                 ->whereNotExists(function ($query) {
                     $query->select(DB::raw(1))
                         ->from('return_assigned_shipment_logs as rasl2')
@@ -5236,19 +5238,27 @@ class ReturnController extends Controller
 
          ->addColumn('productivity', function ($agent_productivity){
                 
-                $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-                ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-                ->where('rasl.status',0)
-                
-                
-                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+                $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl', 'rasl.return_assign_shipment_id', '=', 'return_assigned_shipments.id')
+                ->where('return_assigned_shipments.admin_id', $agent_productivity->agent_id)
+                ->whereDate('rasl.created_at', $agent_productivity->current_date)
+
+                //checking if agent has unassigned shipment to agent
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('return_assigned_shipment_logs as rasl2')
+                        ->whereColumn('rasl2.return_assign_shipment_id', '=', 'return_assigned_shipments.id')
+                        ->where('rasl2.status', 4);
+                })
+                ->where('rasl.status', 0)
+                ->count();//3
                 
                 $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                 ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
                 ->whereIn('rasl.status',[1,2,3,7])
                 ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
-                ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-
+                ->whereDate('rasl.created_at',$agent_productivity->current_date)
+                ->count(); //1
+                
                 // $already_updated = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
                 // ->where('return_assigned_shipments.admin_id','!=',$agent_productivity->agent_id)
                 // ->whereDate('rasl.created_at',$agent_productivity->current_date)
@@ -5256,9 +5266,11 @@ class ReturnController extends Controller
                 $updated_by_others = ReturnAssignedShipmentLogs::leftjoin('return_assigned_shipments as ras','ras.id','=','return_assigned_shipment_logs.return_assign_shipment_id')
                 ->where('ras.admin_id',$agent_productivity->agent_id)
                 ->where('return_assigned_shipment_logs.status', '!=', 0)
+                ->where('return_assigned_shipment_logs.status', '!=', 4)
                 ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
                 ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
-                ->count();
+                ->count();//2
+                // dd($updated_by_others);
 
                 $total_productivity = ($total_assigning - $updated_by_others);
 
@@ -5266,7 +5278,7 @@ class ReturnController extends Controller
                     return 0;
                 }
                 else{
-                    return number_format(($actual_productivity/($total_productivity))*100,2);
+                    return number_format(($actual_productivity/($total_assigning))*100,2);
                 }
          })
 
