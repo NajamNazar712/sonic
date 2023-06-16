@@ -11277,7 +11277,7 @@ class AdminReportsController extends Controller
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
         $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
         $shippers = User::whereIn('status', [3, 4])->get();
-        $shipment_status = ShipmentStatus::get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
 
         return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers,'shipment_status' => $shipment_status]);
     }
@@ -11312,10 +11312,18 @@ class AdminReportsController extends Controller
         ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
         
         $datatables = Datatables::of($quick_scanned)
+        ->filterColumn('ss.name',function ($query,$keyword){
+            if ($keyword != '') {
+            $query->where('ss.id',$keyword);
+            }
+            else {
+            $query->whereRaw('false');
+            }
+        })
         ->addColumn('tracking_number_hyperlink', function ($requests) {
         return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
         });
-
+        
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');

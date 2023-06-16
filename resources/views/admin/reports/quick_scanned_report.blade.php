@@ -146,7 +146,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    {{-- <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script> --}}
     <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -161,13 +161,6 @@
             $('#track_form #rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Search Rider',
                 allowClear:true
-            });
-           
-            var shipment_status = @json($shipment_status);
-
-            var shipment_status_data = $.map(shipment_status, function (obj) {
-                obj.id = obj.id || obj.text;
-                return obj;
             });
          jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -283,7 +276,7 @@
             });
             
             var table = $('#datatable').DataTable({
-                scrollX: false, scrollY: '500px',
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
@@ -318,7 +311,7 @@
                     {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle text_center tracking_number'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle text_center origin '},
                     {data: 'destination', name: 'dc.name', class: 'align-middle text_center destination '},
-                    {data: 'status', name: 'ss.name', class: 'align-middle text_center status'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle text_center shipment_status'},
                     {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
                     {data: 'arrival_date', name: 'sj.created_at', class: 'text_center align-middle arrival_date'},
                     {data: 'status_date_time', name: 'sj.updated_at', class: 'text_center align-middle status_date_time'},
@@ -337,13 +330,14 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var shipment_status = '<select name="shipment_status" id="shipment_status" class="select2 form-control"></select>';
 
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="1">Requested</option>' +
-                        '<option value="2">Picked</option>' +
-                        '<option value="3">Not Picked</option>' +
-                        '<option value="4">Cancelled</option>' +
-                        '</select>';
+                    // var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    //     '<option value="1">Requested</option>' +
+                    //     '<option value="2">Picked</option>' +
+                    //     '<option value="3">Not Picked</option>' +
+                    //     '<option value="4">Cancelled</option>' +
+                    //     '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -352,11 +346,11 @@
                         if ($(header).is('.action') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
-                        else if($(header).is('.status')){
-                            $(status_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
+                        else if ($(header).is('.shipment_status')) {
+                            $(shipment_status).appendTo($(search))
+                            .on('change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -368,7 +362,23 @@
                             }
                         }
                     });
-                    $('#status_select').select2({data: shipment_status_data, placeholder: 'Select Status'});
+                         var data4 = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id;
+                        return obj;
+                    });
+
+                    var data4 = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $('#shipment_status').prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 
                     this.api().table().columns.adjust();
                 }
