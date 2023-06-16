@@ -1357,7 +1357,11 @@ class Permission
         
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+ 			'accounts.substitute_account_management.index' => 873,
+ 			'accounts.substitute_account_management.add.index' => 874,
+ 			'accounts.substitute_account_management.update.index' => 875,
  			'management.shipment_received.index' => 878,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
