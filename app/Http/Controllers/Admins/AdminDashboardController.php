@@ -13054,6 +13054,10 @@ class AdminDashboardController extends Controller
 
     public function shipment_received_details_list(Request $request)
     {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 670);
+        }
         $all_received = ShipementReceiveDetails::join('admins','shipment_receiver_details.received_by','admins.id')
         ->select(
             'shipment_receiver_details.tracking_number as tracking_id',
@@ -13071,8 +13075,6 @@ class AdminDashboardController extends Controller
     }
 
     public function shipment_received_excel_upload(Request $request){
-
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 670);  
 
         $names = [
             'tracking_number' => 'Tracking Number',

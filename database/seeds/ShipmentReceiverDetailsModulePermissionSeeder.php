@@ -17,7 +17,7 @@ class ShipmentReceiverDetailsModulePermissionSeeder extends Seeder
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 669, 'screen_name' => 'Shipment Receiver Details', 'action'=> 'View'),
-            array('id' => 670, 'screen_name' => 'Shipment Receiver Details', 'action'=> 'Add'),
+            array('id' => 670, 'screen_name' => 'Shipment Receiver Details', 'action'=> 'Excel Download'),
         ));
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
