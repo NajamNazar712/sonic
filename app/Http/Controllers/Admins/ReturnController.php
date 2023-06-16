@@ -5092,11 +5092,18 @@ class ReturnController extends Controller
 
         
         ->addColumn('unresponsive_return',function ($agent_productivity){
+            // $unresponsive_return = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            // ->leftjoin('status_remarks as sr','sr.shipment_id','return_assigned_shipments.shipment_id')
+            // ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
+            // ->where('sscf.remark',4)
+            // ->where('rasl.assigned_by','=',$agent_productivity->agent_id) //checking if the agent id exisit in row in return_assigned_shipment_logs table 
+            // ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            // return $unresponsive_return;
+
             $unresponsive_return = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            ->leftjoin('status_remarks as sr','sr.shipment_id','return_assigned_shipments.shipment_id')
-            ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
-            ->where('sscf.remark',4)
-            ->where('rasl.assigned_by','=',$agent_productivity->agent_id) //checking if the agent id exisit in row in return_assigned_shipment_logs table 
+            ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+            ->where('rasl.status',8)
+            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $unresponsive_return;
 
@@ -5195,7 +5202,7 @@ class ReturnController extends Controller
                 })
                 
                 ->orWhere(function ($innerQuery) use ($agent_productivity) {
-                    $innerQuery->whereIn('rasl.status', [1,2,7])
+                    $innerQuery->whereIn('rasl.status', [1,2,7,8])
                     ->where('rasl.assigned_by', $agent_productivity->agent_id);
                 });
             })
@@ -5238,13 +5245,13 @@ class ReturnController extends Controller
             //getting all the rows from return_assigned_shipment_logs which doesn't contain agent id
             $updated_by_others = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,3,7,4])
+            ->whereIn('rasl.status',[1,2,3,7,4,8])
             ->where('rasl.assigned_by','!=',$agent_productivity->agent_id) 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             
             $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,3,7])
+            ->whereIn('rasl.status',[1,2,3,7,8])
             ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             // dd($actual_productivity);
@@ -5286,7 +5293,7 @@ class ReturnController extends Controller
                     })
                     
                     ->orWhere(function ($innerQuery) use ($agent_productivity) {
-                        $innerQuery->whereIn('rasl.status', [1,2,7])
+                        $innerQuery->whereIn('rasl.status', [1,2,7,8])
                         ->where('rasl.assigned_by', $agent_productivity->agent_id);
                     });
                 })
@@ -6395,6 +6402,11 @@ class ReturnController extends Controller
     public function update_call_status(Request $request){
 
         $shipment = Shipment::find($request->shipment_id);
+        
+        if (!$shipment) {
+            return response()->json(['status' => 0]);
+        }
+
         $status = new StatusRemark();
         $status->shipment_id = $request->shipment_id;
         $status->call_finding_id = $request->call_finding_id;
@@ -6405,6 +6417,21 @@ class ReturnController extends Controller
         $status->updated_by = Auth::id();
 
         $status->save();
+
+        // If sub_status_call_finding_id is Not Answered (4), update ReturnAssignedShipments and ReturnAssignedShipmentLogs
+            if($request->sub_status_call_finding_id == 4){
+            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+            if ($return_assign_shipment) {
+                // $return_assign_shipment->status = 0;
+                // $return_assign_shipment->save();
+
+                $return_assign_log = new ReturnAssignedShipmentLogs();
+                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                $return_assign_log->status = 8; 
+                $return_assign_log->assigned_by = Auth::id();
+                $return_assign_log->save();
+            }
+        }
 
         return response()->json(['status' => 1]);
 
