@@ -5068,7 +5068,7 @@ class ReturnController extends Controller
             ->leftjoin('status_remarks as sr','sr.shipment_id','return_assigned_shipments.shipment_id')
             ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
             ->where('sscf.remark',4)
-            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
+            ->where('rasl.assigned_by','=',$agent_productivity->agent_id) //checking if the agent id exisit in row in return_assigned_shipment_logs table 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $unresponsive_return;
 
@@ -5180,22 +5180,30 @@ class ReturnController extends Controller
             
             $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            // ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
-            ->where('rasl.status',0)
+            ->where('rasl.status',0) 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-        
+            
+
+            //getting all the rows from return_assigned_shipment_logs which doesn't contain agent id
+            $updated_by_others = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+            ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+            ->whereIn('rasl.status',[1,2,3,7])
+            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id) 
+            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            
             $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->whereIn('rasl.status',[1,2,3,7])
             ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            // dd($actual_productivity);
                 
             if($total_assigning == 0){
                 return '0';
             }
             else{
 
-                return $total_assigning - $actual_productivity;
+                return $total_assigning - $updated_by_others -$actual_productivity;
             }
          })
 
@@ -5218,14 +5226,14 @@ class ReturnController extends Controller
                 // ->where('return_assigned_shipments.admin_id','!=',$agent_productivity->agent_id)
                 // ->whereDate('rasl.created_at',$agent_productivity->current_date)
                 // ->count();
-                $already_updated = ReturnAssignedShipmentLogs::leftjoin('return_assigned_shipments as ras','ras.id','=','return_assigned_shipment_logs.return_assign_shipment_id')
+                $updated_by_others = ReturnAssignedShipmentLogs::leftjoin('return_assigned_shipments as ras','ras.id','=','return_assigned_shipment_logs.return_assign_shipment_id')
                 ->where('ras.admin_id',$agent_productivity->agent_id)
                 ->where('return_assigned_shipment_logs.status', '!=', 0)
                 ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
                 ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
                 ->count();
 
-                $total_productivity = ($total_assigning - $already_updated);
+                $total_productivity = ($total_assigning - $updated_by_others);
 
                 if($total_productivity  == 0){
                     return 0;
