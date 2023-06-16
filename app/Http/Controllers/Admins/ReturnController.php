@@ -5056,6 +5056,7 @@ class ReturnController extends Controller
             $total_assigning = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',0)
+            ->where('rasl.status','!=',4)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)
             ->distinct('return_assign_shipment_id', 'status')
             ->count();
@@ -5154,6 +5155,7 @@ class ReturnController extends Controller
             return $actual_productivity;
         })
 
+        //total reattempt
          ->addColumn('reattempt', function ($agent_productivity){
             $reattempt = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
@@ -6413,8 +6415,8 @@ class ReturnController extends Controller
         'a.id as agent_id', 'return_assigned_shipments.shipment_id as shipment_id',
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
         's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
-        'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.id as user_id', 'updated_by_user.name as user', 
-        'updated_by_admin.id as admin_id' ,'updated_by_admin.name as admin', 'rasl_latest.status as rasl_status', 's.user_id as shipment_user_id')
+        'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.id as user_id', 'updated_by_user.name as user_name', 
+        'updated_by_admin.id as admin_id' ,'updated_by_admin.name as admin_name', 'rasl_latest.status as rasl_status', 's.user_id as shipment_user_id')
         
         ->groupBy('tracking_number');
 
@@ -6423,10 +6425,10 @@ class ReturnController extends Controller
 
         ->addColumn('updated_by', function ($agent_productivity){
             if($agent_productivity->user != null && $agent_productivity->user_id == $agent_productivity->shipment_user_id){
-                return $agent_productivity->user;
+                return $agent_productivity->user_name;
             }
             else if ($agent_productivity->rasl_status != 0){
-                return $agent_productivity->admin;
+                return $agent_productivity->admin_name;
             }
             else{
                 return '-';
