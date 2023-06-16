@@ -13047,6 +13047,7 @@ class AdminDashboardController extends Controller
 
 
     public function shipment_received_details(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 669);        
         $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
         return view('admin.management.shipment_received.index');
     }
@@ -13070,6 +13071,9 @@ class AdminDashboardController extends Controller
     }
 
     public function shipment_received_excel_upload(Request $request){
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 670);  
+
         $names = [
             'tracking_number' => 'Tracking Number',
             'receiver_name' => 'Receiver Name',
