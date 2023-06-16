@@ -5032,9 +5032,9 @@ class ReturnController extends Controller
         ->addColumn('already_updated',function ($agent_productivity){
             $already_updated = ReturnAssignedShipmentLogs::join('return_assigned_shipments as ras','ras.id','=','return_assigned_shipment_logs.return_assign_shipment_id')
             ->where('ras.admin_id',$agent_productivity->agent_id)
-            ->where('return_assigned_shipment_logs.status', '!=', 0)
-            ->where('return_assigned_shipment_logs.status', '!=', 4)
-            ->where('return_assigned_shipment_logs.status', '!=', 3)
+            ->where('return_assigned_shipment_logs.status', '!=', 0) //assigned
+            ->where('return_assigned_shipment_logs.status', '!=', 4) //unassigned
+            ->where('return_assigned_shipment_logs.status', '!=', 3) //intercept
             ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
             ->count();
@@ -5159,7 +5159,6 @@ class ReturnController extends Controller
             $total_intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',3)
-            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $total_intercept;
         })
@@ -5177,7 +5176,17 @@ class ReturnController extends Controller
         ->addColumn('actual_productivity', function ($agent_productivity){
             $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,3,7])
+            // ->whereIn('rasl.status',[1,2,3,7])
+            // ->whereIn('rasl.status',[1,2,7])
+            // ->where(function ($query) use ($agent_productivity) {
+            //     $query->where(function ($innerQuery) use ($agent_productivity) {
+            //         $innerQuery->where('rasl.status', 3)
+            //             ->where('rasl.assigned_by', '!=', $agent_productivity->agent_id);
+            //     })
+            //     ->orWhere(function ($innerQuery) use ($agent_productivity) {
+            //         $innerQuery->where('rasl.assigned_by', $agent_productivity->agent_id);
+            //     });
+            // })
             ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $actual_productivity;
