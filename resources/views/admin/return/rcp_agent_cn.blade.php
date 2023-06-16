@@ -319,19 +319,19 @@
                     {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
-                // rowCallback: function(row, data, index) {
-                //     var info = table.page.info();
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
 
-                //     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                //     if(index == 0){
-                //     // console.log(data);
-                //     // on_hold_for_sc = data.on_hold_for_sc;
-                //     }
-                //     else{
-                //     // on_hold_for_sc += data.on_hold_for_sc;
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    if(index == 0){
+                    // console.log(data);
+                    // on_hold_for_sc = data.on_hold_for_sc;
+                    }
+                    else{
+                    // on_hold_for_sc += data.on_hold_for_sc;
 
-                //     }
-                // },
+                    }
+                },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
