@@ -12989,8 +12989,6 @@ class AdminDashboardController extends Controller
   
     public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
 
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
-
         $substitute_user = SubstituteUser::find($id);
         $substitute_user->user_id = $shipper_id;
         $substitute_user->name = $request->input('name');
