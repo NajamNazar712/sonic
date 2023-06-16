@@ -5033,6 +5033,7 @@ class ReturnController extends Controller
             $already_updated = ReturnAssignedShipmentLogs::join('return_assigned_shipments as ras','ras.id','=','return_assigned_shipment_logs.return_assign_shipment_id')
             ->where('ras.admin_id',$agent_productivity->agent_id)
             ->where('return_assigned_shipment_logs.status', '!=', 0)
+            ->where('return_assigned_shipment_logs.status', '!=', 4)
             ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
             ->count();
