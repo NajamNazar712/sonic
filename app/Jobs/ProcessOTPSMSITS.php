@@ -57,37 +57,33 @@ class ProcessOTPSMSITS implements ShouldQueue
 
     private function its($sms, $name, $otp) {
         try {
-            $client = new Client(['base_uri' => 'https://gateway.its.com.pk/api/otp', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
+            $client = new Client(['base_uri' => 'https://voicegateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
             $response = $client->get('', [
                 'query' => [
-                    'action' => 'sendmessage',
-                    'username' => 'Trax',
-                    'password' => 'Tr@x!101',
-                    'originator' => 87323,
-                    'recipient' => $sms->to,
-                    'otherurl' => $name,
-                    'otpcode' => $otp,
-                    'otptype' => 1
+                    'Apikey' => '3FAE1AA22D777FDD699758014500ECF6',
+                    'CampId' => '220',
+                    'Recipient' => $sms->to,
+                    'Param1' => $otp,
+                    'UniqueId' => $sms->id,
                 ]
             ]);
 
-            $response = simplexml_load_string($response->getBody());
-            $response = json_decode(json_encode($response), true);
-
-            if (isset($response['data']['acceptreport']) && $response['data']['acceptreport']['statuscode'] == 0) {
+            if ($response->getStatusCode() == 200) {
                 $this->sms->status = 3;
 
                 $this->sms->save();
             }
             else {
+                $response = json_decode($response->getBody()->getContents(), true);
+
                 $this->sms->status = 2;
 
                 $this->sms->save();
 
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
-                $subject = '[Error] SMS API - ITS';
-                $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+                $to = ['muhammad.yousuf@trax.pk'];
+                $subject = '[Error] CALL API - ITS';
+                $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
                 $mail = Mail::to($to)->send(new Notifications($subject, $body));
             }

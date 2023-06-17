@@ -76,12 +76,12 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="latitude" id="latitude" class="form-control latitude" placeholder="Latitude" value="{{$city->location_latitude}}">
+                <input type="text" name="latitude" id="latitude" class="form-control latitude" placeholder="Latitude" value="{{$city->location_latitude}}" data-rule-required="true" data-msg-required="Latitude is required">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->location_longitude}}">
+                <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude" value="{{$city->location_longitude}}" data-rule-required="true" data-msg-required="Longitude is required">
             </fieldset>
         </div>
     </div><div class="row">
@@ -90,12 +90,12 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude" value="{{$city->hub_location_latitude}}">
+                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude" value="{{$city->hub_location_latitude}}" data-rule-required="true" data-msg-required="Latitude is required">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude" value="{{$city->hub_location_longitude}}">
+                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude" value="{{$city->hub_location_longitude}}" data-rule-required="true" data-msg-required="Longitude is required">
             </fieldset>
         </div>
     </div>

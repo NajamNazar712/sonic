@@ -48,6 +48,16 @@
                                                 <input type="text" name="booking_to_date" class="form-control bg-primary border-primary white rounded-right" id="booking_to_date" placeholder="Booking Date To" data-value="{{ \Carbon\Carbon::now() }}">
                                             </div>
                                         </div>
+                                        <div class="col-3">
+                                            <fieldset class="form-group">
+                                                <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
+                                                    <option value="" disabled ></option> <!-- added this line -->
+                                                    @foreach($merged_accounts as $merged_account)
+                                                        <option value="{{$merged_account->id}}">{{$merged_account->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </fieldset>
+                                        </div>
 
                                         <div class="form-group col-md-3 mt-2 justify-content-center">
                                             <button type="submit" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -535,6 +545,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#search_account_type').select2({
+                placeholder:'Select Merged Account ',
+                width:'100%',
+                // allowClear:true
+            });
 
             $('#track_form .phone_number').inputmask({
                 'mask': '9999-9999999',
@@ -987,6 +1002,8 @@
                         d.booking_from_date = $('input[name="booking_from_date_formatted"]').val();
                         d.booking_to_date = $('input[name="booking_to_date_formatted"]').val();
                         d.phone_number = $('input[name="phone_number"]').val();
+                        d.search_account_type = $('#search_account_type').val();
+
                     }
                 },
                 rowId: 'shipment_id',

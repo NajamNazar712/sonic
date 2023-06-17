@@ -73,12 +73,12 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="latitude" id="latitude" class="form-control latitude" placeholder="Latitude">
+                <input type="text" name="latitude" id="latitude" class="form-control latitude" placeholder="Latitude" data-rule-required="true" data-msg-required="Latitude is required">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude">
+                <input type="text" name="longitude" id="longitude" class="form-control longitude" placeholder="Longitude" data-rule-required="true" data-msg-required="Longitude is required">
             </fieldset>
         </div>
     </div>
@@ -88,12 +88,12 @@
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude">
+                <input type="text" name="hub_latitude" id="hub_latitude" class="form-control hub_latitude" placeholder="Latitude" data-rule-required="true" data-msg-required="Latitude is required">
             </fieldset>
         </div>
         <div class="col">
             <fieldset class="form-group">
-                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude">
+                <input type="text" name="hub_longitude" id="hub_longitude" class="form-control hub_longitude" placeholder="Longitude" data-rule-required="true" data-msg-required="Longitude is required">
             </fieldset>
         </div>
     </div>

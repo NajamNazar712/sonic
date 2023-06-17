@@ -685,6 +685,7 @@ class AdminHumanResourseController extends Controller
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
                     $admin->dummy_pin = $employee->pin;
+                    $admin->updated_by = Auth::id();
                     $admin->update();
                 }
             } else {
@@ -693,6 +694,7 @@ class AdminHumanResourseController extends Controller
                     $rider = $rider->first();
                     $rider->pin = bcrypt($employee->pin);
                     $rider->dummy_pin = $employee->pin;
+                    $rider->updated_by = Auth::id();
                     $rider->update();
                 }
             }
@@ -3169,11 +3171,11 @@ class AdminHumanResourseController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 437);
         }
         $payslips = EmployeePayslip::leftjoin('payslip_pdfs as pp', 'pp.payslip_id', '=', 'employee_payslips.id')->select('employee_payslips.id as id', 'employee_payslips.payroll_month as payroll_month', 'employee_payslips.trax_id as trax_id', 'employee_payslips.name as name', 'employee_payslips.designation as designation', 'employee_payslips.department as department', 'employee_payslips.hub as hub', 'employee_payslips.zone as zone', 'employee_payslips.joining_date as joining_date', 'employee_payslips.cnic as cnic', 'employee_payslips.total_deduction as total_deduction', 'employee_payslips.net_salary as net_salary', 'employee_payslips.iban as iban', 'employee_payslips.total_salary as total_salary', 'employee_payslips.hub_id as hub_id', 'pp.id as pdf_id', 'pp.file_path as file_path');
-        if (!in_array(596, session('permissions'))) {
-            $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
-        } else {
-            $payslips->whereIn('hub_id', session('hubs'));
-        }
+         if (!in_array(596, session('permissions'))) {
+             $payslips->where('trax_id', Auth::user()->trax_id)->where('trax_id', '!=', null);
+         } else {
+             $payslips->whereIn('hub_id', session('hubs'));
+         }
 
         $datatable = Datatables::of($payslips)
             ->editColumn('total_salary', function ($payslip) {
@@ -3277,6 +3279,8 @@ class AdminHumanResourseController extends Controller
             'pickup_incentive' => 'Pickup Incentive',
             'delivery_incentive' => 'Delivery Incentive',
             'operation_incentive' => 'Operations Incentive',
+            'retail_incentive' => 'Retail Incentive',
+            'sales_incentive' => 'Sales Incentive',
             'extra_duty_allowance' => 'Extra Duty Allowance',
             'others_addition' => 'Others Addition',
             'total_salary' => 'Total Salary',
@@ -3346,6 +3350,8 @@ class AdminHumanResourseController extends Controller
             'pickup_incentive' => ['nullable', 'integer'],
             'delivery_incentive' => ['nullable', 'integer'],
             'operation_incentive' => ['nullable', 'integer'],
+            'retail_incentive' => ['nullable', 'integer'],
+            'sale_incentive' => ['nullable', 'integer'],
             'extra_duty_allowance' => ['nullable', 'integer'],
             'others_addition' => ['nullable', 'integer'],
             'total_salary' => ['required', 'integer'],
@@ -3372,19 +3378,19 @@ class AdminHumanResourseController extends Controller
 
         ];
 
-        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive', 32 => 'extra_duty_allowance', 33 => 'others_addition', 34 => 'total_salary', 35 => 'paycut', 36 => 'absent', 37 => 'late_deduction', 38 => 'income_tax', 39 => 'eobi', 40 => 'advance_salary', 41 => 'month_closing', 42 => 'loan', 43 => 'fuel_card', 44 => 'open_parcel', 45 => 'phone_call', 46 => 'recovery', 47 => 'auction_sale', 48 => 'penalty', 49 => 'others_deduction', 50 => 'van_deduction', 51 => 'medical_insurance', 52 => 'total_deduction', 53 => 'net_salary', 54 => 'iban', 55 => 'confirmation_date', 56 => 'employee_type'];
+        $fields = [0 => 'trax_id', 1 => 'name', 2 => 'designation', 3 => 'department', 4 => 'hub', 5 => 'zone', 6 => 'joining_date', 7 => 'cnic', 8 => 'employee_status', 9 => 'payroll_days', 10 => 'present_days', 11 => 'pay_cut_days', 12 => 'absent_days', 13 => 'extra_paid_days', 14 => 'fuel_days', 15 => 'basic_salary', 16 => 'house_rent', 17 => 'medical', 18 => 'gross_salary', 19 => 'mobile_allowance', 20 => 'vehicle_allowance', 21 => 'fuel_allowance', 22 => 'conveyance_allowance', 23 => 'vehicle_maintenance', 24 => 'fixed_incentive', 25 => 'holiday_allowance', 26 => 'overtime', 27 => 'bonus', 28 => 'arrears', 29 => 'pickup_incentive', 30 => 'delivery_incentive', 31 => 'operation_incentive',32 =>'retail_incentive',33 => 'sales_incentive',34 => 'extra_duty_allowance', 35 => 'others_addition', 36 => 'total_salary', 37 => 'paycut', 38 => 'absent', 39 => 'late_deduction', 40 => 'income_tax', 41 => 'eobi', 42 => 'advance_salary', 43 => 'month_closing', 44 => 'loan', 45 => 'fuel_card', 46 => 'open_parcel', 47 => 'phone_call', 48 => 'recovery', 49 => 'auction_sale', 50 => 'penalty', 51 => 'others_deduction', 52 => 'van_deduction', 53 => 'medical_insurance', 54 => 'total_deduction', 55 => 'net_salary', 56 => 'iban', 57 => 'confirmation_date', 58 => 'employee_type'];
         if ($file = $request->file('payslip')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-            $header = ['Employee ID', 'Employee Name', 'Designation', 'Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive', 'Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
+            $header = ['Employee ID', 'Employee Name', 'Designation', 'Department', 'Hub', 'Zone', 'Date of Joining', 'CNIC', 'Employee Status', 'Payroll Days', 'Present Days', 'Pay Cut Days', 'Absent Days', 'Extra Paid Days', 'Fuel Days', 'Basic Salary', 'House Rent', 'Medical', 'Gross Salary', 'Mobile Allowance', 'Vehicle Allowance', 'Fuel Allowance', 'Conveyance Allowance', 'Vehicle Maintenance', 'Fixed Incentive', 'Sunday / Holiday Allowance', 'Overtime', 'Bonus', 'Arrears', 'Pickup Incentive', 'Delivery Incentive', 'Operations Incentive','Retail Incentive','Sales Incentive','Extra Duty Allowance', 'Others Addition', 'Total Salary', 'Pay Cut', 'Absent', 'Late Deduction', 'Income Tax', 'EOBI', 'Advance Salary', 'Month Closing', 'Loan', 'Fuel Card', 'Open Parcel', 'Phone Call', 'Recovery', 'Auction Sale', 'Penalty', 'Others Deduction', 'Van Deduction', 'Medical Insurance', 'Total Deduction', 'Net Salary', 'IBAN', 'Confirmation Date', 'Employee Type'];
 
             if (isset($spreadsheet)) {
                 $header_correct = true;
 
                 foreach ($spreadsheet[0] as $index => $header_value) {
-                    if ($index == 54) {
+                    if ($index == 56) {
                     } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                         $header_correct = false;
                         break;
@@ -3409,7 +3415,7 @@ class AdminHumanResourseController extends Controller
 
                     $rows[] = $row;
                 }
-
+                
                 unset($spreadsheet);
                 $errors = array();
 
@@ -3482,6 +3488,7 @@ class AdminHumanResourseController extends Controller
                             $payslip->pickup_incentive = trim($row['pickup_incentive']);
                             $payslip->delivery_incentive = trim($row['delivery_incentive']);
                             $payslip->operation_incentive = trim($row['operation_incentive']);
+                            
                             $payslip->extra_duty_allowance = trim($row['extra_duty_allowance']);
                             $payslip->others_addition = trim($row['others_addition']);
                             $payslip->total_salary = trim($row['total_salary']);
@@ -3522,6 +3529,8 @@ class AdminHumanResourseController extends Controller
                         $payslip_details['pickup_incentive'] = trim($row['pickup_incentive']);
                         $payslip_details['delivery_incentive'] = trim($row['delivery_incentive']);
                         $payslip_details['operation_incentive'] = trim($row['operation_incentive']);
+                        $payslip_details['retail_incentive'] = trim($row['retail_incentive']);
+                        $payslip_details['sales_incentive'] = trim($row['sales_incentive']);
                         $payslip_details['extra_duty_allowance'] = trim($row['extra_duty_allowance']);
                         $payslip_details['others_addition'] = trim($row['others_addition']);
                         $payslip_details['total_salary'] = trim($row['total_salary']);
@@ -3546,6 +3555,8 @@ class AdminHumanResourseController extends Controller
                         $payslip_details['net_salary'] = trim($row['net_salary']);
                         $payslip->iban = trim($row['iban']);
                         $payslip->added_by = Auth::id();
+                        $payslip->retail_incentive = trim($row['retail_incentive']);
+                        $payslip->sales_incentive = trim($row['sales_incentive']);
                         $payslip->save();
                         dispatch(new ProcessPaySlipPdfEmail($payslip_details, $payslip->id));
                         $updated++;
@@ -3576,7 +3587,6 @@ class AdminHumanResourseController extends Controller
     {
 
         $payslip = EmployeePayslip::find($request->payslip_id);
-
         if (!$payslip) {
             return response()->json(['status' => 0, 'error' => 'Payslip not found!']);
         }
@@ -3618,6 +3628,8 @@ class AdminHumanResourseController extends Controller
             $pickup_incentive = ($payslip->pickup_incentive != null) ? number_format($payslip->pickup_incentive) : '-';
             $delivery_incentive = ($payslip->delivery_incentive != null) ? number_format($payslip->delivery_incentive) : '-';
             $operations_incentive = ($payslip->operation_incentive != null) ? number_format($payslip->operation_incentive) : '-';
+            $retail_incentive = ($payslip->retail_incentive != null) ? number_format($payslip->retail_incentive) : '-';
+            $sales_incentive = ($payslip->sales_incentive != null) ? number_format($payslip->sales_incentive) : '-';
             $extra_duty_allowance = ($payslip->extra_duty_allowance != null) ? number_format($payslip->extra_duty_allowance) : '-';
             $others_addition = ($payslip->others_addition != null) ? number_format($payslip->others_addition) : '-';
 
@@ -3882,26 +3894,26 @@ class AdminHumanResourseController extends Controller
                                 <td colspan="2"  class="border twice-right">' . $auction_sale . '</td>
                             </tr>
                             <tr class="text-left">
-                                <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
-                                <td colspan="2"  class="border twice-right">' . $extra_duty_allowance . '</td>
+                                <td colspan="2" class="border twice-right">Retail Incentive</td>
+                                <td colspan="2"  class="border twice-right">'. $retail_incentive .'</td>
                                 <td colspan="2"  class="border twice-right">Penalty</td>
                                 <td colspan="2"  class="border twice-right">' . $penalty . '</td>
                             </tr>
                             <tr class="text-left">
-                                <td colspan="2" class="border twice-right">Others Addition</td>
-                                <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
+                                <td colspan="2" class="border twice-right">Sales Incentive</td>
+                                <td colspan="2"  class="border twice-right">'. $sales_incentive .'</td>
                                 <td colspan="2"  class="border twice-right">Medical Insurance</td>
                                 <td colspan="2"  class="border twice-right">' . $medical_insurance . '</td>
                             </tr>
                             <tr class="text-left">
-                                <td colspan="2" class="border twice-right"></td>
-                                <td colspan="2"  class="border twice-right"></td>
+                                <td colspan="2" class="border twice-right">Extra Duty Allowance</td>
+                                <td colspan="2"  class="border twice-right">' . $extra_duty_allowance  . '</td>
                                 <td colspan="2"  class="border twice-right">Van Deduction</td>
                                 <td colspan="2"  class="border twice-right">' . $van_deduction . '</td>
                             </tr>
                             <tr class="text-left">
-                                <td colspan="2" class="border twice-right"></td>
-                                <td colspan="2"  class="border twice-right"></td>
+                                <td colspan="2" class="border twice-right">Others Addition</td>
+                                <td colspan="2"  class="border twice-right">' . $others_addition . '</td>
                                 <td colspan="2"  class="border twice-right">Others Deduction</td>
                                 <td colspan="2"  class="border twice-right">' . $others_deduction . '</td>
                             </tr>
@@ -3936,7 +3948,7 @@ class AdminHumanResourseController extends Controller
             return array('status' => 1, 'image' => $pdf_file);
     }
     public function payslip_download(Request $request, $id)
-    {
+    {  
         $payslip = EmployeePayslip::find($id);
         if($payslip){
             $payslip_pdf = PayslipPdf::where('payslip_id', $id);

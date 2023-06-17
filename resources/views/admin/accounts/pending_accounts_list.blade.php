@@ -659,6 +659,9 @@
                         head.push('Documents Rejected At');
                         head.push('Documents Status');
                         head.push('Documents Rejection Reason');
+                        head.push('Duplicate');
+                        head.push('International Rate Status');
+                        head.push('International Rate Status Remarks');
                         head.push('Segment');
                         head.push('Sub Category Segment');
                         head.push('Referral Code');
@@ -696,6 +699,9 @@
                             row.push(values.documents_rejected_at);
                             row.push(values.documents_status);
                             row.push(values.documents_rejection_reason);
+                            row.push(values.duplication);
+                            row.push(values.international_rate_status);
+                            row.push(values.international_rejected_reason);
                             row.push(values.segment);
                             row.push(values.sub_segment);
                             row.push(values.referral_name);

@@ -40,6 +40,16 @@
                                             <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right search_date_to" id="search_date_to" placeholder="Date (To)">
                                         </div>
                                     </div>
+                                    <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_account_type[]" id="search_account_type" class="form-control select2" multiple>
+                                                <option value="" disabled ></option> <!-- added this line -->
+                                                @foreach($merged_accounts as $merged_account)
+                                                    <option value="{{$merged_account->id}}">{{$merged_account->name}} </option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
                 
                                     <div class="w-100"></div>
                 
@@ -120,6 +130,7 @@
                                         <th class="border-primary border-darken-1">Launched By Name</th>
                                         {{--<th class="border-primary border-darken-1">Launched By Type</th>--}}
                                         <th class="border-primary border-darken-1">Launched Date</th>
+                                        <th class="border-primary border-darken-1">Shipper Name</th>
                                         <th class="border-primary border-darken-1">Closed Date</th>
                                         <th class="border-primary border-darken-1"></th>
                                     </tr>
@@ -157,7 +168,11 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-
+            $('#search_account_type').select2({
+                placeholder:'Select Merged Account ',
+                width:'100%',
+                // allowClear:true
+            });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 // clear: '',
@@ -214,7 +229,9 @@
             function get_summary_cards_data() {
                 var from_date = $('input[name="search_date_from_formatted"]').val();
                 var to_date = $('input[name="search_date_to_formatted"]').val();
-               
+                var to_date = $('input[name="search_date_to_formatted"]').val();
+                var search_account_type = $('#search_account_type').val();
+
                 $.ajax({
                     url: '{!! route('cod.crm.request.card_data') !!}',
                     method: 'post',
@@ -222,6 +239,7 @@
                         '_token': '{{ csrf_token() }}',
                         'from_date': from_date,
                         'to_date': to_date,
+                        'search_account_type': search_account_type,
 
                     }
                 }).done(function (data) {
@@ -266,6 +284,7 @@
                             head.push('Launched By');
                             head.push('Launched By Name');
                             head.push('Launched Date');
+                            head.push('Shipper Name');
                             head.push('Closed Date');
 
                             $.each(result.data, function(index, values) {
@@ -284,6 +303,7 @@
                                 row.push(values.added_by);
                                 row.push(values.launched_by_name);
                                 row.push(values.created_at);
+                                row.push(values.shipper_name);
                                 row.push(values.closed_at);
 
                                 body.push(row);
@@ -316,13 +336,13 @@
                 ajax:{
                     url: '{{ route('cod.crm.request.list') }}',
                     data: function (d) {
-                        
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_account_type = $('#search_account_type').val();
                     }
                 },
                 rowId: 'id',
-                    order: [[10, 'desc']],
+                    order: [[12, 'desc']],
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -339,6 +359,7 @@
                     {data: 'added_by', name: 'crm_requests.launched_by', class: 'align-middle added_by'},
                     {data: 'launched_by_name', name: 'crm_requests.launched_by_id', class: 'align-middle launched_by_name',orderable: false, searchable: false},
                     {data: 'created_at', name: 'crm_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
                     {data: 'closed_at', name: 'crmst.created_at', class: 'align-middle closed_at'},
 
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

@@ -231,7 +231,7 @@ class AddActivityTrailActionSeeder extends Seeder
             array('id' => 214, 'screen_name' => 'Station Recovery Report', 'action'=> 'Excel Download'),
             array('id' => 215, 'screen_name' => 'Not Attempted Aging Report', 'action'=> 'View'),
             array('id' => 216, 'screen_name' => 'Not Attempted Aging Report', 'action'=> 'Excel Download'),
-            array('id' => 217, 'screen_name' => 'Daily and Monthly Adjustments Report', 'action'=> 'View'),
+            You have to allow Location, cannot proceed without it. array('id' => 217, 'screen_name' => 'Daily and Monthly Adjustments Report', 'action'=> 'View'),
             array('id' => 218, 'screen_name' => 'Daily and Monthly Adjustments Report', 'action'=> 'Excel Download'),
             array('id' => 219, 'screen_name' => 'Petty Cash Expense Summary Report', 'action'=> 'View'),
             array('id' => 220, 'screen_name' => 'Petty Cash Expense Summary Report', 'action'=> 'Excel Download'),

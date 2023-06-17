@@ -119,6 +119,7 @@
                             <th class="border-primary border-darken-1">Service Type</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Call Findings</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                             <th class="border-primary border-darken-1">Shipper Remarks</th>
                             <th class="border-primary border-darken-1">OSA Estimated Charges</th>
@@ -573,6 +574,82 @@
         </div>
     </div>
 
+    {{-- call history modal --}}
+    <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog"
+        aria-labelledby="update_call_status_modal" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Call History</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="update_call_status_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                        @csrf
+                        <div class="form-group text-left">
+                            <input type="hidden" id="shipment_id" value="">
+                            <select name="call_finding_dropdown" class="form-control select2" id="call_finding_dropdown" data-rule-required="true" 
+                                data-msg-required="Call Finding is required">
+                                <option value="1">Unresponsive</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group text-left sub_status_call_finding_container d-none">
+                            <select name="sub_status_call_finding" class="form-control select2" id="sub_status_call_finding">
+                                @foreach($sub_status_call_finding as $sscf)
+                                    <option value="{{$sscf->id}}">{{ $sscf->remark }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <div class="form-group text-left custom_remark_container d-none">
+                            <input type="text" id="custom_remark" name="custom_remark" class="form-control" placeholder="Enter Other Text">
+                        </div>
+                        
+                        <div class="form-group text-left">
+                            <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true" 
+                                data-msg-required="Call To is required">
+                                <option value="1">Shippper</option>
+                                <option value="2">Consigneee</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group ml-1 ">
+                            <button type="submit" name="add" id="btnReturn"
+                                class="btn btn-primary update_return_confirm" value="Add">Update Call History</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+                        </div>
+                
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- call history log modal --}}
+    <div class="modal fade" id="call_history_modal" role="dialog" aria-labelledby="call_history_modal_title" aria-hidden="true">
+        <div class="modal-dialog modal-xl" role="document">
+            <div class="modal-content">
+                <div class="modal-header text-center">
+                    <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
 @endsection
 
 @section('css')
@@ -677,6 +754,191 @@
             }
         @endphp
         $(document).ready(function() {
+
+            // update_call_status_modal function
+            $('#update_call_status_modal').on('shown.bs.modal', function () {
+                $('#call_to').val('').change();
+                $('#custom_remark').val('');
+                $('#sub_status_call_finding').val('').change();
+                $('#call_finding_dropdown').val('').change();
+            });
+
+            $('#update_call_status_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var data = 
+                    {
+                    shipment_id: $('#shipment_id').val(),
+                    call_finding_id: $('#call_finding_dropdown').val(),
+                    sub_status_call_finding_id: $('#sub_status_call_finding').val(),
+                    custom_remark: $('#custom_remark').val(),
+                    call_to_id: $('#call_to').val(),
+                    '_token': '{{ csrf_token() }}'
+                    };
+                    // AJAX request
+                    $.ajax({
+                        url: "{{ route('admin.return.update_call_status') }}",
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            if (response.status == 1) 
+                            {
+                                swal({
+                                    text: 'Call Status Updated Successfully',
+                                    icon: 'success',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            $('#update_call_status_modal').modal('hide');
+                            }
+                            else{
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: 'Please Update Status Again',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                            }
+                            table.draw();
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                        console.error('Form submission failed:', textStatus, errorThrown);
+                        }
+                    });
+                }
+            });
+
+            // End update_call_status_modal function
+
+            // call_history_modal datatable function
+            $('#datatable').on('click', 'tr td.remarks button', function() {
+                var shipment_id = table.row($(this).parents('tr')).data().shId;
+
+                $('#call_history_modal .modal-body').html('');
+                $('#call_history_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.return.call_status_history') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipment_id': shipment_id
+                    }
+                })
+                .done(function(data) {
+                    if (data) {
+                        var modalBody = $('#call_history_modal .modal-body');
+                        modalBody.html('');
+
+                        var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
+                        tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Others</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                        tableHtml += '<tbody class="text-center">';
+                        $.each(data, function(index, value) {
+                            var updated_at = value.updated_at;
+                            var trimmedDateTime = updated_at.substring(0, 10);
+                            var trimmedTime = updated_at.substring(11, 16);
+                            var remark = value.remark;
+                            var custom_remarks = value.sub_status_call_finding_remarks;
+                            if(custom_remarks == null){
+                                custom_remarks = '-';
+                            }
+                            var status = value.status;
+                            var updated_by = value.updated_by;
+                            var call_to_id = value.call_to_id;
+                            if(call_to_id ==1){
+                                call_to_id = 'Shipper'
+                            }
+                            else{
+                                call_to_id = 'Consignee'
+                            }
+                            var call_finding_id = value.call_finding_id;
+                            if(call_finding_id ==1){
+                                call_finding_id = 'Un-responsive'
+                            }
+                            else{
+                                call_finding_id = ''
+                            }
+
+                            tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + call_to_id + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
+                        });
+
+                        tableHtml += '</tbody></table>';
+
+                        modalBody.append(tableHtml);
+
+                        $('#call_history_modal').modal('show');
+                    }
+                });
+            });
+
+            // End call_history_modal datatable function
+
+
+            // update_call_status_modal Validations
+            $("#call_finding_dropdown").change(function () {
+                var selectedValue = $(this).val();
+                
+                if (selectedValue === '1') {
+                    $('.sub_status_call_finding_container').removeClass('d-none');
+                    $('#sub_status_call_finding').attr('data-rule-required',true);
+                    $('#sub_status_call_finding').attr('data-msg-required','Call Finding is required');
+                }
+                else {
+                    $('.sub_status_call_finding_container').addClass('d-none');
+                    $('#sub_status_call_finding').removeAttr('data-rule-required',true);
+                    $('#sub_status_call_finding').removeAttr('data-msg-required','Call Finding is required');
+                }
+                
+                
+            });
+                
+            $("#sub_status_call_finding").change(function () {
+                var selectedValue = $(this).val();
+
+                if (selectedValue === '7') {
+                    $('.custom_remark_container').removeClass('d-none');
+                    $('#custom_remark').attr('data-rule-required',true);
+                    $('#custom_remark').attr('data-msg-required','Other text is required');
+                }
+                else {
+                    $('.custom_remark_container').addClass('d-none');
+                    $('#custom_remark').removeAttr('data-rule-required',true);
+                    $('#custom_remark').removeAttr('data-msg-required','Other text is required');
+                }
+
+            });
+             
+            
+            $('#sub_status_call_finding').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Status',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+
+            $('#call_finding_dropdown').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Call Finding',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+
+            $('#call_to').prepend('<option value="" selected="selected"></option>')
+                .select2({
+                    width: '100%',
+                    placeholder: 'Select Call To',
+                    allowClear: true,
+                    dropdownParent: $('#update_call_status_form')
+                });
+            
+            // update_call_status_modal Validations
 
             // $('#send_sms_modal').modal('show');
 
@@ -885,6 +1147,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Reason');
+                            head.push('Call Findings');
                             head.push('Remarks');
                             head.push('Shipper Remarks');
                             head.push('OSA Estimated Charges');
@@ -925,7 +1188,8 @@
                                 row.push(values.service_type);
                                 row.push(values.status);
                                 row.push(values.reason);
-                                row.push(values.remarks);
+                                row.push(values.remarks_excel); //Remarks Count
+                                row.push(values.shipment_remarks_excel);
                                 row.push(values.shipper_remarks);
                                 row.push(values.nsa_osa_estimated_charges);
                                 row.push(values.arrival);
@@ -1446,7 +1710,7 @@
                 },
                 rowId: 'shId',
                 order: [
-                    [23, 'desc']
+                    [24, 'desc']
                 ],
                 columns: [{
                         data: 'shId',
@@ -1458,197 +1722,42 @@
                             return '';
                         }
                     },
-                    {
-                        data: 'id',
-                        defaultContent: '',
-                        orderable: false,
-                        searchable: false,
-                        class: 'align-middle serial_number'
-                    },
-                    {
-                        data: 'tracking_number',
-                        name: 'shipments.tracking_number',
-                        class: 'align-middle tracking_number'
-                    },
-                    {
-                        data: 'order_id',
-                        name: 'shipments.order_id',
-                        class: 'align-middle order_id'
-                    },
-                    {
-                        data: 'shipper',
-                        name: 'u.name',
-                        class: 'align-middle shipper'
-                    },
-                    {
-                        data: 'shipper_phone',
-                        name: 'shipper_phone',
-                        class: 'align-middle shipper_phone'
-                    },
-                    {
-                        data: 'vendor_name',
-                        name: 'usi.vendor',
-                        class: 'align-middle vendor_name'
-                    },
-                    {
-                        data: 'origin',
-                        name: 'oc.name',
-                        class: 'align-middle origin'
-                    },
-                    {
-                        data: 'destination',
-                        name: 'dc.name',
-                        class: 'align-middle destination'
-                    },
-                    {
-                        data: 'hub',
-                        name: 'h.name',
-                        class: 'align-middle hub'
-                    },
-                    {
-                        data: 'consignee_name',
-                        name: 'shipments.consignee_name',
-                        class: 'align-middle consignee_name'
-                    },
-                    {
-                        data: 'consignee_phone',
-                        name: 'consignee_phone',
-                        class: 'align-middle consignee_phone'
-                    },
-                    {
-                        data: 'consignee_address',
-                        name: 'shipments.consignee_address',
-                        class: 'align-middle consignee_address'
-                    },
-                    {
-                        data: 'sub_station',
-                        name: 'dlm.area_name',
-                        class: 'align-middle sub_station',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'amount',
-                        name: 'shipments.amount',
-                        class: 'align-middle amount'
-                    },
+                    { data: 'id', defaultContent: '', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    { data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    { data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    { data: 'shipper_phone',  name: 'shipper_phone', class: 'align-middle shipper_phone'},
+                    { data: 'vendor_name', name: 'usi.vendor', class: 'align-middle vendor_name'},
+                    { data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    { data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    { data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    { data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
+                    { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    { data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', orderable: false, searchable: false},
+                    { data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
-                    {
-                        data: 'mode',
-                        name: 'sm.id',
-                        class: 'align-middle mode'
-                    },
-                    {
-                        data: 'service_type',
-                        name: 'bt.id',
-                        class: 'align-middle service_type'
-                    },
-                    {
-                        data: 'status',
-                        name: 'status',
-                        class: 'align-middle status'
-                    },
-                    {
-                        data: 'reason',
-                        name: 'ssr.name',
-                        class: 'align-middle reason'
-                    },
-                    {
-                        data: 'shipment_remarks',
-                        name: 'admin_journey.remarks',
-                        class: 'align-middle shipment_remarks'
-                    },
-                    {
-                        data: 'shipper_remarks',
-                        name: 'shipments_journey.remarks',
-                        class: 'align-middle shipper_remarks'
-                    },
-                    {
-                        data: 'nsa_osa_estimated_charges',
-                        name: 'nsa_osa_estimated_charges',
-                        class: 'align-middle nsa_osa_estimated_charges'
-                    },
-                    {
-                        data: 'arrival',
-                        name: 'sj.created_at',
-                        class: 'align-middle arrival'
-                    },
-                    {
-                        data: 'status_date',
-                        name: 'shipments_journey.created_at',
-                        class: 'align-middle status_date'
-                    },
-                    {
-                        data: 'reattemp_status_remarks',
-                        name: 'reattempt_shipment_status_remarks.remarks',
-                        class: 'align-middle reattemp_status_remarks',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'confirmation_req',
-                        name: '',
-                        class: 'align-middle confirmation_req',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'confirmation_on',
-                        name: '',
-                        class: 'align-middle confirmation_on',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'delivery_attempt',
-                        name: '',
-                        class: 'align-middle reattempts',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'reattempts',
-                        name: 'sret.created_at',
-                        class: 'align-middle reattempts',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'assigned_agent',
-                        name: 'asad.name',
-                        class: 'align-middle assigned_agent'
-                    },
-                    {
-                        data: 'assigned_at',
-                        name: 'ras.created_at',
-                        class: 'align-middle assigned_at'
-                    },
-                    {
-                        data: 'assigned_by',
-                        name: 'asadby.name',
-                        class: 'align-middle assigned_by'
-                    },
-                    {
-                        data: 'consolidation',
-                        name: 'consolidation',
-                        class: 'align-middle consolidation',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'consolidated_id',
-                        name: 'consolidations.consolidation_id',
-                        class: 'align-middle consolidated_id',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'text-center align-middle action p-1',
-                        orderable: false,
-                        searchable: false
-                    }
+                    { data: 'mode', name: 'sm.id', class: 'align-middle mode'},
+                    { data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                    { data: 'status', name: 'status', class: 'align-middle status'},
+                    { data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
+                    { data: 'remarks', name: 'sscf.remark', class: 'align-middle text-center remarks'},
+                    { data: 'shipment_remarks', name: 'admin_journey.remarks', class: 'align-middle shipment_remarks' },
+                    { data: 'shipper_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipper_remarks' },
+                    { data: 'nsa_osa_estimated_charges', name: 'nsa_osa_estimated_charges', class: 'align-middle nsa_osa_estimated_charges' },
+                    { data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival' },
+                    { data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    { data: 'reattemp_status_remarks', name: 'reattempt_shipment_status_remarks.remarks', class: 'align-middle reattemp_status_remarks', orderable: false, searchable: false},
+                    { data: 'confirmation_req', name: '', class: 'align-middle confirmation_req', orderable: false, searchable: false},
+                    { data: 'confirmation_on', name: '',  class: 'align-middle confirmation_on', orderable: false, searchable: false},
+                    { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
+                    { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
+                    { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
+                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
+                    { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
+                    { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
+                    { data: 'action',name: 'action',class: 'text-center align-middle action p-1',orderable: false,searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -1993,6 +2102,13 @@
                     });
 
 
+                }
+                if (action === 'call_history') {
+                    var call_history = $(this).parents('tr').attr('id');
+                    if (call_history) {
+                        $('#shipment_id').val(call_history);
+                        $('#update_call_status_modal').modal('show');
+                    }
                 }
             });
 
