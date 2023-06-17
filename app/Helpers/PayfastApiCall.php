@@ -26,11 +26,11 @@ class PayfastApiCall
 
         $environment = config('app.env');
         if($environment == 'production'){
-            $url          = "https://pay.trax.pk/online-transaction-details";
+            $url          = "https://pay.trax.pk/api/online-transaction-details";
             $payment_link = "https://pay.trax.pk/pay/$rand";
         }
         else if($environment == 'staging'){
-            $url          = "https://pay-staging.trax.pk/online-transaction-details";
+            $url          = "https://pay-staging.trax.pk/api/online-transaction-details";
             $payment_link = "https://pay-staging.trax.pk/pay/$rand";
         }
         else{
