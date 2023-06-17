@@ -1211,9 +1211,17 @@ class ShipperReportsController extends Controller
 
         if (in_array(session('user_id'), session('mms_shippers'))) {
             $connection = 'reports';
-            $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-            $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
-
+            if(isset($request->arrival_time_from)) {
+                $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
+            }
+            else{
+                $arrival_from = "00:00:00";
+            }
+            if(isset($request->arrival_time_to)) {
+                $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
+            }else{
+                $arrival_to = "23:59:59";
+            }
             $from = $request->get('search_date_from');
             $from = Carbon::parse($from)->toDateTimeString();
             $to = $request->get('search_date_to');
