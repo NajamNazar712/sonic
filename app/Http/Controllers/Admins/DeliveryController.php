@@ -4663,10 +4663,6 @@ class DeliveryController extends Controller
             ->where('fintech_charges','!=','')->count('id');
             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
         })
-
-
-
-
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
@@ -4788,14 +4784,22 @@ class DeliveryController extends Controller
 
         $delivery_note_shipment = DeliveryNoteShipment::join('shipments','delivery_note_shipments.shipment_id','shipments.id')
         ->where('delivery_note_shipments.delivery_note_id', $req->id)
-        ->select('shipments.tracking_number as trackingNo', 
-        'shipments.fintech_charges as fintech_charges',
+        ->select('shipments.tracking_number as trackingNo', 'shipments.amount as COD_amount',
+        'shipments.fintech_charges as fintech_charges','shipments.received_amount as received_amount',   
         'shipments.created_at as Date')->where('shipments.fintech_charges','!=','')->get();
-
-
-       return response()->json([
-        'data' => $delivery_note_shipment,
-       ]);
+        
+        if(count($delivery_note_shipment) != 0){
+            return response()->json([
+                'status' => '200',
+                'data'   => $delivery_note_shipment,
+            ]); 
+        }
+        else{
+            return response()->json([
+                'status' => '404',
+                'data'   => '',
+             ]); 
+        }
     }
 
     public function pending_cash_collect(Request $request)

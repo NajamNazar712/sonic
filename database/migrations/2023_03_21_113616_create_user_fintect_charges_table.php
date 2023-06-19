@@ -31,6 +31,6 @@ class CreateUserFintectChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('user_fintect_charges');
+        Schema::dropIfExists('users_fintech_charges');
     }
 }

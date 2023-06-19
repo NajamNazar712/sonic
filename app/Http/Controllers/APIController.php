@@ -7114,6 +7114,7 @@ public function fintech_payment_detials(Request $req){
 
         $shipment = Shipment::find($shipment_id);
         $shipment->received_amount = $total_amount_received;
+        $shipment->fintech_charges = $total_fintech_calculated[0];
         $shipment->save();
 
         NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
