@@ -218,7 +218,6 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -427,6 +426,21 @@ class RetailShipmentBookController extends Controller
             }
             $shipper_info->save();
         }
+
+        $admin_id = Auth::id();
+        $center_n_franchise = RetailUser::where('id',$admin_id)->select('category','category_id');
+        if ($center_n_franchise->exists())
+        {
+            $center_n_franchise = $center_n_franchise->first();
+            $cat = $center_n_franchise->category;
+            $cat_id = $center_n_franchise->category_id;
+        }
+        else
+        {
+            $cat = $center_n_franchise = null;
+            $cat_id = $center_n_franchise = null;
+        }
+
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product;
@@ -452,6 +466,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
+        $retail_shipment->category = $cat;
+        $retail_shipment->category_id = $cat_id;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
