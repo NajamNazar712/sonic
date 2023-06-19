@@ -278,7 +278,7 @@
                                             IBAN Number:
                                             <span class="danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                        <input type="text" class="form-control iban text-uppercase required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                                     </div>
                                     <div class="form-group col">
                                         <label for="account_name">Account Number:
@@ -532,8 +532,14 @@
             var international_shipping_modes = @json($retail_international_shipping_modes);
 
             $('#consignee_phone_no').inputmask({
-                'mask': '9999-9999999',
-                'clearIncomplete': true
+                mask: 'R',
+                repeat:25,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[0-9]',
+                    },
+                },
             });
             
             function print(ids){
@@ -712,6 +718,17 @@
                 width:'100%',
                 placeholder:"Select Charges Mode*",
                 allowClear:true
+            });
+
+            $('#iban_no').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
             });
 
             $('#weight').inputmask({
