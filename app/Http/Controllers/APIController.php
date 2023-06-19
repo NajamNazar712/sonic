@@ -7100,16 +7100,15 @@ public function fintech_payment_detials(Request $req){
         //  ]);
         //total amount received   
         $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
-
         $fintech_details = new FintechPaymentDetails();
-        $fintech_details->trax_pay_id            =  $trax_pay_id;
-        $fintech_details->transaction_id         =  $req->transaction_id;
-        $fintech_details->rider_tip              =  $req->tip;
-        $fintech_details->rider_id               =  $shipments->rider;
-        $fintech_details->fintech_company_id     =  $req->fintech_company;
-        $fintech_details->total_fintech_amount   =  $total_fintech_calculated[0];
-        $fintech_details->fintech_company_amount =  $total_company_fintech_charges;
-        $fintech_details->revenue                =  $revenue;
+        $fintech_details->trax_pay_id            = $trax_pay_id;
+        $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->rider_tip              = $req->tip;
+        $fintech_details->rider_id               = $shipments->rider;
+        $fintech_details->fintech_company_id     = $req->fintech_company;
+        $fintech_details->total_fintech_amount   = $total_fintech_calculated[0];
+        $fintech_details->fintech_company_amount = $total_company_fintech_charges;
+        $fintech_details->revenue                = $revenue;
         $fintech_details->save();
 
         $shipment = Shipment::find($shipment_id);
