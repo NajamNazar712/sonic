@@ -5992,20 +5992,24 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
-        //DB::enableQueryLog();
-        $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
-        ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+        // $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
+        // ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+
+        $data = Shipment::leftJoin('rider_deliveries','rider_deliveries.shipment_id', 'shipments.id')
+        ->leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
 
 
-        //for the current row
+        //for the current row (Current Status)
+        //rider_deliveries.delivery_note_id ko agar main change raha hun to shipment kadata araha hai
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1 and reference_1_id = rider_deliveries.delivery_note_id)'));
+                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1 
+                and reference_1_id = rider_deliveries.delivery_note_id)'));
         })
         
         ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
 
-        //for the last row
+        //for the last row (last Status)
         ->leftJoin('shipments_journey as sjls', function ($join) {
             $subquery = DB::table('shipments_journey')
                 ->select(DB::raw('MAX(id)'))
@@ -6014,8 +6018,8 @@ class ReturnController extends Controller
                 ->whereRaw('reference_1_id = rider_deliveries.delivery_note_id')
                 ->whereRaw('id < sj.id')
                 ->groupBy('shipment_id', 'reference_1_id');
-            $join->on('sjls.id', '=', DB::raw("({$subquery->toSql()})"))
-                ->mergeBindings($subquery);
+                $join->on('sjls.id', '=', DB::raw("({$subquery->toSql()})"))
+                    ->mergeBindings($subquery);
         })
         
         ->leftJoin('shipment_status as ls', 'ls.id','=','sjls.shipper_status_id')
@@ -6035,8 +6039,17 @@ class ReturnController extends Controller
              DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.shipper_status_id = 12  ) as rcp_count')
         )
 
-        ->whereIn('rider_deliveries.rider_status_id',[12,52])
-        ->groupBy('rider_deliveries.delivery_note_id');
+        //Shipment Status should be only Rcp(Id: 12) & Shipment - Re-Attempt Requested (Id: 52)
+        ->whereIn('shipments.shipper_status_id', [12,52])
+
+        //Current Status should be only Rcp(Id: 12) & Return Confirm (Id: 20)
+        ->whereIn('cs.id',[12,20])
+
+        // Shipment Status Reason Should be only Consignee Refused(Id: 8)
+        ->where('ssr.id',8)
+        
+        ->groupBy('shipments.id');
+        // ->groupBy('rider_deliveries.delivery_note_id');
         
             
         $datatable = Datatables::of($data)
