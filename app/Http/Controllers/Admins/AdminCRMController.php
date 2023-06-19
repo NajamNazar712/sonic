@@ -1352,7 +1352,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -1364,7 +1364,6 @@ class AdminCRMController extends Controller
                 $responsible_zone = "";
                 $status = $requests->shipment_status_id;
                 $shipment_id = $requests->shipment_id;
-
                 $origin_zone = $requests->origin_zone;
                 $destination_zone = $requests->zone;
                 $status_destination_array = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
@@ -1413,7 +1412,7 @@ class AdminCRMController extends Controller
                     }
                 }
                 
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -2043,7 +2042,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -2103,7 +2102,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -2624,7 +2623,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -2684,7 +2683,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
@@ -3074,7 +3073,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_hub = $destination_hub;
                 }
                 else{
@@ -3134,7 +3133,7 @@ class AdminCRMController extends Controller
                         }
                     }
                 }
-                elseif(in_array($status, $status_destination_array)){
+                elseif(in_array($status, $status_destination_array) && $requests->case_nature != 'Service Request'){
                     $responsible_zone = $destination_zone;
                 }else{
                     $responsible_zone = '-';
