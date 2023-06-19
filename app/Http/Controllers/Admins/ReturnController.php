@@ -6495,6 +6495,7 @@ class ReturnController extends Controller
         ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
         ->leftjoin('status_remarks as sr','sr.shipment_id','=','return_assigned_shipments.shipment_id')
         ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
+
         
         //getting latest row of return_assigned_shipments.id to get updated by
         ->leftJoin('return_assigned_shipment_logs as rasl_latest', function ($join) {
@@ -6566,6 +6567,8 @@ class ReturnController extends Controller
                         return 'Unassigned';
                     case 7:
                         return 'On Hold For Self Collection';
+                    case 8:
+                        return 'Unresponsive';
                 }
             }
         
