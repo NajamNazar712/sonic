@@ -5175,21 +5175,45 @@ class ReturnController extends Controller
         })
         
 
-        ->addColumn('total_intercept',function ($agent_productivity){
-            $total_intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->where('rasl.status',3)
-            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
-            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-            return $total_intercept;
-        })
+        // ->addColumn('total_intercept',function ($agent_productivity){
+        //     $total_intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+        //     ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+        //     ->where('rasl.status',3)
+        //     ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
+        //     ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+        //     return $total_intercept;
+        // })
+
+        // ->addColumn('intercept', function ($agent_productivity){
+        //     $intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+        //     ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
+        //     ->select([
+        //         'return_assigned_shipments.admin_id',
+        //         DB::raw("(select count(id) from return_assigned_shipment_logs where status = 3 and assigned_by != $agent_productivity->agent_id and created_at like '%$agent_productivity->current_date%') as data1"),
+        //         DB::raw("(select count(id) from return_assigned_shipment_logs where status = 10 and assigned_by = $agent_productivity->agent_id and created_at like '%$agent_productivity->current_date%') as data2")
+        //     ])
+        //     ->first();
+        //     $status1 = $intercept->data1 + $intercept->data2;
+        //     return $status1;
+        //  })
 
         ->addColumn('intercept', function ($agent_productivity){
             $intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->where('rasl.status',3)
-            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
-            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            ->where(function ($query) use ($agent_productivity) {
+                $query->where(function ($query) use ($agent_productivity) {
+                    $query->where('rasl.status', 3)
+                        ->where('rasl.assigned_by', '!=', $agent_productivity->agent_id);
+                })
+                ->orWhere(function ($query) use ($agent_productivity) {
+                    $query->where('rasl.status', 10)
+                        ->where('rasl.assigned_by', $agent_productivity->agent_id);
+                });
+            })
+            // ->where('rasl.status',3)
+            // ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
+            ->whereDate('rasl.created_at',$agent_productivity->current_date)
+            ->count();
             return $intercept;
          })
 

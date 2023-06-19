@@ -580,7 +580,7 @@
                     total_return_confirm = data.total_return_confirm;
                     total_mark_for_self_collection = data.total_mark_for_self_collection;
                     total_unresponsive_in_percent = data.total_unresponsive_in_percent;
-                    total_intercept = data.total_intercept;
+                    total_intercept = data.intercept;
                     unresponsive_return = data.unresponsive_return;
                     on_hold_for_sc = data.on_hold_for_sc;
                     }
