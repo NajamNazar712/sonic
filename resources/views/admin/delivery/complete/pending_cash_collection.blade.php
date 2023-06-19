@@ -104,8 +104,9 @@
             </div>
             <div class="modal-body text-center">
 
-                <table border="1" style="margin-left:35px;" >
+                <table border="1">
                     <tr >
+                        <th width="70">#</th>
                         <th width="140">Tracking #</th>
                         <th width="120">COD Amount</th>
                         <th width="150">Fintech Charges</th>
@@ -1261,6 +1262,7 @@
         });
 
     function fintechshipmentsshow(event,id){
+        var y = 1;
         $("#shipment_table").html('');
         $.ajax({
             type : 'get',
@@ -1272,6 +1274,7 @@
                     for(let x of res.data){
                         $("#shipment_table").append(`
                             <tr>
+                            <td>${y++}</td>
                             <td>${x.trackingNo}</td>
                             <td>${x.COD_amount}</td>
                             <td>${x.fintech_charges}</td>
