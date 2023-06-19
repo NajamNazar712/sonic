@@ -859,6 +859,22 @@ $roles = explode("," , $settings->text);
                                         </li>
                                     @endif
 
+                                     {{-- <li><a class="menu-item" href="#">Advance Petty Cash</a>
+                                        <ul class="menu-content">
+                                            @if (session('role_id') == 1 || in_array(157, session('permissions')))
+                                                <li><a class="menu-item"
+                                                        href="{{ route('admin.petty_cash.advance.index') }}">Create</a>
+                                                </li>
+                                            @endif
+                                                @if (session('role_id') == 1 || in_array(157, session('permissions')))
+                                                <li><a class="menu-item"
+                                                        href="{{ route('admin.settings.petty_cash.heads.index') }}">Statement</a>
+                                                </li>
+                                            @endif
+                                            
+                                        </ul>
+                                    </li> --}}
+
                                 </ul>
                             </li>
                         @endif
@@ -2195,7 +2211,6 @@ $roles = explode("," , $settings->text);
                                                             href="{{ route('admin.settings.petty_cash.consignee.index') }}">Hub
                                                             Assigning</a></li>
                                                 @endif
-                                            </ul>
                                         </li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(171, session('permissions')))
