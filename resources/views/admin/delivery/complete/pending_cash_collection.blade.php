@@ -104,13 +104,13 @@
             </div>
             <div class="modal-body text-center">
 
-                <table border="1">
-                    <tr>
-                      <th>Tracking #</th>
-                      <th>COD</th>
-                      <th>Fintech Charges</th>
-                      <th>Amount Received</th>
-                      <th>Created Date</th>
+                <table border="1" style="margin-left:35px;" >
+                    <tr >
+                        <th width="140">Tracking #</th>
+                        <th width="120">COD Amount</th>
+                        <th width="150">Fintech Charges</th>
+                        <th width="150">Amount Received</th>
+                        <th width="140">Created Date</th>
                     </tr>
                     <tbody id="shipment_table">
                     <tbody>

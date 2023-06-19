@@ -4781,7 +4781,6 @@ class DeliveryController extends Controller
     }
 
     public function pending_cash_collection_showshipment(Request $req){
-
         $delivery_note_shipment = DeliveryNoteShipment::join('shipments','delivery_note_shipments.shipment_id','shipments.id')
         ->where('delivery_note_shipments.delivery_note_id', $req->id)
         ->select('shipments.tracking_number as trackingNo', 'shipments.amount as COD_amount',
