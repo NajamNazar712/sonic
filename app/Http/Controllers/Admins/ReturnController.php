@@ -5105,14 +5105,6 @@ class ReturnController extends Controller
 
         
         ->addColumn('unresponsive_return',function ($agent_productivity){
-            // $unresponsive_return = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
-            // ->leftjoin('status_remarks as sr','sr.shipment_id','return_assigned_shipments.shipment_id')
-            // ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
-            // ->where('sscf.remark',4)
-            // ->where('rasl.assigned_by','=',$agent_productivity->agent_id) //checking if the agent id exisit in row in return_assigned_shipment_logs table 
-            // ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-            // return $unresponsive_return;
-
             $unresponsive_return = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',8)
@@ -5187,7 +5179,7 @@ class ReturnController extends Controller
             $total_intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',3)
-            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
+            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $total_intercept;
         })
