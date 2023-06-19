@@ -110,7 +110,7 @@
                         <th width="140">Tracking #</th>
                         <th width="120">COD Amount</th>
                         <th width="150">Fintech Charges</th>
-                        <th width="150">Amount Received</th>
+                        <th width="150">Received COD Amount </th>
                         <th width="140">Created Date</th>
                     </tr>
                     <tbody id="shipment_table">
