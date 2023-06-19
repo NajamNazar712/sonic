@@ -5046,6 +5046,7 @@ class ReturnController extends Controller
             ->where('return_assigned_shipment_logs.status', '!=', 0) //assigned
             ->where('return_assigned_shipment_logs.status', '!=', 4) //unassigned
             ->where('return_assigned_shipment_logs.status', '!=', 3) //intercept
+            ->where('return_assigned_shipment_logs.status', '!=', 9) //intercept requested by shipper
 
             ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
@@ -5266,7 +5267,7 @@ class ReturnController extends Controller
             //getting all the rows from return_assigned_shipment_logs which doesn't contain agent id
             $updated_by_others = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,3,5,7,4,8])
+            ->whereIn('rasl.status',[1,2,3,5,7,4,8,10])
             ->where('rasl.assigned_by','!=',$agent_productivity->agent_id) 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             // dd($updated_by_others);

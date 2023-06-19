@@ -7,6 +7,8 @@ use App\Http\Models\City;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
@@ -136,6 +138,28 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                        if($return_assign_shipment->exists()){
+
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->status = 0;
+                            $return_assign_shipment->save();
+
+                            // Adding row as request intercept with status = 9
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 9;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+
+                            // Adding another row as approved intercept with status = 10
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 10;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+                        }
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
