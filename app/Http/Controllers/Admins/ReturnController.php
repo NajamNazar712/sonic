@@ -5179,7 +5179,7 @@ class ReturnController extends Controller
             $total_intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',3)
-            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
+            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $total_intercept;
         })
@@ -5188,7 +5188,7 @@ class ReturnController extends Controller
             $intercept = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',3)
-            ->where('rasl.assigned_by','!=',$agent_productivity->agent_id)
+            ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
             return $intercept;
          })
