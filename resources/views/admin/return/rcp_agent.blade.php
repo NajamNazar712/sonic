@@ -598,7 +598,7 @@
                     }
                     
                     if(index == (info.end - 1)){
-                    $('#total').text(total_shipments);
+                        $('#total').text(total_shipments);
                         $('#completed').text(completed_shipments);
                         $('#productivity').text(((completed_shipments/total_shipments)*100).toFixed(2));
                         $('#total_return_confirm').text(total_return_confirm);

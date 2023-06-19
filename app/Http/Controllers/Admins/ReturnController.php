@@ -817,15 +817,26 @@ class ReturnController extends Controller
                 ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remark, NULL, Auth::id(),null,null,1,null,null,null,null,$consignee_refused_reasons);
                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
                 if($return_assign_shipment->exists()){
-                   $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                   $return_assign_shipment->status = 0;
-                   $return_assign_shipment->save();
-
-                   $return_assign_log = new ReturnAssignedShipmentLogs();
+                    $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
+                    
+                    if($request->single_return_reason_select == 13){ //Consignee is not Responding
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                       $return_assign_log->status = 2;
+                       $return_assign_log->status = 8; //as Unresponsive in RCP Agent Productivity Screen
                        $return_assign_log->assigned_by = Auth::id();
                        $return_assign_log->save();
+                   }
+
+                   else
+                   {
+                   $return_assign_log = new ReturnAssignedShipmentLogs();
+                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                       $return_assign_log->status = 2; //as return in RCP Agent Productivity Screen
+                       $return_assign_log->assigned_by = Auth::id();
+                       $return_assign_log->save();
+                    }
                }
 
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
@@ -5035,6 +5046,7 @@ class ReturnController extends Controller
             ->where('return_assigned_shipment_logs.status', '!=', 0) //assigned
             ->where('return_assigned_shipment_logs.status', '!=', 4) //unassigned
             ->where('return_assigned_shipment_logs.status', '!=', 3) //intercept
+
             ->where('return_assigned_shipment_logs.assigned_by','!=',$agent_productivity->agent_id)
             ->whereDate('return_assigned_shipment_logs.created_at',$agent_productivity->current_date)
             ->count();
@@ -5248,14 +5260,16 @@ class ReturnController extends Controller
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',0) 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            // dd($total_assigning);
             
 
             //getting all the rows from return_assigned_shipment_logs which doesn't contain agent id
             $updated_by_others = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,3,7,4,8])
+            ->whereIn('rasl.status',[1,2,3,5,7,4,8])
             ->where('rasl.assigned_by','!=',$agent_productivity->agent_id) 
             ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
+            // dd($updated_by_others);
             
             $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
@@ -6426,20 +6440,20 @@ class ReturnController extends Controller
 
         $status->save();
 
-        // If sub_status_call_finding_id is Not Answered (4), update ReturnAssignedShipments and ReturnAssignedShipmentLogs
-            if($request->sub_status_call_finding_id == 4){
-            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-            if ($return_assign_shipment) {
-                // $return_assign_shipment->status = 0;
-                // $return_assign_shipment->save();
+        // // If sub_status_call_finding_id is Not Answered (4), update ReturnAssignedShipments and ReturnAssignedShipmentLogs
+        //     if($request->sub_status_call_finding_id == 4){
+        //     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+        //     if ($return_assign_shipment) {
+        //         // $return_assign_shipment->status = 0;
+        //         // $return_assign_shipment->save();
 
-                $return_assign_log = new ReturnAssignedShipmentLogs();
-                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                $return_assign_log->status = 8; 
-                $return_assign_log->assigned_by = Auth::id();
-                $return_assign_log->save();
-            }
-        }
+        //         $return_assign_log = new ReturnAssignedShipmentLogs();
+        //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //         $return_assign_log->status = 8; 
+        //         $return_assign_log->assigned_by = Auth::id();
+        //         $return_assign_log->save();
+        //     }
+        // }
 
         return response()->json(['status' => 1]);
 
@@ -6529,10 +6543,13 @@ class ReturnController extends Controller
 
 
         ->addColumn('updated_by', function ($agent_productivity){
+
             if($agent_productivity->user != null && $agent_productivity->user_id == $agent_productivity->shipment_user_id){
+
                 return $agent_productivity->user_name;
             }
             else if ($agent_productivity->rasl_status != 0){
+
                 return $agent_productivity->admin_name;
             }
             else{

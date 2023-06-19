@@ -86,6 +86,8 @@ class ShipperInterceptReBookController extends Controller
                 } else {
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
+
+                    //Different Consignee
                     if ($intercept_type == 1){
                         InterceptReBookRequest::create([
                             'shipment_id' => $request->shipment_id,
