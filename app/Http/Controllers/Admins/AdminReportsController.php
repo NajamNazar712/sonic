@@ -11122,23 +11122,23 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
             
-            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'),'v2_pickup_notes.shipments as total_shipments','v2_pickup_notes.arrived_shipments as total_arrived_shipments','v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
             ->where('v2_pickup_notes.status',1)
             ->groupBy('v2_pickup_notes.id');
 
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {
                 $function = "scanned_shipments_popup('".$entry->id."')";
-                if ($entry->scanned_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
+                if ($entry->total_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->total_shipments . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->addColumn('arrived_shipments_btn', function ($entry) {
                 $function = "arrived_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                if ($entry->total_arrived_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->total_arrived_shipments . '</button>';
                 } else {
                     return 0;
                 }
@@ -11146,18 +11146,18 @@ class AdminReportsController extends Controller
             ->addColumn('without_scan_shipments_btn', function ($entry) {
 
                 $function = "without_scan_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
+                if ($entry->total_arrived_shipments > 0) {
 
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->addColumn('without_scan_shipments', function ($entry) {
 
-                if ($entry->arrived_shipments > 0) {
+                if ($entry->total_arrived_shipments > 0) {
 
-                    return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
+                    return  ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) ;
                 } else {
                     return 0;
                 }

@@ -144,6 +144,7 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.weight_reconciliation.index') }}">Weight Reconciliation</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>
 
                         @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
@@ -164,7 +165,6 @@
                             <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
                         @endif
 
-{{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
                     </ul>
                 </li>
             @endif

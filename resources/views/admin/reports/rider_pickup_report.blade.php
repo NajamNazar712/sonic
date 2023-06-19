@@ -260,11 +260,11 @@
                                 row.push(values.rider_name);
                                 row.push(values.origin);
                                 row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
+                                row.push(values.total_shipments);
+                                row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.scanned_shipments;
-                                arrived_shipments += values.arrived_shipments;
+                                scanned_shipments += values.total_shipments;
+                                arrived_shipments += values.total_arrived_shipments;
                                 without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
@@ -343,8 +343,8 @@
                     var without_scan_shipments_count = 0;
                     
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.scanned_shipments;
-                        arrived_shipments_count += shipment_data.arrived_shipments;
+                        scanned_shipments_count += shipment_data.total_shipments;
+                        arrived_shipments_count += shipment_data.total_arrived_shipments;
                         without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
                     var api = this.api();
