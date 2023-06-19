@@ -195,7 +195,9 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
-                                    window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                                    if(confirm) {
+                                        window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                                    }
                                 });
 
 
@@ -228,7 +230,9 @@
                                     closeOnEsc: false,
                                     dangerMode: true
                                 }).then(function(confirm) {
-                                    window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}"
+                                    if(confirm) {
+                                        window.location.href = "{{route('admin.settings.auto_assigning.global_status')}}";
+                                    }
                                 });
 
                             }
@@ -375,8 +379,9 @@
                                 closeOnEsc: false,
                                 dangerMode: true
                             }).then(function(confirm) {
-                                         $.ajax({
-                                            url:'{!! route("admin.settings.auto_assigning.delete") !!}',
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route("admin.settings.auto_assigning.delete") !!}',
                                             method: 'POST',
                                             data: {
                                                 'id': id,
@@ -389,6 +394,7 @@
                                             });
                                             table.draw();
                                         });
+                                    }
                             });
 
                 
