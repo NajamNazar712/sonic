@@ -9064,7 +9064,6 @@ class DeliveryController extends Controller
             $open_box_ids = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('open_box', 1)->pluck('shipment_id')->toArray();
             $notifications = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('notification', 1)->pluck('shipment_id')->toArray();
             $rider_informations = RiderDeliveryNoteRequestShipment::where('request_note_id', $delivery_request->id)->whereIn('status', [0, 4])->where('rider_information', 1)->pluck('shipment_id')->toArray();
-
             // dd($request_shipments->get(),$delivery_request->id,$notifications);
 
             if (count($shipments) == 0) {
@@ -9074,15 +9073,9 @@ class DeliveryController extends Controller
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
-                
                 $valid_shipments = $valid_shipments->toArray();
-
-            
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
                 Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
-                
-                
-               
                 $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                     $query->where('booking_type_id', '!=', 4)
                         ->orWhere(function ($sub_query) {
@@ -9176,9 +9169,14 @@ class DeliveryController extends Controller
                     }
 
                     foreach ($valid_shipments as $shipment) {
+                        $payment_detials = PayfastApiCall::ApiCall($note->id,$shipment);   
+                        $rand            = $payment_detials['unique_key'];
+                        $payment_link    = $payment_detials['payment_link'];
+                        $url             = $payment_detials['url'];
+                        $shipments_id    = array_wrap($shipment);
+                        CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);         
                         NotificationsController::send(10, $note->id, $shipment);
                         NotificationsController::send(11, $note->id, $shipment);
-
                         if (in_array($shipment, $notifications)) {
                             $shipment_obj = Shipment::find($shipment);
                             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment);
@@ -9202,14 +9200,7 @@ class DeliveryController extends Controller
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
-                                $payment_detials = PayfastApiCall::ApiCall();   
-                                $rand            = $payment_detials['unique_key'];
-                                $payment_link    = $payment_detials['payment_link'];
-                                $url             = $payment_detials['url'];
-                                $shipments_id    = array_wrap($shipment);
-                                CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
                                 NotificationsController::send(12, $note->id, $shipment,$payment_link);   
-
                             }
                         }
                     }
