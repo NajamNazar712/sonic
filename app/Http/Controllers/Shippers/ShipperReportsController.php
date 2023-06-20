@@ -1372,8 +1372,9 @@ class ShipperReportsController extends Controller
 
     public function rider_pickup_index(){
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
 
-        return view('client.reports.rider_pickup_report')->with(['hubs' => $hubs]);
+        return view('client.reports.rider_pickup_report')->with(['hubs' => $hubs,'riders' => $riders]);
     }
 
     public function rider_pickup_list(Request $request){
@@ -1396,7 +1397,7 @@ class ShipperReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
             })
 
-            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'))
+            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'),DB::raw("IFNULL(LPAD(v2_pickup_notes.id, 6, '0'), '-') as pickup_note_id_padded"),'v2_pickup_notes.shipments as total_shipments','v2_pickup_notes.arrived_shipments as total_arrived_shipments','v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
             ->where('v2_pickup_notes.status',1)
             ->where('s.user_id', '=', session('user_id'))
             ->groupBy('v2_pickup_notes.id');
@@ -1404,16 +1405,16 @@ class ShipperReportsController extends Controller
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {
                 $function = "scanned_shipments_popup('".$entry->id."')";
-                if ($entry->scanned_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
+                if ($entry->total_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->total_shipments . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->addColumn('arrived_shipments_btn', function ($entry) {
                 $function = "arrived_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                if ($entry->total_arrived_shipments > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->total_arrived_shipments . '</button>';
                 } else {
                     return 0;
                 }
@@ -1421,18 +1422,18 @@ class ShipperReportsController extends Controller
             ->addColumn('without_scan_shipments_btn', function ($entry) {
 
                 $function = "without_scan_shipments_popup('".$entry->id."')";
-                if ($entry->arrived_shipments > 0) {
+                if ($entry->total_arrived_shipments > 0) {
 
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments-$entry->scanned_shipments) . '</button>';
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->addColumn('without_scan_shipments', function ($entry) {
 
-                if ($entry->arrived_shipments > 0) {
+                if ($entry->total_arrived_shipments > 0) {
 
-                    return  ($entry->arrived_shipments-$entry->scanned_shipments) ;
+                    return  ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) ;
                 } else {
                     return 0;
                 }
@@ -1448,13 +1449,15 @@ class ShipperReportsController extends Controller
         if($hub = $request->get('search_hub')){
             $datatables = $datatables->where('c.hub_id', '=', $hub);
         }
+        if($rider = $request->get('search_rider')){
+            $datatables = $datatables->where('r.id', '=', $rider);
+        }
 
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatables = $datatables->whereBetween('v2_pickup_notes.created_at', [$from,$to]);
         }
-
         return $datatables->make(true);
     }
 

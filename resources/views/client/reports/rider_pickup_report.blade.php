@@ -22,6 +22,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-5">
+                        <fieldset class="form-group">
+                            <select name="search_rider" id="search_rider" class="form-control select2">
+                                @foreach($riders as $rider)
+                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -47,15 +56,15 @@
                     </div>
                 </div>
                 <div id="datatable_wrapper">
-                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                    <table class="table table-bordered datatable mb-0" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th>
-                            <th class="border-primary border-darken-1">Rider Trax ID</th>
+                            <th class="border-primary border-darken-1">Pickup Request id</th>
+                            <th class="border-primary border-darken-1">Pickup Date</th>
+                            {{-- <th class="border-primary border-darken-1">Rider Trax ID</th> --}}
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Pickup Note ID</th>
                             <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
@@ -88,9 +97,12 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -140,13 +152,17 @@
     </style>
 @endsection
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -154,6 +170,11 @@
 
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider',
                 width:'100%',
                 allowClear:true
             });
@@ -210,11 +231,11 @@
                             head = [];
                             footer = [];
                             head.push('S.No');
-                            head.push('Date');
-                            head.push('Rider ID');
+                            head.push('Pickup Note ID');
+                            head.push('Pickup Date');
+                            // head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');
-                            head.push('Pickup Note ID');
                             head.push('No. of Scanned Shipments');
                             head.push('No. of Arrived Shipments');
                             head.push('Arrival Without Scan Shipments');
@@ -226,16 +247,16 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.pickup_note_id_padded);
                                 row.push(values.date);
-                                row.push(values.rider_id);
+                                // row.push(values.rider_id);
                                 row.push(values.rider_name);
                                 row.push(values.origin);
-                                row.push(values.pickup_note_id_padded);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
+                                row.push(values.total_shipments);
+                                row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.scanned_shipments;
-                                arrived_shipments += values.arrived_shipments;
+                                scanned_shipments += values.total_shipments;
+                                arrived_shipments += values.total_arrived_shipments;
                                 without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
@@ -258,7 +279,7 @@
                 }
             } );
 
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -289,14 +310,14 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[1, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
-                    { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
+                    { data:'pickup_note_id_padded', class: 'align-middle text-center pickup_note',sortable: true,orderable: true,searchable:false},
+                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date',orderable: true},
+                    // { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
                     { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
                     { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
-                    { data:'pickup_note_id_padded', class: 'align-middle text-center pickup_note'},
                     { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
                     { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
                     { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
@@ -314,8 +335,8 @@
                     var without_scan_shipments_count = 0;
 
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.scanned_shipments;
-                        arrived_shipments_count += shipment_data.arrived_shipments;
+                        scanned_shipments_count += shipment_data.total_shipments;
+                        arrived_shipments_count += shipment_data.total_arrived_shipments;
                         without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
                     var api = this.api();
