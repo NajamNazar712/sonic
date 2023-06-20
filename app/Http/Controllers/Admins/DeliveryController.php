@@ -7396,9 +7396,18 @@ class DeliveryController extends Controller
 
 
                     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                    $Intercept_Re_Book_Request = InterceptReBookRequest::where('shipment_id', $shipment_id)->latest()->first();
                     if ($return_assign_shipment) {
                         $return_assign_shipment->status = 0;
                         $return_assign_shipment->save();
+
+
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 11; //intercept request by 
+                        // if admin id is null set shippper_id as assigned by else set admin id
+                        $return_assign_log->assigned_by = $Intercept_Re_Book_Request->admin_id ? $Intercept_Re_Book_Request->admin_id : InterceptReBookRequest::where('shipment_id', $shipment_id)->value('shipper_id');
+                        $return_assign_log->save();
 
                         $return_assign_log = new ReturnAssignedShipmentLogs();
                         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;

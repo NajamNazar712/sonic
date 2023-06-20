@@ -103,7 +103,7 @@ class ShipperInterceptReBookController extends Controller
                             'shipper_id' => $user_id,
                             'status' => 0,
                             'intercept_type' => $intercept_type,
-                            'admin_id' => Auth::id()
+                            'admin_id' => null
                         ]);
                         $shipment->consignee_status_id = 54;
                         $shipment->shipper_status_id = 54;
