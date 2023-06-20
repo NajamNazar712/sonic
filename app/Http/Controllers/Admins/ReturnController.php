@@ -5424,7 +5424,7 @@ class ReturnController extends Controller
                     return 0;
                 }
                 else{
-                    return number_format(($total_productivity/($total_assigning))*100,2);
+                    return number_format(($actual_productivity/($total_assigning))*100,2);
                 }
          })
 
