@@ -26,6 +26,8 @@ class CreateAdvancePettyCashStatementsTable extends Migration
             $table->integer('zone_id')->index();
             $table->integer('station_manager_id')->index();
             $table->tinyInteger('status')->default(0);
+            $table->integer('amount_availed')->default(0);
+            $table->integer('balance')->default(0);
             $table->timestamps();
         });
     }
