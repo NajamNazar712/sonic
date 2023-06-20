@@ -1545,10 +1545,15 @@ class ShipperReportsController extends Controller
     public function special_dashboard_mms_index()
     {
         if (session('special_dashboard_user')) {
+            $today = Carbon::now()->subDays(2)->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
             $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-            return view('client.reports.speical_dashboard_mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
+            $sister_users = DB::connection('reports')->table('substitute_user_merge_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))->select('u.id', 'u.name')->get();
+            $user = DB::connection('reports')->table('users')->select('id', 'name')->where('id', session('user_id'))->first();
+
+            return view('client.reports.speical_dashboard_mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
         } else{
             return redirect()->back()->with('error', 'Not Found!');
         }
@@ -1556,6 +1561,8 @@ class ShipperReportsController extends Controller
     }
     public function special_dashboard_mms_list(Request $request)
     {
+
+        dd($request->all());
         if (session('special_dashboard_user')) {
 
             $sister_users = session('special_dashboard_sister_user');
