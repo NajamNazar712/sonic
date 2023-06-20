@@ -865,6 +865,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
             Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
+            Route::get('replacementAjax', 'Admins\AdminDashboardController@replacementListAjax')->name('replacement.ajax');
             Route::post('/add', 'Admins\AdminDashboardController@addRiderDetails')->name('add');
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');

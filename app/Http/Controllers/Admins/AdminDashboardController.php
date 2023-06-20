@@ -10886,6 +10886,14 @@ class AdminDashboardController extends Controller
 
         return response()->json($route);
     }
+    
+    // public function replacementListAjax(Request $request)
+    // {
+    //     $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')
+    //     ->where('id', $request->id)
+    //     ->where('line_manager', )
+    //     ->whereNotNull('trax_id')->get();
+    // }
 
     public function addRiderDetails(Request $request)
     {

@@ -930,28 +930,30 @@
                 width:'100%',
                 dropdownParent: $('#employeeRequiredInfoModal')
             });
-            // incomplete work
-            // $('#employee_nature_list').on('change',function () {
-            //     var replacementlist = $('#replacement_employee_list');
-            //     var id = $('#employee_nature_list').val();
-            //     $.ajax({
-            //         url:'{!! route('admin.management.rider.category.ajax') !!}',
-            //         type:'GET',
-            //         dataType:'json',
-            //         data: {
-            //             'id':id,
-            //         },
-            //         success:function (data) {
+            
+            $('#employee_nature_list').on('change',function () {
+                var replacementlist = $('#replacement_employee_list');
+                var employee_nature_list = $('#employee_nature_list').val();
+                var employee_id = $('#employee_id').val();
+                $.ajax({
+                    url:'{!! route('admin.management.rider.replacement.ajax') !!}',
+                    type:'GET',
+                    dataType:'json',
+                    data: {
+                        'employee_id':employee_id,
+                        'employee_nature_list':employee_nature_list,
+                    },
+                    success:function (data) {
 
-            //             replacementlist.empty();
-            //             $.each(data, function (key, value) {
-            //                 var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
-            //                 replacementlist.append(newOption);
-            //             });
-            //             // replacementlist.val(route_id).trigger('change');
-            //         }
-            //     });
-            // });
+                        replacementlist.empty();
+                        $.each(data, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
+                            replacementlist.append(newOption);
+                        });
+                        // replacementlist.val(route_id).trigger('change');
+                    }
+                });
+            });
 
             var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
                 firstDay: 1,
