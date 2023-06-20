@@ -4898,8 +4898,6 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
-
-            
             ->editColumn('fintech_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)
                 ->pluck('shipment_id')->toArray(); 
@@ -4911,8 +4909,6 @@ class DeliveryController extends Controller
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
-
-
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -5016,7 +5012,6 @@ class DeliveryController extends Controller
         if ($legend_id = $request->get('legend_filter')) {
             $datatable->whereIn('delivery_notes.cash_collection_status', [2, 3]);
         }
-
         return $datatable->make(true);
     }
 
