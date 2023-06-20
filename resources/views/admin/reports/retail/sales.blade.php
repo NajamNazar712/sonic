@@ -111,7 +111,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
 {{--                        <th class="border-primary border-darken-1">Account No.</th>--}}
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Franchise/Trax center</th>
+                        <th class="border-primary border-darken-1">Franchise / Trax Center</th>
                         <th class="border-primary border-darken-1">Booking Staff Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
