@@ -10813,12 +10813,34 @@ class AdminFinanceController extends Controller
                 ->sum('amount');
                 return $sales_tax_withheld;
             })
+            ->filterColumn('sales_tax_withheld', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->whereExists(function ($subquery) use ($keyword) {
+                        $subquery->select(DB::raw(1))
+                            ->from('invoice_adjustments')
+                            ->whereRaw('invoice_adjustments.invoice_id = invoices.id')
+                            ->where('invoice_adjustments.reason_id', 2)
+                            ->where('invoice_adjustments.amount', '=', $keyword);
+                    });
+                }
+            })
             ->addColumn('income_tax_withhold', function ($invoice) {
                 $income_tax_withhold = DB::table('invoice_adjustments')
                 ->where('invoice_id',$invoice->id)
                 ->where('reason_id',1)
                 ->sum('amount');
                 return $income_tax_withhold;
+            })
+            ->filterColumn('income_tax_withhold', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->whereExists(function ($subquery) use ($keyword) {
+                        $subquery->select(DB::raw(1))
+                            ->from('invoice_adjustments')
+                            ->whereRaw('invoice_adjustments.invoice_id = invoices.id')
+                            ->where('invoice_adjustments.reason_id', 1)
+                            ->where('invoice_adjustments.amount', '=', $keyword);
+                    });
+                }
             })
             ->addColumn('other_deductions', function ($invoice) {
                 $other_deductions = DB::table('invoice_adjustments')
