@@ -4929,11 +4929,16 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('cash_amount', function ($shipment) {
-                if ($shipment->cash_amount != null) {
-                    return number_format($shipment->cash_amount);
-                } else {
-                    return number_format($shipment->amount);
-                }
+                $dncc_amount = $shipment->amount;
+                $hbl_connect_amount = $shipment->transactions_amount;
+                $cash_amount = $dncc_amount - $hbl_connect_amount;
+
+                return number_format($cash_amount);
+                // if ($shipment->cash_amount != null) {
+                //     return number_format($shipment->cash_amount);
+                // } else {
+                //     return number_format($shipment->amount);
+                // }
             })
             ->editColumn('deposit_amount', function ($deliveries) {
                 if ($deliveries->deposit_amount != null) {
@@ -6867,11 +6872,16 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('cash_amount', function ($shipment) {
-                if ($shipment->cash_amount != null) {
-                    return number_format($shipment->cash_amount);
-                } else {
-                    return number_format($shipment->amount);
-                }
+                $dncc_amount = $shipment->amount;
+                $hbl_connect_amount = $shipment->transactions_amount;
+                $cash_amount = $dncc_amount - $hbl_connect_amount;
+
+                return number_format($cash_amount);
+                // if ($shipment->cash_amount != null) {
+                //     return number_format($shipment->cash_amount);
+                // } else {
+                //     return number_format($shipment->amount);
+                // }
             })
             ->editColumn('created_via', function ($delivery) {
                 if ($delivery->created_via == 0) {
