@@ -33,7 +33,7 @@ class ShopifyController extends Controller
         $rules = [
             'address' => ['string', 'max:255'],
             'message' => ['string', 'max:255'],
-            'image' => ['nullable', 'file|mimes:jpg,jpeg,png', 'max:2048']
+            'image' => ['nullable', 'mimes:jpg,jpeg,png', 'max:2048']
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
