@@ -376,8 +376,8 @@ class ShipperDashboardController extends Controller
         $to = $request->to_date;
         $origin = $request->origin;
         $user = [session('user_id')];
-        if($request->has('users')){
-            if($request->users != null && $request->users != ''){
+        if($request->has('user')){
+            if($request->user != null && $request->user != ''){
                 $user = $request->user;
             }
         }
