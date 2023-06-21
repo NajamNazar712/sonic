@@ -199,7 +199,7 @@
                                 row.push(values.shipper_name);
                                 row.push(values.arrival_date);
                                 row.push(values.status_date_time);
-                                row.push(values.status_by);
+                                row.push(values.account_type);
                                 row.push(values.last_scanned_location);
                                 row.push(values.last_scanned_city);
                                 row.push(values.last_scanned_by);
@@ -315,7 +315,7 @@
                     {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
                     {data: 'arrival_date', name: 'sj.created_at', class: 'text_center align-middle arrival_date'},
                     {data: 'status_date_time', name: 'sj.updated_at', class: 'text_center align-middle status_date_time'},
-                    {data: 'status_by', name: 'a.name', class: 'text_center align-middle status_by'},
+                    {data: 'account_type', name: 'account_type', class: 'text_center align-middle status_by'},
                     {data: 'last_scanned_location', name: 'sssl.name', class: 'text_center align-middle last_scanned_location'},
                     {data: 'last_scanned_city', name: 'ahc.name', class: 'text_center align-middle last_scanned_city'},
                     {data: 'last_scanned_by', name: 'ad.name', class: 'text_center align-middle last_scanned_by'},

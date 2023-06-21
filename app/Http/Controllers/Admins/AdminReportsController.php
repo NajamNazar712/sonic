@@ -50,6 +50,8 @@ use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Admin\Retail\RetailUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -11297,32 +11299,70 @@ class AdminReportsController extends Controller
             $join->on('shipments_journey.shipment_id', '=', 'shipment_scanning_journeys.shipment_id')
                  ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipment_scanning_journeys.shipment_id)'));
         })
-        ->join('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
+        ->leftJoin('shipment_scanning_journeys as ssj', function ($join) {
+            $join->on('ssj.id', '=', 'shipment_scanning_journeys.id')
+                ->where('ssj.id', '=', DB::raw('(select id from shipment_scanning_journeys order by id desc limit 1 offset 1)'));
+        })
+        ->leftJoin('shipment_scanning_screen_locations as sssl', 'shipment_scanning_journeys.screen_location_id', '=', 'sssl.id')
         ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
-        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-        ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
+        ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
         ->join('admins as a', 'sj.admin_id', '=', 'a.id')
         ->join('admins as ad', 'shipment_scanning_journeys.admin_id', '=', 'ad.id')
         ->join('admin_hubs as ah', 'ah.admin_id', '=', 'shipment_scanning_journeys.admin_id')
-        ->join('cities AS ahc', 'ah.hub_id', '=', 'ahc.id')
+        ->join('cities as ahc', 'ah.hub_id', '=', 'ahc.id')
         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
         ->where('sj.shipper_status_id', '=', 2)
-        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city');
+        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city','shipment_scanning_journeys.user_type as user_type');
+        // ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
         
+        // $datatables = Datatables::of($quick_scanned)
+        // ->filterColumn('ss.name',function ($query,$keyword){
+        //     if ($keyword != '') {
+        //     $query->where('ss.id',$keyword);
+        //     }
+        //     else {
+        //     $query->whereRaw('false');
+        //     }
+        // })
+        // ->addColumn('tracking_number_hyperlink', function ($requests) {
+        // return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+        // });
         $datatables = Datatables::of($quick_scanned)
-        ->filterColumn('ss.name',function ($query,$keyword){
+        ->filterColumn('ss.name', function ($query, $keyword) {
             if ($keyword != '') {
-            $query->where('ss.id',$keyword);
-            }
-            else {
-            $query->whereRaw('false');
+                $query->where('ss.id', $keyword);
+            } else {
+                $query->whereRaw('false');
             }
         })
         ->addColumn('tracking_number_hyperlink', function ($requests) {
-        return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+            return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+        })
+        ->addColumn('account_type', function ($requests) {
+            $account_type = '-';
+         
+            if ($requests->status_by == null && $requests->shipper_name == null) {
+                $account_type = '-';
+            } else {
+                $userType = '';
+                if ($requests->user_type == 1) {
+                    $userType = 'Admin';
+                } elseif ($requests->user_type == 2) {
+                    $userType = 'Shipper';
+                } elseif ($requests->user_type == 3) {
+                    $userType = 'Substitute Shipper';
+                } elseif ($requests->user_type == 4) {
+                    $userType = 'Retail User';
+                } elseif ($requests->user_type == 5) {
+                    $userType = 'Rider';
+                }
+                $account_type = $requests->status_by . '(' . $userType . ')';
+            }
+            return $account_type;
         });
-        
+    
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');

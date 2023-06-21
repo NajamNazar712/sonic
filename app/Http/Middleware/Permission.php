@@ -624,6 +624,8 @@ class Permission
             'reports.shipper_summary.list' => 794,
 
             'reports.crm_agent_wise_report.index' => 784,
+            'reports.quick_scanned_report.index' => 877,
+            'reports.quick_scanned_report.list' => 877,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
