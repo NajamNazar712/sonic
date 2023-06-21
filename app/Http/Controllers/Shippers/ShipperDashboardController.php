@@ -381,8 +381,8 @@ class ShipperDashboardController extends Controller
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         } else {
-            $thirtyDays = Carbon::parse($from);
-            $today = Carbon::parse($to);
+            $thirtyDays = Carbon::parse($from)->toDateTimeString();
+            $today = Carbon::parse($to)->toDateTimeString();
         }
         $restriction = false;
         if (session('user_type') == 2) {
