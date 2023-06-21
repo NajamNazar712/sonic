@@ -375,7 +375,12 @@ class ShipperDashboardController extends Controller
         $from = $request->from_date;
         $to = $request->to_date;
         $origin = $request->origin;
-        $user = $request->user;
+        $user = [session('user_id')];
+        if($request->has('users')){
+            if($request->users != null && $request->users != ''){
+                $user = $request->user;
+            }
+        }
         $destination = $request->destination;
         if ($from == null || $to == null) {
             $today = Carbon::now()->endOfDay();
