@@ -29,8 +29,8 @@
                         <th class="border-primary border-darken-1">Station Approved At</th>
                         {{-- <th class="border-primary border-darken-1">Operation Approved By</th>
                         <th class="border-primary border-darken-1">Operation Approved At</th> --}}
-                        <th class="border-primary border-darken-1">Finance Approved By</th>
-                        <th class="border-primary border-darken-1">Finance Approved At</th>
+                        {{-- <th class="border-primary border-darken-1">Finance Approved By</th>
+                        <th class="border-primary border-darken-1">Finance Approved At</th> --}}
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1"></th>
 
@@ -91,8 +91,8 @@
                             head.push('Station Approved At');
                             // head.push('Operation Approved By');
                             // head.push('Operation Approved At');
-                            head.push('Finance Approved By');
-                            head.push('Finance Approved At');
+                            // head.push('Finance Approved By');
+                            // head.push('Finance Approved At');
                             head.push('Status');
 
 
@@ -114,8 +114,8 @@
                                 row.push(values.station_approved_at);
                                 // row.push(values.operation_approved_by);
                                 // row.push(values.operation_approved_at);
-                                row.push(values.finance_approved_by);
-                                row.push(values.finance_approved_at);
+                                // row.push(values.finance_approved_by);
+                                // row.push(values.finance_approved_at);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -132,7 +132,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'Approved Petty Cash Statements',
+                    title: 'Rejected Petty Cash Statements',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -163,8 +163,8 @@
                     {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
                     // {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
                     // {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
-                    {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
-                    {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
+                    // {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
+                    // {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
