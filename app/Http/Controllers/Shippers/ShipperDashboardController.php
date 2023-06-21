@@ -135,7 +135,6 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
-        // $quote = Inspiring::quote();
         $shipper_id = session('user_id');
         $sales_person_data = array();
         if($shipper_id){
@@ -147,7 +146,7 @@ class ShipperDashboardController extends Controller
             if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
             {
                 $stats = array();
-                $today = Carbon::now()->endOfDay();
+                $today = Carbon::now()->subDays(2)->endOfDay();
                 $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
                 $restriction = false;
                 if (session('user_type') == 2) {
@@ -378,14 +377,12 @@ class ShipperDashboardController extends Controller
         $origin = $request->origin;
         $user = $request->user;
         $destination = $request->destination;
-        $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         if ($from == null || $to == null) {
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         } else {
-            $thirtyDays = $from;
-            $today = $to;
+            $thirtyDays = Carbon::parse($from)->toDateTimeString();
+            $today = Carbon::parse($to)->toDateTimeString();
         }
         $restriction = false;
         if (session('user_type') == 2) {
