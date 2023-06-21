@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
-use App\ConsigneeAddressAreaIntercept;
+
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\Admins\FTLController;
 use App\Http\Controllers\ConsigneeInformationController;
@@ -7542,6 +7542,17 @@ class ShipperShipmentBookController extends Controller
 
         }
         return $city_area_id;
+
+    }
+
+    static function update_consignee_address_area($shipment_id,$area_id){
+        if(!empty($area_id)) {
+            $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
+            $consignee_address_area = ($consignee_address_area->exists()) ? $consignee_address_area->first() : new ConsigneeAddressArea();
+            $consignee_address_area->shipment_id = $shipment_id;
+            $consignee_address_area->city_area_id = $area_id;
+            $consignee_address_area->save();
+        }
 
     }
 

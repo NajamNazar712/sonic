@@ -201,6 +201,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                    else{
                        $new_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city,$request->consignee_address);
                        $old_con_city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$shipment->consignee_address);
+                       ShipperShipmentBookController::update_consignee_address_area($shipment->id,$new_con_city_area_id);
                        InterceptReBookRequestHistory::create([
                            'shipment_id' =>$request->shipment_id,
                            'old_consignee_city_id' => $shipment->consignee_city_id,
