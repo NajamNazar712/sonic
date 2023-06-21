@@ -651,7 +651,12 @@
                         $('#completed').text(0);
                         $('#rcp_reattempt').text(0);
                         $('#productivity').text(0);
+                        $('#total_intercept').text(0);
+                        $('#total_mark_for_self_collection').text(0);
                         $('#total_return_confirm').text(0);
+                        $('#unresponsive_return').text(0);
+                        $('#total_unresponsive_in_percent').text(0);
+                        $('#on_hold_for_sc').text(0);
                     table.draw(true);
                 }
             });
