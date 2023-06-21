@@ -82,8 +82,8 @@
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Hub</th>
-                            <th class="border-primary border-darken-1">Last Status</th>
-                            <th class="border-primary border-darken-1">Last Status Date</th>
+                            {{-- <th class="border-primary border-darken-1">Last Status</th>
+                            <th class="border-primary border-darken-1">Last Status Date</th> --}}
                             <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Current Status Date</th>
                             <th class="border-primary border-darken-1">RCP Reason</th>
@@ -282,8 +282,8 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Last Status');
-                            head.push('Last Status Date');
+                            // head.push('Last Status');
+                            // head.push('Last Status Date');
                             head.push('Current Status');
                             head.push('Current Status Date');
                             head.push('RCP Reason');
@@ -300,8 +300,8 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hubname);
-                                row.push(values.last_status);
-                                row.push(values.last_status_date);
+                                // row.push(values.last_status);
+                                // row.push(values.last_status_date);
                                 row.push(values.current_status);
                                 row.push(values.date);
                                 row.push(values.reason);
@@ -366,8 +366,8 @@
                     {data: 'origin',name: 'cities.name',class: 'align-middle origin'},
                     {data: 'destination',name: 'destinationcity.name',class: 'align-middle destination'},
                     {data: 'hubname',name: 'hub.name',class: 'align-middle hub'},
-                    {data: 'last_status',class: 'align-middle last_status'},
-                    {data: 'last_status_date',name: 'ls.updated_at',class: 'align-middle date'},
+                    // {data: 'last_status',class: 'align-middle last_status'},
+                    // {data: 'last_status_date',name: 'ls.updated_at',class: 'align-middle date'},
                     {data: 'current_status',class: 'align-middle current_status'},
                     {data: 'date',name: 'sj.updated_at',class: 'align-middle date'},
                     {data: 'reason',name: 'ssr.name',class: 'align-middle date'},
