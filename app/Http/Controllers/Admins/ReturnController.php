@@ -6589,12 +6589,13 @@ class ReturnController extends Controller
 
                 return $agent_productivity->user_name;
             }
-            else if ($agent_productivity->rasl_status != 0){
+            // else if ($agent_productivity->rasl_status != 0){
 
-                return $agent_productivity->admin_name;
-            }
+            //     return $agent_productivity->admin_name;
+            // }
             else{
-                return '-';
+                // return '-';
+                return $agent_productivity->admin_name;
             }
         })
 
