@@ -336,11 +336,7 @@
                 width:'100%',
                 allowClear:true
             });
-            var from_date;
-            var to_date;
-
-
-            from_date = $('#search_date_from').pickadate({
+            var from_date = $('#search_date_from').pickadate({
             firstDay: 1,
             clear: false,
             selectYears: true,
@@ -361,12 +357,12 @@
             },
             max: true // Set the maximum date to today
         });
-        to_date = $('#search_date_to').pickadate({
+        var to_date = $('#search_date_to').pickadate({
             firstDay: 1,
             clear: false,
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            formatSubmit: 'yyyy-mm-dd 23:59:59',
             hiddenSuffix: '_formatted',
             onClose: function() {
                 var selectedDate = this.get('select'); // Get the selected date
