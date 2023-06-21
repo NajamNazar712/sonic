@@ -339,58 +339,52 @@
             var from_date;
             var to_date;
 
+
             from_date = $('#search_date_from').pickadate({
-                firstDay: 1,
-                clear: false,
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
-                        var currentDate = moment(old_date_formatted);
+            firstDay: 1,
+            clear: false,
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onClose: function() {
+                var selectedDate = this.get('select'); // Get the selected date
 
-                        var to_date_formatted = $('input[name="search_date_to_formatted"]').val();
-                        var toDate = moment(to_date_formatted);
+                // Calculate the maximum allowed date (two days before the current date)
+                var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
 
-                        if (currentDate.format('x') > toDate.format('x')) {
-                            to_date.pickadate('picker').clear();
-                        }
-                        var afterDate = currentDate.add(31, 'days');
-
-                        to_date.pickadate('picker').set({'max': afterDate.toDate()},{muted: true});
-                        to_date.pickadate('picker').set({'select': afterDate.toDate()},{muted: true});
-
-
-                    }
+                // Compare selected date to the maximum allowed date
+                if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
                 }
-            });
-            to_date = $('#search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
-                        var currentDate = moment(current_date_formatted);
+            },
+            max: true // Set the maximum date to today
+        });
+        to_date = $('#search_date_to').pickadate({
+            firstDay: 1,
+            clear: false,
+            selectYears: true,
+            selectMonths: true,
+            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            hiddenSuffix: '_formatted',
+            onClose: function() {
+                var selectedDate = this.get('select'); // Get the selected date
 
-                        var from_date_formatted = $('input[name="search_date_from_formatted"]').val();
-                        var fromDate = moment(from_date_formatted);
+                // Calculate the maximum allowed date (two days before the current date)
+                var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
 
-                        if (currentDate.format('x') < fromDate.format('x')) {
-                            from_date.pickadate('picker').clear();
-                        }
-
-                        var beforeDate = currentDate.subtract(31, 'days');
-                        from_date.pickadate('picker').set({'min': beforeDate.toDate()},{muted: true});
-                    }
+                // Compare selected date to the maximum allowed date
+                if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
                 }
-            });
-            
+            },
+            max: true // Set the maximum date to today
+        });
+
+
+        
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
