@@ -6523,8 +6523,9 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),452);
         }
         
-        $agent_productivity = ReturnAssignedShipments::join('admins as a','a.id','=','return_assigned_shipments.admin_id')
-        // ->join('return_assigned_shipments as ras','agent_return_confirmations.return_assigned_shipment_id','=','ras.id')
+        // $agent_productivity = ReturnAssignedShipments::join('agent_return_confirmations','agent_return_confirmations.return_assigned_shipment_id','=','return_assigned_shipments.id')
+        $agent_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
+        ->leftjoin('admins as a','a.id','=','return_assigned_shipments.admin_id')
         ->leftjoin('shipments as s','s.id','=','return_assigned_shipments.shipment_id')
         ->leftjoin('users as u','u.id','=','s.user_id')
         ->leftjoin('user_shipping_infos as usi','usi.user_id','=','u.id')
@@ -6567,9 +6568,17 @@ class ReturnController extends Controller
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
         's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
         'return_assigned_shipments.updated_at as agent_status_date', 'updated_by_user.id as user_id', 'updated_by_user.name as user_name', 
-        'updated_by_admin.id as admin_id' ,'updated_by_admin.name as admin_name', 'rasl_latest.status as rasl_status', 's.user_id as shipment_user_id')
-        
-        ->groupBy('tracking_number');
+        'updated_by_admin.id as admin_id' ,'updated_by_admin.name as admin_name', 'rasl_latest.status as rasl_status', 
+        's.user_id as shipment_user_id','rasl.updated_at as log_updated_at', 
+        'return_assigned_shipments.id')
+        ->orderby('return_assigned_shipments.id','desc')
+        // ->where('rasl.id', 170)
+        // ->groupBy('return_assigned_shipments.id','s.tracking_number');
+        ->groupBy('return_assigned_shipments.id');
+        // ->groupBy('s.tracking_number');
+
+        // ->groupBy('return_assigned_shipments.id');
+        // dd($agent_productivity->get());
 
         $datatable = Datatables::of($agent_productivity)
 
@@ -6590,11 +6599,14 @@ class ReturnController extends Controller
         })
 
         ->addColumn('agent_status',function ($agent_productivity){
-            $status = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as ras','ras.return_assign_shipment_id','return_assigned_shipments.id')
-            ->where('return_assigned_shipments.shipment_id',$agent_productivity->shipment_id)
-            ->select('ras.status')->orderby('ras.id','desc')->first();
+            // dd($agent_productivity->rasl_status);
+            // $status = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','return_assigned_shipments.id')
+            // ->where('return_assigned_shipments.shipment_id',$agent_productivity->shipment_id)
+            // ->select('rasl.status')->orderby('rasl.id','desc')->first();
+            // dd($status);
+            $status = $agent_productivity->rasl_status;
             if ($status) {
-                switch ($status->status) {
+                switch ($status) {
                     case 0:
                         return 'Assigned';
                     case 1:
@@ -6629,9 +6641,9 @@ class ReturnController extends Controller
         if ($request->get('from_date') && $request->get('to_date')) {
         $from = $request->get('from_date');
         $to = $request->get('to_date');
-        $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
+        $agent_productivity = $agent_productivity->whereBetween('return_assigned_shipments.updated_at',[$from,$to]);
+        
         }
-
         if ($request->get('agent')) {
             $agent_ids = $request->get('agent');
             $agent_productivity = $agent_productivity->whereIn('a.id',$agent_ids);
