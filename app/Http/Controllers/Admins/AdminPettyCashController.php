@@ -720,29 +720,30 @@ class AdminPettyCashController extends Controller
         $statement_id = $request->statement_id;
         $petty = PettyCashStatement::find($statement_id);
         if ($petty) {
-            // if ($petty->station_approved_by == null) {
-            //     if (session('role_id') == 1 || in_array(190, session('permissions'))) {
-            //         $petty->station_approved_by = Auth::id();
-            //         $petty->station_approved_at = Carbon::now();
-            //         $petty->status = 1;
-            //         $petty->save();
-            //         $this->petty_cash_statement_details_auto_approve($request->statement_id);
-            //     } else {
-            //         return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
-            //     }
-
-            // }
-              if ($petty->operation_approved_by == null) {
-                if (session('role_id') == 1 || in_array(191, session('permissions'))) {
-                    $petty->operation_approved_by = Auth::id();
-                    $petty->operation_approved_at = Carbon::now();
-                    $petty->status = 2;
+            if ($petty->station_approved_by == null) {
+                if (session('role_id') == 1 || in_array(190, session('permissions'))) {
+                    $petty->station_approved_by = Auth::id();
+                    $petty->station_approved_at = Carbon::now();
+                    $petty->status = 1;
                     $petty->save();
                     $this->petty_cash_statement_details_auto_approve($request->statement_id);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
-            } else if ($petty->finance_received_statement_by == null) {
+
+            }
+            //   if ($petty->operation_approved_by == null) {
+            //     if (session('role_id') == 1 || in_array(191, session('permissions'))) {
+            //         $petty->operation_approved_by = Auth::id();
+            //         $petty->operation_approved_at = Carbon::now();
+            //         $petty->status = 2;
+            //         $petty->save();
+            //         $this->petty_cash_statement_details_auto_approve($request->statement_id);
+            //     } else {
+            //         return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
+            //     }
+            // } 
+            else if ($petty->finance_received_statement_by == null) {
                 if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                     $petty->finance_received_statement_by = Auth::id();
                     $petty->finance_received_statement_at = Carbon::now();
