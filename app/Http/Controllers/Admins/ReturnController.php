@@ -5285,7 +5285,7 @@ class ReturnController extends Controller
             //         ->where('rasl.assigned_by', $agent_productivity->agent_id);
             //     });
             // })
-            ->whereIn('rasl.status', [1,2,7,8,11])
+            ->whereIn('rasl.status', [1,2,7,8,10,11])
             ->where('rasl.assigned_by', $agent_productivity->agent_id)
             ->whereDate('rasl.created_at',$agent_productivity->current_date)
             ->count();
@@ -5344,7 +5344,7 @@ class ReturnController extends Controller
             
             $actual_productivity = ReturnAssignedShipments::join('return_assigned_shipment_logs as rasl','rasl.return_assign_shipment_id','=','return_assigned_shipments.id')
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
-            ->whereIn('rasl.status',[1,2,7,8,11])
+            ->whereIn('rasl.status',[1,2,7,8,10,11])
             // ->where(function ($query) use ($agent_productivity) {
             //     $query->where(function ($query) use ($agent_productivity) {
             //         $query->where('rasl.status', 3)
@@ -5401,7 +5401,7 @@ class ReturnController extends Controller
                 //     });
                 // })
 
-                ->whereIn('rasl.status', [1,2,7,8,11])
+                ->whereIn('rasl.status', [1,2,7,8,10,11])
                 ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
                 ->whereDate('rasl.created_at',$agent_productivity->current_date)
                 ->count(); //1
@@ -5443,8 +5443,8 @@ class ReturnController extends Controller
             ->where('return_assigned_shipments.admin_id',$agent_productivity->agent_id)
             ->where('rasl.status',7)
             ->where('rasl.assigned_by','=',$agent_productivity->agent_id)
-            ->whereDate('rasl.created_at',$agent_productivity->current_date)->count();
-
+            ->whereDate('rasl.created_at',$agent_productivity->current_date)
+            ->count();
             return $on_hold_for_sc;
          });
             
