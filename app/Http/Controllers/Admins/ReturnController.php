@@ -6605,7 +6605,8 @@ class ReturnController extends Controller
             // ->select('rasl.status')->orderby('rasl.id','desc')->first();
             // dd($status);
             $status = $agent_productivity->rasl_status;
-            if ($status) {
+            // dd($status);
+            if ($status !== null) {
                 switch ($status) {
                     case 0:
                         return 'Assigned';
