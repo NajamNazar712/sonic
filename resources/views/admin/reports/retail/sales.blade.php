@@ -112,6 +112,7 @@
 {{--                        <th class="border-primary border-darken-1">Account No.</th>--}}
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Franchise / Trax Center</th>
+                        <th class="border-primary border-darken-1">Franchise / Trax Center Name</th>
                         <th class="border-primary border-darken-1">Booking Staff Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -309,6 +310,7 @@
                             // head.push('Account No.');
                             head.push('Shipper Name');
                             head.push('Franchise/Trax center');
+                            head.push('Franchise/Trax center Name');
                             head.push('Booking Staff Name');
                             head.push('Status');
                             head.push('Payment Status');
@@ -346,6 +348,7 @@
                                 // row.push(values.account_no);
                                 row.push(values.shipper_name);
                                 row.push(values.franchise_center);
+                                row.push(values.franchise_center_name);
                                 row.push(values.booked_by);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
@@ -430,6 +433,7 @@
                     // { data:'account_number' ,name: 'account_number', class: 'align-middle account_number'},
                     { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name'},
                     { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center',orderable: false, searchable: false},
+                    { data:'franchise_center_name' ,name: 'franchise_center_name', class: 'align-middle franchise_center_name',orderable: false, searchable: false},
                     { data:'booked_by' ,name: 'ru.name', class: 'align-middle booked_by'},
                     // { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},

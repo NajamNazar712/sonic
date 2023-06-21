@@ -165,7 +165,7 @@ class AdminRetailReportController extends Controller
             ->editColumn('collection_amount', function($shipment){
                 return number_format($shipment->collection_amount);
             })
-//            ->addColumn('franchise_center', function ($shipment) {
+            ->addColumn('franchise_center', function ($shipment) {
 //                if($shipment->retail_category){
 //
 //                    if ($shipment->retail_category == 2) {
@@ -178,14 +178,24 @@ class AdminRetailReportController extends Controller
 //                else{
 //                    return $shipment->retail_trax_center_name;
 //                }
-//            })
-            ->addColumn('franchise_center', function ($shipment) {
                 if($shipment->retail_cat == 1){
-                    $shipment_frenchise = RetailFranchise::where('id',$shipment->retail_cat_id)->select('name');
-                    if ($shipment_frenchise->exists())
+                    return 'Franchise';
+                }
+                elseif($shipment->retail_cat == 2){
+                    return 'Center';
+                }
+                else
+                {
+                    return '-';
+                }
+            })
+            ->addColumn('franchise_center_name', function ($shipment) {
+                if($shipment->retail_cat == 1){
+                    $shipment_franchise = RetailFranchise::where('id',$shipment->retail_cat_id)->select('name');
+                    if ($shipment_franchise->exists())
                     {
-                        $shipment_frenchise = $shipment_frenchise->first();
-                        return $shipment_frenchise->name;
+                        $shipment_franchise = $shipment_franchise->first();
+                        return $shipment_franchise->name;
                     }
                     else
                     {

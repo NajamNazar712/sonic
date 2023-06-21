@@ -14,8 +14,8 @@ class UpdateRetailShipmentsTableForCenterAndFrenchise extends Migration
     public function up()
     {
         Schema::table('retail_shipments', function (Blueprint $table) {
-            $table->integer('category')->nullable();
-            $table->integer('category_id')->nullable();
+            $table->integer('category')->index()->nullable();
+            $table->integer('category_id')->index()->nullable();
         });
     }
 
