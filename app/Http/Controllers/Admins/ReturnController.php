@@ -6606,7 +6606,6 @@ class ReturnController extends Controller
             // ->select('rasl.status')->orderby('rasl.id','desc')->first();
             // dd($status);
             $status = $agent_productivity->rasl_status;
-            // dd($status);
             if ($status !== null) {
                 switch ($status) {
                     case 0:
@@ -6619,6 +6618,8 @@ class ReturnController extends Controller
                         return 'Intercept';
                     case 4:
                         return 'Unassigned';
+                    case 5:
+                        return 'Reattempt';
                     case 7:
                         return 'On Hold For Self Collection';
                     case 8:
