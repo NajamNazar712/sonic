@@ -6487,21 +6487,6 @@ class ReturnController extends Controller
 
         $status->save();
 
-        // // If sub_status_call_finding_id is Not Answered (4), update ReturnAssignedShipments and ReturnAssignedShipmentLogs
-        //     if($request->sub_status_call_finding_id == 4){
-        //     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-        //     if ($return_assign_shipment) {
-        //         // $return_assign_shipment->status = 0;
-        //         // $return_assign_shipment->save();
-
-        //         $return_assign_log = new ReturnAssignedShipmentLogs();
-        //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-        //         $return_assign_log->status = 8; 
-        //         $return_assign_log->assigned_by = Auth::id();
-        //         $return_assign_log->save();
-        //     }
-        // }
-
         return response()->json(['status' => 1]);
 
     }
@@ -6604,15 +6589,6 @@ class ReturnController extends Controller
             }
         })
 
-        // ->editColumn('call_findings', function ($agent_productivity){
-        //     if($agent_productivity->call_findings == 1){
-        //         return 'Unresponsive';
-        //     }
-        //     else{
-        //         return '-';
-        //     }
-        // })
-
         ->addColumn('agent_status',function ($agent_productivity){
             $status = ReturnAssignedShipments::leftjoin('return_assigned_shipment_logs as ras','ras.return_assign_shipment_id','return_assigned_shipments.id')
             ->where('return_assigned_shipments.shipment_id',$agent_productivity->shipment_id)
@@ -6653,7 +6629,7 @@ class ReturnController extends Controller
         if ($request->get('from_date') && $request->get('to_date')) {
         $from = $request->get('from_date');
         $to = $request->get('to_date');
-        $agent_productivity = $agent_productivity->whereBetween('return_assigned_shipments.updated_at',[$from,$to]);
+        $agent_productivity = $agent_productivity->whereBetween('agent_return_confirmations.current_date',[$from,$to]);
         }
 
         if ($request->get('agent')) {
