@@ -261,7 +261,7 @@
                 clear: false,
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onClose: function() {
                     var selectedDate = this.get('select'); // Get the selected date
@@ -272,7 +272,7 @@
                     // Compare selected date to the maximum allowed date
                     if (selectedDate && selectedDate.pick > maxAllowedDate) {
                         // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
-                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
+                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 23:59:59' });
                     }
                 },
                 max: true // Set the maximum date to today
