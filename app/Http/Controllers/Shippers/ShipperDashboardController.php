@@ -377,14 +377,12 @@ class ShipperDashboardController extends Controller
         $origin = $request->origin;
         $user = $request->user;
         $destination = $request->destination;
-        $today = Carbon::now()->endOfDay();
-        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         if ($from == null || $to == null) {
             $today = Carbon::now()->endOfDay();
             $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         } else {
-            $thirtyDays = $from;
-            $today = $to;
+            $thirtyDays = Carbon::parse($from);
+            $today = Carbon::parse($to);
         }
         $restriction = false;
         if (session('user_type') == 2) {
