@@ -197,7 +197,8 @@ class AutoAssignCrmAgentNew extends Command
 
                                 CrmRequestAgentHistory::create([
                                     'crm_request_id' => $value->id,
-                                    'agent_id' => $agent_log->agent_id
+                                    'agent_id' => $agent_log->agent_id,
+                                    'assigned_by' => 346
                                 ]);
                                 $value->agent_id = $agent_log->agent_id;
                                 $value->save();
