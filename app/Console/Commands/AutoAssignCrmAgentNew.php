@@ -49,6 +49,9 @@ class AutoAssignCrmAgentNew extends Command
         if($settings->exists()) {
             $settings = $settings->first();
             if ($settings->setting_value == 1) {
+                $yesterday = Carbon::now()->subDay(1)->format('Y-m-d 00:00:01');
+                $today = Carbon::now()->format('Y-m-d H:i:s');
+
                 $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                     ->leftjoin('users as shipper', 'shipper.id', '=', 's.user_id')
                     ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
@@ -73,7 +76,9 @@ class AutoAssignCrmAgentNew extends Command
                         'shipper_key.user_id as shipper_key_id',
                         'shipper_non_key.user_id as shipper_non_key_id'
                     )
-                    ->whereNull('crm_requests.agent_id');
+                    ->whereNull('crm_requests.agent_id')
+                    ->whereBetween('crm_requests.created_at',[$yesterday,$today])
+                    ->orderby('crm_requests.created_at','desc');
 
                 if ($crm_requests->exists()) {
                     $crm_requests = $crm_requests->get();
