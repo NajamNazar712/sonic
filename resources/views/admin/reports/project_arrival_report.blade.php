@@ -69,14 +69,14 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th>
-                            <th class="border-primary border-darken-1">Rider Trax ID</th>
-                            <th class="border-primary border-darken-1">Rider Name</th>
-                            <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Pickup Note ID</th>
-                            <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
+                            <th class="border-primary border-darken-1">Rider Picked Date and Time</th>
+                            <th class="border-primary border-darken-1">Scanned By</th>
+                            <th class="border-primary border-darken-1">No of shipments scanned</th>
+                            <th class="border-primary border-darken-1">No of shipments Arrived</th>
+                            <th class="border-primary border-darken-1">Dif b/w PA and NA</th>
+                            {{-- <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
+                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th> --}}
                         </tr>
                         </thead>
                     </table>
@@ -165,7 +165,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#datatable_wrapper').hide();
+            // $('#datatable_wrapper').hide();
 
 
 
@@ -237,27 +237,27 @@
                         data: params,
                         success: function (result) {
                             head = [];
-                            head.push('S.No');
-                            head.push('Date');
-                            head.push('Rider ID');
-                            head.push('Rider Name');
-                            head.push('Origin');
-                            head.push('Pickup Note ID');
-                            head.push('No. of Scanned Shipments');
-                            head.push('No. of Arrived Shipments');
-                            head.push('Arrival Without Scan Shipments');
+                            // head.push('S.No');
+                            // head.push('Date');
+                            // head.push('Rider ID');
+                            // head.push('Rider Name');
+                            // head.push('Origin');
+                            // head.push('Pickup Note ID');
+                            // head.push('No. of Scanned Shipments');
+                            // head.push('No. of Arrived Shipments');
+                            // head.push('Arrival Without Scan Shipments');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                row.push(index + 1);
-                                row.push(values.date);
-                                row.push(values.rider_id);
-                                row.push(values.rider_name);
-                                row.push(values.origin);
-                                row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
-                                row.push(values.without_scan_shipments);
+                                // row.push(index + 1);
+                                // row.push(values.date);
+                                // row.push(values.rider_id);
+                                // row.push(values.rider_name);
+                                // row.push(values.origin);
+                                // row.push(values.pickup_note_id);
+                                // row.push(values.scanned_shipments);
+                                // row.push(values.arrived_shipments);
+                                // row.push(values.without_scan_shipments);
 
                                 body.push(row);
                             });
@@ -302,15 +302,15 @@
                 },
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
-                    { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
-                    { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
-                    { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
-                    { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
-                    { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
-                    { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
+                    // {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    // { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
+                    // { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
+                    // { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
+                    // { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
+                    // { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
+                    // { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
+                    // { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
+                    // { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
