@@ -191,56 +191,6 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
-
-
-            var from_date;
-            var to_date;
-
-        from_date = $('#search_date_from').pickadate({
-            firstDay: 1,
-            clear: false,
-            selectYears: true,
-            selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
-            hiddenSuffix: '_formatted',
-            onClose: function() {
-                var selectedDate = this.get('select'); // Get the selected date
-
-                // Calculate the maximum allowed date (two days before the current date)
-                var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
-
-                // Compare selected date to the maximum allowed date
-                if (selectedDate && selectedDate.pick > maxAllowedDate) {
-                // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
-                this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
-                }
-            },
-            max: true // Set the maximum date to today
-        });
-        to_date = $('#search_date_to').pickadate({
-            firstDay: 1,
-            clear: false,
-            selectYears: true,
-            selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
-            hiddenSuffix: '_formatted',
-            onClose: function() {
-                var selectedDate = this.get('select'); // Get the selected date
-
-                // Calculate the maximum allowed date (two days before the current date)
-                var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
-
-                // Compare selected date to the maximum allowed date
-                if (selectedDate && selectedDate.pick > maxAllowedDate) {
-                // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
-                this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
-                }
-            },
-            max: true // Set the maximum date to today
-        });
-
-
-
         $(document).ready(function () {
             $('#search_tracking_no').inputmask({
                 'alias': 'integer',
@@ -286,35 +236,48 @@
             });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: false,
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                onClose: function() {
+                    var selectedDate = this.get('select'); // Get the selected date
+
+                    // Calculate the maximum allowed date (two days before the current date)
+                    var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
+
+                    // Compare selected date to the maximum allowed date
+                    if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                        // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
                     }
-                }
+                },
+                max: true // Set the maximum date to today
             });
 
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: false,
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                onClose: function() {
+                    var selectedDate = this.get('select'); // Get the selected date
+
+                    // Calculate the maximum allowed date (two days before the current date)
+                    var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
+
+                    // Compare selected date to the maximum allowed date
+                    if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                        // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
                     }
-                }
+                },
+                max: true // Set the maximum date to today
             });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
