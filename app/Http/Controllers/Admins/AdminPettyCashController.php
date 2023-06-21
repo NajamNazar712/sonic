@@ -807,15 +807,17 @@ class AdminPettyCashController extends Controller
                                 $petty->save();
                             }
 
-                        } else if ($petty->operation_approved_by == null) {
-                            if (session('role_id') == 1 || in_array(191, session('permissions'))) {
-                                $petty->operation_approved_by = Auth::id();
-                                $petty->operation_approved_at = Carbon::now();
-                                $petty->status = 2;
-                                $petty->save();
+                        } 
+                        // else if ($petty->operation_approved_by == null) {
+                        //     if (session('role_id') == 1 || in_array(191, session('permissions'))) {
+                        //         $petty->operation_approved_by = Auth::id();
+                        //         $petty->operation_approved_at = Carbon::now();
+                        //         $petty->status = 2;
+                        //         $petty->save();
 
-                            }
-                        } else if ($petty->finance_received_statement_by == null) {
+                        //     }
+                        // } 
+                        else if ($petty->finance_received_statement_by == null) {
                             if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                                 $petty->finance_received_statement_by = Auth::id();
                                 $petty->finance_received_statement_at = Carbon::now();
