@@ -6633,6 +6633,8 @@ class ReturnController extends Controller
                         return 'On Hold For Self Collection';
                     case 8:
                         return 'Unresponsive';
+                    case 10:
+                        return 'Intercept Approved';
                 }
             }
         
