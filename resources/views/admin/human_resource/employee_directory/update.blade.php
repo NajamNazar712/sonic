@@ -2423,6 +2423,8 @@
                     });
 
                     @if($employee->department_id == 6)
+                    area_list.empty();
+                    area_list.attr("disabled", "disabled");
                     $.ajax({
                         url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
                         method: 'POST',
@@ -2431,24 +2433,23 @@
                             'city_id': id
                         }
                     })
-                        .done(function (data) {
-                            area_list.empty();
+                    .done(function (data) {
                             if(data.status == 1) {
                                 if (data.areas.length > 0) {
-                                    area_list.attr("disabled", false);
                                     $.each(data.areas, function (key, value) {
                                         var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
                                         area_list.append(newOption);
                                     });
                                     area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
-
+                                    area_list.removeAttr("disabled");
 
                                 } else {
-                                    area_list.attr("disabled", true);
+                                    area_list.attr("disabled", "disabled");
                                     area_list.attr("duired", false);
                                     $('#area_list-error').remove();
                                 }
                             }
+
                         });
 
                     @endif
@@ -2457,6 +2458,8 @@
                 let id = $(this).val();
                 
                 if(id) {
+                    area_list.empty();
+                    area_list.attr("disabled", "disabled");
                     $.ajax({
                         url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
                         method: 'POST',
@@ -2478,27 +2481,25 @@
                         //         containerId: 'toast-top-center'
                         //     });
                         // }
-                        area_list.empty();
+
                         if(data.status == 1) {
 
                             if (data.areas.length > 0) {
-                                area_list.attr("disabled", false);
+
                                 $.each(data.areas, function (key, value) {
                                     var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
                                     area_list.append(newOption);
                                 });
                                 area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
 
-
+                                area_list.removeAttr("disabled");
                             } else {
 
-                                area_list.attr("disabled", true);
+                                area_list.attr("disabled", "disabled");
                                 area_list.attr("duired", false);
                                 $('#area_list-error').remove();
                             }
                         }
-                       
-
                     });
                 }
             @endif
@@ -2947,16 +2948,16 @@
             area_list.empty();
             @if(count($areas_list) > 0)
                 var areas = @json($areas_list);
-                area_list.attr("disabled", false);
+                area_list.attr("disabled", "disabled");
                 $.each(areas, function (key, value) {
                     var newOption = "<option value="+ value.id +">" + value.name + "</option>";
                     area_list.append(newOption);
                 });
                 area_list.val( '{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
-
+                area_list.removeAttr("disabled");
             
             @else
-                area_list.attr("disabled", true);
+                area_list.attr("disabled", "disabled");
                 area_list.attr("data-rule-required", false);
                 $('#area_list-error').hide();
             @endif
