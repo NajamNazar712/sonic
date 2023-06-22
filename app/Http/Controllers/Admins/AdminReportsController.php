@@ -11314,7 +11314,7 @@ class AdminReportsController extends Controller
         ->join('cities as ahc', 'ah.hub_id', '=', 'ahc.id')
         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
         ->where('sj.shipper_status_id', '=', 2)
-        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city','shipment_scanning_journeys.user_type as user_type');
+        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city','shipment_scanning_journeys.user_type as user_type')->orderByDesc('shipment_scanning_journeys.updated_at')->groupBy('s.tracking_number');
         // ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
         
         // $datatables = Datatables::of($quick_scanned)
@@ -11340,6 +11340,33 @@ class AdminReportsController extends Controller
         ->addColumn('tracking_number_hyperlink', function ($requests) {
             return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
         })
+        ->addColumn('last_scanned_by', function ($requests) {
+            $last_scanned_by = '-';
+         
+            if ($requests->status_by == null && $requests->shipper_name == null) {
+                $last_scanned_by = '-';
+            } else {
+                $userType = '';
+                if ($requests->user_type == 1) {
+                    $userType = 'Admin';
+                } elseif ($requests->user_type == 2) {
+                    $userType = 'Shipper';
+                } elseif ($requests->user_type == 3) {
+                    $userType = 'Substitute Shipper';
+                } elseif ($requests->user_type == 4) {
+                    $userType = 'Retail User';
+                } elseif ($requests->user_type == 5) {
+                    $userType = 'Rider';
+                }
+                $last_scanned_by = $requests->last_scanned_by . '(' . $userType . ')';
+            }
+            return $last_scanned_by;
+        })->filterColumn('last_scanned_by', function ($query, $keyword) {
+            $query->where(function ($query) use ($keyword) {
+                $query->where('ad.name', 'like', "%{$keyword}%")
+                      ->orWhere('shipment_scanning_journeys.user_type', 'like', "%{$keyword}%");
+            });
+        })
         ->addColumn('account_type', function ($requests) {
             $account_type = '-';
          
@@ -11361,7 +11388,12 @@ class AdminReportsController extends Controller
                 $account_type = $requests->status_by . '(' . $userType . ')';
             }
             return $account_type;
-        });
+        })->filterColumn('account_type', function ($query, $keyword) {
+            $query->where(function ($query) use ($keyword) {
+                $query->where('a.name', 'like', "%{$keyword}%")
+                      ->orWhere('shipment_scanning_journeys.user_type', 'like', "%{$keyword}%");
+            });
+        });;
     
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
