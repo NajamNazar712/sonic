@@ -11314,7 +11314,7 @@ class AdminReportsController extends Controller
         ->join('cities as ahc', 'ah.hub_id', '=', 'ahc.id')
         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
         ->where('sj.shipper_status_id', '=', 2)
-        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city','shipment_scanning_journeys.user_type as user_type')->orderByDesc('shipment_scanning_journeys.updated_at')->groupBy('s.tracking_number');
+        ->select('s.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.updated_at as arrival_date', 'sj.updated_at as status_date_time', 'a.name as status_by', 'sssl.name as last_scanned_location', 'ad.name as last_scanned_by', 'shipment_scanning_journeys.updated_at as last_scanned_at', 'ahc.name as last_scanned_city','shipment_scanning_journeys.user_type as user_type')->groupBy('tracking_number');
         // ->where('shipment_scanning_journeys.screen_location_id', '=', 8);
         
         // $datatables = Datatables::of($quick_scanned)
