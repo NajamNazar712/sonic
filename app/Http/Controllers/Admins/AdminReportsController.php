@@ -11303,7 +11303,7 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 64 and verification = 1)'));
             })->join('admins as a','arrsh.admin_id','=','a.id')
             
-            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'),'v2_pickup_notes.arrived_shipments as total_arrived_shipments','v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider','total_s.created_at as rider_picked_date_time','a.name as scanned_by')
+            ->select('v2_pickup_notes.status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'),'v2_pickup_notes.arrived_shipments as total_arrived_shipments','v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider','arrsh.created_at as rider_picked_date_time','a.name as scanned_by')
             ->where('v2_pickup_notes.status',1)
             ->groupBy('v2_pickup_notes.id');
 

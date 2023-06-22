@@ -304,7 +304,7 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'rider_picked_date_time' ,name: 'total_s.created_at', class: 'align-middle text-center date'},
+                    { data:'rider_picked_date_time' ,name: 'arrsh.created_at', class: 'align-middle text-center date'},
                     { data:'scanned_by',name: 'a.name', class: 'align-middle text-center scanned_by'},
                     { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
                     { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
