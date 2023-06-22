@@ -868,7 +868,7 @@ $roles = explode("," , $settings->text);
                                             @endif
                                                 @if (session('role_id') == 1 || in_array(157, session('permissions')))
                                                 <li><a class="menu-item"
-                                                        href="{{ route('admin.settings.petty_cash.heads.index') }}">Statement</a>
+                                                        href="{{ route('admin.petty_cash.advance.statements.index') }}">Statement</a>
                                                 </li>
                                             @endif
                                             

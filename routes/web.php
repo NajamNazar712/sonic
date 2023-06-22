@@ -2276,6 +2276,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');
             Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');
             Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');
+
+            Route::prefix('statements')->name('statements.')->group(function () {
+                Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_statements_index')->name('index');
+                Route::get('list', 'Admins\AdminPettyCashController@advance_petty_cash_statements_list')->name('list');
+                Route::post('print', 'Admins\AdminPettyCashController@statement_print')->name('print');
+                Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
+                Route::post('reject_all', 'Admins\AdminPettyCashController@petty_cash_statements_reject_all')->name('reject_all');
+                Route::get('{id}/edit', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_index')->name('edit');
+                Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_list')->name('edit.list');
+                Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
+                Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
+                Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
+                Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
+                Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
+                Route::post('station_operation_finance_approved', 'Admins\AdminPettyCashController@petty_cash_station_operation_finance_approved_all')->name('station_operation_finance_approved');
+                Route::post('check', 'Admins\AdminPettyCashController@petty_cash_statement_check')->name('check');
+
+                //make details:
+                Route::get('{id}/make_detail', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_make_detail')->name('make_detail'); //todo new
+                Route::post('make_detail_submit', 'Admins\AdminPettyCashController@advance_make_petty_cash_statement_detail_submit')->name('make_detail_submit');
+            });
         });
 
     });

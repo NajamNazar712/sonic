@@ -15,6 +15,15 @@ class CreateAdvancePettyCashStatementDetailsTable extends Migration
     {
         Schema::create('advance_petty_cash_statement_details', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('advance_petty_cash_statement_id')->index();
+            $table->integer('status')->index();
+            $table->integer('updated_by')->index();
+            $table->timestamp('date')->index();
+            $table->string('expense_details');
+            $table->double('amount');
+            $table->integer('reference_no');
+            $table->longText('remarks');
+            $table->double('station_amount');
             $table->timestamps();
         });
     }

@@ -15,6 +15,7 @@ class CreateAdvancePettyCashStatementsTable extends Migration
     {
         Schema::create('advance_petty_cash_statements', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('sdn_id')->index();
             $table->integer('hub_id')->index();
             $table->bigInteger('reference_no')->unique();
             $table->timestamp('from');
