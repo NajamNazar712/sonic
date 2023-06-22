@@ -308,7 +308,7 @@
                 order: [[12, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_hyperlink', name: 's.tracking_number', class: 'align-middle text_center tracking_number'},
+                    {data: 'tracking_number_hyperlink', name: 'shipments.tracking_number', class: 'align-middle text_center tracking_number'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle text_center origin '},
                     {data: 'destination', name: 'dc.name', class: 'align-middle text_center destination '},
                     {data: 'status', name: 'ss.name', class: 'align-middle text_center shipment_status'},
@@ -319,7 +319,7 @@
                     {data: 'last_scanned_location', name: 'sssl.name', class: 'text_center align-middle last_scanned_location'},
                     {data: 'last_scanned_city', name: 'ahc.name', class: 'text_center align-middle last_scanned_city'},
                     {data: 'last_scanned_by', name: 'ad.name', class: 'text_center align-middle last_scanned_by'},
-                    {data: 'last_scanned_at', name: 'shipment_scanning_journeys.updated_at', class: 'text_center align-middle last_scanned_at'},
+                    {data: 'last_scanned_at', name: 'sjs.created_at', class: 'text_center align-middle last_scanned_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
