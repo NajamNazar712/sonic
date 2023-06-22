@@ -250,6 +250,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
+                max: '{{ Carbon\Carbon::now() }}',
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
