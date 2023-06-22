@@ -31,7 +31,6 @@
                         <th class="border-primary border-darken-1">Operation Approved At</th> --}}
                         {{-- <th class="border-primary border-darken-1">Finance Approved By</th>
                         <th class="border-primary border-darken-1">Finance Approved At</th> --}}
-                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
@@ -93,7 +92,7 @@
                             // head.push('Operation Approved At');
                             // head.push('Finance Approved By');
                             // head.push('Finance Approved At');
-                            head.push('Status');
+                         
 
 
                             $.each(result.data, function(index, values) {
@@ -116,7 +115,7 @@
                                 // row.push(values.operation_approved_at);
                                 // row.push(values.finance_approved_by);
                                 // row.push(values.finance_approved_at);
-                                row.push(values.status);
+                           
 
                                 body.push(row);
                             });
@@ -165,7 +164,6 @@
                     // {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
                     // {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
                     // {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
-                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -181,11 +179,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="3">Finance Approved</option>' +
-                        '<option value="4">Paid</option>' +
-                        '<option value="5">Adjusted</option>' +
-                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -209,12 +202,12 @@
                         }
                     });
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $("#status_select").prepend('<option value="" selected></option>').select2({
+                    //     placeholder: "Select Status",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
 
                     this.api().table().columns.adjust();
                 }

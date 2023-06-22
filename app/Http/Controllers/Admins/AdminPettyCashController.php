@@ -686,10 +686,10 @@ class AdminPettyCashController extends Controller
 
 //                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
                 if ((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))) {
-                    if ((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4) || ($petty->status == 7 && session('department_id') == 4)) {
-                        if ($petty->status == 2) {
+                    if ((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 2 && session('department_id') == 4) || ($petty->status == 7 && session('department_id') == 4)) {
+                        if (in_array($petty->status,[1,2])) {
                             $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Receive</button>';
-                        } else {
+                        }else {
                             $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
                         }
                     }
