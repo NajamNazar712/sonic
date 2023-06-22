@@ -2407,41 +2407,51 @@
                             'city_id': id
                         }
                     })
+                    .done(function (data) {
+                        $("#rider_route").html('');
+                        if (data.status == 1) {
+                            $.each(data.routes, function (i, value) {
+                                $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
+                            });
+                            $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                    @if($employee->department_id == 6)
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
                         .done(function (data) {
-                            $("#rider_route").html('');
-                            if (data.status == 1) {
-                                $.each(data.routes, function (i, value) {
-                                    $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
-                                });
-                                $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                            
-                            @if($employee->department_id == 6)
                             area_list.empty();
-                            if(data.areas.length > 0){ 
+                            if(data.status == 1) {
+                                if (data.areas.length > 0) {
                                     area_list.attr("disabled", false);
                                     $.each(data.areas, function (key, value) {
-                                        var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                        var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
                                         area_list.append(newOption);
                                     });
                                     area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
 
-                            
-                                }
-                            else{
-                                console.log('aya re aya');
-                                area_list.attr("disabled", true);
-                                area_list.attr("duired", false);
-                                $('#area_list-error').remove();
-                            }
-                            @endif
 
+                                } else {
+                                    area_list.attr("disabled", true);
+                                    area_list.attr("duired", false);
+                                    $('#area_list-error').remove();
+                                }
+                            }
                         });
+
+                    @endif
                 }
                 @else
                 let id = $(this).val();
@@ -2468,24 +2478,24 @@
                         //         containerId: 'toast-top-center'
                         //     });
                         // }
-                        
-                      
                         area_list.empty();
-                        if(data.areas.length > 0){ 
-                            area_list.attr("disabled", false);
-                            $.each(data.areas, function (key, value) {
-                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
-                                area_list.append(newOption);
-                            });
-                           area_list.val( '{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+                        if(data.status == 1) {
 
-                    
-                        }
-                        else{
-                         
-                            area_list.attr("disabled", true);
-                            area_list.attr("duired", false);
-                            $('#area_list-error').remove();
+                            if (data.areas.length > 0) {
+                                area_list.attr("disabled", false);
+                                $.each(data.areas, function (key, value) {
+                                    var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
+                                    area_list.append(newOption);
+                                });
+                                area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+
+
+                            } else {
+
+                                area_list.attr("disabled", true);
+                                area_list.attr("duired", false);
+                                $('#area_list-error').remove();
+                            }
                         }
                        
 

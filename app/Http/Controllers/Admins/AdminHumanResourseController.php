@@ -6077,13 +6077,13 @@ class AdminHumanResourseController extends Controller
     {
         
         if ($request->has('city_id')) {
-            $routes = Route::where('city_id', $request->city_id)->where('status', 1);
-            if ($routes->exists()) {
-                $routes = $routes->get();
-                $areas = CityArea::where('city_id', $request->city_id)->select('id','name')->where('status',1)->get();
-                return response()->json(['status' => 1, 'routes' => $routes, 'areas' => $areas]);
+            $areas = CityArea::where('city_id', $request->city_id)->select('id','name')->where('status',1);
+            if($areas->exists()) {
+                $areas = $areas->get();
+                return response()->json(['status' => 1,  'areas' => $areas]);
+            }else{
+                return response()->json(['status' => 0]);
             }
-            return response()->json(['status' => 1]);
         } else {
             return response()->json(['status' => 0, 'error' => 'City is Required']);
         }
