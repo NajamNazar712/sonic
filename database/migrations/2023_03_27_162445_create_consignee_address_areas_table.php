@@ -16,7 +16,7 @@ class CreateConsigneeAddressAreasTable extends Migration
         Schema::create('consignee_address_areas', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('shipment_id')->index();
-            $table->integer('city_area_id')->index();
+            $table->integer('city_area_id')->nullable()->index();
             $table->timestamps();
         });
     }

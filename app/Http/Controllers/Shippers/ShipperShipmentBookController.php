@@ -7440,9 +7440,8 @@ class ShipperShipmentBookController extends Controller
                         }
                     }
                 }
+                $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
                 if($found_area_id) {
-
-                    $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
                     $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
                     if ($area->exists()) {
                         $area = $area->first();
@@ -7451,6 +7450,9 @@ class ShipperShipmentBookController extends Controller
                         $default_area = $default_area->first();
                         $area_id = $default_area->id;
                     }
+                }else{
+                    $default_area = $default_area->first();
+                    $area_id = $default_area->id;
                 }
                 $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
                 if (!$consignee_address_area->exists()) {
@@ -7486,8 +7488,8 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+            $default_area = CityArea::where('city_id', $city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
             if($found_area_id) {
-                $default_area = CityArea::where('city_id', $city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
                 $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
                 if ($area->exists()) {
                     $area = $area->first();
@@ -7496,11 +7498,14 @@ class ShipperShipmentBookController extends Controller
                     $default_area = $default_area->first();
                     $area_id = $default_area->id;
                 }
-                if($area_id) {
-                    $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-                    $user_shipping_info->city_area_id = $area_id;
-                    $user_shipping_info->save();
-                }
+            }else{
+                $default_area = $default_area->first();
+                $area_id = $default_area->id;
+            }
+            if($area_id) {
+                $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+                $user_shipping_info->city_area_id = $area_id;
+                $user_shipping_info->save();
             }
             return true;
         }
@@ -7527,9 +7532,8 @@ class ShipperShipmentBookController extends Controller
                     }
                 }
             }
+            $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
             if($found_area_id) {
-
-                $default_area = CityArea::where('city_id', $consignee_city_id)->where('default', 1)->where('status', 1)->orderby('id', 'desc');
                 $area = CityArea::whereIn('id', $found_area_id)->where('status',1)->latest();
                 if ($area->exists()) {
                     $area = $area->first();
@@ -7538,6 +7542,9 @@ class ShipperShipmentBookController extends Controller
                     $default_area = $default_area->first();
                     $city_area_id = $default_area->id;
                 }
+            }else{
+                $default_area = $default_area->first();
+                $city_area_id = $default_area->id;
             }
 
         }
