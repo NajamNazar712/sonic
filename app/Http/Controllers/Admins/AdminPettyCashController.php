@@ -19,6 +19,7 @@ use App\Http\Models\Admin\PettyCashStatementDraft;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\AdvancePettyCashStatement;
 use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -2449,7 +2450,7 @@ class AdminPettyCashController extends Controller
         return view('admin.petty_cash.advance.make')->with(['heads' => $head, 'sdns' => $sdns, 'zones' => $zones, 'employees' => $employees, 'operation_managers' => $operation_managers]);
     }
 
-    public function make_advance_petty_cash_statement_submit(Request $request)
+    public function advance_petty_cash_submit(Request $request)
     {
         if ($request->has('submit_button')) {
             $total_amount = 0;
@@ -2461,7 +2462,7 @@ class AdminPettyCashController extends Controller
 
             if ($request->input('submit_button') == 'create') {
 
-                $petty_cash = new PettyCashStatement();
+                $petty_cash = new AdvancePettyCashStatement();
                 $petty_cash->zone_id = $request->select_statement_zone;
                 $petty_cash->hub_id = $request->select_statement_hub;
                 $petty_cash->reference_no = $request->reference_no;
@@ -2471,62 +2472,26 @@ class AdminPettyCashController extends Controller
                 $petty_cash->destination_hub_id = Admin::find($request->select_statement_station_manager)->default_hub_id ?? 0;
                 $petty_cash->station_manager_id = $request->select_statement_station_manager;
                 $petty_cash->created_by = Auth::id();
+                $petty_cash->status = 1;
                 $petty_cash->save();
-                $petty_cash_statement_id = $petty_cash->id;
-                $first = true;
-                foreach ($selected_ids as $selected_id) {
-                    $total_amount += $request->amount[$selected_id];
+             
 
-                    $petty_detail = new PettyCashStatementDetail();
-                    $petty_detail->petty_cash_statement_id = $petty_cash_statement_id;
-                    $petty_detail->account_head_id = $request->head[$selected_id];
-                    $petty_detail->account_title_id = $request->title[$selected_id];
-                    $petty_detail->city_id = $request->city[$selected_id];
-                    $petty_detail->employee_id = $request->employee[$selected_id];
-                    $petty_detail->employee_name = $request->employee_name[$selected_id];
-                    $petty_detail->employee_designation = $request->employee_designation[$selected_id];
-                    $petty_detail->dncc_id = $request->dncc[$selected_id] ?? Null;
-                    $petty_detail->delivered_shipments = $request->delivered_shipment_count[$selected_id] ?? Null;
-                    $petty_detail->expense_details = str_replace(array("\n", "\r"), '', $request->expense[$selected_id]);
-                    $petty_detail->amount = $request->amount[$selected_id];
-                    $petty_detail->reference_no = $request->reference[$selected_id];
-                    $petty_detail->remarks = str_replace(array("\n", "\r"), '', $request->remarks[$selected_id]);
-                    $petty_detail->save();
-
-                    if ($request->hasFile('upload_image' . $selected_id)) {
-
-                        $file = $request->file('upload_image' . $selected_id);
-                        $filename = 'statement_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.' . $file->getClientOriginalExtension();
-
-                        Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
-
-                        $petty_detail->reference_document = $filename;
-                        $petty_detail->save();
-                    }
-
-                    if ($request->hasFile('upload_2_image' . $selected_id)) {
-                        $file = $request->file('upload_2_image' . $selected_id);
-                        $filename = 'statement_2_' . $petty_cash_statement_id . '_detail_' . $petty_detail->id . '.' . $file->getClientOriginalExtension();
-
-
-                        Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
-
-                        $petty_detail->reference_document_2 = $filename;
-                        $petty_detail->save();
-                    }
-
-                }
-                PettyCashStatement::where('id', $petty_cash_statement_id)->update(['total_amount' => $total_amount]);
-
-                $shipment_id = $this->create_shipment($petty_cash->id);
-                $petty_cash->shipment_id = $shipment_id;
-                $petty_cash->save();
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created', 'print' => $shipment_id]);
+                return redirect()->back()->with(['status' => 1, 'success' => 'Advance Petty Cash Statement Created Successfully']);
 
             }
 
         } else {
             return redirect()->back()->with(['error' => 'Request not submitted properly!']);
+        }
+    }
+
+    public function advance_petty_cash_statement_check_reference(Request $request)
+    {
+        $reference = $request->reference;
+        if (AdvancePettyCashStatement::where('reference_no', $reference)->exists()) {
+            return "true";
+        } else {
+            return "false";
         }
     }
 

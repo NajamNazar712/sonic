@@ -859,7 +859,7 @@ $roles = explode("," , $settings->text);
                                         </li>
                                     @endif
 
-                                     {{-- <li><a class="menu-item" href="#">Advance Petty Cash</a>
+                                     <li><a class="menu-item" href="#">Advance Petty Cash</a>
                                         <ul class="menu-content">
                                             @if (session('role_id') == 1 || in_array(157, session('permissions')))
                                                 <li><a class="menu-item"
@@ -873,7 +873,7 @@ $roles = explode("," , $settings->text);
                                             @endif
                                             
                                         </ul>
-                                    </li> --}}
+                                    </li>
 
                                 </ul>
                             </li>

@@ -2272,7 +2272,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('advance')->name('advance.')->group(function () {
-            Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('advance_petty_cash_index');
+            Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('index');
+            Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');
+            Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');
             Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');
         });
 
