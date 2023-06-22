@@ -74,7 +74,7 @@
                             <th class="border-primary border-darken-1">Pickup Note ID</th>
                             <th class="border-primary border-darken-1">No of shipments scanned</th>
                             <th class="border-primary border-darken-1">No of shipments Arrived</th>
-                            <th class="border-primary border-darken-1">Dif b/w PA and NA</th>
+                            {{-- <th class="border-primary border-darken-1">Dif b/w PA and NA</th> --}}
                             {{-- <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th> --}}
@@ -234,7 +234,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.rider_pickup.list') }}',
+                        url: '{{ route('admin.reports.project_arrival.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -292,7 +292,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.rider_pickup.list') }}',
+                    url: '{{ route('admin.reports.project_arrival.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
@@ -309,7 +309,7 @@
                     { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
                     { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
                     { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
+                    // { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

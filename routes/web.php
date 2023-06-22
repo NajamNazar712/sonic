@@ -2759,6 +2759,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('project_arrival')->name('project_arrival.')->group(function()
         {
             Route::get('', 'Admins\AdminReportsController@project_arrival_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@project_arrival_list')->name('list');
         });
 
 
