@@ -51,9 +51,11 @@ class AdminZonalManagementController extends Controller
             ->addColumn('action', function($zone) {
                 if($zone->business_category_id == 1){
                     $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $duplicate_zone = '<button type="button" class="dropdown-item duplicate_zone"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">Duplicate Zone</div></button>';
                 }
                 else{
                     $edit_button = '<button type="button" class="dropdown-item international_edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    $duplicate_zone ='';
                 }
                 $active = '<button type="button" class="dropdown-item activate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Activate Zone</div></button>';
                 $inactive = '<button type="button" class="dropdown-item deactivate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Deactivate Zone</div></button>';
@@ -74,8 +76,9 @@ class AdminZonalManagementController extends Controller
                         $dropdown .= $active;
                     }
                 }
-
+                
                 $dropdown .= $view_cities_button;
+                $dropdown .= $duplicate_zone;
 
                 $dropdown .= '
                   </div>
@@ -254,4 +257,45 @@ class AdminZonalManagementController extends Controller
 
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
     }
+
+    public function duplicate_zone(Request $request) {
+        $id = $request->input('zone_id');
+        $zone_class_cities = ZoneClassCity::where('zone_id', $id)->get();
+           
+        $new_zone = new Zone();
+        $new_zone->name = $request->name;
+        $new_zone->gst = $request->zone_charges;
+        $new_zone->status = 1;
+        $new_zone->business_category_id = 1;
+        $new_zone->save();
+
+        // get all the rows of input zone_id (which you want to duplicate) and create new rows with new id 
+        foreach ($zone_class_cities as $oldRecord) {
+            $newRecord = $oldRecord->replicate();
+            $newRecord->zone_id = $new_zone->id;
+            $newRecord->save();
+        }
+            return redirect()->back()->with(['success' => 'Zone: ' . $request->input('name') . ' has been added!']); 
+    }
+
+    public function check_zone_name(Request $request, $id) {
+        
+        if ($request->filled('name')) {
+          $name = Zone::where('name', $request->input('name'));
+  
+          if ($id) {
+            $name = $name->where('id', '!=', $id);
+          }
+  
+          if (!$name->exists()) {
+            return 'true';
+          }
+          else {
+            return 'false';
+          }
+        }
+        else {
+          return 'false';
+        }
+      }
 }
