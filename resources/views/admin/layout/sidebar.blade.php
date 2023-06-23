@@ -1622,6 +1622,9 @@
                         @if (session('role_id') == 1 || in_array(839, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.revenue_report_by_invoice.index') }}">Revenue Report By Invoice</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(877, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.quick_scanned_report.index') }}">Quick Scanned Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
