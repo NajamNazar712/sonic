@@ -11283,7 +11283,7 @@ class AdminReportsController extends Controller
 
         return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers,'shipment_status' => $shipment_status]);
     }
-    public function quick_scanned_report_list(Request $request)
+        public function quick_scanned_report_list(Request $request)
     {
         if($request->get('excel') && $request->get('excel') == true)
         {
@@ -11385,4 +11385,5 @@ class AdminReportsController extends Controller
 
         return $datatables->make(true);
     }
+
 }
