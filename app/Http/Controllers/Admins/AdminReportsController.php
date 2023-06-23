@@ -11301,7 +11301,7 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipment_scanning_journeys as ssj', function($join){
                 $join->on('ssj.shipment_id', '=', 'shipments.id')
-                    ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where ssj.shipment_id = shipments.id)'));
+                    ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipment_scanning_screen_locations as sssl', 'ssj.screen_location_id', '=', 'sssl.id')
             ->leftjoin('admins as lsa', 'sjl.admin_id', '=', 'lsa.id')
