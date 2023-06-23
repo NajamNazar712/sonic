@@ -14,10 +14,11 @@
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
                     <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement->id}}">
+                    <input type="hidden" name="petty_statement_actual_amount" id="petty_statement_actual_amount" value="{{$petty_statement->total_amount}}">
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
-{{--                                {{$sdns}}--}}
+                                {{--                                {{$sdns}}--}}
                                 <select name="select_statement_sdn" id="select_statement_sdn" class="form-control select2" data-rule-required="true" data-msg-required="SDN is required">
                                     @foreach($sdns as $sdn)
                                         <option value="{{$sdn->id}}">{{str_pad($sdn->id, 6, '0', STR_PAD_LEFT)}}</option>
@@ -37,7 +38,7 @@
                         </div>
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control reference_no" name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement->reference_no}}">
+                                <input type="text" disabled class="form-control reference_no" name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement->reference_no}}">
                             </fieldset>
                         </div>
                     </div>
@@ -62,7 +63,7 @@
 
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="select_statement_station_manager" disabled id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
+                                <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
                                     @foreach($operation_managers as $manager)
                                         <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
                                     @endforeach
@@ -105,9 +106,9 @@
                         <div class="col-2">
                             <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" name="submit_button" value="create"><i class="la la-list"></i> Make Statement</button>
                         </div>
-                        <div class="col-2">
-                            <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>
-                        </div>
+{{--                        <div class="col-2">--}}
+{{--                            <button id="statement_draft" type="submit"  class="btn btn-success btn-block" name="submit_button" value="draft"><i class="la la-save"></i> Save Draft</button>--}}
+{{--                        </div>--}}
                     </div>
                 </form>
             </div>
