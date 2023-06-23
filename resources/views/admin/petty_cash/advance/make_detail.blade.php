@@ -62,7 +62,7 @@
 
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="select_statement_station_manager" id="select_statement_station_manager" class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
+                                <select name="select_statement_station_manager" id="select_statement_station_manager" disabled class="form-control select2" data-rule-required="true" data-msg-required="Station Manager is required">
                                     @foreach($operation_managers as $manager)
                                         <option value="{{$manager->id}}">{{$manager->name}} @if($manager->trax_id != '')({{$manager->trax_id}}) @endif</option>
                                     @endforeach
@@ -263,6 +263,8 @@
                 });
             });
 
+            $('#select_statement_sdn').val('{!! $petty_statement->sdn_id!!}').trigger('change');
+
             $('#select_statement_zone').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Zone',
                 width:'100%',
@@ -287,6 +289,7 @@
                     }
                 });
             });
+            $('#select_statement_zone').val('{!! $petty_statement->zone_id!!}').trigger('change');
 
             $('#select_statement_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
@@ -316,12 +319,14 @@
                     }
                 });
             });
+            $('#select_statement_hub').val('{!! $petty_statement->hub_id!!}').trigger('change');
 
 
             $('#select_statement_station_manager').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Station Manager',
                 width:'100%',
             });
+            $('#select_statement_station_manager').val('{!! $petty_statement->station_manager_id!!}').trigger('change');
 
             var min_date_limit = '{{ Carbon\Carbon::now()->subDays(3)->toDateString() }}';
             var all_max_date = new Date();

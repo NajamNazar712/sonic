@@ -2643,7 +2643,7 @@ class AdminPettyCashController extends Controller
         } else {
             $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
         }
-        //        dd($head,$petty,$zones,$sdns,$employees,$operation_managers,$hub_array);
+//                dd($head,$petty,$zones,$sdns,$employees,$operation_managers,$hub_array);
         return view('admin.petty_cash.advance.make_detail')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
 
     }
@@ -3017,7 +3017,6 @@ class AdminPettyCashController extends Controller
                 } else if ($petty_details->status == 1) {
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details Already Rejected!']);
                 }
-
             } else {
                 return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
             }
@@ -3029,7 +3028,85 @@ class AdminPettyCashController extends Controller
     public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
     {
         dd($request->all());
+        $selected_ids = explode(',', $request->input('selected_rows'));
+        $statement_id = $request->petty_statement_id;
+        $petty_cash = AdvancePettyCashStatement::find($statement_id);
+        $total_amount = 0;
+        if ($petty_cash) {
+            if(!in_array($petty_cash->status_id ,[0,1,2,7]))
+            {
+                return redirect()->route('admin.petty_cash.approved.view',$statement_id);
+            }
+            foreach ($selected_ids as $selected_id) {
+                $total_amount += $request->amount[$selected_id];
+                $petty_detail = AdvancePettyCashStatementDetail::where('petty_cash_id', $petty_cash->id)->where('id', $selected_id)->first();
 
+                if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
+                    $petty_detail->account_head_id = $request->head[$selected_id];
+                    $petty_detail->account_title_id = $request->title[$selected_id];
+                }
+
+                $petty_detail->expense_details = $request->expense[$selected_id];
+                $petty_detail->reference_no = $request->reference[$selected_id];
+                $petty_detail->remarks = $request->remarks[$selected_id];
+                if ($petty_cash->status == 0) {
+                    $petty_detail->station_amount = $request->amount[$selected_id];
+                    $petty_detail->dncc_id = $request->dncc[$selected_id] ?? null;
+                    $petty_detail->delivered_shipments = $request->delivered_shipment_count[$selected_id] ?? null;
+                } else if ($petty_cash->status == 1) {
+                    $petty_detail->operation_amount = $request->amount[$selected_id];
+                } else {
+                    $petty_detail->finance_amount = $request->amount[$selected_id];
+                }
+//                if ($petty_detail->amount != $request->amount[$selected_id]) {
+//                    $amount_log = new PettyCashStatementAmountLog();
+//                    $amount_log->petty_cash_statement_detail_id = $petty_detail->id;
+//                    $amount_log->admin_id = Auth::id();
+//                    $amount_log->changed_amount = $request->amount[$selected_id];
+//                    $amount_log->save();
+//                }
+                $petty_detail->save();
+                if ($request->hasFile('upload_image' . $petty_detail->id)) {
+                    $file = $request->file('upload_image' . $petty_detail->id);
+                    $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                    Storage::disk('public')->delete('petty_cash_statement_details/' . $filename);
+
+
+                    Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                    $petty_detail->reference_document = $filename;
+                    $petty_detail->save();
+                }
+
+                if ($request->hasFile('upload_2_image' . $petty_detail->id)) {
+                    $file = $request->file('upload_2_image' . $petty_detail->id);
+                    $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                    Storage::disk('public')->delete('petty_cash_statement_details/' . $filename);
+
+
+                    Storage::disk('public')->putFileAs('petty_cash_statement_details', $file, $filename);
+
+                    $petty_detail->reference_document_2 = $filename;
+                    $petty_detail->save();
+                }
+            }
+            if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
+            {
+                $sdn_log = new PettyCashSdnLog();
+                $sdn_log->petty_cash_statement_id = $petty_cash->id;
+                $sdn_log->previous_sdn_id = $petty_cash->sdn_id;
+                $sdn_log->admin_id = Auth::id();
+                $sdn_log->save();
+
+                $petty_cash->sdn_id = $request->select_statement_sdn;
+
+            }
+            $petty_cash->total_amount = $total_amount;
+            $petty_cash->save();
+            return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Updated!']);
+        } else {
+            return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash Statement With This ID Not Found!']);
+        }
     }
 
 }

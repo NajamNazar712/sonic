@@ -2272,10 +2272,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('advance')->name('advance.')->group(function () {
-            Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('index');
-            Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');
-            Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');
-            Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');
+            Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('index');//todo new
+            Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');//todo new
+            Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');//todo new
+            Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');//todo new
 
             Route::prefix('statements')->name('statements.')->group(function () {
                 Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_statements_index')->name('index');//todo new
