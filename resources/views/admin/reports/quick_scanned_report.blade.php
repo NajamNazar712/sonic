@@ -20,9 +20,9 @@
                         </div>
                         <div class="col-3">
                             <div class="form-group">
-                                <select name="rider" id="rider" class="form-control select2" >
-                                    @foreach($riders as $rider)
-                                        <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                <select name="shipper" id="shipper" class="form-control select2" >
+                                    @foreach($shippers as $shipper)
+                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -34,7 +34,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                 </div>
-                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::now()->subDays(30) }}">
+                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::today() }}">
                             </div>
                         </div>
                         <div class="col-3">
@@ -158,8 +158,8 @@
 
     <script>
         $(document).ready(function() {
-            $('#track_form #rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder: 'Search Rider',
+            $('#track_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder: 'Search Shipper',
                 allowClear:true
             });
 
@@ -300,7 +300,7 @@
                         data: function (d) {
                             d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                             d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                            d.rider = $('select[name="rider"]').val();
+                            d.shipper = $('select[name="shipper"]').val();
                             d.tracking_numbers = $('#tracking_numbers').val();
                         }
                     },
@@ -335,8 +335,8 @@
                     var tracking_numbers = $('#track_form .tracking_numbers').val();
                     var search_date_from = $('#track_form #search_date_from').val();
                     var search_date_to = $('#track_form #search_date_to').val();
-                    var rider = $('#track_form #rider').val();
-                    if (tracking_numbers != '' || (search_date_from != '' && search_date_to != '') || rider != '') {
+                    var shipper = $('#track_form #shipper').val();
+                    if (tracking_numbers != '' || (search_date_from != '' && search_date_to != '') || shipper != '') {
                         table.draw();
                     }
                 });

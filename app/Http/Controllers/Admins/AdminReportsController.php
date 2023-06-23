@@ -11276,12 +11276,9 @@ class AdminReportsController extends Controller
     public function quick_scanned_report_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 667);
-        $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
         $shippers = User::whereIn('status', [3, 4])->get();
-        $shipment_status = ShipmentStatus::select('id', 'name')->get();
 
-        return view('admin.reports.quick_scanned_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers,'shipment_status' => $shipment_status]);
+        return view('admin.reports.quick_scanned_report')->with(['shippers' => $shippers]);
     }
         public function quick_scanned_report_list(Request $request)
     {
@@ -11311,14 +11308,12 @@ class AdminReportsController extends Controller
         ->leftjoin('users as lsu', 'sjl.user_id', '=', 'lsu.id')
         ->leftjoin('riders as lsr', 'sjl.rider_id', '=', 'lsr.id')
         ->leftjoin('admins as ssja', 'ssj.admin_id', '=', 'ssja.id')
-        ->leftjoin('riders as ssjr', 'ssj.admin_id', '=', 'ssjr.id')
         ->leftjoin('users as ssju', 'ssj.user_id', '=', 'ssju.id')
         ->leftjoin('substitute_users as ssjsu', 'ssj.substitute_user_id', '=', 'ssjsu.id')
         ->leftjoin('cities as ssjac', 'ssja.default_hub_id', '=', 'ssjac.id')
         ->leftjoin('cities as ssjuc', 'ssju.city_id', '=', 'ssjuc.id')
-        ->leftjoin('cities as ssjrc', 'ssju.city_id', '=', 'ssjrc.id')
         ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
-        ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssjr.name as last_scanned_by_rider', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city', 'ssjrc.name as last_scanned_rider_city');
+        ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city');
 
         $datatables = Datatables::of($quick_scanned)
         ->addColumn('tracking_number_hyperlink', function ($requests) {
@@ -11334,9 +11329,6 @@ class AdminReportsController extends Controller
             elseif ($requests->user_type == 3) {
                 return $requests->last_scanned_by_sub_user . ' Substitute Shipper';
             }
-            elseif ($requests->user_type == 5) {
-                return $requests->last_scanned_by_rider . ' Rider';
-            }
             else{
                 return '-';
             }
@@ -11347,9 +11339,6 @@ class AdminReportsController extends Controller
             }
             elseif ($requests->user_type == 2 || $requests->user_type == 3) {
                 return $requests->last_scanned_user_city;
-            }
-            elseif ($requests->user_type == 5) {
-                return $requests->last_scanned_rider_city;
             }
             else{
                 return '-';
@@ -11377,10 +11366,10 @@ class AdminReportsController extends Controller
         }
         if ($tracking_numbers = $request->get('tracking_numbers')) 
         {
-            $datatables->whereIn('s.tracking_number',explode(',', $tracking_numbers));
+            $datatables->whereIn('shipments.tracking_number',explode(',', $tracking_numbers));
         }
-        if($rider = $request->get('rider')){
-            $datatables->where('sjs.admin_id', '=', $rider)->where('sjs.user_type',5);
+        if($shipper = $request->get('shipper')){
+            $datatables->where('u.id', '=', $shipper);
         }
 
         return $datatables->make(true);
