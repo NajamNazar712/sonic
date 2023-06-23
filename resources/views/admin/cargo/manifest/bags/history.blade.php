@@ -17,101 +17,87 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <div class="text-center">
-                                <form id="bag_type_search_form"
-                                      class="d-inline-block form-inline mb-1 justify-content-center text-left"
-                                      novalidate="novalidate">
-                                    <div class="form-group">
-                                        <select name="bag_type" class="select2" id="bag_type">
-                                            <option value="" selected="selected"></option>
-                                            <option value="0">All</option>
-                                            <option value="1">Normal</option>
-                                            <option value="2">Return</option>
-                                        </select>
-                                    </div>
-                                </form>
+                             <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
 
-                                <form id="tracking_number_search_form"
-                                      class="d-inline-block form-inline ml-1 mb-1 justify-content-center"
-                                      novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="tracking_number" class="form-control tracking_number"
-                                               id="tracking_number" placeholder="Tracking Number">
-                                    </div>
-                                </form>
-
-                                <form id="bag_number_search_form"
-                                      class="d-inline-block form-inline ml-1 mb-1 justify-content-center"
-                                      novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="bag_number" class="form-control bag_number"
-                                               id="bag_number" placeholder="Bag Number">
-                                    </div>
-                                </form>
-
-
-                                <form id="search_form" class="form-inline mb-1 justify-content-center"
-                                      novalidate="novalidate">
-                                    <div class="col-3 mt-1">
-                                        <div class="form-group input-group ">
-                                            <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                        <fieldset class="col-4">
+                                            <fieldset class="form-group">
+                                                <select name="bag_type"  id="bag_type"   class="form-control select2">
+                                                    <option value="" selected="selected"></option>
+                                                    <option value="0">All</option>
+                                                    <option value="1">Normal</option>
+                                                    <option value="2">Return</option>
+                                                </select>
+                                            </fieldset>
+                                        </fieldset>
+                                        <fieldset class="col-4">
+                                            <div class="form-group">
+                                                <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number" >
                                             </div>
-                                            <input type="text" name="search_date_from"
-                                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                   id="search_date_from" placeholder="Select From Date">
-                                        </div>
-                                    </div>
-                                    <div class="col-3 mt-1">
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o"></span>
-                                        </span>
+                                        </fieldset>
+                                        <fieldset class="col-4">
+                                            <div class="form-group ">
+                                                <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
                                             </div>
-                                            <input type="text" name="search_date_to"
-                                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                   id="search_date_to" placeholder="Select To Date">
-                                        </div>
-                                    </div>
+                                        </fieldset>
+
+                                        <fieldset class="col-3 mt-1">
+                                            <div class="form-group input-group ">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_from"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_from" placeholder="Select From Date">
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="col-3 mt-1">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o"></span>
+                                                    </span>
+                                                </div>
+                                                <input type="text" name="search_date_to"
+                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                       id="search_date_to" placeholder="Select To Date">
+                                            </div>
+                                        </fieldset>
 
 
-                                    <div class="col-3 mt-1">
+                                        <fieldset class="col-3 mt-1">
 
-                                        <select name="search_origin" id="search_origin"
-                                                class="form-control select2 col-4">
-                                            <option value="">Search origin</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                            <select name="search_origin" id="search_origin"
+                                                    class="form-control select2 col-4">
+                                                <option value="">Search origin</option>
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
 
-                                    <div class="col-3 mt-1">
+                                        <fieldset class="col-3 mt-1">
 
-                                        <select name="search_destination" id="search_destination"
-                                                class="form-control select2 col-4">
-                                            <option value="">Search destination</option>
-                                            @foreach($hubs as $hub)
-                                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
+                                            <select name="search_destination" id="search_destination"
+                                                    class="form-control select2 col-4">
+                                                <option value="">Search destination</option>
+                                                @foreach($hubs as $hub)
+                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
 
-                                    <div class="col-4 mt-1">
-                                        <div class="form-group">
-                                            <button type="button" id="search_filter_btn"
-                                                    class="btn btn-block btn-outline-info btn-min-width"><i
-                                                        class="la la-search"></i>
-                                                Search
-                                            </button>
-                                        </div>
-                                    </div>
-
+                                        <fieldset class="col-4 mt-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-block btn-outline-info btn-min-width"><i
+                                                            class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </fieldset>
                                 </form>
-                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -295,9 +281,9 @@
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.bags.history.list') }}',
                     data: function (d) {
-                        d.bag_type = $('#bag_type_search_form #bag_type').val();
-                        d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
-                        d.bag_number = $('#bag_number_search_form #bag_number').val();
+                        d.bag_type = $('#search_form #bag_type').val();
+                        d.tracking_number = $('#search_form #tracking_number').val();
+                        d.bag_number = $('#search_form #bag_number').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_origin = $('#search_origin').val();
@@ -538,26 +524,6 @@
             var route = '{!! route('admin.tracking.index') !!}';
 
 
-            $('#bag_type_search_form #bag_type').select2({
-                placeholder: 'Bag Type',
-                width: '200px', // Set a fixed width for the text box
-                allowClear: false,
-                closeOnSelect: false,
-            });
-
-
-            $('#tracking_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
-
-            $('#bag_number').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
-
             /*           $('#tracking_number_search_form').bind('submit', function(e) {
                             e.preventDefault();
 
@@ -603,6 +569,25 @@
                 allowClear: false
             });
 
+            $('#bag_type').select2({
+                placeholder: 'Select Bag Type',
+                width: '100%',
+                allowClear: false
+            });
+
+            $('#tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#bag_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+
 
             var search_date_to = $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
@@ -617,7 +602,7 @@
                     }
                 }
             });
-
+            var currentDate = '{{ \Carbon\Carbon::now()->format("Y-m-d") }}';
             var search_date_from = $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -627,7 +612,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function (context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        $('#search_form #search_date_to').pickadate('picker').set('max', currentDate);;
                     }
                 }
             });
