@@ -855,7 +855,8 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="1" class="color primary"><strong>Weight</strong></td>
                                 <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
-                                <td colspan="1" class="color primary"><strong>Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
                                 <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
@@ -867,6 +868,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
