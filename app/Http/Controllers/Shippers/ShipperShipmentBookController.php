@@ -7451,8 +7451,10 @@ class ShipperShipmentBookController extends Controller
                         $area_id = $default_area->id;
                     }
                 }else{
-                    $default_area = $default_area->first();
-                    $area_id = $default_area->id;
+                    if($default_area->exists()) {
+                        $default_area = $default_area->first();
+                        $area_id = $default_area->id;
+                    }
                 }
                 $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
                 if (!$consignee_address_area->exists()) {
@@ -7499,8 +7501,10 @@ class ShipperShipmentBookController extends Controller
                     $area_id = $default_area->id;
                 }
             }else{
-                $default_area = $default_area->first();
-                $area_id = $default_area->id;
+                if($default_area->exists()) {
+                    $default_area = $default_area->first();
+                    $area_id = $default_area->id;
+                }
             }
             if($area_id) {
                 $user_shipping_info = UserShippingInfo::find($pickup_address_id);
@@ -7543,8 +7547,10 @@ class ShipperShipmentBookController extends Controller
                     $city_area_id = $default_area->id;
                 }
             }else{
-                $default_area = $default_area->first();
-                $city_area_id = $default_area->id;
+                if($default_area->exists()) {
+                    $default_area = $default_area->first();
+                    $city_area_id = $default_area->id;
+                }
             }
 
         }
