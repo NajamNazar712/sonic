@@ -25,13 +25,12 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
-                        {{-- <th class="border-primary border-darken-1">Station Approved By</th>
-                        <th class="border-primary border-darken-1">Station Approved At</th> --}}
-                        <th class="border-primary border-darken-1">Operation Approved By</th>
-                        <th class="border-primary border-darken-1">Operation Approved At</th>
-                        <th class="border-primary border-darken-1">Finance Approved By</th>
-                        <th class="border-primary border-darken-1">Finance Approved At</th>
-                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Station Approved By</th>
+                        <th class="border-primary border-darken-1">Station Approved At</th>
+                        {{-- <th class="border-primary border-darken-1">Operation Approved By</th>
+                        <th class="border-primary border-darken-1">Operation Approved At</th> --}}
+                        {{-- <th class="border-primary border-darken-1">Finance Approved By</th>
+                        <th class="border-primary border-darken-1">Finance Approved At</th> --}}
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
@@ -87,13 +86,13 @@
                             head.push('Amount');
                             head.push('Created By');
                             head.push('Created At');
-                            // head.push('Station Approved By');
-                            // head.push('Station Approved At');
-                            head.push('Operation Approved By');
-                            head.push('Operation Approved At');
-                            head.push('Finance Approved By');
-                            head.push('Finance Approved At');
-                            head.push('Status');
+                            head.push('Station Approved By');
+                            head.push('Station Approved At');
+                            // head.push('Operation Approved By');
+                            // head.push('Operation Approved At');
+                            // head.push('Finance Approved By');
+                            // head.push('Finance Approved At');
+                         
 
 
                             $.each(result.data, function(index, values) {
@@ -110,13 +109,13 @@
                                 row.push(values.total_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                // row.push(values.station_approved_by);
-                                // row.push(values.station_approved_at);
-                                row.push(values.operation_approved_by);
-                                row.push(values.operation_approved_at);
-                                row.push(values.finance_approved_by);
-                                row.push(values.finance_approved_at);
-                                row.push(values.status);
+                                row.push(values.station_approved_by);
+                                row.push(values.station_approved_at);
+                                // row.push(values.operation_approved_by);
+                                // row.push(values.operation_approved_at);
+                                // row.push(values.finance_approved_by);
+                                // row.push(values.finance_approved_at);
+                           
 
                                 body.push(row);
                             });
@@ -132,7 +131,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'Approved Petty Cash Statements',
+                    title: 'Rejected Petty Cash Statements',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -159,13 +158,12 @@
                     {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    // {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
-                    // {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
-                    {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
-                    {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
-                    {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
-                    {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
-                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
+                    {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
+                    {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
+                    // {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
+                    // {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
+                    // {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
+                    // {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -181,11 +179,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="3">Finance Approved</option>' +
-                        '<option value="4">Paid</option>' +
-                        '<option value="5">Adjusted</option>' +
-                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -209,12 +202,12 @@
                         }
                     });
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $("#status_select").prepend('<option value="" selected></option>').select2({
+                    //     placeholder: "Select Status",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
 
                     this.api().table().columns.adjust();
                 }

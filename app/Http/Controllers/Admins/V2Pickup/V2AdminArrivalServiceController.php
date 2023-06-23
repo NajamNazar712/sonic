@@ -35,9 +35,11 @@ class V2AdminArrivalServiceController extends Controller
         $this->middleware('Permission');
     }
     public function arrival_service_index(){
+
         return view('admin.v2_pickups.arrival_service_center.arrival_service');
     }
     public function arrival_service_details(Request $request){
+
         $shipment = Shipment::where('tracking_number',$request->tracking_number);
 
         if($shipment->exists()) {
@@ -46,9 +48,11 @@ class V2AdminArrivalServiceController extends Controller
 
             //todo: now checking canceled shipment arrival
             $user = ShipmentsJourney::where('shipment_id',$shipment->id)->select('user_id','shipper_status_id')->orderby('id','desc')->first();
+
             if($user->shipper_status_id == 17)
             {
                 $canceled_shipment = CancelledShipmentArrival::where('shipper_id',$user->user_id)->first();
+
                 if($canceled_shipment)
                 {
                     return ['status' => 1, 'error' => 'Shipment is not allowed for arrival because shipper cancelled this shipment !'];
@@ -75,6 +79,8 @@ class V2AdminArrivalServiceController extends Controller
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
 
+
+
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
                 }else if($shipment->booking_type_id == 1 && $shipment->pieces > 1){
@@ -99,6 +105,8 @@ class V2AdminArrivalServiceController extends Controller
 
                     $details['id'] = $shipment->id;
                     $details['tracking_number'] = $shipment->tracking_number;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
                     $details['shipper'] = $shipment->user->name;
                     $details['amount'] = $shipment->amount;
                     //$details['weight'] = floatval($shipment->actual_weight);

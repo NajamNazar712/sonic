@@ -51,7 +51,7 @@ class AdminPettyCashController extends Controller
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
-        $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
+        $operation_managers = Admin::whereIn('role_id',[10,122])->where('status',1)->select(['id','trax_id','name'])->get();
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
         } else {
@@ -261,10 +261,10 @@ class AdminPettyCashController extends Controller
                 }
                 PettyCashStatement::where('id', $petty_cash_statement_id)->update(['total_amount' => $total_amount]);
 
-                $shipment_id = $this->create_shipment($petty_cash->id);
-                $petty_cash->shipment_id = $shipment_id;
-                $petty_cash->save();
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created', 'print' => $shipment_id]);
+                // $shipment_id = $this->create_shipment($petty_cash->id);
+                // $petty_cash->shipment_id = $shipment_id;
+                // $petty_cash->save();
+                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
 
             } else {
 
@@ -686,10 +686,10 @@ class AdminPettyCashController extends Controller
 
 //                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
                 if ((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))) {
-                    if ((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4) || ($petty->status == 7 && session('department_id') == 4)) {
-                        if ($petty->status == 2) {
+                    if ((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 2 && session('department_id') == 4) || ($petty->status == 7 && session('department_id') == 4)) {
+                        if (in_array($petty->status,[1,2])) {
                             $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Receive</button>';
-                        } else {
+                        }else {
                             $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
                         }
                     }
@@ -720,29 +720,30 @@ class AdminPettyCashController extends Controller
         $statement_id = $request->statement_id;
         $petty = PettyCashStatement::find($statement_id);
         if ($petty) {
-            // if ($petty->station_approved_by == null) {
-            //     if (session('role_id') == 1 || in_array(190, session('permissions'))) {
-            //         $petty->station_approved_by = Auth::id();
-            //         $petty->station_approved_at = Carbon::now();
-            //         $petty->status = 1;
-            //         $petty->save();
-            //         $this->petty_cash_statement_details_auto_approve($request->statement_id);
-            //     } else {
-            //         return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
-            //     }
-
-            // }
-              if ($petty->operation_approved_by == null) {
-                if (session('role_id') == 1 || in_array(191, session('permissions'))) {
-                    $petty->operation_approved_by = Auth::id();
-                    $petty->operation_approved_at = Carbon::now();
-                    $petty->status = 2;
+            if ($petty->station_approved_by == null) {
+                if (session('role_id') == 1 || in_array(190, session('permissions'))) {
+                    $petty->station_approved_by = Auth::id();
+                    $petty->station_approved_at = Carbon::now();
+                    $petty->status = 1;
                     $petty->save();
                     $this->petty_cash_statement_details_auto_approve($request->statement_id);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
                 }
-            } else if ($petty->finance_received_statement_by == null) {
+
+            }
+            //   if ($petty->operation_approved_by == null) {
+            //     if (session('role_id') == 1 || in_array(191, session('permissions'))) {
+            //         $petty->operation_approved_by = Auth::id();
+            //         $petty->operation_approved_at = Carbon::now();
+            //         $petty->status = 2;
+            //         $petty->save();
+            //         $this->petty_cash_statement_details_auto_approve($request->statement_id);
+            //     } else {
+            //         return response()->json(['status' => 0, 'error' => 'Petty Cash Request can not approve at current status!']);
+            //     }
+            // } 
+            else if ($petty->finance_received_statement_by == null) {
                 if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                     $petty->finance_received_statement_by = Auth::id();
                     $petty->finance_received_statement_at = Carbon::now();
@@ -781,7 +782,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_approve(Request $request)
-    {
+    {  
         $id = $request->detail_id;
         if ($request->has('approve_all')) {
             if ($id) {
@@ -807,15 +808,17 @@ class AdminPettyCashController extends Controller
                                 $petty->save();
                             }
 
-                        } else if ($petty->operation_approved_by == null) {
-                            if (session('role_id') == 1 || in_array(191, session('permissions'))) {
-                                $petty->operation_approved_by = Auth::id();
-                                $petty->operation_approved_at = Carbon::now();
-                                $petty->status = 2;
-                                $petty->save();
+                        } 
+                        // else if ($petty->operation_approved_by == null) {
+                        //     if (session('role_id') == 1 || in_array(191, session('permissions'))) {
+                        //         $petty->operation_approved_by = Auth::id();
+                        //         $petty->operation_approved_at = Carbon::now();
+                        //         $petty->status = 2;
+                        //         $petty->save();
 
-                            }
-                        } else if ($petty->finance_received_statement_by == null) {
+                        //     }
+                        // } 
+                        else if ($petty->finance_received_statement_by == null) {
                             if (session('role_id') == 1 || in_array(173, session('permissions'))) {
                                 $petty->finance_received_statement_by = Auth::id();
                                 $petty->finance_received_statement_at = Carbon::now();
@@ -835,7 +838,12 @@ class AdminPettyCashController extends Controller
                     if ($flag = false) {
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
                     } else {
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                        if ($petty->finance_received_statement_by == null){
+                            return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                        }
+                        else{
+                            return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Received!']);
+                        }
                     }
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
@@ -906,7 +914,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_submit(Request $request)
-    {
+    {   
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
@@ -2104,9 +2112,9 @@ class AdminPettyCashController extends Controller
                     $petty_cash_draft->delete();
                     PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
 
-                    $shipment_id = $this->create_shipment($petty_cash->id);
-                    $petty_cash->shipment_id = $shipment_id;
-                    $petty_cash->save();
+                    // $shipment_id = $this->create_shipment($petty_cash->id);
+                    // $petty_cash->shipment_id = $shipment_id;
+                    // $petty_cash->save();
 
                     return redirect()->route('admin.petty_cash.statements.index')->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
                 }
