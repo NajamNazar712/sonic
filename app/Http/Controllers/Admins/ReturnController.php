@@ -6166,86 +6166,61 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),641);
         }
 
-        // $data = RiderDelivery::leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
-        // ->leftJoin('shipments', 'shipments.id', 'rider_deliveries.shipment_id')
+        $data = Shipment::leftJoin('rider_deliveries','rider_deliveries.shipment_id', '=', 'shipments.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id','=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
+            })
+            ->leftJoin('shipments_journey as sjrcp', function ($join) {
+                $join->on('sjrcp.shipment_id', '=', 'shipments.id')
+                    ->where('sjrcp.id','=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and shipper_status_id = 12 and verification = 1)'));
+            })
+            ->leftJoin('delivery_notes as dn', 'dn.id', '=','sjrcp.reference_1_id')
+            ->leftJoin('riders', 'riders.id', '=','dn.rider_id')
+            ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
+            ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
+            ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
+            ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
+            ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sjrcp.status_reason_id')
+            ->select('dn.id as delivery_note_id', 'riders.name as rider_name', 'riders.trax_id as rider_employee_id',
+                'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin',
+                'destinationcity.name as destination','sj.created_at as date', 'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id', 'ssr.name as reason', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.shipper_status_id = 12  ) as rcp_count'))
+            ->whereIn('shipments.shipper_status_id', [12,20]);
 
-        $data = Shipment::leftJoin('rider_deliveries','rider_deliveries.shipment_id', 'shipments.id')
-        ->leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
-        ->leftJoin('shipments_journey as sj', function ($join) {
-            $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
-//                and reference_1_id = rider_deliveries.delivery_note_id)'));
-        })
-        ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
-        ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
-        ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
-        ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
-        ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
-        ->leftJoin('employees as emp', 'emp.id', 'riders.employee_id')
-        ->leftJoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
+            if($rider = $request->get('rider')) {
+                $data = $data->whereIn('riders.id',$rider);
+            }
+            if($hub = $request->get('hub')) {
+                $data = $data->whereIn('hub.id',$hub);
+            }
+            if($search_date_from = $request->get('search_date_from') && $search_date_to = $request->get('search_date_to')) {
+                $data = $data->whereBetween('sj.created_at',[$request->get('search_date_from'), $request->get('search_date_to')]);
+            }
 
-        ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
-            'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
-            'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-            'destinationcity.name as destination','sj.created_at as date',
-            // 'sjls.created_at as last_status_date',
-            'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id',
-            // 'ls.name as last_status',
-            'ssr.name as reason',
-             DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and verification = 1 and shipments_journey.shipper_status_id = 12  ) as rcp_count')
-        )
-
-        //Shipment Status should be only Rcp(Id: 12) & Shipment - Re-Attempt Requested (Id: 52)
-        ->whereIn('shipments.shipper_status_id', [12,20]);
-
-        //Current Status should be only Rcp(Id: 12) & Return Confirm (Id: 20)
-        // ->whereIn('cs.id',[12,20])
-
-        // Shipment Status Reason Should be only Consignee Refused(Id: 8)
-        // ->where('ssr.id',8)
-        
-//        ->groupBy('shipments.id');
-        // ->groupBy('rider_deliveries.delivery_note_id');
-
-
-
-        if($rider = $request->get('rider'))
-        {
-            $data = $data->whereIn('riders.id',$rider);
-        }
-
-        if($hub = $request->get('hub'))
-        {
-            $data = $data->whereIn('hub.id',$hub);
-        }
-
-        if($search_date_from = $request->get('search_date_from') && $search_date_to = $request->get('search_date_to'))
-        {
-            $data = $data->whereBetween('sj.created_at',[$request->get('search_date_from'), $request->get('search_date_to')]);
-        }
-        $datatable = Datatables::of($data)
-        ->editColumn('tracking_number', function ($shipments) {
-            $route = route('admin.tracking.index');
-            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-        })
-        ->addColumn('tracking_number_excel', function ($shipments) {
-            ($shipments->tracking_number);
-            return $shipments->tracking_number;
-        })
-        ->filterColumn('current_status' , function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('cs.id', $keyword);
-            });
-        })
-        ->filterColumn('last_status' , function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('ls.id', $keyword);
-            });
-        })
-        ->addColumn('otp_entered', function ($shipments) {
-            return $shipments->otp_status == null ? 'No' : 'Yes';
-        })
-        ->filterColumn('otp_entered' , function ($query, $keyword) {
+            $datatable = Datatables::of($data)
+            ->editColumn('tracking_number', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('tracking_number_excel', function ($shipments) {
+                ($shipments->tracking_number);
+                return $shipments->tracking_number;
+            })
+            ->filterColumn('current_status' , function ($query, $keyword) {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('cs.id', $keyword);
+                });
+            })
+            ->filterColumn('last_status' , function ($query, $keyword) {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('ls.id', $keyword);
+                });
+            })
+            ->addColumn('otp_entered', function ($shipments) {
+                return $shipments->otp_status == null ? 'No' : 'Yes';
+            })
+            ->filterColumn('otp_entered' , function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
                     if($keyword == 1){
                          $sub_query->where('rider_deliveries.otp_entered', '>', 0);
