@@ -11318,7 +11318,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $quick_scanned = $quick_scanned->whereBetween('ssj.created_at', [$from,$to]);
+            $quick_scanned = $quick_scanned->whereBetween('sj.created_at', [$from,$to]);
         }
         if ($tracking_numbers = $request->get('tracking_numbers'))
         {
