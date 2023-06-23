@@ -12466,7 +12466,7 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
-                    
+
                     $deliveries['tracking_number'] = $tracking_number;
 
                     if ($shipment_data->shipper_status_id == 5) {
@@ -12478,7 +12478,7 @@ class RiderAPIController extends Controller
                     else {
                         $shipment_reattempt = NULL;
                     }
-                    
+
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
@@ -13996,7 +13996,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-            
+
             if(!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()){
                 $rider_remark = new RiderRemark;
                 $rider_remark->rider_id = $request->rider_id;
@@ -14006,8 +14006,8 @@ class RiderAPIController extends Controller
             }else{
                 return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
             }
-        }   
-           
+        }
+
     }
     public function rider_remark_list(Request $request)
     {
@@ -14059,6 +14059,97 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $rider_remarks]);
         } else {
             return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
+        }
+    }
+    //response:
+    //rider_trax_id
+    //date
+    //checkin_date
+
+
+    //from
+    //to
+    //rider_trax_id optional
+
+    public function rider_checkin(Request $request)
+    {
+
+        $rules = [
+            'from' => ['required', 'date_format:Y/m/d'],
+            'to' => ['required', 'date_format:Y/m/d'],
+            'trax_id' => ['nullable','string']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $from = Carbon::parse($request->from);
+            $to = Carbon::parse($request->to);
+            $today = Carbon::now();
+
+            $total_difference_from = $from;
+            $total_difference_from = $total_difference_from->diff($today)->days;
+            $between_difference_from = $from;
+            $between_difference_from = $between_difference_from->diff($to)->days;
+            if($total_difference_from <= 90){
+                if($between_difference_from <= 45){
+                    $details = array();
+
+                    $trax_id_check = false;
+                    if($request->has('trax_id')){
+                        if($request->trax_id != null && $request->trax_id != ''){
+                            $employee = Employee::where('trax_id', $request->trax_id);
+                            if($employee->exists()){
+                                $employee = $employee->first();
+
+                                $trax_id_check = true;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Employee not found!']);
+                            }
+                        }
+                    }
+
+                    if($trax_id_check == false){
+                        $rider_attendances = EmployeeAttendance::where('employee_type', 2)->whereBetween('attendance_date',[$from,$to]);
+                    }
+                    else{
+                        $rider_attendances = EmployeeAttendance::where('employee_id', $employee->id)->where('employee_type', 2)->whereBetween('attendance_date',[$from,$to]);
+                    }
+
+                    if($rider_attendances->exists()){
+                        $rider_attendances = $rider_attendances->get();
+                        foreach ($rider_attendances as $rider_attendance){
+                            if($trax_id_check == false) {
+                                $employee = Employee::find($rider_attendance->employee_id);
+                            }
+                            if($employee){
+                                if($rider_attendance->clock_in_datetime != null){
+                                    $detail = array('Trax ID' => $employee->trax_id, 'Name' => $employee->name, 'Clock In' => $rider_attendance->clock_in_datetime);
+                                    $details[$rider_attendance->attendance_date][] = $detail;
+                                }
+                            }
+                        }
+
+                        return response()->json(['status' => 0, 'data' => $details]);
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Data not found!']);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Date difference range must not exceed 45 days']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
+            }
+
         }
     }
 }
