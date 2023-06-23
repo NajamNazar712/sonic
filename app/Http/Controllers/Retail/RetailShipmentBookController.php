@@ -849,6 +849,7 @@ class RetailShipmentBookController extends Controller
                 ';
                     $gst = $shipment->retail->gst;
                     $packaging_and_insurance = $shipment->retail->packaging_charges + $shipment->retail->insurance_charges;
+                    $r_t = ($shipment->retail->admin_discount_type == 1) ? ' %' : (($shipment->retail->admin_discount_type == 0) ? ' Flat' : ' -');
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
@@ -868,7 +869,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
-                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . $r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
