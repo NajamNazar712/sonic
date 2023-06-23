@@ -77,7 +77,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Delivery Note ID</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
-                            <th class="border-primary border-darken-1">Rider Employee ID</th>
+                            <th class="border-primary border-darken-1">Rider ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -277,7 +277,7 @@
                             head.push('S.No');
                             head.push('Delivery Note ID');
                             head.push('Tracking Number');
-                            head.push('Rider Employee ID');
+                            head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');
                             head.push('Destination');

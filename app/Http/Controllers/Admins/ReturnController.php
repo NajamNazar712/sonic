@@ -5980,7 +5980,7 @@ class ReturnController extends Controller
     public function return_confirm_otp_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(),640);
         $rider_name = Rider::all();
-        $shipment_status = ShipmentStatus::select('id', 'name')->get();
+        $shipment_status = ShipmentStatus::select('id', 'name')->whereIn('id', [12, 20])->get();
         $hub_name =City::where('hub',1)->where('status',1)->select('id','name')->get();
         $today = Carbon::now()->endOfDay();
         $sevenDays = Carbon::now()->subDays(7)->startOfDay();
@@ -5997,31 +5997,12 @@ class ReturnController extends Controller
 
         $data = Shipment::leftJoin('rider_deliveries','rider_deliveries.shipment_id', 'shipments.id')
         ->leftJoin('riders', 'riders.id','rider_deliveries.rider_id')
-
-
-        //for the current row (Current Status)
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1 
-                and reference_1_id = rider_deliveries.delivery_note_id)'));
+                ->where('sj.id','=', DB::raw('(select max(id) from shipments_journey where shipment_id = shipments.id and verification = 1)'));
+//                and reference_1_id = rider_deliveries.delivery_note_id)'));
         })
-        
         ->leftJoin('shipment_status as cs', 'cs.id','=','sj.shipper_status_id')
-
-        //for the last row (last Status)
-        // ->leftJoin('shipments_journey as sjls', function ($join) {
-        //     $subquery = DB::table('shipments_journey')
-        //         ->select(DB::raw('MAX(id)'))
-        //         ->where('verification', 1)
-        //         ->whereRaw('shipment_id = sj.shipment_id')
-        //         ->whereRaw('reference_1_id = rider_deliveries.delivery_note_id')
-        //         ->whereRaw('id < sj.id')
-        //         ->groupBy('shipment_id', 'reference_1_id');
-        //         $join->on('sjls.id', '=', DB::raw("({$subquery->toSql()})"))
-        //             ->mergeBindings($subquery);
-        // })
-        
-        // ->leftJoin('shipment_status as ls', 'ls.id','=','sjls.shipper_status_id')
         ->leftJoin('user_shipping_infos', 'user_shipping_infos.id', 'shipments.pickup_address_id')
         ->leftJoin('cities', 'cities.id', 'user_shipping_infos.city_id')
         ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
@@ -6032,7 +6013,7 @@ class ReturnController extends Controller
         ->select('rider_deliveries.delivery_note_id as delivery_note_id', 
             'riders.name as rider_name', 'emp.trax_id as rider_employee_id',
             'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 
-            'destinationcity.name as destination','sj.created_at as date', 
+            'destinationcity.name as destination','sj.created_at as date',
             // 'sjls.created_at as last_status_date',
             'rider_deliveries.otp_entered as otp_status','hub.name as hubname','cs.name as current_status','cs.id as current_status_id',
             // 'ls.name as last_status',
@@ -6041,7 +6022,7 @@ class ReturnController extends Controller
         )
 
         //Shipment Status should be only Rcp(Id: 12) & Shipment - Re-Attempt Requested (Id: 52)
-        ->whereIn('shipments.shipper_status_id', [12,52])
+        ->whereIn('shipments.shipper_status_id', [12,20]);
 
         //Current Status should be only Rcp(Id: 12) & Return Confirm (Id: 20)
         // ->whereIn('cs.id',[12,20])
@@ -6049,10 +6030,25 @@ class ReturnController extends Controller
         // Shipment Status Reason Should be only Consignee Refused(Id: 8)
         // ->where('ssr.id',8)
         
-        ->groupBy('shipments.id');
+//        ->groupBy('shipments.id');
         // ->groupBy('rider_deliveries.delivery_note_id');
-        
-            
+
+
+
+        if($rider = $request->get('rider'))
+        {
+            $data = $data->whereIn('riders.id',$rider);
+        }
+
+        if($hub = $request->get('hub'))
+        {
+            $data = $data->whereIn('hub.id',$hub);
+        }
+
+        if($search_date_from = $request->get('search_date_from') && $search_date_to = $request->get('search_date_to'))
+        {
+            $data = $data->whereBetween('sj.created_at',[$request->get('search_date_from'), $request->get('search_date_to')]);
+        }
         $datatable = Datatables::of($data)
         ->editColumn('tracking_number', function ($shipments) {
             $route = route('admin.tracking.index');
@@ -6085,22 +6081,6 @@ class ReturnController extends Controller
 
                 });
             });
-
-            if($rider = $request->get('rider'))
-            {
-                $data = $data->whereIn('riders.id',$rider);
-            }
-    
-            if($hub = $request->get('hub'))
-            {
-                $data = $data->whereIn('hub.id',$hub);
-            }
-
-            if($search_date_from = $request->get('search_date_from') && $search_date_to = $request->get('search_date_to'))
-            {
-                $data = $datatable->whereBetween('sj.created_at',[$request->get('search_date_from'), $request->get('search_date_to')]);
-            }
-
         return $datatable->make(true);
     }
 
