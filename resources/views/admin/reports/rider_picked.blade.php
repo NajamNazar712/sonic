@@ -26,7 +26,7 @@
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}}</option>
+                                    <option value="{{$rider->id}}">{{$rider->name}}{{ $rider->trax_id != null ? "|".$rider->trax_id : " " }}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -69,14 +69,20 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th> 
                             <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Status Date</th>
+                            <th class="border-primary border-darken-1">Rider Location</th>
+                            <th class="border-primary border-darken-1">Rider Hub</th>
+                            <th class="border-primary border-darken-1">Rider Zone</th>
+                            <th class="border-primary border-darken-1">Shipper Name</th>
+                            <th class="border-primary border-darken-1">Shipper Address</th>
+                            <th class="border-primary border-darken-1">Shipper City</th>
                             <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Pickup Note ID</th>
-                            <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
-                            <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Cod Amount</th>
+                            <th class="border-primary border-darken-1">Product Type</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
                         </tr>
                         </thead>
                     </table>

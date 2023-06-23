@@ -11272,7 +11272,7 @@ class AdminReportsController extends Controller
     }
 
     public function project_arrival_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 671);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
         $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
         $shippers = User::whereIn('status', [3, 4])->get();
@@ -11284,7 +11284,7 @@ class AdminReportsController extends Controller
 
         if($request->get('excel') && $request->get('excel') == true)
         {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),672);
         }
 
         $rider_pickup = DB::connection('reports')->table('v2_pickup_notes')
@@ -11452,18 +11452,17 @@ class AdminReportsController extends Controller
     }
 
     public function rider_picked_index(){
-        // ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 673);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name','trax_id']);
         $shippers = User::whereIn('status', [3, 4])->get();
-
         return view('admin.reports.rider_picked')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
     }
     public function rider_picked_list(Request $request){
 
         if($request->get('excel') && $request->get('excel') == true)
         {
-            // ActivityTrailController::createActivityTrailLog(Auth::id(),198);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),674);
         }
 
         $rider_pickup = DB::connection('reports')->table('v2_pickup_notes')
@@ -11487,6 +11486,7 @@ class AdminReportsController extends Controller
             ->select('v2_pickup_notes.status as status','pr.id as pickup_request_id','v2_pickup_notes.id','v2_pickup_notes.id as pickup_note_id','v2_pickup_notes.created_at as date','r.trax_id as rider_id','r.name as rider_name','c.name as origin','prs.shipment_id as shipment_id', DB::raw('count(arrsh.id) as arrived_shipments'), DB::raw('count(total_s.id) as scanned_shipments'),'v2_pickup_notes.arrived_shipments as total_arrived_shipments','v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider','arrsh.created_at as rider_picked_date_time','a.name as scanned_by')
             ->where('v2_pickup_notes.status',1)
             ->groupBy('v2_pickup_notes.id');
+            
 
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {
@@ -11558,7 +11558,7 @@ class AdminReportsController extends Controller
         return $datatables->make(true);
     }
     public function rider_picked_arrival_scanned_shipments(Request $request){
-        dd("project_arrival_scanned_shipments");
+        dd("rider_picked_arrival_scanned_shipments");
 
         $shipments =  DB::connection('reports')->table('v2_pickup_notes')
         ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
@@ -11576,7 +11576,7 @@ class AdminReportsController extends Controller
         return response()->json(['status' => 1, 'data' => $shipments]);
     }
     public function rider_picked_arrival_arrived_shipments(Request $request){
-        dd("project_arrival_arrived_shipments");
+        dd("rider_picked_arrival_arrived_shipments");
 
          $shipments =  DB::connection('reports')->table('v2_pickup_notes')
          ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
