@@ -11315,6 +11315,19 @@ class AdminReportsController extends Controller
         ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
         ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city');
 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $quick_scanned = $quick_scanned->whereBetween('ssj.created_at', [$from,$to]);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers'))
+        {
+            $quick_scanned->whereIn('shipments.tracking_number',explode(',', $tracking_numbers));
+        }
+        if($shipper = $request->get('shipper')){
+            $quick_scanned->where('u.id', '=', $shipper);
+        }
+
         $datatables = Datatables::of($quick_scanned)
         ->addColumn('tracking_number_hyperlink', function ($requests) {
             return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
@@ -11358,19 +11371,6 @@ class AdminReportsController extends Controller
                 return '-';
             }
         });
-    
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $datatables = $datatables->whereBetween('ssj.created_at', [$from,$to]);
-        }
-        if ($tracking_numbers = $request->get('tracking_numbers')) 
-        {
-            $datatables->whereIn('shipments.tracking_number',explode(',', $tracking_numbers));
-        }
-        if($shipper = $request->get('shipper')){
-            $datatables->where('u.id', '=', $shipper);
-        }
 
         return $datatables->make(true);
     }
