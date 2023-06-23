@@ -782,7 +782,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_approve(Request $request)
-    {
+    {  
         $id = $request->detail_id;
         if ($request->has('approve_all')) {
             if ($id) {
@@ -838,7 +838,12 @@ class AdminPettyCashController extends Controller
                     if ($flag = false) {
                         return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
                     } else {
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                        if ($petty->finance_received_statement_by == null){
+                            return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                        }
+                        else{
+                            return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Received!']);
+                        }
                     }
                 } else {
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
@@ -909,7 +914,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function edit_petty_cash_statements_submit(Request $request)
-    {
+    {   
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
