@@ -1394,8 +1394,7 @@ class AdminCargoManifestController extends Controller
 
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $stop_date = Carbon::createFromFormat('Y-m-d', $to)->endOfDay()->toDateTimeString();
-            $datatables->whereBetween('cargo_manifest_bags.created_at', [$from, $stop_date]);
+            $datatables->whereBetween('cargo_manifest_bags.created_at', [$from, $to]);
         }
 
         if ($search_origin = $request->get('search_origin')) {

@@ -19,7 +19,7 @@
 
                              <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
 
-                                        <fieldset class="col-4">
+                                        <fieldset class="col-2">
                                             <fieldset class="form-group">
                                                 <select name="bag_type"  id="bag_type"   class="form-control select2">
                                                     <option value="" selected="selected"></option>
@@ -29,66 +29,68 @@
                                                 </select>
                                             </fieldset>
                                         </fieldset>
-                                        <fieldset class="col-4">
+                                        <fieldset class="col-2">
                                             <div class="form-group">
                                                 <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number" >
                                             </div>
                                         </fieldset>
-                                        <fieldset class="col-4">
+                                        <fieldset class="col-2">
                                             <div class="form-group ">
                                                 <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
                                             </div>
                                         </fieldset>
 
-                                        <fieldset class="col-3 mt-1">
-                                            <div class="form-group input-group ">
-                                                <div class="input-group-prepend">
+
+
+                                 <fieldset class="col-2 ">
+
+                                     <select name="search_origin" id="search_origin"
+                                             class="form-control select2 col-4">
+                                         <option value="">Select origin</option>
+                                         @foreach($hubs as $hub)
+                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                         @endforeach
+                                     </select>
+                                 </fieldset>
+
+                                 <fieldset class="col-2 ">
+
+                                     <select name="search_destination" id="search_destination"
+                                             class="form-control select2 col-4">
+                                         <option value="">Select destination</option>
+                                         @foreach($hubs as $hub)
+                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                         @endforeach
+                                     </select>
+                                 </fieldset>
+
+                                 <fieldset class="col-3">
+                                     <div class="form-group input-group ">
+                                         <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                 <span class="la la-calendar-o"></span>
                                             </span>
-                                                </div>
-                                                <input type="text" name="search_date_from"
-                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Select From Date" data-value="{{ Carbon\Carbon::now() }}">
-                                            </div>
-                                        </fieldset>
-                                        <fieldset class="col-3 mt-1">
-                                            <div class="form-group input-group">
-                                                <div class="input-group-prepend">
+                                         </div>
+                                         <input type="text" name="search_date_from"
+                                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                id="search_date_from" placeholder="Select From Date" data-value="{{ Carbon\Carbon::now() }}">
+                                     </div>
+                                 </fieldset>
+                                 <fieldset class="col-3">
+                                     <div class="form-group input-group">
+                                         <div class="input-group-prepend">
                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                         <span class="la la-calendar-o"></span>
                                                     </span>
-                                                </div>
-                                                <input type="text" name="search_date_to"
-                                                       class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_to" placeholder="Select To Date" data-value="{{ Carbon\Carbon::now() }}">
-                                            </div>
-                                        </fieldset>
+                                         </div>
+                                         <input type="text" name="search_date_to"
+                                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                id="search_date_to" placeholder="Select To Date" data-value="{{ Carbon\Carbon::now() }}">
+                                     </div>
+                                 </fieldset>
 
 
-                                        <fieldset class="col-3 mt-1">
-
-                                            <select name="search_origin" id="search_origin"
-                                                    class="form-control select2 col-4">
-                                                <option value="">Select origin</option>
-                                                @foreach($hubs as $hub)
-                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-
-                                        <fieldset class="col-3 mt-1">
-
-                                            <select name="search_destination" id="search_destination"
-                                                    class="form-control select2 col-4">
-                                                <option value="">Select destination</option>
-                                                @foreach($hubs as $hub)
-                                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                                @endforeach
-                                            </select>
-                                        </fieldset>
-
-                                        <fieldset class="col-4 mt-1">
+                                        <fieldset class="col-1">
                                             <div class="form-group">
                                                 <button type="button" id="search_filter_btn"
                                                         class="btn btn-block btn-outline-info btn-min-width"><i
@@ -593,7 +595,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 00:00:01',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
@@ -608,7 +610,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
