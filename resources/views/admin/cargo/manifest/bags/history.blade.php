@@ -49,7 +49,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Select From Date">
+                                                       id="search_date_from" placeholder="Select From Date" data-value="{{ Carbon\Carbon::now() }}">
                                             </div>
                                         </fieldset>
                                         <fieldset class="col-3 mt-1">
@@ -61,7 +61,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_to"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_to" placeholder="Select To Date">
+                                                       id="search_date_to" placeholder="Select To Date" data-value="{{ Carbon\Carbon::now() }}">
                                             </div>
                                         </fieldset>
 
@@ -70,7 +70,7 @@
 
                                             <select name="search_origin" id="search_origin"
                                                     class="form-control select2 col-4">
-                                                <option value="">Search origin</option>
+                                                <option value="">Select origin</option>
                                                 @foreach($hubs as $hub)
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
@@ -81,7 +81,7 @@
 
                                             <select name="search_destination" id="search_destination"
                                                     class="form-control select2 col-4">
-                                                <option value="">Search destination</option>
+                                                <option value="">Select destination</option>
                                                 @foreach($hubs as $hub)
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
@@ -559,12 +559,12 @@
              });*/
 
             $('#search_origin').select2({
-                placeholder: 'Search Origin',
+                placeholder: 'Select Origin',
                 width: '100%',
                 allowClear: false
             });
             $('#search_destination').select2({
-                placeholder: 'Search Destination',
+                placeholder: 'Select Destination',
                 width: '100%',
                 allowClear: false
             });
@@ -587,32 +587,32 @@
                 'allowPlus': false
             });
 
-
-
-            var search_date_to = $('#search_form #search_date_to').pickadate({
+            var currentDate = '{{ \Carbon\Carbon::now()->format("Y-m-d") }}';
+            var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function (context) {
+                onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        $('#search_date_to').pickadate('picker').set('max', currentDate);
                     }
                 }
             });
-            var currentDate = '{{ \Carbon\Carbon::now()->format("Y-m-d") }}';
-            var search_date_from = $('#search_form #search_date_from').pickadate({
+
+            var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function (context) {
+                onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('max', currentDate);;
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
