@@ -1707,6 +1707,9 @@ $roles = explode("," , $settings->text);
                         @if (session('role_id') == 1 || in_array(839, session('permissions'))) {{-- Need to Change --}}
                             <li><a class="menu-item" href="{{ route('admin.reports.project_arrival.index') }}">Project Arrival Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(839, session('permissions'))) {{-- Need to Change --}}
+                        <li><a class="menu-item" href="{{ route('admin.reports.rider_picked.index') }}">Rider Picked Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

@@ -396,6 +396,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('without_scan_shipments', 'Shippers\ShipperReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
 
         });
+        Route::prefix('project_arrival')->name('project_arrival.')->group(function(){
+            Route::get('', 'Shippers\ShipperReportsController@project_arrival_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@project_arrival_list')->name('list');
+            Route::post('scanned_shipments', 'Shippers\ShipperReportsController@project_arrival_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Shippers\ShipperReportsController@project_arrival_arrived_shipments')->name('arrived_shipments');
+            Route::post('without_scan_shipments', 'Shippers\ShipperReportsController@project_arrival_diff_pa_na_shipments')->name('diff_pa_na_shipments');
+        });
+
     });
 
     Route::prefix('rates')->name('rates.')->group(function () {
@@ -2756,16 +2764,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
             
         });
-        Route::prefix('project_arrival')->name('project_arrival.')->group(function()
-        {
-            Route::get('', 'Admins\AdminReportsController@project_arrival_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@project_arrival_list')->name('list');
-        });
-
-
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function(){
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
             Route::post('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');
+        });
+        Route::prefix('project_arrival')->name('project_arrival.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@project_arrival_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@project_arrival_list')->name('list');
+            Route::post('scanned_shipments', 'Admins\AdminReportsController@project_arrival_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Admins\AdminReportsController@project_arrival_arrived_shipments')->name('arrived_shipments');
+            Route::post('without_scan_shipments', 'Admins\AdminReportsController@project_arrival_diff_pa_na_shipments')->name('diff_pa_na_shipments');
+        });
+        Route::prefix('rider_picked')->name('rider_picked.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@rider_picked_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rider_picked_list')->name('list');
+            Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_picked_arrival_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_picked_arrival_arrived_shipments')->name('arrived_shipments');
         });
     });
 

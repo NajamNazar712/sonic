@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Project Arrival Report')
+@section('title', 'Rider Picked Report')
 
 @section('content')
     <h1 class="mb-1">
-        Project Arrival Report
+        Rider Picked Report
     </h1>
 
     <div class="card">
@@ -69,15 +69,14 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Rider Picked Date and Time</th>
-                            <th class="border-primary border-darken-1">Scanned By</th>
+                            <th class="border-primary border-darken-1">Date</th> 
+                            <th class="border-primary border-darken-1">Rider Trax ID</th>
+                            <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Pickup Note ID</th>
-                            <th class="border-primary border-darken-1">No of shipments scanned</th>
-                            <th class="border-primary border-darken-1">No of shipments Arrived</th>
-                            <th class="border-primary border-darken-1">Dif b/w PA and NA</th>
-                            {{-- <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
+                            <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th> --}}
+                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
                         </tr>
                         </thead>
                     </table>
@@ -166,16 +165,16 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            // $('#datatable_wrapper').hide();
-
-
+            $('#datatable_wrapper').hide();
+            
+            
 
             $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
             });
-
+            
             $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Rider',
                 width:'100%',
@@ -234,38 +233,61 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.project_arrival.list') }}',
+                        url: '{{ route('admin.reports.rider_pickup.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
+                            footer = [];
                             head.push('S.No');
-                            head.push('Rider Picked Date and Time');
-                            head.push('Scanned By');
+                            head.push('Date');
+                            head.push('Rider ID');
+                            head.push('Rider Name');
+                            head.push('Origin');
                             head.push('Pickup Note ID');
                             head.push('No. of Scanned Shipments');
                             head.push('No. of Arrived Shipments');
-                            head.push('Dif b/w PA and NA');
+                            head.push('Arrival Without Scan Shipments');
+
+                            var scanned_shipments = 0;
+                            var arrived_shipments = 0;
+                            var without_scan_shipments = 0;
 
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.rider_picked_date_time);
-                                row.push(values.scanned_by);
+                                row.push(values.date);
+                                row.push(values.rider_id);
+                                row.push(values.rider_name);
+                                row.push(values.origin);
                                 row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
-                                row.push(values.diff_pa_na);
+                                row.push(values.total_shipments);
+                                row.push(values.total_arrived_shipments);
+                                row.push(values.without_scan_shipments);
+                                scanned_shipments += values.total_shipments;
+                                arrived_shipments += values.total_arrived_shipments;
+                                without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
+
+                            footer.push('-');
+                            footer.push('Total');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push('');
+                            footer.push(scanned_shipments);
+                            footer.push(arrived_shipments);
+                            footer.push(without_scan_shipments);
                         },
                         async: false
                     });
                     UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return {body: body, header: head, footer: footer};
                 }
             } );
 
+            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -287,7 +309,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.project_arrival.list') }}',
+                    url: '{{ route('admin.reports.rider_pickup.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
@@ -299,12 +321,14 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'rider_picked_date_time' ,name: 'arrsh.created_at', class: 'align-middle text-center date'},
-                    { data:'scanned_by',name: 'a.name', class: 'align-middle text-center scanned_by'},
+                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
+                    { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
+                    { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
+                    { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
                     { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
                     { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
                     { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'diff_pa_na_btn', class: 'align-middle diff_pa_na', orderable: false, searchable: false},
+                    { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -313,6 +337,41 @@
                 initComplete: function() {
                     this.api().table().columns.adjust();
                 },
+                footerCallback: function(row, data, start, end, display) {
+                    var scanned_shipments_count = 0;
+                    var arrived_shipments_count = 0;
+                    var without_scan_shipments_count = 0;
+                    
+                    $.each(data, function(index, shipment_data) {
+                        scanned_shipments_count += shipment_data.total_shipments;
+                        arrived_shipments_count += shipment_data.total_arrived_shipments;
+                        without_scan_shipments_count += shipment_data.without_scan_shipments;
+                    });
+                    var api = this.api();
+                    api.columns('.date', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html('Total');
+                    });
+                    
+                    api.columns('.scanned_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        
+                        $(this.footer()).html(scanned_shipments_count);
+                    });
+                    api.columns('.arrived_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                        $(this.footer()).html(arrived_shipments_count);
+                    });
+                    api.columns('.without_scan_shipments', {
+                        page: 'current'
+                    }).every(function() {
+                       
+                        $(this.footer()).html(without_scan_shipments_count);
+                    });
+                }
             });
 
             $('#search_filter_btn').on('click',function () {
@@ -321,11 +380,11 @@
             });
 
             $('#datatable tbody').on('click', 'tr td.pickup_note button.print', function() {
-
+                   
                 var pickup_note_id = parseInt($(this).attr('rel'));
                 print(pickup_note_id);
             });
-
+    
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.v2_pickups.pending.print') !!}',
@@ -335,111 +394,111 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
+                .done(function(data) {
+                    var tab = window.open('', '_blank');
+    
+                    if(!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
             }
         });
 
         function scanned_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.scanned_shipments') !!}',
+                    url: '{!! route('admin.reports.rider_pickup.scanned_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Scanned Shipment(s)');
-
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
                         }
-                    });
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Scanned Shipment(s)');
+                        
+                    }
+                });
             }
         }
 
         function arrived_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.arrived_shipments') !!}',
+                    url: '{!! route('admin.reports.rider_pickup.arrived_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Arrived Shipment(s)');
-
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
                         }
-                    });
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Arrived Shipment(s)');
+                        
+                    }
+                });
             }
         }
 
-        function diff_pa_na_shipments_popup(pickup_note_id) {
+        function without_scan_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.diff_pa_na_shipments') !!}',
+                    url: '{!! route('admin.reports.rider_pickup.without_scan_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Without Scan Shipment(s)');
-
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
                         }
-                    });
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Without Scan Shipment(s)');
+                        
+                    }
+                });
             }
         }
 

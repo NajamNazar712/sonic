@@ -1,4 +1,4 @@
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
 @section('title', 'Project Arrival Report')
 
@@ -27,15 +27,6 @@
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-5">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -159,10 +150,16 @@
     </style>
 @endsection
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -234,7 +231,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.project_arrival.list') }}',
+                        url: '{{ route('cod.reports.project_arrival.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -287,7 +284,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.project_arrival.list') }}',
+                    url: '{{ route('cod.reports.project_arrival.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
@@ -359,7 +356,7 @@
         function scanned_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.scanned_shipments') !!}',
+                    url: '{!! route('cod.reports.project_arrival.scanned_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
@@ -388,7 +385,7 @@
         function arrived_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.arrived_shipments') !!}',
+                    url: '{!! route('cod.reports.project_arrival.arrived_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
@@ -417,29 +414,29 @@
         function diff_pa_na_shipments_popup(pickup_note_id) {
             if (pickup_note_id) {
                 $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.diff_pa_na_shipments') !!}',
+                    url: '{!! route('cod.reports.project_arrival.diff_pa_na_shipments') !!}',
                     method: 'POST',
                     data: {
                         'id': pickup_note_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Without Scan Shipment(s)');
-
+                .done(function(data) {
+                    if (data) {
+                        $('#shipments_modal .modal-body').html('');
+                        $('#shipments_modal').modal('show');
+                        var shipments = '';
+                        if (data.data) {
+                            var route = '{!! route('admin.tracking.index') !!}';
+                            $.each(data.data, function(index, shipment_data) {
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                            });
                         }
-                    });
+                        $('#shipments_modal .modal-body').html(shipments);
+                        $('#shipments_modal_title').html('Without Scan Shipment(s)');
+
+                    }
+                });
             }
         }
 
