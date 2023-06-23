@@ -11090,6 +11090,7 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
     public function rider_pickup_index(){
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
@@ -11461,6 +11462,7 @@ class AdminReportsController extends Controller
         $shippers = User::whereIn('status', [3, 4])->get();
         return view('admin.reports.rider_picked')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
     }
+
     public function rider_picked_list(Request $request){
 
         if($request->get('excel') && $request->get('excel') == true)
@@ -11560,6 +11562,7 @@ class AdminReportsController extends Controller
 
         return $datatables->make(true);
     }
+
     public function rider_picked_arrival_scanned_shipments(Request $request){
         dd("rider_picked_arrival_scanned_shipments");
 
@@ -11578,6 +11581,7 @@ class AdminReportsController extends Controller
         ->get();
         return response()->json(['status' => 1, 'data' => $shipments]);
     }
+
     public function rider_picked_arrival_arrived_shipments(Request $request){
         dd("rider_picked_arrival_arrived_shipments");
 
