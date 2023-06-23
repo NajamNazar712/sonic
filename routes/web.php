@@ -1600,6 +1600,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@rcp_agent_cn_index')->name('index');
             Route::get('list', 'Admins\ReturnController@rcp_agent_cn_list')->name('list');
         });
+
+        Route::prefix('new_rcp_agent')->name('new_rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
+        });
+
+        Route::prefix('new_rcp_agent_shipments')->name('new_rcp_agent_shipments.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
+        });
         
         Route::prefix('revert')->name('revert.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_revert_index')->name('index');
