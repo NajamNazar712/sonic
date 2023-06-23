@@ -7140,7 +7140,7 @@ class AdminFinanceController extends Controller
                                 $invoice_shipment->type = $pending_invoice_shipment->type;
                                 $invoice_shipment->charges = $pending_invoice_shipment->charges;
                                 $invoice_shipment->gst = $pending_invoice_shipment->gst;
-                                $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
+                                $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
                                 $invoice_shipment->save();
 
@@ -7235,7 +7235,7 @@ class AdminFinanceController extends Controller
                             $invoice_shipment->charges = $packaging_material_request->amount;
                             $invoice_shipment->gst = round($packaging_material_request->amount * $gst);
                             $invoice_amount = $packaging_material_request->amount + round($packaging_material_request->amount * $gst);
-                            $invoice_shipment->invoice_amount = round($invoice_amount);
+                            $invoice_shipment->invoice_amount = $invoice_amount;
 
                             $invoice_shipment->save();
 
@@ -7796,7 +7796,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -7807,7 +7807,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words($invoice->total_invoice_amount) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8395,7 +8395,7 @@ class AdminFinanceController extends Controller
                                 </tr>
                                 <tr>
                                   <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
-                                  <td class="color secondary text-right">' . number_format(ROUND($total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
+                                  <td class="color secondary text-right">' . number_format(ROUND($invoice->total_invoice_amount, 0, PHP_ROUND_HALF_DOWN)) . '</td>
                                 </tr>
                               </tbody>
                             </table>
@@ -8406,7 +8406,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words($total_invoice_amount) . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words() . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -12522,7 +12522,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment->type = $pending_invoice_shipment->type;
             $invoice_shipment->charges = $pending_invoice_shipment->charges;
             $invoice_shipment->gst = $pending_invoice_shipment->gst;
-            $invoice_shipment->invoice_amount = round($pending_invoice_shipment->invoice_amount);
+            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
 
             $invoice_shipment->save();
 

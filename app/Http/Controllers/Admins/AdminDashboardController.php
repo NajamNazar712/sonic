@@ -99,6 +99,9 @@ use App\Http\Models\SaleTierTagHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\SubstituteUserModulePermission;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Shipper\SubstituteUserPermission;
 use App\Http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedAccountHead;
@@ -184,6 +187,12 @@ use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
+
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Http\Models\Admin\ShipementReceiveDetails;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
@@ -9379,6 +9388,17 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.sister_account.add.account', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Sister Account</div></button>';
                         }
                     }
+
+                    $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+                    if($shippers){
+                        $shippers = explode(',', $shippers->text);
+                        
+                        if(in_array($result->id,$shippers) && session('role_id') == 1 || in_array(873, session('permissions')))
+                        {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
+                        }
+                    }
+
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.documents', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Documents</div></button>';
                     if (session('role_id') == 1 || in_array(149, session('permissions'))) {
                         $dropdown .= '<button type="button" class="dropdown-item shipment_days_button"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Auto Shipment Cancel Days</div></button>';
@@ -12787,6 +12807,436 @@ class AdminDashboardController extends Controller
             return redirect()->route('admin.dashboard.index')->with('error', 'User not found!');
         }
     }
+
+    public function substitute_accounts_view($id)
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 662);
+        return view('admin.accounts.substitute_account_management.index')->with(['shipper_id' => $id]);
+    }
+
+    public function substitute_accounts_list(Request $request,$id) {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
+        }
+        $substitute_users = SubstituteUser::join('admins','admins.id','substitute_users.created_by_admin_id')
+        ->select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction', 'admins.name as created_by')
+        ->where('substitute_users.user_id', $id)
+        ->where('substitute_users.is_created_by_admin',1);
+
+        $datatables = Datatables::of($substitute_users)
+        ->editColumn('status', function ($substitute_user) {
+            return (($substitute_user->status) ? 'Enabled' : 'Disabled');
+        })
+        ->editColumn('restriction', function ($substitute_user) {
+            return (($substitute_user->restriction) ? 'Enabled' : 'Disabled');
+        })
+        ->addColumn('action', function($substitute_user) {
+            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+            $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+
+            $dropdown = '
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            if (session('role_id') == 1 || in_array(875, session('permissions'))) {
+
+                $dropdown .= $edit_button;
+            }
+
+            if ($substitute_user->status) {
+                $dropdown .= $disable_button;
+            }
+            else {
+                $dropdown .= $enable_button;
+            }
+
+            $dropdown .= '
+                </div>
+            </div>
+            ';
+
+            return $dropdown;
+        })
+        ->filterColumn('status', function($query, $keyword) {
+            $keyword = strtolower($keyword);
+
+            if ($keyword != '') {
+                $query->where('substitute_users.status', '=', $keyword);
+            }
+            else {
+                $query->whereRaw('FALSE');
+            }
+        });
+
+        return $datatables->make(true);
+    }
+    public function substitute_accounts_email(Request $request,$id = null) {
+        if ($request->filled('email')) {
+            $email = SubstituteUser::where('email', $request->input('email'));
+  
+            if ($id) {
+                $email = $email->where('id', '!=', $id);
+            }
+
+            if (!$email->exists()) {
+                return 'true';
+            }
+            else {
+                return 'false';
+            }
+        }
+        else {
+          return 'false';
+        }
+    }
+
+    public function substitute_accounts_add_index($shipper_id) {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
+        $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
+
+        $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
+        $sister_accounts = MergedSisterAccount::join('users','users.id','merged_sister_accounts.user_id')
+        ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
+        ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
+        ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
+        
+        return view('admin.accounts.substitute_account_management.add.index')->with(['shipper_id' => $shipper_id,'permissions' => $permissions , 'sister_accounts' => $sister_accounts]);
+    }
+  
+    public function substitute_accounts_add_store(Request $request,$id) {
+
+        $substitute_user = new SubstituteUser();
+
+        $substitute_user->user_id = $id;
+        $substitute_user->name = $request->input('name');
+        $substitute_user->email = $request->input('email');
+        $substitute_user->phone_number = $request->input('phone_number');
+        $substitute_user->cnic = $request->input('cnic');
+        $substitute_user->password = bcrypt($request->input('password'));
+        $substitute_user->restriction = $request->input('restriction');
+        $substitute_user->is_created_by_admin = 1;
+        $substitute_user->created_by_admin_id = Auth::id();
+        $substitute_user->save();
+
+        if ($request->has('account_ids')) {
+            
+            foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
+                foreach($account_ids as  $account_id) {
+                    $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
+    
+                    $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
+                    $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
+                    $Substitute_user_merge_sister_account_mapping->head_user_id = $id;
+                    $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
+        
+                    $Substitute_user_merge_sister_account_mapping->save();
+                }
+            }
+        }
+
+        $new_permission_ids = [10,16,17,18,19];
+
+        SubstituteUserPermission::where('substitute_user_id', $id)->delete();
+
+        foreach($new_permission_ids as $permission_id) {
+            $substitute_user_permission = new SubstituteUserPermission();
+
+            $substitute_user_permission->substitute_user_id = $substitute_user->id;
+            $substitute_user_permission->permission_id = $permission_id;
+
+            $substitute_user_permission->save();
+        }
+
+        // if ($request->has('permission_ids')) {
+        //     foreach($request->input('permission_ids') as $permission_id) {
+        //     $substitute_user_permission = new SubstituteUserPermission();
+
+        //     $substitute_user_permission->substitute_user_id = $substitute_user->id;
+        //     $substitute_user_permission->permission_id = $permission_id;
+
+        //     $substitute_user_permission->save();
+        //     }
+        // }
+
+        return redirect()->route('admin.accounts.substitute_account_management.index',$id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been added!','shipper_id' => $id]);
+    }
+
+    public function substitute_accounts_status(Request $request) {
+        $substitute_user = SubstituteUser::find($request->id);
+
+        if ($substitute_user) {
+            $substitute_user->status = $request->status;
+
+            $substitute_user->save();
+
+            if ($request->status) {
+            return ['status' => 0, 'success' => 'Substitute User has been enabled'];
+            }
+            else {
+            return ['status' => 0, 'success' => 'Substitute User has been disabled'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Substitute User with given ID is present'];
+        }
+    }
+
+    public function substitute_accounts_update_index($shipper_id , $id) {
+        
+        $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
+        $substitute_user = SubstituteUser::find($id);
+
+        $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
+        $sister_accounts = MergedSisterAccount::join('users','users.id','merged_sister_accounts.user_id')
+        ->select('merged_sister_accounts.user_id','users.name','merged_sister_accounts.merged_head_id')
+        ->whereIn('merged_sister_accounts.merged_head_id',$merged_head_account_ids)
+        ->where('merged_sister_accounts.user_id', '!=' , $shipper_id)->get();
+        
+        $merged_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->pluck('sister_user_id')->toArray();
+
+        $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
+
+        return view('admin.accounts.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions, 'shipper_id' => $shipper_id , "id" => $id, 'sister_accounts' => $sister_accounts , 'merged_accounts' => $merged_accounts]);
+    }
+  
+    public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
+
+        $substitute_user = SubstituteUser::find($id);
+        $substitute_user->user_id = $shipper_id;
+        $substitute_user->name = $request->input('name');
+        $substitute_user->email = $request->input('email');
+        $substitute_user->phone_number = $request->input('phone_number');
+        $substitute_user->cnic = $request->input('cnic');
+        $substitute_user->restriction = $request->input('restriction');
+
+        if ($request->filled('password')) {
+        $substitute_user->password = bcrypt($request->input('password'));
+        }
+       
+        $substitute_user->save();
+        SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$id)->delete();
+
+        if ($request->has('account_ids')) {
+
+
+            foreach($request->input('account_ids') as $merge_head_id => $account_ids) {
+                foreach($account_ids as  $account_id) {
+                    $Substitute_user_merge_sister_account_mapping = new SubstituteUserMergeSisterAccountMapping();
+    
+                    $Substitute_user_merge_sister_account_mapping->substitute_user_id = $substitute_user->id;
+                    $Substitute_user_merge_sister_account_mapping->merged_head_id = $merge_head_id;
+                    $Substitute_user_merge_sister_account_mapping->head_user_id = $shipper_id;
+                    $Substitute_user_merge_sister_account_mapping->sister_user_id = $account_id;
+        
+                    $Substitute_user_merge_sister_account_mapping->save();
+                }
+            }
+        }
+
+        // if ($request->has('permission_ids')) {
+        //     $current_permission_ids = SubstituteUserPermission::where('substitute_user_id', $id)->pluck('permission_id')->toArray();
+
+        //     $delete_permission_ids = array_diff($current_permission_ids, $request->input('permission_ids'));
+        //     $new_permission_ids = array_diff($request->input('permission_ids'), $current_permission_ids);
+
+        //     SubstituteUserPermission::where('substitute_user_id', $id)->whereIn('permission_id', $delete_permission_ids)->delete();
+
+        //     foreach($new_permission_ids as $permission_id) {
+        //         $substitute_user_permission = new SubstituteUserPermission();
+
+        //         $substitute_user_permission->substitute_user_id = $id;
+        //         $substitute_user_permission->permission_id = $permission_id;
+
+        //         $substitute_user_permission->save();
+        //     }
+        // }
+        // else {
+        //     SubstituteUserPermission::where('substitute_user_id', $id)->delete();
+        // }
+
+        return redirect()->route('admin.accounts.substitute_account_management.index',$shipper_id)->with(['success' => 'Substitute User: ' . $request->input('name') . ' has been updated!' , 'shipper_id' => $id]);
+    }
+
+
+    public function shipment_received_details(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 669);        
+        $admin = Admin::select('id', 'name', 'trax_id')->where('status', 1)->get();
+        return view('admin.management.shipment_received.index');
+    }
+
+    public function shipment_received_details_list(Request $request)
+    {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 670);
+        }
+        $all_received = ShipementReceiveDetails::join('admins','shipment_receiver_details.received_by','admins.id')
+        ->select(
+            'shipment_receiver_details.tracking_number as tracking_id',
+            'shipment_receiver_details.receiver_name as receiverName',
+            'shipment_receiver_details.receiver_cnic as receiverCnic',
+            'shipment_receiver_details.receiver_relationship as relationship',
+            'shipment_receiver_details.created_at',
+            'admins.name as created_by'
+            );
+        
+            
+        $datatable = Datatables::of($all_received);
+
+        return $datatable->make(true);
+    }
+
+    public function shipment_received_excel_upload(Request $request){
+
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'receiver_name' => 'Receiver Name',
+            'receiver_cnic' => 'Receiver Cnic',
+            'receiver_relationship' => 'Receiver Releationship',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+
+            'receiver_cnic.regex' => ':attribute format is Invalid, required Format is: 00000-0000000-0.',
+        ];
+
+        $rules = [
+            'tracking_number' => ['required', 'between:1,255'],
+            'receiver_name' => ['required', 'between:1,100'],
+            'receiver_cnic' => ['required', 'regex:/^[0-9]{5}-[0-9]{7}-[0-9]$/'],
+            'receiver_relationship' => ['required', 'between:1,100'],
+        ];
+
+        if ($file = $request->file('receivers_excel')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();     
+            $header = ['Tracking Number', 'Receiver Name', 'Receiver Cnic', 'Receiver Relationship'];
+        }
+        
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            $fields = [0 => 'tracking_number', 1 => 'receiver_name', 2 => 'receiver_cnic', 3 => 'receiver_relationship'];
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+
+        if (!isset($spreadsheet) || !empty($spreadsheet)) {
+            $rows = array();
+
+            if (isset($spreadsheet)) {
+                foreach ($spreadsheet as $spreadsheet_row) {
+                    $row = array();
+
+                    foreach ($spreadsheet_row as $key => $value) {
+                        $row[$fields[$key]] = $value;
+                    }
+
+                    $rows[] = $row;
+                }
+
+                unset($spreadsheet);
+            }
+        }
+        
+        $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+        $shippers = explode(',', $shippers->text);
+        $special_dashboard_shippers = User::whereIn('id', $shippers)->pluck('id')->toArray();
+
+        foreach ($rows as $key => $row) {
+            $row_id = $key + 2;
+
+            $validate = Validator::make($row, $rules, $messages);
+
+            $validate->setAttributeNames($names);
+
+            if ($validate->fails()) {
+                foreach ($validate->errors()->toArray() as $key => $error_array) {
+                    foreach ($error_array as $error) {
+                        if (!isset($errors[$row_id][$key])) {
+                            $errors[$row_id][$key] = $error;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (empty($errors)) {
+            foreach ($rows as $key => $row) {
+                $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
+                if (empty($shipment)) {
+                    return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' is Invalid']);
+                } else {
+                    if (in_array($shipment->user_id, $special_dashboard_shippers)) {
+                        if ($shipment->shipper_status_id == 14) {
+                            if ($shipment->amount != 0) {
+                                return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' has no zero cod amount']);
+                            }
+                        } else {
+                            return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' is not delivered']);
+                        }
+                    } else {
+                        return redirect()->back()->with(['error' => 'Tracking Number ' . $row['tracking_number'] . ' has No Special Dashboard Shipper Shipment']);
+                    }
+                }
+            }
+
+            foreach ($rows as $key => $row) {
+                $receive_details = ShipementReceiveDetails::where('tracking_number', $row['tracking_number'])->first();
+
+                $shipment = Shipment::where('tracking_number', $row['tracking_number'])->first();
+                if ($receive_details) {
+                    $receive_details->shipment_id = $shipment->id;
+                    $receive_details->tracking_number = $row['tracking_number'];
+                    $receive_details->receiver_name = $row['receiver_name'];
+                    $receive_details->receiver_cnic = $row['receiver_cnic'];
+                    $receive_details->receiver_relationship = $row['receiver_relationship'];
+                    $receive_details->received_by = Auth::id();
+                    $receive_details->update();
+                } else {
+                    $receive_details = new ShipementReceiveDetails();
+                    $receive_details->shipment_id = $shipment->id;
+                    $receive_details->tracking_number = $row['tracking_number'];
+                    $receive_details->receiver_name = $row['receiver_name'];
+                    $receive_details->receiver_cnic = $row['receiver_cnic'];
+                    $receive_details->receiver_relationship = $row['receiver_relationship'];
+                    $receive_details->received_by = Auth::id();
+                    $receive_details->save();
+                }
+
+            }
+            return redirect()->back()->with(['success' => 'Uploaded Successfully']);
+        }
+        else{
+            $errors = array_map(function ($row, $errors) {
+                return $row . ':' . PHP_EOL . implode(' | ', $errors);
+            }, array_keys($errors), $errors);
+
+            return redirect()->back()->withErrors($errors);
+        }
+
+    }
+
 
     public function add_city_sub_area($city_id){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 642);

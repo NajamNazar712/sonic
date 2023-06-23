@@ -741,6 +741,7 @@ class V2AdminPickupsController extends Controller
 
     public function arrival_bulk_index(Request $request)
     {
+
         $settings = GlobalSettings::where('type', 'global_rider_id')->first();
 
         if ($settings) {
@@ -807,6 +808,8 @@ class V2AdminPickupsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['shipment_items'] = $shipment_items;
                         $details['shipment_items_count'] = $shipment_items_count;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
 
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                         return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
@@ -818,6 +821,8 @@ class V2AdminPickupsController extends Controller
                         $details['tracking_number'] = $shipment->tracking_number;
                         $details['pieces_count'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_pieces;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
@@ -859,11 +864,17 @@ class V2AdminPickupsController extends Controller
 
                         $details['id'] = $shipment->id;
                         $details['tracking_number'] = $shipment->tracking_number;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
                         $details['shipper'] = $shipment->user->name;
                         $details['pickup_request_id'] = str_pad($pickup_request_id, 6, '0', STR_PAD_LEFT);
                         $details['rider'] = $rider;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+
                         $details['pickup_request_id_unpadded'] = $pickup_request_id;
                         $details['rider_assigned'] = $rider_assigned_flag;
+
 
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -890,6 +901,8 @@ class V2AdminPickupsController extends Controller
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
                     $details['scanned_shipment_item'] = $shipment_item->id;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
@@ -915,6 +928,8 @@ class V2AdminPickupsController extends Controller
                     $details['pieces'] = $shipment->pieces;
                     $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                     $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                     return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                 } else {
@@ -1440,10 +1455,11 @@ class V2AdminPickupsController extends Controller
 
     public function arrival_individual_shipment_details(Request $request)
     {
-        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
+
 
             //todo: now checking canceled shipment arrival
             $user = ShipmentsJourney::where('shipment_id', $shipment->id)->select('user_id', 'shipper_status_id')->orderby('id', 'desc')->first();
@@ -1494,8 +1510,15 @@ class V2AdminPickupsController extends Controller
 
                     $details['id'] = $shipment->id;
                     $details['tracking_number'] = $shipment->tracking_number;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+
+
+
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
@@ -1507,6 +1530,11 @@ class V2AdminPickupsController extends Controller
                     $details['tracking_number'] = $shipment->tracking_number;
                     $details['pieces_count'] = $shipment->pieces;
                     $details['pieces_tracking_numbers'] = $shipment_pieces;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                 } else {
@@ -1676,6 +1704,9 @@ class V2AdminPickupsController extends Controller
                     $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     $details['rider_assigned'] = $rider_assigned_flag;
                     $details['rider_picked'] = $rider_picked;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+
                     $id = Auth::user();
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
@@ -1698,6 +1729,9 @@ class V2AdminPickupsController extends Controller
                     $details['shipment_items'] = $shipment_items;
                     $details['shipment_items_count'] = $shipment_items_count;
                     $details['scanned_shipment_item'] = $shipment_item->id;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
+
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 2, 'success' => 'Try and Buy Shipment found!', 'details' => $details];
@@ -1717,6 +1751,9 @@ class V2AdminPickupsController extends Controller
                         $details['pieces'] = $shipment->pieces;
                         $details['pieces_tracking_numbers'] = $shipment_all_pieces;
                         $details['scanned_shipment_piece'] = $shipment_pieces->tracking_number;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
+
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null, $shipment_pieces->id);
                         return ['status' => 3, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
                     } else {
@@ -1809,6 +1846,8 @@ class V2AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
                     $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     $details['rider_assigned'] = $rider_assigned_flag;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -2726,6 +2765,8 @@ class V2AdminPickupsController extends Controller
                     $details['weight'] = floatval($shipment->actual_weight);
                     $details['pickup_request_id_unpadded'] = $pickup_request_id;
                     $details['rider_assigned'] = $rider_assigned_flag;
+                    $details['city'] = $shipment->consignee_city->name;
+                    $details['hub'] = $shipment->consignee_city->hub_city->name;
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
@@ -3639,16 +3680,19 @@ class V2AdminPickupsController extends Controller
 
         if ($settings) {
             $global_rider_id = $settings->setting_value;
+
         } else {
             $global_rider_id = 0;
         }
         $riders = Rider::where('status', 1)->select('id', 'name', 'trax_id')->get();
+
         return view('admin.v2_pickups.project_shipper_arrival')->with(['global_rider_id' => $global_rider_id, 'riders' => $riders]);
     }
 
     public function project_shippers_shipment_details(Request $request)
     {
         $include_shippers = ProjectArrivalShipper::all()->pluck('user_id')->toArray();
+
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
@@ -3739,8 +3783,12 @@ class V2AdminPickupsController extends Controller
 
                         $details['id'] = $shipment->id;
                         $details['tracking_number'] = $shipment->tracking_number;
+                        $details['city'] = $shipment->consignee_city->name;
+                        $details['hub'] = $shipment->consignee_city->hub_city->name;
                         $details['shipper'] = $shipment->user->name;
                         $details['weight'] = floatval($shipment->actual_weight);
+
+
 
                         ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                         return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];

@@ -45,6 +45,7 @@
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Rider Id</th>
                         <th class="border-primary border-darken-1">City Area</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
@@ -254,6 +255,7 @@
                             head.push('Return Note No.');
                             head.push('Status');
                             head.push('Hub');
+                            head.push('Rider Id');
                             head.push('Area');
                             head.push('Rider');
                             head.push('No. Of Shipments');
@@ -271,7 +273,8 @@
                                 row.push(values.return_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
-                                row.push(values.area);
+                                row.push(values.rider_id);
+                                 row.push(values.area);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
                                 row.push(values.assigned_by);
@@ -323,7 +326,8 @@
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    {data:'area' ,name: 'ca.name', class:'align-middle area'},
+                    { data:'rider_id' ,name: 'riders.trax_id', class: 'align-middle rider_id'},
+                    { data:'area' ,name: 'ca.name', class:'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'assigned_by' ,name: 'admins.name', class: 'align-middle assigned_by'},
