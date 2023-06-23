@@ -18,6 +18,7 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+                    @if(!empty($shippers))
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
@@ -27,6 +28,7 @@
                             </select>
                         </fieldset>
                     </div>
+                    @endif
 
                     <div class="col-4">
                         <fieldset class="form-group">

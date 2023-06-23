@@ -51,7 +51,7 @@ class AdminPettyCashController extends Controller
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
-        $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
+        $operation_managers = Admin::whereIn('role_id',[10,122])->where('status',1)->select(['id','trax_id','name'])->get();
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
         } else {
@@ -261,10 +261,10 @@ class AdminPettyCashController extends Controller
                 }
                 PettyCashStatement::where('id', $petty_cash_statement_id)->update(['total_amount' => $total_amount]);
 
-                $shipment_id = $this->create_shipment($petty_cash->id);
-                $petty_cash->shipment_id = $shipment_id;
-                $petty_cash->save();
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created', 'print' => $shipment_id]);
+                // $shipment_id = $this->create_shipment($petty_cash->id);
+                // $petty_cash->shipment_id = $shipment_id;
+                // $petty_cash->save();
+                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
 
             } else {
 
@@ -622,7 +622,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
             ->leftjoin('admins as pccb', 'pccb.id', '=', 'petty_cash_statements.checked_by')
             ->leftjoin('shipments', 'shipments.id', '=', 'petty_cash_statements.shipment_id')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount', 'shipments.tracking_number', 'sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.checked_at', 'pccb.name as checked_by','petty_cash_statements.date')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.reference_no', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','sab.name as finance_apprved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.checked_at', 'pccb.name as checked_by','petty_cash_statements.date')
             ->whereIn('petty_cash_statements.status', [0, 1, 2, 7]);
 
         if (session('role_id') != 1) {
@@ -637,10 +637,6 @@ class AdminPettyCashController extends Controller
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
-            })
-            ->addColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->addColumn('sdn_update_logs', function ($petty) {
                 $log = PettyCashSdnLog::where('petty_cash_statement_id',$petty->statement_id);
@@ -1013,7 +1009,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
             ->leftjoin('shipments', 'shipments.id', '=', 'petty_cash_statements.shipment_id')
-            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','petty_cash_statements.date', 'shipments.tracking_number')
+            ->select('petty_cash_statements.id as statement_id', 'petty_cash_statements.id as statement_link', 'h.name as hub_name', 'petty_cash_statements.reference_no','o.name as origin_hub_name','d.name as destination_hub_name', 'petty_cash_statements.from', 'petty_cash_statements.to', 'cb.name as created_by', 'petty_cash_statements.created_at', 'sab.name as station_approved_by', 'petty_cash_statements.station_approved_at', 'oab.name as operation_approved_by', 'petty_cash_statements.operation_approved_at', 'fab.name as finance_approved_by', 'petty_cash_statements.finance_approved_at', 'petty_cash_statements.status', 'petty_cash_statements.total_amount','petty_cash_statements.date')
             ->whereIn('petty_cash_statements.status', [3, 4, 5]);
 
         if (session('role_id') != 1) {
@@ -1028,10 +1024,6 @@ class AdminPettyCashController extends Controller
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty) {
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
-            })
-            ->addColumn('tracking_number_link', function ($shipments) {
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->addColumn('sdn_update_logs', function ($petty) {
                 $log = PettyCashSdnLog::where('petty_cash_statement_id',$petty->statement_id);
@@ -2111,9 +2103,9 @@ class AdminPettyCashController extends Controller
                     $petty_cash_draft->delete();
                     PettyCashStatement::where('id', $petty_cash->id)->update(['total_amount' => $total_amount]);
 
-                    $shipment_id = $this->create_shipment($petty_cash->id);
-                    $petty_cash->shipment_id = $shipment_id;
-                    $petty_cash->save();
+                    // $shipment_id = $this->create_shipment($petty_cash->id);
+                    // $petty_cash->shipment_id = $shipment_id;
+                    // $petty_cash->save();
 
                     return redirect()->route('admin.petty_cash.statements.index')->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
                 }
@@ -2175,6 +2167,7 @@ class AdminPettyCashController extends Controller
             $tracking_number = $this->generate_tracking_number($shipment->id, $city_id, $consignee_city_id);
             $this->add_item($shipment->id, 24, $special_instructions, 1, null, 0, 0);
             ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
+            ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, NULL, Auth::id(), $petty_cash_statement_id);
             return $shipment->id;
         }
     }

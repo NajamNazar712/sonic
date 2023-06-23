@@ -225,6 +225,27 @@
             </div>
         </div>
     </div>
+
+    {{-- Call History Modal --}}
+    <div class="modal fade" id="update_call_status_modal" data-backdrop="static" role="dialog" aria-labelledby="update_call_status_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Call History</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="modal-header text-center">
+                        <h4 class="modal-title font-weight-bold" id="shipments_title">Remarks Log</h4>
+                    </div>
+                    <div class="modal-body text-center" id="remarks_log_modal_body">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -398,6 +419,7 @@
                                 shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + $international_tracking_number + '</div>';
                                 shipment += '<div class="mb-0 ml-1">  '+ details.received_img + '  </div>';
                                 shipment += '<button class="btn btn-secondary ml-auto mr-0 mr-sm-1  add_request" id=' + id + ' data-tracking=' + details.tracking_number + '>Add Request</button>';
+                                shipment += '<button class="btn btn-secondary ml-0 mr-1 mr-sm-1 call_status" id=' + id + ' data-tracking=' + details.tracking_number + '>Call History</button>';
                                 if(details.pod_file){
                               
                                     shipment += '<button class="btn btn-secondary mr-sm-1 d-sm-inline-block print" id=' + id + '>Print</button>';
@@ -1276,6 +1298,76 @@
 
             });
 
+            $('#tracking').on('click', '.call_status', function () {
+            var id = $(this).attr('id');
+            var tracking = $(this).attr('data-tracking');
+            var tracking_rows = '<div class="col-4"><span class="mr-1"><i class="la la-angle-right align-bottom"></i><b> '+ tracking +'</b></span></div>';
+            $('#shipment_id').val(id);
+
+            $('#call_history_modal .modal-body').html('');
+            $('#call_history_modal').modal('show');
+
+            $.ajax({
+                url: '{!! route('cod.tracking.call_status_history') !!}',
+                method: 'POST',
+                data: {
+                    '_token': '{{ csrf_token() }}',
+                    'shipment_id': id
+                }
+            })
+            .done(function(data) {
+                if (data) {
+                    var modalBody = $('#remarks_log_modal_body');
+
+                    modalBody.html('');
+
+                    var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
+                    tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Other Remarks</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                    tableHtml += '<tbody class="text-center">';
+
+                    $.each(data, function(index, value) {
+                        var updated_at = value.updated_at;
+                        var trimmedDateTime = updated_at.substring(0, 10);
+                        var trimmedTime = updated_at.substring(11, 16);
+                        var remark = value.remark;
+                        var custom_remarks = value.sub_status_call_finding_remarks;
+                        if(custom_remarks == null){
+                            custom_remarks = '-';
+                        }
+                        var status = value.status;
+                        var updated_by = value.updated_by;
+                        var call_to_id = value.call_to_id;
+                        if(call_to_id == 1){
+                            call_to_id = 'Shipper';
+                        } else{
+                            call_to_id = 'Consignee';
+                        }
+                        var call_finding_id = value.call_finding_id;
+                        if(call_finding_id == 1){
+                            call_finding_id = 'Un-responsive';
+                        } else{
+                            call_finding_id = '';
+                        }
+
+                        tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + call_to_id + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
+                    });
+
+                    tableHtml += '</tbody></table>';
+
+                    modalBody.append(tableHtml);
+                }
+                
+                    });
+
+                $('#update_call_status_modal').modal('show');
+            });
+
+            $('#update_call_status_modal').on('shown.bs.modal', function () {
+                    $('#call_to').val('').change();
+                    $('#custom_remark').val('');
+                    $('#sub_status_call_finding').val('').change();
+                    $('#call_finding_dropdown').val('').change();
+            });
             
 		});
 	</script>
