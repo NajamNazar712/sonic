@@ -2581,23 +2581,20 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action', function ($petty) {
                 $route = route('admin.petty_cash.advance.statements.make_detail', ['id' => $petty->statement_id]);
+                $edit_route = route('admin.petty_cash.advance.statements.edit_make_detail', ['id' => $petty->statement_id]);
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-eye"></i> View Details</a>';
-
-//                if((session('role_id') == 1) || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
-                if ((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions'))) {
-                    if ((session('role_id') == 1) || ($petty->status == 0 && session('department_id') == 6) || ($petty->status == 1 && (session('department_id') == 6)) || ($petty->status == 2 && session('department_id') == 4) || ($petty->status == 7 && session('department_id') == 4)) {
-                        if ($petty->status == 2) {
-                            $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Receive</button>';
-                        } else {
-                            $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
-                        }
-                    }
+                if ($petty->status == 1)
+                {
+                    $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-eye"></i> Add Details</a>';
+                }
+                elseif($petty->status == 2)
+                {
+                    $dropdown .= '<a href="' . $edit_route . '" class="dropdown-item" ><i class="ft-eye"></i> Edit Details</a>';
                 }
                 return $dropdown;
             });
@@ -2620,7 +2617,7 @@ class AdminPettyCashController extends Controller
         return $petty->make(true);
     }
 
-    public function advance_edit_petty_cash_statement_make_detail(Request $request,$id)
+    public function advance_add_petty_cash_statement_make_detail(Request $request,$id)
     {
         $petty = AdvancePettyCashStatement::find($id);
         if(!in_array($petty->status_id ,[0,1,2,7,6]))
@@ -2688,6 +2685,8 @@ class AdminPettyCashController extends Controller
                     $petty_detail->remarks = str_replace(array("\n", "\r"), '', $request->remarks[$selected_id]);
                     $petty_detail->save();
 
+                    AdvancePettyCashStatement::where('id',$petty_cash_statement_id)->update(['status_id' => 2]);
+
                     if ($request->hasFile('upload_image' . $selected_id)) {
 
                         $file = $request->file('upload_image' . $selected_id);
@@ -2720,227 +2719,294 @@ class AdminPettyCashController extends Controller
         }
     }
 
-//    public function advance_edit_petty_cash_statement_index(Request $request, $id)
-//    {
-//        $petty = AdvancePettyCashStatement::find($id);
-//        if(!in_array($petty->status_id ,[0,1,2,7,6]))
-//        {
-//            return redirect()->route('admin.petty_cash.approved.view',$id);
-//        }
-//        $head = PettyCashAccountHead::select('id', 'name')->get();
-//
-//        $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
-//        $hub_array = array();
-//        $city_array = array();
-//        $dncc_array = "";
-//        foreach ($zones as $zone) {
-//            if($zone->id == $petty->zone_id) {
-//                $hub_array[$zone->id] = $zone->zone_cities->where('hub', 1);
-//            }
-//        }
-//
-//        $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
-//        $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
-//        if (session('role_id') == 1) {
-//            $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
-//        } else {
-//            $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
-//        }
-//
-//        return view('admin.petty_cash.advance.edit')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
-//    }
+    public function advance_edit_petty_cash_statement_make_detail(Request $request,$id)
+    {
+        //        dd($request->all(),$id);
+        $petty = AdvancePettyCashStatement::find($id);
+        if(!in_array($petty->status_id ,[0,1,2,7,6]))
+        {
+            return redirect()->route('admin.petty_cash.approved.view',$id);
+        }
+        $head = PettyCashAccountHead::select('id', 'name')->get();
 
-//    public function advance_edit_petty_cash_statement_list(Request $request,$id)
-//    {
-//        $petty_details = AdvancePettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statement_details.hub_id')
-//            ->leftjoin('admins as op','op.id','advance_petty_cash_statement_details.operation_manager_id')
-//            ->leftjoin('cities as c', 'c.id', '=', 'advance_petty_cash_statement_details.city_id')
-//            ->leftjoin('zones as z', 'z.id', '=', 'advance_petty_cash_statement_details.zone_id')
-//            ->leftjoin('admins as a', 'a.id', '=', 'advance_petty_cash_statement_details.employee_id')
-//            ->join('advance_petty_cash_statements as pcs', 'pcs.id', '=', 'advance_petty_cash_statement_details.advance_petty_cash_statement_id')
-//            ->select('advance_petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city','z.name as zone','advance_petty_cash_statement_details.employee_id', 'pcs.hub_id', 'pcs.sdn_id','advance_petty_cash_statement_details.account_head_id', 'advance_petty_cash_statement_details.account_title_id', 'advance_petty_cash_statement_details.date', 'advance_petty_cash_statement_details.expense_details', 'advance_petty_cash_statement_details.amount', 'advance_petty_cash_statement_details.reference_no', 'advance_petty_cash_statement_details.remarks', 'advance_petty_cash_statement_details.status', 'pcs.status as petty_status', 'advance_petty_cash_statement_details.station_amount', 'advance_petty_cash_statement_details.operation_amount', 'advance_petty_cash_statement_details.finance_amount', 'advance_petty_cash_statement_details.reference_document as reference_document', 'advance_petty_cash_statement_details.reference_document_2 as reference_document_2', 'advance_petty_cash_statement_details.created_at','advance_petty_cash_statement_details.employee_name as employee_name_data','advance_petty_cash_statement_details.employee_designation as employee_designation_data','advance_petty_cash_statement_details.zone_id','advance_petty_cash_statement_details.city_id','op.name as op_name','op.trax_id as op_trax_id','op.id as op_id','advance_petty_cash_statement_details.dncc_id','advance_petty_cash_statement_details.delivered_shipments')
-//            ->where('advance_petty_cash_statement_details.advance_petty_cash_statement_id', $id);
-//
+        $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
+        $hub_array = array();
+        $city_array = array();
+        $dncc_array = "";
+        foreach ($zones as $zone) {
+            if($zone->id == $petty->zone_id) {
+                $hub_array[$zone->id] = $zone->zone_cities->where('hub', 1);
+            }
+        }
+
+        $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
+        $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
+        if (session('role_id') == 1) {
+            $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
+        } else {
+            $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
+        }
+
+        return view('admin.petty_cash.advance.edit_make_detail')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
+    }
+
+    public function advance_edit_petty_cash_statement_make_detail_list(Request $request,$id)
+    {
+        $petty_details = AdvancePettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statement_details.hub_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'advance_petty_cash_statement_details.city_id')
+            ->leftjoin('zones as z', 'z.id', '=', 'advance_petty_cash_statement_details.zone_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'advance_petty_cash_statement_details.employee_id')
+            ->join('advance_petty_cash_statements as pcs', 'pcs.id', '=', 'advance_petty_cash_statement_details.petty_cash_id')
+            ->select('advance_petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city',
+                'z.name as zone',
+                'advance_petty_cash_statement_details.employee_id', 'pcs.hub_id', 'pcs.sdn_id','advance_petty_cash_statement_details.account_head_id', 'advance_petty_cash_statement_details.account_title_id', 'advance_petty_cash_statement_details.created_at as date', 'advance_petty_cash_statement_details.expense_details', 'advance_petty_cash_statement_details.amount', 'advance_petty_cash_statement_details.reference_no', 'advance_petty_cash_statement_details.remarks', 'advance_petty_cash_statement_details.status', 'pcs.status_id as petty_status',   'advance_petty_cash_statement_details.reference_document as reference_document', 'advance_petty_cash_statement_details.reference_document_2 as reference_document_2', 'advance_petty_cash_statement_details.created_at','advance_petty_cash_statement_details.employee_name as employee_name_data','advance_petty_cash_statement_details.employee_designation as employee_designation_data',
+                'advance_petty_cash_statement_details.zone_id',
+                'advance_petty_cash_statement_details.city_id',
+                'advance_petty_cash_statement_details.dncc_id','advance_petty_cash_statement_details.delivered_shipments')
+            ->where('advance_petty_cash_statement_details.petty_cash_id', $id);
+
 //            dd($petty_details->get());
-//        return Datatables::of($petty_details)
-//            ->setRowAttr([
-//                'status' => function ($petty_details) {
-//                    return $petty_details->status;
-//                },
-//            ])
-//            ->addColumn('account_head', function ($petty_details) {
-//
-//                $heads = PettyCashAccountHead::select('id', 'name')->get();
-//                $drops = '';
-//                $selected = '';
-//                foreach ($heads as $status) {
-//                    if ($status->id == $petty_details->account_head_id) {
-//                        $selected = 'selected';
-//                    } else {
-//                        $selected = '';
-//                    }
-//                    $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
-//                }
-//                $select = '<select class="form-control form-control-sm select2 head_select" disabled name="head[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Head is required">' . $drops . '</select>';
-//                return $select;
-//
-//            })
-//            ->addColumn('account_title', function ($petty_details) {
-//                $account_head_id = $petty_details->account_head_id;
-//                $petty_cash_account_title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id', $account_head_id)->pluck('petty_cash_account_title_id')->toArray();
-//                $titles = PettyCashAccountTitle::select('id', 'name')->whereIn('id', $petty_cash_account_title_ids)->get();
-//                $drops = '';
-//                $selected = '';
-//                foreach ($titles as $status) {
-//                    if ($status->id == $petty_details->account_title_id) {
-//                        $selected = 'selected';
-//                    } else {
-//                        $selected = '';
-//                    }
-//                    $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
-//                }
-//                $select = '<select class="form-control form-control-sm select2 title_select" disabled name="title[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Title is required">' . $drops . '</select>';
-//                return $select;
-//
-//            })
-//            ->addColumn('city_name', function ($petty_details) {
-//                $hub_id = $petty_details->hub_id;
-//                $city_id = $petty_details->city_id;
-//                $cities = City::where('status',1)->where('hub_id',$hub_id)->select('id','name')->get();
-//                $drops = '';
-//                $selected = '';
-//                foreach ($cities as $city) {
-//                    if ($city->id == $city_id) {
-//                        $selected = 'selected';
-//                    } else {
-//                        $selected = '';
-//                    }
-//                    $drops .= '<option value="' . $city->id . '" ' . $selected . '>' . $city->name . '</option>';
-//                }
-//                $select = '<select class="form-control form-control-sm select2 city_select" disabled name="city[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="City is required">' . $drops . '</select>';
-//                return $select;
-//            })
-//            ->addColumn('employee_trax_id', function ($petty_details) {
-//                $employee_id = $petty_details->employee_id;
-//                $employees = Admin::where('status',1)->where('trax_id','!=',null)->select('id','trax_id')->get();
-//                $drops = '<option value=""></option>';
-//                $selected = '';
-//                foreach ($employees as $employee) {
-//                    if ($employee->id == $employee_id) {
-//                        $selected = 'selected';
-//                    } else {
-//                        $selected = '';
-//                    }
-//                    $drops .= '<option value="' . $employee->id . '" ' . $selected . '>' . $employee->trax_id . '</option>';
-//                }
-//                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
-//                return $select;
-//            })
-//            ->addColumn('employee_name',function ($petty_details){
-//                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_name_data . '" name="employee_name[' . $petty_details->statement_detail_id . ']">';
-//                return $input;
-//            })
-//            ->addColumn('employee_designation',function ($petty_details){
-//                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" >';
-//                return $input;
-//            })
-//            ->addColumn('dncc', function ($petty_details) {
-//                $sdn_id = $petty_details->sdn_id;
-//                $dncc_id = $petty_details->dncc_id;
-//                $drops = '';
-//                $selected = '';
-//                $response = $this::make_petty_cash_statement_get_dncc_static($sdn_id);
-//                $drops .= "<option value='' data-count='' selected></option>";
-//                if($response['status'] == 1)
-//                {
-//                    foreach ($response['data'] as $data)
-//                    {
-//                        $id = $data['id'];
-//                        $count = $data['count'];
-//                        $text = $data['text'];
-//                        if ($id == $dncc_id) {
-//                            $selected = 'selected';
-//                        } else {
-//                            $selected = '';
-//                        }
-//                        $drops .= "<option value='" . $id . "' data-count='" . $count . "' ".$selected.">" . $text . "</option>";
-//                    }
-//                }
-//                $select = '<select class="form-control form-control-sm select2 dncc_select" disabled name="dncc[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
-//                return $select;
-//            })
-//            ->editColumn('delivered_shipments',function ($petty_details){
-//                $input = '<input class="form-control form-control-sm" placeholder="Delivered Shipments" readonly value="' . $petty_details->delivered_shipments . '" name="delivered_shipment_count[' . $petty_details->statement_detail_id . ']" >';
-//                return $input;
-//            })
-//            ->editColumn('expense_details', function ($petty_details) {
-//                $expense = '<textarea class="form-control form-control-sm" rows="6" disabled name="expense[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Expense Detail is required">' . $petty_details->expense_details . '</textarea>';
-//                return $expense;
-//            })
-//            ->editColumn('amount', function ($petty_details) {
-//                $selected_amount = '';
-//                if ($petty_details->finance_amount !== null) {
-//                    $selected_amount = $petty_details->finance_amount;
-//                } else if ($petty_details->operation_amount !== null) {
-//                    $selected_amount = $petty_details->operation_amount;
-//                } else if ($petty_details->station_amount !== null) {
-//                    $selected_amount = $petty_details->station_amount;
-//                } else {
-//                    $selected_amount = $petty_details->amount;
-//                }
-//
-//                $amount = '<div class="input-group" style="min-width: 100px;"><input type="text" class="form-control form-control-sm amount_input" disabled value="' . $selected_amount . '" name="amount[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
-//                return $amount;
-//            })
-//            ->editColumn('reference_no', function ($petty_details) {
-//                $reference = '<input class="form-control form-control-sm" disabled placeholder="Enter Reference No." value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" >';
-//                return $reference;
-//            })
-//            ->editColumn('remarks', function ($petty_details) {
-//                $remarks = '<textarea class="form-control form-control-sm" placeholder="Enter Remarks" rows="6" disabled name="remarks[' . $petty_details->statement_detail_id . ']">' . $petty_details->remarks . '</textarea>';
-//                return $remarks;
-//            })
-//            ->editColumn('reference_document', function ($petty_details) {
-//                $reference_document = '<div class="text-center">';
-//                if ($petty_details->reference_document != null) {
-//                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]) . ' target="_blank">View</a></button>';
-//                }
-//                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
-//                if ($petty_details->reference_document_2 != null) {
-//                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
-//                }
-//                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_2_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
-//                return $reference_document;
-//            })
-//            ->editColumn('status', function ($petty_details) {
-//                if ($petty_details->status == 0) {
-//                    return "Pending";
-//                } else
-//                    if ($petty_details->status == 1) {
-//                        return "Rejected";
-//                    } else if ($petty_details->status == 2) {
-//                        return "Approved";
-//                    }
-//            })
-//            ->addColumn('action', function ($petty) {
-//                $dropdown = '';
-//                if ($petty->petty_status != 6) {
-//                    if ((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 1) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)) {
-//                        $dropdown = '
-//              <div class="btn-group">
-//                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-//                <div class="dropdown-menu dropdown-menu-sm">
-//            ';
-//
-////                    $dropdown .= '<button type="button" class="dropdown-item reference_document" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Reference Document</div></button>';
-//                        $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
-//                        $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
-//
-//                    }
-//                }
-//                return $dropdown;
-//            })
-//            ->make(true);
-//    }
+        return Datatables::of($petty_details)
+            ->setRowAttr([
+                'status' => function ($petty_details) {
+                    return $petty_details->status;
+                },
+            ])
+            ->addColumn('account_head', function ($petty_details) {
+
+                $heads = PettyCashAccountHead::select('id', 'name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($heads as $status) {
+                    if ($status->id == $petty_details->account_head_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 head_select" disabled name="head[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Head is required">' . $drops . '</select>';
+                return $select;
+
+            })
+            ->addColumn('account_title', function ($petty_details) {
+                $account_head_id = $petty_details->account_head_id;
+                $petty_cash_account_title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id', $account_head_id)->pluck('petty_cash_account_title_id')->toArray();
+                $titles = PettyCashAccountTitle::select('id', 'name')->whereIn('id', $petty_cash_account_title_ids)->get();
+                $drops = '';
+                $selected = '';
+                foreach ($titles as $status) {
+                    if ($status->id == $petty_details->account_title_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 title_select" disabled name="title[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Title is required">' . $drops . '</select>';
+                return $select;
+
+            })
+            ->addColumn('city_name', function ($petty_details) {
+                $hub_id = $petty_details->hub_id;
+                $city_id = $petty_details->city_id;
+                $cities = City::where('status',1)->where('hub_id',$hub_id)->select('id','name')->get();
+                $drops = '';
+                $selected = '';
+                foreach ($cities as $city) {
+                    if ($city->id == $city_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $city->id . '" ' . $selected . '>' . $city->name . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 city_select" disabled name="city[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="City is required">' . $drops . '</select>';
+                return $select;
+            })
+            ->addColumn('employee_trax_id', function ($petty_details) {
+                $employee_id = $petty_details->employee_id;
+                $employees = Admin::where('status',1)->where('trax_id','!=',null)->select('id','trax_id')->get();
+                $drops = '<option value=""></option>';
+                $selected = '';
+                foreach ($employees as $employee) {
+                    if ($employee->id == $employee_id) {
+                        $selected = 'selected';
+                    } else {
+                        $selected = '';
+                    }
+                    $drops .= '<option value="' . $employee->id . '" ' . $selected . '>' . $employee->trax_id . '</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 employee_select" disabled name="employee[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
+                return $select;
+            })
+            ->addColumn('employee_name',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_name_data . '" name="employee_name[' . $petty_details->statement_detail_id . ']">';
+                return $input;
+            })
+            ->addColumn('employee_designation',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" disabled value="' . $petty_details->employee_designation_data . '" name="employee_designations[' . $petty_details->statement_detail_id . ']" >';
+                return $input;
+            })
+            ->addColumn('dncc', function ($petty_details) {
+                $sdn_id = $petty_details->sdn_id;
+                $dncc_id = $petty_details->dncc_id;
+                $drops = '';
+                $selected = '';
+                $response = $this::make_petty_cash_statement_get_dncc_static($sdn_id);
+                $drops .= "<option value='' data-count='' selected></option>";
+                if($response['status'] == 1)
+                {
+                    foreach ($response['data'] as $data)
+                    {
+                        $id = $data['id'];
+                        $count = $data['count'];
+                        $text = $data['text'];
+                        if ($id == $dncc_id) {
+                            $selected = 'selected';
+                        } else {
+                            $selected = '';
+                        }
+                        $drops .= "<option value='" . $id . "' data-count='" . $count . "' ".$selected.">" . $text . "</option>";
+                    }
+                }
+                $select = '<select class="form-control form-control-sm select2 dncc_select" disabled name="dncc[' . $petty_details->statement_detail_id . ']">' . $drops . '</select>';
+                return $select;
+            })
+            ->editColumn('delivered_shipments',function ($petty_details){
+                $input = '<input class="form-control form-control-sm" placeholder="Delivered Shipments" readonly value="' . $petty_details->delivered_shipments . '" name="delivered_shipment_count[' . $petty_details->statement_detail_id . ']" >';
+                return $input;
+            })
+            ->editColumn('expense_details', function ($petty_details) {
+                $expense = '<textarea class="form-control form-control-sm" rows="6" disabled name="expense[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Expense Detail is required">' . $petty_details->expense_details . '</textarea>';
+                return $expense;
+            })
+            ->editColumn('amount', function ($petty_details) {
+                $selected_amount = '';
+                if ($petty_details->finance_amount !== null) {
+                    $selected_amount = $petty_details->finance_amount;
+                } else if ($petty_details->operation_amount !== null) {
+                    $selected_amount = $petty_details->operation_amount;
+                } else if ($petty_details->station_amount !== null) {
+                    $selected_amount = $petty_details->station_amount;
+                } else {
+                    $selected_amount = $petty_details->amount;
+                }
+
+                $amount = '<div class="input-group" style="min-width: 100px;"><input type="text" class="form-control form-control-sm amount_input" disabled value="' . $selected_amount . '" name="amount[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Amount is required"><div class="input-group-append amount_log"><span class="input-group-text p-0 pl-sm-1 pr-sm-1"><i class="ft-align-justify font-medium-4"></i></span></div></div>';
+                return $amount;
+            })
+            ->editColumn('reference_no', function ($petty_details) {
+                $reference = '<input class="form-control form-control-sm" disabled placeholder="Enter Reference No." value="' . $petty_details->reference_no . '" name="reference[' . $petty_details->statement_detail_id . ']" >';
+                return $reference;
+            })
+            ->editColumn('remarks', function ($petty_details) {
+                $remarks = '<textarea class="form-control form-control-sm" placeholder="Enter Remarks" rows="6" disabled name="remarks[' . $petty_details->statement_detail_id . ']">' . $petty_details->remarks . '</textarea>';
+                return $remarks;
+            })
+            ->editColumn('reference_document', function ($petty_details) {
+                $reference_document = '<div class="text-center">';
+                if ($petty_details->reference_document != null) {
+                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document]) . ' target="_blank">View</a></button>';
+                }
+                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB).">';
+                if ($petty_details->reference_document_2 != null) {
+                    $reference_document .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href=' . route('admin.petty_cash.statements.reference_document', [$petty_details->reference_document_2]) . ' target="_blank">View</a></button>';
+                }
+                $reference_document .= '<input class="form-control form-control-sm" style="min-width: 200px;" type="file" name="upload_2_image' . $petty_details->statement_detail_id . '" disabled data-rule-extension="jpeg|jpg|png|xls|xlsx|pdf" data-msg-extension="Only file with extension jpeg, jpg, pdf, xls, xlsx or png allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)."></div>';
+                return $reference_document;
+            })
+            ->editColumn('status', function ($petty_details) {
+                if ($petty_details->status == 0) {
+                    return "Pending";
+                } else
+                    if ($petty_details->status == 1) {
+                        return "Rejected";
+                    } else if ($petty_details->status == 2) {
+                        return "Approved";
+                    }
+            })
+            ->addColumn('action', function ($petty) {
+                $dropdown = '';
+                if ($petty->petty_status != 6) {
+                    if ($petty->status == 0) {
+                    if ((session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) || (($petty->petty_status == 0 || $petty->petty_status == 1) && (session('role_id') == 8 || session('role_id') == 10))) && ($petty->status != 1)) {
+                        $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                            $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
+                        }
+                    }
+                }
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+    public function detail_edit_petty_cash_statements_approve(Request $request)
+    {
+        $id = $request->detail_id;
+        if ($request->has('approve_all')) {
+            if ($id) {
+                $petty_details = AdvancePettyCashStatementDetail::where('petty_cash_statement_id', $id)->get();
+                if ($petty_details) {
+                    $flag = false;
+                    foreach ($petty_details as $petty_detail) {
+                        if ($petty_detail['status'] != 1) {
+                            AdvancePettyCashStatementDetail::where('id', $petty_detail['id'])->update([
+                                'status' => 2,
+                                'updated_by' => Auth::id()
+                            ]);
+                        }
+                    }
+
+                    if ($flag = false) {
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    } else {
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+            }
+        } else {
+            if ($id) {
+                $petty_details = AdvancePettyCashStatementDetail::find($id);
+                if ($petty_details) {
+                    if ($petty_details->status == 0) {
+                        $petty_details->status = 2;
+                        $petty_details->updated_by = Auth::id();
+                        $petty_details->save();
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    } else if ($petty_details->status == 2) {
+                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                    } else {
+                        return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details rejected so it can\'t be changed!']);
+                    }
+
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+                }
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+            }
+        }
+    }
+
+    public function detail_edit_petty_cash_statements_reject(Request $request)
+    {
+
+    }
+
+    public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
+    {
+        dd($request->all());
+    }
 
 }
