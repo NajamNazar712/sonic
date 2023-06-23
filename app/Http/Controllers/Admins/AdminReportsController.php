@@ -11287,38 +11287,38 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),668);
         }
         $quick_scanned = DB::connection('reports')->table('shipments')
-        ->leftjoin('shipment_scanning_journeys as ssj', function($join){
-            $join->on('ssj.shipment_id', '=', 'shipments.id')
-            ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where ssj.shipment_id = shipments.id)'));
-        })
-        ->leftjoin('shipments_journey as sj', function ($join) {
-            $join->on('sj.shipment_id', '=', 'shipments.id')
-                 ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-        })
-        ->leftjoin('shipments_journey as sjl', function ($join) {
-            $join->on('sjl.shipment_id', '=', 'shipments.id')
-                 ->where('sjl.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-        })
-        ->leftJoin('shipment_scanning_screen_locations as sssl', 'ssj.screen_location_id', '=', 'sssl.id')
-        ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-        ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
-        ->leftjoin('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-        ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
-        ->leftjoin('admins as lsa', 'sjl.admin_id', '=', 'lsa.id')
-        ->leftjoin('users as lsu', 'sjl.user_id', '=', 'lsu.id')
-        ->leftjoin('riders as lsr', 'sjl.rider_id', '=', 'lsr.id')
-        ->leftjoin('admins as ssja', 'ssj.admin_id', '=', 'ssja.id')
-        ->leftjoin('users as ssju', 'ssj.user_id', '=', 'ssju.id')
-        ->leftjoin('substitute_users as ssjsu', 'ssj.substitute_user_id', '=', 'ssjsu.id')
-        ->leftjoin('cities as ssjac', 'ssja.default_hub_id', '=', 'ssjac.id')
-        ->leftjoin('cities as ssjuc', 'ssju.city_id', '=', 'ssjuc.id')
-        ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
-        ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city');
+            ->leftjoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where('sjl.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_scanning_journeys as ssj', function($join){
+                $join->on('ssj.shipment_id', '=', 'shipments.id')
+                    ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where ssj.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipment_scanning_screen_locations as sssl', 'ssj.screen_location_id', '=', 'sssl.id')
+            ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('admins as lsa', 'sjl.admin_id', '=', 'lsa.id')
+            ->leftjoin('users as lsu', 'sjl.user_id', '=', 'lsu.id')
+            ->leftjoin('riders as lsr', 'sjl.rider_id', '=', 'lsr.id')
+            ->leftjoin('admins as ssja', 'ssj.admin_id', '=', 'ssja.id')
+            ->leftjoin('users as ssju', 'ssj.user_id', '=', 'ssju.id')
+            ->leftjoin('substitute_users as ssjsu', 'ssj.substitute_user_id', '=', 'ssjsu.id')
+            ->leftjoin('cities as ssjac', 'ssja.default_hub_id', '=', 'ssjac.id')
+            ->leftjoin('cities as ssjuc', 'ssju.city_id', '=', 'ssjuc.id')
+            ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
+            ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $quick_scanned = $quick_scanned->whereBetween('sj.created_at', [$from,$to]);
+            $quick_scanned = $quick_scanned->whereBetween('ssj.created_at', [$from,$to]);
         }
         if ($tracking_numbers = $request->get('tracking_numbers'))
         {
