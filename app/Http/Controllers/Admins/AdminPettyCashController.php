@@ -3001,12 +3001,35 @@ class AdminPettyCashController extends Controller
 
     public function detail_edit_petty_cash_statements_reject(Request $request)
     {
+        $id = $request->detail_id;
+        if ($id) {
+            $petty_details = AdvancePettyCashStatementDetail::find($id);
+            if ($petty_details) {
+                if ($petty_details->status == 0 || $petty_details->status == 2) {
+                    $petty_details->status = 1;
+                    $petty_details->updated_by = Auth::id();
+                    $petty_details->save();
+//                    $statement_id = $petty_details->petty_cash_statement_id;
+//                    $statement = PettyCashStatement::find($statement_id);
+//                    $statement->total_amount = $statement->total_amount - $sub_amount;
+//                    $statement->save();
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Rejected!']);
+                } else if ($petty_details->status == 1) {
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details Already Rejected!']);
+                }
 
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+            }
+        } else {
+            return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+        }
     }
 
     public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
     {
         dd($request->all());
+
     }
 
 }
