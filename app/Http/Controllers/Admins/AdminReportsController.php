@@ -11287,6 +11287,10 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),668);
         }
         $quick_scanned = DB::connection('reports')->table('shipments')
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
@@ -11300,10 +11304,6 @@ class AdminReportsController extends Controller
                     ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where ssj.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipment_scanning_screen_locations as sssl', 'ssj.screen_location_id', '=', 'sssl.id')
-            ->leftjoin('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->leftjoin('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->leftjoin('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('admins as lsa', 'sjl.admin_id', '=', 'lsa.id')
             ->leftjoin('users as lsu', 'sjl.user_id', '=', 'lsu.id')
             ->leftjoin('riders as lsr', 'sjl.rider_id', '=', 'lsr.id')
@@ -11318,7 +11318,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $quick_scanned = $quick_scanned->whereBetween('ssj.created_at', [$from,$to]);
+            $quick_scanned = $quick_scanned->whereBetween('shipments.created_at', [$from,$to]);
         }
         if ($tracking_numbers = $request->get('tracking_numbers'))
         {
