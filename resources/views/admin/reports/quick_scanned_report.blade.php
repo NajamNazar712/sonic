@@ -34,7 +34,7 @@
                                                 <span class="la la-calendar-o small-calender-icon"></span>
                                             </span>
                                 </div>
-                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::today() }}">
+                                <input type="text" name="search_date_from"  class="form-control bg-primary border-primary white rounded-right pickadate" id="search_date_from" placeholder="From" data-value="{{ Carbon\Carbon::now()->subDays(30) }}">
                             </div>
                         </div>
                         <div class="col-3">
@@ -162,89 +162,7 @@
                 placeholder: 'Search Rider',
                 allowClear:true
             });
-         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    blockPagePermanently();
-                    body = [];
-                    var params = table.ajax.params();
-                    params.start = 0;
-                    params.length = -1;
-                    params.excel = true;
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.quick_scanned_report.list')}}',
-                        data: params,
-                        success: function (result)
-                        {
-                            head = [];
-                            head.push('S.No');
-                            head.push('Tracking No.');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Status');
-                            head.push('Shipper Name');
-                            head.push('Arrival Date');
-                            head.push('Status Date Time');
-                            head.push('Status By');
-                            head.push('Last Scanned Location');
-                            head.push('Last Scanned City');
-                            head.push('Last Scanned By');
-                            head.push('Last Scanned At');
-                            $.each(result.data, function(index, values) {
-                                row = [];
-                                row.push(index + 1);
-                                row.push(values.tracking_number);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.status);
-                                row.push(values.shipper_name);
-                                row.push(values.arrival_date);
-                                row.push(values.status_date_time);
-                                row.push(values.account_type);
-                                row.push(values.last_scanned_location);
-                                row.push(values.last_scanned_city);
-                                row.push(values.last_scanned_by);
-                                row.push(values.last_scanned_at);
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-                    UnblockPagePermanently();
 
-                    return {body: body, header: head};
-                }
-            });
-
-            
-            var select = $('#track_form .tracking_numbers').selectize({
-                placeholder: 'Tracking Number(s)*',
-                delimiter: ',',
-                createOnBlur: true,
-                persist: false,
-                plugins: ['remove_button'],
-                onDropdownOpen: function (dropdown) {
-                    dropdown.remove();
-                },
-                onType: function (str) {
-                    var regex = /^[0-9,]+$/;
-
-                    if (!regex.test(str)) {
-                        select[0].selectize.setTextboxValue('');
-                    }
-                },
-                create: function (input) {
-                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-                        return {
-                            value: input,
-                            text: input
-                        }
-                    }
-                    else {
-                        return false;
-                    }
-                }
-            });
-          
             var search_date_from = $('#track_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -274,127 +192,154 @@
                     }
                 }
             });
-            
-            var table = $('#datatable').DataTable({
-                scrollX: true, scrollY: '500px',
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        title: 'Quick Scanned Report',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o "></i> Excel',
-                    },
-                ],
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
-                processing: false,
-                deferLoading: 0,
-                language: {
-                    processing: data_table_loader
+
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
                 },
-                serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.reports.quick_scanned_report.list') }}',
-                    data: function (d) {
-                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        d.rider = $('select[name="rider"]').val();
-                        d.tracking_numbers = $('#tracking_numbers').val();
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
                     }
                 },
-                rowId: 'id',
-                order: [[12, 'asc']],
-                columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_hyperlink', name: 'shipments.tracking_number', class: 'align-middle text_center tracking_number'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle text_center origin '},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle text_center destination '},
-                    {data: 'status', name: 'ss.name', class: 'align-middle text_center shipment_status'},
-                    {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
-                    {data: 'arrival_date', name: 'sj.created_at', class: 'text_center align-middle arrival_date'},
-                    {data: 'status_date_time', name: 'sj.updated_at', class: 'text_center align-middle status_date_time'},
-                    {data: 'account_type', name: 'account_type', class: 'text_center align-middle status_by'},
-                    {data: 'last_scanned_location', name: 'sssl.name', class: 'text_center align-middle last_scanned_location'},
-                    {data: 'last_scanned_city', name: 'ahc.name', class: 'text_center align-middle last_scanned_city'},
-                    {data: 'last_scanned_by', name: 'ad.name', class: 'text_center align-middle last_scanned_by'},
-                    {data: 'last_scanned_at', name: 'sjs.created_at', class: 'text_center align-middle last_scanned_at'},
-                ],
-                rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var shipment_status = '<select name="shipment_status" id="shipment_status" class="select2 form-control"></select>';
-
-                    // var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                    //     '<option value="1">Requested</option>' +
-                    //     '<option value="2">Picked</option>' +
-                    //     '<option value="3">Not Picked</option>' +
-                    //     '<option value="4">Cancelled</option>' +
-                    //     '</select>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
                         }
-                        else if ($(header).is('.shipment_status')) {
-                            $(shipment_status).appendTo($(search))
-                            .on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                         var data4 = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.id = obj.id;
-                        return obj;
-                    });
-
-                    var data4 = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.name;
-                        return obj;
-                    });
-
-                    $('#shipment_status').prepend('<option value="" selected></option>').select2({
-                        data:data4,
-                        placeholder: "Select Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-
-                    this.api().table().columns.adjust();
+                    }
+                    else {
+                        return false;
+                    }
                 }
             });
 
-            $('#track_form').bind('submit', function (e) {
-                e.preventDefault();
-                var tracking_numbers = $('#track_form .tracking_numbers').val();
-                var search_date_from = $('#track_form #search_date_from').val();
-                var search_date_to = $('#track_form #search_date_to').val();
-                var rider = $('#track_form #rider').val();
-                if (tracking_numbers != '' || (search_date_from != '' && search_date_to != '') || rider != '') {
-                    table.draw();
-                }
-               
-            });
+             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                    if ( this.context.length ) {
+                        blockPagePermanently();
+                        body = [];
+                        var params = table.ajax.params();
+                        params.start = 0;
+                        params.length = -1;
+                        params.excel = true;
+                        var jsonResult = $.ajax({
+                            url: '{{ route('admin.reports.quick_scanned_report.list')}}',
+                            data: params,
+                            success: function (result)
+                            {
+                                head = [];
+                                head.push('S.No');
+                                head.push('Tracking No.');
+                                head.push('Origin');
+                                head.push('Destination');
+                                head.push('Status');
+                                head.push('Shipper Name');
+                                head.push('Arrival Date');
+                                head.push('Status Date Time');
+                                head.push('Status By');
+                                head.push('Last Scanned Location');
+                                head.push('Last Scanned City');
+                                head.push('Last Scanned By');
+                                head.push('Last Scanned At');
+                                $.each(result.data, function(index, values) {
+                                    row = [];
+                                    row.push(index + 1);
+                                    row.push(values.tracking_number);
+                                    row.push(values.origin);
+                                    row.push(values.destination);
+                                    row.push(values.status);
+                                    row.push(values.shipper_name);
+                                    row.push(values.arrival_date);
+                                    row.push(values.status_date_time);
+                                    row.push(values.account_type);
+                                    row.push(values.last_scanned_location);
+                                    row.push(values.last_scanned_city);
+                                    row.push(values.last_scanned_by);
+                                    row.push(values.last_scanned_at);
+                                    body.push(row);
+                                });
+                            },
+                            async: false
+                        });
+                        UnblockPagePermanently();
+
+                        return {body: body, header: head};
+                    }
+                });
+            
+                var table = $('#datatable').DataTable({
+                    scrollX: true, scrollY: '500px',
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            title: 'Quick Scanned Report',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o "></i> Excel',
+                        },
+                    ],
+                    lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                    pageLength: 50,
+                    pagingType: 'full_numbers',
+                    processing: false,
+                    deferLoading: 0,
+                    language: {
+                        processing: data_table_loader
+                    },
+                    serverSide: true,
+                    ajax: {
+                        url: '{{ route('admin.reports.quick_scanned_report.list') }}',
+                        data: function (d) {
+                            d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                            d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                            d.rider = $('select[name="rider"]').val();
+                            d.tracking_numbers = $('#tracking_numbers').val();
+                        }
+                    },
+                    rowId: 'id',
+                    order: [[12, 'asc']],
+                    columns: [
+                        {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                        {data: 'tracking_number_hyperlink', name: 'shipments.tracking_number', class: 'align-middle text_center tracking_number'},
+                        {data: 'origin', name: 'oc.name', class: 'align-middle text_center origin '},
+                        {data: 'destination', name: 'dc.name', class: 'align-middle text_center destination '},
+                        {data: 'status', name: 'ss.name', class: 'align-middle text_center shipment_status'},
+                        {data: 'shipper_name', name: 'u.name', class: 'text_center align-middle shipper_name'},
+                        {data: 'arrival_date', name: 'sj.created_at', class: 'text_center align-middle arrival_date'},
+                        {data: 'status_date_time', name: 'sjl.created_at', class: 'text_center align-middle status_date_time'},
+                        {data: 'last_status_by', name: 'last_status_by', class: 'text_center align-middle last_status_by', orderable: false, searchable: false},
+                        {data: 'last_scanned_location', name: 'sssl.name', class: 'text_center align-middle last_scanned_location'},
+                        {data: 'last_scanned_city', name: 'last_scanned_city', class: 'text_center align-middle last_scanned_city', orderable: false, searchable: false},
+                        {data: 'last_scanned_by', name: 'last_scanned_by', class: 'text_center align-middle last_scanned_by', orderable: false, searchable: false},
+                        {data: 'last_scanned_at', name: 'ssj.created_at', class: 'text_center align-middle last_scanned_at'},
+                    ],
+                    rowCallback: function(row, data, index) {
+                        var info = table.page.info();
+                        $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    },
+                    initComplete: function() {
+                        this.api().table().columns.adjust();
+                    }
+                });
+
+                $('#track_form').bind('submit', function (e) {
+                    e.preventDefault();
+                    var tracking_numbers = $('#track_form .tracking_numbers').val();
+                    var search_date_from = $('#track_form #search_date_from').val();
+                    var search_date_to = $('#track_form #search_date_to').val();
+                    var rider = $('#track_form #rider').val();
+                    if (tracking_numbers != '' || (search_date_from != '' && search_date_to != '') || rider != '') {
+                        table.draw();
+                    }
+                });
 
         });
     </script>
