@@ -31,15 +31,6 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-5">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -181,12 +172,6 @@
                 allowClear:true
             });
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
-
             var max = '{{ Carbon\Carbon::now() }}';
 
             var from_date = $('#from_date').pickadate({
@@ -263,7 +248,7 @@
                                 row.push(values.total_shipments);
                                 row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.total_shipments;
+                                scanned_shipments += values.shipments_scanned_by_rider;
                                 arrived_shipments += values.total_arrived_shipments;
                                 without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
@@ -313,7 +298,6 @@
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
-                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -343,7 +327,7 @@
                     var without_scan_shipments_count = 0;
                     
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.total_shipments;
+                        scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
                         arrived_shipments_count += shipment_data.total_arrived_shipments;
                         without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
@@ -433,7 +417,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
