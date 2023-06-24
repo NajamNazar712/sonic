@@ -17,7 +17,7 @@ class CreateRcpAssignedShipmentLogsTable extends Migration
             $table->increments('id');
             $table->integer('rcp_assigned_shipment_id')->index();
             $table->integer('shipment_id')->index();
-            $table->integer('shipment_status');
+            $table->integer('status');
             $table->integer('admin_id')->index()->nullable();
             $table->integer('user_id')->index()->nullable();
             $table->timestamps();

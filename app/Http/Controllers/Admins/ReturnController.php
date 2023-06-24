@@ -672,6 +672,56 @@ class ReturnController extends Controller
                        $return_assign_log->save();
                    }
 
+
+                    $return_assign_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
+                    if($return_assign_shipment->exists()){
+                        //Assuring if agent is updating the status
+                        if($return_assign_shipment->admin_id == Auth::id() ){
+
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->shipment_status = 2; //return confirm status
+                            $return_assign_shipment->admin_id = Auth::id();
+                            $return_assign_shipment->save();
+
+                            //updating return row of agent 
+                            $update_rcp_assigned_agent_row = RcpAssignedAgent::where('id',$return_assign_shipment->rcp_assigned_agent_id)->first();
+                            $update_rcp_assigned_agent_row->increment('return');
+                            $actual_productivity = $update_rcp_assigned_agent_row->increment('actual_productivity'); //1
+                            $assigned_shipments = $update_rcp_assigned_agent_row->assigned_shipments; //2
+
+                            $productivity = 0; // Default value in case $assigned_shipments is zero
+                            if ($assigned_shipments != 0) {
+                                $productivity = number_format(($actual_productivity / $assigned_shipments) * 100, 2);
+                            }
+
+                            $update_rcp_assigned_agent_row->productivity = $productivity;
+                            $update_rcp_assigned_agent_row->admin_id = Auth::id();
+                            $update_rcp_assigned_agent_row->save();
+
+                            //creating log 
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->shipment_id = $return_assign_shipment->shipment_id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                         }
+                         
+                         //If admin is updating the status
+                         else{
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->shipment_status = 2; //return confirm status
+                            $return_assign_shipment->admin_id = Auth::id();
+                            $return_assign_shipment->save();
+
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->shipment_id = $return_assign_shipment->shipment_id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                         }
+                    }
                 }
 
             }
@@ -698,15 +748,16 @@ class ReturnController extends Controller
                 }
 
                 //For New Return Assigned Shipments
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->first();
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1);
                 if($rcp_assigned_shipment->exists()){
                     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                     $rcp_assigned_shipment->assigned_status = 2;
                     $rcp_assigned_shipment->save();
 
-                    $decrease_assigned_shipments = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                    $decrease_assigned_shipments->assigned_shipments = $decrease_assigned_shipments->assigned_shipments - 1;
-                    $decrease_assigned_shipments->save();
+                    $decrease_assigned_pending_shipments = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->whereDate('created_at',date('Y-m-d'))->first();
+                    $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
+                    $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
+                    $decrease_assigned_pending_shipments->save();
                 }
             }
             return ['status'=> 1,'success'=>"Agent Unassigned successfully"];
@@ -768,6 +819,8 @@ class ReturnController extends Controller
                        $return_assign_log->assigned_by = Auth::id();
                        $return_assign_log->save();
                    }
+
+                   
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
@@ -775,6 +828,7 @@ class ReturnController extends Controller
                     $reattempt_remarks_col->shipment_id = $shipment;
                     $reattempt_remarks_col->remarks = 'Manual';
                     $reattempt_remarks_col->save();
+
                 }
 
             }
@@ -854,6 +908,64 @@ class ReturnController extends Controller
                     }
                }
 
+               //Updating New RcpAssigned Tables
+               $return_assign_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->first();
+                    if($return_assign_shipment->exists()){
+                        //Assuring if agent is updating the status
+                        if($return_assign_shipment->admin_id == Auth::id() ){
+
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->shipment_status = 2; //return confirm status
+                            $return_assign_shipment->admin_id = Auth::id();
+                            $return_assign_shipment->save();
+
+                            //updating return row of agent 
+                            $update_rcp_assigned_agent_row = RcpAssignedAgent::where('id',$return_assign_shipment->rcp_assigned_agent_id)->first();
+                            $update_rcp_assigned_agent_row->increment('return');
+                            $update_rcp_assigned_agent_row->decrement('pending_shipments');
+                            $actual_productivity = $update_rcp_assigned_agent_row->increment('actual_productivity'); //1
+                            $assigned_shipments = $update_rcp_assigned_agent_row->assigned_shipments; //2
+
+                            $productivity = 0; // Default value in case $assigned_shipments is zero
+                            if ($assigned_shipments != 0) {
+                                $productivity = number_format(($actual_productivity / $assigned_shipments) * 100, 2);
+                            }
+
+                            $update_rcp_assigned_agent_row->productivity = $productivity;
+                            $update_rcp_assigned_agent_row->admin_id = Auth::id();
+                            $update_rcp_assigned_agent_row->save();
+
+                            //creating log 
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->shipment_id = $return_assign_shipment->shipment_id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                         }
+                         
+                         //If admin is updating the status
+                         else{
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->shipment_status = 2; //return confirm status
+                            $return_assign_shipment->admin_id = Auth::id();
+                            $return_assign_shipment->save();
+
+                            //updating pending column of agent 
+                            $update_rcp_assigned_agent_row = RcpAssignedAgent::where('id',$return_assign_shipment->rcp_assigned_agent_id)->first();
+                            $update_rcp_assigned_agent_row->decrement('pending_shipments');
+                            $update_rcp_assigned_agent_row->increment('already_updated');
+                            $update_rcp_assigned_agent_row->save();
+
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->shipment_id = $return_assign_shipment->shipment_id;
+                            $return_assign_log->status = 2;
+                            $return_assign_log->admin_id = Auth::id();
+                            $return_assign_log->save();
+                         }
+                    }
+
                 return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
             }
             return ['status'=>0,'error'=>"Shipment is in different status, Cannot mark it as Return - Confirm!"];
@@ -920,6 +1032,57 @@ class ReturnController extends Controller
                        $return_assign_log->status = 1;
                        $return_assign_log->assigned_by = Auth::id();
                        $return_assign_log->save();
+                   }
+
+                   //For New Table
+                   $reattempt_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->first();
+                   if($reattempt_shipment->exists()){
+                       //Assuring if agent is updating the status
+                       if($reattempt_shipment->admin_id == Auth::id() ){
+
+                           $reattempt_shipment = $reattempt_shipment ->latest()->first();
+                           $reattempt_shipment->shipment_status = 1; //reattempt status
+                           $reattempt_shipment->admin_id = Auth::id();
+                           $reattempt_shipment->save();
+
+                           //updating return row of agent 
+                           $update_rcp_assigned_agent_row = RcpAssignedAgent::where('id',$reattempt_shipment->rcp_assigned_agent_id)->first();
+                           $update_rcp_assigned_agent_row->increment('reattempt');
+                           $actual_productivity = $update_rcp_assigned_agent_row->increment('actual_productivity'); //1
+                           $assigned_shipments = $update_rcp_assigned_agent_row->assigned_shipments; //2
+
+                           $productivity = 0; // Default value in case $assigned_shipments is zero
+                           if ($assigned_shipments != 0) {
+                               $productivity = number_format(($actual_productivity / $assigned_shipments) * 100, 2);
+                           }
+
+                           $update_rcp_assigned_agent_row->productivity = $productivity;
+                           $update_rcp_assigned_agent_row->admin_id = Auth::id();
+                           $update_rcp_assigned_agent_row->save();
+
+                           //creating log 
+                           $return_assign_log = new RcpAssignedShipmentLog();
+                           $return_assign_log->rcp_assigned_shipment_id = $reattempt_shipment->id;
+                           $return_assign_log->shipment_id = $reattempt_shipment->shipment_id;
+                           $return_assign_log->status = 1;
+                           $return_assign_log->admin_id = Auth::id();
+                           $return_assign_log->save();
+                        }
+                        
+                        //If admin is updating the status
+                        else{
+                           $reattempt_shipment = $reattempt_shipment ->latest()->first();
+                           $reattempt_shipment->shipment_status = 1; //return confirm status
+                           $reattempt_shipment->admin_id = Auth::id();
+                           $reattempt_shipment->save();
+
+                           $return_assign_log = new RcpAssignedShipmentLog();
+                           $return_assign_log->rcp_assigned_shipment_id = $reattempt_shipment->id;
+                           $return_assign_log->shipment_id = $reattempt_shipment->shipment_id;
+                           $return_assign_log->status = 1;
+                           $return_assign_log->admin_id = Auth::id();
+                           $return_assign_log->save();
+                        }
                    }
 
                     NotificationsController::send(15, 0, $request->shipment_id);
@@ -4453,17 +4616,19 @@ class ReturnController extends Controller
         $shipment_ids = $request->shipment_ids;
         if($shipment_ids){
             foreach ($shipment_ids as $shipment_id){
+
                 $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
                 if($check_already_assigned){
                     $check_already_assigned->status = 0;
                     $check_already_assigned->save();
 
-                            $return_assign_log = new ReturnAssignedShipmentLogs();
-                            $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
-                            $return_assign_log->status = 4;
-                            $return_assign_log->assigned_by = Auth::id();
-                            $return_assign_log->save();
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                    $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                    $return_assign_log->status = 4;
+                    $return_assign_log->assigned_by = Auth::id();
+                    $return_assign_log->save();
                 }
+
                 $assign_shipments = new ReturnAssignedShipments();
                 $assign_shipments->admin_id = $request->admin_id;
                 $assign_shipments->shipment_id = $shipment_id;
@@ -4477,9 +4642,11 @@ class ReturnController extends Controller
                             $return_assign_log->assigned_by = Auth::id();
                             $return_assign_log->save();
 
-                //set record in login/logut table
+                //set record in login/logout table
                 $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
                 
+
+
                 if(!$check_agent_return_confrimation->exists()){
 
                  
@@ -4494,110 +4661,98 @@ class ReturnController extends Controller
                          $agent_return_confrimation->save();
                      }
                  }
-                 else{
+
+
+                 else
+                 {
                     $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                     $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
                     $check_agent_return_confrimation->save();
                  }
-                //set record in login/logut table end
+                //set record in login/logout table end
                 
             }
             ////////////////////////////////////////////////////////////
             // for new return_shipments_assigned_agents
             foreach ($shipment_ids as $shipment_id){
-                $check_shipment_status_id = Shipment::where('id', $shipment_id)->first();
 
-                //checking if the shipments is already assigned to the agent 
-                $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->first();
-                if($check_already_assigned){
+                $check_agent_return_confrimation = RcpAssignedAgent::where('admin_id',$request->admin_id)->whereDate('created_at',date('Y-m-d'));
+                // Check if the agent confirmation doesn't exist and if it was not created today
+                if (!$check_agent_return_confrimation->exists()) {
+                    $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
+                     
+                     if($agent_role->exists()){
+                         $agent_return_confrimation = new RcpAssignedAgent;
+                         $agent_return_confrimation->admin_id = $request->admin_id;
+                         $agent_return_confrimation->total_shipments = $agent_return_confrimation->total_shipments + 1 ;
+                         $agent_return_confrimation->assigned_shipments = $agent_return_confrimation->assigned_shipments + 1 ;
+                         $agent_return_confrimation->pending_shipments = $agent_return_confrimation->pending_shipments + 1 ;
+                         $agent_return_confrimation->save();
 
-                    
-                    $check_already_assigned->assigned_status = 2; //changing the status as unassgined  
-                    $check_already_assigned->save();
+                        $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->first();
+                        if($check_already_assigned){
+                            $check_already_assigned->assigned_status = 2; //changing the status as unassgined  
+                            $check_already_assigned->save();
+                            $agent = RcpAssignedAgent::where('admin_id', $request->admin_id)->first();
+                            $agent->decrement('assigned_shipments');
+                            $agent->save();
+                        }
 
-                    $agent = RcpAssignedAgent::where('admin_id', $request->admin_id)->first();
-                    $agent->assigned_shipments = $agent->assigned_shipments - 1;
-                    $agent->save();
+                        $assign_shipments = new RcpAssignedShipment();
+                        $assign_shipments->admin_id = $request->admin_id;
+                        $assign_shipments->shipment_id = $shipment_id;
+                        $assign_shipments->rcp_assigned_agent_id = $agent_return_confrimation->id;
+                        $assign_shipments->assigned_status = 1;
+                        $assign_shipments->assigned_by = Auth::id();
+                        $assign_shipments->save();
 
-                }
+                        //updating logs
+                        $assign_shipments_logs = new RcpAssignedShipmentLog();
+                        $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
+                        $assign_shipments_logs->shipment_id = $shipment_id;
+                        $assign_shipments_logs->status = 0;
+                        $assign_shipments_logs->admin_id = $request->admin_id;
+                        $assign_shipments_logs->save();
+                     }
 
+                 }
 
-                $check_agent_already_exist = RcpAssignedAgent::where('admin_id', $request->admin_id)->where('created_at',Carbon::now()->format("Y-m-d"))->first();
-                if($check_agent_already_exist){
+                else
+                {
+                    $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
+                    $check_agent_return_confrimation->increment('total_shipments');
+                    $check_agent_return_confrimation->increment('assigned_shipments');
+                    $check_agent_return_confrimation->increment('pending_shipments');
+                    $check_agent_return_confrimation->save();
 
-                    $check_agent_already_exist->total_shipments =  $check_agent_already_exist->total_shipments + 1; //changing the status as unassgined  
-                    $check_agent_already_exist->assigned_shipments =  $check_agent_already_exist->assigned_shipments + 1;
-                    $check_agent_already_exist->save();
+                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->first();
+                    if($check_already_assigned){
+                        $check_already_assigned->assigned_status = 2; //changing the status as unassgined  
+                        $check_already_assigned->save();
+
+                        $agent = RcpAssignedAgent::where('admin_id', $request->admin_id)->first();
+                        $agent->decrement('assigned_shipments');
+                        $agent->save();
+                    }
 
                     $assign_shipments = new RcpAssignedShipment();
-                    $assign_shipments->rcp_assigned_agent_id = $check_agent_already_exist->id;
-                    $assign_shipments->shipment_id = $shipment_id;
                     $assign_shipments->admin_id = $request->admin_id;
-                    $assign_shipments->shipment_status = $check_shipment_status_id->shipper_status_id;
+                    $assign_shipments->shipment_id = $shipment_id;
+                    $assign_shipments->rcp_assigned_agent_id = $check_agent_return_confrimation->id;
                     $assign_shipments->assigned_status = 1;
                     $assign_shipments->assigned_by = Auth::id();
                     $assign_shipments->save();
 
-                    $return_assign_log = new RcpAssignedShipmentLog();
-                    $return_assign_log->rcp_assigned_shipment_id = $assign_shipments->id;
-                    $return_assign_log->shipment_id = $shipment_id;
-                    $return_assign_log->shipment_status = $check_shipment_status_id->shipper_status_id;
-                    $return_assign_log->save();
-
-                    //set record in login/logout table
-                    $check_agent_return_confrimation = RcpAssignedAgent::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
-                
+                    //updating logs
+                    $assign_shipments_logs = new RcpAssignedShipmentLog();
+                    $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
+                    $assign_shipments_logs->shipment_id = $shipment_id;
+                    $assign_shipments_logs->status = 0;
+                    $assign_shipments_logs->admin_id = $request->admin_id;
+                    $assign_shipments_logs->save();
                 }
 
-                else
-                {
-
-                $agent = new RcpAssignedAgent;
-                $agent->admin_id = $request->admin_id;
-                $agent->total_shipments = $agent->total_shipments +  1;
-                $agent->assigned_shipments =  $agent->assigned_shipments + 1;
-                $agent->save();
-
-
-                $assign_shipments = new RcpAssignedShipment();
-                $assign_shipments->rcp_assigned_agent_id = $agent->id;
-                $assign_shipments->shipment_id = $shipment_id;
-                $assign_shipments->admin_id = $request->admin_id;
-                $assign_shipments->shipment_status = $check_shipment_status_id->shipper_status_id;
-                $assign_shipments->assigned_status = 1;
-                $assign_shipments->assigned_by = Auth::id();
-                $assign_shipments->save();
-
-
-
-                $return_assign_log = new RcpAssignedShipmentLog();
-                $return_assign_log->rcp_assigned_shipment_id = $assign_shipments->id;
-                $return_assign_log->shipment_id = $shipment_id;
-                $return_assign_log->shipment_status = $check_shipment_status_id->shipper_status_id;
-                $return_assign_log->save();
-
-                //set record in login/logout table
-                $check_agent_return_confrimation = RcpAssignedAgent::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
-                
-                // if(!$check_agent_return_confrimation->exists()){
-                //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                //      ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
-                     
-                //      if($agent_role->exists()){
-                //          $agent_return_confrimation = new RcpAssignedAgent;
-                //          $agent_return_confrimation->admin_id = $request->admin_id;
-                //         //  $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                //          $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                //          $agent_return_confrimation->save();
-                //      }
-                //  }
-                //  else{
-                //     $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
-                //     // $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                //     $check_agent_return_confrimation->save();
-                //  }
-                //set record in login/logout table end
-                }
             }
 
             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);

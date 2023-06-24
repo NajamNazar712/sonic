@@ -21,7 +21,15 @@ class CreateRcpAssignedAgentsTable extends Migration
             $table->dateTime('end_time')->nullable();
             $table->integer('total_shipments')->default('0');
             $table->integer('assigned_shipments')->default('0');
+            $table->integer('actual_productivity')->default('0');
+            $table->integer('reattempt')->default('0');
+            $table->integer('return')->default('0');
+            $table->integer('intercept')->default('0');
+            $table->integer('on_hold_for_self_collection')->default('0');
+            $table->integer('unresponsive_return')->default('0');
             $table->integer('pending_shipments')->default('0');
+            $table->integer('already_updated')->default('0');
+            $table->decimal('productivity')->default('0');
             $table->timestamps();
         });
     }
