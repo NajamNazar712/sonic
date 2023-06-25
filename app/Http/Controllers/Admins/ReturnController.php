@@ -1239,10 +1239,6 @@ class ReturnController extends Controller
  
                              $actual_productivity = $rcp_assigned_agent->actual_productivity; 
  
-                             // $productivity = $rcp_assigned_agent->productivity; // fetch current productivity of agent
-                             // if ($assigned_shipments != 0) {
-                             //     $productivity = number_format(($actual_productivity / $assigned_shipments) * 100, 2);
-                             // }
                              $already_updated = $rcp_assigned_agent->already_updated;
  
                              $productivity = $rcp_assigned_agent->productivity; 
@@ -7085,6 +7081,13 @@ class ReturnController extends Controller
 
         $status->save();
 
+        //adding status_remark_id in rcp_assigned_shipments table
+        $add_status_remarks_id = RcpAssignedShipment::where('shipment_id',$request->shipment_id)->latest()->first();
+        $add_status_remarks_id->status_remarks_id = $status->id;
+        $add_status_remarks_id->save();
+
+
+
         return response()->json(['status' => 1]);
 
     }
@@ -7321,64 +7324,81 @@ class ReturnController extends Controller
         return view('admin.return.new_rcp_agent_shipments', compact('agents','today'));
     }
 
-    public function new_rcp_agent_shipments_list(Request $request){   
+    public function new_rcp_agent_shipments_list(Request $request){
         if($request->get('excel') && $request->get('excel') == true)
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),666);
         }
         
-        // $agent_productivity = ReturnAssignedShipments::join('agent_return_confirmations','agent_return_confirmations.return_assigned_shipment_id','=','return_assigned_shipments.id')
-        $agent_productivity = RcpAssignedShipment::join('rcp_assigned_agents as raa','raa.id','rcp_assigned_shipments.id')
-        ->leftjoin('admins as a','a.id','=','raa.admin_id')
-        ->leftjoin('shipments as s','s.id','=','rcp_assigned_shipments.shipment_id')
-        ->leftjoin('users as u','u.id','=','s.user_id')
-        ->leftjoin('user_shipping_infos as usi','usi.user_id','=','u.id')
-        ->leftjoin('cities as c','c.id','=','usi.city_id')
-        ->leftjoin('cities as consignee_city','consignee_city.id','=','s.consignee_city_id')
-
+        // $agent_productivity = RcpAssignedShipment::join('rcp_assigned_agents as raa','raa.id','rcp_assigned_shipments.id')
+        $agent_productivity = RcpAssignedAgent::
+        join('rcp_assigned_shipments as rcp_assigned_shipments','rcp_assigned_shipments.rcp_assigned_agent_id','rcp_assigned_agents.id')
+        ->leftjoin('admins as a','a.id','rcp_assigned_agents.admin_id')
+        ->leftjoin('shipments as s','s.id','rcp_assigned_shipments.shipment_id')
+        ->leftjoin('users as u','u.id','s.user_id')
+        ->leftjoin('user_shipping_infos as usi','usi.user_id','u.id')
+        ->leftjoin('cities as c','c.id','usi.city_id')
+        ->leftjoin('cities as consignee_city','consignee_city.id','s.consignee_city_id')
+        ->leftjoin('admins as admin','admin.id','rcp_assigned_shipments.admin_id') //to get admin name in updated_by column
+        ->leftjoin('users as user','user.id','rcp_assigned_shipments.user_id') //to get user name in updated_by column
         //for current status reason and shipment status
         ->leftJoin('shipments_journey as sj', function ($join) {
-            $join->on('sj.shipment_id','=','s.id')
-                ->on('sj.id', '=', DB::raw("(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)"));
+            $join->on('sj.shipment_id','s.id')
+                ->on('sj.id',  DB::raw("(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id)"));
         })
 
-        ->leftjoin('shipment_status_reason as ssr','ssr.id','=','sj.status_reason_id')
-        ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
+        ->leftjoin('shipment_status_reason as ssr','ssr.id','sj.status_reason_id')
+        ->leftjoin('shipment_status as ss','ss.id','sj.shipper_status_id')
 
-        ->leftjoin('status_remarks as sr','sr.shipment_id','=','rcp_assigned_shipments.shipment_id')
-        ->leftjoin('sub_status_call_findings as sscf','sscf.id','=','sr.sub_status_call_finding_id')
-        
+        ->leftjoin('status_remarks as sr','sr.shipment_id','rcp_assigned_shipments.status_remarks_id')
+        ->leftjoin('sub_status_call_findings as sscf','sscf.id','sr.sub_status_call_finding_id')
         
         // Filter the join condition for shipper_status_id = 2 (arrive at origin) for arriaval date
-        ->leftjoin('shipments_journey as sjj', function($join) {
-            $join->on('sjj.shipment_id', '=', 's.id')
-                 ->where('sjj.shipper_status_id', '=', 2);
+        ->join('shipments_journey as sjj', function($join) {
+            $join->on('sjj.shipment_id',  's.id')
+                 ->where('sjj.shipper_status_id',  2);
         })
 
         ->select('s.tracking_number as tracking_number','u.name as shipper_name','c.name as origin',
         'consignee_city.name as consignee_city','s.amount as collection_amount','ss.name as current_status', 
-        'sj.updated_at as current_status_date', 'ssr.name as reason','sjj.updated_at as arrival_date',
+        'sj.updated_at as current_status_date', 'ssr.name as reason',
+        'sjj.updated_at as arrival_date',
         'a.id as agent_id', 'rcp_assigned_shipments.shipment_id as shipment_id',
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
         's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
-        'rcp_assigned_shipments.updated_at as agent_status_date', 'rcp_assigned_shipments.shipmnet_status as rasl_status', 's.user_id as shipment_user_id',
-       
+        'rcp_assigned_shipments.updated_at as agent_status_date', 'rcp_assigned_shipments.shipment_status as rasl_status', 
+        's.user_id as shipment_user_id', 'rcp_assigned_shipments.id', 'admin.name as admin_name', 'user.name as user_name',
+        'rcp_assigned_shipments.assigned_status as assigned_status')
 
-        'rcp_assigned_shipments.id')
-        ->orderby('rcp_assigned_shipments.id','desc')
+        ->orderby('rcp_assigned_shipments.updated_at','desc')
         ->groupBy('rcp_assigned_shipments.id');
 
         $datatable = Datatables::of($agent_productivity)
 
 
         ->addColumn('updated_by', function ($agent_productivity){
+            $update_by = RcpAssignedShipment::where('id',$agent_productivity->id)->where('shipment_status','!=',0)->first();
+            if($update_by)
+            {
+                if ($update_by->admin_id) {
+                    return $agent_productivity->admin_name;
+                } 
 
-            if($agent_productivity->user_name != null && $agent_productivity->user_id == $agent_productivity->shipment_user_id){
+                else {
+                    return $agent_productivity->user_name;
+                }
+            }
 
-                return $agent_productivity->user_name;
+            return '-';
+        })
+        
+        ->editColumn('assigned_status', function ($agent_productivity){
+            if($agent_productivity->assigned_status == 1){
+
+                return 'Assigned';
             }
             else{
-                return $agent_productivity->admin_name;
+                return 'Un Assigned';
             }
         })
 

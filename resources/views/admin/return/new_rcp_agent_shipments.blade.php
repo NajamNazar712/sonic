@@ -71,6 +71,7 @@
                         <th class="border-primary border-darken-1">Call Findings</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Assigned To</th>
+                        <th class="border-primary border-darken-1">Assigned Status</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Agent Status</th>
                         <th class="border-primary border-darken-1">Agent Status Date</th>
@@ -210,7 +211,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.rcp_agent_cn.list') }}',
+                        url: '{{ route('admin.return.new_rcp_agent_shipments.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -290,7 +291,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.return.rcp_agent_cn.list') }}',
+                    url: '{{ route('admin.return.new_rcp_agent_shipments.list') }}',
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
@@ -314,6 +315,7 @@
                     {data: 'call_findings', orderable: false, name: 'call_findings', class: 'align-middle call_findings'},
                     {data: 'arrival_date', orderable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
                     {data: 'assigned_to', orderable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
+                    {data: 'assigned_status', orderable: false, name: 'assigned_status', class: 'align-middle assigned_status'}, 
                     {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
                     {data: 'agent_status', orderable: false, name: 'agent_status', class: 'align-middle agent_status'},
                     {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
