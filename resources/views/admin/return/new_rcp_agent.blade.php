@@ -41,15 +41,6 @@
                                     </select>
                                 </fieldset>
                             </div>
-                            {{-- <div class="col-4">
-                                <fieldset class="form-group pb-1">
-                                    <select name="search_shipper" id="search_shipper" class="form-control select2" requireddata-rule-required="true" data-msg-required="Shipper is required">
-                                        @foreach($shippers as $shipper)
-                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </fieldset>
-                            </div> --}}
                             <div class="col-4">
                                 <div class="form-group input-group  pb-1">
                                     <div class="input-group-prepend">
@@ -464,7 +455,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.rcp_agent.list') }}',
+                        url: '{{ route('admin.return.new_rcp_agent.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -540,7 +531,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.return.rcp_agent.list') }}',
+                    url: '{{ route('admin.return.new_rcp_agent.list') }}',
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();
@@ -555,18 +546,18 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
                     {data: 'agent_category', orderable: false, name: 'e.staff_category_id', class: 'align-middle agent_category'}, 
-                    {data: 'start_time', name: 'start_time', class: 'align-middle start_time'},
-                    {data: 'end_time', name: 'end_time', class: 'align-middle end_time'},
-                    {data: 'total_assigning', orderable: false, searchable: false, name: 'total_assigning', class: 'align-middle total_assigning'},
-                    {data: 'actual_productivity', orderable: false, searchable: false, name: 'actual_productivity', class: 'align-middle actual_productivity'},
-                    {data: 'reattempt', orderable: false, searchable: false, name: 'reattempt', class: 'align-middle reattempt'},
-                    {data: 'return', orderable: false, searchable: false, name: 'return', class: 'align-middle return'},
-                    {data: 'intercept', orderable: false, searchable: false, name: '', class: 'align-middle intercept'},
-                    {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'on_hold_for_sc', class: 'align-middle pending'},
-                    {data: 'pending', orderable: false, searchable: false, name: 'pending', class: 'align-middle pending'},
-                    {data: 'already_updated', orderable: false, searchable: false, name: '', class: 'align-middle already_updated'}, 
-                    {data: 'unresponsive_return', orderable: false, searchable: false, name: 'unresponsive_return', class: 'align-middle unresponsive_return'}, 
-                    {data: 'productivity', orderable: false, searchable: false, name: 'productivity', class: 'align-middle productivity'},
+                    {data: 'start_time', name: 'rcp_assigned_agents.start_time', class: 'align-middle start_time'},
+                    {data: 'end_time', name: 'rcp_assigned_agents.end_time', class: 'align-middle end_time'},
+                    {data: 'total_assigning', orderable: false, searchable: false, name: 'rcp_assigned_agents.total_assigning', class: 'align-middle total_assigning'},
+                    {data: 'actual_productivity', orderable: false, searchable: false, name: 'rcp_assigned_agents.actual_productivity', class: 'align-middle actual_productivity'},
+                    {data: 'reattempt', orderable: false, searchable: false, name: 'rcp_assigned_agents.reattempt', class: 'align-middle reattempt'},
+                    {data: 'return', orderable: false, searchable: false, name: 'rcp_assigned_agents.return', class: 'align-middle return'},
+                    {data: 'intercept', orderable: false, searchable: false, name: 'rcp_assigned_agents.intercept', class: 'align-middle intercept'},
+                    {data: 'on_hold_for_sc', orderable: false, searchable: false, name: 'rcp_assigned_agents.on_hold_for_sc', class: 'align-middle pending'},
+                    {data: 'pending', orderable: false, searchable: false, name: 'rcp_assigned_agents.pending', class: 'align-middle pending'},
+                    {data: 'already_updated', orderable: false, searchable: false, name: 'rcp_assigned_agents.already_updated', class: 'align-middle already_updated'}, 
+                    {data: 'unresponsive_return', orderable: false, searchable: false, name: 'rcp_assigned_agents.unresponsive_return', class: 'align-middle unresponsive_return'}, 
+                    {data: 'productivity', orderable: false, searchable: false, name: 'rcp_assigned_agents.productivity', class: 'align-middle productivity'},
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -589,7 +580,7 @@
                     completed_shipments += data.actual_productivity;
                     reattempt_shipments += data.reattempt;
                     total_return_confirm += data.total_return_confirm;
-                    total_unresponsive_in_percent += data.total_unresponsive_in_percent;
+                    total_unresponsive_in_percent += data.unresponsive_return;
                     total_mark_for_self_collection += data.total_mark_for_self_collection;
                     total_intercept += data.intercept;
                     unresponsive_return += data.unresponsive_return;
