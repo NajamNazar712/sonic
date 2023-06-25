@@ -7440,7 +7440,7 @@ class DeliveryController extends Controller
                              $rcp_assigned_shipment_request_intercept->save();
 
                              $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_request_intercept_id = $rcp_assigned_shipment_request_intercept->id;
+                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment_request_intercept->id;
                              $return_assign_log->shipment_id = $rcp_assigned_shipment_request_intercept->shipment_id;
                              $return_assign_log->status = 8; //intercept request approval
                              $return_assign_log->admin_id = Auth::id();

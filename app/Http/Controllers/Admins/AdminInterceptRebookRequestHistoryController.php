@@ -247,7 +247,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              
                          //If admin is updating the status update rcp_assigned_shipment & log
                              else{
-                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                              $rcp_assigned_shipment->shipment_status = 7; //intercept request
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
@@ -342,7 +341,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                        //Updating New RcpAssigned Tables
                      $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
-                     if ($rcp_assigned_shipment && $rcp_assigned_shipment->exists()) {
+                     if ($rcp_assigned_shipment->exists()) {
 
                          //Assuring if agent is requesting for intercept request status rcp_assigned_agent
                          $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -396,7 +395,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              
                             //If admin is updating the status update rcp_assigned_shipment & log
                              else{
-                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                              $rcp_assigned_shipment->shipment_status = 8; //intercept request
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
