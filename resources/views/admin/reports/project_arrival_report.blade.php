@@ -13,7 +13,7 @@
                 @include('admin.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-4">
+                    {{-- <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -30,7 +30,7 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                    </div>
+                    </div> --}}
                     <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
