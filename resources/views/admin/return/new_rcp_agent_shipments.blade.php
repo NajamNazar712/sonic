@@ -317,7 +317,7 @@
                     {data: 'assigned_to', orderable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
                     {data: 'assigned_status', orderable: false, name: 'assigned_status', class: 'align-middle assigned_status'}, 
                     {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
-                    {data: 'agent_status', orderable: false, name: 'agent_status', class: 'align-middle agent_status'},
+                    {data: 'agent_status', orderable: false, name: 'rass.agent_status', class: 'align-middle agent_status'},
                     {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
