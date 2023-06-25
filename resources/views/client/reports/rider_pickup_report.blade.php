@@ -335,7 +335,7 @@
                     var without_scan_shipments_count = 0;
 
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.total_shipments;
+                        scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
                         arrived_shipments_count += shipment_data.total_arrived_shipments;
                         without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
@@ -390,7 +390,7 @@
                             if (data.data) {
                                 var route = '{!! route('cod.tracking.index') !!}';
                                 $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                                 });
                             }
                             $('#shipments_modal .modal-body').html(shipments);
@@ -419,7 +419,7 @@
                             if (data.data) {
                                 var route = '{!! route('cod.tracking.index') !!}';
                                 $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                                 });
                             }
                             $('#shipments_modal .modal-body').html(shipments);
@@ -448,7 +448,7 @@
                             if (data.data) {
                                 var route = '{!! route('cod.tracking.index') !!}';
                                 $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                                 });
                             }
                             $('#shipments_modal .modal-body').html(shipments);
