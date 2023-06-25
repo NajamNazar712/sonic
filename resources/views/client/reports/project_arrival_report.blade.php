@@ -12,8 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
-                    <div class="col-4">
+                <div class="row mb-2 justify-content-center" id="track_form">
+                    {{-- <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -30,6 +30,11 @@
                                 @endforeach
                             </select>
                         </fieldset>
+                    </div> --}}
+                    <div class="col-5">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*"  id="tracking_numbers" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
                     </div>
                     <div class="col-4">
                         <div class="form-group input-group">
@@ -60,12 +65,12 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Rider Picked Date and Time</th>
-                            <th class="border-primary border-darken-1">Scanned By</th>
-                            <th class="border-primary border-darken-1">Pickup Note ID</th>
-                            <th class="border-primary border-darken-1">No of shipments scanned</th>
-                            <th class="border-primary border-darken-1">No of shipments Arrived</th>
-                            <th class="border-primary border-darken-1">Dif b/w PA and NA</th>
+                            <th class="border-primary border-darken-1">Origin</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Project Arrival By</th>
+                            <th class="border-primary border-darken-1">Project Arrival At</th>
+                            <th class="border-primary border-darken-1">Normal Arrival By</th>
+                            <th class="border-primary border-darken-1">Normal Arrival At</th>
                             {{-- <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
                             <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th> --}}
@@ -101,6 +106,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -147,6 +154,9 @@
             width: auto !important;
             text-align: left;
         }
+        .tracking_numbers{
+            width: 100% !important;
+        }
     </style>
 @endsection
 @section('js')
@@ -160,6 +170,7 @@
 <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -221,6 +232,34 @@
 
                 }
             });
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -236,23 +275,23 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Rider Picked Date and Time');
-                            head.push('Scanned By');
-                            head.push('Pickup Note ID');
-                            head.push('No. of Scanned Shipments');
-                            head.push('No. of Arrived Shipments');
-                            head.push('Dif b/w PA and NA');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Project Arrival By');
+                            head.push('Project Arrival At');
+                            head.push('Normal Arrival By');
+                            head.push('Normal Arrival At');
 
                             $.each(result.data, function(index, values) {
-                                row = [];
-                                row.push(index + 1);
-                                row.push(values.rider_picked_date_time);
-                                row.push(values.scanned_by);
-                                row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
-                                row.push(values.diff_pa_na);
-                                body.push(row);
+                                // row = [];
+                                // row.push(index + 1);
+                                // row.push(values.rider_picked_date_time);
+                                // row.push(values.scanned_by);
+                                // row.push(values.pickup_note_id);
+                                // row.push(values.scanned_shipments);
+                                // row.push(values.arrived_shipments);
+                                // row.push(values.diff_pa_na);
+                                // body.push(row);
                             });
                         },
                         async: false
@@ -269,7 +308,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Project Arrival Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
@@ -286,22 +325,24 @@
                 ajax:{
                     url: '{{ route('cod.reports.project_arrival.list') }}',
                     data: function (d) {
-                        d.search_hub = $('#search_hub').val();
-                        d.search_rider = $('#search_rider').val();
-                        d.search_shipper = $('#search_shipper').val();
+                        // d.search_hub = $('#search_hub').val();
+                        // d.search_rider = $('#search_rider').val();
+                        // d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.tracking_numbers = $('#tracking_numbers').val();
+
                     }
                 },
                 order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'rider_picked_date_time' ,name: 'arrsh.created_at', class: 'align-middle text-center date'},
-                    { data:'scanned_by',name: 'a.name', class: 'align-middle text-center scanned_by'},
-                    { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
-                    { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
-                    { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'diff_pa_na_btn', class: 'align-middle diff_pa_na', orderable: false, searchable: false},
+                    // {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    // { data:'rider_picked_date_time' ,name: 'arrsh.created_at', class: 'align-middle text-center date'},
+                    // { data:'scanned_by',name: 'a.name', class: 'align-middle text-center scanned_by'},
+                    // { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
+                    // { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
+                    // { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
+                    // { data:'diff_pa_na_btn', class: 'align-middle diff_pa_na', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -325,7 +366,7 @@
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.v2_pickups.pending.print') !!}',
+                    url: '{!! route('cod.reports.project_arrival.print') !!}',
                     method: 'POST',
                     data: {
                         'ids': [id],
