@@ -122,7 +122,7 @@ class AdminLoginController extends Controller
             }
 
             //mark login in new return_shipments_assigned_agents
-            $check_login = RcpAssignedAgent::where('admin_id', $id)->whereDate('created_at',date('Y-m-d'));
+            $check_login = RcpAssignedAgent::where('admin_id', $id)->whereDate('created_at', date('Y-m-d'));
             if (!$check_login->exists()) {
                 $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
                     ->where('admin_roles.department_id', 3)->where('a.id', $id);
@@ -190,7 +190,7 @@ class AdminLoginController extends Controller
             $check_logout_new_rcp_agents = RcpAssignedAgent::where('admin_id', $admin->id())->whereDate('created_at',date('Y-m-d'));
             if ($check_logout->exists()) {
                 $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                    ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
+                ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
                 if ($agent_role->exists()) {
                     $agent_logout = $check_logout->first();
                     $agent_logout->logout_time = Carbon::now();
@@ -202,7 +202,7 @@ class AdminLoginController extends Controller
                 $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
                     ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
                 if ($agent_role->exists()) {
-                    $agent_logout = $check_logout->first();
+                    $agent_logout = $check_logout_new_rcp_agents->first();
                     $agent_logout->end_time = Carbon::now();
                     $agent_logout->save();
                 }
