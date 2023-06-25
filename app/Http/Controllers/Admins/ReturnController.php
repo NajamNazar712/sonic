@@ -5221,7 +5221,7 @@ class ReturnController extends Controller
                      }
 
                  }
-                 //performing no action if the same shipment is assigned to same agent same day
+                 //performing no action if the same shipment is assigned to same agent same day with same status
                 else
                 {
                     
