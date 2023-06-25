@@ -1181,9 +1181,10 @@ class ReturnController extends Controller
                          $return_assign_log->save();
                          }
                          
-                     //If admin is updating the status update rcp_assigned_shipment & log
-                         else{
-                         $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                        //If admin is updating the status update rcp_assigned_shipment & log
+                         else
+                         {
+                        //  $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                          $rcp_assigned_shipment->shipment_status = 6; //status consignee is not responding as unresponsive
                          $rcp_assigned_shipment->admin_id = Auth::id();
                          $rcp_assigned_shipment->save();
@@ -1220,7 +1221,8 @@ class ReturnController extends Controller
                          $return_assign_log->save();
                          }
                  }
-                 //Updating New RcpAssigned Tables OTHER REASONS STATUSES
+
+                 //Updating New RcpAssigned Tables OTHER REASONS
                  else{
                      //Assuring if agent is updating the status update rows in rcp_assigned_agent
                          $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -1265,7 +1267,7 @@ class ReturnController extends Controller
                           
                          //If admin is updating the status update rcp_assigned_shipment & log
                           else{
-                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                            //  $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                              $rcp_assigned_shipment->shipment_status = 4; //return confirm status
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
