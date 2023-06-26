@@ -11329,16 +11329,16 @@ class AdminReportsController extends Controller
         {
             ActivityTrailController::createActivityTrailLog(Auth::id(),672);
         }
-        // $project_arrival = $select = [
-        //     'shipper'=> 0,
-        //     'origin'=> 0,
-        //     'destination'=> 0,
-        //     'project_arrival_by'=> 0,
-        //     'project_arrival_at'=> 0,
-        //     'Normal_arrival_by'=> 0,
-        //     'Normal_arrival_at'=> 0,
+        $project_arrival = $select = [
+            'shipper'=> 0,
+            'origin'=> 0,
+            'destination'=> 0,
+            'project_arrival_by'=> 0,
+            'project_arrival_at'=> 0,
+            'Normal_arrival_by'=> 0,
+            'Normal_arrival_at'=> 0,
           
-        // ];
+        ];
         // $project_arrival = DB::connection('reports')->table('shipments')
         // ->join('shipments_journey as sj',function($join){
         // $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
