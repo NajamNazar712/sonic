@@ -385,10 +385,10 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_agent').prepend('<option value="" selected></option>').select2({
+            $('#search_agent').select2({
                 width:'100%',
                 placeholder:"Select Agent",
-                allowClear:true,
+                // allowClear:true,
             });
             $('#search_hub').prepend('<option value="" selected></option>').select2({
                 width:'100%',
