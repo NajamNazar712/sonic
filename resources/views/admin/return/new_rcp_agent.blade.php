@@ -494,7 +494,7 @@
                                 row.push(values.pending);
                                 row.push(values.already_updated);
                                 row.push(values.unresponsive_return);
-                                row.push(values.productivity);
+                                row.push(values.agent_productivity);
 
 
                                 body.push(row);
@@ -557,7 +557,7 @@
                     {data: 'pending', orderable: false, searchable: false, name: 'rcp_assigned_agents.pending', class: 'align-middle pending'},
                     {data: 'already_updated', orderable: false, searchable: false, name: 'rcp_assigned_agents.already_updated', class: 'align-middle already_updated'}, 
                     {data: 'unresponsive_return', orderable: false, searchable: false, name: 'rcp_assigned_agents.unresponsive_return', class: 'align-middle unresponsive_return'}, 
-                    {data: 'productivity', orderable: false, searchable: false, name: 'rcp_assigned_agents.productivity', class: 'align-middle productivity'},
+                    {data: 'agent_productivity', orderable: false, searchable: false, name: 'agent_productivity', class: 'align-middle productivity'},
 
                 ],
                 rowCallback: function(row, data, index) {

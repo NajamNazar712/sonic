@@ -200,7 +200,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                        ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
 
-                    //Updating New RcpAssigned Tables
+                    //Updating New RcpAssigned Tables for different consignee
                      $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
                      if ($rcp_assigned_shipment && $rcp_assigned_shipment->exists()) {
 
@@ -216,6 +216,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              //updating return row of agent 
                              $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                              $rcp_assigned_agent->increment('intercept');
+                             $rcp_assigned_agent->decrement('pending_shipments');
                              $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                              $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
 
@@ -355,6 +356,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              //updating return row of agent 
                              $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                              $rcp_assigned_agent->increment('intercept');
+                             $rcp_assigned_agent->decrement('pending_shipments');
                              $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                              $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
 
