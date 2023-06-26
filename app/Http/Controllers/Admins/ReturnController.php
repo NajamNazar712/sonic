@@ -7419,7 +7419,7 @@ class ReturnController extends Controller
             else {
                 $productivity = 0;
             }
-
+            dd($productivity);
            return $productivity;
         });
 
