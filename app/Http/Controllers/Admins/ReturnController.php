@@ -7406,7 +7406,6 @@ class ReturnController extends Controller
             }
         })
         ->addColumn('agent_productivity', function ($agent_productivity) {
-            // $rcp_assigned_agent = RcpAssignedShipment::where('shipment_id', $agent_productivity->shipment_id)->first();
 
             $assigned_shipments = $agent_productivity->total_assigning; //20
  
@@ -7419,7 +7418,6 @@ class ReturnController extends Controller
             else {
                 $productivity = 0;
             }
-            dd($productivity);
            return $productivity;
         });
 
