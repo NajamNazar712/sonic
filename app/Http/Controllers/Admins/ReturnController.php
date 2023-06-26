@@ -7507,10 +7507,8 @@ class ReturnController extends Controller
         's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
         'rcp_assigned_shipments.updated_at as agent_status_date', 'rass.name as agent_status', 
         's.user_id as shipment_user_id', 'rcp_assigned_shipments.id', 'admin.name as admin_name', 'user.name as user_name',
-        'rcp_assigned_shipments.assigned_status as assigned_status')
-
-        ->orderby('rcp_assigned_shipments.updated_at','desc')
-        ->groupBy('rcp_assigned_shipments.id');
+        'rcp_assigned_shipments.assigned_status as assigned_status');
+        // ->groupBy('rcp_assigned_shipments.id');
 
         $datatable = Datatables::of($agent_productivity)
 
@@ -7533,12 +7531,16 @@ class ReturnController extends Controller
         })
 
         ->filterColumn('updated_by', function ($query, $keyword) {
-            $query->where(function ($sub_query) use ($keyword) {
-                $sub_query->where('user.name', 'like', '%' . $keyword . '%');
-            })
-                ->orWhere(function ($sub_query) use ($keyword) {
+            if ($update_by->user_id) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('user.name', 'like', '%' . $keyword . '%');
+                })
+            } 
+            elseif ($update_by->admin_id) {
+                $query->where(function ($sub_query) use ($keyword) {
                     $sub_query->where('admin.name', 'like', '%' . $keyword . '%');
-                });
+                })
+            }
         })
         ->addColumn('tracking_number_link',function ($shipments){
             $route = route('admin.tracking.index');

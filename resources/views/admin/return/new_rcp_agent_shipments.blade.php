@@ -299,7 +299,7 @@
                         d.to_date = $('#search_form input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[1, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number'},
@@ -319,7 +319,7 @@
                     {data: 'assigned_status', orderable: false, name: 'rcp_assigned_shipments.assigned_status', class: 'align-middle assigned_status'}, 
                     {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
                     {data: 'agent_status', orderable: false, name: 'rass.name', class: 'align-middle agent_status'},
-                    {data: 'agent_status_date', orderable: false, name: 'return_assigned_shipments.updated_at', class: 'align-middle agent_status_date'}, 
+                    {data: 'agent_status_date', orderable: false, name: 'rcp_assigned_shipments.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
 
