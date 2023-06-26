@@ -11097,7 +11097,11 @@ class AdminReportsController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 617);
         $hubs = DB::connection('reports')->table('cities')->select('id', 'name')->where('hub', 1)->where('status', 1)->get();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        // $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $riders =   DB::connection('reports')->table('v2_pickup_notes')
+        ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
+        ->distinct('r.id')
+        ->get(['r.id', 'r.name']);
         $shippers = User::whereIn('status', [3, 4])->get();
 
         return view('admin.reports.rider_pickup_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
