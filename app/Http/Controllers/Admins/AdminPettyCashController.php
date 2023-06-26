@@ -22,6 +22,7 @@ use App\Http\Models\Admin\PettyCashStatementDraft;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
+//use App\Http\Models\AdvancePettyCashStatement;
 use App\Http\Models\AdvancePettyCashStatement;
 use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
@@ -2622,6 +2623,7 @@ class AdminPettyCashController extends Controller
     public function advance_add_petty_cash_statement_make_detail(Request $request,$id)
     {
         $petty = AdvancePettyCashStatement::find($id);
+
         if(!in_array($petty->status_id ,[0,1,2,7,6]))
         {
             return redirect()->route('admin.petty_cash.advance.statements',$id);
@@ -2638,6 +2640,8 @@ class AdminPettyCashController extends Controller
             }
         }
 
+        $hubs = City::where('hub',1)->select('id','name')->get();
+
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
         if (session('role_id') == 1) {
@@ -2646,7 +2650,7 @@ class AdminPettyCashController extends Controller
             $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
         }
 
-        return view('admin.petty_cash.advance.make_detail')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
+        return view('admin.petty_cash.advance.make_detail')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hubs'=> $hubs,'hub_array' => $hub_array]);
 
     }
 
