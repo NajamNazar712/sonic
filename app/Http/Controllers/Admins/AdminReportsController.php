@@ -11103,7 +11103,6 @@ class AdminReportsController extends Controller
         ->distinct('r.id')
         ->get(['r.id', 'r.name']);
         $shippers = User::whereIn('status', [3, 4])->get();
-
         return view('admin.reports.rider_pickup_report')->with(['hubs' => $hubs, 'riders' => $riders, 'shippers' => $shippers]);
     }
 
