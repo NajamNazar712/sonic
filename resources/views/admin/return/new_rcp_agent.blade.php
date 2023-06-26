@@ -579,7 +579,7 @@
                     total_shipments += data.total_assigning;
                     completed_shipments += data.actual_productivity;
                     reattempt_shipments += data.reattempt;
-                    total_return_confirm += data.total_return_confirm;
+                    total_return_confirm += data.return;
                     total_unresponsive_in_percent += data.unresponsive_return;
                     total_mark_for_self_collection += data.total_mark_for_self_collection;
                     total_intercept += data.intercept;
