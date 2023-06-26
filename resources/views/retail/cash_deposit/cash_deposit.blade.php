@@ -47,7 +47,7 @@
                                 <th class="border-primary border-darken-1">Retail Note</th>
                                 <th class="border-primary border-darken-1">Trax/Franchise</th>
                                 <th class="border-primary border-darken-1">Booking Code</th>
-                                <th class="border-primary border-darken-1">Total</th>
+                                <th class="border-primary border-darken-1">Total Amount</th>
                                 <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                                 <th class="border-primary border-darken-1">Remaining/Cash</th>
                                 <th class="border-primary border-darken-1">Booking Date</th>
