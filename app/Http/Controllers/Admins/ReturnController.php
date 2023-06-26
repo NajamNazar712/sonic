@@ -7406,7 +7406,7 @@ class ReturnController extends Controller
             }
         })
         ->addColumn('agent_productivity', function ($agent_productivity) {
-            $rcp_assigned_agent = RcpAssignedShipment::where('id', $agent_productivity->id)->where('shipment_status', '!=', 0)->latest()->first();
+            $rcp_assigned_agent = RcpAssignedShipment::where('id', $agent_productivity->id)->where('shipment_status', '!=', 0)->first();
 
             $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
  
