@@ -1405,17 +1405,28 @@ class ShipperReportsController extends Controller
         //     ->where('s.user_id', '=', session('user_id'))
         //     ->groupBy('v2_pickup_notes.id');
 
+        // $rider_pickup = DB::connection('reports')->table('v2_pickup_notes')
+        // ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
+        // ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+        // ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+        // ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+        // ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
+        // ->join('cities as c', 'c.id', '=', 'r.city_id')
+        // ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
+        // ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'v2_pickup_notes.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
+        // ->where('v2_pickup_notes.status',1)
+        // ->where('s.user_id', '=', session('user_id'));
         $rider_pickup = DB::connection('reports')->table('v2_pickup_notes')
-        ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-        ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-        ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-        ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
-        ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
-        ->join('cities as c', 'c.id', '=', 'r.city_id')
-        ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
-        ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'v2_pickup_notes.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
-        ->where('v2_pickup_notes.status',1)
-        ->where('s.user_id', '=', session('user_id'));
+            ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
+            ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
+            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
+            ->leftjoin('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
+            ->leftjoin('shipments as s', 's.id', '=', 'prs.shipment_id')
+            ->join('cities as c', 'c.id', '=', 'r.city_id')
+            ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
+            ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'pr.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
+            ->where('v2_pickup_notes.status',1)
+            ->where('s.user_id', '=', session('user_id'));
 
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {

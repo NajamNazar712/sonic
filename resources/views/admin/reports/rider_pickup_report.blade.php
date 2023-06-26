@@ -60,7 +60,7 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th> 
+                            <th class="border-primary border-darken-1">Pickup Date</th> 
                             <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
@@ -224,7 +224,7 @@
                             head = [];
                             footer = [];
                             head.push('S.No');
-                            head.push('Date');
+                            head.push('Pickup Date');
                             head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');

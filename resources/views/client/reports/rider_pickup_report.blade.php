@@ -22,7 +22,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-5">
+                    {{-- <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -30,7 +30,7 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                    </div>
+                    </div> --}}
                     <div class="col-4">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
@@ -60,7 +60,7 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Pickup Request id</th>
+                            <th class="border-primary border-darken-1">Pickup Request ID</th>
                             <th class="border-primary border-darken-1">Pickup Date</th>
                             {{-- <th class="border-primary border-darken-1">Rider Trax ID</th> --}}
                             <th class="border-primary border-darken-1">Rider Name</th>
