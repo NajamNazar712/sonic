@@ -11756,7 +11756,7 @@ class AdminReportsController extends Controller
             ->join('zones as rz','rz.id','=', 'rc.zone_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('cities as uc','uc.id','=','u.city_id')
-            ->join('user_shipping_infos as usi','usi.user_id','=','shipments.pickup_address_id')
+            ->join('user_shipping_infos as usi','usi.id','=','shipments.pickup_address_id')
             ->join('cities as uo','uo.id','=','usi.city_id')
             ->join('cities as des','des.id','=','shipments.consignee_city_id')
             ->join('products as p','p.id','=','u.product_id')
