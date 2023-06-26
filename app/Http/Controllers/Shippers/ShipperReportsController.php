@@ -1426,7 +1426,7 @@ class ShipperReportsController extends Controller
             ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
             ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'pr.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
             ->where('v2_pickup_notes.status',1)
-            ->where('s.user_id', '=', session('user_id'));
+            ->where('s.user_id', '=', session('user_id'))->groupBy('pr.id');
 
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {
