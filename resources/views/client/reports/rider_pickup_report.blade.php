@@ -252,7 +252,7 @@
                                 // row.push(values.rider_id);
                                 row.push(values.rider_name);
                                 row.push(values.origin);
-                                row.push(values.total_shipments);
+                                row.push(values.shipments_scanned_by_rider);
                                 row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
                                 scanned_shipments += values.shipments_scanned_by_rider;
