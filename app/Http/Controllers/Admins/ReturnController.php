@@ -175,10 +175,10 @@ class ReturnController extends Controller
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
                     ->where('new_ras.id','=',
                         DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        and rcp_assigned_shipments.assigned_status = 1)'));
+                        and rcp_assigned_shipments.assigned_status = 1)'))
                         
-                        // ->where('new_ras.user_id','=',null)
-                        // ->where('new_ras.shipment_status',3);
+                        ->where('new_ras.user_id','=',null)
+                        ->where('new_ras.shipment_status','!=',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
@@ -5214,7 +5214,7 @@ class ReturnController extends Controller
                 else
                 {
                     
-                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
+                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
                     if(!$check_already_assigned){
                         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                         $check_agent_return_confrimation->increment('total_shipments');
