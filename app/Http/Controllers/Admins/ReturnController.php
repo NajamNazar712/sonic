@@ -178,6 +178,7 @@ class ReturnController extends Controller
                         and rcp_assigned_shipments.assigned_status = 1)'))
                         
                         ->where('new_ras.user_id','=',null)
+                        ->whereDate('new_ras.user_id.created_at',date('Y-m-d'))
                         ->where('new_ras.shipment_status','!=',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
@@ -7418,7 +7419,7 @@ class ReturnController extends Controller
             } 
             
             else {
-                $productivity = 0; // Set productivity to 0 if no remaining assigned shipments
+                $productivity = 0;
             }
 
             $rcp_assigned_agent->productivity = $productivity;
