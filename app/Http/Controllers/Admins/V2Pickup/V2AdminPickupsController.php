@@ -4028,7 +4028,6 @@ class V2AdminPickupsController extends Controller
     public function project_shippers_store(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
-
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -4045,21 +4044,14 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
-        
-        if(count($shipment_ids)){
-            
-            $newRequest = new Request(['ids' => $shipment_ids]);
-            $this->project_arrival_print($newRequest);
-        } else {
-
-            return redirect()->back()->with(['success' => 'Project Shipper Receiving Done', 'shipment_ids' => $shipment_ids]);
-        }
+      
+        return redirect()->back()->with(['success' => 'Project Shipper Receiving Done', 'shipment_ids' => $shipment_ids]);
+    
         
     }
     public function project_arrival_print(Request $request)
     {
-        // dd($request->ids);
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+        // $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '
                 <!doctype html>
@@ -4070,7 +4062,7 @@ class V2AdminPickupsController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Pickup Note</title>
+                    <title>Project Arrival</title>
 
                     <style>
                       @page {
@@ -4128,7 +4120,7 @@ class V2AdminPickupsController extends Controller
       ';
 
         foreach ($request->ids as $id) {
-            $shipment = Shipment::find($id);
+            $shipment = Shipment::where('shipper_status_id',64)->find($id);
             $user = User::where('id',$shipment->user_id)->first();
             // $route = $rider->route;
             // $route_name = '';
@@ -4140,21 +4132,13 @@ class V2AdminPickupsController extends Controller
             <tbody>
                 <tr>
                 <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
-                
+                <td class="text-center align-middle"><b>Project Arrival</b></td>
                 <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                 </tr>
                 <tr>
-                <tr>
-                <td class="color secondary"><strong>User Name</strong></td>
-                <td>' . $user->name . '</td>
-                <td rowspan="7" class="text-center align-middle pl-1 pr-1">
-                    <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                    <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                </td>
-                </tr>
             </tbody>
             </table>
-        ';
+            ';
 
             $html .= '
                       <table class="table table-sm table-bordered border">
@@ -4162,12 +4146,13 @@ class V2AdminPickupsController extends Controller
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking Number</strong></td>
+                            <td class="color primary"><strong>User Name</strong></td>
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td class="color primary"><strong>Consignee Name</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
                             <td class="color primary"><strong>COD</strong></td>
                           </tr>
-        ';
+            ';
 
             $serial_number = 1;
 
@@ -4179,7 +4164,8 @@ class V2AdminPickupsController extends Controller
                 // $shipper = $pickup_request->shipper;
                 // $pickup_address = $pickup_request->pickup_address;
                 $shipments = Shipment::join('cities as des','des.id','shipments.consignee_city_id')
-                    ->select('shipments.tracking_number as tracking_number', 'shipments.consignee_name as consignee_name', 'des.name as destination', 'shipments.amount as cod','shipments.order_id as order_id')->get()->toArray();
+                    ->join('users as u','u.id','=','shipments.user_id')
+                    ->select('shipments.tracking_number as tracking_number', 'shipments.consignee_name as consignee_name', 'des.name as destination', 'shipments.amount as cod','shipments.order_id as order_id','u.name as user_name')->where('shipments.id',$id)->where('shipper_status_id',64)->get()->toArray();
 //dd($poc);
                 // $pocName = "";
                 // $phoneNo = "";
@@ -4211,6 +4197,7 @@ class V2AdminPickupsController extends Controller
                         <tr>
                         <td>' . $serial_number . '</td>
                         <td>' . $data['tracking_number'] . '</td>
+                        <td>' . $data['user_name'] . '</td>
                         <td>' . $data['order_id'] . '</td>
                         <td>' . $data['consignee_name'] . '</td>
                         <td>' . $data['destination'] . '</td>
@@ -4233,6 +4220,20 @@ class V2AdminPickupsController extends Controller
             $html .= '
                         </tbody>
                       </table>
+
+                      <hr>
+                      <br>
+                      <br>
+                      <div class="row">
+                      
+                      <div class="col-4">
+                        No. of Received Shipments : __________________________
+                      </div>
+                      
+                      <div class="col-8 text-right">
+                      Client Signature : ______________________
+                      </div>
+                      </div>
 
                       <hr>
         ';

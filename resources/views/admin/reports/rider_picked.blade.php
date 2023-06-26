@@ -244,10 +244,10 @@
                             footer = [];
                             head.push('S.No');
                             head.push('Tracking Number');
-                            head.push('Rider ID');
+                            head.push('Rider Trax ID');
                             head.push('Rider Name');
                             head.push('Status Date');
-                            head.push('Rider Location');
+                            head.push('Rider City');
                             head.push('Rider Hub');
                             head.push('Rider Zone');
                             head.push('Shipper Name');
@@ -293,7 +293,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Rider-Picked Status Report (W/O Arrival)',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },

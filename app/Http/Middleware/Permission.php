@@ -624,6 +624,10 @@ class Permission
             'reports.shipper_summary.list' => 794,
 
             'reports.crm_agent_wise_report.index' => 784,
+            'reports.project_arrival.index' => 879,
+            'reports.project_arrival.list' => 879,
+            'reports.rider_picked.index' => 880,
+            'reports.rider_picked.list' => 880,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

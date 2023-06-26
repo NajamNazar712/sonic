@@ -1147,6 +1147,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
             Route::post('add_remarks', 'Admins\V2Pickup\V2AdminPickupsController@add_remarks')->name('add_remarks');
             Route::post('all_remarks', 'Admins\V2Pickup\V2AdminPickupsController@all_remarks')->name('all_remarks');
+            Route::post('project_arrival_print', 'Admins\V2Pickup\V2AdminPickupsController@project_arrival_print')->name('project_arrival_print');
         });
         // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
