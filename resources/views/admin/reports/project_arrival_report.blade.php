@@ -74,6 +74,7 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Numbers</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -295,15 +296,17 @@
                             head.push('Normal Arrival By');
                             head.push('Normal Arrival At');
                              $.each(result.data, function(index, values) {
-                                // row = [];
-                                // row.push(index + 1);
-                                // row.push(values.rider_picked_date_time);
-                                // row.push(values.scanned_by);
-                                // row.push(values.pickup_note_id);
-                                // row.push(values.scanned_shipments);
-                                // row.push(values.arrived_shipments);
-                                // row.push(values.diff_pa_na);
-                                // body.push(row);
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.project_arrival_by);
+                                row.push(values.project_arrival_at);
+                                row.push(values.normal_arrival_by);
+                                row.push(values.normal_arrival_at);
+                                body.push(row);
                             });
                         },
                         async: false
@@ -320,7 +323,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Project Arrival Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
@@ -348,12 +351,14 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'rider_picked_date_time' ,name: 'arrsh.created_at', class: 'align-middle text-center date'},
-                    { data:'scanned_by',name: 'a.name', class: 'align-middle text-center scanned_by'},
-                    { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
-                    { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
-                    { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'diff_pa_na_btn', class: 'align-middle diff_pa_na', orderable: false, searchable: false},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center shipper'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
+                    { data:'origin',name: 'uo.name', class: 'align-middle text-center origin'},
+                    { data:'destination',name: 'des.name', class: 'align-middle text-center destination'},
+                    { data:'project_arrival_by',name: 'apa.name', class: 'align-middle text-center project_arrival_by'},
+                    { data:'project_arrival_at',name: 'sjpa.created_at', class: 'align-middle text-center project_arrival_at'},
+                    { data:'normal_arrival_by',name: 'aa.name', class: 'align-middle text-center project_arrival_at'},
+                    { data:'normal_arrival_at',name: 'sja.created_at', class: 'align-middle text-center project_arrival_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -375,122 +380,7 @@
                 print(pickup_note_id);
             });
 
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'ids': [id],
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
+           
         });
-
-        function scanned_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.scanned_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Scanned Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
-        function arrived_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.arrived_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Arrived Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
-        function diff_pa_na_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.project_arrival.diff_pa_na_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Without Scan Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
     </script>
 @endsection
