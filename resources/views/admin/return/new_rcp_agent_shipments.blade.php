@@ -316,10 +316,10 @@
                     {data: 'call_findings', orderable: false, name: 'call_findings', class: 'align-middle call_findings'},
                     {data: 'arrival_date', orderable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
                     {data: 'assigned_to', orderable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
-                    {data: 'assigned_status', orderable: false, name: 'rcp_assigned_shipments.assigned_status', class: 'align-middle assigned_status'}, 
+                    {data: 'assigned_status', orderable: false, name: 'ras.assigned_status', class: 'align-middle assigned_status'}, 
                     {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
                     {data: 'agent_status', orderable: false, name: 'rass.name', class: 'align-middle agent_status'},
-                    {data: 'agent_status_date', orderable: false, name: 'rcp_assigned_shipments.updated_at', class: 'align-middle agent_status_date'}, 
+                    {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
 
