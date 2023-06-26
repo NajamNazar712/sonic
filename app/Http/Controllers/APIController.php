@@ -7107,9 +7107,8 @@ class APIController extends Controller
                 $amount = $request->amount;
                 $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
                 if ($existing_hbl_konnect_transaction->exists()) {
-                    return ['status' => 1, 'message' => 'Request completed successfully!'];
+                    return ['status' => 1, 'message' => 'Transaction Already Exists !'];
                 } else {
-
                     $retail_note = RetailCashDeposit::where('id', $retail_note_id);
                     if ($retail_note->exists()) {
                         $retail_note = $retail_note->first();
@@ -7132,10 +7131,17 @@ class APIController extends Controller
                     }
 
                     $cash_amount = $retail_note->total_cash - $transaction_amount;
-
                     if ($cash_amount < 0)
                     {
-                        return ['status' => 0, 'message' => 'Net amount should be positive'];
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                        if ($hbl_konnect_transaction_delivery_note->exists())
+                        {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount - $hbl_konnect_transaction_delivery_note->transactions_amount;
+
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' .$remaining_amount];
+                        }
                     }
                     $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
                     $hbl_konnect_transaction_delivery_note->cash_amount = $cash_amount;
