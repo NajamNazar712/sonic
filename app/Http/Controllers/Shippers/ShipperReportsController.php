@@ -1456,8 +1456,11 @@ class ShipperReportsController extends Controller
                 if ($scanned_shipments > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->arrived_shipments - $scanned_shipments) . '</button>';
                 } else {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                    if($entry->arrived_shipments > 0){
+                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->arrived_shipments . '</button>';
+                    }
                 }
+                return 0;
             });
 
         if($hub = $request->get('search_hub')){

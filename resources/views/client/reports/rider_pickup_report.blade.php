@@ -259,16 +259,8 @@
                 }
             } );
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                dom: 'btipr',
                 scrollX: true, scrollY: '500px',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-                    },
-                ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 autoWidth:false,
                 pageLength: 50,

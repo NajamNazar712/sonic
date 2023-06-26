@@ -279,7 +279,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Rider Wise Pickup Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
