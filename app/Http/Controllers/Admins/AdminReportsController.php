@@ -11752,17 +11752,21 @@ class AdminReportsController extends Controller
             })
             ->join('riders as r', 'r.id', '=', 'sj.rider_id')
             ->join('cities as rc','rc.id','=','r.city_id')
-            ->join('cities as rh','rh.hub_id','rc.id')
-            ->join('zones as rz','rz.id','rc.zone_id')
+            ->join('cities as rh','rh.id','=', 'rc.hub_id')
+            ->join('zones as rz','rz.id','=', 'rc.zone_id')
             ->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('cities as uc','uc.id','=','u.city_id')
-            ->join('user_shipping_infos as usi','usi.user_id','=','u.id')
-            ->join('cities as uo','uo.id','usi.city_id')
-            ->join('cities as des','des.id','shipments.consignee_city_id')
-            ->join('products as p','p.id','u.product_id')
-            ->select('r.trax_id as rider_trax_id','r.name as rider_name','sj.updated_at as status_date','rc.name as rider_city','rh.name as rider_hub','rz.name as rider_zone','u.name as shipper_name','u.address as shipper_address','uc.name as shipper_cities','uo.name as origin','des.name as shipper_destination','shipments.amount as cod','p.product_name as product_type')
+            ->join('user_shipping_infos as usi','usi.user_id','=','s.pickup_address_id')
+            ->join('cities as uo','uo.id','=','usi.city_id')
+            ->join('cities as des','des.id','=','shipments.consignee_city_id')
+            ->join('products as p','p.id','=','u.product_id')
+            ->select('shipments.tracking_number', 'r.trax_id as rider_trax_id','r.name as rider_name','sj.updated_at as status_date','rc.name as rider_city','rh.name as rider_hub','rz.name as rider_zone','u.name as shipper_name','u.address as shipper_address','uc.name as shipper_cities','uo.name as origin','des.name as shipper_destination','shipments.amount as cod','p.product_name as product_type')
             ->where('shipments.shipper_status_id',53);
-       $datatables = Datatables::of($rider_pickup);
+       $datatables = Datatables::of($rider_pickup)
+           ->addColumn('tracking_number_link', function ($crm_request) {
+               $route = route('admin.tracking.index');
+               return "<u><a href='{$route}?tracking_number=$crm_request->tracking_number' class='tracking' target='_blank'>$crm_request->tracking_number</a></u>";
+           });
         if($rider = $request->get('search_rider')){
             $datatables = $datatables->where('r.id', '=', $rider);
         }
