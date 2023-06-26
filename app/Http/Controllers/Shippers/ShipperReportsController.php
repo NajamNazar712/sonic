@@ -1429,7 +1429,6 @@ class ShipperReportsController extends Controller
             ->join('cities as c', 'c.id', '=', 'r.city_id')
             ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
             ->select('v2_pickup_requests.id as pickup_request_id', 'pn.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_requests.received as arrived_shipments')
-            ->where('pn.status',1)
             ->where('v2_pickup_requests.shipper_id',session('user_id'));
         $datatables = Datatables::of($rider_pickup)
             ->addColumn('scanned_shipments_btn', function ($entry) {
