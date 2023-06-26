@@ -178,7 +178,7 @@ class ReturnController extends Controller
                         and rcp_assigned_shipments.assigned_status = 1)'))
                         
                         ->where('new_ras.user_id','=',null)
-                        ->whereDate('new_ras.user_id.created_at',date('Y-m-d'))
+                        ->whereDate('new_ras.created_at',date('Y-m-d'))
                         ->where('new_ras.shipment_status','!=',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
