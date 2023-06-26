@@ -7138,7 +7138,7 @@ class APIController extends Controller
                         {
                             $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
 
-                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount - $hbl_konnect_transaction_delivery_note->transactions_amount;
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
 
                             return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' .$remaining_amount];
                         }
