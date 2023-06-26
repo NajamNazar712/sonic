@@ -7532,6 +7532,14 @@ class ReturnController extends Controller
             return '-';
         })
 
+        ->filterColumn('updated_by', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('admin.name', 'like', '%' . $keyword . '%');
+                });
+        })
         ->editColumn('tracking_number',function ($shipments){
             $route = route('admin.tracking.index');
             if ($shipments->star_status == 1)
