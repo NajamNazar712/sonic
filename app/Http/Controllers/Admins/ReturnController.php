@@ -7406,14 +7406,13 @@ class ReturnController extends Controller
             }
         })
         ->addColumn('agent_productivity', function ($agent_productivity) {
-            $rcp_assigned_agent = RcpAssignedShipment::where('id', $agent_productivity->id)->where('shipment_status', '!=', 0)->first();
+            $rcp_assigned_agent = RcpAssignedShipment::where('shipment_id', $agent_productivity->shipment_id)->first();
 
-            $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
+            $assigned_shipments = $rcp_assigned_agent->total_assigning; //3
  
-            $actual_productivity = $rcp_assigned_agent->actual_productivity;
-            $already_updated = $rcp_assigned_agent->already_updated;
+            $actual_productivity = $rcp_assigned_agent->actual_productivity;  //1
 
-            $productivity = $rcp_assigned_agent->productivity; 
+            // $productivity = $rcp_assigned_agent->productivity; 
             if ($actual_productivity != 0) {
                 $productivity = number_format(($actual_productivity / ($assigned_shipments)) * 100, 2);
             } 
@@ -7422,7 +7421,7 @@ class ReturnController extends Controller
                 $productivity = 0;
             }
 
-            $rcp_assigned_agent->productivity = $productivity;
+           return $productivity;
         });
 
         if ($request->get('from_date') && $request->get('to_date')) {
