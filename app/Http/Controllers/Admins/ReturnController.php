@@ -175,7 +175,10 @@ class ReturnController extends Controller
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
                     ->where('new_ras.id','=',
                         DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        and rcp_assigned_shipments.assigned_status = 1)'));
+                        and rcp_assigned_shipments.assigned_status = 1)'))
+                        //assuring that shipper hasn't updated shipment as reattempt
+                        ->where('new_ras.user_id','=',null)
+                        ->where('new_ras.shipment_status',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
@@ -1407,8 +1410,8 @@ class ReturnController extends Controller
                             //updating return row of agent 
                             $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                             $rcp_assigned_agent->increment('reattempt');
-                            $rcp_assigned_agent->decrement('pending_shipments');
                             $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
+                            $rcp_assigned_agent->decrement('pending_shipments');
                             $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
 
                             $actual_productivity = $rcp_assigned_agent->actual_productivity; 
