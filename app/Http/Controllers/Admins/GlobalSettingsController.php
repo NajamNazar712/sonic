@@ -5185,7 +5185,22 @@ class GlobalSettingsController extends Controller
             $segments = Segment::all();
             $shipment_status = ShipmentStatus::select('id', 'name')->get();
             $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
-            $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+           // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+            $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                ->where('blacklist', '=', 0)
+                ->get()
+                ->filter(function ($user) {
+                    if(isset($user->sale_tier_tags['user_id'])){
+                        $kam_status = $user->sale_tier_tags['kam'];
+                        if(empty($kam_status)){
+                            return $user;
+                        }
+                    }else{
+                        return $user;
+                    }
+                });
+
 
             $zn = $selected_agent->zones->pluck('zone_id')->toArray();
             $hubs = City::whereIn('zone_id', $zn)->get();
@@ -8209,7 +8224,12 @@ class GlobalSettingsController extends Controller
         $segments = Segment::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
-        $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        //$shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                 ->where('blacklist', '=', 0)
+                 ->whereDoesntHave('sale_tier_tags')
+                 ->get();
         return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones,'case_natures'=>$case_natures,'segments'=>$segments,'shipper_key'=>$shipper_key,'shipper_non_key'=>$shipper_non_key,'shipment_status'=>$shipment_status]);
     }
     public function global_status(Request $request){
