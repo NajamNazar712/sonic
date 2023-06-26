@@ -2280,7 +2280,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('statements')->name('statements.')->group(function () {
                 Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_statements_index')->name('index');//todo new
                 Route::get('list', 'Admins\AdminPettyCashController@advance_petty_cash_statements_list')->name('list');//todo new
-                Route::post('print', 'Admins\AdminPettyCashController@statement_print')->name('print');
+                Route::post('advance_print', 'Admins\AdminPettyCashController@advance_statement_print')->name('advance_print');//todo new
+                Route::post('advance_view/sdn_logs', 'Admins\AdminPettyCashController@advance_sdn_log')->name('advance_sdn_logs'); //todo new
                 Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
                 Route::post('reject_all', 'Admins\AdminPettyCashController@petty_cash_statements_reject_all')->name('reject_all');
                 Route::get('{id}/edit', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_index')->name('edit');//todo new
