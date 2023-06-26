@@ -255,7 +255,7 @@
                                 row.push(values.total_shipments);
                                 row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.total_shipments;
+                                scanned_shipments += values.shipments_scanned_by_rider;
                                 arrived_shipments += values.total_arrived_shipments;
                                 without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
@@ -263,7 +263,6 @@
 
                             footer.push('-');
                             footer.push('Total');
-                            footer.push('');
                             footer.push('');
                             footer.push('');
                             footer.push('');
