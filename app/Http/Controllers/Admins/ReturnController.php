@@ -5251,7 +5251,7 @@ class ReturnController extends Controller
                             // $agent->decrement('assigned_shipments');
                             // $agent->save();
 
-                            $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('status', 1);
+                            $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
@@ -5300,7 +5300,7 @@ class ReturnController extends Controller
                         // $agent->decrement('assigned_shipments');
                         // $agent->save();
 
-                        $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('status', 1);
+                        $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
@@ -5308,7 +5308,7 @@ class ReturnController extends Controller
                                     $assigned->save();
                                 }
                             }
-                            
+
                         $assign_shipments = new RcpAssignedShipment();
                         $assign_shipments->admin_id = $request->admin_id;
                         $assign_shipments->shipment_id = $shipment_id;
