@@ -385,7 +385,7 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_agent').select2({
+            $('#search_agent').prepend('<option value="" selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Agent",
                 allowClear:true,
@@ -568,7 +568,7 @@
                     total_shipments = data.total_assigning;
                     completed_shipments = data.actual_productivity;
                     reattempt_shipments = data.reattempt;
-                    total_return_confirm = data.total_return_confirm;
+                    total_return_confirm = data.return;
                     total_mark_for_self_collection = data.total_mark_for_self_collection;
                     total_unresponsive_in_percent = data.total_unresponsive_in_percent;
                     total_intercept = data.intercept;
