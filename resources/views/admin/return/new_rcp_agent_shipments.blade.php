@@ -57,7 +57,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -216,7 +216,7 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Tracking No.');
+                            head.push('Tracking Number');
                             head.push('Shipper Name');
                             head.push('Origin');
                             head.push('Destination');
@@ -240,6 +240,7 @@
 
 
                                 row.push(index + 1);
+                                row.push(values.tracking_number);
                                 row.push(values.agent_name);
                                 row.push(values.shipper_name); 
                                 row.push(values.origin);
