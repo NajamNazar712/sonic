@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rider Picked Report')
+@section('title', 'Rider-Picked Status Report (W/O Arrival)')
 
 @section('content')
     <h1 class="mb-1">
-        Rider Picked Report
+        Rider-Picked Status Report (W/O Arrival)
     </h1>
 
     <div class="card">
@@ -69,10 +69,11 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking Number</th>
                             <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Status Date</th>
-                            <th class="border-primary border-darken-1">Rider Location</th>
+                            <th class="border-primary border-darken-1">Rider City</th>
                             <th class="border-primary border-darken-1">Rider Hub</th>
                             <th class="border-primary border-darken-1">Rider Zone</th>
                             <th class="border-primary border-darken-1">Shipper Name</th>
@@ -242,6 +243,7 @@
                             head = [];
                             footer = [];
                             head.push('S.No');
+                            head.push('Tracking Number');
                             head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Status Date');
@@ -259,6 +261,7 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
+                                row.push(values.tracking_number);
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider_name);
                                 row.push(values.status_date);
@@ -314,9 +317,10 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[1, 'desc']],
+                order: [[4, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'rider_trax_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_trax_id'},
                     { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
                     { data:'status_date' ,name: 'sj.updated_at', class: 'align-middle text-center status_date'},
