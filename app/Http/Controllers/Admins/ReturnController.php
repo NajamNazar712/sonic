@@ -1002,8 +1002,8 @@ class ReturnController extends Controller
                           //updating return row of agent 
                           $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                           $rcp_assigned_agent->increment('reattempt');
-                          $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                           $rcp_assigned_agent->decrement('pending_shipments');
+                          $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                           $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
 
                           $actual_productivity = $rcp_assigned_agent->actual_productivity; 
@@ -1253,8 +1253,8 @@ class ReturnController extends Controller
                              //updating return row of agent 
                              $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                              $rcp_assigned_agent->increment('return');
-                             $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                              $rcp_assigned_agent->decrement('pending_shipments');
+                             $actual_productivity = $rcp_assigned_agent->increment('actual_productivity');
                              $assigned_shipments = $rcp_assigned_agent->assigned_shipments; 
  
                              $actual_productivity = $rcp_assigned_agent->actual_productivity; 
