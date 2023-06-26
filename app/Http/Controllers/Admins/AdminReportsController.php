@@ -11117,8 +11117,7 @@ class AdminReportsController extends Controller
             ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
             ->join('cities as c', 'c.id', '=', 'r.city_id')
             ->join('cities as ch', 'ch.id', '=', 'c.hub_id')
-            ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'v2_pickup_notes.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider')
-            ->where('v2_pickup_notes.status',1);
+            ->select('v2_pickup_notes.status', 'v2_pickup_notes.id', 'v2_pickup_notes.id as pickup_note_id', 'v2_pickup_notes.created_at as date', 'r.trax_id as rider_id', 'r.name as rider_name', 'ch.name as origin', 'v2_pickup_notes.shipments as total_shipments', 'v2_pickup_notes.arrived_shipments as total_arrived_shipments', 'v2_pickup_notes.shipments_scanned_by_rider as shipments_scanned_by_rider');
 
         if($rider = $request->get('search_rider')){
             $rider_pickup = $rider_pickup->where('r.id', '=', $rider);
@@ -11196,23 +11195,8 @@ class AdminReportsController extends Controller
 
                     return response()->json(['status' => 1, 'data' => $shipments]);
                 }
-                return response()->json(['status' => 1, 'data' => 1]);
             }
-            return response()->json(['status' => 1, 'data' => 1]);
         }
-//       $shipments =  DB::connection('reports')->table('v2_pickup_notes')
-//            ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-//            ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-//            ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-//            ->join('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
-//            ->join('shipments as s', 's.id', '=', 'prs.shipment_id')
-//            ->join('shipments_journey as total_s', function ($join) {
-//                $join->on('total_s.shipment_id', '=', 'prs.shipment_id')
-//                    ->where('total_s.id', '=',
-//                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 53 and verification = 1)'));
-//            })->select('s.tracking_number','s.id')
-//            ->where('v2_pickup_notes.id',$request->id)
-//            ->get();
      }
 
     public function rider_pickup_arrived_shipments(Request $request){
@@ -11229,27 +11213,8 @@ class AdminReportsController extends Controller
                     $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->pluck('tracking_number')->toArray();
                     return response()->json(['status' => 1, 'data' => $shipments]);
                 }
-                return response()->json(['status' => 1, 'data' => 1]);
             }
-            return response()->json(['status' => 1, 'data' => 1]);
         }
-
-        // $shipments =  DB::connection('reports')->table('v2_pickup_notes')
-        // ->join('riders as r', 'r.id', '=', 'v2_pickup_notes.rider_id')
-        // ->join('v2_pickup_note_requests as pnr', 'pnr.pickup_note_id', '=', 'v2_pickup_notes.id')
-        // ->join('v2_pickup_requests as pr', 'pr.id', '=', 'pnr.pickup_request_id')
-        // ->join('v2_pickup_request_shipments as prs', 'prs.pickup_request_id', '=', 'pr.id')
-        // ->join('shipments as s', 's.id', '=', 'prs.shipment_id')
-        // ->join('shipments_journey as arrsh', function ($join) {
-        //     $join->on('arrsh.shipment_id', '=', 'prs.shipment_id')
-        //         ->where('arrsh.id', '=',
-        //             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = prs.shipment_id and shipments_journey.reference_1_id = pr.id and shipments_journey.shipper_status_id = 2 and verification = 1)'));
-        // })->select('s.tracking_number','s.id')
-        // ->where('v2_pickup_notes.id',$request->id)
-        // ->get();
-   
-        // return response()->json(['status' => 1, 'data' => $shipments]);
-
     }
 
     public function rider_pickup_without_scan_shipments(Request $request){
@@ -11273,9 +11238,16 @@ class AdminReportsController extends Controller
                        return response()->json(['status' => 1, 'data' => $shipments]);
                     }
                 }
-                return response()->json(['status' => 2, 'data' => 1]);
+                else{
+                    $shipment_journeys = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 2);
+                    if($shipment_journeys->exists()) {
+                        $shipment_ids = $shipment_journeys->pluck('shipment_id')->toArray();
+                        $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)
+                            ->where('user_id', '=', session('user_id'))->pluck('tracking_number')->toArray();
+                        return response()->json(['status' => 1, 'data' => $shipments]);
+                    }
+                }
             }
-            return response()->json(['status' => 1, 'data' => 1]);
         }
 
 

@@ -62,7 +62,6 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Pickup Request ID</th>
                             <th class="border-primary border-darken-1">Pickup Date</th>
-                            {{-- <th class="border-primary border-darken-1">Rider Trax ID</th> --}}
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
                             <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
@@ -231,54 +230,34 @@
                             head = [];
                             footer = [];
                             head.push('S.No');
-                            head.push('Pickup Note ID');
+                            head.push('Pickup Request ID');
                             head.push('Pickup Date');
-                            // head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');
                             head.push('No. of Scanned Shipments');
                             head.push('No. of Arrived Shipments');
                             head.push('Arrival Without Scan Shipments');
 
-                            var scanned_shipments = 0;
-                            var arrived_shipments = 0;
-                            var without_scan_shipments = 0;
-
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.pickup_note_id_padded);
+                                row.push(values.pickup_request_id);
                                 row.push(values.date);
-                                // row.push(values.rider_id);
                                 row.push(values.rider_name);
                                 row.push(values.origin);
                                 row.push(values.shipments_scanned_by_rider);
                                 row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.shipments_scanned_by_rider;
-                                arrived_shipments += values.total_arrived_shipments;
-                                without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
-
-                            footer.push('-');
-                            footer.push('Total');
-                            footer.push('');
-                            footer.push('');
-                            footer.push('');
-                            footer.push(scanned_shipments);
-                            footer.push(arrived_shipments);
-                            footer.push(without_scan_shipments);
-                        },
-                        async: false
-                    });
+                            async: false
+                        }
+                    })
                     UnblockPagePermanently();
 
-                    return {body: body, header: head, footer: footer};
+                    return {body: body, header: head};
                 }
             } );
-
-            $('#datatable').append("<tfoot><tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr></tfoot>");
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
@@ -312,9 +291,8 @@
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'pickup_note_id_padded', class: 'align-middle text-center pickup_note',sortable: true,orderable: true,searchable:false},
-                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date',orderable: true},
-                    // { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
+                    { data:'pickup_request_id',name: 'v2_pickup_requests.id', class: 'align-middle text-center pickup_note'},
+                    { data:'date' ,name: 'pn.created_at', class: 'align-middle text-center date',orderable: true},
                     { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
                     { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
                     { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
@@ -371,13 +349,13 @@
             });
         });
 
-        function scanned_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
+        function scanned_shipments_popup(pickup_request_id) {
+            if (pickup_request_id) {
                 $.ajax({
                     url: '{!! route('cod.reports.rider_pickup.scanned_shipments') !!}',
                     method: 'POST',
                     data: {
-                        'id': pickup_note_id,
+                        'pickup_request_id': pickup_request_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -400,13 +378,13 @@
             }
         }
 
-        function arrived_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
+        function arrived_shipments_popup(pickup_request_id) {
+            if (pickup_request_id) {
                 $.ajax({
                     url: '{!! route('cod.reports.rider_pickup.arrived_shipments') !!}',
                     method: 'POST',
                     data: {
-                        'id': pickup_note_id,
+                        'pickup_request_id': pickup_request_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
@@ -429,13 +407,13 @@
             }
         }
 
-        function without_scan_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
+        function without_scan_shipments_popup(pickup_request_id) {
+            if (pickup_request_id) {
                 $.ajax({
                     url: '{!! route('cod.reports.rider_pickup.without_scan_shipments') !!}',
                     method: 'POST',
                     data: {
-                        'id': pickup_note_id,
+                        'pickup_request_id': pickup_request_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 })
