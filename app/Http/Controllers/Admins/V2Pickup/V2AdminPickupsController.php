@@ -4045,12 +4045,16 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
+        
         if(count($shipment_ids)){
+            
             $newRequest = new Request(['ids' => $shipment_ids]);
             $this->project_arrival_print($newRequest);
+        } else {
+
+            return redirect()->back()->with(['success' => 'Project Shipper Receiving Done', 'shipment_ids' => $shipment_ids]);
         }
         
-        return redirect()->back()->with(['success' => 'Project Shipper Receiving Done', 'shipment_ids' => $shipment_ids]);
     }
     public function project_arrival_print(Request $request)
     {
@@ -4182,6 +4186,7 @@ class V2AdminPickupsController extends Controller
                 // $names = "";
                 // $i = 0;
                 foreach ($shipments as $data) {
+                    // dd($data);
                 //     if ($i == null) {
                 //         if ($i == 0) {
                 //             $pocName .= '' . $data['poc'];
@@ -4205,11 +4210,11 @@ class V2AdminPickupsController extends Controller
                 $html .= '
                         <tr>
                         <td>' . $serial_number . '</td>
-                        <td>' . $data->tracking_number . '</td>
-                        <td>' . $data->order_id . '</td>
-                        <td>' . $data->consignee_name . '</td>
-                        <td>' . $data->destination . '</td>
-                        <td>' . $data->cod . '</td>
+                        <td>' . $data['tracking_number'] . '</td>
+                        <td>' . $data['order_id'] . '</td>
+                        <td>' . $data['consignee_name'] . '</td>
+                        <td>' . $data['destination'] . '</td>
+                        <td>' . $data['cod'] . '</td>
                         </tr>
           ';
 
