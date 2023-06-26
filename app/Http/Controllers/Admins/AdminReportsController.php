@@ -11229,24 +11229,23 @@ class AdminReportsController extends Controller
             $pickup_request_shipments = DB::connection('reports')->table('v2_pickup_request_shipments')->whereIn('pickup_request_id', $pickup_request_ids);
             if($pickup_request_shipments->exists()){
                 $pickup_request_shipment_ids = $pickup_request_shipments->pluck('shipment_id')->toArray();
-                $shipment_journeys = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 53);
-                if($shipment_journeys->exists()){
-                    $shipment_ids = $shipment_journeys->pluck('shipment_id')->toArray();
-                    $not_scanned_shipment_ids = array_diff($pickup_request_shipment_ids,$shipment_ids);
-                   if($not_scanned_shipment_ids > 0)
-                    {
-                       $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $not_scanned_shipment_ids)->pluck('tracking_number')->toArray();
-                       return response()->json(['status' => 1, 'data' => $shipments]);
+                $arrived_shipments_journey = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 2);
+                if($arrived_shipments_journey->exists()){
+                    $arrived_shipment_ids = $arrived_shipments_journey->pluck('shipment_id')->toArray();
+
+                    $scanned_shipment_journeys = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 53);
+
+                    if($scanned_shipment_journeys->exists()) {
+                        $scanned_shipment_ids = $scanned_shipment_journeys->pluck('shipment_id')->toArray();
+
+                        $shipment_ids = array_diff($arrived_shipment_ids,$scanned_shipment_ids);
                     }
-                }
-                else{
-                    $shipment_journeys = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 2);
-                    if($shipment_journeys->exists()) {
-                        $shipment_ids = $shipment_journeys->pluck('shipment_id')->toArray();
-                        $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)
-                            ->where('user_id', '=', session('user_id'))->pluck('tracking_number')->toArray();
-                        return response()->json(['status' => 1, 'data' => $shipments]);
+                    else{
+                        $shipment_ids = $arrived_shipment_ids;
                     }
+
+                    $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $shipment_ids)->pluck('tracking_number')->toArray();
+                    return response()->json(['status' => 1, 'data' => $shipments]);
                 }
             }
         }
