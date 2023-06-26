@@ -1591,14 +1591,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
-            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
         });
 
         Route::prefix('rcp_agent_cn')->name('rcp_agent_cn.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_cn_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_cn_list')->name('list');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
         });
 
         Route::prefix('new_rcp_agent')->name('new_rcp_agent.')->group(function () {

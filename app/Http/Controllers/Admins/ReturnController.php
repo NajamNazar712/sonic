@@ -7531,18 +7531,28 @@ class ReturnController extends Controller
         
             return '-';
         })
+
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            if ($shipments->star_status == 1)
+            {
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'><i class='star_shippers_icon'></i>$shipments->tracking_number</a></u>";
+            }
+            else
+            {
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            }
+        })
         
         
         ->editColumn('assigned_status', function ($agent_productivity){
             if($agent_productivity->assigned_status == 1){
-
                 return 'Assigned';
             }
             else{
                 return 'Un Assigned';
             }
         })
-
 
         ->editColumn('agent_category',function($agent_productivity){
             if ($agent_productivity->agent_category == 1) {

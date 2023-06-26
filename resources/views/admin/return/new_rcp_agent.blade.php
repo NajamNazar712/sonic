@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
-@section('title','New RCP Agent Productivity')
+@section('title','RCP Agent Productivity')
 
 
 @section('content')
     <h1 class="mb-1">
-        New RCP Agent Productivity
+        RCP Agent Productivity
     </h1>
 
     <div class="card">
@@ -455,7 +455,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.new_rcp_agent.list') }}',
+                        url: '{{ route('admin.return.rcp_agent.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -531,7 +531,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.return.new_rcp_agent.list') }}',
+                    url: '{{ route('admin.return.rcp_agent.list') }}',
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.hub = $('#search_hub').val();

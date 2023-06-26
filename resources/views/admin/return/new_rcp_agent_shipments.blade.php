@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
-@section('title','New RCP Agent Productivity Shipment')
+@section('title','RCP Agent Productivity Shipment')
 
 
 @section('content')
     <h1 class="mb-1">
-        New RCP Agent Productivity Shipments
+        RCP Agent Productivity Shipments
     </h1>
 
     <div class="card">
@@ -158,7 +158,7 @@
             $('#search_agent').select2({
                 width:'100%',
                 placeholder:"Select Agent",
-                allowClear:true,
+                // allowClear:true,
             });
             $('#search_category').prepend('<option value="" selected></option>').select2({
                 width:'100%',
@@ -211,7 +211,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.new_rcp_agent_shipments.list') }}',
+                        url: '{{ route('admin.return.rcp_agent_cn.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -291,7 +291,7 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.return.new_rcp_agent_shipments.list') }}',
+                    url: '{{ route('admin.return.rcp_agent_cn.list') }}',
                     data: function (d) {
                         d.agent = $('#search_agent').val();
                         d.from_date = $('#search_form input[name="from_date_formatted"]').val();
@@ -315,12 +315,14 @@
                     {data: 'call_findings', orderable: false, name: 'call_findings', class: 'align-middle call_findings'},
                     {data: 'arrival_date', orderable: false, name: 'sjj.updated_at', class: 'align-middle arrival_date'}, 
                     {data: 'assigned_to', orderable: false, name: 'a.name', class: 'align-middle assigned_to'}, 
-                    {data: 'assigned_status', orderable: false, name: 'assigned_status', class: 'align-middle assigned_status'}, 
+                    {data: 'assigned_status', orderable: false, name: 'rcp_assigned_shipments.assigned_status', class: 'align-middle assigned_status'}, 
                     {data: 'updated_by', orderable: false, name: 'updated_by', class: 'align-middle updated_by'},
                     {data: 'agent_status', orderable: false, name: 'rass.agent_status', class: 'align-middle agent_status'},
                     {data: 'agent_status_date', orderable: false, name: 'ras.updated_at', class: 'align-middle agent_status_date'}, 
 
                 ],
+
+                
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
@@ -334,7 +336,17 @@
 
                     }
                 },
+                
                 initComplete: function() {
+
+                    var assigned_status =
+                        '<select name="assigned_status" id="assigned_status" class="select2 form-control">' +
+                        '<option value="1">Assigned</option>' +
+                        '<option value="2">Un Assigned</option>' +
+                        '</select>';
+
+
+
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -347,7 +359,12 @@
                         if ($(header).is('.serial_number') || $(header).is('.productivity')  || $(header).is('.un_assigned')) {
                             $(td).appendTo($(search));
                         }
-                      
+                        else if ($(header).is('.assigned_status')) {
+                            $(assigned_status).appendTo($(search))
+                                .on('change', function() {
+                                    column.search($(this).val(), false, false, true).draw();
+                                }).wrap(td);
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -357,6 +374,13 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+
+                    $("#assigned_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
 
                     this.api().table().columns.adjust();
