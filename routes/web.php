@@ -1231,6 +1231,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('v3_pickups')->name('v3_pickups.')->group(function () {
+        Route::get('add', 'Admins\V3Pickup\V3AdminPickupsController@add_pickup_request')->name('add');
+        Route::post('get_pickup_address', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_address')->name('get_pickup_address');
+        Route::post('add', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_add')->name('add');
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@history_pickup_requests')->name('index');
+            Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@history_list')->name('list');
+        });
+
+    });
+
     Route::prefix('delivery')->name('delivery.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\DeliveryController@pending_delivery_index')->name('index');

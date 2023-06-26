@@ -220,39 +220,6 @@
                                 </ul>
                             </li>
                         @endif
-                        {{--                             <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a> --}}
-                        {{--                                <ul class="menu-content"> --}}
-                        {{--                                    @if (session('role_id') == 1 || in_array(17, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(20, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a> --}}
-                        {{--                                        </li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(23, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(123, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.history.index') }}">History</a></li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(271, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.rider.index') }}">Rider</a></li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(272, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.rider.action_log.index') }}">Rider Action Log</a></li> --}}
-                        {{--                                    @endif --}}
-
-                        {{--                                    @if (session('role_id') == 1 || in_array(24, session('permissions'))) --}}
-                        {{--                                        <li><a class="menu-item" href="{{ route('admin.pickups.quick_arrival_of_shipments.index') }}">Quick Arrival of Shipments</a></li> --}}
-                        {{--                                    @endif --}}
-                        {{--                                </ul> --}}
-                        {{--                            </li> --}}
-
 
                         @if (session('role_id') == 1 || count(array_intersect([17, 24, 271, 272, 366, 670, 830], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Pickups</span></a>
@@ -262,11 +229,11 @@
                                     {{--                                        @endif --}}
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.v2_pickups.pending.add_pickup_request') }}">Add Pickup Request</a></li>
+                                                href="{{ route('admin.v3_pickups.add') }}">Add Pickup Request</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.v2_pickups.pending.history_pickup_request') }}">Pickup History Request</a></li>
+                                                href="{{ route('admin.v3_pickups.history.index') }}">Pickup Request History</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item"

@@ -358,7 +358,7 @@
                                 <td>Rider Remarks:</td>
                                 <td id="rider_remarks_td"></td>
                             </tr>
-                            <tr>                                
+                            <tr>
                                 <td>Shipper Remarks:</td>
                                 <td id="shipper_remarks_td"></td>
                             </tr>
@@ -375,7 +375,7 @@
                                 <td id="remarks_td"></td>
                             </tr>
                         </tbody>
-                            
+
                     </table>
 
                 </div>
@@ -399,7 +399,7 @@
         .legends{
             cursor:pointer;
         }
-        
+
 @foreach($legends as $legend)
     @if($legend->id == 1)
         .new_pickup{
@@ -512,7 +512,7 @@
                 params.length = -1;
                 params.excel = true;
                 var jsonResult = $.ajax({
-                    url: '{{ route('admin.v2_pickups.pending.list') }}',
+                    url: '{{ route('admin.v3_pickups.history.list') }}',
                     data: params,
                     success: function (result) {
                         head = [];
@@ -712,7 +712,7 @@
             },
             serverSide: true,
             ajax:{
-                    url: '{{ route('admin.v2_pickups.pending.list') }}',
+                    url: '{{ route('admin.v3_pickups.history.list') }}',
                     data: function (d) {
                         d.legend_filter = $('#legend_filter').val();
                         d.before_cut_off_time = $('#search_filter').val();
@@ -726,14 +726,14 @@
             columns: [
                 {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
-                {data: 'requested_date', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_date'},
+                {data: 'pickup_request_id', name: 'v3_pickup_requests.id', class: 'align-middle pickup_request_id'},
+                {data: 'requested_date', name: 'v3_pickup_requests.created_at', class: 'align-middle requested_date'},
                 {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
                 {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
                 {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'},
-                {data: 'bookings_link', name: 'v2_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
+                {data: 'bookings_link', name: 'v3_pickup_requests.booked', class: 'align-middle text-center bookings_link'},
                 {data: 'shipments_rider_picked', name: 'vpr.shipments', class: 'align-middle shipments_rider_picked'},
-                // {data: 'received_link', name: 'v2_pickup_requests.received', class: 'align-middle received_link text-center'},
+                // {data: 'received_link', name: 'v3_pickup_requests.received', class: 'align-middle received_link text-center'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'territory', name: 't.name', class: 'align-middle territory'},
                 {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
@@ -744,16 +744,16 @@
                 {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
                 {data: 'city', name: 'ci.name', class: 'align-middle city'},
                 {data: 'pickup_status', name: 'prs.id', class: 'align-middle pickup_status'},
-                
+
                 /* {data: 'trax_reason', name: 'trax_reason', class: 'align-middle trax_reason', orderable: false, searchable: false},
                 {data: 'trax_remarks', name: 'trax_remarks', class: 'align-middle trax_remarks', orderable: false, searchable: false},
                 {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false},
                 {data: 'rider_remarks', name: 'vpr.rider_remarks', class: 'align-middle rider_remarks', orderable: false, searchable: false},
                  */
-                
+
                 {data: 'all_remarks', name: 'vpn.pickup_note_id', class: 'align-middle all_remarks'},
-                
-                
+
+
                 {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
                 {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                 {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
@@ -1020,7 +1020,7 @@
             });
 
 
-            
+
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.v2_pickups.pending.print') !!}',
@@ -1050,7 +1050,7 @@
                     });
             }
 
-            
+
             $('table#legends_table').on('click', 'tr', function(){
                 var id = parseInt($(this).attr('id'));
                 if(id){
@@ -1184,9 +1184,9 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    form.submit();    
+                    form.submit();
                 }
-                
+
                 });
 
 

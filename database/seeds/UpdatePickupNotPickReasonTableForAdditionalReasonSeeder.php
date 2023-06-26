@@ -11,8 +11,8 @@ class UpdatePickupNotPickReasonTableForAdditionalReasonSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('v2_pickup_request_not_pick_reasons')->insert(array(
+        `DB::table('v2_pickup_request_not_pick_reasons')->insert(array(
             array('id' => 10, 'name' => 'Refused on Call')
-        ));
+        ));`
     }
 }

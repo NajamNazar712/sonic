@@ -4009,59 +4009,5 @@ class V2AdminPickupsController extends Controller
 
         return redirect()->back()->with(['success' => 'Project Shipper Receiving Done']);
     }
-    public function add_pickup_request()
-    {
-        $shippers = User::where('status',3)->get();
-        return view('admin.v2_pickups.add_pickup')->with(['shippers' => $shippers]);
-    }
-    public function get_shipper_cities(Request $request)
-    {
-        $shipperId = $request->input('shipperId');
-        $cities = City::leftJoin('user_shipping_infos as usi', function ($join) use ($shipperId) {
-            $join->on('usi.city_id', '=', 'cities.id')
-                ->where('usi.user_id', '=', $shipperId);
-        })
-        ->leftJoin('cities as c', 'usi.city_id', '=', 'c.id')
-        ->where('usi.status', '=', 1)
-        ->where('c.status','=',1)
-        ->where('c.pickup','=',1)
-        ->get();
-        return response()->json($cities);
-    } 
-    public function get_pickup_address(Request $request)
-    {
-        $cityId = $request->input('city_id');
-        $areas = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
-        return response()->json($areas);
-    }
-    public function history_pickup_request(Request $request)
-    {
-        $riders = Rider::where('status', 1)->select(['id', 'name','trax_id']);
-        $pickup_statuses = V2PickupRequestStatus::all();
-        $rider_statuses = V2PickupRequestRiderStatus::all();
-        if (session('role_id') != 1) {
-            $riders = $riders->whereHas('city', function ($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            });
-        }
-        $not_pick_reasons = V2PickupRequestNotPickReason::all();
-        $riders = $riders->get();
-
-        $legends = V2PickupRequestLegend::all();
-        $cut_off_time = '17:30:00';
-        $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
-        if ($setting->exists()) {
-            $setting = $setting->first();
-            $cut_off_time = $setting->setting_value;
-        }
-
-        $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
-        if ($rider_settings->exists()) {
-            $rider_settings = $rider_settings->first();
-            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
-        }
-
-        return view('admin.v2_pickups.history_pickup_request')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
-    }
 
 }
