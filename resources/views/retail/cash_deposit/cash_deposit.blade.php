@@ -300,7 +300,7 @@
                     }
                 },
                 rowId: 'performa_no',
-                order: [[6, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'shipments_button', name: 'retail_cash_deposits.total_cn', class: 'align-middle text-center shipments_button'},
