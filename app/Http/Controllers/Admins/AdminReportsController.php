@@ -11153,8 +11153,11 @@ class AdminReportsController extends Controller
 
                 $function = "without_scan_shipments_popup('".$entry->id."')";
                 if ($entry->total_arrived_shipments > 0) {
-
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) . '</button>';
+                    if(($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) > 0){
+                        return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->total_arrived_shipments-$entry->shipments_scanned_by_rider) . '</button>';
+                    }else {
+                        return 0;
+                    }
                 } else {
                     return 0;
                 }
@@ -11229,9 +11232,7 @@ class AdminReportsController extends Controller
                 $shipment_journeys = DB::connection('reports')->table('shipments_journey')->whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 53);
                 if($shipment_journeys->exists()){
                     $shipment_ids = $shipment_journeys->pluck('shipment_id')->toArray();
-                    $not_scanned_shipment_ids = [];
                     $not_scanned_shipment_ids = array_diff($pickup_request_shipment_ids,$shipment_ids);
-                    //array diffrence of pickup_request_shipment_ids and shipment_ids if count > 0 
                    if($not_scanned_shipment_ids > 0)
                     {
                        $shipments = DB::connection('reports')->table('shipments')->whereIn('id', $not_scanned_shipment_ids)->pluck('tracking_number')->toArray();
