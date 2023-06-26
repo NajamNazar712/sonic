@@ -178,7 +178,6 @@ class ReturnController extends Controller
                         and rcp_assigned_shipments.assigned_status = 1)'))
                         
                         ->where('new_ras.user_id','=',null)
-                        // ->whereDate('new_ras.created_at',date('Y-m-d'))
                         ->where('new_ras.shipment_status','!=',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
@@ -5251,6 +5250,15 @@ class ReturnController extends Controller
                             // $agent = RcpAssignedAgent::where('admin_id', $request->admin_id)->first();
                             // $agent->decrement('assigned_shipments');
                             // $agent->save();
+
+                            $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('status', 1);
+                            if($already_assigned->exists()){
+                                $already_assigned = $already_assigned->get();
+                                foreach ($already_assigned as $key => $assigned) {
+                                    $assigned->assigned_status = 2;
+                                    $assigned->save();
+                                }
+                            }
                             $assign_shipments = new RcpAssignedShipment();
                             $assign_shipments->admin_id = $request->admin_id;
                             $assign_shipments->shipment_id = $shipment_id;
@@ -5291,6 +5299,16 @@ class ReturnController extends Controller
                         // $agent = RcpAssignedAgent::where('admin_id', $request->admin_id)->first();
                         // $agent->decrement('assigned_shipments');
                         // $agent->save();
+
+                        $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('status', 1);
+                            if($already_assigned->exists()){
+                                $already_assigned = $already_assigned->get();
+                                foreach ($already_assigned as $key => $assigned) {
+                                    $assigned->assigned_status = 2;
+                                    $assigned->save();
+                                }
+                            }
+                            
                         $assign_shipments = new RcpAssignedShipment();
                         $assign_shipments->admin_id = $request->admin_id;
                         $assign_shipments->shipment_id = $shipment_id;
