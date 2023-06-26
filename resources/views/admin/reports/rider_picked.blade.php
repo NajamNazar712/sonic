@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Rider Picked Report')
+@section('title', 'Rider-Picked Status Report (W/O Arrival)')
 
 @section('content')
     <h1 class="mb-1">
-        Rider Picked Report
+        Rider-Picked Status Report (W/O Arrival)
     </h1>
 
     <div class="card">

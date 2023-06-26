@@ -11762,56 +11762,6 @@ class AdminReportsController extends Controller
             ->join('products as p','p.id','u.product_id')
             ->select('r.trax_id as rider_trax_id','r.name as rider_name','sj.updated_at as status_date','rc.name as rider_city','rh.name as rider_hub','rz.name as rider_zone','u.name as shipper_name','u.address as shipper_address','uc.name as shipper_cities','uo.name as origin','des.name as shipper_destination','shipments.amount as cod','p.product_name as product_type')
             ->where('shipments.shipper_status_id',53);
-        // $datatables = Datatables::of($rider_pickup)
-        //     ->addColumn('scanned_shipments_btn', function ($entry) {
-        //         $function = "scanned_shipments_popup('".$entry->id."')";
-        //         if ($entry->scanned_shipments > 0) {
-        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->scanned_shipments . '</button>';
-        //         } else {
-        //             return 0;
-        //         }
-        //     })
-        //     ->addColumn('arrived_shipments_btn', function ($entry) {
-        //         $function = "arrived_shipments_popup('".$entry->id."')";
-        //         if ($entry->total_arrived_shipments > 0) {
-        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . $entry->total_arrived_shipments . '</button>';
-        //         } else {
-        //             return 0;
-        //         }
-        //     }) 
-        //     ->addColumn('diff_pa_na_btn', function ($entry) {
-        //         $function = "diff_pa_na_shipments_popup('".$entry->id."')";
-        //         if ($entry->total_arrived_shipments > 0) {
-
-        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->total_arrived_shipments-$entry->scanned_shipments) . '</button>';
-        //         } else {
-        //             return 0;
-        //         }
-        //     })
-        //     ->addColumn('diff_pa_na', function ($entry) {
-
-        //         if ($entry->total_arrived_shipments > 0) {
-
-        //             return  ($entry->total_arrived_shipments-$entry->scanned_shipments) ;
-        //         } else {
-        //             return 0;
-        //         }
-        //     })
-            
-        //     ->addColumn('pickup_note_id_btn', function ($entry) {
-        //         if ($entry->pickup_note_id != null) {
-        //             return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $entry->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($entry->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-        //         }
-        //         return '';
-        //     })
-        //     ->addColumn('pickup_note_btn', function ($entry) {
-        //         $function = "pickup_note('".$entry->id."')";
-        //         if ($entry->id > 0) {
-        //             return '<button class="btn btn-sm btn-outline-info align-middle" onclick="'.$function.'" >' . ($entry->pickup_note_id) . '</button>';
-        //         } else {
-        //             return 0;
-        //         }
-        //     });
        $datatables = Datatables::of($rider_pickup);
         if($rider = $request->get('search_rider')){
             $datatables = $datatables->where('r.id', '=', $rider);
@@ -11826,7 +11776,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
-            $datatables = $datatables->whereBetween('shipments.created_at', [$from,$to]);
+            $datatables = $datatables->whereBetween('sj.created_at', [$from,$to]);
         }
         return $datatables->make(true);
     }
