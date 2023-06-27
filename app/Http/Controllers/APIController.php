@@ -6999,11 +6999,11 @@ class APIController extends Controller
     }
 
     public function return_shipments_list(){
-        dd('this function return shipments list');
+//        dd('this function return shipments list');
+        return ['status' => 2, 'message' => 'Access Denied!'];
     }
 
-
-	public function fintech_payment_detials(Request $req){
+    public function fintech_payment_detials(Request $req){
         $shipments = Shipment::join('delivery_note_shipments','shipments.id','delivery_note_shipments.shipment_id')
         ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
         ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
@@ -7024,7 +7024,7 @@ class APIController extends Controller
         $standard_fintech_charges = new standard_fintech_charges();
         $standard                 = $standard_fintech_charges->first();     
         $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage 
-                                                                     // (Applicable on both users charges or standard charges)
+                                                                    // (Applicable on both users charges or standard charges)
         if($userFintechCharges->exists()){
             $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges from user
         }
@@ -7065,7 +7065,7 @@ class APIController extends Controller
             $total_company_fed  = number_format($company_fed * $total_company_charges,2);
         }
         else{
-             $total_company_fed = $select_range->fed_tax; // company Fed
+            $total_company_fed = $select_range->fed_tax; // company Fed
         }
         //Calculate Additional Charges
         if(!empty($select_range->additional_charges)){
@@ -7080,7 +7080,6 @@ class APIController extends Controller
         else{
             $additional_charges = 0;
         }
-
         // total company charges Fintech Charges   
         $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges; 
 
@@ -7108,20 +7107,20 @@ class APIController extends Controller
         //  ]);
         //total amount received   
         $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
-
         $fintech_details = new FintechPaymentDetails();
-        $fintech_details->trax_pay_id            =  $trax_pay_id;
-        $fintech_details->transaction_id         =  $req->transaction_id;
-        $fintech_details->rider_tip              =  $req->tip;
-        $fintech_details->rider_id               =  $shipments->rider;
-        $fintech_details->fintech_company_id     =  $req->fintech_company;
-        $fintech_details->total_fintech_amount   =  $total_fintech_calculated[0];
-        $fintech_details->fintech_company_amount =  $total_company_fintech_charges;
-        $fintech_details->revenue                =  $revenue;
+        $fintech_details->trax_pay_id            = $trax_pay_id;
+        $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->rider_tip              = $req->tip;
+        $fintech_details->rider_id               = $shipments->rider;
+        $fintech_details->fintech_company_id     = $req->fintech_company;
+        $fintech_details->total_fintech_amount   = $total_fintech_calculated[0];
+        $fintech_details->fintech_company_amount = $total_company_fintech_charges;
+        $fintech_details->revenue                = $revenue;
         $fintech_details->save();
 
         $shipment = Shipment::find($shipment_id);
         $shipment->received_amount = $total_amount_received;
+        $shipment->fintech_charges = $total_fintech_calculated[0];
         $shipment->save();
 
         NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
@@ -7340,3 +7339,4 @@ class APIController extends Controller
         }
     }
 }
+

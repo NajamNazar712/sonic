@@ -94,7 +94,7 @@
 
 <!--Shipments popup -->
 <div class="modal fade" id="fintech_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title" id="shipments_modal_title">Fintech Charges(s)</h4>
@@ -105,11 +105,14 @@
             </div>
             <div class="modal-body text-center">
 
-                <table>
-                    <tr>
-                      <th>Tracking #</th>
-                      <th>Fintech Charges</th>
-                      <th>Created Date</th>
+                <table border="1">
+                    <tr >
+                        <th width="70">#</th>
+                        <th width="140">Tracking #</th>
+                        <th width="120">COD Amount</th>
+                        <th width="150">Fintech Charges</th>
+                        <th width="150">Received COD Amount </th>
+                        <th width="140">Created Date</th>
                     </tr>
                     <tbody id="shipment_table">
                     <tbody>
@@ -1262,28 +1265,32 @@
 
         });
 
-function fintechshipmentsshow(event,id){
-    $("#shipment_table").html('');
-    $.ajax({
-        type : 'get',
-        url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
-        data : {id:id},
-        success:function(res){
-            $("#fintech_modal").modal('show');
-            for(let x of res.data){
-                $("#shipment_table").append(`
-                    <tr>
-                    <td>${x.trackingNo}</td>
-                    <td>${x.fintech_charges}</td>
-                    <td>${x.Date}</td>
-                    </tr>
-                `);
+    function fintechshipmentsshow(event,id){
+        var y = 1;
+        $("#shipment_table").html('');
+        $.ajax({
+            type : 'get',
+            url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
+            data : {id:id},
+            success:function(res){
+                if(res.status == 200){
+                    $("#fintech_modal").modal('show');
+                    for(let x of res.data){
+                        $("#shipment_table").append(`
+                            <tr>
+                            <td>${y++}</td>
+                            <td>${x.trackingNo}</td>
+                            <td>${x.COD_amount}</td>
+                            <td>${x.fintech_charges}</td>
+                            <td>${x.received_amount}</td>
+                            <td>${x.Date}</td>
+                            </tr>
+                        `);
+                    }
+                } 
             }
-            
-        }
-        
-    });
-}
+        });
+    }
 
 
 

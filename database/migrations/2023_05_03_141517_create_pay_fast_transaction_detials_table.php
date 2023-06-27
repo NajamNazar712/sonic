@@ -36,6 +36,6 @@ class CreatePayFastTransactionDetialsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('pay_fast_transaction_detials');
+        Schema::dropIfExists('payfast_transaction_detials');
     }
 }

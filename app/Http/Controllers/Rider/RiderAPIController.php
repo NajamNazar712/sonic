@@ -95,6 +95,7 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
@@ -148,6 +149,7 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\TraxPayTransaction;
 use App\ReturnDeliveredToShipperSms;
 
 class RiderAPIController extends Controller
@@ -12504,8 +12506,27 @@ class RiderAPIController extends Controller
                     } else {
                         $deliveries['delivery_otp'] = 1;
                     }
+
                     $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);
-                    $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
+                    $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                    ->where('trax_pay_transactions.shipment_id',$shipment_id)
+                    ->where('trax_pay_transactions.delivery_note_id',$delivery_note->id);
+                    $deliveries['payment_link'] = "";
+                    //fintech code 
+                    if($one_link_payment->exists()){
+                        $deliveries['amount_paid'] = 1;
+                    }
+                    else if($fintech_payment->exists()){
+                        $deliveries['amount_paid'] = 1;
+                    }
+                    else{
+                        $deliveries['amount_paid'] = 0;
+                        $payment_link = TraxPayTransaction::where('shipment_id',$shipment_id)->first();
+                        if(!empty($payment_link)){
+                            $deliveries['payment_link'] = $payment_link->link;   
+                        }   
+                    }
+                    // $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();
