@@ -2444,6 +2444,7 @@ class AdminPettyCashController extends Controller
         $employees = Admin::where('trax_id', '!=', null)->where('status', 1)->select(['id', 'trax_id'])->get();
         $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
+     
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id',$exclude_sdns)->select('id')->get();
         } else {
@@ -2453,9 +2454,13 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_petty_cash_submit(Request $request)
-    {
+    {  
         if ($request->has('submit_button')) {
             $total_amount = 0;
+            if(PettyCashStatement::where('sdn_id',$request->select_statement_sdn)->exists()){
+                return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash exists for this SDN, Cannot create Advance Petty Cash']);
+            }
+          
             if (AdvancePettyCashStatement::where('reference_no', '=', $request->reference_no)->exists()) {
                 return redirect()->back()->with(['status' => 0, 'error' => 'Reference No. not Unique']);
             }
