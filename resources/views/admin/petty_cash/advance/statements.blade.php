@@ -383,10 +383,10 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Created</option>' +
-                        '<option value="1">Station Approved</option>' +
-                        '<option value="2">Operation Approved</option>' +
-                        '<option value="7">Received Statement</option>' +
+                        // '<option value="0">Created</option>' +
+                        // '<option value="1">Station Approved</option>' +
+                        // '<option value="2">Operation Approved</option>' +
+                        // '<option value="7">Received Statement</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -411,8 +411,15 @@
                         }
                     });
 
+                      var data2 = $.map({!! $statuses !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Status",
+                        data:data2,
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

@@ -32,7 +32,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                 </div>
-                                <input type="text" name="select_statement_date" data-value="{{$petty_statement->from}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
+                                <input type="text" name="select_statement_date" data-value="{{$petty_statement->from}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required" disabled>
                             </div>
                         </div>
                         <div class="col">
@@ -660,7 +660,7 @@
 
 
         });
-        $('#statements_total_amount').text(total_amount);
+        //$('#statements_total_amount').text(total_amount);
     });
 
     $('body').on('click', '.remove_row',function () {
@@ -686,7 +686,7 @@
 
 
         });
-        $('#statements_total_amount').text(total_amount);
+        //$('#statements_total_amount').text(total_amount);
     }
 });
 </script>

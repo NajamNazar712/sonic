@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use AdvancePettyCashStatementSeeder;
 use App\AdvacncePettyCashSdnLog;
 use App\AdvancePettyCashStatementDetail;
+use App\AdvancePettyCashStatementStatus;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\Admin;
@@ -2521,7 +2523,8 @@ class AdminPettyCashController extends Controller
             $hubs = City::where('hub', 1)->where('status',1)->whereIn('id', session('hubs'))->get();
         }
         $zones = Zone::where('status', 1)->get();
-        return view('admin.petty_cash.advance.statements')->with(['hubs' => $hubs,'zones'=>$zones]);
+        $statuses = AdvancePettyCashStatementStatus::all();
+        return view('admin.petty_cash.advance.statements')->with(['hubs' => $hubs,'zones'=>$zones,'statuses' => $statuses]);
     }
 
     public function advance_petty_cash_statements_list(Request $request)
