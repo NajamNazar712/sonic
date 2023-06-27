@@ -109,7 +109,7 @@
                                 @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
                                     @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
                                     <div class="ml-1">
-                                        <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>
+                                        <button id="statement_approve" type="button"  class="btn btn-primary btn-block"> {{ $petty_statement->status == 1 ? 'Receive Statement' : 'Approve' }}</button>
                                     </div>
                                     <div class="ml-1">
                                         <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>

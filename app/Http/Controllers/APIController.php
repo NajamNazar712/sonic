@@ -4453,7 +4453,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-
+                                            $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$request->consignee_address);
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $shipment->consignee_city_id,
@@ -4465,6 +4465,7 @@ class APIController extends Controller
                                                 'amount' => $shipment->amount,
                                                 'shipper_id' => $user_id,
                                                 'status' => 0,
+                                                'city_area_id'=>$city_area_id
                                             ]);
 
                                             $shipment->consignee_status_id = 54;
@@ -4524,6 +4525,7 @@ class APIController extends Controller
 
                                             $s_amount = str_replace(",", "", "$request->amount");
                                             $amount = (int) $s_amount;
+                                            $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city_id,$request->consignee_address);
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $request->consignee_city_id,
@@ -4535,6 +4537,7 @@ class APIController extends Controller
                                                 'amount' => $amount,
                                                 'shipper_id' => $user_id,
                                                 'status' => 0,
+                                                'city_area_id'=>$city_area_id
                                             ]);
 
                                             $shipment->consignee_status_id = 54;

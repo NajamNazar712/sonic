@@ -136,7 +136,7 @@
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'area_name', name: 'delivery_location_mappings.name', class: 'align-middle area_name'},
-                    {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'city_name', name: 'ct.name', class: 'align-middle city_name'},
                     {data: 'added_by', name: 'ab.name', class: 'align-middle added_by'},
                     {data: 'updated_by', name: 'ub.name', class: 'align-middle updated_by'},
                     {data: 'updated_at', name: 'delivery_location_mappings.updated_at', class: 'align-middle updated_at'},

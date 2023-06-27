@@ -39,6 +39,16 @@
                                     </div>
 
                                     <div class="col-3">
+                                        <fieldset class="form-group">
+                                            <select name="search_area" id="search_area" class="form-control select2">
+                                                @foreach($areas as $area)
+                                                    <option value="{{$area->id}}">{{$area->name}} - {{ $area->hubs->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </fieldset>
+                                    </div>
+
+                                    <div class="col-3">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -144,6 +154,7 @@
 
     <script>
         $(document).ready(function () {
+            $('#search_area').attr("disabled", true);
             $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder: 'Select Rider',
                 width: '100%',
@@ -153,6 +164,38 @@
                 placeholder: 'Select City',
                 width: '100%',
                 allowClear: true
+            }).bind("change",function(){
+                var area_list = $('#search_area');
+                let id = $(this).val();
+                area_list.attr("disabled", true);
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                    .done(function (data) {
+                        area_list.empty();
+                        if(data.areas.length > 0){
+                            area_list.attr("disabled", false);
+                            $.each(data.areas, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                area_list.append(newOption);
+                            });
+                        }else{
+                            area_list.attr("disabled", true);
+                        }
+
+                    });
+                }
+            });
+            $("#search_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                allowClear: true,
+                width: '100%',
             });
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
@@ -254,6 +297,8 @@
                     data: function (d) {
                         d.search_rider = $('select[name="search_rider"]').val();
                         d.search_city = $('select[name="search_city"]').val();
+                        d.search_area = $('select[name="search_area"]').val();
+
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
 
