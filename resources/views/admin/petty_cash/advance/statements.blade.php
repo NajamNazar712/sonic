@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-@section('title','Petty Cash Statements')
+@section('title','Advance Petty Cash Statements')
 
 @section('content')
     <h1 class="mb-1">
