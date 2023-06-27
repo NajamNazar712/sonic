@@ -1646,7 +1646,7 @@
                                 });
                             }
                         },
-                        @if (session('role_id') == 1 || in_array(316, session('permissions')))
+                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
                         {
                             title: 'Upload',
                             className: 'btn btn-primary excel-upload',
