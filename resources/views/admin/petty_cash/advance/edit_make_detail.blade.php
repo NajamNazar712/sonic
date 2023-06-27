@@ -32,8 +32,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                 </div>
-
-                                <input type="text" name="select_statement_date" disabled data-value="{{$petty_statement->date}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
+                                <input type="text" name="select_statement_date" disabled data-value="{{$petty_statement->from}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
                             </div>
                         </div>
                         <div class="col">

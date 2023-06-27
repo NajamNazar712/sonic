@@ -214,12 +214,10 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.petty_cash.statements.list') }}',
+                        url: '{{ route('admin.petty_cash.advance.statements.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
-
-
                             head.push('S.No');
                             head.push('Statement No.');
                             head.push('Hub Name');
@@ -230,19 +228,12 @@
                             head.push('Total Amount');
                             head.push('Created By');
                             head.push('Created At');
-                            // head.push('Station Approved By');
-                            // head.push('Station Approved At');
                             head.push('Operation Approved By');
                             head.push('Operation Approved At');
                             head.push('Status');
-                            // head.push('Checked At');
-                            // head.push('Checked By');
-
 
                             $.each(result.data, function(index, values) {
                                 row = [];
-
-
                                 row.push(index + 1);
                                 row.push(values.statement_id);
                                 row.push(values.hub_name);
@@ -253,14 +244,9 @@
                                 row.push(values.total_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                // row.push(values.station_approved_by);
-                                // row.push(values.station_approved_at);
                                 row.push(values.operation_approved_by);
                                 row.push(values.operation_approved_at);
                                 row.push(values.status);
-                                // row.push(values.checked_at);
-                                // row.push(values.checked_by);
-
                                 body.push(row);
                             });
                         },
@@ -274,251 +260,14 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[
-                // @if (session('role_id') == 1 || (in_array(190, session('permissions')) && session('department_id') == 6))
-                //     {
-                //         className: 'btn btn-primary station',
-                //         text: 'Station Approved',
-                //         enabled: false,
-
-                //         action: function (e, dt, node, config) {
-                //             $('input:hidden[name=statement_ids]').val(selected_rows);
-
-                //             if(selected_rows.length === 0){
-                //                 table.button('.finance').disable();
-                //                 table.button('.station').disable();
-                //                 table.button('.operation').disable();
-                //                 table.button('.check').disable();
-                //                 return false;
-                //             }
-                //             else if(selected_rows !== ''){
-                //                 swal({
-                //                     title: 'Are You Sure?',
-                //                     icon: 'warning',
-                //                     buttons: {
-                //                         cancel: {
-                //                             text: 'No',
-                //                             value: null,
-                //                             visible: true,
-                //                             closeModal: true,
-                //                         },
-                //                         confirm: {
-                //                             text: 'Yes',
-                //                             value: true,
-                //                             visible: true,
-                //                             closeModal: true
-                //                         }
-                //                     },
-                //                     closeOnClickOutside: false,
-                //                     closeOnEsc: false,
-                //                     dangerMode: true
-                //                 }).then(function (confirm) {
-                //                     if (confirm) {
-                //                         $.ajax({
-                //                             url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
-                //                             method: 'POST',
-                //                             data: {
-                //                                 '_token': '{{ csrf_token() }}',
-                //                                 'statement_ids': selected_rows,
-                //                                 'action': 'station'
-                //                             }
-                //                         }).done(function(data){
-                //                             if(data.status == 0){
-                //                                 table.rows().deselect();
-                //                                 selected_rows = [];
-                //                                 table.button('.finance').disable();
-                //                                 table.button('.station').disable();
-                //                                 table.button('.operation').disable();
-                //                                 table.button('.check').disable();
-                //                                 table.draw(true);
-                //                                 table.columns.adjust().draw();
-                //                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                //                             }
-                //                             else
-                //                             {
-                //                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                //                             }
-
-                //                         });
-                //                     }
-                //                 });
-
-                //             }else{
-                //                 var error = 'Statement ID Not Found, Please Try again!';
-                //                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                //                 table.button('.finance').disable();
-                //                 table.button('.station').disable();
-                //                 table.button('.operation').disable();
-                //                 table.button('.check').disable();
-                //             }
-                //         }
-                //     },
-                //         @endif
-
-                        @if (session('role_id') == 1 || (in_array(191, session('permissions')) &&  session('department_id') == 6))
-                    {
-                        className: 'btn btn-primary operation',
-                        text: 'Operation Approved',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-
-                            $('input:hidden[name=statement_ids]').val(selected_rows);
-
-                            if(selected_rows.length === 0){
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                //table.button('.check').disable();
-                                return false;
-                            }
-                            else if(selected_rows !== ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows,
-                                                'action': 'operation'
-                                            }
-                                        }).done(function(data){
-                                            if(data.status == 0){
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                table.button('.finance').disable();
-                                                table.button('.station').disable();
-                                                table.button('.operation').disable();
-                                                //table.button('.check').disable();
-                                                table.draw(true);
-                                                table.columns.adjust().draw();
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            else
-                                            {
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                            }
-
-                                        });
-                                    }
-                                });
-
-                            }else{
-                                var error = 'Statement ID Not Found, Please Try again!';
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                //table.button('.check').disable();
-                            }
-                        }
-                    },
-                        @endif
-                        @if (session('role_id') == 1 || (in_array(173, session('permissions')) &&  session('department_id') == 4))
-                    {
-                        className: 'btn btn-primary finance',
-                        text: 'Finance Approved',
-                        enabled: false,
-
-                        action: function (e, dt, node, config) {
-                            $('input:hidden[name=statement_ids]').val(selected_rows);
-
-                            if(selected_rows.length === 0){
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                //table.button('.check').disable();
-                                return false;
-                            }
-                            else if(selected_rows !== ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        $.ajax({
-                                            url: '{!! route('admin.petty_cash.statements.station_operation_finance_approved') !!}',
-                                            method: 'POST',
-                                            data: {
-                                                '_token': '{{ csrf_token() }}',
-                                                'statement_ids': selected_rows,
-                                                'action': 'finance'
-                                            }
-                                        }).done(function(data){
-                                            if(data.status == 0){
-                                                table.rows().deselect();
-                                                selected_rows = [];
-                                                table.button('.finance').disable();
-                                                table.button('.station').disable();
-                                                table.button('.operation').disable();
-                                                //table.button('.check').disable();
-                                                table.draw(true);
-                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                            }
-                                            else
-                                            {
-                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                            }
-
-                                        });
-                                    }
-                                });
-
-                            }else{
-                                var error = 'Statement ID Not Found, Please Try again!';
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                table.button('.finance').disable();
-                                table.button('.station').disable();
-                                table.button('.operation').disable();
-                                //table.button('.check').disable();
-                            }
-                        }
-                    },
-                        @endif
                     {
                         className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Make Petty Cash Statements',
                         action: function (e, dt, node, config) {
-                            window.location = '{{ route('admin.petty_cash.make.index')  }}'
+                            window.location = '{{ route('admin.petty_cash.advance.index')  }}'
                         }
-                    },{
+                    },
+                    {
                         extend: 'selectAll',
                         text: 'Select All',
                         className: 'select_all',
@@ -538,10 +287,6 @@
                                     if (index === -1) {
                                         selected_rows.push(id);
                                     }
-
-                                    table.button('.finance').enable();
-                                    table.button('.station').enable();
-                                    table.button('.operation').enable();
                                     //table.button('.check').enable();
                                 }
                             });
@@ -565,13 +310,6 @@
 
                                     if (index !== -1) {
                                         selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.finance').disable();
-                                        table.button('.station').disable();
-                                        table.button('.operation').disable();
-                                        //table.button('.check').disable();
                                     }
                                 }
                             });
@@ -733,7 +471,7 @@
             $('body').on('click','.sdn_update_logs button.sdn_logs',function(){
                 var id = $(this).parents('tr').attr('id');
                 $.ajax({
-                    url: '{!! route('admin.petty_cash.sdn_logs') !!}',
+                    url: '{!! route('admin.petty_cash.advance.statements.advance_sdn_logs') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
@@ -815,9 +553,22 @@
                 }
             });
 
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+            var id = parseInt($(this).parent('tr').attr('statement_id'));
+            console.log(statement_id);
+            var index = $.inArray(statement_id, selected_rows);
+
+            if (index === -1) {
+                selected_rows.push(statement_id);
+            }
+            else {
+                selected_rows.splice(index, 1);
+            }
+        });
+
             function printStatement(id) {
                 $.ajax({
-                    url: '{!! route('admin.petty_cash.statements.print') !!}',
+                    url: '{!! route('admin.petty_cash.advance.statements.advance_print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -843,18 +594,6 @@
                         }
                     });
             }
-        });
-        $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-            var id = parseInt($(this).parent('tr').attr('statement_id'));
-            console.log(statement_id);
-            var index = $.inArray(statement_id, selected_rows);
-
-            if (index === -1) {
-                selected_rows.push(statement_id);
-            }
-            else {
-                selected_rows.splice(index, 1);
-            }
-        });
+    });
     </script>
 @endsection
