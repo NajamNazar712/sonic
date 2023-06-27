@@ -7205,10 +7205,10 @@ class ReturnController extends Controller
 
         //adding status_remark_id in rcp_assigned_shipments table
         $add_status_remarks_id = RcpAssignedShipment::where('shipment_id',$request->shipment_id)->latest()->first();
-        $add_status_remarks_id->status_remarks_id = $status->id;
-        $add_status_remarks_id->save();
-
-
+        if($add_status_remarks_id){
+            $add_status_remarks_id->status_remarks_id = $status->id;
+            $add_status_remarks_id->save();
+        }
 
         return response()->json(['status' => 1]);
 

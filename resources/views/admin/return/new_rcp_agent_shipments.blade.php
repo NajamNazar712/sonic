@@ -241,7 +241,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.agent_name);
                                 row.push(values.shipper_name); 
                                 row.push(values.origin);
                                 row.push(values.consignee_city);

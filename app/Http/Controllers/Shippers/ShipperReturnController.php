@@ -538,13 +538,13 @@ class ShipperReturnController extends Controller
                         $return_assign_log->save();
                    }
 
-                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id) ->latest()->first();
+                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
                    if($rcp_assigned_shipment->exists()){
+                       $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        
-                       $rcp_assigned_shipment->shipment_status = 3; //re-attempt status
-                       $rcp_assigned_shipment->user_id = Auth::id();
-                       $rcp_assigned_shipment->save();
-
+                        $rcp_assigned_shipment->shipment_status = 3; //re-attempt status
+                        $rcp_assigned_shipment->user_id = Auth::id();
+                        $rcp_assigned_shipment->save();
                        //updating already_updated & pending of agent if shipment is updated by shipper 
                        $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
                        $already_updated = $rcp_assigned_agent->increment('already_updated');
