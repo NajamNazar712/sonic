@@ -5434,6 +5434,8 @@ class ReturnController extends Controller
                 }
             }
             if(empty($errors)){
+
+                $already_assigned_shipment = array();
                 $tracking_numbers = array();
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
@@ -5548,8 +5550,7 @@ class ReturnController extends Controller
                             $assign_shipments_logs->save();
                         }
                         else{
-                            return redirect()->back()->with('error', 'Please Un Assign the Shipments');
-                            // return response()->json(['status' => 1, 'error' => 'Please Un Assign the Shipments']);
+                            $already_assigned_shipment[] = 'Please Un Assign the Shipment Tracking number(' . $shipment_id .')';
                         }
 
                      }
@@ -5559,8 +5560,8 @@ class ReturnController extends Controller
                  //agent already exist
                 else
                 {
-                    
                     $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
+                    
                     if(!$check_already_assigned){
                         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                         $check_agent_return_confrimation->increment('total_shipments');
@@ -5594,21 +5595,29 @@ class ReturnController extends Controller
                         $assign_shipments_logs->save();
                     }
 
-                    // else{
-                    //     return response()->json(['status' => 1, 'error' => $id_shipment->id,'shipment has already been assigned to an agent today!']);
-                    // }
+                    else{
+                        $already_assigned_shipment[] = 'Row # '. $row_id. ' Tracking number (' . $shipment_id . ') has already been assigned to an agent';
+                    }
 
                 }
-
             
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
                 }
-                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
-                    return $row . ': ' . $tracking_number;
-                }, array_keys($tracking_numbers), $tracking_numbers));
+                // dd($already_assigned_shipment);
 
-                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                if(!empty($already_assigned_shipment))
+                {
+                    return redirect()->back()->withErrors($already_assigned_shipment);
+                }
+                else{
+                    $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                        return $row . ': ' . $tracking_number;
+                    }, array_keys($tracking_numbers), $tracking_numbers));
+    
+                    return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+                }
+               
             }
             else{
                 $errors = array_map(function ($row, $errors) {
