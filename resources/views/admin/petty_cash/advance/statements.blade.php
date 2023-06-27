@@ -361,7 +361,7 @@
                     {data: 'total_amount', name: 'advance_petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'advance_petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'status', name: 'advance_petty_cash_statements.status', class: 'align-middle status'},
+                    {data: 'status_name', name: 'apcs.name', class: 'align-middle status'},
                     {data: 'sdn_update_logs', name: '', class: 'text-center align-middle sdn_update_logs', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

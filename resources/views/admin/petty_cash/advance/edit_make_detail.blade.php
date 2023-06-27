@@ -11,7 +11,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <form id="edit_statement_form" action="{{route('admin.petty_cash.advance.statements.edit_make_detail_submit')}}" method="post" enctype="multipart/form-data">
-{{--                    @method('PUT')--}}
+                    {{--@method('PUT')--}}
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
                     <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement->id}}">

@@ -2495,7 +2495,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash->status_id = 1;
                 $petty_cash->save();
 
-                return redirect()->back()->with(['status' => 1, 'success' => 'Advance Petty Cash Statement Created Successfully']);
+                return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Petty Cash Created']);
             }
 
         } else {
@@ -2536,8 +2536,9 @@ class AdminPettyCashController extends Controller
         $petty = AdvancePettyCashStatement::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statements.hub_id')
             ->leftjoin('cities as o', 'o.id', '=', 'advance_petty_cash_statements.origin_hub_id')
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
+            ->leftjoin('advance_petty_cash_statement_statuses as apcs','advance_petty_cash_statements.status_id','=','apcs.id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
-            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status', 'advance_petty_cash_statements.total_amount','advance_petty_cash_statements.created_at as date')
+            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name')
             ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
@@ -2768,13 +2769,12 @@ class AdminPettyCashController extends Controller
     {
         $petty_details = AdvancePettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statement_details.hub_id')
             ->leftjoin('cities as c', 'c.id', '=', 'advance_petty_cash_statement_details.city_id')
-            ->leftjoin('zones as z', 'z.id', '=', 'advance_petty_cash_statement_details.zone_id')
+//            ->leftjoin('zones as z', 'z.id', '=', 'advance_petty_cash_statement_details.zone_id')
             ->leftjoin('admins as a', 'a.id', '=', 'advance_petty_cash_statement_details.employee_id')
             ->join('advance_petty_cash_statements as pcs', 'pcs.id', '=', 'advance_petty_cash_statement_details.petty_cash_id')
             ->select('advance_petty_cash_statement_details.id as statement_detail_id', 'h.name as hub','c.name as city',
-                'z.name as zone',
+//                'z.name as zone',
                 'advance_petty_cash_statement_details.employee_id', 'pcs.hub_id', 'pcs.sdn_id','advance_petty_cash_statement_details.account_head_id', 'advance_petty_cash_statement_details.account_title_id', 'advance_petty_cash_statement_details.created_at as date', 'advance_petty_cash_statement_details.expense_details', 'advance_petty_cash_statement_details.amount', 'advance_petty_cash_statement_details.reference_no', 'advance_petty_cash_statement_details.remarks', 'advance_petty_cash_statement_details.status', 'pcs.status_id as petty_status',   'advance_petty_cash_statement_details.reference_document as reference_document', 'advance_petty_cash_statement_details.reference_document_2 as reference_document_2', 'advance_petty_cash_statement_details.created_at','advance_petty_cash_statement_details.employee_name as employee_name_data','advance_petty_cash_statement_details.employee_designation as employee_designation_data',
-                'advance_petty_cash_statement_details.zone_id',
                 'advance_petty_cash_statement_details.city_id',
                 'advance_petty_cash_statement_details.dncc_id','advance_petty_cash_statement_details.delivered_shipments')
             ->where('advance_petty_cash_statement_details.petty_cash_id', $id);
@@ -3041,7 +3041,6 @@ class AdminPettyCashController extends Controller
 
     public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
     {
-//        dd($request->all());
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = AdvancePettyCashStatement::find($statement_id);
