@@ -11302,12 +11302,12 @@ class AdminReportsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),672);
         }
         $project_arrival = DB::connection('reports')->table('shipments')
-        ->join('shipments_journey as sjpa',function($join){
+        ->leftjoin('shipments_journey as sjpa',function($join){
         $join->on('sjpa.shipment_id', '=', 'shipments.id')
         ->where('sjpa.id', '=',
             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id  and shipments_journey.shipper_status_id = 64)'));
         })
-        ->join('shipments_journey as sja',function($join){
+        ->leftjoin('shipments_journey as sja',function($join){
         $join->on('sja.shipment_id', '=', 'shipments.id')
         ->where('sja.id', '=',
             DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id  and shipments_journey.shipper_status_id = 2)'));
@@ -11316,8 +11316,8 @@ class AdminReportsController extends Controller
         ->join('user_shipping_infos as usi','usi.id','=','shipments.pickup_address_id')
         ->join('cities as uo','uo.id','usi.city_id')
         ->join('cities as des','des.id','shipments.consignee_city_id')
-        ->join('admins as apa','apa.id','=','sjpa.admin_id')
-        ->join('admins as aa','aa.id','=','sja.admin_id')
+        ->leftjoin('admins as apa','apa.id','=','sjpa.admin_id')
+        ->leftjoin('admins as aa','aa.id','=','sja.admin_id')
         ->select('shipments.tracking_number as tracking_number_link','u.name as shipper','uo.name as origin','des.name as destination','apa.name as project_arrival_by','sjpa.created_at as project_arrival_at','aa.name as normal_arrival_by','sja.created_at as normal_arrival_at');
 
         $datatables = Datatables::of($project_arrival)
