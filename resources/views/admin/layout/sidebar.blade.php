@@ -722,7 +722,7 @@ $roles = explode("," , $settings->text);
 
             @if (session('role_id') == 1 ||
                     count(array_intersect(
-                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827],
+                            [42, 52, 54, 59, 61, 136, 167, 232, 120, 145, 146, 147, 232, 238, 243, 454, 455, 509, 625, 807, 827,881,882],
                             session('permissions'))) !== 0)
 
                 <li class="nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
@@ -832,7 +832,7 @@ $roles = explode("," , $settings->text);
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([145, 146, 147, 238, 243], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([145, 146, 147, 238, 243,881,882], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Petty Cash</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(145, session('permissions')))
@@ -861,12 +861,12 @@ $roles = explode("," , $settings->text);
 
                                      <li><a class="menu-item" href="#">Advance Petty Cash</a>
                                         <ul class="menu-content">
-                                            @if (session('role_id') == 1 || in_array(157, session('permissions')))
+                                            @if (session('role_id') == 1 || in_array(881, session('permissions')))
                                                 <li><a class="menu-item"
                                                         href="{{ route('admin.petty_cash.advance.index') }}">Create</a>
                                                 </li>
                                             @endif
-                                                @if (session('role_id') == 1 || in_array(157, session('permissions')))
+                                                @if (session('role_id') == 1 || in_array(882, session('permissions')))
                                                 <li><a class="menu-item"
                                                         href="{{ route('admin.petty_cash.advance.statements.index') }}">Statement</a>
                                                 </li>

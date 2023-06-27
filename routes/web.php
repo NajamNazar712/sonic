@@ -2275,24 +2275,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('index');//todo new
             Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');//todo new
             Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');//todo new
-            Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');//todo new
+            // Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');//todo new
 
             Route::prefix('statements')->name('statements.')->group(function () {
                 Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_statements_index')->name('index');//todo new
                 Route::get('list', 'Admins\AdminPettyCashController@advance_petty_cash_statements_list')->name('list');//todo new
                 Route::post('advance_print', 'Admins\AdminPettyCashController@advance_statement_print')->name('advance_print');//todo new
                 Route::post('advance_view/sdn_logs', 'Admins\AdminPettyCashController@advance_sdn_log')->name('advance_sdn_logs'); //todo new
-                Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
-                Route::post('reject_all', 'Admins\AdminPettyCashController@petty_cash_statements_reject_all')->name('reject_all');
                 Route::get('{id}/edit', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_index')->name('edit');//todo new
                 Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_list')->name('edit.list');//todo new
-                Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
-                Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
-                Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
-                Route::post('view/amount', 'Admins\AdminPettyCashController@edit_petty_cash_statements_amount')->name('view.amount');
-                Route::get('reference_document/{reference_document}', 'Admins\AdminPettyCashController@reference_document')->name('reference_document');
-                Route::post('station_operation_finance_approved', 'Admins\AdminPettyCashController@petty_cash_station_operation_finance_approved_all')->name('station_operation_finance_approved');
-                Route::post('check', 'Admins\AdminPettyCashController@petty_cash_statement_check')->name('check');
 
                 //make details:
                 Route::get('{id}/make_detail', 'Admins\AdminPettyCashController@advance_add_petty_cash_statement_make_detail')->name('make_detail'); //todo new
@@ -2301,6 +2292,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('{id}/edit_make_detail', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_make_detail')->name('edit_make_detail'); //todo new
                 Route::get('{id}/edit_make_detail/list', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_make_detail_list')->name('edit_make_detail.list'); //todo new
                 Route::post('edit_make_detail_submit', 'Admins\AdminPettyCashController@advance_edit_make_petty_cash_statement_detail_submit')->name('edit_make_detail_submit');//todo new
+
                 Route::post('detail_edit/approve', 'Admins\AdminPettyCashController@detail_edit_petty_cash_statements_approve')->name('detail_edit.approve');//todo new
                 Route::post('detail_edit/reject', 'Admins\AdminPettyCashController@detail_edit_petty_cash_statements_reject')->name('detail_edit.reject');//todo new
             });

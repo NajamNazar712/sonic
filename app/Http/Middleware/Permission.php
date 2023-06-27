@@ -1352,6 +1352,9 @@ class Permission
         
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+
+            'petty_cash.advance.index' => 881,
+            'petty_cash.advance.statements.index' => 882,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
