@@ -2611,9 +2611,10 @@ class AdminPettyCashController extends Controller
             ';  
                 $petty_details = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty->statement_id); 
 
-                if ($petty->status == 1 && !$petty_details->exists()) {
+                if ($petty->status == 1 && ($petty->total_amount != $petty->amount_availed)) {
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-eye"></i> Add Details</a>';
-                } elseif ($petty->status == 1 && $petty_details->exists()) {
+                }
+                if ($petty->status == 1 && $petty_details->exists()) {
                     $dropdown .= '<a href="' . $edit_route . '" class="dropdown-item" ><i class="ft-eye"></i> Edit Details</a>';
                 }
             }
@@ -2673,7 +2674,7 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_make_petty_cash_statement_detail_submit(Request $request)
-    {
+    {dd();
 
         if ($request->has('submit_button')) {
 
@@ -2683,6 +2684,13 @@ class AdminPettyCashController extends Controller
                 $total_amount = 0;
                 $petty_cash_statement_id = $request->petty_statement_id;
                 $actual_amount = $request->petty_statement_actual_amount;
+
+                $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id);
+
+                if($existing_petty_cash->exists())
+                {
+                    $existing_petty_cash_sum = $existing_petty_cash->sum('amount');
+                }
 
                 foreach ($selected_ids as $selected_id) {
 
