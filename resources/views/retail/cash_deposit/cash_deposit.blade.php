@@ -204,7 +204,7 @@
                                 row.push(values.category);
                                 row.push(values.booking_code);
                                 row.push(values.total_cash);
-                                row.push(values.hbl_konnect_cash);//
+                                row.push(values.hbl_konnect_cash_excel);//
                                 row.push(values.remaining_cash);//
                                 row.push(values.booking_date);
                                 row.push(values.status);

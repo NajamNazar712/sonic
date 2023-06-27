@@ -142,6 +142,23 @@ class RetailCashCollectionController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('hbl_konnect_cash_excel', function ($data) {
+
+                $remaining_cash = HblKonnectTransactionRetail::where('retail_note_id',$data->retail_pickup_note_id)->select('amount');
+                if ($remaining_cash->exists())
+                {
+                    $remaining_cash = $remaining_cash->get()->toArray();
+                    $sum = array_reduce($remaining_cash, function ($carry, $item) {
+                        return $carry + $item["amount"];
+                    });
+
+                    return $sum;
+                }
+                else
+                {
+                    return '-';
+                }
+            })
             ->addColumn('remaining_cash', function ($data) {
 
                 $remaining_cash = HblKonnectTransactionRetailNote::where('retail_note_id',$data->retail_pickup_note_id)->select('cash_amount');
