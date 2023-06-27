@@ -2674,32 +2674,37 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_make_petty_cash_statement_detail_submit(Request $request)
-    {dd();
+    {       
 
         if ($request->has('submit_button')) {
 
             $selected_ids = explode(',', $request->input('selected_rows'));
 
             if ($request->input('submit_button') == 'create') {
-                $total_amount = 0;
+                $existing_petty_cash_sum = 0;
                 $petty_cash_statement_id = $request->petty_statement_id;
                 $actual_amount = $request->petty_statement_actual_amount;
 
                 $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id);
-
+                $petty_detail_amount_sum = array_sum($request['amount']);
                 if($existing_petty_cash->exists())
                 {
                     $existing_petty_cash_sum = $existing_petty_cash->sum('amount');
+                  
+                }
+                
+                if((($petty_detail_amount_sum + $existing_petty_cash_sum) > $actual_amount) || ($petty_detail_amount_sum > $actual_amount)){
+                        return redirect()->back()->with(['status' => 1, 'error' => 'Entered Amount is exceeding the total amount!']);
                 }
 
                 foreach ($selected_ids as $selected_id) {
 
-                    $total_amount += $request->amount[$selected_id];
+                    // $total_amount += $request->amount[$selected_id];
 
-                    if($total_amount > $actual_amount)
-                    {
-                        return redirect()->back()->with(['status' => 1, 'error' => 'Sum of the amount is greater then the actual amount  !']);
-                    }
+                    // if($total_amount > $actual_amount)
+                    // {
+                    //     return redirect()->back()->with(['status' => 1, 'error' => 'Sum of the amount is greater then the actual amount  !']);
+                    // }
 
                     $petty_detail = new AdvancePettyCashStatementDetail();
                     $petty_detail->petty_cash_id = $petty_cash_statement_id;
@@ -3044,11 +3049,19 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
-    {
+    {   
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = AdvancePettyCashStatement::find($statement_id);
         $amount_availed = 0;
+
+        $petty_detail_amount_sum = array_sum($request['amount']);
+        //$existing_petty_cash_sum = AdvancePettyCashStatementDetail::where('petty_cash_id', $petty_cash->id)->sum('amount');
+                
+        if(($petty_detail_amount_sum > $petty_cash->total_amount)){
+                return redirect()->back()->with(['status' => 1, 'error' => 'Entered Amount is exceeding the total amount!']);
+        }
+
         if ($petty_cash) {
             if(!in_array($petty_cash->status_id ,[0,1,2,7]))
             {
