@@ -133,7 +133,6 @@ Route::name('api.')->group(function () {
         Route::post('reset_pin', 'Rider\RiderAPIController@reset_pin')->name('reset_pin');
         Route::get('logout', 'Rider\RiderAPIController@logout')->name('logout');
 
-
         Route::prefix('register_request')->name('register_request.')->group(function () {
             //Obsoleted
             Route::post('store', 'Rider\RiderAPIController@rider_signup_v2')->name('store');
@@ -153,6 +152,8 @@ Route::name('api.')->group(function () {
             Route::post('attachment_check', 'Rider\RiderAPIController@rider_attachments_check')->name('attachment_check');
             Route::post('get_line_managers', 'Rider\RiderAPIController@get_line_managers')->name('get_line_managers');
         });
+
+        Route::post('rider_attendance_details', 'Rider\RiderAPIController@rider_checkin')->name('rider_attendance_details');
 
         Route::middleware('RiderAPIToken')->group(function () {
             Route::get('check_app_version', 'Rider\RiderAPIController@check_bolt_version')->name('check_app_version');
