@@ -918,7 +918,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
-								<td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . $r_t.'</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
