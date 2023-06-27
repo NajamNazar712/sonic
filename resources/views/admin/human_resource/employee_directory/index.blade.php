@@ -17,7 +17,7 @@
                             <div class="row mb-2 justify-content-center">
                                 <div class="col-12 ">
                                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group input-group ">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -29,7 +29,7 @@
                                                        id="search_date_from" placeholder="Select From Date">
                                             </div>
                                         </div>
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
                                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -41,7 +41,7 @@
                                                        id="search_date_to" placeholder="Select To Date">
                                             </div>
                                         </div>
-                                        <div class="col-4 mt-1">
+                                        <div class="col-3 mt-1">
                                             <div class="form-group">
                                                 <select name="search_line_manager" id="search_line_manager" class="select2 form-control " style="width: 100%">
                                                     @foreach($line_managers as $line_manager)
@@ -50,6 +50,18 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        
+                                      
+                                         <div class="col-3 mt-1">
+                                            <div class="form-group">
+                                                <select name="area" id="select_area" class="select2 form-control " style="width: 100%">
+                                                    @foreach($areas as $area)
+                                                        <option value="{{$area->id}}">{{$area->name}} - {{$area->hubs->name}} </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        
 
                                         <input type="hidden" id="filter_line_manager" value="0">
                                         <div class="col-4 mt-1">
@@ -108,6 +120,7 @@
                                     <th class="border-primary border-darken-1">Gender</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Email</th>
@@ -256,6 +269,18 @@
                                     <textarea name="address" class="form-control" placeholder="Address" id="address"
                                               cols="30" rows="5" required data-rule-required="true"
                                               data-msg-required="This field is required"></textarea>
+                                </fieldset>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group">
+                                    <select name="area" id="area_list" class="form-control select2"
+                                            data-rule-required="true" data-msg-required="This field is required">
+                                        @foreach($areas as $area)
+                                            <option value="{{$area->id}}">{{$area->name}}</option>
+                                        @endforeach
+                                    </select>
                                 </fieldset>
                             </div>
                         </div>
@@ -892,7 +917,7 @@
                     success:function (data) {
 
                         routelist.empty();
-                        $.each(data, function (key, value) {
+                        $.each(data.route, function (key, value) {
                             var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
                             routelist.append(newOption);
                         });
@@ -1131,6 +1156,12 @@
                 allowClear: true,
                 width: '100%',
             });
+           
+            $("#select_area").prepend('<option value="" selected></option>').select2({
+                placeholder: "Select Area",
+                allowClear: true,
+                width: '100%',
+            });
 
             $("#updateLineManagerForm #line_manager_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Line Manager",
@@ -1200,6 +1231,7 @@
                             head.push('Gender');
                             head.push('Hub');
                             head.push('City');
+                            head.push('Area');
                             head.push('CNIC');
                             head.push('Phone No.');
                             head.push('Official Email');
@@ -1231,6 +1263,7 @@
                                 row.push(values.gender);
                                 row.push(values.employee_hub);
                                 row.push(values.city);
+                                row.push(values.area);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
                                 row.push(values.official_email);
@@ -1497,6 +1530,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                         d.search_line_manager = $('#search_line_manager').val();
                         d.filter_line_manager = $('#filter_line_manager').val();
+                        d.area = $('#select_area').val();
                     }
                 },
                 order: [[22, 'desc']],
@@ -1512,6 +1546,7 @@
                     {data: 'gender', name: 'eg.name', class: 'align-middle gender'},
                     {data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
                     {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},
@@ -1996,12 +2031,14 @@
                 var address = table.row($(elm).parents('tr')).data().address;
                 var city_id = table.row($(elm).parents('tr')).data().city_id;
                 var shift_id = table.row($(elm).parents('tr')).data().shift_id;
+                var area_id = table.row($(elm).parents('tr')).data().area_id;
                 var check_bit = table.row($(elm).parents('tr')).data().check_if_rider_present_bit;
                 var sub_category = table.row($(elm).parents('tr')).data().rider_sub_category;
                 var main_category = table.row($(elm).parents('tr')).data().rider_main_category_id;
                 var rider_type = table.row($(elm).parents('tr')).data().rider_type_id;
                 $('#city_list').val(city_id).trigger('change');
                 $('#shift_list').val(shift_id).trigger('change');
+                $('#area_list').val(area_id).trigger('change');
                 if(check_bit != null)
                 {
                     // var rider_type = table.row($(elm).parents('tr')).data().active_rider_type_id;

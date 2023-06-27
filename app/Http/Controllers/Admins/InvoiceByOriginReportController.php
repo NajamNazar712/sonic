@@ -117,7 +117,7 @@ class InvoiceByOriginReportController extends Controller
             }
             $data_category_wise[$category_id] = $origins;
         }
-
+        //dd($invoice);
         if (count($data_category_wise) > 0) {
             foreach ($data_category_wise as $category_id => $origins) {
                 foreach ($origins as $origin){
@@ -140,6 +140,7 @@ class InvoiceByOriginReportController extends Controller
                     $revenue_by_invoice->intercept_charges = $total_intercept_charges[$origin];
                     $revenue_by_invoice->gst = $total_gst[$origin];
                     $revenue_by_invoice->total_charges = $total_charges[$origin];
+                    $revenue_by_invoice->payment_type = $invoice->payment_type ?? NULL;
                     $revenue_by_invoice->save();
 
                 }

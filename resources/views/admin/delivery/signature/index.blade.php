@@ -44,6 +44,7 @@
                                     <thead>
                                     <tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1">S. No</th>
+                                        <th class="border-primary border-darken-1">Area</th>
                                         <th class="border-primary border-darken-1">Delivery Note ID</th>
                                         <th class="border-primary border-darken-1">Tracking Number</th>
                                         <th class="border-primary border-darken-1">Signature</th>
@@ -144,6 +145,7 @@
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle text-center serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle text-center area'},
                     { data:'delivery_note' ,name: 'rider_deliveries.delivery_note_id', class: 'align-middle text-center delivery_note'},
                     {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number text-center'},
                     {data: 'picture_path', name: 'rider_deliveries.picture_path', class: 'align-middle picture_path text-center', orderable: false, searchable: false},

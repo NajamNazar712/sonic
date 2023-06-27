@@ -154,6 +154,8 @@
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Cargo Status</th>
+                        <th class="border-primary border-darken-1">Bag Seal Number</th>
+                        <th class="border-primary border-darken-1">Bag Status</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
@@ -365,6 +367,8 @@
                             head.push('Total Attempt');
                             head.push('History Status');
                             head.push('Cargo Status');
+                            head.push('Bag Seal Number');
+                            head.push('Bag Status');
                             head.push('Service Type');
                             head.push('Arrival');
                             head.push('Last Status Date');
@@ -403,6 +407,8 @@
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
                                 row.push(values.cargo_status);
+                                row.push(values.seal_number);
+                                row.push(values.bag_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
@@ -481,7 +487,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[13, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -496,6 +502,8 @@
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
+                    {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
+                    {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},

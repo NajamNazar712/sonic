@@ -116,6 +116,7 @@
                         <th class="border-primary border-darken-1">Account ID</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Payment Type</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
@@ -328,6 +329,7 @@
                             head.push('Account ID');
                             head.push('Shipper Name');
                             head.push('Origin');
+                            head.push('Payment Type');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
@@ -353,6 +355,7 @@
                                 row.push(values.account_no);
                                 row.push(values.shipper);
                                 row.push(values.origin);
+                                row.push(values.payment_type);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
@@ -426,6 +429,7 @@
                     { data:'account_no' ,name: 'users.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'users.name', class: 'align-middle shipper'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'payment_type' ,name: 'rbi.payment_type', class: 'align-middle payment_type'},
                     { data:'weight_charges' ,name: 'rbi.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'rbi.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'rbi.insurance_charges', class: 'align-middle insurance_charges'},

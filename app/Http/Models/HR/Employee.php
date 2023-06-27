@@ -83,6 +83,12 @@ class Employee extends Model
         return $this->belongsTo(Employee::class,'line_manager_id','id');
     }
 
+    public function area()
+    {
+        return $this->belongsTo('App\Http\Models\CityArea', 'area_id', 'id');
+    }
+
+
     
 
 }
