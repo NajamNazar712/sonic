@@ -2438,12 +2438,13 @@ class AdminPettyCashController extends Controller
 
     //todo : advance petty cash
     public function advance_petty_cash_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 457);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 675);
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id', 1)->select('id', 'name')->where('status', 1)->get();
         $employees = Admin::where('trax_id', '!=', null)->where('status', 1)->select(['id', 'trax_id'])->get();
         $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
+
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id',$exclude_sdns)->select('id')->get();
         } else {
@@ -2516,7 +2517,7 @@ class AdminPettyCashController extends Controller
     {
         if($request->get('excel') && $request->get('excel') == true)
         {
-            ActivityTrailController::createActivityTrailLog(Auth::id(),99);
+            ActivityTrailController::createActivityTrailLog(Auth::id(),676);
         }
 
         $petty = AdvancePettyCashStatement::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statements.hub_id')
@@ -2584,20 +2585,19 @@ class AdminPettyCashController extends Controller
             ->addColumn('action', function ($petty) {
                 $route = route('admin.petty_cash.advance.statements.make_detail', ['id' => $petty->statement_id]);
                 $edit_route = route('admin.petty_cash.advance.statements.edit_make_detail', ['id' => $petty->statement_id]);
+                if ((session('role_id') == 1) || in_array(883, session('permissions'))) {
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                if ($petty->status == 1)
-                {
+                if ($petty->status == 1) {
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-eye"></i> Add Details</a>';
-                }
-                elseif($petty->status == 2)
-                {
+                } elseif ($petty->status == 2) {
                     $dropdown .= '<a href="' . $edit_route . '" class="dropdown-item" ><i class="ft-eye"></i> Edit Details</a>';
                 }
+            }
                 return $dropdown;
             });
         if ($hub = $request->get('search_hub')) {
