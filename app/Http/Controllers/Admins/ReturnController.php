@@ -5568,7 +5568,7 @@ class ReturnController extends Controller
                         $check_agent_return_confrimation->increment('pending_shipments');
                         $check_agent_return_confrimation->save();
 
-                        $already_assigned = RcpAssignedShipment::where('shipment_id', $check_already_assigned->shipment_id)->where('assigned_status', 1);
+                        $already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
@@ -5579,7 +5579,7 @@ class ReturnController extends Controller
 
                         $assign_shipments = new RcpAssignedShipment();
                         $assign_shipments->admin_id = $agent_id;
-                        $assign_shipments->shipment_id = $check_already_assigned->shipment_id;
+                        $assign_shipments->shipment_id = $id_shipment->id;
                         $assign_shipments->rcp_assigned_agent_id = $check_agent_return_confrimation->id;
                         $assign_shipments->assigned_status = 1;
                         $assign_shipments->assigned_by = Auth::id();
@@ -5588,7 +5588,7 @@ class ReturnController extends Controller
                         //updating logs
                         $assign_shipments_logs = new RcpAssignedShipmentLog();
                         $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
-                        $assign_shipments_logs->shipment_id = $check_already_assigned->shipment_id;
+                        $assign_shipments_logs->shipment_id = $id_shipment->id;
                         $assign_shipments_logs->status = 1;
                         $assign_shipments_logs->admin_id = $agent_id;
                         $assign_shipments_logs->save();
