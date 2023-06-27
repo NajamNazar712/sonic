@@ -2836,6 +2836,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@rider_picked_list')->name('list');
             Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_picked_arrival_scanned_shipments')->name('scanned_shipments');
             Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_picked_arrival_arrived_shipments')->name('arrived_shipments');
+        });
         Route::prefix('quick_scanned_report')->name('quick_scanned_report.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
@@ -4523,7 +4524,4 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('mark_reattempt','Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
 
     });
-
-
-
 });
