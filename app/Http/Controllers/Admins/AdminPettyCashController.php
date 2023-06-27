@@ -2535,7 +2535,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
             ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status', 'advance_petty_cash_statements.total_amount','advance_petty_cash_statements.created_at as date')
-            ->whereIn('advance_petty_cash_statements.status_id', [0, 1, 2, 7]);
+            ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
         if (session('role_id') != 1) {
@@ -2580,14 +2580,11 @@ class AdminPettyCashController extends Controller
             })
             ->editColumn('status', function ($petty) {
                 $status = '';
-                if ($petty->status == 0) {
+                if ($petty->status == 1) {
                     $status = 'Created';
-                } else if ($petty->status == 1) {
-                    $status = 'In Process';
                 } else if ($petty->status == 2) {
-                    $status = 'Detail Added';
+                    $status = 'Completed';
                 } else{
-
                     $status = '-';
                 }
                 return $status;
