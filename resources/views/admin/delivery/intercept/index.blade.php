@@ -54,6 +54,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -272,6 +273,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Consignee Address');
+                            head.push('Area');
                             head.push('COD Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
@@ -293,6 +295,7 @@
                                 row.push(values.consignee_name);
                                 row.push(values.phone);
                                 row.push(values.consignee_address);
+                                row.push(values.city_area_name);
                                 row.push(values.amount);
                                 row.push(values.shipping_mode);
                                 row.push(values.service_type);
@@ -488,6 +491,7 @@
                     data: function (d) {
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_city_area = $('#search_city_area').val();
                     }
                 },
                 rowId: 'shId',
@@ -506,6 +510,7 @@
                     {data: 'consignee_name', name: 'irbr.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone', name: 'irbr.consignee_phone_number_1', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'irbr.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
                     {data: 'amount', name: 'irbr.amount', class: 'align-middle amount'},
                     {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},

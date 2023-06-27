@@ -295,26 +295,7 @@ class RetailShipmentBookController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
-
-        if($request->has('admin_discount'))
-        {
-            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
-                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
-                {
-                    $rates['total_charges'] = ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
-                }
-                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
-                {
-                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount; // todo: for flat
-                }
-            }
-        }
-
-        if ($rates['total_charges'] <= 0)
-        {
-            return redirect()->back()->with(['error' => 'Total charges cannot be less than zero !']);
-        }
-
+       
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
         }
@@ -445,6 +426,21 @@ class RetailShipmentBookController extends Controller
             }
             $shipper_info->save();
         }
+
+        $admin_id = Auth::id();
+        $center_n_franchise = RetailUser::where('id',$admin_id)->select('category','category_id');
+        if ($center_n_franchise->exists())
+        {
+            $center_n_franchise = $center_n_franchise->first();
+            $cat = $center_n_franchise->category;
+            $cat_id = $center_n_franchise->category_id;
+        }
+        else
+        {
+            $cat = $center_n_franchise = null;
+            $cat_id = $center_n_franchise = null;
+        }
+
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product;
@@ -470,21 +466,8 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
-
-        if($request->has('admin_discount'))
-        {
-            $retail_shipment->admin_discount = $request->admin_discount;
-
-            if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
-            {
-                $retail_shipment->admin_discount_type = 1; // todo: for %
-            }
-            elseif ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
-            {
-                $retail_shipment->admin_discount_type = 0; // todo: for flat
-            }
-        }
-
+        $retail_shipment->category = $cat;
+        $retail_shipment->category_id = $cat_id;
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
@@ -554,26 +537,6 @@ class RetailShipmentBookController extends Controller
         }
 
         $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
-
-        if($request->has('admin_discount'))
-        {
-            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
-                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
-                {
-                    $details['total_charges'] = ($details['total_charges'] * $request->admin_discount)/100; // todo: for %
-                }
-                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
-                {
-                    $details['total_charges'] = $details['total_charges'] - $request->admin_discount; // todo: for flat
-                }
-            }
-        }
-
-        if ($details['total_charges'] <= 0)
-        {
-            return response()->json(['status' => 0, 'error' => 'Total charges should be greater than zero !', 'details' => $details]);
-        }
-
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
@@ -737,6 +700,15 @@ class RetailShipmentBookController extends Controller
                     .piece_number{
                         font-size: 2.5rem;
                     }
+
+                    .prominent{
+                      font-size:25px; 
+                      background-color:black !important; 
+                      color:white; 
+                      text-align:center; 
+                      font-weight: 900;
+                      position: relative;" 
+                    }
                 </style>
               </head>
               <body>
@@ -745,6 +717,17 @@ class RetailShipmentBookController extends Controller
 
         $html .= '
             <style>
+
+            @media print {
+              td.prominent{
+                  font-size:25px; 
+                  background-color:black !important; 
+                  color:white !important; 
+                  text-align:center; 
+                  font-weight: 900;
+                  position: relative;" 
+                }
+          }
               @font-face {
                 font-family: "Fajer Noori Nastalique";
                 src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot') . '");
@@ -760,6 +743,15 @@ class RetailShipmentBookController extends Controller
 
               .urdu {
                 font-family: "Fajer Noori Nastalique";
+              }
+
+              .prominent{
+                font-size:25px; 
+                background-color:black !important; 
+                color:white; 
+                text-align:center; 
+                font-weight: 900;
+                position: relative;" 
               }
             </style>
         ';
@@ -869,7 +861,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
-                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . $r_t.'</td>
+								<td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . $r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
@@ -1061,49 +1053,44 @@ class RetailShipmentBookController extends Controller
                             </td>
                     ';
 
-                            if($shipment->business_category->id==2){
-                              $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
-                              ';
-                          }else{
-                            $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
-                            ';
-                          }
+                          //   if($shipment->business_category->id==2){
+                          //     $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
+                          //     ';
+                          // }else{
+                          //   $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
+                          //   ';
+                          // }
                             
 
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                        $table_start .= '
-                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    ';
-                    } else if ($shipment->booking_type_id == 2) {
-                            $table_start .= '
-                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                        ';
-                    }
-//                    else if ($shipment->booking_type_id == 3) {
-//                        $table_start .= '
-//                                <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
-//                    ';
-//                    }
-                    else {
-                        $table_start .= '
-                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    ';
-                    }
+                    // if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                    //     $table_start .= '
+                    //             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    // ';
+                    // } else if ($shipment->booking_type_id == 2) {
+                    //         $table_start .= '
+                    //             <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                    //     ';
+                    // }
+                    // else {
+                    //     $table_start .= '
+                    //             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    // ';
+                    // }
                     $table_start .= '
-                            <td class="color primary"><strong>Datetime</strong></td>
-                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                            <td class="color primary" ><strong>Datetime</strong></td>
+                            <td colspan="3">' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
                           <tr>';
-                          if($shipment->business_category->id==1){
-                            $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipping_mode . '</strong></td>
-                ';
-                        }
+                //           if($shipment->business_category->id==1){
+                //             $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                //             <td><strong>' . $shipping_mode . '</strong></td>
+                // ';
+                //         }
                            
 
                     $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
-                            <td>' . $shipment->order_id . '</td>
+                            <td colspan="3">' . $shipment->order_id . '</td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
@@ -1160,8 +1147,8 @@ class RetailShipmentBookController extends Controller
 
                     $table_end = '
                           <tr>
-                            <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                            <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
+                            <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                            <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
                     if($shipment->shipping_mode_id == 2 && $shipment->estimated_weight != null ) {
                         $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
                         <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . '</strong></td>
@@ -1217,6 +1204,30 @@ class RetailShipmentBookController extends Controller
                         ';
                         }
                     }
+
+                    $shiping_mode = "";
+                    $service_type = "";
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                        $service_type .= '<td colspan="4"  class="prominent" ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                    } 
+                    else if ($shipment->booking_type_id == 2) {
+                        $service_type .= '<td colspan="4" class="prominent replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
+                    }
+                    else {
+                        $service_type .= '<td colspan="4" class="prominent ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                    }
+
+                    if($shipment->business_category->id==1){
+                            $shiping_mode .='<td colspan="2" class="prominent"><strong>' . $shipping_mode . '</strong></td>';
+                    }
+                    
+                    $table_end .= '
+                    <tr>
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Shipping Mode</strong></td>
+                     '.$shiping_mode.'
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Service</strong></td>
+                      '.$service_type.'
+                    </tr> ';
 
                     $table_end .= '
                           </tr>
@@ -1809,8 +1820,6 @@ class RetailShipmentBookController extends Controller
             'account_number' => 'Account Number',
             'bank_id' => 'Bank ID',
             'special_instruction' => 'Special Instruction',
-            'admin_discount' => 'Admin Discount',
-            'admin_discount_type' => 'Admin Discount Type',
         ];
 
         $messages = [
@@ -1864,18 +1873,8 @@ class RetailShipmentBookController extends Controller
             'account_number' => ['nullable', 'numeric'],
             'bank_id' => ['nullable', 'integer', 'between:1,100', Rule::exists('banks_lists', 'id')],
             'special_instruction' => ['nullable', 'between:1,190'],
-            'admin_discount' => ['nullable', 'numeric','between:1,190'],
-            'admin_discount_type' => ['required_with:admin_discount','nullable', 'numeric','between:1,2'],
-
+            
         ];
-
-//        Validator::extend('test', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-//            if(!empty($value)){
-//                return  true;
-//            }else{
-//                return false;
-//            }
-//        });
 
         if($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
@@ -1883,17 +1882,13 @@ class RetailShipmentBookController extends Controller
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
         }
 
-
-
         if (isset($spreadsheet)) {
-                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction',29 => 'admin_discount', 30 => 'admin_discount_type'];
-            if (count($spreadsheet[0]) != 31){
-                dd($spreadsheet[0]);
+                $fields = [0 => 'product_id', 1 => 'business_category_id', 2 => 'shipping_mode_id', 3 => 'destination', 4 => 'volumetric_weight', 5 => 'weight', 6 => 'length', 7 => 'breadth', 8 => 'height', 9 => 'pieces', 10 => 'payment_mode_id', 11 => 'charges_mode_id', 12 => 'shipper_cell_number', 13 => 'shipper_name', 14 => 'shipper_cnic', 15 => 'shipper_address', 16 => 'consignee_cell_number', 17 => 'consignee_name', 18 => 'consignee_cnic', 19 => 'consignee_address', 20 => 'order_id', 21 =>'insurance_offered',22 => 'insurance_value', 23 =>'packaging_charges',24 => 'trax_box_id', 25 => 'iban_number', 26 => 'account_number', 27 => 'bank_id', 28 => 'special_instruction'];
+            if (count($spreadsheet[0]) != 29){
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
             }
             unset($spreadsheet[0]);
         }
-
 
 
         if (!isset($spreadsheet) || !empty($spreadsheet)) {
@@ -1952,14 +1947,6 @@ class RetailShipmentBookController extends Controller
                     $rows[$key]['insurance_value'] = $row['insurance_value'];
                 }
 
-                if(!isset($row['admin_discount']) || $row['admin_discount'] == null){
-                    $row['admin_discount'] = null;
-                }
-
-                if(!isset($row['admin_discount_type']) || $row['admin_discount_type'] == null){
-                    $row['admin_discount_type'] = null;
-                }
-
 
                 $validate = Validator::make($row, $rules, $messages);
 
@@ -2014,7 +2001,6 @@ class RetailShipmentBookController extends Controller
                 }
             }
 
-//            dd($row);
             if (empty($errors)) {
                 foreach ($rows as $key => $row) {
                     $row['user_id'] = $user_id;
@@ -2022,7 +2008,6 @@ class RetailShipmentBookController extends Controller
                     $row['pickup_address_id'] = $pickup_address_id;
                     $row['category'] = $category;
                     $row['category_id'] = $category_id;
-//                    dd($row);
                     dispatch(new ProcessRetailShipmentBookingDB($row));
                 }
 

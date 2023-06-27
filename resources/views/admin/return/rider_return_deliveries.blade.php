@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Deliveries
+       Return Deliveries
     </h1>
 
     <div class="card">
@@ -18,12 +18,15 @@
                         <th class="border-primary border-darken-1">S.No.</th>
                         <th class="border-primary border-darken-1">Return Note#</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Return Note Date</th>
+                        <th class="border-primary border-darken-1">Rider Id</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Total Shipment</th>
                         <th class="border-primary border-darken-1">Update Via App</th>
                         <th class="border-primary border-darken-1">Update Via DBF</th>
+
                     </tr>
                     </thead>
                 </table>
@@ -316,8 +319,10 @@
                             head.push('S. No');
                             head.push('Return Note#');
                             head.push('Hub');
+                            head.push('Area');
                             head.push('Zone');
                             head.push('Return Note Data');
+                            head.push('Rider Id');
                             head.push('Rider Name');
                             head.push('Total Shipment');
                             head.push('Update Via App');
@@ -331,8 +336,10 @@
                                 row.push(index + 1);
                                 row.push(values.return_note_id_padded);
                                 row.push(values.city);
+                                row.push(values.area);
                                 row.push(values.zone);
                                 row.push(values.created_at);
+                                row.push(values.riderid);
                                 row.push(values.rider);
                                 row.push(values.total_shipments);
                                 row.push(values.shipments_rider_updated);
@@ -344,9 +351,9 @@
                                 update_via_dbf_count+=values.shipments_dbf_updated
                             });
 
-
                             footer.push('');
                             footer.push('Total');
+                            footer.push('-');
                             footer.push('-');
                             footer.push('-');
                             footer.push('-');
@@ -406,13 +413,15 @@
                     }
                 },
                 rowId: 'return_note_id',
-                order: [[4, 'desc']],
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'return_note', name: 'return_notes.id', class: 'align-middle text-center return_note'},
                     {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle text-center area'},
                     {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle text-center created_at'},
+                    {data: 'riderid', name: 'r.trax_id ', class: 'align-middle text-center riderid'},
                     {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
                     {data: 'total_shipments_link', name: 'return_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},

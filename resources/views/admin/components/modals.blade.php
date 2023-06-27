@@ -620,7 +620,7 @@
     </div>
 </div>
 
-<div class="modal fade text-left" id="LocationDeniedModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
+{{-- <div class="modal fade text-left" id="LocationDeniedModal" data-backdrop="static" data-keyboard="false" tabindex="-1"
      role="dialog" aria-labelledby="LocationDeniedModal"
      aria-hidden="true">
     <div class="modal-dialog modal-m" role="document">
@@ -640,7 +640,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> --}}
 
 <div class="modal fade text-left" id="EditOneTimeProfileModal" data-backdrop="static" data-keyboard="false"
      tabindex="-1" role="dialog" aria-labelledby="EditOneTimeProfileModal"

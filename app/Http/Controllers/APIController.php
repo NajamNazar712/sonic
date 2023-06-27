@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -88,7 +93,15 @@ use SnappyPDF;
 use Validator;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Admin\UserFintectCharges;
+
 use App\Jobs\ProcessGulAhmedShipmentConfirmation;
+
+
 use Vectorface\Whip\Whip;
 
 class APIController extends Controller
@@ -231,6 +244,48 @@ class APIController extends Controller
 
         return $phone_number;
     }
+
+
+    public function get_shipment_details(Request $req){
+
+        $validator = Validator::make($req->all(), [
+            'link'       => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validator->errors()]);
+        }
+
+        $Shipment = new Shipment();
+        $shipmentDetails = $Shipment->where('trax_pay_transactions.link',$req->link)
+        ->join('cities','shipments.consignee_city_id','cities.id')
+        ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
+        ->select(
+        'shipments.tracking_number as tracking_id', 
+        'shipments.consignee_name as name',
+        'shipments.consignee_address as address',
+        'trax_pay_transactions.fintech_amount as fintech_amount',
+        'trax_pay_transactions.cod_amount as codAmount',
+        'cities.name as city_name',
+        'cities.name as city_name'
+        )->first();
+
+        if(!empty($shipmentDetails)){
+            return response()->json([
+                'status'  => '200',
+                'data' => $shipmentDetails,
+            ]);
+        }
+
+        else{
+            return response()->json([
+                'status'  => '404',
+                'message' => 'Shipment Not Found',
+            ]); 
+        }
+    }
+
+
 
     public function login(Request $request)
     {
@@ -4453,7 +4508,7 @@ class APIController extends Controller
                                         if ($shipment->intercepted == 1) {
                                             return response()->json(['status' => 1, 'message' => 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment->tracking_number]);
                                         } else {
-
+                                            $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($shipment->consignee_city_id,$request->consignee_address);
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $shipment->consignee_city_id,
@@ -4465,6 +4520,7 @@ class APIController extends Controller
                                                 'amount' => $shipment->amount,
                                                 'shipper_id' => $user_id,
                                                 'status' => 0,
+                                                'city_area_id'=>$city_area_id
                                             ]);
 
                                             $shipment->consignee_status_id = 54;
@@ -4524,6 +4580,7 @@ class APIController extends Controller
 
                                             $s_amount = str_replace(",", "", "$request->amount");
                                             $amount = (int) $s_amount;
+                                            $city_area_id = ShipperShipmentBookController::consignee_address_area_intercept($request->consignee_city_id,$request->consignee_address);
                                             InterceptReBookRequest::create([
                                                 'shipment_id' => $shipment->id,
                                                 'consignee_city_id' => $request->consignee_city_id,
@@ -4535,6 +4592,7 @@ class APIController extends Controller
                                                 'amount' => $amount,
                                                 'shipper_id' => $user_id,
                                                 'status' => 0,
+                                                'city_area_id'=>$city_area_id
                                             ]);
 
                                             $shipment->consignee_status_id = 54;
@@ -5172,9 +5230,7 @@ class APIController extends Controller
             'shipment_id' => ['required', Rule::exists('shipments', 'id')],
             'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')]
         ];
-
         $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
-
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
@@ -5189,17 +5245,13 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $shipment_id = $request->shipment_id;
             $delivery_note_id = $request->delivery_note_id;
-
             $one_link_charges = OneLinkPaymentChargesRange::where('range_up', '<', $transaction_amount)->where('range_down', '>', $transaction_amount);
-
             if ($one_link_charges->exists()) {
                 $one_link_charges = $one_link_charges->first();
-
                 $charges = $one_link_charges->charges;
             } else {
                 $charges = 0;
             }
-
             $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
             $one_link_payment_transaction->consumer_number = $consumer_number;
             $one_link_payment_transaction->transaction_authentication_id = $transaction_authentication_id;
@@ -5214,7 +5266,6 @@ class APIController extends Controller
             $one_link_payment_transaction->shipment_id = $shipment_id;
             $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
             $one_link_payment_transaction->save();
-
             $delivery_note = DeliveryNote::find($delivery_note_id);
             $update_count = $delivery_note->one_link_payment_count + 1;
             $delivery_note->one_link_payment_count = $update_count;
@@ -5223,10 +5274,8 @@ class APIController extends Controller
             $shipment = Shipment::find($shipment_id);
             $shipment->received_amount = $amount;
             $shipment->save();
-
             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $one_link_payment_transaction->id);
             NotificationsController::send(185, $delivery_note->rider_id, $one_link_payment_transaction->id);
-
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
     }
@@ -5326,8 +5375,19 @@ class APIController extends Controller
                                     // 2 last digit for decimal values
                                     // example amount is 120 filling length +0000000012000
 
-                                    $amount_length = strlen($shipment_data->amount);
 
+                                    //standard Fintech Charges and Standard FED
+
+                                    $standard_fintech_charges = standard_fintech_charges::where('id','1')->first();
+                                    $charges =  $standard_fintech_charges->standard_fintech_charges;   //stdadard charges
+                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax            
+
+                                    //Calculate 
+                                    $calculate_standard_charges = round(($shipment_data->amount / 100)*$charges);
+                                    $calculate_fed_charges      = round(($calculate_standard_charges / 100)*$fed);
+                                    $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges; 
+                                    $amount_length = strlen($total_cod );
+                                  
                                     // prefix + because we only have possitive value to be collected
                                     $return_data['amount_within_dueDate'] .= "+";
 
@@ -5336,8 +5396,7 @@ class APIController extends Controller
                                         $return_data['amount_within_dueDate'] .= "0";
                                     }
 
-                                    $return_data['amount_within_dueDate'] .= $shipment_data->amount;
-
+                                    $return_data['amount_within_dueDate'] .= $total_cod;
                                     // adding 00 for decimal value Required for 1Link API
                                     $return_data['amount_within_dueDate'] .= "00";
 
@@ -6940,9 +6999,344 @@ class APIController extends Controller
     }
 
     public function return_shipments_list(){
-        dd('this function return shipments list');
+//        dd('this function return shipments list');
+        return ['status' => 2, 'message' => 'Access Denied!'];
     }
 
+    public function fintech_payment_detials(Request $req){
+        $shipments = Shipment::join('delivery_note_shipments','shipments.id','delivery_note_shipments.shipment_id')
+        ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
+        ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
+        ->where('trax_pay_transactions.link',$req->link)
+        ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id','shipments.tracking_number as tracking_id',
+                'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
+                'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
+        // parameters
+        $user_id          = $shipments->shipper_id;
+        $cod_Amount       = $shipments->cod_amount;
+        $fintechCharges   = $shipments->fintech_amount;
+        $delivery_note_id = $shipments->delivery_note_id;
+        $shipment_id      = $shipments->shipment_id;
+        $trax_pay_id      = $shipments->trax_transaction_id;
+        $tracking_no      = $shipments->tracking_id;
 
+        $userFintechCharges       = UserFintectCharges::where('user_id',$user_id)->where('status','1'); // user fintech charges
+        $standard_fintech_charges = new standard_fintech_charges();
+        $standard                 = $standard_fintech_charges->first();     
+        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage 
+                                                                    // (Applicable on both users charges or standard charges)
+        if($userFintechCharges->exists()){
+            $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges from user
+        }
+        else{
+            $fintect_charges_percentage = $standard_fintech_charges->first()->standard_fintech_charges; // fintech charges from standard
+        }
+        // Payfast Return the payment type after the transaction
+        // 3 return for account payment which is equal to 2 in fintech_payment_types table
+        // 4 return for wallet which is equal to 3 in fintech_payment_types table
+        // 7 return for card which is equal to 1 in fintech_payment_types table
 
+            if($req->payment_type == 7){
+                $type = 1;
+            }
+            else if($req->payment_type == 4){
+                $type = 2;
+            }
+            else{
+                $type = 3;
+            }
+        // select range of fintech company according to cod amount
+        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
+        ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
+        ->where('payment_type_id',$type)->first(); 
+        
+        //Calculate Fintech Charges
+        if($select_range->charges_is_percentage == 1){
+            $company_chages        = ($select_range->charges) / 100; // company charges
+            $total_company_charges = number_format($company_chages * $cod_Amount,2);
+        }
+        else{
+            $total_company_charges = $select_range->charges; // company charges
+        }
+
+        // Calculate FED 
+        if($select_range->fed_tax_is_percentage == 1){
+            $company_fed        = ($select_range->fed_tax) / 100; // company Fed
+            $total_company_fed  = number_format($company_fed * $total_company_charges,2);
+        }
+        else{
+            $total_company_fed = $select_range->fed_tax; // company Fed
+        }
+        //Calculate Additional Charges
+        if(!empty($select_range->additional_charges)){
+            if($select_range->additional_charges_is_percentage == 1){
+                $company_additional_charges = ($select_range->additional_charges) / 100; // company Fed
+                $additional_charges         =  number_format($company_additional_charges * $total_company_charges,2);
+            }
+            else{
+                $additional_charges = $select_range->additional_charges; // company Fed
+            }
+        }
+        else{
+            $additional_charges = 0;
+        }
+        // total company charges Fintech Charges   
+        $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges; 
+
+        function calculatepercentage($total_amount,$charges,$fed){
+            $percentage = number_format(($total_amount / 100) * $charges,2) ; 
+            $tax        = number_format(($percentage / 100)*$fed,2);
+            $total      = $tax + $percentage;
+            return [$total,$tax];
+        }
+        //user or Stadard fintech Charges
+        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges_percentage,$fed_percentage);
+
+        //Total revenue
+        $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
+        // return response()->json([
+                // 'cod'             => $cod_Amount, 
+                // 'conpany charges' => $total_company_charges, 
+                // 'company fed'     => $total_company_fed,        
+                // 'company addi'    => $additional_charges,
+                // 'total company'   => $total_company_fintech_charges,
+                // 'fintech %'       => $fintect_charges_percentage,
+                // 'Fed %'           => $fed_percentage,
+                // 'total fintech'   => $total_fintech_calculated[0],
+                // 'revenue'         => $revenue   
+        //  ]);
+        //total amount received   
+        $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
+        $fintech_details = new FintechPaymentDetails();
+        $fintech_details->trax_pay_id            = $trax_pay_id;
+        $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->rider_tip              = $req->tip;
+        $fintech_details->rider_id               = $shipments->rider;
+        $fintech_details->fintech_company_id     = $req->fintech_company;
+        $fintech_details->total_fintech_amount   = $total_fintech_calculated[0];
+        $fintech_details->fintech_company_amount = $total_company_fintech_charges;
+        $fintech_details->revenue                = $revenue;
+        $fintech_details->save();
+
+        $shipment = Shipment::find($shipment_id);
+        $shipment->received_amount = $total_amount_received;
+        $shipment->fintech_charges = $total_fintech_calculated[0];
+        $shipment->save();
+
+        NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
+        NotificationsController::send(217, $shipments->rider, $trax_pay_id);
+        return response()->json(['status' => 200,'tracking_id' => $tracking_no]);
+    }
+
+    public function hbl_konnect_retail_note_cash_collection_information(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $environment = config('app.env');
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_cash_collection_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')]
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'delivery note id is Required.') {
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if ($error == 'delivery note id must be an Integer.') {
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if ($error == 'Given delivery note id is of Invalid ID.') {
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+
+                $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
+                if ($retail_note->exists()) {
+                    $retail_note = $retail_note->first();
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    if ($retail_note->created_at >= $min_date) {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
+                        $transactions_amount = 0;
+                        if ($hbl_konnect_transaction_delivery_note->exists()) {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                            $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                        }
+                        $net_amount = $retail_note->total_cash - $transactions_amount;
+                        $retail_user_id = $retail_note->retail_user_id;
+                        $admin = Admin::where('id', $retail_user_id);
+                        if ($admin->exists()) {
+                            $admin = $admin->first();
+                            $admin_name = $admin->name;
+                            $admin_trax_id = $admin->trax_id;
+                            $admin_cnic = $admin->cnic;
+                        }
+                        return response()->json(['status' => 1, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id,'admin_cnic'=>$admin_cnic]);
+                    } else {
+                        return response()->json(['status' => 0, 'message' => 'Retail Note restricted!']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'message' => 'Retail Note Not Found!']);
+                }
+            }
+        } else {
+            return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
+
+    public function hbl_konnect_retail_note_cash_collection_transactions(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')],
+                'amount' => ['required', 'numeric', 'min:0'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'retail note id is Required.') {
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
+                    }
+                    if ($error == 'retail note id must be an Integer.') {
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'retail note id must be an Integer.';
+                    }
+                    if ($error == 'Given retail note id is of Invalid ID.') {
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
+                    }
+                    if ($error == 'Collection Amount is Required.') {
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                    }
+                    if ($error == 'Collection Amount must be a Number.') {
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                    }
+                    if ($error == 'The Collection Amount must be at least 0.') {
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                    }
+                    if ($error == 'transaction id is Required.') {
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                    }
+                    if ($error == 'transaction id must be an Integer.') {
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                    }
+                    if ($error == 'The transaction id must be at least 0.') {
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+                $transaction_id = $request->transaction_id;
+                $retail_note_id = $request->retail_note_id;
+                $amount = $request->amount;
+                $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
+                if ($existing_hbl_konnect_transaction->exists()) {
+                    return ['status' => 1, 'message' => 'Transaction Already Exists !'];
+                } else {
+                    $retail_note = RetailCashDeposit::where('id', $retail_note_id);
+                    if ($retail_note->exists()) {
+                        $retail_note = $retail_note->first();
+
+                        if($retail_note->status != 0)
+                        {
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                        }
+                    }
+
+                    $transaction_amount = $amount;
+
+                    $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                    if ($hbl_konnect_transaction_delivery_note->exists()) {
+                        $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                        $transaction_amount = $hbl_konnect_transaction_delivery_note->transactions_amount + $amount;
+                    } else {
+                        $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
+                        $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
+                    }
+
+                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    if ($cash_amount < 0)
+                    {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                        if ($hbl_konnect_transaction_delivery_note->exists())
+                        {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
+
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' .$remaining_amount];
+                        }
+                    }
+                    $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
+                    $hbl_konnect_transaction_delivery_note->cash_amount = $cash_amount;
+                    $hbl_konnect_transaction_delivery_note->save();
+
+                    $hbl_konnect_transaction = new HblKonnectTransactionRetail();
+                    $hbl_konnect_transaction->transaction_id = $transaction_id;
+                    $hbl_konnect_transaction->retail_note_id = $retail_note_id;
+                    $hbl_konnect_transaction->amount = $amount;
+                    $hbl_konnect_transaction->save();
+
+                    return ['status' => 1, 'message' => 'Request completed successfully!'];
+                }
+            }
+        } else {
+            return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
 }
+

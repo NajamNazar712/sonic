@@ -87,6 +87,15 @@
                 </fieldset>
             </div>
         </div>
+        <div class="row mb-2">
+        <div class="col">
+              <fieldset class="form-group">
+                <select name="area" id="area_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                   <option value="" selected>Select an Area</option>
+                </select>
+            </fieldset>
+        </div>
+    </div>
         <div class="row">
             <div class="col">
                 <fieldset class="form-group">
@@ -221,6 +230,34 @@
         
         @endif
 
+        $('#area_list').select2({
+            width:'100%',
+            placeholder:"Select An Area",
+            dropdownParent: $("#editRiderForm")
+        });
+
+        var area_list = $('#area_list');
+        area_list.empty();
+        @if(count($areas_list) > 0);
+            var areas = @json($areas_list);
+            area_list.attr("disabled", false);
+            area_list.append(`<option value="">Select Area</option>`)
+            $.each(areas, function (key, value) {
+                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                area_list.append(newOption);
+            });
+            @if(!empty($rider->area_id))
+                area_list.val({{ $rider->area_id }}).trigger('change');
+            @endif
+        
+        @else{
+            area_list.attr("disabled", true);
+            area_list.attr("data-rule-required", false);
+            ('#area_list-error').hide();
+        @endif
+
+
+
         $("input[name='pin']").inputmask({
             'alias': 'integer',
             'allowMinus': false,
@@ -276,9 +313,11 @@
             dropdownParent: $("#editRiderForm")
         });
         @endif
+
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();
+            var area_list = $('#area_list');
             if($(this).val() != ''){
                 $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').removeAttr('disabled');
             }
@@ -296,11 +335,28 @@
                     //     var option = new Option(data[i].code+' ('+data[i].start+' - '+data[i].end+')', data[i].id, true, true);
                     //     routelist.append(option).trigger('change');
                     // }
-                    $.each(data, function (key, value) {
+                    $.each(data.route, function (key, value) {
                         var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
                         routelist.append(newOption);
                     });
                     routelist.val('').trigger('change');
+
+                    area_list.empty();
+                    if(data.areas.length > 0){ 
+                        area_list.attr("disabled", false);
+                        $.each(data.areas, function (key, value) {
+                            var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                            area_list.append(newOption);
+                        });
+                        area_list.val('').trigger('change');
+                    }
+                    else{
+                        area_list.attr("disabled", true);
+                        area_list.attr("data-rule-required", false);
+                        $('#area_list-error').remove();
+                    }
+
+
                 }
             });
         });

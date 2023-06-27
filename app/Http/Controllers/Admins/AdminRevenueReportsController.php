@@ -622,7 +622,7 @@ class AdminRevenueReportsController extends Controller
             ->leftjoin('business_categories as bc', 'bc.id', '=', 'rbi.business_category_id')
             ->leftjoin('cities as oc', 'oc.id', '=', 'rbi.origin_id');
 
-        $invoice->select('at.name as account_type', 'bc.name as business_category', 'seg.name as segment', 'seg_sub.name as sub_segment', 'users.id as account_no', 'users.name as shipper', 'oc.name as origin', 'rbi.invoice_number', 'rbi.invoicing_date', 'rbi.weight_charges', 'rbi.cash_handling_charges', 'rbi.insurance_charges', 'rbi.return_charges', 'rbi.replacement_charges', 'rbi.fuel_surcharge', 'rbi.try_buy_charges', 'rbi.packaging_charges', 'rbi.gst', 'rbi.total_charges', 'rbi.nsa_osa_charges', 'rbi.packing_charges', 'rbi.intercept_charges');
+        $invoice->select('at.name as account_type', 'bc.name as business_category', 'seg.name as segment', 'seg_sub.name as sub_segment', 'users.id as account_no', 'users.name as shipper', 'oc.name as origin', 'rbi.invoice_number', 'rbi.invoicing_date', 'rbi.weight_charges', 'rbi.cash_handling_charges', 'rbi.insurance_charges', 'rbi.return_charges', 'rbi.replacement_charges', 'rbi.fuel_surcharge', 'rbi.try_buy_charges', 'rbi.packaging_charges', 'rbi.gst', 'rbi.total_charges', 'rbi.nsa_osa_charges', 'rbi.packing_charges', 'rbi.intercept_charges','rbi.payment_type as payment_type');
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
 
@@ -667,6 +667,17 @@ class AdminRevenueReportsController extends Controller
             })
             ->editColumn('gst', function ($invoice) {
                 return number_format($invoice->gst);
+            })
+            ->editColumn('payment_type', function ($invoice) {
+                if (!is_null($invoice->payment_type)) {
+                    if ($invoice->payment_type == 1) {
+                        return "Done";
+                    } else {
+                        return "Make";
+                    }
+                } else {
+                    return '';
+                }
             });
             if($search_invoice_number = $request->get('search_invoice_number')){
                 $datatable->where('rbi.invoice_number','=', $search_invoice_number);

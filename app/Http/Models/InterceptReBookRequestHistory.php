@@ -8,7 +8,7 @@ class InterceptReBookRequestHistory extends Model
 {
     protected $table = 'intercept_re_book_request_histories';
     protected $fillable = [
-        'shipment_id','old_consignee_city_id','new_consignee_city_id','old_consignee_name','new_consignee_name','old_consignee_address','new_consignee_address','old_consignee_phone_number_1','new_consignee_phone_number_1','old_consignee_phone_number_2','new_consignee_phone_number_2','old_consignee_email','new_consignee_email','old_amount','new_amount','shipper_id','intercept_type'
+        'shipment_id','old_consignee_city_id','new_consignee_city_id','old_consignee_name','new_consignee_name','old_consignee_address','new_consignee_address','old_consignee_phone_number_1','new_consignee_phone_number_1','old_consignee_phone_number_2','new_consignee_phone_number_2','old_consignee_email','new_consignee_email','old_amount','new_amount','shipper_id','intercept_type' ,'new_con_city_area_id','old_con_city_area_id'
     ];
 
     public function old_consignee_city() {

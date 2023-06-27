@@ -48,6 +48,7 @@
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
+ <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -282,6 +283,7 @@
                             head.push('Business Category');
                             head.push('Rider ID');
                             head.push('Rider');
+  head.push('Area');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -306,6 +308,7 @@
                                 row.push(values.business_category);
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider);
+ row.push(values.city_area_name);
                                 row.push(values.rt);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -379,6 +382,7 @@
                     },
                     {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
+ {data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},

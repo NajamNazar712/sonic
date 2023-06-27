@@ -431,7 +431,6 @@
                 });
             });
             $("#editRider").on("show.bs.modal", function(e) {
-
                 var id = $(e.relatedTarget).data('target-id');
 
                 $.get( "/admin/management/riders/"+id+"/edit/2", function( data ) {

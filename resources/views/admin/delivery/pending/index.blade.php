@@ -26,6 +26,13 @@
                             @endforeach
                         </select>
                     </div>
+                    <div class="col-3">
+                        <div class="form-group">
+                            <select name="area" id="search_area" class="select2 form-control " style="width: 100%">
+                                
+                            </select>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="col justify-content-end mb-3">
@@ -50,6 +57,7 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Reattempt By</th>
@@ -171,8 +179,43 @@
             placeholder: 'Hub',
             allowClear:true
         }).bind('change', function() {
+            var cityId = $(this).val();
             table.draw();
-        });
+
+            $('#search_area').empty();
+
+            if (cityId === '') {
+                $('#search_area').prop('disabled', true);
+                return;
+            }
+
+            $('#search_area').prop('disabled', false);
+
+            $.ajax({
+                url: '{{ route('admin.v2_pickups.action_log.get_city_areas') }}'
+                , type: 'GET'
+                , data: {
+                    city_id: cityId
+                }
+                , dataType: 'json'
+                , success: function(response) {
+                    $('#search_area').append('<option value="">Select</option>');
+                    $.each(response, function(index, area) {
+                        $('#search_area').append('<option value="' + area.id + '">' + area.name + '</option>');
+                    });
+                }
+                , error: function(xhr, status, error) {
+                    console.error(error);
+                }
+            });
+		});
+        $("#search_area").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Area",
+            allowClear: true,
+            width: '100%',
+        }).bind('change', function() {
+            table.draw();
+        });;
         jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
             if ( this.context.length ) {
                 body = [];
@@ -192,6 +235,7 @@
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
+                        head.push('Area');
                         head.push('Consignee Name');
                         head.push('Consignee Phone');
                         head.push('Reattempt By');
@@ -218,6 +262,7 @@
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            row.push(values.area);
                             row.push(values.consignee_name);
                             row.push(values.consignee_phone);
                             row.push(values.agent);
@@ -272,6 +317,7 @@
                     d.search_shipping_mode = $('#search_shipping_mode').val();
                     d.search_hub = $('#search_hub').val();
                     d.star_shipper_filter = $('#star_shippers_filter').val();
+                    d.search_area = $('#search_area').val();
                 }
             },
             rowId: 'shId',
@@ -283,6 +329,7 @@
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                {data: 'area', name: 'ca.name', class: 'align-middle area'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                 {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                 {data: 'agent', name: 'agent.name', class: 'align-middle agent'},
