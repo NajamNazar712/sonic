@@ -360,22 +360,19 @@ class ShipperPickupController extends Controller
 
     public function add_pickup()
     {
-        // dd(auth()->user()->id);
-        // $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28,1])->get(); //37,28 role
-        // $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
-        // $case_natures = CrmRequestCaseNature::all();
-        // $segments = Segment::all();
-        $cities = UserShippingInfo::join('cities as c','c.id','=','user_shipping_infos.city_id')->select('c.id', 'c.name')->where('c.status','=',1)
-        ->where('c.pickup','=',1)
-        ->where('user_shipping_infos.user_id',auth()->user()->id)->distinct()->get();
+        $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('status', 1)->where('hidden', 0)->get();
         // $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
         // $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
-        return view('client.pickups.add_pickup')->with(['cities' => $cities]);
+        return view('client.pickups.add_pickup')->with(['pickup_addresses' => $pickup_addresses]);
     }
     public function get_pickup_address(Request $request)
     {
         $cityId = $request->input('city_id');
         $pickup_address = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
         return response()->json($pickup_address);
+    }
+
+    public function add_pickup_submit(Request $request){
+        dd($request);
     }
 }
