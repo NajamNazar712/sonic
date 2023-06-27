@@ -2,6 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
+use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransactionRetail;
+use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -6944,5 +6949,215 @@ class APIController extends Controller
     }
 
 
+    public function hbl_konnect_retail_note_cash_collection_information(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $environment = config('app.env');
 
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_cash_collection_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')]
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'delivery note id is Required.') {
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'Delivery note id is Required.';
+                    }
+                    if ($error == 'delivery note id must be an Integer.') {
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'Delivery note id must be an Integer.';
+                    }
+                    if ($error == 'Given delivery note id is of Invalid ID.') {
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given delivery note id is of Invalid ID.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+
+                $retail_note_cash_collection_id = $request->retail_note_cash_collection_id;
+                $retail_note = RetailCashDeposit::where('id', $retail_note_cash_collection_id);
+                if ($retail_note->exists()) {
+                    $retail_note = $retail_note->first();
+                    $min_date = Carbon::parse('01-07-2022 00:00:00')->toDateTimeString();
+                    if ($retail_note->created_at >= $min_date) {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note->id);
+                        $transactions_amount = 0;
+                        if ($hbl_konnect_transaction_delivery_note->exists()) {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                            $transactions_amount = $hbl_konnect_transaction_delivery_note->transactions_amount;
+                        }
+                        $net_amount = $retail_note->total_cash - $transactions_amount;
+                        $retail_user_id = $retail_note->retail_user_id;
+                        $admin = Admin::where('id', $retail_user_id);
+                        if ($admin->exists()) {
+                            $admin = $admin->first();
+                            $admin_name = $admin->name;
+                            $admin_trax_id = $admin->trax_id;
+                            $admin_cnic = $admin->cnic;
+                        }
+                        return response()->json(['status' => 1, 'retail_note_id' =>  str_pad($retail_note->id, 6, '0', STR_PAD_LEFT), 'amount' => $net_amount, 'admin_name' => $admin_name, 'admin_trax_id' => $admin_trax_id,'admin_cnic'=>$admin_cnic]);
+                    } else {
+                        return response()->json(['status' => 0, 'message' => 'Retail Note restricted!']);
+                    }
+                } else {
+                    return response()->json(['status' => 0, 'message' => 'Retail Note Not Found!']);
+                }
+            }
+        } else {
+            return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
+
+    public function hbl_konnect_retail_note_cash_collection_transactions(Request $request)
+    {
+        $valid_ip_addresses = array();
+        $valid_ip_addresses[] = '103.111.84.67';
+        $valid_ip_addresses[] = '103.111.85.67';
+        $environment = config('app.env');
+
+        if ($environment == 'production') {
+            $whip = new Whip();
+            $ip_address = $whip->getValidIpAddress();
+            if (in_array($ip_address, $valid_ip_addresses)) {
+                $flag = true;
+            } else {
+                $flag = false;
+            }
+        } else {
+            $flag = true;
+        }
+        if ($flag) {
+            $rules = [
+                'retail_note_id' => ['required', 'integer', Rule::exists('retail_cash_deposits', 'id')],
+                'amount' => ['required', 'numeric', 'min:0'],
+                'transaction_id' => ['required', 'integer', 'min:0'],
+            ];
+            $validate = Validator::make($request->all(), $rules, $this->messages);
+
+            $validate->setAttributeNames($this->names);
+
+            if ($validate->fails()) {
+                $errors = array();
+                foreach ($validate->errors()->all() as $index => $error) {
+                    $errors[$index]['error_code'] = 10;
+                    $errors[$index]['error_text'] = 'Invalid Input.';
+                    if ($error == 'retail note id is Required.') {
+                        $errors[$index]['error_code'] = 1;
+                        $errors[$index]['ERROR_TEXT'] = 'retail note id is Required.';
+                    }
+                    if ($error == 'retail note id must be an Integer.') {
+                        $errors[$index]['error_code'] = 2;
+                        $errors[$index]['error_text'] = 'retail note id must be an Integer.';
+                    }
+                    if ($error == 'Given retail note id is of Invalid ID.') {
+                        $errors[$index]['error_code'] = 3;
+                        $errors[$index]['error_text'] = 'Given retail note id is of Invalid ID.';
+                    }
+                    if ($error == 'Collection Amount is Required.') {
+                        $errors[$index]['error_code'] = 4;
+                        $errors[$index]['ERROR_TEXT'] = 'Collection Amount is Required.';
+                    }
+                    if ($error == 'Collection Amount must be a Number.') {
+                        $errors[$index]['error_code'] = 5;
+                        $errors[$index]['error_text'] = 'Collection Amount must be a Number.';
+                    }
+                    if ($error == 'The Collection Amount must be at least 0.') {
+                        $errors[$index]['error_code'] = 6;
+                        $errors[$index]['error_text'] = 'The Collection Amount must be at least 0.';
+                    }
+                    if ($error == 'transaction id is Required.') {
+                        $errors[$index]['error_code'] = 7;
+                        $errors[$index]['ERROR_TEXT'] = 'Transaction id is Required.';
+                    }
+                    if ($error == 'transaction id must be an Integer.') {
+                        $errors[$index]['error_code'] = 8;
+                        $errors[$index]['error_text'] = 'Transaction id must be an Integer.';
+                    }
+                    if ($error == 'The transaction id must be at least 0.') {
+                        $errors[$index]['error_code'] = 9;
+                        $errors[$index]['error_text'] = 'The transaction id must be at least 0.';
+                    }
+                }
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $errors]);
+            } else {
+                $transaction_id = $request->transaction_id;
+                $retail_note_id = $request->retail_note_id;
+                $amount = $request->amount;
+                $existing_hbl_konnect_transaction = HblKonnectTransactionRetail::where('transaction_id', $transaction_id);
+                if ($existing_hbl_konnect_transaction->exists()) {
+                    return ['status' => 1, 'message' => 'Transaction Already Exists !'];
+                } else {
+                    $retail_note = RetailCashDeposit::where('id', $retail_note_id);
+                    if ($retail_note->exists()) {
+                        $retail_note = $retail_note->first();
+
+                        if($retail_note->status != 0)
+                        {
+                            return ['status' => 0, 'message' => 'Retail note already updated !'];
+                        }
+                    }
+
+                    $transaction_amount = $amount;
+
+                    $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                    if ($hbl_konnect_transaction_delivery_note->exists()) {
+                        $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+                        $transaction_amount = $hbl_konnect_transaction_delivery_note->transactions_amount + $amount;
+                    } else {
+                        $hbl_konnect_transaction_delivery_note = new HblKonnectTransactionRetailNote();
+                        $hbl_konnect_transaction_delivery_note->retail_note_id = $retail_note_id;
+                    }
+
+                    $cash_amount = $retail_note->total_cash - $transaction_amount;
+                    if ($cash_amount < 0)
+                    {
+                        $hbl_konnect_transaction_delivery_note = HblKonnectTransactionRetailNote::where('retail_note_id', $retail_note_id);
+                        if ($hbl_konnect_transaction_delivery_note->exists())
+                        {
+                            $hbl_konnect_transaction_delivery_note = $hbl_konnect_transaction_delivery_note->first();
+
+                            $remaining_amount = $hbl_konnect_transaction_delivery_note->cash_amount;
+
+                            return ['status' => 0, 'message' => 'Net amount should be less then or equal to ' .$remaining_amount];
+                        }
+                    }
+                    $hbl_konnect_transaction_delivery_note->transactions_amount = $transaction_amount;
+                    $hbl_konnect_transaction_delivery_note->cash_amount = $cash_amount;
+                    $hbl_konnect_transaction_delivery_note->save();
+
+                    $hbl_konnect_transaction = new HblKonnectTransactionRetail();
+                    $hbl_konnect_transaction->transaction_id = $transaction_id;
+                    $hbl_konnect_transaction->retail_note_id = $retail_note_id;
+                    $hbl_konnect_transaction->amount = $amount;
+                    $hbl_konnect_transaction->save();
+
+                    return ['status' => 1, 'message' => 'Request completed successfully!'];
+                }
+            }
+        } else {
+            return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
 }

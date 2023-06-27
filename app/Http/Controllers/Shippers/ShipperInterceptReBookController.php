@@ -3,10 +3,15 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\City;
 use App\Http\Models\InterceptReBookRequest;
 use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentStatus;
@@ -86,6 +91,8 @@ class ShipperInterceptReBookController extends Controller
                 } else {
                     $s_amount = str_replace(",", "", "$request->amount");
                     $amount = (int)$s_amount;
+
+                    //Different Consignee
                     if ($intercept_type == 1){
                         InterceptReBookRequest::create([
                             'shipment_id' => $request->shipment_id,
@@ -99,7 +106,7 @@ class ShipperInterceptReBookController extends Controller
                             'shipper_id' => $user_id,
                             'status' => 0,
                             'intercept_type' => $intercept_type,
-                            'admin_id' => Auth::id()
+                            'admin_id' => null
                         ]);
                         $shipment->consignee_status_id = 54;
                         $shipment->shipper_status_id = 54;
@@ -107,7 +114,51 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
+
+                        //Updating New RcpAssigned Tables
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        if ($rcp_assigned_shipment->exists()) {
+                            
+                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                            $rcp_assigned_shipment->shipment_status = 7; //intercept request
+                            $rcp_assigned_shipment->user_id = Auth::id();
+                            $rcp_assigned_shipment->save();
+
+                            //updating already_updated & pending of agent if shipment is updated by shipper 
+                            $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                            $already_updated = $rcp_assigned_agent->increment('already_updated');
+                            $rcp_assigned_agent->decrement('pending_shipments');
+                
+                            $assigned_shipments = $rcp_assigned_agent->assigned_shipments; // Total assigned shipments
+                            $already_updated = $rcp_assigned_agent->already_updated; // Number of shipments already updated
+
+                            $actual_productivity = $rcp_assigned_agent->actual_productivity; 
+
+                            $productivity = $rcp_assigned_agent->productivity; // Existing productivity of the agent = 0
+
+                            if ($actual_productivity != 0) {
+                                $productivity = number_format(($actual_productivity / ($assigned_shipments - $already_updated)) * 100, 2);
+                            } 
+                            
+                            else {
+                                $productivity = 0; // Set productivity to 0 if no remaining assigned shipments
+                            }
+
+                            $rcp_assigned_agent->productivity = $productivity;
+                            $rcp_assigned_agent->save();
+
+                            //creating log 
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $return_assign_log->status = 7; //intercept request
+                            $return_assign_log->user_id = Auth::id();
+                            $return_assign_log->save();
+                                
+                        }  
                     }
+
+                    // Same Consignee
                     else{
                         
                         InterceptReBookRequestHistory::create([
@@ -134,6 +185,77 @@ class ShipperInterceptReBookController extends Controller
                         $shipment->save();
 
                         ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+
+                        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                        if($return_assign_shipment->exists()){
+
+                            $return_assign_shipment = $return_assign_shipment ->latest()->first();
+                            $return_assign_shipment->status = 0;
+                            $return_assign_shipment->save();
+
+                            // Adding row as request intercept with status = 9
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 9;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+
+                            // Adding another row as approved intercept with status = 10
+                            $return_assign_log = new ReturnAssignedShipmentLogs();
+                            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            $return_assign_log->status = 10;
+                            $return_assign_log->assigned_by = Auth::id();
+                            $return_assign_log->save();
+                        }
+
+                        //Updating New RcpAssigned Tables
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        if ($rcp_assigned_shipment && $rcp_assigned_shipment->exists()) {
+                            
+                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                            $rcp_assigned_shipment->shipment_status = 8; //intercept approved
+                            $rcp_assigned_shipment->user_id = Auth::id();
+                            $rcp_assigned_shipment->save();
+
+                            //updating already_updated & pending of agent if shipment is updated by shipper 
+                            $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                            $already_updated = $rcp_assigned_agent->increment('already_updated');
+                            $rcp_assigned_agent->decrement('pending_shipments');
+                
+                            $assigned_shipments = $rcp_assigned_agent->assigned_shipments; // Total assigned shipments
+                            $already_updated = $rcp_assigned_agent->already_updated; // Number of shipments already updated
+
+                            $actual_productivity = $rcp_assigned_agent->actual_productivity; 
+
+                            $productivity = $rcp_assigned_agent->productivity; // Existing productivity of the agent = 0
+
+                            if ($actual_productivity != 0) {
+                                $productivity = number_format(($actual_productivity / ($assigned_shipments - $already_updated)) * 100, 2);
+                            } 
+                            
+                            else {
+                                $productivity = 0; // Set productivity to 0 if no remaining assigned shipments
+                            }
+
+                            $rcp_assigned_agent->productivity = $productivity;
+                            $rcp_assigned_agent->save();
+
+                            //creating log for request intercept then approved
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $return_assign_log->status = 7; //intercept request
+                            $return_assign_log->user_id = Auth::id();
+                            $return_assign_log->save();
+
+                            $return_assign_log = new RcpAssignedShipmentLog();
+                            $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $return_assign_log->status = 8; //intercept approved
+                            $return_assign_log->user_id = Auth::id();
+                            $return_assign_log->save();
+                                
+                        }  
 
                         if($request->hasFile('replacement_parcel_image')){
                             $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);

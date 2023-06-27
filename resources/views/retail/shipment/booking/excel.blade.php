@@ -34,7 +34,7 @@
 
                                     <div class="col ml-auto">
                                         <div class="form-group text-right">
-                                            <a href="{{ asset('file/Trax Book Retail Shipment Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                            <a href="{{ asset('file/Trax Book Retail Shipment Template.xlsx?v=1') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
                                         </div>
                                     </div>
                                 </div>
@@ -104,7 +104,7 @@
 
                                     <table class="table table-bordered">
                                         <thead>
-                                        <tr role="row" class="bg-primary white text-center">
+                                        <tr role=   "row" class="bg-primary white text-center">
                                             <th colspan="2" class="border-primary border-darken-1">Insurance Offered</th>
                                         </tr>
                                         </thead>
@@ -127,6 +127,27 @@
                                             <td class="text-center">No</td>
                                             <td class="text-center">Yes</td>
                                         </tr>
+                                        </tbody>
+                                    </table>
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr role="row" class="bg-primary white text-center">
+                                            <th colspan="2" class="border-primary border-darken-1">Admin Discount Type</th>
+                                        </tr>
+                                        <tr role="row" class="bg-primary bg-lighten-1 white">
+                                            <th class="text-center border-primary border-lighten-2">ID</th>
+                                            <th class="border-primary border-lighten-2">Name</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr role="row">
+                                                <td class="text-center">1</td>
+                                                <td>Percentage Discount</td>
+                                            </tr>
+                                            <tr role="row">
+                                                <td class="text-center">2</td>
+                                                <td>Flat Discount</td>
+                                            </tr>
                                         </tbody>
                                     </table>
                                 </div>
