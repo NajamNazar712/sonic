@@ -2546,7 +2546,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
             ->leftjoin('advance_petty_cash_statement_statuses as apcs','advance_petty_cash_statements.status_id','=','apcs.id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
-            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name')
+            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed')
             ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
@@ -2573,7 +2573,6 @@ class AdminPettyCashController extends Controller
                 {
                     return "-";
                 }
-                return '-';
             })
             ->editColumn('total_amount', function ($shipment) {
                 return number_format($shipment->total_amount);
@@ -2609,11 +2608,12 @@ class AdminPettyCashController extends Controller
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
-            ';
+            ';  
+                $petty_details = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty->statement_id); 
 
-                if ($petty->status == 1) {
+                if ($petty->status == 1 && !$petty_details->exists()) {
                     $dropdown .= '<a href="' . $route . '" class="dropdown-item" ><i class="ft-eye"></i> Add Details</a>';
-                } elseif ($petty->status == 2) {
+                } elseif ($petty->status == 1 && $petty_details->exists()) {
                     $dropdown .= '<a href="' . $edit_route . '" class="dropdown-item" ><i class="ft-eye"></i> Edit Details</a>';
                 }
             }
@@ -2709,7 +2709,7 @@ class AdminPettyCashController extends Controller
                     $petty_detail->remarks = str_replace(array("\n", "\r"), '', $request->remarks[$selected_id]);
                     $petty_detail->save();
 
-                    AdvancePettyCashStatement::where('id',$petty_cash_statement_id)->update(['status_id' => 2]);
+                    //AdvancePettyCashStatement::where('id',$petty_cash_statement_id)->update(['status_id' => 2]);
 
                     if ($request->hasFile('upload_image' . $selected_id)) {
 
@@ -2735,7 +2735,7 @@ class AdminPettyCashController extends Controller
 
                 }
 
-                return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
+                return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Advance Petty Cash Statement Successfully Created']);
 
             } else {
                 return redirect()->back()->with(['status' => 1, 'error' => 'Something Went Wrong !']);
@@ -2971,55 +2971,43 @@ class AdminPettyCashController extends Controller
 
     public function detail_edit_petty_cash_statements_approve(Request $request)
     {
-        $id = $request->detail_id;
-        if ($request->has('approve_all')) {
-            if ($id) {
-                $petty_details = AdvancePettyCashStatementDetail::where('petty_cash_statement_id', $id)->get();
-                if ($petty_details) {
-                    $flag = false;
-                    foreach ($petty_details as $petty_detail) {
-                        if ($petty_detail['status'] != 1) {
-                            AdvancePettyCashStatementDetail::where('id', $petty_detail['id'])->update([
-                                'status' => 2,
-                                'updated_by' => Auth::id()
-                            ]);
-                        }
-                    }
-
-                    if ($flag = false) {
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
-                    } else {
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
-                    }
-                } else {
-                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
-                }
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
-            }
-        } else {
+        $id = $request->detail_id;   
             if ($id) {
                 $petty_details = AdvancePettyCashStatementDetail::find($id);
                 if ($petty_details) {
                     if ($petty_details->status == 0) {
+                       
+                        $petty = $petty_details->petty_cash_statement;
+                       
+                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;;
+                        $petty->amount_availed += $petty_details->amount;
+                        $petty->save();
+
                         $petty_details->status = 2;
                         $petty_details->updated_by = Auth::id();
                         $petty_details->save();
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                        
+                        if(($petty->total_amount - $petty->amount_availed) == 0){
+                            $petty->status_id = 2;
+                            $petty->save();
+                        }
+
+
+                        return response()->json(['status' => 1, 'success' => 'Advance Petty Cash Statement Detail Successfully Approved!']);
                     } else if ($petty_details->status == 2) {
-                        return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Already Approved!']);
+                        return response()->json(['status' => 1, 'success' => 'Advance Petty Cash Statement Detail Already Approved!']);
                     } else {
-                        return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details rejected so it can\'t be changed!']);
+                        return response()->json(['status' => 0, 'error' => 'Advance Petty Cash Statement Details rejected so it can\'t be changed!']);
                     }
 
                 } else {
-                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details not found!']);
+                    return response()->json(['status' => 0, 'error' => 'Advance Petty Cash Statement Details not found!']);
                 }
             } else {
-                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
+                return response()->json(['status' => 0, 'error' => 'Advance Petty Cash Statement Detail ID not found!']);
             }
-        }
     }
+
 
     public function detail_edit_petty_cash_statements_reject(Request $request)
     {
@@ -3122,7 +3110,7 @@ class AdminPettyCashController extends Controller
             $petty_cash->balance = $petty_cash->total_amount - $amount_availed;
             $petty_cash->save();
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Updated!']);
+             return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Advance Petty Cash Statement Successfully Updated']);
         } else {
             return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash Statement With This ID Not Found!']);
         }

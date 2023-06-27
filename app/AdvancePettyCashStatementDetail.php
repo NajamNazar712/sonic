@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AdvancePettyCashStatementDetail extends Model
 {
     public function petty_cash_statement() {
-        return $this->belongsTo('App\Http\Models\Admin\AdvancePettyCashStatement');
+        return $this->belongsTo('App\Http\Models\Admin\AdvancePettyCashStatement','petty_cash_id','id');
     }
     public function heads(){
         return $this->belongsTo('App\Http\Models\Admin\PettyCashAccountHead', 'account_head_id', 'id');
