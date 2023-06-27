@@ -50,15 +50,18 @@ class AdminPettyCashController extends Controller
     //Petty Cash Statement Status 0 -> Pending,  1 -> Station Approved,  2 -> Operation Approved,  3 -> Finance Approved,  4 -> Paid, 5 -> Adjusted, 6 -> Rejected  7 -> Received Statement
     public function make_petty_cash_statement_index()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(),457);
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id',1)->select('id','name')->where('status',1)->get();
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
+        $exclude_sdns = AdvancePettyCashStatement::pluck('sdn_id')->toArray();
+
         if (session('role_id') == 1) {
-            $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
+            $sdns = StationDepositNote::where('status','!=', 2)->whereNotIn('id', $exclude_sdns)->select('id')->get();
         } else {
-            $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
+            $sdns = StationDepositNote::where('status','!=', 2)->whereNotIn('id', $exclude_sdns)->whereIn('hub_id', session('hubs'))->select('id')->get();
         }
         return view('admin.petty_cash.make')->with(['heads' => $head, 'sdns'=>$sdns,'zones'=>$zones,'employees'=>$employees,'operation_managers'=>$operation_managers]);
     }
@@ -196,9 +199,13 @@ class AdminPettyCashController extends Controller
     }
 
     public function make_petty_cash_statement_submit(Request $request)
-    {
+    {   
         if ($request->has('submit_button')) {
             $total_amount = 0;
+
+            if (AdvancePettyCashStatement::where('sdn_id', $request->select_statement_sdn)->exists()) {
+                return redirect()->back()->with(['status' => 0, 'error' => 'Advance Petty Cash exists for this SDN, Cannot create Petty Cash']);
+            }
             if (PettyCashStatement::where('reference_no', '=', $request->reference_no)->exists()) {
                 return redirect()->back()->with(['status' => 0, 'error' => 'Reference No. not Unique']);
             }
@@ -2444,7 +2451,6 @@ class AdminPettyCashController extends Controller
         $employees = Admin::where('trax_id', '!=', null)->where('status', 1)->select(['id', 'trax_id'])->get();
         $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
-
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id',$exclude_sdns)->select('id')->get();
         } else {
@@ -2454,9 +2460,13 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_petty_cash_submit(Request $request)
-    {
+    {  
         if ($request->has('submit_button')) {
             $total_amount = 0;
+            if(PettyCashStatement::where('sdn_id',$request->select_statement_sdn)->exists()){
+                return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash exists for this SDN, Cannot create Advance Petty Cash']);
+            }
+          
             if (AdvancePettyCashStatement::where('reference_no', '=', $request->reference_no)->exists()) {
                 return redirect()->back()->with(['status' => 0, 'error' => 'Reference No. not Unique']);
             }

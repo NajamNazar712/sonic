@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Advance Petty Cashd Statement
+        Advance Petty Cash Statement
     </h1>
 
     <div class="card">
