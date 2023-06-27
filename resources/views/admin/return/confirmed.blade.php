@@ -59,6 +59,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Return City</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Sub Station</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -225,6 +226,7 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Return City');
+                            head.push('Area');
                             head.push('Consignee Name');
                             head.push('Consignee Sub Station');
                             head.push('Collection Amount');
@@ -256,6 +258,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.return_city);
+                                row.push(values.area);
                                 row.push(values.consignee_name);
                                 row.push(values.sub_station);
                                 row.push(values.amount);
@@ -498,6 +501,7 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'return_city', name: 'return_city', class: 'align-middle return_city', orderable: false, searchable: false},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station',orderable: false,searchable:false},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},

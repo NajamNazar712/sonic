@@ -52,6 +52,8 @@ use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\Admin\Retail\RetailUser;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
@@ -68,6 +70,7 @@ use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\CRM\CRMCount;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\SpecialApprovalRequestAdmin;
 
@@ -11403,6 +11406,107 @@ class AdminReportsController extends Controller
             $to = $request->get('search_to');
             $datatables = $datatables->whereBetween('sj.created_at', [$from,$to]);
         }
+        return $datatables->make(true);
+    }
+    public function quick_scanned_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 667);
+        $shippers = User::whereIn('status', [3, 4])->get();
+
+        return view('admin.reports.quick_scanned_report')->with(['shippers' => $shippers]);
+    }
+        public function quick_scanned_report_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),668);
+        }
+        $quick_scanned = DB::connection('reports')->table('shipments')
+            ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->leftjoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('shipments_journey as sjl', function ($join) {
+                $join->on('sjl.shipment_id', '=', 'shipments.id')
+                    ->where('sjl.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipment_scanning_journeys as ssj', function($join){
+                $join->on('ssj.shipment_id', '=', 'shipments.id')
+                    ->where('ssj.id','=', DB::raw('(select max(id) from shipment_scanning_journeys where shipment_scanning_journeys.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipment_scanning_screen_locations as sssl', 'ssj.screen_location_id', '=', 'sssl.id')
+            ->leftjoin('admins as lsa', 'sjl.admin_id', '=', 'lsa.id')
+            ->leftjoin('users as lsu', 'sjl.user_id', '=', 'lsu.id')
+            ->leftjoin('riders as lsr', 'sjl.rider_id', '=', 'lsr.id')
+            ->leftjoin('admins as ssja', 'ssj.admin_id', '=', 'ssja.id')
+            ->leftjoin('users as ssju', 'ssj.user_id', '=', 'ssju.id')
+            ->leftjoin('substitute_users as ssjsu', 'ssj.substitute_user_id', '=', 'ssjsu.id')
+            ->leftjoin('cities as ssjac', 'ssja.default_hub_id', '=', 'ssjac.id')
+            ->leftjoin('cities as ssjuc', 'ssju.city_id', '=', 'ssjuc.id')
+            ->leftjoin('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
+            ->select('shipments.tracking_number as tracking_number', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper_name', 'ss.name as status', 'sj.created_at as arrival_date', 'sjl.created_at as status_date_time', 'sssl.name as last_scanned_location', 'ssja.name as last_scanned_by_admin', 'ssju.name as last_scanned_by_user', 'ssjsu.name as last_scanned_by_sub_user', 'ssj.created_at as last_scanned_at' ,'ssj.user_type as user_type', 'lsu.name as last_status_by_shipper', 'lsa.name as last_status_by_admin', 'lsr.name as last_status_by_rider', 'ssjac.name as last_scanned_admin_city', 'ssjuc.name as last_scanned_user_city');
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $quick_scanned = $quick_scanned->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        if ($tracking_numbers = $request->get('tracking_numbers'))
+        {
+            $quick_scanned->whereIn('shipments.tracking_number',explode(',', $tracking_numbers));
+        }
+        if($shipper = $request->get('shipper')){
+            $quick_scanned->where('u.id', '=', $shipper);
+        }
+
+        $datatables = Datatables::of($quick_scanned)
+        ->addColumn('tracking_number_hyperlink', function ($requests) {
+            return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $requests->tracking_number . ' class="tracking" target="_blank">' . $requests->tracking_number . '</a></u>';
+        })
+        ->addColumn('last_scanned_by', function ($requests) {
+            if ($requests->user_type == 1) {
+                return $requests->last_scanned_by_admin . ' Admin';
+            }
+            elseif ($requests->user_type == 2) {
+                return $requests->last_scanned_by_user . ' Shipper';
+            }
+            elseif ($requests->user_type == 3) {
+                return $requests->last_scanned_by_sub_user . ' Substitute Shipper';
+            }
+            else{
+                return '-';
+            }
+        })
+        ->addColumn('last_scanned_city', function ($requests) {
+            if ($requests->user_type == 1) {
+                return $requests->last_scanned_admin_city;
+            }
+            elseif ($requests->user_type == 2 || $requests->user_type == 3) {
+                return $requests->last_scanned_user_city;
+            }
+            else{
+                return '-';
+            }
+        })
+        ->addColumn('last_status_by', function ($requests) {
+            if ($requests->last_status_by_shipper != null) {
+                return $requests->last_status_by_shipper . ' (Shipper)';
+            }
+            elseif ($requests->last_status_by_admin != null) {
+                return $requests->last_status_by_admin . ' (Admin)';
+            }
+            elseif ($requests->last_status_by_rider != null) {
+                return $requests->last_status_by_rider . ' (Rider)';
+            }
+            else{
+                return '-';
+            }
+        });
+
         return $datatables->make(true);
     }
 

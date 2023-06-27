@@ -638,11 +638,11 @@
                                                 href="{{ route('admin.return.rcp_agent.index') }}">RCP Agent
                                                 Productivity</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(665, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(876, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.rcp_agent_cn.index') }}">RCP Agent
                                                 Productivity Shipment Wise</a></li>
-                                    @endif
+                                    @endif                                    
                                     @if (session('role_id') == 1 || in_array(643, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.revert.index') }}">Return Revert</a></li>
@@ -665,7 +665,7 @@
                                     
                                     @if (session('role_id') == 1 || in_array(849, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.return.return_confirm_otp.index') }}">Return Confirm OTP</a></li>
+                                                href="{{ route('admin.return.return_confirm_otp.index') }}">Return OTP History</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -1627,6 +1627,8 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(880, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.rider_picked.index') }}">Rider-Picked Status (W/O Arrival)</a></li>
+                        @if (session('role_id') == 1 || in_array(877, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.quick_scanned_report.index') }}">Quick Scanned Report</a></li>
                         @endif
                     </ul>
                 </li>
@@ -2633,7 +2635,7 @@
             <li class=" nav-item"><a href="#"><span class="menu-title"><i class="ft-users"></i>Human
                         Resource</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 783,829, 831], session('permissions'))) !== 0)
+                    @if (session('role_id') == 1 || count(array_intersect([449, 465, 467, 478, 481, 484, 492, 506, 568, 596, 592, 613, 717, 783,829, 831,845], session('permissions'))) !== 0)
 
                         <li><a class="menu-item" href="{{ route('admin.human_resource.download_docs') }}">Download
                                 Docs</a></li>
@@ -2710,6 +2712,11 @@
                     @if (Auth::user()->trax_id != NULL)
                         <li><a class="menu-item" href="{{ route('admin.human_resource.payslip.index')}}">Payslips</a></li>
                     @endif
+
+                    @if (session('role_id') == 1 || in_array(845, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.human_resource.employee_areas.index')}}">Assign Employee Area</a></li>
+                    @endif
+                    
 
 
                 </ul>

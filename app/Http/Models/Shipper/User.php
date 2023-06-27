@@ -81,4 +81,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo('App\Http\Models\Referral', 'referral_id', 'id');
     }
+
+    public function sale_tier_tags()
+    {
+        return $this->belongsTo('App\Http\Models\SaleTierTag','id','user_id');
+    }
 }

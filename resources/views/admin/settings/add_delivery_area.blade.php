@@ -28,15 +28,14 @@
 
                                         
                                         <div class="form-group">
-                                            <select class="form-control" name="city_id" id="city_id" data-rule-required="true" data-msg-required="City Name is required">
+                                            <select class="form-control" name="city_id" onchange="getArea(this.value)" id="city_id" data-rule-required="true" data-msg-required="City Name is required">
                                                 @foreach ($cities as $city)
                                                     <option value="{{$city->id}}">{{$city->name}}</option>
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group text-center">
+                                        <div class="form-group text-center" id="show_area" >
                                             <input type="text" id="area_name" name="area_name" class="form-control area_name text-center" placeholder="Write Area Name*" data-rule-required="true" data-msg-required="Area Name is required" data-tags-input-name="area_name">
-                                            
                                         </div>
 
                                         <button type="submit" class="btn btn-primary">Add</button>
@@ -101,6 +100,46 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 }
             });
+
         });
+
+
+        function getArea(city_id){
+
+            $.ajax({
+                url: '{!! route('admin.settings.delivery_area_keyword.get_city_area') !!}',
+                method: 'GET',
+                data: {
+                    'city_id': city_id
+                }
+            }).done(function(data) {
+                $('#show_area').html('');
+                var area_input = `<input type="text" id="area_name" name="area_name" class="form-control area_name text-center" placeholder="Write Area Name*" data-rule-required="true" data-msg-required="Area Name is required" data-tags-input-name="area_name">`
+                var select = `<input type="hidden" id='default_hub' name='default_hub' value="1"><select class="form-control" id="area_name" name="area_name" data-rule-required="true" data-msg-required="City Area Name is required"></select>
+                                         `
+
+                if(data.hub === 1){
+                    $('#show_area').html(select);
+                    if(data.data.length > 0) {
+
+                        var push = "";
+                        $.each(data.data, function(index, value) {
+                            push+= `<option value="${value.id}">${value.name}</option>`
+                        });
+                        $('#area_name').append(push);
+                    }
+                    $('#area_name').prepend('<option value="" selected="selected"></option>').select2({
+                        width: '100%',
+                        placeholder: 'Select City Area'
+                    });
+
+                }else{
+                    $('#show_area').html(area_input);
+                }
+
+
+
+             });
+        }
     </script>
 @endsection

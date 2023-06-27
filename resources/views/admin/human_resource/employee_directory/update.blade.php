@@ -198,6 +198,19 @@
                                                 </select>
                                             </div>
                                         </div>
+
+                                        @if(($employee->employee_type_id == 2 || $employee->employee_type_id == 1 ) && $employee->department_id == 6)
+                                            
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label>Area<span class="text-danger">*</span></label>
+                                                <select name="area" id="area_list" class="select2 form-control " data-rule-required="true"  data-msg-required="Area is required" style="width: 100%">
+                                                    <option value="" selected>Select an Area</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        @endif
+
                                         @if($employee->employee_type_id == 1)
                                         <div class="col-md-12">
                                             <div class="form-group">
@@ -2382,6 +2395,7 @@
                 placeholder: "Select City",
                 width:'100%',
             }).bind("change",function(){
+                var area_list = $('#area_list');
                 @if($employee->employee_type_id == 2)
                 let id = $(this).val();
                 if(id) {
@@ -2393,24 +2407,106 @@
                             'city_id': id
                         }
                     })
-                        .done(function (data) {
-                            $("#rider_route").html('');
-                            if (data.status == 1) {
-                                $.each(data.routes, function (i, value) {
-                                    $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
-                                });
-                                $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
-                            } else {
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
+                    .done(function (data) {
+                        $("#rider_route").html('');
+                        if (data.status == 1) {
+                            $.each(data.routes, function (i, value) {
+                                $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
+                            });
+                            $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+
+                    @if($employee->department_id == 6)
+                    area_list.empty();
+                    area_list.attr("disabled", "disabled");
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                    .done(function (data) {
+                            if(data.status == 1) {
+                                if (data.areas.length > 0) {
+                                    $.each(data.areas, function (key, value) {
+                                        var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
+                                        area_list.append(newOption);
+                                    });
+                                    area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+                                    area_list.removeAttr("disabled");
+
+                                } else {
+                                    area_list.attr("disabled", "disabled");
+                                    area_list.attr("duired", false);
+                                    $('#area_list-error').remove();
+                                }
                             }
+
                         });
+
+                    @endif
                 }
-                @endif
+                @else
+                let id = $(this).val();
+                
+                if(id) {
+                    area_list.empty();
+                    area_list.attr("disabled", "disabled");
+                    $.ajax({
+                        url: '{!! route('admin.human_resource.employee_directory.get_area') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                    .done(function (data) {
+                        // $("#rider_route").html('');
+                        // if (data.status == 2) {
+                        //     $.each(data.routes, function (i, value) {
+                        //         $("#rider_route").append("<option value=" + value.id + ">" + value.code + " ("  + value.start + " to " + value.end +")" +"</option>");
+                        //     });
+                        //     $("#rider_route").val("{{$rider_route_id ?? ''}}").trigger('change');
+                        // } else {
+                        //     toastr.error(data.error, 'Error!', {
+                        //         positionClass: 'toast-top-center',
+                        //         containerId: 'toast-top-center'
+                        //     });
+                        // }
+
+                        if(data.status == 1) {
+
+                            if (data.areas.length > 0) {
+
+                                $.each(data.areas, function (key, value) {
+                                    var newOption = "<option value=" + value.id + ">" + value.name + "</option>";
+                                    area_list.append(newOption);
+                                });
+                                area_list.val('{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+
+                                area_list.removeAttr("disabled");
+                            } else {
+
+                                area_list.attr("disabled", "disabled");
+                                area_list.attr("duired", false);
+                                $('#area_list-error').remove();
+                            }
+                        }
+                    });
+                }
+            @endif
+
             });
             $("#city").val("{{$employee->city_id ?? ''}}").trigger('change');
+           
 
 
             $("#shift_list").prepend('<option value="" selected></option>').select2({
@@ -2842,6 +2938,29 @@
             $(".cancel-btn").on('click',function(){
                 location.reload();
             });
+
+            $('#area_list').select2({
+                width:'100%',
+                placeholder:"Select An Area",
+            });
+
+             var area_list = $('#area_list');
+            area_list.empty();
+            @if(count($areas_list) > 0)
+                var areas = @json($areas_list);
+                area_list.attr("disabled", "disabled");
+                $.each(areas, function (key, value) {
+                    var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                    area_list.append(newOption);
+                });
+                area_list.val( '{{ !empty($employee->area_id) ? $employee->area_id : '' }}').trigger('change');
+                area_list.removeAttr("disabled");
+            
+            @else
+                area_list.attr("disabled", "disabled");
+                area_list.attr("data-rule-required", false);
+                $('#area_list-error').hide();
+            @endif
 
         });
     </script>

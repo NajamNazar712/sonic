@@ -628,6 +628,8 @@ class Permission
             'reports.project_arrival.list' => 879,
             'reports.rider_picked.index' => 880,
             'reports.rider_picked.list' => 880,
+            'reports.quick_scanned_report.index' => 877,
+            'reports.quick_scanned_report.list' => 877,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -1164,6 +1166,8 @@ class Permission
             'human_resource.fuel_allocation.index' => 831,
             'human_resource.fuel_allocation.list' => 831,
 
+            'human_resource.employee_areas.index' => 845,
+
 			'attendance.index' => 465,
             'attendance.list' => 465,
             'attendance.horizontal.index' => 465,
@@ -1247,6 +1251,8 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+            'return.new_rcp_agent.index' => 600,
+            'return.new_rcp_agent.list' => 600,
             'sales.territory.territoryindex' =>630,
             'sales.designation.designationindex' =>631,
             'settings.sales.incentive.index' =>632,
@@ -1362,6 +1368,7 @@ class Permission
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
             'return.rcp_agent_cn.index' => 876,
+            'return.new_rcp_agent_shipments.index' => 876,
  			'accounts.substitute_account_management.index' => 873,
  			'accounts.substitute_account_management.add.index' => 874,
  			'accounts.substitute_account_management.update.index' => 875,

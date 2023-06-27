@@ -870,6 +870,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
         Route::get('', 'Admins\AdminDashboardController@walk_in_city_list')->name('city_list');
         Route::post('', 'Admins\AdminDashboardController@check_min_charges')->name('min_charges');
+        Route::get('/city/{id}/add_city_sub_area', 'Admins\AdminDashboardController@add_city_sub_area')->name('add_city_sub_area');
+        Route::post('/city/add_city_sub_area_ajax', 'Admins\AdminDashboardController@add_city_sub_area_ajax')->name('add_city_sub_area_ajax');
+        Route::post('/city/city_sub_area_post', 'Admins\AdminDashboardController@city_sub_area_post')->name('city_sub_area_post');
+        Route::post('city/city_area_status', 'Admins\AdminDashboardController@city_area_status')->name('city_area_status');
+        Route::post('city/city_area_default', 'Admins\AdminDashboardController@city_area_default')->name('city_area_default');
         //        Route::post('shippingModesAjax', 'Admins\AdminDashboardController@modesAjax')->name('shippingModes.ajax');
 
         //Route
@@ -1131,6 +1136,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('action_log')->name('action_log.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_index_v2')->name('index');
             Route::get('v2_list', 'Admins\V2Pickup\V2AdminPickupsController@pickups_action_log_list_v2')->name('list');
+            Route::get('getCityAreas', 'Admins\V2Pickup\V2AdminPickupsController@get_city_areas')->name('get_city_areas');
+
         });
         Route::prefix('un_assigned')->name('un_assigned.')->group(function () {
             Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@unassigned_index')->name('index');
@@ -1280,6 +1287,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
                 Route::get('list', 'Admins\Retail\RetailCashCollectionController@retail_list')->name('list');
+                Route::post('hbl_konnect_cash', 'Admins\Retail\RetailCashCollectionController@hbl_konnect_cash')->name('hbl_konnect_cash');
 
                 Route::prefix('pending')->name('pending.')->group(function () {
                     Route::post('shipments', 'Admins\Retail\RetailCashCollectionController@number_of_shipments')->name('shipments');
@@ -1597,14 +1605,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
-            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
         });
 
         Route::prefix('rcp_agent_cn')->name('rcp_agent_cn.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_cn_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_cn_list')->name('list');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
+        });
+
+        Route::prefix('new_rcp_agent')->name('new_rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
+        });
+
+        Route::prefix('new_rcp_agent_shipments')->name('new_rcp_agent_shipments.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
         });
         
         Route::prefix('revert')->name('revert.')->group(function () {
@@ -2817,6 +2836,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@rider_picked_list')->name('list');
             Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_picked_arrival_scanned_shipments')->name('scanned_shipments');
             Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_picked_arrival_arrived_shipments')->name('arrived_shipments');
+        Route::prefix('quick_scanned_report')->name('quick_scanned_report.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
         });
     });
 
@@ -3581,6 +3603,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@delivery_area_keyword_store')->name('store');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@delivery_area_keyword_enable_disable')->name('enable_disable');
             Route::post('update', 'Admins\GlobalSettingsController@delivery_area_keyword_update')->name('update');
+            Route::get('get_city_area', 'Admins\GlobalSettingsController@get_city_area')->name('get_city_area');
         });
 
         Route::prefix('booking_destination_keyword')->name('booking_destination_keyword.')->group(function () {
@@ -3791,6 +3814,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipment_details', 'AdminShipmentHandoverController@arrival_bulk_shipment_details')->name('shipment_details');
             Route::post('store', 'AdminShipmentHandoverController@bulk_handover_submit')->name('store');
             Route::post('shipments_pieces', 'AdminShipmentHandoverController@add_handover_shipments_pieces')->name('shipments_pieces');
+            Route::post('sub_area', 'AdminShipmentHandoverController@sub_area')->name('sub_area');
         });
         Route::prefix('receive')->name('receive.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@handover_receive_index')->name('index');
@@ -3805,6 +3829,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('remaining', 'AdminShipmentHandoverController@handover_shipments_remaining')->name('remaining');
             Route::post('print', 'AdminShipmentHandoverController@handover_print')->name('print');
             Route::post('pieces_list', 'AdminShipmentHandoverController@handover_shipments_pieces')->name('pieces_list');
+            Route::post('get_user', 'AdminShipmentHandoverController@get_user')->name('get_user');
         });
         Route::prefix('responsibles')->name('responsibles.')->group(function () {
             Route::get('', 'AdminShipmentHandoverController@responsibles_index')->name('index');
@@ -3813,6 +3838,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status', 'AdminShipmentHandoverController@responsibles_status')->name('status');
             Route::post('details', 'AdminShipmentHandoverController@responsibles_editview')->name('details');
             Route::post('edit', 'AdminShipmentHandoverController@responsibles_edit')->name('edit');
+            Route::post('get_sub_area', 'AdminShipmentHandoverController@get_sub_area')->name('get_sub_area');
         });
     });
     Route::prefix('power_bi')->name('power_bi.')->group(function () {
@@ -4081,6 +4107,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('{employee}/attachments', 'Admins\AdminHumanResourseController@employee_directory_attachments_update')->name('attachments.update');
             Route::post('designation_logs', 'Admins\AdminHumanResourseController@designation_change_logs')->name('designation_logs');
             Route::post('employee_log', 'Admins\AdminHumanResourseController@employee_log')->name('employee_log');
+            Route::post('get_area', 'Admins\AdminHumanResourseController@get_area')->name('get_area');
             Route::prefix('staff')->name('staff.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
@@ -4235,6 +4262,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminHumanResourseController@rider_fuel_allocation_list')->name('list');
             Route::post('allocate', 'Admins\AdminHumanResourseController@rider_fuel_allocation_allocate')->name('allocate');
             Route::post('delivery_notes', 'Admins\AdminHumanResourseController@rider_fuel_allocation_delivery_notes')->name('delivery_notes');
+        });
+
+         Route::prefix('employee_areas')->name('employee_areas.')->group(function () {
+            Route::get('', 'Admins\AdminHumanResourseController@employee_hubs')->name('index');
+            Route::post('assign', 'Admins\AdminHumanResourseController@assign_employee_areas')->name('assign');
         });
     });
 
@@ -4434,6 +4466,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print', 'Retail\RetailCashDepositController@print')->name('print');
         Route::post('finalize_rncc', 'Retail\RetailCashDepositController@finalize_rncc')->name('finalize_rncc');
+        Route::post('hbl_konnect_cash', 'Retail\RetailCashDepositController@hbl_konnect_cash')->name('hbl_konnect_cash');
     });
 
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {
