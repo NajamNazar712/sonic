@@ -5548,7 +5548,8 @@ class ReturnController extends Controller
                             $assign_shipments_logs->save();
                         }
                         else{
-                            return response()->json(['status' => 1, 'error' => 'Please Un Assign the Shipments']);
+                            return redirect()->back()->with('error', 'Please Un Assign the Shipments');
+                            // return response()->json(['status' => 1, 'error' => 'Please Un Assign the Shipments']);
                         }
 
                      }
