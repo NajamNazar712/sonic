@@ -5284,7 +5284,7 @@ class ReturnController extends Controller
                      
                      if($agent_role->exists()){
                          
-                         //Check if the same shipment assigned to the same agent doesn't exist & created same day
+                         ///Check if the same shipment assigned to the same agent doesn't exist & created same day
                          $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
                          if(!$check_already_assigned){
                             $agent_return_confrimation = new RcpAssignedAgent;
