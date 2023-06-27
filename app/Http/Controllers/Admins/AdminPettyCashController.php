@@ -2775,7 +2775,7 @@ class AdminPettyCashController extends Controller
 
     public function advance_edit_petty_cash_statement_make_detail_list(Request $request,$id)
     {
-        $petty_details = AdvancePettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statement_details.hub_id')
+        $petty_details = AdvancePettyCashStatementDetail::leftjoin('cities as h', 'h.id', '=', 'advance_petty_cash_statement_details.city_id')
             ->leftjoin('cities as c', 'c.id', '=', 'advance_petty_cash_statement_details.city_id')
 //            ->leftjoin('zones as z', 'z.id', '=', 'advance_petty_cash_statement_details.zone_id')
             ->leftjoin('admins as a', 'a.id', '=', 'advance_petty_cash_statement_details.employee_id')

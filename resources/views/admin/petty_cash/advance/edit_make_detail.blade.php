@@ -712,7 +712,7 @@
 
 
                 });
-                $('#statements_total_amount').text(total_amount);
+                //$('#statements_total_amount').text(total_amount);
             });
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
