@@ -183,6 +183,7 @@ class ReturnController extends Controller
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
+
             // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
 			->leftjoin('consolidation_shipments as consolidations', function ($join){
@@ -241,7 +242,7 @@ class ReturnController extends Controller
                 });
             });
             if (in_array(317, session('permissions'))) {
-                $shipments = $shipments->where('ras.admin_id', Auth::id());
+                $shipments = $shipments->where('new_ras.admin_id', Auth::id());
             }
         }
 
