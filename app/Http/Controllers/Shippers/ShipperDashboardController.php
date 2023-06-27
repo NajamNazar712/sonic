@@ -69,6 +69,7 @@ use App\Http\Models\Shipper\UserOtpVerification;
 use App\Http\Models\ShipperContact;
 use App\Http\Models\ShipperNotificationEmail;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 use App\Http\Models\UserDocumentAttachment;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
@@ -116,6 +117,8 @@ use App\Http\Models\Admin\PODImage;
 use App\Http\Models\RiderDelivery;
 use App\Http\Models\InternationalShipment;
 use App\Http\Models\Sister_account\MergedSisterAccount;
+use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Auth as FacadesAuth;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -132,62 +135,390 @@ class ShipperDashboardController extends Controller
     }
 
     public function welcome_index(){
-//        $quote = Inspiring::quote();
         $shipper_id = session('user_id');
         $sales_person_data = array();
         if($shipper_id){
-            $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
-            if($sales_person_tag){
-                $sales_person_tag = Admin::find($sales_person_tag->admin_id);
-                $sales_person_data['name'] = $sales_person_tag->name;
-                if($sales_person_tag->official_phone_number != '')
-                {
-                    $sales_person_data['phone'] = $sales_person_tag->official_phone_number;
+
+            $shippers = GlobalSettings::where('type','mms_setting')->select('text')->first();
+            $special_shippers = explode(',', $shippers->text);
+       
+
+            if(session('special_dashboard_user') && in_array(session('user_id'),$special_shippers))
+            {
+                $stats = array();
+                $today = Carbon::now()->subDays(2)->endOfDay();
+                $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+                $restriction = false;
+                if (session('user_type') == 2) {
+                    if (session('restriction') == 1) {
+                        $restriction = true;
+                    }
                 }
-                else{
-                    $sales_person_data['phone'] = $sales_person_tag->phone_number;
+                $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id', 1)->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id', 17)->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [2, 3, 4])->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50])->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52])->whereBetween('shipments.created_at', [$thirtyDays, $today])->where('user_id', session('user_id'));
+                if ($restriction == true) {
+                    $stats['total'] = $stats['total']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['booked'] = $stats['booked']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['canceled'] = $stats['canceled']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['received'] = $stats['received']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['delivered'] = $stats['delivered']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['return'] = $stats['return']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
+                    $stats['in_process'] = $stats['in_process']->join('substitute_user_shipments as sus', function ($join) {
+                        $join->on('sus.shipment_id', '=', 'shipments.id')
+                            ->where('sus.substitute_user_id', '=', Auth::id());
+                    });
                 }
-                
-                $sales_person_data['email'] = $sales_person_tag->email;
-            }
-            $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
-                        ->join('admins as a','a.id','=','scu.user_id')
-                        ->where('sales_commissions.shipper_id',session('user_id'))
-                        ->wherein('scu.tier_id',[2,3])
-                        ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->get();
-
-               $poc = array();
-               $kam = array();
-               foreach($details as $detail){
-                   if($detail->tier_id == 2){
-                       $poc[] = $detail;
-                   }
-                   else{
-                       $kam[] = $detail;
-                   }
-               }
-            $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
-            $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
-            $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
-
-            $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
-            ->wherein('riders.route_id',$routes)
-            ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
-
-
-            /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
-            if($shipper_payment->exists()){
-                $shipper_payment = $shipper_payment->first();
+                $stats['total'] = number_format($stats['total']->count());
+                $stats['booked'] = number_format($stats['booked']->count());
+                $stats['canceled'] = number_format($stats['canceled']->count());
+                $stats['received'] = number_format($stats['received']->count());
+                $stats['delivered'] = number_format($stats['delivered']->count());
+                $stats['return'] = number_format($stats['return']->count());
+                $stats['in_process'] = number_format($stats['in_process']->count());
+                $cities = DB::connection('reports')->table('cities')->select(['id', 'name'])->get();
+                $sister_users = DB::connection('reports')->table('substitute_user_merge_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))->select('u.id', 'u.name')->get();
+                $user = DB::connection('reports')->table('users')->select('id', 'name')->where('id', session('user_id'))->first();
+                return view('client.special_dashboard')->with(['stats' => $stats, 'cities' => $cities, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
             }
             else{
-                $shipper_payment = null;
-            }*/
-            $shipper_payment = null;
 
-            
-            return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+                $sales_person_tag = SalePersonTag::where('user_id', $shipper_id)->where('status', 0)->first();
+                if($sales_person_tag){
+                    $sales_person_tag = Admin::find($sales_person_tag->admin_id);
+                    $sales_person_data['name'] = $sales_person_tag->name;
+                    if($sales_person_tag->official_phone_number != '')
+                    {
+                        $sales_person_data['phone'] = $sales_person_tag->official_phone_number;
+                    }
+                    else{
+                        $sales_person_data['phone'] = $sales_person_tag->phone_number;
+                    }
+                    
+                    $sales_person_data['email'] = $sales_person_tag->email;
+                }
+                $details = SalesCommission::join('sales_commission_users as scu','sales_commissions.id','=','scu.sales_commission_id')
+                            ->join('admins as a','a.id','=','scu.user_id')
+                            ->where('sales_commissions.shipper_id',session('user_id'))
+                            ->wherein('scu.tier_id',[2,3])
+                            ->select('a.name as name','a.email as email','a.phone_number as phone','scu.tier_id as tier_id')->get();
+
+                $poc = array();
+                $kam = array();
+                foreach($details as $detail){
+                    if($detail->tier_id == 2){
+                        $poc[] = $detail;
+                    }
+                    else{
+                        $kam[] = $detail;
+                    }
+                }
+                $pickup_address_ids = UserShippingInfo::where('user_id', session('user_id'))->where('status', 1)->pluck('id')->toArray();
+                $route_ids = RouteLocations::whereIn('pickup_address_id', $pickup_address_ids)->pluck('route_id')->toArray();
+                $routes = Route::whereIn('id', $route_ids)->where('status', 1)->pluck('id')->toArray();
+
+                $riders = Rider::join('cities as oc','riders.city_id','=','oc.id')
+                ->wherein('riders.route_id',$routes)
+                ->select('riders.phone as phone', 'riders.name as name','oc.name as city')->get();
+
+
+                /*$shipper_payment = ShipperPayment::where('user_id', $shipper_id);
+                if($shipper_payment->exists()){
+                    $shipper_payment = $shipper_payment->first();
+                }
+                else{
+                    $shipper_payment = null;
+                }*/
+                $shipper_payment = null;
+
+                return view('client.welcome')->with(['sales_person_data'=>$sales_person_data ,'poc' => $poc,'kam' => $kam, 'pickup_riders' => $riders, 'shipper_payments' => $shipper_payment]);
+            }
+ 
         }
     }
+
+    public function welcome_list(Request $request)
+    {   
+        $shipments = DB::connection('reports')->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=', 'sps.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2 and shipments_journey.verification = 1)'));
+            })
+            ->leftJoin('shipments_journey as cj', function ($join) {
+                $join->on('cj.shipment_id', '=', 'shipments.id')
+                    ->where('cj.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1)'));
+            })
+            ->join('shipment_status as ss', 'ss.id', '=', 'cj.shipper_status_id')
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type', '=', 0);
+            })
+            ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
+            ->leftJoin('shipments_journey as sjrr', function ($join) {
+                $join->on('sjrr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 44, 47, 48, 57, 60])
+                    ->where('sjrr.id', '=',
+                        DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id IN (12, 20) and shipments_journey.verification = 1 and shipments_journey.status_reason_id is not null)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjrr.status_reason_id')
+            ->select(['u.name as user_name', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'p.product_name', 'si.description', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone', 'ssr.name as return_reason', 'shipments.created_at as booking_date']);
+
+        if (session('user_type') == 2) {
+            if (session('restriction') == 1) {
+                $shipments = $shipments->join('substitute_user_shipments as sus', function ($join) {
+                    $join->on('sus.shipment_id', '=', 'shipments.id')
+                        ->where('sus.substitute_user_id', '=', Auth::id());
+                });
+            }
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $shipments = $shipments->whereBetween('shipments.created_at', [$from, $to]);
+
+            $from_id = DB::connection('reports')->table('shipments')->select('id')->where('created_at', '>=', $from);
+            if ($from_id->exists()) {
+                $from_id = $from_id->first()->id;
+
+                $to_id = DB::connection('reports')->table('shipments')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+                if ($to_id->exists()) {
+                    $to_id = $to_id->first()->id;
+
+                    $shipments->where('shipments.id', '>=', $from_id)
+                        ->where('shipments.id', '<=', $to_id);
+                }
+            }
+        }
+
+        $datatable = Datatables::of($shipments)
+            ->addColumn('tracking_number_link', function ($shipments) {
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('collection_amount', function ($shipments) {
+                return number_format($shipments->collection_amount);
+            });
+            if ($user = $request->get('search_user')) {
+                $datatable->whereIn('shipments.user_id', $user);
+            } else {
+                $datatable->where('shipments.user_id', session('user_id'));
+            }
+            if ($origin = $request->get('search_origin')) {
+                $datatable->where('oc.id', '=', $origin);
+            }
+            if ($destination = $request->get('search_destination')) {
+                $datatable->where('dc.id', '=', $destination);
+            }
+            if ($card = $request->get('cards_filter')) {
+                switch ($card) {
+                    case 'total':
+                        $datatable->whereIn('shipments.shipper_status_id', [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52, 14, 16, 30, 36, 37, 39, 40, 41, 47, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50, 17]);
+                        break;
+                    case 'booked':
+                        $datatable->where('shipments.shipper_status_id', 1);
+                        break;
+                    case 'received':
+                        $datatable->whereIn('shipments.shipper_status_id', [2, 3, 4]);
+                        break;
+                    case 'delivered':
+                        $datatable->whereIn('shipments.shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                        break;
+                    case 'returned':
+                        $datatable->whereIn('shipments.shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50]);
+                        break;
+                    case 'in_process':
+                        $datatable->whereIn('shipments.shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52]);
+                        break;
+                    case 'cancelled':
+                        $datatable->where('shipments.shipper_status_id', 17);
+                        break;
+                }
+
+            }
+        return $datatable->make(true);
+
+    }
+
+    public function welcome_data(Request $request)
+    {
+        $stats = array();
+        $from = $request->from_date;
+        $to = $request->to_date;
+        $origin = $request->origin;
+        $user = [session('user_id')];
+        if($request->has('user')){
+            if($request->user != null && $request->user != ''){
+                $user = $request->user;
+            }
+        }
+        $destination = $request->destination;
+        if ($from == null || $to == null) {
+            $today = Carbon::now()->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        } else {
+            $thirtyDays = Carbon::parse($from)->toDateTimeString();
+            $today = Carbon::parse($to)->toDateTimeString();
+        }
+        $restriction = false;
+        if (session('user_type') == 2) {
+            if (session('restriction') == 1) {
+                $restriction = true;
+            }
+        }
+        $stats['total'] = DB::connection('reports')->table('shipments')->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+
+        $stats['booked'] = DB::connection('reports')->table('shipments')->where('shipper_status_id', 1)->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        $stats['canceled'] = DB::connection('reports')->table('shipments')->where('shipper_status_id', 17)->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        $stats['received'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [2, 3, 4])->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        $stats['delivered'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        $stats['return'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46, 50])->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        $stats['in_process'] = DB::connection('reports')->table('shipments')->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19, 49, 52])->whereBetween('shipments.created_at', [$thirtyDays, $today])->whereIn('user_id', $user);
+        if ($restriction == true) {
+            $stats['total'] = $stats['total']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['booked'] = $stats['booked']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['canceled'] = $stats['canceled']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['received'] = $stats['received']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['delivered'] = $stats['delivered']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['return'] = $stats['return']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+            $stats['in_process'] = $stats['in_process']->join('substitute_user_shipments as sus', function ($join) {
+                $join->on('sus.shipment_id', '=', 'shipments.id')
+                    ->where('sus.substitute_user_id', '=', Auth::id());
+            });
+        }
+        if ($origin) {
+            $stats['total'] = $stats['total']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['booked'] = $stats['booked']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['canceled'] = $stats['canceled']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['received'] = $stats['received']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['delivered'] = $stats['delivered']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['return'] = $stats['return']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+            $stats['in_process'] = $stats['in_process']->whereExists(function ($query) use ($origin) {
+                $query->from('user_shipping_infos')
+                    ->where('shipments.pickup_address_id', '=', DB::raw('`user_shipping_infos`.`id`'))
+                    ->whereExists(function ($sub_query) use ($origin) {
+                        $sub_query->from('cities')
+                            ->where('user_shipping_infos.city_id', '=', DB::raw('`cities`.`id`'))
+                            ->where('cities.id', $origin);
+                    });
+            });
+        }
+
+        if ($destination) {
+            $stats['total'] = $stats['total']->where('consignee_city_id', $destination);
+            $stats['booked'] = $stats['booked']->where('consignee_city_id', $destination);
+            $stats['received'] = $stats['received']->where('consignee_city_id', $destination);
+            $stats['canceled'] = $stats['canceled']->where('consignee_city_id', $destination);
+            $stats['delivered'] = $stats['delivered']->where('consignee_city_id', $destination);
+            $stats['return'] = $stats['return']->where('consignee_city_id', $destination);
+            $stats['in_process'] = $stats['in_process']->where('consignee_city_id', $destination);
+        }
+
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['in_process'] = number_format($stats['in_process']->count());
+        return response()->json(['status' => 1, 'stats' => $stats]);
+    }
+
     public function opt_verify(Request $request){
         $code = $request->code;
         if($code){
@@ -256,12 +587,12 @@ class ShipperDashboardController extends Controller
         $get_merged_head_id = MergedSisterAccount::where('user_id', session('user_id'))->first();
         if($get_merged_head_id){
             $merged_head_id =  $get_merged_head_id->merged_head_id;
-
-            $merged_accounts = MergedSisterAccount::leftjoin('users as u', 'u.id', '=', 'merged_sister_accounts.user_id')
-                ->leftjoin('cities as c', 'c.id', '=', 'u.city_id')
-                ->select('u.id as id', 'u.name as name', 'u.poc as poc', 'u.phone as phone', 'u.address as address', 'c.name as city')
-                ->where('merged_head_id', $merged_head_id)
-                ->get();
+            
+            $merged_user_id =  $get_merged_head_id->user_id;
+            $merged_accounts = SubstituteUserMergeSisterAccountMapping::leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')
+            ->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))
+            ->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))
+            ->select('u.id', 'u.name')->get();
         }
 //        END
 
@@ -864,8 +1195,8 @@ class ShipperDashboardController extends Controller
     }
 
     public function getPickups(Request $request) {
-        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor'])
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')->leftjoin('city_areas as ca', 'user_shipping_infos.city_area_id', '=', 'ca.id')
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_brand_name as pickup_brand_name','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name','c.id as city_id', 'user_shipping_infos.vendor','ca.name as city_area_name'])
         ->where('user_id', session('user_id'))
         ->where('hidden', 0);
 
@@ -1034,8 +1365,9 @@ class ShipperDashboardController extends Controller
 
         if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
         {
-            UserShippingInfo::create(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'pickup_brand_name'=>$pickup_brand_name,'poc'=>$poc,
-                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor]);
+          $usi =  UserShippingInfo::insertGetId(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'pickup_brand_name'=>$pickup_brand_name,'poc'=>$poc,
+                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone, 'vendor' => $vendor,'created_at'=>Carbon::now()]);
+            ShipperShipmentBookController::shipper_address_area($city_id,$pickup_address,$usi);
             return redirect()->back()->with('success','Pickup Address added successfully!');
 
         }else{

@@ -18,6 +18,11 @@ class CargoManifestBag extends Model
         return $this->belongsTo('App\Http\Models\City', 'destination_hub_id', 'id');
     }
 
+    public function current_hub() {
+        return $this->belongsTo('App\Http\Models\City', 'current_hub_id', 'id');
+    }
+
+
 
     public function shipping_mode() {
         return $this->belongsTo('App\Http\Models\ShippingMode');

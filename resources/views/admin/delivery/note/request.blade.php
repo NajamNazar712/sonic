@@ -33,6 +33,7 @@
                                     <th class="border-primary border-darken-1">S. No</th>
                                     <th class="border-primary border-darken-1">Employee ID</th>
                                     <th class="border-primary border-darken-1">Rider</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Hub</th>
                                     <th class="border-primary border-darken-1">Delivery Note</th>
                                     <th class="border-primary border-darken-1">Pending DNCC</th>
@@ -258,6 +259,7 @@
                             head.push('S.No');
                             head.push('Employee ID');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Hub');
                             head.push('Delivery Note');
                             head.push('Pending DNCC');
@@ -275,6 +277,7 @@
                                 row.push(index + 1);
                                 row.push(values.trax_id);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.hub);
                                 row.push(values.delivery_note);
                                 row.push(values.dn_received_amount);
@@ -352,6 +355,7 @@
                     },
                     {data: 'trax_id', name: 'r.trax_id', class: 'align-middle trax_id'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'delivery_note', name: 'delivery_note_requests.delivery_note', class: 'align-middle delivery_note'},
                     {data: 'dn_received_amount', name: 'delivery_note_requests.dn_received_amount', class: 'align-middle dn_received_amount'},
