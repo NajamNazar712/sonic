@@ -859,7 +859,7 @@ $roles = explode("," , $settings->text);
                                         </li>
                                     @endif
 
-                                     <li><a class="menu-item" href="#">Advance Petty Cash</a>
+                                     {{-- <li><a class="menu-item" href="#">Advance Petty Cash</a>
                                         <ul class="menu-content">
                                             @if (session('role_id') == 1 || in_array(881, session('permissions')))
                                                 <li><a class="menu-item"
@@ -873,7 +873,25 @@ $roles = explode("," , $settings->text);
                                             @endif
                                             
                                         </ul>
-                                    </li>
+                                    </li> --}}
+
+                                        @if (session('role_id') == 1 ||count(array_intersect([881,882], session('permissions'))) !== 0)
+                                        <li class=" nav-item"><a href="#"><span class="menu-title">Advance Petty Cash</span></a>
+
+                                            <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(881, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.petty_cash.advance.index') }}">Create</a>
+                                                    </li>
+                                                @endif
+                                                @if (session('role_id') == 1 || in_array(882, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.petty_cash.advance.statements.index') }}">Statement</a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </li>
+                                    @endif
 
                                 </ul>
                             </li>
