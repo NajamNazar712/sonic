@@ -14,6 +14,9 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryRelation;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\ShipmentJourneyConsigneeRefusedSubReason;
 use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
@@ -7336,6 +7339,7 @@ class DeliveryController extends Controller
             ->make(true);
     }
 
+    
     public function approve(Request $request)
     {
         $shipment_ids = $request->ids;
@@ -7425,6 +7429,25 @@ class DeliveryController extends Controller
                         $return_assign_log->assigned_by = Auth::id();
                         $return_assign_log->save();
                     }
+
+                    //  Updating  RcpAssignedShipment Table and log 
+                     $rcp_assigned_shipment_request_intercept = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('shipment_status', 7);
+                     if($rcp_assigned_shipment_request_intercept->exists()){
+
+                             $rcp_assigned_shipment_request_intercept = $rcp_assigned_shipment_request_intercept ->latest()->first();
+                             $rcp_assigned_shipment_request_intercept->shipment_status = 8; //intercept request approval
+                             $rcp_assigned_shipment_request_intercept->admin_id = Auth::id();
+                             $rcp_assigned_shipment_request_intercept->save();
+
+                             $return_assign_log = new RcpAssignedShipmentLog();
+                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment_request_intercept->id;
+                             $return_assign_log->shipment_id = $rcp_assigned_shipment_request_intercept->shipment_id;
+                             $return_assign_log->status = 8; //intercept request approval
+                             $return_assign_log->admin_id = Auth::id();
+                             $return_assign_log->save();
+                     }
+
+
                     $print[] = $shipment_id;
                 }
             }
@@ -7486,6 +7509,23 @@ class DeliveryController extends Controller
                     ]);
 
                     ShipmentsJourneyController::add($shipment_id, 20, 20, $status_reason_id, $remarks, NULL, Auth::id());
+
+                     //  Updating  RcpAssignedShipment Table and log 
+                     $rcp_assigned_shipment_request_intercept = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('shipment_status', 7);
+                     if($rcp_assigned_shipment_request_intercept->exists()){
+
+                             $rcp_assigned_shipment_request_intercept = $rcp_assigned_shipment_request_intercept ->latest()->first();
+                             $rcp_assigned_shipment_request_intercept->shipment_status = 9; //intercept request reject
+                             $rcp_assigned_shipment_request_intercept->admin_id = Auth::id();
+                             $rcp_assigned_shipment_request_intercept->save();
+
+                             $return_assign_log = new RcpAssignedShipmentLog();
+                             $return_assign_log->rcp_assigned_shipment_request_intercept_id = $rcp_assigned_shipment_request_intercept->id;
+                             $return_assign_log->shipment_id = $rcp_assigned_shipment_request_intercept->shipment_id;
+                             $return_assign_log->status = 9; //intercept request reject
+                             $return_assign_log->admin_id = Auth::id();
+                             $return_assign_log->save();
+                     }
                 }
             }
 

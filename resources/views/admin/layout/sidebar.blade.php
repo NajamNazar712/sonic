@@ -617,7 +617,7 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.rcp_agent_cn.index') }}">RCP Agent
                                                 Productivity Shipment Wise</a></li>
-                                    @endif
+                                    @endif                                    
                                     @if (session('role_id') == 1 || in_array(643, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.revert.index') }}">Return Revert</a></li>
