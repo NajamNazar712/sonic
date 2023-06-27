@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Advance Petty Cash Statement')
+@section('title','Make Advance Petty Cash Statement')
 
 @section('content')
     <h1 class="mb-1">
-        Advance Petty Cash Statement
+        Make Advance Petty Cash Statement
     </h1>
 
     <div class="card">

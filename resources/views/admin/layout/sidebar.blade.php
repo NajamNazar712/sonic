@@ -842,7 +842,7 @@
                                             <ul class="menu-content">
                                                 @if (session('role_id') == 1 || in_array(881, session('permissions')))
                                                     <li><a class="menu-item"
-                                                            href="{{ route('admin.petty_cash.advance.index') }}">Create</a>
+                                                            href="{{ route('admin.petty_cash.advance.index') }}">Make</a>
                                                     </li>
                                                 @endif
                                                 @if (session('role_id') == 1 || in_array(882, session('permissions')))
