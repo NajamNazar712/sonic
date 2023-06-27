@@ -205,8 +205,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -222,8 +222,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -306,16 +306,8 @@
             } );
 
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                dom: 'btipr',
                 scrollX: true, scrollY: '500px',
-                buttons: [
-                    {
-                        extend: 'excelHtml5',
-                        title: 'Project Arrival Report',
-                        text:'<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-                    },
-                ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 autoWidth:false,
                 pageLength: 50,

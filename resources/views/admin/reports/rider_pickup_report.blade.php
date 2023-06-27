@@ -178,8 +178,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -195,8 +195,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -279,7 +279,8 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Wise Pickup Report',
+                        title: 'Rider Wise Pickup Report',   
+                        className: 'btn btn-primary excel',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
