@@ -12,7 +12,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div id="search_form" class="row mb-2 justify-content-center" id="track_form">
+                <div class="row mb-2 justify-content-center" id="track_form">
                     {{-- <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -216,7 +216,7 @@
                 },
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                        $('#track_form #to_date').pickadate('picker').set('min', $('#track_form #from_date').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -235,7 +235,7 @@
                 },
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #from_date').pickadate('picker').set('min', $('#search_form #to_date').pickadate('picker').get('select'));
+                        $('#track_form #from_date').pickadate('picker').set('min', $('#track_form #to_date').pickadate('picker').get('select'));
                     }
                 }
             });

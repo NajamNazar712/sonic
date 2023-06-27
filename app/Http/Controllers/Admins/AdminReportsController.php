@@ -11318,7 +11318,7 @@ class AdminReportsController extends Controller
         ->join('cities as des','des.id','shipments.consignee_city_id')
         ->leftjoin('admins as apa','apa.id','=','sjpa.admin_id')
         ->leftjoin('admins as aa','aa.id','=','sja.admin_id')
-        ->select('shipments.tracking_number as tracking_number_link','u.name as shipper','uo.name as origin','des.name as destination','apa.name as project_arrival_by','sjpa.created_at as project_arrival_at','aa.name as normal_arrival_by','sja.created_at as normal_arrival_at');
+        ->select('shipments.tracking_number as tracking_number_link','shipments.tracking_number as tracking_number','u.name as shipper','uo.name as origin','des.name as destination','apa.name as project_arrival_by','sjpa.created_at as project_arrival_at','aa.name as normal_arrival_by','sja.created_at as normal_arrival_at');
 
         $datatables = Datatables::of($project_arrival)
         ->editColumn('tracking_number_link', function ($project_arrival) {
