@@ -21,7 +21,7 @@ use App\Http\Models\Admin\PettyCashStatementDraft;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\Admin\RetailPickupNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
-use App\Http\Models\AdvancePettyCashStatement;
+use App\Http\Models\Admin\AdvancePettyCashStatement;
 use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
