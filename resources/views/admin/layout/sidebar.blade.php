@@ -2101,7 +2101,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825], session('permissions'))) !== 0)
+                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825,851,854], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Financials</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([157, 158, 462], session('permissions'))) !== 0)
@@ -2162,6 +2162,20 @@
                                                 href="{{ route('admin.settings.onelink_payment_charges.index') }}">1Link
                                                 Payment Charges</a></li>
                                     @endif
+
+
+                                    @if (session('role_id') == 1 || in_array(851, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.fintech_company_charges.index') }}">Fintech Company Charges</a></li>
+                                    @endif  
+
+
+                                    @if (session('role_id') == 1 || in_array(854, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
+                                    @endif  
+
+
                                 </ul>
                             </li>
                         @endif

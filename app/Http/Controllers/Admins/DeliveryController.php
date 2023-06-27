@@ -101,6 +101,7 @@ use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
 use App\Jobs\RCPSmsToConsignee;
+use App\Jobs\CountFintechCharges;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -112,7 +113,8 @@ use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
-
+use App\Jobs\SwichPaymentGatewayApi;
+use App\Helpers\PayfastApiCall;
 class DeliveryController extends Controller
 {
 
@@ -1051,7 +1053,14 @@ class DeliveryController extends Controller
                             //Urdu
                             NotificationsController::send(135, $note->id, $shipment);
                         } else {
-                            NotificationsController::send(12, $note->id, $shipment);
+                              //When Admin Create Delivery Note
+                            $payment_detials = PayfastApiCall::ApiCall($note->id,$shipment);   
+                            $rand            = $payment_detials['unique_key'];
+                            $payment_link    = $payment_detials['payment_link'];
+                            $url             = $payment_detials['url'];
+                            $shipments_id = array_wrap($shipment);
+                            CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
+                            NotificationsController::send(12, $note->id, $shipment,$payment_link);   
                         }
                     } else {
                         $shipment_otp->otp = null;
@@ -4655,13 +4664,23 @@ class DeliveryController extends Controller
             ->where('delivery_notes.cash_collection_status', 0)
             ->where('delivery_notes.status', '!=', 4)
             ->where('delivery_notes.pending_status', 1);
-
-
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($deliveries)
+
+
+        ->editColumn('count_fintech_shipments', function ($deliveries) {
+            $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
+            $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
+            ->where('fintech_charges','!=','')->count('id');
+            return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+        })
+
+
+
+
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
@@ -4689,13 +4708,6 @@ class DeliveryController extends Controller
                 $cash_amount = $dncc_amount - $hbl_connect_amount;
 
                 return number_format($cash_amount);
-
-                // if($shipment->cash_amount){
-                //     return number_format($shipment->cash_amount);
-                // }
-                // else{
-                //     return number_format($shipment->amount);
-                // }
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
@@ -4786,6 +4798,20 @@ class DeliveryController extends Controller
         return $datatable->make(true);
     }
 
+    public function pending_cash_collection_showshipment(Request $req){
+
+        $delivery_note_shipment = DeliveryNoteShipment::join('shipments','delivery_note_shipments.shipment_id','shipments.id')
+        ->where('delivery_note_shipments.delivery_note_id', $req->id)
+        ->select('shipments.tracking_number as trackingNo', 
+        'shipments.fintech_charges as fintech_charges',
+        'shipments.created_at as Date')->where('shipments.fintech_charges','!=','')->get();
+
+
+       return response()->json([
+        'data' => $delivery_note_shipment,
+       ]);
+    }
+
     public function pending_cash_collect(Request $request)
     {
         $delivery_note_id = $request->delivery_note_id;
@@ -4872,21 +4898,33 @@ class DeliveryController extends Controller
             ->leftjoin('zones as zn', 'zn.id', '=', 'c.zone_id')
             ->leftjoin('delivery_cash_collections as dcc', 'dcc.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('hbl_konnect_transaction_delivery_notes as hktdn', 'hktdn.delivery_note_id', '=', 'delivery_notes.id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status', 'rt.name as rider_type', 'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 'delivery_notes.cash_collection_status', 'dcc.amount as deposit_amount', 'dcc.remarks', 'dcc.deposit_slip', 'ca.name as area'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.cash_collection_status as cash_collect_status', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link', 'delivery_notes.cash_collected_by', 'ccb.name as cash_collected', 'delivery_notes.cash_collected_at', 'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 'delivery_notes.status', 'rt.name as rider_type', 'zn.name as zone_name', 'hktdn.transactions_amount as transactions_amount', 'hktdn.cash_amount as cash_amount', 'delivery_notes.one_link_payment_count', 'delivery_notes.cash_collection_status', 'dcc.amount as deposit_amount', 'dcc.remarks', 'dcc.deposit_slip', 'ca.name as area'])
             ->whereIn('delivery_notes.cash_collection_status', [1, 2, 3])
             ->where('delivery_notes.dncc_status', 0);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
-
+            
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+
+            
+            ->editColumn('fintech_charges', function ($deliveries) {
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)
+                ->pluck('shipment_id')->toArray(); 
+                $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
+                ->where('fintech_charges','!=','')->count('id');
+                return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+            })
+
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
             })
+
+
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -6750,6 +6788,8 @@ class DeliveryController extends Controller
 
     public function history_list(Request $request)
     {
+
+       
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 304);
         }
@@ -6772,8 +6812,17 @@ class DeliveryController extends Controller
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
-
+        
         $datatable = Datatables::of($deliveries)
+
+        ->editColumn('fintech_shipments_charges', function ($deliveries) {
+            $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
+            $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
+            ->where('fintech_charges','!=','')->count('id');
+            return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+        })
+
+
             ->editColumn('delivery_note', function ($deliveries) {
                 $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
                 if ($deliveries->pending_status == 1) {
@@ -8331,8 +8380,52 @@ class DeliveryController extends Controller
                     NotificationsController::send(132, $delivery_note_id, $shipment->id);
                     //Urdu
                     NotificationsController::send(135, $delivery_note_id, $shipment->id);
-                } else {
-                    NotificationsController::send(12, $delivery_note_id, $shipment->id);
+                } 
+                else {
+                 
+                //Pay Fast Api Integration Payment Link Start
+                $url              = 'https://invoice.apps.net.pk:7088/api/merchant/invoice/create';
+                $client_id        = 'b207f5c8-e8b9-11ed-898c-005056a4e164';
+                $client_secret    = '3854b5d902f0fe5f7e9bca547aad92bc6bb8574ef1656e1788bbc41e41bc7834';
+                $customer_details = Shipment::where('id',$shipment['id'])->first();
+        
+                //Parameters
+                $email              = 'info@trax.com';
+                $recipient_email    = 'info@trax.com';
+                $Bill_cat           = 'Bill';
+                $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
+                $billing_month      =  date('Y-m');
+                $description        = 'This is demo description';
+    
+                //request body
+                $request_body  = http_build_query([
+                    'customer_email'   => $email,
+                    'total_amount'     => $total_amount,
+                    'invoice_ref_id'   => $customer_details->tracking_number,
+                    'billing_month'    => $billing_month,
+                    'bill_category'    => $Bill_cat,
+                    'due_in_days'      => 10,
+                    'expires_in_days'  => 15,
+                    'description'      => $description,
+                    'recipient_email'  => $recipient_email
+                ]);
+            
+                $client = new Client();
+                $response = $client->request('Post', $url, [
+                    'headers' => [
+                        'Content-Type' => 'application/x-www-form-urlencoded',
+                        'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                    ],
+                    'body' => $request_body,
+                ]);
+
+                $body = $response->getBody()->getContents();
+                $data = json_decode($body, true);
+                //Pay Fast Api Integration Payment Link End   
+                    $shipment = array();
+                    $shipment['id'] = $shipment->id;
+                    $shipment['link'] = $data['payment_link'];
+                    NotificationsController::send(12, $delivery_note_id, $shipment);
                 }
 
                 return response()->json(['status' => 0, 'success' => 'Shipments Added']);
@@ -9067,9 +9160,15 @@ class DeliveryController extends Controller
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
+                
                 $valid_shipments = $valid_shipments->toArray();
+
+            
                 $invalid_shipments = array_diff($shipments, $valid_shipments);
                 Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+                
+                
+               
                 $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
                     $query->where('booking_type_id', '!=', 4)
                         ->orWhere(function ($sub_query) {
@@ -9189,7 +9288,14 @@ class DeliveryController extends Controller
                                 //Urdu
                                 NotificationsController::send(135, $note->id, $shipment);
                             } else {
-                                NotificationsController::send(12, $note->id, $shipment);
+                                $payment_detials = PayfastApiCall::ApiCall();   
+                                $rand            = $payment_detials['unique_key'];
+                                $payment_link    = $payment_detials['payment_link'];
+                                $url             = $payment_detials['url'];
+                                $shipments_id    = array_wrap($shipment);
+                                CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
+                                NotificationsController::send(12, $note->id, $shipment,$payment_link);   
+
                             }
                         }
                     }

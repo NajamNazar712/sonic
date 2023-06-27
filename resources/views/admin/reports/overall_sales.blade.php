@@ -209,6 +209,7 @@
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Intercept Charges</th>
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">Packing Charges</th>
@@ -664,6 +665,7 @@
                     { data:'nsa_osa_charges' ,name: 'shipments.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst',sortable:false},
                     { data:'intercept_charges' ,name: 'shipments.intercept_charges', class: 'align-middle intercept_charges'},
+                    { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges',sortable:false},

@@ -193,18 +193,23 @@ use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Models\Admin\ShipementReceiveDetails;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
-use CreateCityOsaRatesTable;
+use App\Jobs\CountFintechCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use GuzzleHttp\Client;
+use App\Http\Models\Admin\UserFintectCharges;use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
 {
 
     public function __construct()
-    {
-        $this->middleware('auth:admin');
-
-        $this->middleware('Permission');
+    {   $this->middleware('auth:admin')->except('payfast_payment');
+        $this->middleware('Permission')->except('payfast_payment');
     }
 
+
+    public function payfast_payment_details(){
+        return view('payfast-payment-view');
+    }
     public function index()
     {
 
@@ -509,9 +514,88 @@ class AdminDashboardController extends Controller
         return view('admin.simple_dashboard');
     }
 
+public function payfast_payment(Request $request){
+    dd($request->all());
+}
+
+
+    public function user_fintech_charges(Request $req){
+        $UserFintectCharges = new UserFintectCharges();
+        $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
+        if(!empty($values)){
+            return response()->json([
+                'status' => '200',
+                'data'   => $values,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => '404',
+                'data'   => '',
+            ]);
+        }
+    }
+
+    public function add_fintech_charges(Request $req){
+        $UserFintectCharges = new UserFintectCharges();
+        $standard_fintech_charges = standard_fintech_charges::find(1);
+
+        if(!empty($standard_fintech_charges)){
+            if($req->checkboxval == 'false'){
+                $UserFintectCharges::where('user_id',$req->userID)->update([
+                    'status'     => 2,
+                    'updated_by' => session('id')
+                ]); 
+
+                return response()->json([
+                    'status'  => '200',
+                    'message' => 'Fintech Charges Updated Successfully!',
+                ]);
+            }
+            if($req->checkboxval == 'true'){
+                if($standard_fintech_charges->standard_fintech_charges > $req->fintechCharges){
+                    return response()->json([
+                        'status'  => '401',
+                        'message' => 'Shipper Fintech Charges Should be Greater then standard Fintech charges',
+                    ]);
+                }
+                try{
+                    $value =  $UserFintectCharges::where('user_id',$req->userID)->first();
+                    if(!empty($value->user_id)){
+                        $UserFintectCharges::where('user_id',$req->userID)->update([
+                            'fintech_charges'  => $req->fintechCharges,
+                            'status'           => '1',
+                            'updated_by'       => session('id')
+                        ]); 
+                    }
+                    else{
+                        $UserFintectCharges->user_id            = $req->userID;
+                        $UserFintectCharges->fintech_charges    = $req->fintechCharges;
+                        $UserFintectCharges->added_by           = session('id');
+                        $UserFintectCharges->updated_by         = session('id');
+                        $UserFintectCharges->save();
+                    }
+                        return response()->json([
+                            'status'  => '200',
+                            'message' => 'Fintech Charges Updated Successfully!',
+                        ]);
+                }
+                catch(exception $e){
+                    return response()->json([
+                        'message' => 'Charges Not Set',
+                    ]); 
+                }  
+            }
+        }
+        else{
+            return response()->json([
+                'status'  => '401',
+                'message' => 'First Set Standard Fintech Charges then user Charges',
+            ]);
+        }
+    }
     public function statistics_search(Request $request)
     {
-//        return $request;
         $graph = array();
         $destination_id = $request->destination;
         $shipper = $request->shipper;
@@ -530,18 +614,18 @@ class AdminDashboardController extends Controller
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
-                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
-                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
-                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $booked               = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
+                $arrived              = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
+                $in_transit           = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
+                $canceled             = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
+                $destination          = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
+                $out_for_delivery     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
+                $return_confirm       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
+                $return_delivered     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
+                $pending_shipments    = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12, 54, 55]);
-                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                $delivered            = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -638,18 +722,18 @@ class AdminDashboardController extends Controller
                     });
                 }
 
-                $graph['booked'][] = $booked->count();
-                $graph['arrived'][] = $arrived->count();
-                $graph['in_transit'][] = $in_transit->count();
-                $graph['canceled'][] = $canceled->count();
-                $graph['delivered'][] = $delivered->count();
-                $graph['destination'][] = $destination->count();
-                $graph['out_for_delivery'][] = $out_for_delivery->count();
-                $graph['return_confirm'][] = $return_confirm->count();
-                $graph['return_delivered'][] = $return_delivered->count();
-                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['booked'][]               = $booked->count();
+                $graph['arrived'][]              = $arrived->count();
+                $graph['in_transit'][]           = $in_transit->count();
+                $graph['canceled'][]             = $canceled->count();
+                $graph['delivered'][]            = $delivered->count();
+                $graph['destination'][]          = $destination->count();
+                $graph['out_for_delivery'][]     = $out_for_delivery->count();
+                $graph['return_confirm'][]       = $return_confirm->count();
+                $graph['return_delivered'][]     = $return_delivered->count();
+                $graph['pending_shipments'][]    = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
-                $graph['pending_return'][] = $pending_return->count();
+                $graph['pending_return'][]       = $pending_return->count();
 //                $graph['complaints_launched'][] = $complaints_launched->count();
 //                $graph['complaints_in_process'][]  = $complaints_in_process->count();
 //                $graph['complaints_closed'][] = $complaints_closed->count();
@@ -9451,6 +9535,11 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
                     }
 
+                    
+                if (session('role_id') == 1 || in_array(855, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
+                }
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -9780,6 +9869,11 @@ class AdminDashboardController extends Controller
 
                 if (session('role_id') == 1 || in_array(619, session('permissions'))) {
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
+                }
+
+
+                if (session('role_id') == 1 || in_array(856, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
                 }
 
                 $dropdown .= '

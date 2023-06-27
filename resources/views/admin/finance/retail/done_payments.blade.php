@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Retail Done Payments
+					Retail Done Payments 
 				</h1>
 
 				<div class="card">
@@ -143,6 +143,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Adjustment Charges</th>
+										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
@@ -720,6 +721,7 @@
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'adjustment_charges', name: 'dpc.adjustment', class: 'align-middle text-center adjustment_charges', orderable: false},
+					{data:'fintech_charges', name: 'fintech_charges', class: 'align-middle text-center fintech_charges', orderable: false},
 					{data:'total_payable', name: 'dpc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'ubi.id', class: 'align-middle text-center bank'},
 					{data:'reference_number', name: 'retail_done_payments.reference_number', class: 'align-middle text-center reference_number'},

@@ -19,6 +19,9 @@ Route::get('payment_details/{id}/{id1}','TrackingController@payment_details')->n
 Route::get('/', function () {
     return redirect()->route('cod.login');
 });
+Route::get('payfast-payment', 'Admins\AdminDashboardController@payfast_payment')->name('payfast-payment');    
+Route::get('payfast-payment-details', 'Admins\AdminDashboardController@payfast_payment_details')->name('payfast-payment-details');    
+
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
@@ -596,6 +599,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
     Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
+
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
         Route::post('search', 'Admins\AdminDashboardController@statistics_search')->name('search');
@@ -660,6 +664,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('update/profile/password', 'Admins\AdminDashboardController@update_profile_password')->name('update.profile.password');
     Route::post('update/profile/password/submit', 'Admins\AdminDashboardController@update_profile_password_submit')->name('update.profile.password.submit');
     Route::post('update/profile/submit', 'Admins\AdminDashboardController@edit_profile_submit')->name('update.profile.submit');
+
     Route::prefix('update_one_time_profile')->name('update_one_time_profile.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@get_one_time_profile')->name('index');
         Route::get('check', 'Admins\AdminDashboardController@check_profile')->name('check');
@@ -682,7 +687,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\OrderManagementController@self_collection_list')->name('list');
         });
     });
+
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
+    
     Route::prefix('accounts')->name('accounts.')->group(function () {
         Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
         Route::post('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
@@ -710,6 +717,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('restrict_order_id/info', 'Admins\AdminDashboardController@restrict_order_id_info')->name('restrict_order_id.info');
         Route::post('restrict_order_id/submit', 'Admins\AdminDashboardController@restrict_order_id_submit')->name('restrict_order_id.submit');
         Route::post('/add_retag_territory', 'Admins\AdminDashboardController@add_retag_territory')->name('add_retag_territory');
+        Route::post('add_fintech_charges', 'Admins\AdminDashboardController@add_fintech_charges')->name('add_fintech_charges');    
+        Route::get('user_fintech_charges', 'Admins\AdminDashboardController@user_fintech_charges')->name('user_fintech_charges'); 
 
         Route::get('duplicate/info', 'Admins\AdminDashboardController@duplicate_info')->name('duplicate.info');
         Route::prefix('payment_cycle')->name('payment_cycle.')->group(function () {
@@ -1265,6 +1274,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('pending')->name('pending.')->group(function () {
                 Route::get('', 'Admins\DeliveryController@pending_cash_collection_index')->name('index');
                 Route::get('list', 'Admins\DeliveryController@pending_cash_collection_list')->name('list');
+                //show shipemtns with fintech charges
+                Route::get('show', 'Admins\DeliveryController@pending_cash_collection_showshipment')->name('showshipment');
+                //end 
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all', 'Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments', 'Admins\DeliveryController@cash_collection_shipments')->name('shipments');
@@ -3366,6 +3378,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('store', 'Admins\GlobalSettingsController@onelink_payment_charges_submit')->name('store');
             // Route::post('store', 'Admins\GlobalSettingsController@pickup_address_wise_payment_accounts_submit')->name('store');
         });
+        
+        Route::prefix('fintech_company_charges')->name('fintech_company_charges.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@setup_fintech_charges_index')->name('index');
+            Route::get('add', 'Admins\GlobalSettingsController@setup_fintech_charges_show')->name('form');
+            Route::get('list', 'Admins\GlobalSettingsController@setup_fintech_charges_list')->name('list');
+            Route::post('store', 'Admins\GlobalSettingsController@setup_fintech_charges_save')->name('store');
+            Route::get('edit/{id}', 'Admins\GlobalSettingsController@setup_fintech_charges_edit')->name('edit');
+            Route::post('edit_save', 'Admins\GlobalSettingsController@setup_fintech_charges_edit_save')->name('edit_save');
+            Route::get('edit_status', 'Admins\GlobalSettingsController@change_company_status')->name('status');
+        });
+
+
+        Route::prefix('standard_fintech_charges')->name('standard_fintech_charges.')->group(function () {
+        Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
+        Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
+
+            });
+
+
+
+
+
+
+        //End
 
         Route::prefix('month_closing')->name('month_closing.')->group(function () {
             Route::prefix('types')->name('types.')->group(function () {

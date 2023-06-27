@@ -22,6 +22,7 @@ Route::name('api.')->group(function () {
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
+  
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 
@@ -113,6 +114,14 @@ Route::name('api.')->group(function () {
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
     });
+
+
+    Route::prefix('fintech')->name('fintech.')->group(function () {
+        Route::post('shipment-details', 'APIController@get_shipment_details')->name('shipment-details');
+        Route::post('payment-details', 'APIController@fintech_payment_detials')->name('payment-details');
+    });
+
+
 
 
     Route::prefix('rider')->name('rider.')->group(function () {
