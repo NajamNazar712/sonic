@@ -1247,6 +1247,8 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+            'return.new_rcp_agent.index' => 600,
+            'return.new_rcp_agent.list' => 600,
             'sales.territory.territoryindex' =>630,
             'sales.designation.designationindex' =>631,
             'settings.sales.incentive.index' =>632,
@@ -1362,6 +1364,7 @@ class Permission
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
             'return.rcp_agent_cn.index' => 876,
+            'return.new_rcp_agent_shipments.index' => 876,
  			'accounts.substitute_account_management.index' => 873,
  			'accounts.substitute_account_management.add.index' => 874,
  			'accounts.substitute_account_management.update.index' => 875,

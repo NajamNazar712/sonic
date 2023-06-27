@@ -1281,6 +1281,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('retail')->name('retail.')->group(function () {
                 Route::get('', 'Admins\Retail\RetailCashCollectionController@retail_index')->name('index');
                 Route::get('list', 'Admins\Retail\RetailCashCollectionController@retail_list')->name('list');
+                Route::post('hbl_konnect_cash', 'Admins\Retail\RetailCashCollectionController@hbl_konnect_cash')->name('hbl_konnect_cash');
 
                 Route::prefix('pending')->name('pending.')->group(function () {
                     Route::post('shipments', 'Admins\Retail\RetailCashCollectionController@number_of_shipments')->name('shipments');
@@ -1598,14 +1599,25 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         Route::prefix('rcp_agent')->name('rcp_agent.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_list')->name('list');
-            Route::post('data', 'Admins\ReturnController@rcp_agent_data')->name('data');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
         });
 
         Route::prefix('rcp_agent_cn')->name('rcp_agent_cn.')->group(function () {
-            Route::get('', 'Admins\ReturnController@rcp_agent_cn_index')->name('index');
-            Route::get('list', 'Admins\ReturnController@rcp_agent_cn_list')->name('list');
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
+        });
+
+        Route::prefix('new_rcp_agent')->name('new_rcp_agent.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_list')->name('list');
+            Route::post('data', 'Admins\ReturnController@new_rcp_agent_data')->name('data');
+        });
+
+        Route::prefix('new_rcp_agent_shipments')->name('new_rcp_agent_shipments.')->group(function () {
+            Route::get('', 'Admins\ReturnController@new_rcp_agent_shipments_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@new_rcp_agent_shipments_list')->name('list');
         });
         
         Route::prefix('revert')->name('revert.')->group(function () {
@@ -4441,6 +4453,7 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('/shipments', 'Retail\RetailCashDepositController@shipments')->name('shipments');
         Route::post('print', 'Retail\RetailCashDepositController@print')->name('print');
         Route::post('finalize_rncc', 'Retail\RetailCashDepositController@finalize_rncc')->name('finalize_rncc');
+        Route::post('hbl_konnect_cash', 'Retail\RetailCashDepositController@hbl_konnect_cash')->name('hbl_konnect_cash');
     });
 
     Route::prefix('parcel_receiving')->name('parcel_receiving.')->group(function () {

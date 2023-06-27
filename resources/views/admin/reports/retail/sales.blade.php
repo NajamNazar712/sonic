@@ -111,7 +111,8 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
 {{--                        <th class="border-primary border-darken-1">Account No.</th>--}}
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Franchise/Trax center</th>
+                        <th class="border-primary border-darken-1">Franchise / Trax Center</th>
+                        <th class="border-primary border-darken-1">Franchise / Trax Center Name</th>
                         <th class="border-primary border-darken-1">Booking Staff Name</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -133,6 +134,7 @@
                         <th class="border-primary border-darken-1">Product Insurance Value</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
                         <th class="border-primary border-darken-1">Discount Amount</th>
+                        <th class="border-primary border-darken-1">Admin Discount Amount</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
@@ -309,6 +311,7 @@
                             // head.push('Account No.');
                             head.push('Shipper Name');
                             head.push('Franchise/Trax center');
+                            head.push('Franchise/Trax center Name');
                             head.push('Booking Staff Name');
                             head.push('Status');
                             head.push('Payment Status');
@@ -330,6 +333,7 @@
                             head.push('Product Insurance Value');
                             head.push('Insurance Charges');
                             head.push('Discount Amount');
+                            head.push('Admin Discount Amount');
                             head.push('Packaging Charges');
                             head.push('GST');
                             head.push('Total Charges');
@@ -346,6 +350,7 @@
                                 // row.push(values.account_no);
                                 row.push(values.shipper_name);
                                 row.push(values.franchise_center);
+                                row.push(values.franchise_center_name);
                                 row.push(values.booked_by);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
@@ -367,6 +372,7 @@
                                 row.push(values.product_value);
                                 row.push(values.insurance_charges);
                                 row.push(values.discount_amount);
+                                row.push(values.admin_discount);
                                 row.push(values.packaging_charges);
                                 row.push(values.gst);
                                 row.push(values.total_charges);
@@ -423,13 +429,14 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[10, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     // { data:'account_number' ,name: 'account_number', class: 'align-middle account_number'},
                     { data:'shipper_name' ,name: 'rsi.shipper_name', class: 'align-middle shipper_name'},
                     { data:'franchise_center' ,name: 'franchise_center', class: 'align-middle franchise_center',orderable: false, searchable: false},
+                    { data:'franchise_center_name' ,name: 'franchise_center_name', class: 'align-middle franchise_center_name',orderable: false, searchable: false},
                     { data:'booked_by' ,name: 'ru.name', class: 'align-middle booked_by'},
                     // { data:'pickup_address' ,name: 'usi.pickup_address', class: 'align-middle pickup_address'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
@@ -452,6 +459,7 @@
                     { data:'product_value' ,name: 'si.price', class: 'align-middle product_value'},
                     { data:'insurance_charges' ,name: 'rs.insurance_charges', class: 'align-middle insurance_charges'},
                     { data:'discount_amount' ,name: 'rs.charges_with_discount', class: 'align-middle discount_amount'},
+                    { data:'admin_discount' ,name: 'rs.admin_discount', class: 'align-middle admin_discount'},
                     { data:'packaging_charges' ,name: 'rs.packaging_charges', class: 'align-middle packaging_charges'},
                     { data:'gst' ,name: 'rs.gst', class: 'align-middle gst'},
                     { data:'total_charges' ,name: 'rs.total_charges', class: 'align-middle total_charges'},

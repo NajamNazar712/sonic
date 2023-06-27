@@ -51,6 +51,8 @@
                                         <th>Account Number</th>
                                         <th>Bank ID</th>
                                         <th>Special Instruction</th>
+                                        <th>Admin Discount</th>
+                                        <th>Admin Discount Type</th>
                                         <th></th>
                                     </tr>
                                     </thead>
@@ -223,6 +225,16 @@
                                                 <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['special_instruction']}}</font></td>
                                             @else
                                                 <td>{!! Form::text('form[' . $no . '][special_instruction]', $ro['special_instruction'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                                @if(isset($errors[$no]['admin_discount']))
+                                                <td>{!! Form::text('form[' . $no . '][admin_discount]', $ro['admin_discount'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['admin_discount']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][admin_discount]', $ro['admin_discount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
+                                            @endif
+                                                @if(isset($errors[$no]['admin_discount_type']))
+                                                <td>{!! Form::text('form[' . $no . '][admin_discount_type]', $ro['admin_discount_type'],['class' => 'form-control is-invalid','style'=>'width:100px']) !!}<font color="red">{{$errors[$no]['admin_discount_type']}}</font></td>
+                                            @else
+                                                <td>{!! Form::text('form[' . $no . '][admin_discount_type]', $ro['admin_discount_type'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                             @endif
                                             <td><button type="button" class="btn btn-icon btn-danger cancel_shipment"><i class="la la-close"></i> </button></td>
                                         </tr>

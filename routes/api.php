@@ -637,6 +637,9 @@ Route::name('api.')->group(function () {
         Route::prefix('hbl_konnect')->name('hbl_konnect.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
             Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+
+            Route::post('retail_note_information', 'APIController@hbl_konnect_retail_note_cash_collection_information')->name('retail_note_information');
+            Route::post('retail_note_transaction_information', 'APIController@hbl_konnect_retail_note_cash_collection_transactions')->name('retail_note_transaction_information');
         });
         Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
