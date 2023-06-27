@@ -302,7 +302,7 @@ class RetailShipmentBookController extends Controller
             if ($request->filled('admin_discount') && $request->admin_discount > 0) {
                 if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
                 {
-                    $rates['total_charges'] = ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
+                    $rates['total_charges'] = $rates['total_charges'] - ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
                 }
                 if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
                 {
@@ -579,7 +579,7 @@ class RetailShipmentBookController extends Controller
             if ($request->filled('admin_discount') && $request->admin_discount > 0) {
                 if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
                 {
-                    $details['total_charges'] = ($details['total_charges'] * $request->admin_discount)/100; // todo: for %
+                    $details['total_charges'] = $details['total_charges'] - ($details['total_charges'] * $request->admin_discount)/100; // todo: for %
                 }
                 if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
                 {
