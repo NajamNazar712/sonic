@@ -457,6 +457,7 @@
                         <div class="row mb-2">
                             {{csrf_field()}}
                             <input type="hidden" name="employee_id" id="employee_id" value="">
+                            <input type="hidden" id="selected_employee_id" value="">
                                 <div class="col"  id="employee_nature_list_group">
                                 <div class="form-group">
                                     <label>Employee Nature<span class="text-danger">*</span></label>
@@ -934,25 +935,27 @@
             $('#employee_nature_list').on('change',function () {
                 var replacementlist = $('#replacement_employee_list');
                 var employee_nature_list = $('#employee_nature_list').val();
-                var employee_id = $('#employee_id').val();
-                $.ajax({
-                    url:'{!! route('admin.management.rider.replacement.ajax') !!}',
-                    type:'GET',
-                    dataType:'json',
-                    data: {
-                        'employee_id':employee_id,
-                        'employee_nature_list':employee_nature_list,
-                    },
-                    success:function (data) {
+                var employee_id = $('#selected_employee_id').val();
+                if(employee_nature_list == 2){
 
-                        replacementlist.empty();
-                        $.each(data, function (key, value) {
-                            var newOption = "<option value="+ value.id +">" + value.code + ' ('  + value.start + ' to ' + value.end +')' +"</option>";
-                            replacementlist.append(newOption);
-                        });
-                        // replacementlist.val(route_id).trigger('change');
-                    }
-                });
+                    $.ajax({
+                        url:'{!! route('admin.management.rider.replacement.ajax') !!}',
+                        type:'GET',
+                        dataType:'json',
+                        data: {
+                            'employee_id':employee_id,
+                        },
+                        success:function (data) {
+                            console.log(data);
+                            replacementlist.empty();
+                            $.each(data.replacement_employees, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.trax_id + ' | '  + value.name +"</option>";
+                                replacementlist.append(newOption);
+                            });
+                            // replacementlist.val(route_id).trigger('change');
+                        }
+                    });
+                }
             });
 
             var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
@@ -1812,6 +1815,7 @@
                                     }
 
                                     $('#approveStaffForm #employee_id').val(data.employee_id);
+                                    $('#approveStaffForm #selected_employee_id').val(data.employee_id);
 
                                     $('#employeeRequiredInfoModal').modal('show');
                                 }

@@ -10887,13 +10887,21 @@ class AdminDashboardController extends Controller
         return response()->json($route);
     }
     
-    // public function replacementListAjax(Request $request)
-    // {
-    //     $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')
-    //     ->where('id', $request->id)
-    //     ->where('line_manager', )
-    //     ->whereNotNull('trax_id')->get();
-    // }
+    public function replacementListAjax(Request $request)
+    {
+        // This is employee list for if staff category type is contractual it return only contractual employees list because pnly contractual can replace contractual employee
+        $employee = Employee::find($request->employee_id);
+        $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')
+        ->where('employee_type_id', $employee->employee_type_id)
+        ->whereNotNull('trax_id');
+        if($employee->staff_category_id == 3){
+
+            $replacement_employees = $replacement_employees->where('staff_category_id', 3);
+        }
+        $replacement_employees = $replacement_employees->get();
+
+        return response()->json(['replacement_employees'=>$replacement_employees]);
+    }
 
     public function addRiderDetails(Request $request)
     {
