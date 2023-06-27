@@ -5515,7 +5515,6 @@ class ReturnController extends Controller
                          
                          //Check if the same shipment assigned to the same agent doesn't exist & created same day
                          $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
-                         
                          if(!$check_already_assigned){
                             $agent_return_confrimation = new RcpAssignedAgent;
                             $agent_return_confrimation->admin_id = $agent_id;
@@ -5549,7 +5548,7 @@ class ReturnController extends Controller
                             $assign_shipments_logs->save();
                         }
                         else{
-                            return response()->json(['status' => 1, 'error' => 'This shipment has already been assigned to another agent today!']);
+                            return response()->json(['status' => 1, 'error' => 'Please Un Assign the Shipments']);
                         }
 
                      }
