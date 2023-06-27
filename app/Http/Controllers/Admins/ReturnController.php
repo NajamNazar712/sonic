@@ -178,7 +178,7 @@ class ReturnController extends Controller
                         and rcp_assigned_shipments.assigned_status = 1)'))
                         
                         ->where('new_ras.user_id','=',null)
-                        ->whereDate('new_ras.created_at',date('Y-m-d'))
+                        // ->whereDate('new_ras.created_at',date('Y-m-d'))
                         ->where('new_ras.shipment_status','!=',3);
             })
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
@@ -890,40 +890,29 @@ class ReturnController extends Controller
 
                 //For New Return Assigned Shipments
                 $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1);
-                if($rcp_assigned_shipment->exists()){
+
+                if ($rcp_assigned_shipment->exists()) {
                     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                     $rcp_assigned_shipment->assigned_status = 2;
                     $rcp_assigned_shipment->save();
 
-                    $decrease_assigned_pending_shipments = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->whereDate('created_at',date('Y-m-d'))->first();
-                    $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
-                    $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
+                    $decrease_assigned_pending_shipments = RcpAssignedAgent::find($rcp_assigned_shipment->rcp_assigned_agent_id);
 
-                    $assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments; // Total assigned shipments
-                    $already_updated = $decrease_assigned_pending_shipments->already_updated; // Number of shipments already updated
-                    $actual_productivity = $decrease_assigned_pending_shipments->actual_productivity; 
-        
-                    $productivity = $decrease_assigned_pending_shipments->productivity; // Existing productivity of the agent = 0
-
-                    if ($actual_productivity != 0) {
-                        $productivity = number_format(($actual_productivity / ($assigned_shipments - $already_updated)) * 100, 2);
-                    } 
-                    
-                    else {
-                        $productivity = 0; // Set productivity to 0 if no remaining assigned shipments
+                    if ($decrease_assigned_pending_shipments) {
+                        $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
+                        $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
+                        $decrease_assigned_pending_shipments->save();
                     }
 
-                    $decrease_assigned_pending_shipments->productivity = $productivity;
-                    $decrease_assigned_pending_shipments->save();
-
-                    //updating Unassign log
+                    // Updating Unassign log
                     $assign_shipments_logs = new RcpAssignedShipmentLog();
                     $assign_shipments_logs->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                     $assign_shipments_logs->shipment_id = $rcp_assigned_shipment->shipment_id;
-                    $assign_shipments_logs->status = 2; //un assign status
+                    $assign_shipments_logs->status = 2; // Unassign status
                     $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
                     $assign_shipments_logs->save();
                 }
+
             }
             return ['status'=> 1,'success'=>"Agent Unassigned successfully"];
 
