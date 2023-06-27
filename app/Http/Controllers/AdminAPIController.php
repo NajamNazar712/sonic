@@ -3935,6 +3935,7 @@ class AdminAPIController extends Controller
         $employee_id = $request->admin_employee;
         $admins = Admin::find($admin_id);
         if ($admins) {
+            $date = '';
             $response = array();
             $admin_shift = EmployeeShift::where('id', $admins->shift_id);
             if ($admin_shift->exists()) {

@@ -2,7 +2,18 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\CrmAgentAutoAssign;
+use App\Http\Models\Admin\CrmAgentAutoAssignBusSeg;
+use App\Http\Models\Admin\CrmAgentAutoAssignCaseNature;
+use App\Http\Models\Admin\CrmAgentAutoAssignCnType;
+use App\Http\Models\Admin\CrmAgentAutoAssignHub;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipper;
+use App\Http\Models\Admin\CrmAgentAutoAssignShipStatus;
+use App\Http\Models\Admin\CrmAgentAutoAssignSNKey;
+use App\Http\Models\Admin\CrmAgentAutoAssignSubSegment;
+use App\Http\Models\Admin\CrmAgentAutoAssignZone;
 use App\Http\Models\Admin\SalePersonAssignedSegment;
+use App\Http\Models\Admin\Segment;
 use App\Http\Models\Admin\SegmentHistory;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -115,6 +126,7 @@ use App\Http\Models\ShipmentStatusReason;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\StarShipper;
+use App\Http\Models\SubCategorySegment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
@@ -1876,18 +1888,23 @@ class GlobalSettingsController extends Controller
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'foc_account_tag');
         $foc_account_tags = array();
+
         if ($settings->exists()) {
             $settings = $settings->first();
+
             $foc_account_tags = array_map('intval', explode(',', $settings->text));
         }
         return view('admin.settings.foc_account')->with(['shippers' => $shippers, 'foc_account_tags' => $foc_account_tags]);
     }
 
+
     public function foc_account_store(Request $request)
     {
         if ($request->has('shippers')) {
+
             if (count($request->shippers) > 0) {
                 $shippers = implode(',', $request->shippers);
+
                 $settings = GlobalSettings::where('type', 'foc_account_tag');
 
                 if ($settings->exists()) {
@@ -1899,6 +1916,47 @@ class GlobalSettingsController extends Controller
                     $settings->setting_value = 0;
                 }
                 $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
+    /*for mms setting controller*/
+    public function mms_report_index()
+    {
+        $users= User::where('status',3)->where('blacklist' ,0 )->select('id' , 'name')->get();
+        $settings = GlobalSettings::where('type', 'mms_setting');
+        $mms_setting_tags = array();
+        if ($settings->exists())
+        {
+            $settings = $settings->first();
+            $mms_setting_tags = array_map('intval',explode(',' , $settings->text));
+        }
+        return view('admin.settings.mms_setting')->with(['users' => $users , 'mms_setting_tags' =>$mms_setting_tags]);
+    }
+
+    public function mms_report_store(Request $request)
+
+    {
+        if ($request->has('users')) {
+
+            if (count($request->users) > 0) {
+                $users = implode(',', $request->users);
+
+                $settings = GlobalSettings::where('type', 'mms_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'mms_setting';
+                    $settings->setting_value = 0;
+                }
+                $settings->text = $users;
                 $settings->save();
             }
             return redirect()->back()->with('success', 'Settings Updated!');
@@ -4976,48 +5034,33 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_index()
     {
-
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 469);
+        $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning')->first();
         $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
-        $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
-        // $case_natures = CrmRequestCaseNature::whereIn('id',[1,2])->get();
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 469);
+        return view('admin.settings.CRM.auto_assigning')->with(['agents'=>$agents,'settings'=>$settings]);
 
-        return view('admin.settings.CRM.auto_assigning')->with(['agents' => $agents, 'zones' => $zones]);
     }
 
     public function crm_auto_assigning_list()
     {
-        $roles = CrmAgent::join('admins as ad', 'ad.id', '=', 'crm_agents.admin_id')
-            ->join('zones as z', 'z.id', 'crm_agents.zone_id')
-            ->select('crm_agents.id', 'ad.name as agent_name', 'z.name as zone_name', 'crm_agents.status as status', 'crm_agents.case_nature_id as case_nature');
+        $roles = CrmAgentAutoAssign::with('zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
+            ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
+            ->select([
+                'crm_agent_auto_assigns.id',
+                'crm_agent_auto_assigns.agent_id',
+                'crm_agent_auto_assigns.created_at',
+                'crm_agent_auto_assigns.status',
+                'ad.name as agent_name',
+            ]);
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
                 if (session('role_id') == 1 || in_array(618, session('permissions'))) {
-                    if ($roles->id == 1 || $roles->id == 2) {
+                        $route = route('admin.settings.auto_assigning.edit', ['id' => $roles->agent_id]);
                         $dropdown = '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
-                    ';
-
-                        if ($roles->status == 1) {
-
-                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                        } else {
-
-                            $dropdown .= ' <button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                        }
-                        $dropdown .= '</div>
-                    </div>
-                        ';
-
-                        return $dropdown;
-                    } else {
-                        $dropdown = '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                    ';
+                    <button  onclick="window.open(\'' . $route . '\')" type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
                         // $dropdown .=' <button type="button" class="dropdown-item delete"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Delete</div></button>';
                         if ($roles->status == 1) {
 
@@ -5032,43 +5075,276 @@ class GlobalSettingsController extends Controller
           ';
 
                         return $dropdown;
-                    }
+
                 } else {
                     return '';
                 }
             })
-            ->editColumn('zone_name', function ($roles) {
-                if ($roles->id == 1 || $roles->id == 2) {
-                    return '-';
-                } else {
-                    return $roles->zone_name;
+            ->addColumn('zone', function ($roles) {
+                    $zone = "<ul>";
+                    foreach ($roles->zones as $value){
+                        $zone.="<li>".$value->zones->name."</li>";
+                    }
+                    return $zone."</ul>";
+            })
+            ->addColumn('hub', function ($roles) {
+                $hub = "<ul>";
+                foreach ($roles->hubs as $value){
+                    $hub.="<li>".$value->hubs->name."</li>";
                 }
-            })->editColumn('status', function ($roles) {
+                return $hub."</ul>";
+
+            })
+            ->addColumn('case_nature', function ($roles) {
+                $case_natures = "<ul>";
+                foreach ($roles->case_natures as $value){
+                    $case_natures.="<li>".$value->case_natures->name."</li>";
+                }
+                return $case_natures."</ul>";
+
+            })
+            ->addColumn('case_nature_type', function ($roles) {
+                $case_natures_type = "<ul>";
+                foreach ($roles->case_nature_types as $value){
+                    $case_natures_type.="<li>".$value->case_nature_types->type."</li>";
+                }
+                return $case_natures_type."</ul>";
+
+            })
+            ->addColumn('business_segment', function ($roles) {
+                $business_segment = "<ul>";
+                foreach ($roles->business_types as $value){
+                    $business_segment.="<li>".$value->business_types->name."</li>";
+                }
+                return $business_segment."</ul>";
+
+            })
+            ->addColumn('sub_business_segment', function ($roles) {
+                $sub_business_types = "<ul>";
+                foreach ($roles->sub_business_types as $value){
+                    $sub_business_types.="<li>".$value->sub_business_types->name."</li>";
+                }
+                return $sub_business_types."</ul>";
+
+            })
+            ->addColumn('shipper_key', function ($roles) {
+                $shipper_key = "<ul>";
+                foreach ($roles->shipper_keys as $value){
+                    $shipper_key.="<li>".$value->shipper_keys->name."</li>";
+                }
+                return $shipper_key."</ul>";
+
+            })
+            ->addColumn('shipper_non_key', function ($roles) {
+                $shipper_non_key = "<ul>";
+                foreach ($roles->shipper_non_keys as $value){
+                    $shipper_non_key.="<li>".$value->shipper_non_keys->name."</li>";
+                }
+                return $shipper_non_key."</ul>";
+            })
+            ->addColumn('shipment_status', function ($roles) {
+                $shipment_statuses = "<ul>";
+                foreach ($roles->shipment_statuses as $value){
+                    $shipment_statuses.="<li>".$value->shipment_statuses->name."</li>";
+                }
+                return $shipment_statuses."</ul>";
+
+            })
+            ->editColumn('status', function ($roles) {
                 if ($roles->status == 1) {
                     return 'Enable';
                 } else {
                     return 'Disable';
                 }
-            })->editColumn('case_nature', function ($roles) {
-                if ($roles->case_nature == 4) {
-                    return 'Claim';
-                } else {
-                    return 'Complaints / Service Request';
-                }
             });
+
 
         return $datatables->make(true);
     }
 
+
+    public function crm_auto_assigning_edit($id)
+    {
+        $selected_agent =  CrmAgentAutoAssign::with('zones.zones','hubs.hubs','case_natures','case_nature_types','business_types','sub_business_types','shipper_keys','shipper_non_keys','shipment_statuses')
+        ->join('admins as ad', 'ad.id', '=', 'crm_agent_auto_assigns.agent_id')
+        ->select([
+            'crm_agent_auto_assigns.id',
+            'crm_agent_auto_assigns.agent_id',
+            'crm_agent_auto_assigns.created_at',
+            'crm_agent_auto_assigns.status',
+            'ad.name as agent_name',
+        ])
+        ->where('crm_agent_auto_assigns.agent_id', $id);
+
+        if($selected_agent->exists()) {
+            $selected_agent = $selected_agent->first();
+
+            $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+            $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
+            $case_natures = CrmRequestCaseNature::all();
+            $segments = Segment::all();
+            $shipment_status = ShipmentStatus::select('id', 'name')->get();
+            $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
+           // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+            $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                ->where('blacklist', '=', 0)
+                ->get()
+                ->filter(function ($user) {
+                    if(isset($user->sale_tier_tags['user_id'])){
+                        $kam_status = $user->sale_tier_tags['kam'];
+                        if(empty($kam_status)){
+                            return $user;
+                        }
+                    }else{
+                        return $user;
+                    }
+                });
+
+
+            $zn = $selected_agent->zones->pluck('zone_id')->toArray();
+            $hubs = City::whereIn('zone_id', $zn)->get();
+
+            $cn = $selected_agent->case_natures->pluck('case_nature_id')->toArray();
+            $case_nature_types = CrmRequestCaseNatureType::whereIn('nature_id', $cn)->get();
+
+            $bsi = $selected_agent->business_types->pluck('business_segment_id')->toArray();
+            $sub_segment = SubCategorySegment::whereIn('segment_id',$bsi)->select('id','name')->orderby('name','asc')->get();
+
+            return view('admin.settings.CRM.edit_auto_assign')->with(['selected_agent' => $selected_agent, 'agents' => $agents, 'zones' => $zones, 'case_natures' => $case_natures, 'segments' => $segments,'sub_segment'=>$sub_segment, 'shipper_key' => $shipper_key, 'shipper_non_key' => $shipper_non_key, 'shipment_status' => $shipment_status, 'hubs' => $hubs, 'case_nature_types' => $case_nature_types]);
+        }else{
+            return redirect()->route('admin.settings.auto_assigning.index')->with(['error' => 'No Agent Found With Given ID']);
+        }
+    }
+
+
+
     public function crm_auto_assigning_submit(Request $request)
     {
-        $crm_agent = CrmAgent::where('admin_id', $request->admin_id);
+        $admin_id = isset($request->admin_id) ? $request->admin_id : $request->id;
+        if(isset($request->id)){
+            
+            CrmAgentAutoAssign::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignHub::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignZone::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignShipStatus::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignCnType::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignCaseNature::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignBusSeg::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignShipper::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignSNKey::where('agent_id', $admin_id)->delete();
+            CrmAgentAutoAssignSubSegment::where('agent_id', $admin_id)->delete();
+        }
+        $crm_agent = CrmAgentAutoAssign::where('agent_id', $admin_id);
         if (!$crm_agent->exists()) {
 
-            CrmAgent::create($request->all());
-            return redirect()->back()->with('success', 'Agent Added!');
+            $agents = $admin_id;
+            $shipment_status_id = $request->input('shipment_status_id', null);
+            $zone_id = $request->input('zone_id', null);
+            $hub_id = $request->input('hub_id', null);
+            $case_nature_id = $request->input('case_nature_id', null);
+            $case_nature_type_id = $request->input('case_nature_type_id', null);
+            $shipper_key_id = $request->input('shipper_key_id', null);
+            $shipper_non_key_id = $request->input('shipper_non_key_id', null);
+            $business_segment_id = $request->input('business_segment_id', null);
+            $sub_business_segment_id = $request->input('sub_business_segment_id', null);
+
+            $crm_agent = new CrmAgentAutoAssign();
+            $crm_agent->agent_id = $agents;
+            $crm_agent->status = isset($request->status) ? $request->status : 0;
+            $crm_agent->save();
+
+            if(!empty($business_segment_id)) {
+               foreach ($business_segment_id as $key=>$value){
+                   $bs[$key]['agent_id'] = $agents;
+                   $bs[$key]['business_segment_id'] = $value;
+                   $bs[$key]['created_at'] = Carbon::now();
+                   $bs[$key]['updated_at'] = Carbon::now();
+               }
+               CrmAgentAutoAssignBusSeg::insert($bs);
+            }
+            if(!empty($sub_business_segment_id)) {
+               foreach ($sub_business_segment_id as $key=>$value){
+                   $sbs[$key]['agent_id'] = $agents;
+                   $sbs[$key]['sub_segment_id'] = $value;
+                   $sbs[$key]['created_at'] = Carbon::now();
+                   $sbs[$key]['updated_at'] = Carbon::now();
+               }
+                CrmAgentAutoAssignSubSegment::insert($sbs);
+            }
+            if(!empty($case_nature_id)) {
+                foreach ($case_nature_id as $key=>$value){
+                    $cn[$key]['agent_id'] = $agents;
+                    $cn[$key]['case_nature_id'] = $value;
+                    $cn[$key]['created_at'] = Carbon::now();
+                    $cn[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignCaseNature::insert($cn);
+            }
+            if(!empty($case_nature_type_id)) {
+                foreach ($case_nature_type_id as $key=>$value){
+                    $cnt[$key]['agent_id'] = $agents;
+                    $cnt[$key]['case_nature_type_id'] = $value;
+                    $cnt[$key]['created_at'] = Carbon::now();
+                    $cnt[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignCnType::insert($cnt);
+            }
+            if(!empty($hub_id)) {
+                foreach ($hub_id as $key=>$value){
+                    $hub[$key]['agent_id'] = $agents;
+                    $hub[$key]['hub_id'] = $value;
+                    $hub[$key]['created_at'] = Carbon::now();
+                    $hub[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignHub::insert($hub);
+            }
+            if(!empty($zone_id)) {
+                foreach ($zone_id as $key=>$value){
+                    $zn[$key]['agent_id'] = $agents;
+                    $zn[$key]['zone_id'] = $value;
+                    $zn[$key]['created_at'] = Carbon::now();
+                    $zn[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignZone::insert($zn);
+            }
+            if(!empty($shipper_key_id)) {
+                foreach ($shipper_key_id as $key=>$value){
+                    $sk[$key]['agent_id'] = $agents;
+                    $sk[$key]['shipper_key_id'] = $value;
+                    $sk[$key]['created_at'] = Carbon::now();
+                    $sk[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignShipper::insert($sk);
+            }
+            if(!empty($shipper_non_key_id)) {
+                foreach ($shipper_non_key_id as $key=>$value){
+                    $snk[$key]['agent_id'] = $agents;
+                    $snk[$key]['shipper_non_key_id'] = $value;
+                    $snk[$key]['created_at'] = Carbon::now();
+                    $snk[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignSNKey::insert($snk);
+            }
+            if(!empty($shipment_status_id)) {
+                foreach ($shipment_status_id as $key=>$value){
+                    $ss[$key]['agent_id'] = $agents;
+                    $ss[$key]['shipment_status_id'] = $value;
+                    $ss[$key]['created_at'] = Carbon::now();
+                    $ss[$key]['updated_at'] = Carbon::now();
+                }
+                CrmAgentAutoAssignShipStatus::insert($ss);
+            }
+
+            if(isset($request->id)){
+
+                return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Edit Agent Successfully!');
+            }else{
+                return redirect()->route('admin.settings.auto_assigning.index')->with('success', 'Agent Added!');
+
+            }
         } else {
-            return redirect()->back()->with('error', 'Agent Already Exists!');
+            return redirect()->route('admin.settings.auto_assigning.index')->with('error', 'Agent Already Exists!');
         }
     }
 
@@ -5103,7 +5379,7 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_assigning_enable_disable(Request $request)
     {
-        $crm_agent = CrmAgent::find($request->id);
+        $crm_agent = CrmAgentAutoAssign::find($request->id);
         if ($crm_agent->status == 1) {
             $crm_agent->status = 0;
             $crm_agent->save();
@@ -7919,4 +8195,67 @@ class GlobalSettingsController extends Controller
         }
 
     }*/
+
+    public function get_hub(Request  $request){
+        if(isset($request->zone_id)) {
+            $zone = $request->zone_id;
+            $hubs = City::where('hub', 1)->whereIn('zone_id',$zone)->select('id','name')->orderby('name','asc')->get();
+
+            return response()->json(['status' => 1, 'hubs' => $hubs]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+
+    public function case_nature_type(Request  $request){
+        if(isset($request->case_nature)) {
+            $case_nature = $request->case_nature;
+            $cnt = CrmRequestCaseNatureType::whereIn('nature_id',$case_nature)->select('id','type')->orderby('type','asc')->get();
+            return response()->json(['status' => 1, 'case_nature_type' => $cnt]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+    public function add_auto_assign_agent(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 661);
+        $agents = Admin::select('id', 'name')->whereIn('role_id', [37, 28])->get(); //37,28 role
+        $zones = Zone::where('status', 1)->where('business_category_id', 1)->get();
+        $case_natures = CrmRequestCaseNature::all();
+        $segments = Segment::all();
+        $shipment_status = ShipmentStatus::select('id', 'name')->get();
+        $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
+        //$shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                 ->where('blacklist', '=', 0)
+                 ->whereDoesntHave('sale_tier_tags')
+                 ->get();
+        return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones,'case_natures'=>$case_natures,'segments'=>$segments,'shipper_key'=>$shipper_key,'shipper_non_key'=>$shipper_non_key,'shipment_status'=>$shipment_status]);
+    }
+    public function global_status(Request $request){
+            $settings = GlobalSettings::where('type', '=', 'crm_agent_auto_assigning');
+            if($settings->exists()){
+                $settings = $settings->first();
+                $id = ($settings->setting_value == 1) ? 0 : 1;
+                $settings->setting_value = $id;
+                $settings->save();
+                if($settings->setting_value == 1){
+                    return redirect()->back()->with('success', 'Auto Assigning Enabled Successfully');
+                }else{
+                    return redirect()->back()->with('success', 'Auto Assigning Disabled Successfully');
+                }
+
+            }
+            return redirect()->back()->with('error', 'Settings Not Found');
+    }
+    public function get_sub_segments(Request  $request){
+        if(isset($request->business_segment_id)) {
+            $business_segment_id = $request->business_segment_id;
+            $sub_business_segment_id = SubCategorySegment::whereIn('segment_id',$business_segment_id)->select('id','name')->orderby('name','asc')->get();
+
+            return response()->json(['status' => 1, 'sub_segment' => $sub_business_segment_id]);
+        } else {
+            return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
 }

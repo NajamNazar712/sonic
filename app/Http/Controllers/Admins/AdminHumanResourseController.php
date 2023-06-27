@@ -685,6 +685,7 @@ class AdminHumanResourseController extends Controller
                     $admin = $admin->first();
                     $admin->password = bcrypt($employee->pin);
                     $admin->dummy_pin = $employee->pin;
+                    $admin->updated_by = Auth::id();
                     $admin->update();
                 }
             } else {
@@ -693,6 +694,7 @@ class AdminHumanResourseController extends Controller
                     $rider = $rider->first();
                     $rider->pin = bcrypt($employee->pin);
                     $rider->dummy_pin = $employee->pin;
+                    $rider->updated_by = Auth::id();
                     $rider->update();
                 }
             }

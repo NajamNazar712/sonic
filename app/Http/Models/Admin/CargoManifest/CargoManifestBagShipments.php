@@ -15,4 +15,9 @@ class CargoManifestBagShipments extends Model
     {
         return $this->belongsTo('App\Http\Models\Shipment','shipment_id');
     }
+
+    public function manifestBag_latest() {
+        return $this->belongsTo('App\Http\Models\Admin\CargoManifest\ManifestBag','cargo_manifest_bag_id','cargo_manifest_bag_id')->orderBy('created_at','desc');
+    }
+
 }

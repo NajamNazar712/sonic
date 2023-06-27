@@ -757,6 +757,8 @@ class Permission
             'crm.escalate' => 353,
             'crm.consignee_info.index' => 363,
             'crm.consignee_info.list' => 363,
+            'crm.dashboard.index' => 869,
+            'crm.dashboard.list' => 869,
 
             'settings.shippers.status_webhook.index' => 646,
             'settings.shippers.status_webhook.list' => 646,
@@ -1241,6 +1243,8 @@ class Permission
             
             'return.rcp_agent.index' => 600,
             'return.rcp_agent.list' => 600,
+            'return.new_rcp_agent.index' => 600,
+            'return.new_rcp_agent.list' => 600,
             'sales.territory.territoryindex' =>630,
             'sales.designation.designationindex' =>631,
             'settings.sales.incentive.index' =>632,
@@ -1249,6 +1253,9 @@ class Permission
 
             'settings.auto_assigning.index' => 616,
             'settings.auto_assigning.list' => 616,
+            'settings.auto_assigning.add' => 617,
+            'settings.auto_assigning.edit' => 618,
+            'settings.auto_assigning.global_status' => 872,
 
             'settings.reattempt_percentage.index' => 659,
 
@@ -1352,6 +1359,13 @@ class Permission
         
             'management.riders.rider_remarks.index'=>862,
  			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+            'return.rcp_agent_cn.index' => 876,
+            'return.new_rcp_agent_shipments.index' => 876,
+ 			'accounts.substitute_account_management.index' => 873,
+ 			'accounts.substitute_account_management.add.index' => 874,
+ 			'accounts.substitute_account_management.update.index' => 875,
+ 			'management.shipment_received.index' => 878,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,

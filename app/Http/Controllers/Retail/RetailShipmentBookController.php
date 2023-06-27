@@ -700,6 +700,15 @@ class RetailShipmentBookController extends Controller
                     .piece_number{
                         font-size: 2.5rem;
                     }
+
+                    .prominent{
+                      font-size:25px; 
+                      background-color:black !important; 
+                      color:white; 
+                      text-align:center; 
+                      font-weight: 900;
+                      position: relative;" 
+                    }
                 </style>
               </head>
               <body>
@@ -708,6 +717,17 @@ class RetailShipmentBookController extends Controller
 
         $html .= '
             <style>
+
+            @media print {
+              td.prominent{
+                  font-size:25px; 
+                  background-color:black !important; 
+                  color:white !important; 
+                  text-align:center; 
+                  font-weight: 900;
+                  position: relative;" 
+                }
+          }
               @font-face {
                 font-family: "Fajer Noori Nastalique";
                 src: url("' . asset('fonts/urdu/Fajer-Noori-Nastalique.eot') . '");
@@ -723,6 +743,15 @@ class RetailShipmentBookController extends Controller
 
               .urdu {
                 font-family: "Fajer Noori Nastalique";
+              }
+
+              .prominent{
+                font-size:25px; 
+                background-color:black !important; 
+                color:white; 
+                text-align:center; 
+                font-weight: 900;
+                position: relative;" 
               }
             </style>
         ';
@@ -818,7 +847,8 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="1" class="color primary"><strong>Weight</strong></td>
                                 <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
-                                <td colspan="1" class="color primary"><strong>Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
                                 <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
@@ -830,6 +860,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>
@@ -1021,49 +1052,44 @@ class RetailShipmentBookController extends Controller
                             </td>
                     ';
 
-                            if($shipment->business_category->id==2){
-                              $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
-                              ';
-                          }else{
-                            $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
-                            ';
-                          }
+                          //   if($shipment->business_category->id==2){
+                          //     $table_start .='<td class="color primary border twice-left"><strong>Service Type</strong></td>
+                          //     ';
+                          // }else{
+                          //   $table_start .='<td class="color primary border twice-left"><strong>Service</strong></td>
+                          //   ';
+                          // }
                             
 
-                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
-                        $table_start .= '
-                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    ';
-                    } else if ($shipment->booking_type_id == 2) {
-                            $table_start .= '
-                                <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
-                        ';
-                    }
-//                    else if ($shipment->booking_type_id == 3) {
-//                        $table_start .= '
-//                                <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
-//                    ';
-//                    }
-                    else {
-                        $table_start .= '
-                                <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-                    ';
-                    }
+                    // if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                    //     $table_start .= '
+                    //             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    // ';
+                    // } else if ($shipment->booking_type_id == 2) {
+                    //         $table_start .= '
+                    //             <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                    //     ';
+                    // }
+                    // else {
+                    //     $table_start .= '
+                    //             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+                    // ';
+                    // }
                     $table_start .= '
-                            <td class="color primary"><strong>Datetime</strong></td>
-                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
+                            <td class="color primary" ><strong>Datetime</strong></td>
+                            <td colspan="3">' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
                           <tr>';
-                          if($shipment->business_category->id==1){
-                            $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td><strong>' . $shipping_mode . '</strong></td>
-                ';
-                        }
+                //           if($shipment->business_category->id==1){
+                //             $table_start .='<td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                //             <td><strong>' . $shipping_mode . '</strong></td>
+                // ';
+                //         }
                            
 
                     $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
-                            <td>' . $shipment->order_id . '</td>
+                            <td colspan="3">' . $shipment->order_id . '</td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
@@ -1120,8 +1146,8 @@ class RetailShipmentBookController extends Controller
 
                     $table_end = '
                           <tr>
-                            <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                            <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
+                            <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                            <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>';
                     if($shipment->shipping_mode_id == 2 && $shipment->estimated_weight != null ) {
                         $table_end .= ' <td class="color primary border twice-top twice-bottom twice-left"><strong>Weight</strong></td>
                         <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . '</strong></td>
@@ -1177,6 +1203,30 @@ class RetailShipmentBookController extends Controller
                         ';
                         }
                     }
+
+                    $shiping_mode = "";
+                    $service_type = "";
+                    if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+                        $service_type .= '<td colspan="4"  class="prominent" ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                    } 
+                    else if ($shipment->booking_type_id == 2) {
+                        $service_type .= '<td colspan="4" class="prominent replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>';
+                    }
+                    else {
+                        $service_type .= '<td colspan="4" class="prominent ><strong>' . $shipment->booking_type->booking_type . '</strong></td>';
+                    }
+
+                    if($shipment->business_category->id==1){
+                            $shiping_mode .='<td colspan="2" class="prominent"><strong>' . $shipping_mode . '</strong></td>';
+                    }
+                    
+                    $table_end .= '
+                    <tr>
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Shipping Mode</strong></td>
+                     '.$shiping_mode.'
+                      <td colspan="1" style="font-size:13px;" class=""><strong>Service</strong></td>
+                      '.$service_type.'
+                    </tr> ';
 
                     $table_end .= '
                           </tr>
