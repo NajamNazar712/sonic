@@ -95,11 +95,12 @@ class ReattemptShipmentStatusController extends Controller
                                 $rcp_assigned_shipment->admin_id = $global_admin;
                                 $rcp_assigned_shipment->save();
 
+                                // Since this function is just approving the reattempt request we dont need to update the agent row
                                 //updating already_updated & pending of agent if shipment is updated by shipper 
-                                $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                                $already_updated = $rcp_assigned_agent->increment('already_updated');
-                                $rcp_assigned_agent->decrement('pending_shipments');
-                                $rcp_assigned_agent->save();
+                                // $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                // $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                // $rcp_assigned_agent->decrement('pending_shipments');
+                                // $rcp_assigned_agent->save();
 
 
                                 $return_assign_log = new RcpAssignedShipmentLog();
