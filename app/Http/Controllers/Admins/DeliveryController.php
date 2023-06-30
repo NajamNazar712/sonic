@@ -2410,17 +2410,17 @@ class DeliveryController extends Controller
                         }
                     } else {
                         if ($selected_status == 12) {
-                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                            if ($return_assign_shipment) {
-                                $return_assign_shipment->status = 0;
-                                $return_assign_shipment->save();
+                            // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                            // if ($return_assign_shipment) {
+                            //     $return_assign_shipment->status = 0;
+                            //     $return_assign_shipment->save();
 
-                                $return_assign_log = new ReturnAssignedShipmentLogs();
-                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                $return_assign_log->status = 6;
-                                $return_assign_log->assigned_by = Auth::id();
-                                $return_assign_log->save();
-                            }
+                            //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                            //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            //     $return_assign_log->status = 6;
+                            //     $return_assign_log->assigned_by = Auth::id();
+                            //     $return_assign_log->save();
+                            // }
                             if (in_array(session('role_id'), [18, 19]) && $selected_status == 12 && in_array($selected_reason, [1, 6, 8, 19]) && ($rcp_sms_setting->setting_value == 1) && !ReturnConfirmationPendingSmsAttempt::where('shipment_id', $shipment)->where('status', 0)->exists()) {
                                 //dispatch(new RCPSmsToConsignee($shipment));
                                 ReturnConfirmationPendingSmsAttempt::create(['shipment_id' => $shipment, 'status' => 0, 'count' => 0]);
@@ -2602,17 +2602,17 @@ class DeliveryController extends Controller
                             }
                         } else {
                             if ($request->status_drop[$shipment] == 12) {
-                                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                                if ($return_assign_shipment) {
-                                    $return_assign_shipment->status = 0;
-                                    $return_assign_shipment->save();
+                                // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                                // if ($return_assign_shipment) {
+                                //     $return_assign_shipment->status = 0;
+                                //     $return_assign_shipment->save();
 
-                                    $return_assign_log = new ReturnAssignedShipmentLogs();
-                                    $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                    $return_assign_log->status = 6;
-                                    $return_assign_log->assigned_by = Auth::id();
-                                    $return_assign_log->save();
-                                }
+                                //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                                //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                //     $return_assign_log->status = 6;
+                                //     $return_assign_log->assigned_by = Auth::id();
+                                //     $return_assign_log->save();
+                                // }
                             }
                             /* if(in_array(session('role_id'),[18,19]) && in_array($request->reason_drop[$shipment],[1,6,8,19]) && ($rcp_sms_setting->setting_value == 1) && ($now > $end_of_the_day)){
                                 dispatch(new RCPSmsToConsignee($shipment));
@@ -7409,28 +7409,28 @@ class DeliveryController extends Controller
                     ShipmentsJourneyController::add($shipment_id, 55, 55, NULL, NULL, NULL, Auth::id());
 
 
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
-                    $Intercept_Re_Book_Request = InterceptReBookRequest::where('shipment_id', $shipment_id)->latest()->first();
-                    if ($return_assign_shipment) {
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
+                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                    // $Intercept_Re_Book_Request = InterceptReBookRequest::where('shipment_id', $shipment_id)->latest()->first();
+                    // if ($return_assign_shipment) {
+                    //     $return_assign_shipment->status = 0;
+                    //     $return_assign_shipment->save();
 
 
-                        $return_assign_log = new ReturnAssignedShipmentLogs();
-                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        $return_assign_log->status = 11; //intercept request by 
-                        // if admin id is null set shippper_id as assigned by else set admin id
-                        $return_assign_log->assigned_by = $Intercept_Re_Book_Request->admin_id ? $Intercept_Re_Book_Request->admin_id : InterceptReBookRequest::where('shipment_id', $shipment_id)->value('shipper_id');
-                        $return_assign_log->save();
+                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    //     $return_assign_log->status = 11; //intercept request by 
+                    //     // if admin id is null set shippper_id as assigned by else set admin id
+                    //     $return_assign_log->assigned_by = $Intercept_Re_Book_Request->admin_id ? $Intercept_Re_Book_Request->admin_id : InterceptReBookRequest::where('shipment_id', $shipment_id)->value('shipper_id');
+                    //     $return_assign_log->save();
 
-                        $return_assign_log = new ReturnAssignedShipmentLogs();
-                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        $return_assign_log->status = 3;
-                        $return_assign_log->assigned_by = Auth::id();
-                        $return_assign_log->save();
-                    }
+                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    //     $return_assign_log->status = 3;
+                    //     $return_assign_log->assigned_by = Auth::id();
+                    //     $return_assign_log->save();
+                    // }
 
-                    //  Updating  RcpAssignedShipment Table and log 
+                    //  Updating  RcpAssignedShipment Table and log for Intercept approval
                      $rcp_assigned_shipment_request_intercept = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('shipment_status', 7);
                      if($rcp_assigned_shipment_request_intercept->exists()){
 
