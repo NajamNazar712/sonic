@@ -1283,41 +1283,21 @@
                                                                                 containerId: 'toast-bottom-center'
                                                                             });
                                                                 } else {
-                                                                    toastr
-                                                                        .error(
-                                                                            data
-                                                                            .error,
-                                                                            'Error!', {
-                                                                                positionClass: 'toast-top-center',
-                                                                                containerId: 'toast-top-center'
-                                                                            });
+                                                                    $('#AssignAgentModal').modal('hide');
+                                                                    toastr.error(data.error,
+                                                                    'Error!', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
                                                                 }
-                                                                selected_rows
-                                                                    = [];
-                                                                restricted_rows
-                                                                    = [];
-
-                                                                table.rows()
-                                                                    .deselect();
-
-                                                                table.draw(
-                                                                true);
-                                                                table.button(
-                                                                        '.assign'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.confirm'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.re-attempt'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.un-assign'
-                                                                        )
-                                                                    .disable();
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                table.rows().deselect();
+                                                                table.draw( true);
+                                                                table.button( '.assign' ).disable();
+                                                                table.button( '.confirm' ).disable();
+                                                                table.button('.re-attempt').disable();
+                                                                table.button('.un-assign').disable();
 
                                                             });
                                                     } else {
@@ -1377,8 +1357,7 @@
                                                 table.rows().nodes().each(function(index) {
                                                     var row = table.row(index);
 
-                                                    if ($(row.node()).hasClass(
-                                                            'selected')) {
+                                                    if ($(row.node()).hasClass('selected')) {
                                                         var id = parseInt(row.id());
                                                         // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
                                                         // shipment_remarks[id] = remark;
@@ -1413,7 +1392,6 @@
                                                             positionClass: 'toast-bottom-center',
                                                             containerId: 'toast-bottom-center'
                                                         });
-
                                                 });
                                             }
                                         });

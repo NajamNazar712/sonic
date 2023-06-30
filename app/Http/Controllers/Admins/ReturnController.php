@@ -1971,7 +1971,7 @@ class ReturnController extends Controller
  
                              $return_assign_log = new RcpAssignedShipmentLog();
                              $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                             $return_assign_log->shipment_id = $rcp_assigned_shipment->id;
                              $return_assign_log->status = 3; //reattempt status
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
@@ -5096,7 +5096,8 @@ class ReturnController extends Controller
                 // Check if the agent doesn't exist and created same day
                 if (!$check_agent_return_confrimation->exists()) {
                     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
+                     ->where('admin_roles.department_id',3)
+                     ->where('a.id',$request->admin_id)->where('a.status',1);
                      
                      if($agent_role->exists()){
                          
@@ -5135,7 +5136,7 @@ class ReturnController extends Controller
                             $assign_shipments_logs->save();
                         }
                         else{
-                            return response()->json(['status' => 1, 'error' => 'This shipment has already been assigned to an another agent!']);
+                            return response()->json(['status' => 1, 'error' => 'This shipment has already been assigned to agent!']);
                         }
 
                      }
@@ -5146,9 +5147,9 @@ class ReturnController extends Controller
                 {
                     
                     $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
-                    $check_shipment_assigned_status_update = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', '!=', 0)->whereRaw(''updated_at < NOW() - INTERVAL 5 MINUTE'')->first();
-                    if(!$check_already_assigned && $check_shipment_assigned_status_update){
-                    // if(!$check_already_assigned){
+                    // $check_shipment_assigned_status_update = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', '!=', 0)->whereRaw('updated_at < NOW() - INTERVAL 5 MINUTE')->first();
+                    // if(!$check_already_assigned && $check_shipment_assigned_status_update){
+                    if(!$check_already_assigned){
                         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
                         $check_agent_return_confrimation->increment('total_shipments');
                         $check_agent_return_confrimation->increment('assigned_shipments');
@@ -5181,7 +5182,7 @@ class ReturnController extends Controller
                         $assign_shipments_logs->save();
                     }
                     else{
-                        return response()->json(['status' => 1, 'error' => 'This shipment has already been assigned to same agent or Agent has just updated the status!']);
+                        return response()->json(['status' => 1, 'error' => 'This shipment has already been assigned to an agent!']);
                     }
 
                 }
