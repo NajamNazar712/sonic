@@ -634,7 +634,7 @@ class ShipperAPIController extends Controller
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
-                            $rcp_assigned_shipment->shipment_status = 3; //reattempt status
+                            $rcp_assigned_shipment->shipment_status = 10; //reattempt request status
                             $rcp_assigned_shipment->user_id = $shipper_id;
                             $rcp_assigned_shipment->save();
 
@@ -648,7 +648,7 @@ class ShipperAPIController extends Controller
                             $return_assign_log = new RcpAssignedShipmentLog ();
                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                            $return_assign_log->status = 3; //reattempt status
+                            $return_assign_log->status = 10; //reattempt request status
                             $return_assign_log->user_id = $shipper_id;
                             $return_assign_log->save();
                         }

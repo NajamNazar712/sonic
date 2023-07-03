@@ -500,7 +500,7 @@ class ShipperReturnController extends Controller
                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
-                       $rcp_assigned_shipment->shipment_status = 3; //reattempt status
+                       $rcp_assigned_shipment->shipment_status = 10; //reattempt request status
                        $rcp_assigned_shipment->user_id = Auth::id();
                        $rcp_assigned_shipment->save();
 
@@ -514,7 +514,7 @@ class ShipperReturnController extends Controller
                        $return_assign_log = new RcpAssignedShipmentLog ();
                        $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                        $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                       $return_assign_log->status = 3; //reattempt status
+                       $return_assign_log->status = 10; //reattempt request status
                        $return_assign_log->user_id = Auth::id();
                        $return_assign_log->save();
                    }
@@ -573,7 +573,7 @@ class ShipperReturnController extends Controller
                    if($rcp_assigned_shipment->exists()){
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        
-                        $rcp_assigned_shipment->shipment_status = 3; //re-attempt status
+                        $rcp_assigned_shipment->shipment_status = 10; //re-attempt request status
                         $rcp_assigned_shipment->user_id = Auth::id();
                         $rcp_assigned_shipment->save();
                        //updating already_updated & pending of agent if shipment is updated by shipper 
@@ -586,7 +586,7 @@ class ShipperReturnController extends Controller
                        $return_assign_log = new RcpAssignedShipmentLog();
                        $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                        $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                       $return_assign_log->status = 3; //re-attempt status
+                       $return_assign_log->status = 10; //re-attempt request status
                        $return_assign_log->user_id = Auth::id();
                        $return_assign_log->save();
                    }
