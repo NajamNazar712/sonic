@@ -2506,7 +2506,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash->status_id = 1;
                 $petty_cash->save();
 
-                return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Petty Cash Created']);
+                return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Advance Petty Cash Created']);
             }
 
         } else {
@@ -2690,7 +2690,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash_statement_id = $request->petty_statement_id;
                 $actual_amount = $request->petty_statement_actual_amount;
 
-                $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id)->whereIn('status',[0,1]);
+                $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id)->whereIn('status',[0,2]);
                 $petty_detail_amount_sum = array_sum($request['amount']);
                 if($existing_petty_cash->exists())
                 {
@@ -3005,7 +3005,7 @@ class AdminPettyCashController extends Controller
                        
                         $petty = $petty_details->petty_cash_statement;
                        
-                        $petty->balance = $petty->balance - $petty->amount_availed - $petty_details->amount;
+                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;
                         $petty->amount_availed += $petty_details->amount;
                         $petty->save();
 
