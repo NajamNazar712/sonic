@@ -423,7 +423,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.overall_sales.list') }}',
+                        url: '{{ route('admin.reports.overland.list') }}',
                         method:'post',
                         headers: {
                             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
@@ -435,55 +435,30 @@
                             head.push('S. No.');
                             head.push('Tracking No.');
                             head.push('Account No.');
-                            head.push('Shipper');
+                            head.push('Shipper Name');
                             head.push('Sub Segment');
-                            head.push('Vendor');
                             head.push('Order ID');
+                            head.push('Sub Segment');
                             head.push('Status');
-                            head.push('Reason');
-                            head.push('Remark');
-                            head.push('Total Attempt');
-                            head.push('Payment Status');
-                            head.push('Invoice No.');
-                            head.push('Payment ID');
                             head.push('Service Type');
+                            head.push('Booked Date');
                             head.push('Arrival Date');
-                            head.push('Rider');
+                            head.push('In Transit Date');
+                            head.push('Arrived At Destination Date');
                             head.push('Origin');
+                            head.push('Origin Zone');
                             head.push('Destination');
-                            // head.push('Consignee Address');
                             head.push('Hub');
-                            head.push('Return City');
-                            head.push('Zone');
-                            head.push('Class');
-                            head.push('Attempts');
-                            head.push('Shipping Mode');
-                            head.push('Category');
-                            head.push('Description');
-                            head.push('International Tracking No.');
-                            head.push('Collection Amount');
+                            head.push('Destination Zone');
+                            head.push('COD Amount');
                             head.push('Actual Weight');
-                            head.push('Chargeable Weight');
-                            head.push('Weight Charges');
-                            head.push('Cash Handling Charges');
-                            head.push('Insurance Charges');
-                            head.push('Packaging Charges');
-                            head.push('Fuel Surcharge');
-                            head.push('Return Charges');
-                            head.push('Replacement Charges');
-                            head.push('Try & Buy Charges');
-                            head.push('NSA/OSA Charges');
-                            head.push('GST');
-                            head.push('Intercept Charges');
-                            head.push('Total Charges');
-                            head.push('Estimated Charges');
-                            head.push('Packing Charges');
-                            head.push('Net Payable');
-                            head.push('Delivered/Returned Date');
-                            head.push('Received/Refused By');
-                            head.push('Sales Person');
-                            head.push('Reason');
-                            head.push('Special Instructions');
+                            head.push('Delivered/Return Date');
+                            head.push('Sale Person');
+                            head.push('Booking To Arrival Tat');
+                            head.push('Arrival To Transit Tat');
+                            head.push('Transit To Arrival At Destination Tat');
+                            head.push('Arrived At Destination to First Out Four Delivery Tat');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -491,54 +466,27 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
-                                row.push(values.sub_segment);
-                                row.push(values.vendor);
                                 row.push(values.order_id);
+                                row.push(values.sub_segment);
                                 row.push(values.current_status);
-                                row.push(values.reason);
-                                row.push(values.remark);
-                                row.push(values.total_attempt);
-                                row.push(values.payment_status);
-                                row.push(values.invoice_number);
-                                row.push(values.payment_id);
                                 row.push(values.service_type);
+                                row.push(values.booked_date);
                                 row.push(values.arrival_date);
-                                row.push(values.ridername);
+                                row.push(values.intransit_date);
+                                row.push(values.arrived_at_destination_date);
                                 row.push(values.origin);
-                                row.push(values.destination);
-                                // row.push(values.consignee_address);
-                                row.push(values.hub);
-                                row.push(values.return_city);
                                 row.push(values.zone);
-                                row.push(values.class);
-                                row.push(values.attempts);
-                                row.push(values.shipping_mode);
-                                row.push(values.category);
-                                row.push(values.description);
-                                row.push(values.international_tracking_number);
-                                row.push(values.p_collection_amount);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.destination_zone);
+                                row.push(values.s_collection_amount);
                                 row.push(values.actual_weight);
-                                row.push(values.chargeable_weight);
-                                row.push(values.weight_charges);
-                                row.push(values.cash_handling_charges);
-                                row.push(values.insurance_charges);
-                                row.push(values.packaging_material_charges);
-                                row.push(values.fuel_surcharge);
-                                row.push(values.return_charges);
-                                row.push(values.replacement_charges);
-                                row.push(values.try_and_buy_charges);
-                                row.push(values.nsa_osa_charges);
-                                row.push(values.p_gst);
-                                row.push(values.intercept_charges);
-                                row.push(values.p_total_charges);
-                                row.push(values.estimated_charges);
-                                row.push(values.packaging_charges);
-                                row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
-                                row.push(values.received_or_refused_by);
                                 row.push(values.sales_person);
-                                row.push(values.reason);
-                                row.push(values.special_instructions);
+                                row.push(values.booking_to_arrival_date_count);
+                                row.push(values.arrival_to_transit_date_count);
+                                row.push(values.transit_to_arrived_dest_date_count);
+                                row.push(values.arrive_to_delivery_date_count);
 
                                 body.push(row);
                             });
@@ -556,7 +504,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Overall Sales Report',
+                        title: 'Overland Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

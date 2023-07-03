@@ -11391,7 +11391,7 @@ class AdminReportsController extends Controller
 
     public function overland_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 149);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 679);
         if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
             $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
         } else {
@@ -11410,11 +11410,10 @@ class AdminReportsController extends Controller
 
     public function overland_list(Request $request)
     {
-//        dd(2);
         $connection = 'reports';
 
         if ($request->get('excel') && $request->get('excel') == true) {
-            ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 679);
         }
         $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
         $arrival_to   = Carbon::parse($request->arrival_time_to)->format('H:i:s');
@@ -11426,7 +11425,7 @@ class AdminReportsController extends Controller
 
         $from = str_replace('00:00:00', $arrival_from, $from);
         $to   = str_replace('00:00:00', $arrival_to, $to);
-//dd($request->all());
+
         $overland = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
@@ -11506,7 +11505,7 @@ class AdminReportsController extends Controller
             ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as booked_date', 'sja.created_at as arrival_date','sjb.created_at as intransit_date','sjc.created_at as arrived_at_destination_date','sjd.created_at as out_for_delivery_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'dr.created_at as delivered_or_returned', 'z.name as zone','dz.name as destination_zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city')
             ->whereIn('shipments.shipper_status_id', [1,2,3,4,5])
             ->where('u.sub_segment_id',1)
-            ->where('shipments.id',1724845)
+//            ->where('shipments.id',1724845)
             ->whereBetween('sj.created_at', [$from, $to]);
 
         $datatable = Datatables::of($overland)
@@ -11687,8 +11686,6 @@ class AdminReportsController extends Controller
         if ($search_business_category = $request->get('search_business_category')) {
             $datatable->where('shipments.business_category_id', '=', $search_business_category);
         }
-
-//        dd($overland->get(),$from,$to);
 
         return $datatable->make(true);
 
