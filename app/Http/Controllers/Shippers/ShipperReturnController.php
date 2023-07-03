@@ -429,6 +429,7 @@ class ShipperReturnController extends Controller
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        $rcp_assigned_shipment->shipment_status = 4; //return confirm status
+                       $rcp_assigned_shipment->assigned_status = 2;
                        $rcp_assigned_shipment->user_id = Auth::id();
                        $rcp_assigned_shipment->save();
 
