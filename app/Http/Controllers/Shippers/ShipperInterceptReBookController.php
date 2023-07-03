@@ -121,6 +121,7 @@ class ShipperInterceptReBookController extends Controller
                             
                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 7; //intercept request
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = Auth::id();
                             $rcp_assigned_shipment->save();
 
@@ -191,12 +192,13 @@ class ShipperInterceptReBookController extends Controller
                         //     $return_assign_log->save();
                         // }
 
-                        //Updating New RcpAssigned Tables
+                        //Updating New RcpAssigned Tables 
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
                         if ($rcp_assigned_shipment && $rcp_assigned_shipment->exists()) {
                             
                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 8; //intercept approved
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = Auth::id();
                             $rcp_assigned_shipment->save();
 
