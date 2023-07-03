@@ -1624,7 +1624,8 @@
                                 });
                             }
                         },
-                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
+
+                        @if(session('role_id') == 1 || in_array(884, session('permissions')))
                         {
                             title: 'Upload',
                             className: 'btn btn-primary excel-upload',
@@ -1633,6 +1634,9 @@
                                 $('#excel_upload_modal').modal('show');
                             }
                         },
+                        @endif
+
+                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
                         {
                             title: 'Upload Agent',
                             className: 'btn btn-primary excel-upload',

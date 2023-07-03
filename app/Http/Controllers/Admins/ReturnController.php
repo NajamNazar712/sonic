@@ -5028,7 +5028,6 @@ class ReturnController extends Controller
 
 
     }
-
     public function assign_agent(Request $request){
         $shipment_ids = $request->shipment_ids;
         if($shipment_ids){
@@ -5089,9 +5088,6 @@ class ReturnController extends Controller
                 //set record in login/logout table end
                 
             // }
-            ////////////////////////////////////////////////////////////
-            // for new return_shipments_assigned_agents
-            // foreach ($shipment_ids as $shipment_id){
 
                 $check_agent_return_confrimation = RcpAssignedAgent::where('admin_id',$request->admin_id)->whereDate('created_at',date('Y-m-d'));
                 // Check if the agent doesn't exist and created same day
