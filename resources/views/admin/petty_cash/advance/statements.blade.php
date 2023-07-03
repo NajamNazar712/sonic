@@ -85,7 +85,7 @@
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Date</th>
                         <th class="border-primary border-darken-1">Total Amount</th>
-                        <th class="border-primary border-darken-1">Amount Availed</th>
+                        <th class="border-primary border-darken-1">Amount Availed (Only Approved) </th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -227,7 +227,7 @@
                             head.push('Statement Reference No.');
                             head.push('Date');
                             head.push('Total Amount');
-                            head.push('Amount Availed');
+                            head.push('Amount Availed (Only Approved)');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Operation Approved By');
@@ -513,7 +513,7 @@
                 if(id){
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to approve petty cash statement!',
+                        text: 'Select Yes to approve advance petty cash statement!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -543,7 +543,7 @@
                                 }
                             }).done(function(data){
                                 if(data.status){
-                                    table.draw(true);
+                                    table.draw();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});

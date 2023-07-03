@@ -577,6 +577,7 @@
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     current.parents('td').prev('td').text('Approved');
                                     current.parents('tr').attr('status',2);
+                                    location.reload();
                                 }
                                 else{
                                     toastr.error(data.error, 'Error!', {

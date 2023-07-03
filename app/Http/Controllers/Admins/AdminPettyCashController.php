@@ -2618,7 +2618,9 @@ class AdminPettyCashController extends Controller
                     $dropdown .= '<a href="' . $edit_route . '" class="dropdown-item" ><i class="ft-eye"></i> Edit Details</a>';
                 }
             }
+            if($petty->status == 1){
                 return $dropdown;
+            }
             });
         if ($hub = $request->get('search_hub')) {
             $petty->where('h.id', '=', $hub);
@@ -2992,7 +2994,7 @@ class AdminPettyCashController extends Controller
                        
                         $petty = $petty_details->petty_cash_statement;
                        
-                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;;
+                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;
                         $petty->amount_availed += $petty_details->amount;
                         $petty->save();
 
