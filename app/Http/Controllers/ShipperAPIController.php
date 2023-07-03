@@ -930,7 +930,7 @@ class ShipperAPIController extends Controller
                             }
 
                         }
-                        return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
+                        return response()->json(['status' => 0, 'message' => 'IIntercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']]);
