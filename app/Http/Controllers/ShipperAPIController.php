@@ -559,6 +559,7 @@ class ShipperAPIController extends Controller
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = $shipper_id;
                             $rcp_assigned_shipment->save();
 
@@ -635,6 +636,7 @@ class ShipperAPIController extends Controller
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 10; //reattempt request status
+                            $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                             $rcp_assigned_shipment->user_id = $shipper_id;
                             $rcp_assigned_shipment->save();
 

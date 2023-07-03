@@ -72,9 +72,9 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Assigned To</th>
                         <th class="border-primary border-darken-1">Assigned Status</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
-                        <th class="border-primary border-darken-1">Agent Status</th>
-                        <th class="border-primary border-darken-1">Agent Status Date</th>
+                        <th class="border-primary border-darken-1">Updated By (Admin, Agent, Shipper)</th>
+                        <th class="border-primary border-darken-1">Status (Admin, Agent, Shipper)</th>
+                        <th class="border-primary border-darken-1">Status Date</th>
                     </tr>
                     </thead>
                 </table>
