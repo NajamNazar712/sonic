@@ -2461,6 +2461,8 @@ class AdminPettyCashController extends Controller
         $employees = Admin::where('trax_id', '!=', null)->where('status', 1)->select(['id', 'trax_id'])->get();
         $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
+        $exclude_advance_sdns = AdvancePettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
+        $excliude_sdns = array_merge($exclude_advance_sdns,$exclude_sdns);
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id',$exclude_sdns)->select('id')->get();
         } else {
@@ -2500,6 +2502,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash->station_manager_id = $request->select_statement_station_manager;
                 $petty_cash->created_by = Auth::id();
                 $petty_cash->total_amount = $request->amount;
+                $petty_cash->balance = $request->amount;
                 $petty_cash->status_id = 1;
                 $petty_cash->save();
 
@@ -2546,7 +2549,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
             ->leftjoin('advance_petty_cash_statement_statuses as apcs','advance_petty_cash_statements.status_id','=','apcs.id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
-            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed')
+            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed','advance_petty_cash_statements.balance as balance_amount')
             ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
@@ -2687,7 +2690,7 @@ class AdminPettyCashController extends Controller
                 $petty_cash_statement_id = $request->petty_statement_id;
                 $actual_amount = $request->petty_statement_actual_amount;
 
-                $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id);
+                $existing_petty_cash = AdvancePettyCashStatementDetail::where('petty_cash_id',$petty_cash_statement_id)->whereIn('status',[0,1]);
                 $petty_detail_amount_sum = array_sum($request['amount']);
                 if($existing_petty_cash->exists())
                 {
@@ -2779,10 +2782,18 @@ class AdminPettyCashController extends Controller
 
         $employees = Admin::where('trax_id','!=',null)->where('status',1)->select(['id','trax_id'])->get();
         $operation_managers = Admin::where('role_id',10)->where('status',1)->select(['id','trax_id','name'])->get();
+        // if (session('role_id') == 1) {
+        //     $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
+        // } else {
+        //     $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
+        // }
+        $exclude_sdns = PettyCashStatement::where('sdn_id', '>', 0)->distinct()->pluck('sdn_id')->toArray();
+        $exclude_advance_sdns = AdvancePettyCashStatement::where('sdn_id', '>', 0)->distinct()->pluck('sdn_id')->toArray();
+        $excliude_sdns = array_merge($exclude_advance_sdns, $exclude_sdns);
         if (session('role_id') == 1) {
-            $sdns = StationDepositNote::where('status','!=', 2)->select('id')->get();
+            $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id', $exclude_sdns)->select('id')->get();
         } else {
-            $sdns = StationDepositNote::where('status','!=', 2)->whereIn('hub_id', session('hubs'))->select('id')->get();
+            $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id', $exclude_sdns)->whereIn('hub_id', session('hubs'))->select('id')->get();
         }
 
         return view('admin.petty_cash.advance.edit_make_detail')->with(['heads' => $head, 'petty_statement' => $petty,'zones'=>$zones,'sdns'=>$sdns,'employees'=>$employees,'operation_managers'=>$operation_managers,'hub_array'=>$hub_array]);
@@ -2994,7 +3005,7 @@ class AdminPettyCashController extends Controller
                        
                         $petty = $petty_details->petty_cash_statement;
                        
-                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;
+                        $petty->balance = $petty->balance - $petty->amount_availed - $petty_details->amount;
                         $petty->amount_availed += $petty_details->amount;
                         $petty->save();
 
@@ -3051,13 +3062,13 @@ class AdminPettyCashController extends Controller
     }
 
     public function advance_edit_make_petty_cash_statement_detail_submit(Request $request)
-    {   
-        $selected_ids = explode(',', $request->input('selected_rows'));
+    {   //dd($request->all());
+        $selected_ids = ($request->input('selected_rows') != NULL ) ?  explode(',', $request->input('selected_rows')) : array();
         $statement_id = $request->petty_statement_id;
         $petty_cash = AdvancePettyCashStatement::find($statement_id);
         $amount_availed = 0;
 
-        $petty_detail_amount_sum = array_sum($request['amount']);
+        $petty_detail_amount_sum = ($request->input('selected_rows') != NULL ) ? array_sum($request['amount']) : 0;
         //$existing_petty_cash_sum = AdvancePettyCashStatementDetail::where('petty_cash_id', $petty_cash->id)->sum('amount');
                 
         if(($petty_detail_amount_sum > $petty_cash->total_amount)){
@@ -3070,50 +3081,53 @@ class AdminPettyCashController extends Controller
                 return redirect()->route('admin.petty_cash.advance.statement');
             }
 
-            foreach ($selected_ids as $selected_id) {
+            if(count($selected_ids) > 0){
+            
+                foreach ($selected_ids as $selected_id) {
 
-                $petty_detail = AdvancePettyCashStatementDetail::where('petty_cash_id', $petty_cash->id)->where('id', $selected_id)->first();
-                if($petty_detail->status == 0)
-                {
-                    $amount_availed += $request->amount[$selected_id];
-                    if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
-                        $petty_detail->account_head_id = $request->head[$selected_id];
-                        $petty_detail->account_title_id = $request->title[$selected_id];
-                    }
+                    $petty_detail = AdvancePettyCashStatementDetail::where('petty_cash_id', $petty_cash->id)->where('id', $selected_id)->first();
+                    if($petty_detail->status == 0)
+                    {
+                        $amount_availed += $request->amount[$selected_id];
+                        if (session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)) {
+                            $petty_detail->account_head_id = $request->head[$selected_id];
+                            $petty_detail->account_title_id = $request->title[$selected_id];
+                        }
 
-                    $petty_detail->expense_details = $request->expense[$selected_id];
-                    $petty_detail->reference_no = $request->reference[$selected_id];
-                    $petty_detail->remarks = $request->remarks[$selected_id];
+                        $petty_detail->expense_details = $request->expense[$selected_id];
+                        $petty_detail->reference_no = $request->reference[$selected_id];
+                        $petty_detail->remarks = $request->remarks[$selected_id];
 
-                    if ($petty_cash->status == 0) {
-                        $petty_detail->amount = $request->amount[$selected_id];
-                        $petty_detail->dncc_id = $request->dncc[$selected_id] ?? null;
-                        $petty_detail->delivered_shipments = $request->delivered_shipment_count[$selected_id] ?? null;
-                    }
-                    $petty_detail->save();
-
-                    if ($request->hasFile('upload_image' . $petty_detail->id)) {
-                        $file = $request->file('upload_image' . $petty_detail->id);
-                        $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
-                        Storage::disk('public')->delete('advance_petty_cash_statement_details/' . $filename);
-
-
-                        Storage::disk('public')->putFileAs('advance_petty_cash_statement_details', $file, $filename);
-
-                        $petty_detail->reference_document = $filename;
+                        if ($petty_cash->status == 0) {
+                            $petty_detail->amount = $request->amount[$selected_id];
+                            $petty_detail->dncc_id = $request->dncc[$selected_id] ?? null;
+                            $petty_detail->delivered_shipments = $request->delivered_shipment_count[$selected_id] ?? null;
+                        }
                         $petty_detail->save();
-                    }
 
-                    if ($request->hasFile('upload_2_image' . $petty_detail->id)) {
-                        $file = $request->file('upload_2_image' . $petty_detail->id);
-                        $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
-                        Storage::disk('public')->delete('advance_petty_cash_statement_details/' . $filename);
+                        if ($request->hasFile('upload_image' . $petty_detail->id)) {
+                            $file = $request->file('upload_image' . $petty_detail->id);
+                            $filename = 'statement_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                            Storage::disk('public')->delete('advance_petty_cash_statement_details/' . $filename);
 
 
-                        Storage::disk('public')->putFileAs('advance_petty_cash_statement_details', $file, $filename);
+                            Storage::disk('public')->putFileAs('advance_petty_cash_statement_details', $file, $filename);
 
-                        $petty_detail->reference_document_2 = $filename;
-                        $petty_detail->save();
+                            $petty_detail->reference_document = $filename;
+                            $petty_detail->save();
+                        }
+
+                        if ($request->hasFile('upload_2_image' . $petty_detail->id)) {
+                            $file = $request->file('upload_2_image' . $petty_detail->id);
+                            $filename = 'statement_2_' . $petty_cash->id . '_detail_' . $petty_detail->id.'.'.$file->getClientOriginalExtension();
+                            Storage::disk('public')->delete('advance_petty_cash_statement_details/' . $filename);
+
+
+                            Storage::disk('public')->putFileAs('advance_petty_cash_statement_details', $file, $filename);
+
+                            $petty_detail->reference_document_2 = $filename;
+                            $petty_detail->save();
+                        }
                     }
                 }
             }
@@ -3129,9 +3143,11 @@ class AdminPettyCashController extends Controller
                 $petty_cash->sdn_id = $request->select_statement_sdn;
             }
 
-            $petty_cash->amount_availed = $amount_availed;
-            $petty_cash->balance = $petty_cash->total_amount - $amount_availed;
-            $petty_cash->save();
+            if(count($selected_ids) > 0){
+                $petty_cash->amount_availed = $amount_availed;
+                $petty_cash->balance = $petty_cash->total_amount - $amount_availed;
+                $petty_cash->save();
+            }
 
              return redirect()->route('admin.petty_cash.advance.statements.index')->with(['status' => 1, 'success' => 'Advance Petty Cash Statement Successfully Updated']);
         } else {

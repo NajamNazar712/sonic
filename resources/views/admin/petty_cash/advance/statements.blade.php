@@ -86,6 +86,7 @@
                         <th class="border-primary border-darken-1">Date</th>
                         <th class="border-primary border-darken-1">Total Amount</th>
                         <th class="border-primary border-darken-1">Amount Availed (Only Approved) </th>
+                        <th class="border-primary border-darken-1">Balance </th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -228,10 +229,9 @@
                             head.push('Date');
                             head.push('Total Amount');
                             head.push('Amount Availed (Only Approved)');
+                            head.push('Balance Amount');
                             head.push('Created By');
                             head.push('Created At');
-                            head.push('Operation Approved By');
-                            head.push('Operation Approved At');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -245,10 +245,9 @@
                                 row.push(values.date);
                                 row.push(values.total_amount);
                                 row.push(values.amount_availed);
+                                row.push(values.balance_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.operation_approved_by);
-                                row.push(values.operation_approved_at);
                                 row.push(values.status);
                                 body.push(row);
                             });
@@ -351,7 +350,7 @@
                     }
                 },
                 rowId: 'statement_id',
-                order: [11, 'desc'],
+                order: [12, 'desc'],
                 columns: [
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -363,6 +362,7 @@
                     {data: 'date', name: 'date', class: 'align-middle date'},
                     {data: 'total_amount', name: 'advance_petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'amount_availed', name: 'advance_petty_cash_statements.amount_availed', class: 'align-middle amount_availed'},
+                    {data: 'balance_amount', name: 'advance_petty_cash_statements.balance', class: 'align-middle balance_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'advance_petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'status_name', name: 'apcs.name', class: 'align-middle status'},
