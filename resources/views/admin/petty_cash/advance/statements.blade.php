@@ -301,7 +301,7 @@
                                 row.push(values.balance_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.status);
+                                row.push(values.status_name);
                                 body.push(row);
                             });
                         },
