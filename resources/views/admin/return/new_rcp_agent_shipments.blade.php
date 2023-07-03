@@ -230,9 +230,10 @@
                             head.push('Call Findings');
                             head.push('Arrival Date');
                             head.push('Assigned To');
-                            head.push('Updated By');
-                            head.push('Agent Status');
-                            head.push('Agent Status Date');
+                            head.push('Assigned Status');
+                            head.push('Updated By (Admin, Agent, Shipper)');
+                            head.push('Status (Admin, Agent, Shipper)');
+                            head.push('Status Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -254,6 +255,7 @@
                                 row.push(values.call_findings);
                                 row.push(values.arrival_date);
                                 row.push(values.assigned_to);
+                                row.push(values.assigned_status);
                                 row.push(values.updated_by);
                                 row.push(values.agent_status);
                                 row.push(values.agent_status_date);
@@ -286,6 +288,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
