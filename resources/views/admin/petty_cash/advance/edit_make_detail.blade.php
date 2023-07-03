@@ -659,36 +659,37 @@
                 }
             });
 
-            function edit_ops(){
-                table.rows().nodes().each(function(index) {
-                    var row = table.row(index);
-                    var id = parseInt(row.id());
-                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
-                        $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
-                        $(row.node()).find('td.expense_amount input').attr('disabled',false);
-                        $(row.node()).find('td.reference_no input').attr('disabled',false);
-                        $(row.node()).find('td.remarks textarea').attr('disabled',false);
-                        $(row.node()).find('td.reference_document input').attr('disabled',false);
-                        var index = $.inArray(id, selected_rows);
-                        if(index === -1){
-                            selected_rows.push(id);
-                        }
-                    }
+            // function edit_ops(){
+            //     table.rows().nodes().each(function(index) {
+            //         var row = table.row(index);
+            //         var id = parseInt(row.id());
+            //         if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+            //             $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
+            //             $(row.node()).find('td.expense_amount input').attr('disabled',false);
+            //             $(row.node()).find('td.reference_no input').attr('disabled',false);
+            //             $(row.node()).find('td.remarks textarea').attr('disabled',false);
+            //             $(row.node()).find('td.reference_document input').attr('disabled',false);
+            //             var index = $.inArray(id, selected_rows);
+            //             if(index === -1){
+            //                 selected_rows.push(id);
+            //             }
+            //         }
 
-                });
-            }
+            //     });
+            // }
 
             function edit_finance() {
                 $("#select_statement_sdn").attr('disabled',false);
-                $(".dncc_select").attr('disabled',false);
+                //$(".dncc_select").attr('disabled',false);
                 table.rows().nodes().each(function(index) {
                     var row = table.row(index);
                     var id = parseInt(row.id());
-                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+                    if($(row.node()).attr('status') == 0){
                         $(row.node()).find('td.account_head select').attr('disabled',false);
                         $(row.node()).find('td.account_title select').attr('disabled',false);
                         $(row.node()).find('td.zone select').attr('disabled',false);
                         $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
+                        $(row.node()).find('td.dncc select').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
