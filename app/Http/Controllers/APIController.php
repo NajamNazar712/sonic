@@ -4531,7 +4531,7 @@ class APIController extends Controller
                                             // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
 
                                             //Updating New RcpAssigned Tables for Same Consignee Intercept
-                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
                                             if ($rcp_assigned_shipment->exists()) {
                                                 
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -4632,7 +4632,7 @@ class APIController extends Controller
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
 
                                             //Updating New RcpAssigned Tables for different Consignee Intercept
-                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
                                             if ($rcp_assigned_shipment->exists()) {
                                                     $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                                                     $rcp_assigned_shipment->shipment_status = 7; //intercept request
@@ -4657,7 +4657,7 @@ class APIController extends Controller
                                                 }  
 
 
-                                            return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
+                                            return response()->json(['status' => 0, 'message' => 'IIIntercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
                                     } else {
                                         return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment->tracking_number]);
