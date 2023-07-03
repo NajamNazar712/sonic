@@ -2462,7 +2462,7 @@ class AdminPettyCashController extends Controller
         $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
         $exclude_advance_sdns = AdvancePettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
-        $excliude_sdns = array_merge($exclude_advance_sdns,$exclude_sdns);
+        $exclude_sdns = array_merge($exclude_advance_sdns,$exclude_sdns);
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id',$exclude_sdns)->select('id')->get();
         } else {
@@ -2785,7 +2785,7 @@ class AdminPettyCashController extends Controller
         // }
         $exclude_sdns = PettyCashStatement::where('sdn_id', '>', 0)->distinct()->pluck('sdn_id')->toArray();
         $exclude_advance_sdns = AdvancePettyCashStatement::where('sdn_id', '>', 0)->distinct()->pluck('sdn_id')->toArray();
-        $excliude_sdns = array_merge($exclude_advance_sdns, $exclude_sdns);
+        $exclude_sdns = array_merge($exclude_advance_sdns, $exclude_sdns);
         if (session('role_id') == 1) {
             $sdns = StationDepositNote::where('status', '!=', 2)->whereNotIn('id', $exclude_sdns)->select('id')->get();
         } else {
