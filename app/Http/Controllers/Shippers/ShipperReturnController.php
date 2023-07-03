@@ -355,7 +355,7 @@ class ShipperReturnController extends Controller
                     //Shipper is updating the status update rows in rcp_assigned_agent
                     $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                     $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                    $rcp_assigned_shipment->assigned_status = 2; //return confirm status
+                    $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                     $rcp_assigned_shipment->user_id = Auth::id();
                     $rcp_assigned_shipment->save();
 
@@ -429,7 +429,7 @@ class ShipperReturnController extends Controller
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                       $rcp_assigned_shipment->assigned_status = 2;
+                       $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                        $rcp_assigned_shipment->user_id = Auth::id();
                        $rcp_assigned_shipment->save();
 
@@ -503,7 +503,7 @@ class ShipperReturnController extends Controller
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        $rcp_assigned_shipment->shipment_status = 10; //reattempt request status
-                       $rcp_assigned_shipment->assigned_status = 2;
+                       $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                        $rcp_assigned_shipment->user_id = Auth::id();
                        $rcp_assigned_shipment->save();
 
@@ -576,7 +576,7 @@ class ShipperReturnController extends Controller
                    if($rcp_assigned_shipment->exists()){
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                         $rcp_assigned_shipment->shipment_status = 10; //re-attempt request status
-                        $rcp_assigned_shipment->assigned_status = 2;
+                        $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                         $rcp_assigned_shipment->user_id = Auth::id();
                         $rcp_assigned_shipment->save();
                        //updating already_updated & pending of agent if shipment is updated by shipper 
