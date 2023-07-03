@@ -4530,6 +4530,38 @@ class APIController extends Controller
 
                                             // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
 
+                                            //Updating New RcpAssigned Tables for Same Consignee Intercept
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                                            if ($rcp_assigned_shipment->exists()) {
+                                                
+                                                $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                                                $rcp_assigned_shipment->shipment_status = 8; //intercept approved
+                                                $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                                                $rcp_assigned_shipment->user_id = $user_id;
+                                                $rcp_assigned_shipment->save();
+
+                                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                                $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                                $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                                $rcp_assigned_agent->decrement('pending_shipments');
+                                                $rcp_assigned_agent->save();
+
+                                                //creating log for request intercept then approved
+                                                $return_assign_log = new RcpAssignedShipmentLog();
+                                                $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                                $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                                $return_assign_log->status = 7; //intercept request
+                                                $return_assign_log->user_id = $user_id;
+                                                $return_assign_log->save();
+
+                                                $return_assign_log = new RcpAssignedShipmentLog();
+                                                $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                                $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                                $return_assign_log->status = 8; //intercept approved
+                                                $return_assign_log->user_id = $user_id;
+                                                $return_assign_log->save(); 
+                                            }  
+
 
 
 
@@ -4598,6 +4630,31 @@ class APIController extends Controller
                                             $shipment->save();
 
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
+
+                                            //Updating New RcpAssigned Tables for different Consignee Intercept
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                                            if ($rcp_assigned_shipment->exists()) {
+                                                    $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
+                                                    $rcp_assigned_shipment->shipment_status = 7; //intercept request
+                                                    $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
+                                                    $rcp_assigned_shipment->user_id = $user_id;
+                                                    $rcp_assigned_shipment->save();
+
+                                                    //updating already_updated & pending of agent if shipment is updated by shipper 
+                                                    $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                                    $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                                    $rcp_assigned_agent->decrement('pending_shipments');
+                                                    $rcp_assigned_agent->save();
+
+                                                    //creating log 
+                                                    $return_assign_log = new RcpAssignedShipmentLog();
+                                                    $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                                    $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                                    $return_assign_log->status = 7; //intercept request
+                                                    $return_assign_log->user_id = $user_id;
+                                                    $return_assign_log->save();
+                                                        
+                                                }  
 
 
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);

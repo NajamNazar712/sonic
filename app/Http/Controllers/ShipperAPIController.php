@@ -854,8 +854,7 @@ class ShipperAPIController extends Controller
                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
                             $return_assign_log->status = 8; //intercept approved
                             $return_assign_log->user_id = $user_id;
-                            $return_assign_log->save();
-                                
+                            $return_assign_log->save(); 
                         }  
 
                         
@@ -930,7 +929,7 @@ class ShipperAPIController extends Controller
                             }
 
                         }
-                        return response()->json(['status' => 0, 'message' => 'IIntercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
+                        return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']]);
                     }
                 } else {
                     return response()->json(['status' => 1, 'message' => 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']]);
