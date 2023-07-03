@@ -7465,6 +7465,7 @@ class ReturnController extends Controller
         ->leftjoin('cities as consignee_city','consignee_city.id','s.consignee_city_id')
         ->leftjoin('admins as admin','admin.id','ras.admin_id') //to get admin name in updated_by column
         ->leftjoin('users as user','user.id','ras.user_id') //to get user name in updated_by column
+        ->leftjoin('substitute_users as su','su.id','ras.substitute_user_id') //to get substitute name in updated_by column
         //for current status reason and shipment status
         ->leftJoin('shipments_journey as sj', function ($join) {
             $join->on('sj.shipment_id','s.id')
@@ -7488,7 +7489,7 @@ class ReturnController extends Controller
         'a.name as assigned_to', 's.consignee_name as consignee_name', 's.consignee_address as consignee_address',
         's.consignee_phone_number_1 as consignee_phone_number','sscf.remark as call_findings',
         'ras.updated_at as agent_status_date', 'rass.name as agent_status', 
-        's.user_id as shipment_user_id', 'ras.id', 'admin.name as admin_name', 'user.name as user_name',
+        's.user_id as shipment_user_id', 'ras.id', 'admin.name as admin_name', 'user.name as user_name', 'su.name as subsitute_name',
         'ras.assigned_status as assigned_status')->orderby('agent_status_date','desc');
 
         $datatable = Datatables::of($agent_productivity)
@@ -7506,6 +7507,9 @@ class ReturnController extends Controller
                 elseif ($update_by->admin_id) {
                     return $agent_productivity->admin_name;
                 }
+                elseif ($update_by->substitute_user_id) {
+                    return $agent_productivity->subsitute_name;
+                }
             }
         
             return '-';
@@ -7520,6 +7524,11 @@ class ReturnController extends Controller
             elseif ($update_by->admin_id) {
                 $query->where(function ($sub_query) use ($keyword) {
                     $sub_query->where('admin.name', 'like', '%' . $keyword . '%');
+                });
+            }
+            elseif ($update_by->substitute_user_id) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('su.name', 'like', '%' . $keyword . '%');
                 });
             }
         })
