@@ -4526,9 +4526,7 @@ class APIController extends Controller
                                             $shipment->shipper_status_id = 54;
                                             $shipment->intercepted = 1;
                                             $shipment->save();
-                                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
-                                            // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
 
                                             //Updating New RcpAssigned Tables for Same Consignee Intercept
                                             $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
@@ -4561,6 +4559,11 @@ class APIController extends Controller
                                                 $return_assign_log->user_id = $user_id;
                                                 $return_assign_log->save(); 
                                             }  
+
+                                            ShipmentsJourneyController::add($shipment->id, 54, 54, NULL, NULL, $user_id, NULL);
+
+                                            // ShipmentsJourneyController::add($shipment->id, 55, 55, NULL, NULL, $user_id, NULL);
+
 
                                             return response()->json(['status' => 0, 'message' => 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment->tracking_number]);
                                         }
