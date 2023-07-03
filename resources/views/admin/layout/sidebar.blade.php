@@ -638,11 +638,11 @@
                                                 href="{{ route('admin.return.rcp_agent.index') }}">RCP Agent
                                                 Productivity</a></li>
                                     @endif
-                                    @if (session('role_id') == 1 || in_array(665, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(876, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.rcp_agent_cn.index') }}">RCP Agent
                                                 Productivity Shipment Wise</a></li>
-                                    @endif
+                                    @endif                                    
                                     @if (session('role_id') == 1 || in_array(643, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.revert.index') }}">Return Revert</a></li>
@@ -2119,7 +2119,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825], session('permissions'))) !== 0)
+                                count(array_intersect([157, 158, 171, 189, 229, 230, 362, 462, 825,851,854], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Financials</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || count(array_intersect([157, 158, 462], session('permissions'))) !== 0)
@@ -2180,6 +2180,20 @@
                                                 href="{{ route('admin.settings.onelink_payment_charges.index') }}">1Link
                                                 Payment Charges</a></li>
                                     @endif
+
+
+                                    @if (session('role_id') == 1 || in_array(851, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.fintech_company_charges.index') }}">Fintech Company Charges</a></li>
+                                    @endif  
+
+
+                                    @if (session('role_id') == 1 || in_array(854, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.standard_fintech_charges.index') }}">Standard Fintech Charges</a></li>
+                                    @endif  
+
+
                                 </ul>
                             </li>
                         @endif

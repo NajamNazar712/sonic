@@ -227,6 +227,22 @@
 {{--                                    </div>--}}
                                     <div class="col mt-1">
                                         <div class="form-group">
+                                            <div class="row">
+                                               <div class="col-md-7">
+                                                   <label>Admin Discount</label>
+                                                   <input type="text" name="admin_discount" id="admin_discount"
+                                                          class="form-control form-control-sm" placeholder="Admin Discount">
+                                               </div>
+                                                <div class="col-md-5 align-self-end">
+                                                    <label for="" class="">Flat</label>
+                                                    <input type="checkbox" id="admin_discount_type" name="admin_discount_type" class="switchery"
+                                                           data-size="sm" data-switchery="true">
+                                                    <label for="" class="">%</label>
+                                                    <input id="admin_discount_type1" value="0" name="admin_discount_type1" hidden>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
                                             <label>Charges</label>
                                             <input type="text" name="charges" id="charges" class="form-control form-control-sm" placeholder="Charges" disabled>
                                         </div>
@@ -278,7 +294,7 @@
                                             IBAN Number:
                                             <span class="danger">*</span>
                                         </label>
-                                        <input type="text" class="form-control iban required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
+                                        <input type="text" class="form-control iban text-uppercase required" placeholder="(e.g: PK37MEZN0001220100004069)" value="" name="iban_no" id="iban_no" data-rule-maxlength="24" data-rule-maxlength-message="Max character length 24">
                                     </div>
                                     <div class="form-group col">
                                         <label for="account_name">Account Number:
@@ -424,6 +440,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
+
         #tiles{
             position: relative;
             z-index: 1;
@@ -527,13 +544,23 @@
         }
 
         $(document).ready(function () {
-
+            $('#admin_discount').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             var shipping_modes = @json($shipping_modes);
             var international_shipping_modes = @json($retail_international_shipping_modes);
 
             $('#consignee_phone_no').inputmask({
-                'mask': '9999-9999999',
-                'clearIncomplete': true
+                mask: 'R',
+                repeat:25,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[0-9]',
+                    },
+                },
             });
             
             function print(ids){
@@ -712,6 +739,17 @@
                 width:'100%',
                 placeholder:"Select Charges Mode*",
                 allowClear:true
+            });
+
+            $('#iban_no').inputmask({
+                mask: 'R',
+                repeat: 24,
+                greedy: false,
+                definitions: {
+                    R: {
+                        validator: '[a-zA-Z0-9]',
+                    },
+                },
             });
 
             $('#weight').inputmask({
@@ -896,6 +934,22 @@
                                 }
                             }
                         });
+                }
+            });
+
+            var toggleValue = false;
+            $('#admin_discount_type').change( function () {
+                console.log('clicked');
+                toggleValue = !toggleValue;
+                if(toggleValue)
+                {
+                   $('#admin_discount_type1').val("1");
+                   console.log(toggleValue);
+                }
+                else
+                {
+                    $('#admin_discount_type1').val("0");
+                    console.log(toggleValue);
                 }
             });
 
@@ -1098,7 +1152,6 @@
                     destination = $('#international_destination').val();
                 }
 
-                
                 var weight = $('#weight').val();
                 var trax_box = $('#trax_box').val();
                  length = $('#length').val();
@@ -1106,7 +1159,8 @@
                  height = $('#height').val();
                  insurance = $('#insurance_amount').val();
                  packaging = $('#packaging_amount').val();
-
+                var admin_discount = $('#admin_discount').val();
+                var admin_discount_type = $('#admin_discount_type1').val();
 
                  if($('#insurance_offered').val() == 1 && (insurance == null || insurance == '')){
                      var error = 'Insurance Amount is required';
@@ -1148,21 +1202,44 @@
                             'insurance_amount': insurance,
                             'packaging_amount': packaging,
                             'height': height,
+                            'admin_discount': admin_discount,
+                            'admin_discount_type1': admin_discount_type,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
                         .done(function (data) {
-                            var total_charges = '';
-                            if(data.status){
+                            if (data.status === 1)
+                            {
+                                var total_charges = '';
 
-                                $('#charges').val(data.details.charges);
-                                $('#discount').val(data.details.discount_amount);
-                                $('#charges_with_discount').val(data.details.charges_with_discount);
-                                $('#gst').val(data.details.gst_charges);
-                                $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
 
-                                $('#total_charges').val(data.details.total_charges);
+                                    $('#charges').val(data.details.charges);
+                                    $('#discount').val(data.details.discount_amount);
+                                    $('#charges_with_discount').val(data.details.charges_with_discount);
+                                    $('#gst').val(data.details.gst_charges);
+                                    $('#packaging_and_insurance_charges').val(data.details.packaging_and_insurance_charges);
+
+                                    $('#total_charges').val(data.details.total_charges);
+
                             }
+                            else
+                            {
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+
+                                $('#charges').val('');
+                                $('#discount').val('');
+                                $('#charges_with_discount').val('');
+                                $('#gst').val('');
+                                $('#packaging_and_insurance_charges').val('');
+
+                                $('#total_charges').val('');
+
+                                $('#admin_discount').val('');
+                            }
+
                         });
                 }
                 else{
@@ -1355,10 +1432,6 @@
                 $('#consignee_table').html('');   
 
             });
-
-
-
-           
         });
     </script>
 @endsection
