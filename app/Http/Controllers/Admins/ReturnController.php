@@ -1733,6 +1733,7 @@ class ReturnController extends Controller
         }
     }
 
+    //Uploading shipments with statuses (Confirm & Reattempt) Upload Agent Button on Rcp Screen
     public function excel_store(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
@@ -5197,6 +5198,7 @@ class ReturnController extends Controller
         }
     }
 
+    //Assigning and Unassigning Shipments to agents by uploading excel sheet (Upload Agent Modal in Rcp Screen)
     public function assign_agent_excel(Request $request){
         $names = [
             'tracking_number' => 'Tracking Number',
@@ -5367,12 +5369,10 @@ class ReturnController extends Controller
                     //     }
 
                     // }
-                    //set record in login/logut table end
-
-                   
-                    // for new return_shipments_assigned_agents
-            
                     
+
+                //If agent row is not empty
+                if(!empty($agent_id)){
                 $check_agent_return_confrimation = RcpAssignedAgent::where('admin_id',$agent_id)->whereDate('created_at',date('Y-m-d'));
                 // Check if the agent doesn't exist and created same day
                 if (!$check_agent_return_confrimation->exists()) {
@@ -5464,13 +5464,39 @@ class ReturnController extends Controller
                     else{
                         $already_assigned_shipment[] = 'Row # '. $row_id. ' Tracking number (' . $shipment_id . ') has already been assigned to an agent';
                     }
+                }
+            }
+                
+                //If agent row is empty against the tracking number -> Unassign the shipment if the shipment is assigned to an agent 
+                else{
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1);
 
+                    if ($rcp_assigned_shipment->exists()) {
+                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                        $rcp_assigned_shipment->assigned_status = 2;
+                        $rcp_assigned_shipment->save();
+
+                        $decrease_assigned_pending_shipments = RcpAssignedAgent::find($rcp_assigned_shipment->rcp_assigned_agent_id);
+
+                        if ($decrease_assigned_pending_shipments) {
+                            $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
+                            $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
+                            $decrease_assigned_pending_shipments->save();
+                        }
+
+                        // Updating Unassign log
+                        $assign_shipments_logs = new RcpAssignedShipmentLog();
+                        $assign_shipments_logs->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                        $assign_shipments_logs->shipment_id = $rcp_assigned_shipment->shipment_id;
+                        $assign_shipments_logs->status = 2; // Unassign status
+                        $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
+                        $assign_shipments_logs->save();
+                    }
                 }
             
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
                 }
-                // dd($already_assigned_shipment);
 
                 if(!empty($already_assigned_shipment))
                 {

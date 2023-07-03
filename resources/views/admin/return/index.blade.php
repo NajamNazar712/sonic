@@ -1733,7 +1733,7 @@
                     { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
-                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
                     { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
