@@ -7500,15 +7500,16 @@ class ReturnController extends Controller
                 
             if ($update_by) {
                 
-                if ($update_by->user_id) {
+                if ($update_by->substitute_user_id) {
+                    return $agent_productivity->subsitute_name;
+                }
+
+                elseif ($update_by->user_id) {
                     return $agent_productivity->user_name;
                 } 
                 
                 elseif ($update_by->admin_id) {
                     return $agent_productivity->admin_name;
-                }
-                elseif ($update_by->substitute_user_id) {
-                    return $agent_productivity->subsitute_name;
                 }
             }
         
