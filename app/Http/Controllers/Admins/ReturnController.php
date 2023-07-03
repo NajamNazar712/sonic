@@ -1904,7 +1904,7 @@ class ReturnController extends Controller
                         ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
 
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_details->id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_details->id)->where('assigned_status',1);
                         if($rcp_assigned_shipment->exists()){
                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
