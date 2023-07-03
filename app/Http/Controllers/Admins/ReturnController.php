@@ -929,7 +929,7 @@ class ReturnController extends Controller
 
 
                      //Updating New RcpAssigned Tables
-                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status',1);
                     if($rcp_assigned_shipment->exists()){
                         //Assuring if agent is updating the status update rows in rcp_assigned_agent
                       $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -1061,7 +1061,7 @@ class ReturnController extends Controller
             //    }
 
           
-            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status',1);
             if($rcp_assigned_shipment->exists()){
                  //Updating New RcpAssigned Tables if Shipment_status_reason = 13 (Consignee is not Responding) as unresponsive
                  if($request->single_return_reason_select == 13)
@@ -1239,7 +1239,7 @@ class ReturnController extends Controller
                 //    }
 
                     //Updating New RcpAssigned Tables
-                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status',1);
                     if($rcp_assigned_shipment->exists()){
                         //Assuring if agent is updating the status update rows in rcp_assigned_agent
                         $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
