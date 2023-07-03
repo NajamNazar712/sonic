@@ -4386,7 +4386,7 @@ class APIController extends Controller
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                            $rcp_assigned_shipment->admin_id = $user_id;
+                            $rcp_assigned_shipment->user_id = $user_id;
                             $rcp_assigned_shipment->save();
 
                             //updating already_updated & pending of agent if shipment is updated by shipper 
@@ -4400,7 +4400,7 @@ class APIController extends Controller
                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
                             $return_assign_log->status = 4; //return confirm status
-                            $return_assign_log->admin_id = $user_id;
+                            $return_assign_log->user_id = $user_id;
                             $return_assign_log->save();
                         }
 
@@ -4442,7 +4442,7 @@ class APIController extends Controller
                                 // $return_assign_log->save();
                                 
                                 $rcp_assigned_shipment->shipment_status = 3; //reattempt
-                                $rcp_assigned_shipment->admin_id = $user_id;
+                                $rcp_assigned_shipment->user_id = $user_id;
                                 $rcp_assigned_shipment->save();
 
                                 //updating already_updated & pending of agent if shipment is updated by shipper 
@@ -4456,7 +4456,7 @@ class APIController extends Controller
                                 $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                                 $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
                                 $return_assign_log->status = 3; //reattempt
-                                $return_assign_log->admin_id = $user_id;
+                                $return_assign_log->user_id = $user_id;
                                 $return_assign_log->save();
                             }
                             if ($journey) {
