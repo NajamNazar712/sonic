@@ -4622,11 +4622,11 @@ class AdminHumanResourseController extends Controller
                             $response = $this->calculateToDateLeaves($admin_profile, $to_date);
                             if($response['status'] == 1){
                                 $calcDays = $diffDays;
-                                $leave_counts = $admin_profile->leave_count;
+                                $fiscal_leave_count = $admin_profile->fiscal_leave_count;
                                 if($admin_profile->leave_count < 0) {
                                     $calcDays = $diffDays - ($admin_profile->leave_count);
                                 }
-                                if($calcDays <= $response['data'] || $calcDays <= $leave_counts){
+                                if($calcDays <= $response['data'] || $calcDays <= $fiscal_leave_count){
                                     $admin_profile->leave_count = $admin_profile->leave_count - $diffDays;
                                     $admin_profile->fiscal_leave_count = $admin_profile->fiscal_leave_count - $diffDays;
                                 } else {
@@ -4984,7 +4984,7 @@ class AdminHumanResourseController extends Controller
                                         $leave_counts = $admin_profile->leave_count+$old_diffDays; 
                                         $fiscal_leave_counts = $admin_profile->fiscal_leave_count+$old_diffDays; 
                                     }
-                                    if($calcDays <= $response['data'] || $calcDays <= $leave_counts){
+                                    if($calcDays <= $response['data'] || $calcDays <= $fiscal_leave_counts){
                                         $admin_profile->leave_count = $leave_counts - $diffDays;
                                         $admin_profile->fiscal_leave_count = $fiscal_leave_counts - $diffDays;
                                     } else {
