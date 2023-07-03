@@ -11444,31 +11444,49 @@ class AdminReportsController extends Controller
                     ->on('dc.id', '=', 'zcc.city_id')
                     ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) { // only fetch max arrival
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) { // only fetch max book
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', 2)
+                    ->where('sj.shipper_status_id', 1)
                     ->where(
                         'sj.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sja', function ($join) use ($connection) { // only fetch max arrival
+                $join->on('sja.shipment_id', '=', 'shipments.id')
+                    ->where('sja.shipper_status_id', 2)
+                    ->where(
+                        'sja.id',
                         '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
                     );
             })
-            ->leftJoin('shipments_journey as sjj', function ($join) use ($connection) { // only fetch max arrival
-                $join->on('sjj.shipment_id', '=', 'shipments.id')
-                    ->where('sjj.shipper_status_id', 3)
+            ->leftJoin('shipments_journey as sjb', function ($join) use ($connection) { // only fetch max In transit
+                $join->on('sjb.shipment_id', '=', 'shipments.id')
+                    ->where('sjb.shipper_status_id', 3)
                     ->where(
-                        'sjj.id',
+                        'sjb.id',
                         '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 3)')
                     );
             })
-            ->leftJoin('shipments_journey as sjs', function ($join) use ($connection) { // only fetch max arrival
-                $join->on('sjs.shipment_id', '=', 'shipments.id')
-                    ->where('sjs.shipper_status_id', 4)
+            ->leftJoin('shipments_journey as sjc', function ($join) use ($connection) { // only fetch max arrived at destination
+                $join->on('sjc.shipment_id', '=', 'shipments.id')
+                    ->where('sjc.shipper_status_id', 4)
                     ->where(
-                        'sjs.id',
+                        'sjc.id',
                         '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjd', function ($join) use ($connection) { // only fetch max arrived at destination
+                $join->on('sjd.shipment_id', '=', 'shipments.id')
+                    ->where('sjd.shipper_status_id', 5)
+                    ->where(
+                        'sjd.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)')
                     );
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
@@ -11485,10 +11503,194 @@ class AdminReportsController extends Controller
                     ->leftjoin('admins as adsp', 'adsp.id', '=', 'spt.admin_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city')
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as booked_date', 'sja.created_at as arrival_date','sjb.created_at as intransit_date','sjc.created_at as arrived_at_destination_date','sjd.created_at as out_for_delivery_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'dr.created_at as delivered_or_returned', 'z.name as zone','dz.name as destination_zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city')
             ->whereIn('shipments.shipper_status_id', [1,2,3,4,5])
-            ->where('u.sub_segment_id',1);
-//            ->whereBetween('sj.created_at', [$from, $to]);
-        dd($overland->get(),$from,$to);
+            ->where('u.sub_segment_id',1)
+            ->where('shipments.id',1724845)
+            ->whereBetween('sj.created_at', [$from, $to]);
+
+        $datatable = Datatables::of($overland)
+
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('tracking_number_link', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper . ' (' . $shipment->poc . ')';
+                } else {
+                    return $shipment->shipper;
+                }
+            })
+            ->addColumn('sub_segment', function ($sale) {
+                return 'Logistics';
+            })
+            ->addColumn('class', function ($sale) {
+                $class = '';
+
+                if ($sale->origin_city_id != $sale->destination_city_id) {
+                    switch ($sale->class) {
+                        case 0:
+                            $class = 'Class A';
+                            break;
+                        case 1:
+                            $class = 'Class B';
+                            break;
+                        case 2:
+                            $class = 'Class C';
+                            break;
+                        case 3:
+                            $class = 'Class D';
+                            break;
+                    }
+                } else {
+                    $class = 'Local';
+                }
+
+                return $class;
+            })
+            ->editColumn('delivered_or_returned', function ($overland) {
+                if (in_array($overland->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                    return $overland->delivered_or_returned;
+                } else {
+                    return '';
+                }
+            })
+            ->addColumn('booking_to_arrival_date_count', function ($overland) {
+                if($overland->booked_date == null || $overland->arrival_date == null)
+                {
+                    return '-';
+                }
+                $datee1 = Carbon::parse($overland->booked_date);
+                $datee2 = Carbon::parse($overland->arrival_date);
+
+                $days = $datee1->diffInDaysFiltered(function ($date) {
+                    return $date->dayOfWeek !== Carbon::SUNDAY;
+                }, $datee2);
+
+                if($days > 0 )
+                {
+                    return $days;
+                }
+                else{
+                    return '-';
+                }
+            })
+            ->addColumn('arrival_to_transit_date_count', function ($overland) {
+                if($overland->arrival_date == null || $overland->intransit_date == null)
+                {
+                    return '-';
+                }
+
+                $datee1 = Carbon::parse($overland->arrival_date);
+                $datee2 = Carbon::parse($overland->intransit_date);
+
+                $days = $datee1->diffInDaysFiltered(function ($date) {
+                    return $date->dayOfWeek !== Carbon::SUNDAY;
+                }, $datee2);
+
+                if($days > 0 )
+                {
+                    return $days;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('transit_to_arrived_dest_date_count', function ($overland) {
+                if($overland->intransit_date == null || $overland->arrived_at_destination_date == null)
+                {
+                    return '-';
+                }
+                $datee1 = Carbon::parse($overland->intransit_date);
+                $datee2 = Carbon::parse($overland->arrived_at_destination_date);
+
+                $days = $datee1->diffInDaysFiltered(function ($date) {
+                    return $date->dayOfWeek !== Carbon::SUNDAY;
+                }, $datee2);
+
+                if($days > 0 )
+                {
+                    return $days;
+                }
+                else{
+                    return '-';
+                }
+
+            })
+            ->addColumn('arrive_to_delivery_date_count', function ($overland) {
+
+                if($overland->arrived_at_destination_date == null)
+                {
+                    return '-';
+                }
+
+
+                $datee1 = Carbon::parse($overland->arrived_at_destination_date);
+
+                $shipment_id = $overland->shipment_id;
+                $first_out_for_delivery = ShipmentsJourney::where('shipper_status_id',14)->where('shipment_id',$shipment_id);
+
+                if($first_out_for_delivery->exists())
+                {
+                    $first_out_for_delivery = $first_out_for_delivery->first();
+                    $datee2 = $first_out_for_delivery->created_at;
+
+                    $days = $datee1->diffInDaysFiltered(function ($date) {
+                        return $date->dayOfWeek !== Carbon::SUNDAY;
+                    }, $datee2);
+
+                    if($days > 0 )
+                    {
+                        return $days;
+                    }
+                    else{
+                        return '-';
+                    }
+                }
+            });
+
+        if ($tracking = $request->get('search_tracking')) {
+            $datatable->where('shipments.tracking_number', '=', $tracking);
+        }
+        if ($sales_person = $request->get('search_sales_person')) {
+            $datatable->where('adsp.id', '=', $sales_person);
+        }
+        if ($search_shipper = $request->get('search_shipper')) {
+            $datatable->where('shipments.user_id', '=', $search_shipper);
+        }
+        if ($search_shippers = $request->get('search_shippers')) {
+            $datatable->whereIn('shipments.user_id', $search_shippers);
+        }
+        if ($mode = $request->get('search_shipping_mode')) {
+            $datatable->where('sm.id', '=', $mode);
+        }
+        if ($origin = $request->get('search_origin')) {
+            $datatable->where('oc.id', '=', $origin);
+        }
+        if ($destination = $request->get('search_destination')) {
+            $datatable->where('dc.id', '=', $destination);
+        }
+        if ($hub = $request->get('search_hub')) {
+            $datatable->where('h.id', '=', $hub);
+        }
+        if ($status = $request->get('search_status')) {
+            $datatable->where('ss.id', '=', $status);
+        }
+        if ($sub_segment = $request->get('sub_segment')) {
+            $datatable->where('u.sub_segment_id', '=', $sub_segment);
+        }
+        if ($search_business_category = $request->get('search_business_category')) {
+            $datatable->where('shipments.business_category_id', '=', $search_business_category);
+        }
+
+//        dd($overland->get(),$from,$to);
+
+        return $datatable->make(true);
+
     }
 }
