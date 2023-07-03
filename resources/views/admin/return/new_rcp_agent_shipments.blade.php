@@ -72,8 +72,8 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Assigned To</th>
                         <th class="border-primary border-darken-1">Assigned Status</th>
-                        <th class="border-primary border-darken-1">Updated By (Admin, Agent, Shipper)</th>
-                        <th class="border-primary border-darken-1">Status (Admin, Agent, Shipper)</th>
+                        <th class="border-primary border-darken-1">Updated By (Admin, Agent, User/Sub User)</th>
+                        <th class="border-primary border-darken-1">Status (Admin, Agent, User/Sub User)</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                     </tr>
                     </thead>
@@ -231,8 +231,8 @@
                             head.push('Arrival Date');
                             head.push('Assigned To');
                             head.push('Assigned Status');
-                            head.push('Updated By (Admin, Agent, Shipper)');
-                            head.push('Status (Admin, Agent, Shipper)');
+                            head.push('Updated By (Admin, Agent, User/Sub User)');
+                            head.push('Status (Admin, Agent, User/Sub User)');
                             head.push('Status Date');
 
 
