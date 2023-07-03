@@ -690,7 +690,7 @@ class ReturnController extends Controller
                 //        $return_assign_log->save();
                 //    }
 
-                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
+                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status',1);
                     if($rcp_assigned_shipment->exists()){
                         //Updating New RcpAssigned Tables if Shipment_status_reason = 13 (Consignee is not Responding) as unresponsive
                         if($request->return_reason_select == 13)
