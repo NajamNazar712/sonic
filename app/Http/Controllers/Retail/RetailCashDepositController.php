@@ -93,6 +93,24 @@ class RetailCashDepositController extends Controller
                     return '-';
                 }
             })
+            ->addColumn('hbl_konnect_cash_excel', function ($data) {
+                $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);
+
+                $remaining_cash = HblKonnectTransactionRetail::where('retail_note_id',$cash_deposit->id)->select('amount');
+                if ($remaining_cash->exists())
+                {
+                    $remaining_cash = $remaining_cash->get()->toArray();
+                    $sum = array_reduce($remaining_cash, function ($carry, $item) {
+                        return $carry + $item["amount"];
+                    });
+
+                    return $sum ;
+                }
+                else
+                {
+                    return '-';
+                }
+            })
             ->addColumn('remaining_cash', function ($data) {
 
                 $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);

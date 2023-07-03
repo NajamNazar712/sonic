@@ -127,6 +127,7 @@
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
 										<th class="border-primary border-darken-1">Packing Charges</th>
+										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -136,6 +137,7 @@
 										<th class="border-primary border-darken-1">IBAN</th>
 										<th class="border-primary border-darken-1">Account City</th>
 										<th class="border-primary border-darken-1">Payment Cycle</th>
+										
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -200,7 +202,7 @@
 							</div>
 
 							<div class="modal fade" id="view_details" role="dialog" aria-labelledby="view_details_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
+								<div class="modal-dialog modal-xl" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="view_details_title">Details</h4>
@@ -245,6 +247,7 @@
 														<th class="border-primary border-darken-1">Charges</th>
 														<th class="border-primary border-darken-1">GST</th>
 														<th class="border-primary border-darken-1">WHT</th>
+														<th class="border-primary border-darken-1">Fintech Charges</th>
 														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 														<th class="border-primary border-darken-1">Arrival Date</th>
@@ -652,6 +655,7 @@
 					{data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'ppc.wht', class: 'align-middle text-center total_wht', orderable: false},
 					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
+					{data:'fintech_charges', name: 's.fintech_charges', class: 'align-middle text-center fintech_charges'},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
@@ -661,6 +665,7 @@
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
 					{data:'payment_cycle', name: 'pc.id', class: 'align-middle text-center payment_cycle'},
+				
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -868,6 +873,7 @@
 					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
 					{data:'wht', name: 'pending_payment_shipments.wht', class: 'align-middle wht'},
+					{data:'fintech_charges', name: 'fintech_charges', class: 'align-middle fintech_charges'},
 					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
 					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'},
 					{data:'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
@@ -1134,7 +1140,7 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
@@ -1143,6 +1149,7 @@
 							details += '<td class="align-middle text-center">' + detail.amount + '</td>';
 							details += '<td class="align-middle text-center">' + detail.charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.gst + '</td>';
+							details += '<td class="align-middle text-center">' + detail.fintech_charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.deductable + '</td>';
 							details += '<td class="align-middle text-center">' + detail.payable + '</td>';
 							details += '</tr>';

@@ -93,7 +93,15 @@ use SnappyPDF;
 use Validator;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Admin\UserFintectCharges;
+
 use App\Jobs\ProcessGulAhmedShipmentConfirmation;
+
+
 use Vectorface\Whip\Whip;
 
 class APIController extends Controller
@@ -236,6 +244,48 @@ class APIController extends Controller
 
         return $phone_number;
     }
+
+
+    public function get_shipment_details(Request $req){
+
+        $validator = Validator::make($req->all(), [
+            'link'       => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validator->errors()]);
+        }
+
+        $Shipment = new Shipment();
+        $shipmentDetails = $Shipment->where('trax_pay_transactions.link',$req->link)
+        ->join('cities','shipments.consignee_city_id','cities.id')
+        ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
+        ->select(
+        'shipments.tracking_number as tracking_id', 
+        'shipments.consignee_name as name',
+        'shipments.consignee_address as address',
+        'trax_pay_transactions.fintech_amount as fintech_amount',
+        'trax_pay_transactions.cod_amount as codAmount',
+        'cities.name as city_name',
+        'cities.name as city_name'
+        )->first();
+
+        if(!empty($shipmentDetails)){
+            return response()->json([
+                'status'  => '200',
+                'data' => $shipmentDetails,
+            ]);
+        }
+
+        else{
+            return response()->json([
+                'status'  => '404',
+                'message' => 'Shipment Not Found',
+            ]); 
+        }
+    }
+
+
 
     public function login(Request $request)
     {
@@ -5180,9 +5230,7 @@ class APIController extends Controller
             'shipment_id' => ['required', Rule::exists('shipments', 'id')],
             'delivery_note_id' => ['required', Rule::exists('delivery_notes', 'id')]
         ];
-
         $validate = \Illuminate\Support\Facades\Validator::make($request->all(), $rules);
-
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
@@ -5197,17 +5245,13 @@ class APIController extends Controller
             $tracking_number = $request->tracking_number;
             $shipment_id = $request->shipment_id;
             $delivery_note_id = $request->delivery_note_id;
-
             $one_link_charges = OneLinkPaymentChargesRange::where('range_up', '<', $transaction_amount)->where('range_down', '>', $transaction_amount);
-
             if ($one_link_charges->exists()) {
                 $one_link_charges = $one_link_charges->first();
-
                 $charges = $one_link_charges->charges;
             } else {
                 $charges = 0;
             }
-
             $one_link_payment_transaction = new OneLinkOutForDeliveryShipmentPayment();
             $one_link_payment_transaction->consumer_number = $consumer_number;
             $one_link_payment_transaction->transaction_authentication_id = $transaction_authentication_id;
@@ -5222,7 +5266,6 @@ class APIController extends Controller
             $one_link_payment_transaction->shipment_id = $shipment_id;
             $one_link_payment_transaction->delivery_note_id = $delivery_note_id;
             $one_link_payment_transaction->save();
-
             $delivery_note = DeliveryNote::find($delivery_note_id);
             $update_count = $delivery_note->one_link_payment_count + 1;
             $delivery_note->one_link_payment_count = $update_count;
@@ -5231,10 +5274,8 @@ class APIController extends Controller
             $shipment = Shipment::find($shipment_id);
             $shipment->received_amount = $amount;
             $shipment->save();
-
             NotificationsController::app_notification(19, $delivery_note->rider_id, 2, $delivery_note->rider_id, $one_link_payment_transaction->id);
             NotificationsController::send(185, $delivery_note->rider_id, $one_link_payment_transaction->id);
-
             return response()->json(['status' => 0, 'message' => 'Successful Bill Payment']);
         }
     }
@@ -5334,8 +5375,19 @@ class APIController extends Controller
                                     // 2 last digit for decimal values
                                     // example amount is 120 filling length +0000000012000
 
-                                    $amount_length = strlen($shipment_data->amount);
 
+                                    //standard Fintech Charges and Standard FED
+
+                                    $standard_fintech_charges = standard_fintech_charges::where('id','1')->first();
+                                    $charges =  $standard_fintech_charges->standard_fintech_charges;   //stdadard charges
+                                    $fed     =  $standard_fintech_charges->standard_fed_charges;      // Fed Tax            
+
+                                    //Calculate 
+                                    $calculate_standard_charges = round(($shipment_data->amount / 100)*$charges);
+                                    $calculate_fed_charges      = round(($calculate_standard_charges / 100)*$fed);
+                                    $total_cod  = $calculate_standard_charges + $shipment_data->amount + $calculate_fed_charges; 
+                                    $amount_length = strlen($total_cod );
+                                  
                                     // prefix + because we only have possitive value to be collected
                                     $return_data['amount_within_dueDate'] .= "+";
 
@@ -5344,8 +5396,7 @@ class APIController extends Controller
                                         $return_data['amount_within_dueDate'] .= "0";
                                     }
 
-                                    $return_data['amount_within_dueDate'] .= $shipment_data->amount;
-
+                                    $return_data['amount_within_dueDate'] .= $total_cod;
                                     // adding 00 for decimal value Required for 1Link API
                                     $return_data['amount_within_dueDate'] .= "00";
 
@@ -6948,9 +6999,134 @@ class APIController extends Controller
     }
 
     public function return_shipments_list(){
-        dd('this function return shipments list');
+//        dd('this function return shipments list');
+        return ['status' => 2, 'message' => 'Access Denied!'];
     }
 
+    public function fintech_payment_detials(Request $req){
+        $shipments = Shipment::join('delivery_note_shipments','shipments.id','delivery_note_shipments.shipment_id')
+        ->join('delivery_notes','delivery_note_shipments.delivery_note_id','delivery_notes.id')
+        ->join('trax_pay_transactions','shipments.id','trax_pay_transactions.shipment_id')
+        ->where('trax_pay_transactions.link',$req->link)
+        ->select('delivery_notes.rider_id as rider','shipments.user_id as shipper_id','shipments.tracking_number as tracking_id',
+                'trax_pay_transactions.cod_amount as cod_amount','trax_pay_transactions.fintech_amount as fintech_amount',
+                'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
+        // parameters
+        $user_id          = $shipments->shipper_id;
+        $cod_Amount       = $shipments->cod_amount;
+        $fintechCharges   = $shipments->fintech_amount;
+        $delivery_note_id = $shipments->delivery_note_id;
+        $shipment_id      = $shipments->shipment_id;
+        $trax_pay_id      = $shipments->trax_transaction_id;
+        $tracking_no      = $shipments->tracking_id;
+
+        $userFintechCharges       = UserFintectCharges::where('user_id',$user_id)->where('status','1'); // user fintech charges
+        $standard_fintech_charges = new standard_fintech_charges();
+        $standard                 = $standard_fintech_charges->first();     
+        $fed_percentage           = $standard->standard_fed_charges;  //Standard FED Pecentage 
+                                                                    // (Applicable on both users charges or standard charges)
+        if($userFintechCharges->exists()){
+            $fintect_charges_percentage = $userFintechCharges->first()->fintech_charges; //fintech charges from user
+        }
+        else{
+            $fintect_charges_percentage = $standard_fintech_charges->first()->standard_fintech_charges; // fintech charges from standard
+        }
+        // Payfast Return the payment type after the transaction
+        // 3 return for account payment which is equal to 2 in fintech_payment_types table
+        // 4 return for wallet which is equal to 3 in fintech_payment_types table
+        // 7 return for card which is equal to 1 in fintech_payment_types table
+
+            if($req->payment_type == 7){
+                $type = 1;
+            }
+            else if($req->payment_type == 4){
+                $type = 2;
+            }
+            else{
+                $type = 3;
+            }
+        // select range of fintech company according to cod amount
+        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
+        ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
+        ->where('payment_type_id',$type)->first(); 
+        
+        //Calculate Fintech Charges
+        if($select_range->charges_is_percentage == 1){
+            $company_chages        = ($select_range->charges) / 100; // company charges
+            $total_company_charges = number_format($company_chages * $cod_Amount,2);
+        }
+        else{
+            $total_company_charges = $select_range->charges; // company charges
+        }
+
+        // Calculate FED 
+        if($select_range->fed_tax_is_percentage == 1){
+            $company_fed        = ($select_range->fed_tax) / 100; // company Fed
+            $total_company_fed  = number_format($company_fed * $total_company_charges,2);
+        }
+        else{
+            $total_company_fed = $select_range->fed_tax; // company Fed
+        }
+        //Calculate Additional Charges
+        if(!empty($select_range->additional_charges)){
+            if($select_range->additional_charges_is_percentage == 1){
+                $company_additional_charges = ($select_range->additional_charges) / 100; // company Fed
+                $additional_charges         =  number_format($company_additional_charges * $total_company_charges,2);
+            }
+            else{
+                $additional_charges = $select_range->additional_charges; // company Fed
+            }
+        }
+        else{
+            $additional_charges = 0;
+        }
+        // total company charges Fintech Charges   
+        $total_company_fintech_charges = $total_company_charges + $total_company_fed + $additional_charges; 
+
+        function calculatepercentage($total_amount,$charges,$fed){
+            $percentage = number_format(($total_amount / 100) * $charges,2) ; 
+            $tax        = number_format(($percentage / 100)*$fed,2);
+            $total      = $tax + $percentage;
+            return [$total,$tax];
+        }
+        //user or Stadard fintech Charges
+        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges_percentage,$fed_percentage);
+
+        //Total revenue
+        $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
+        // return response()->json([
+                // 'cod'             => $cod_Amount, 
+                // 'conpany charges' => $total_company_charges, 
+                // 'company fed'     => $total_company_fed,        
+                // 'company addi'    => $additional_charges,
+                // 'total company'   => $total_company_fintech_charges,
+                // 'fintech %'       => $fintect_charges_percentage,
+                // 'Fed %'           => $fed_percentage,
+                // 'total fintech'   => $total_fintech_calculated[0],
+                // 'revenue'         => $revenue   
+        //  ]);
+        //total amount received   
+        $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
+        $fintech_details = new FintechPaymentDetails();
+        $fintech_details->trax_pay_id            = $trax_pay_id;
+        $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->rider_tip              = $req->tip;
+        $fintech_details->rider_id               = $shipments->rider;
+        $fintech_details->fintech_company_id     = $req->fintech_company;
+        $fintech_details->total_fintech_amount   = $total_fintech_calculated[0];
+        $fintech_details->fintech_company_amount = $total_company_fintech_charges;
+        $fintech_details->revenue                = $revenue;
+        $fintech_details->save();
+
+        $shipment = Shipment::find($shipment_id);
+        $shipment->received_amount = $total_amount_received;
+        $shipment->fintech_charges = $total_fintech_calculated[0];
+        $shipment->save();
+
+        NotificationsController::app_notification(21, $shipments->rider, 2, $shipments->rider, $fintech_details->id);
+        NotificationsController::send(217, $shipments->rider, $trax_pay_id);
+        return response()->json(['status' => 200,'tracking_id' => $tracking_no]);
+    }
 
     public function hbl_konnect_retail_note_cash_collection_information(Request $request)
     {
@@ -6958,7 +7134,6 @@ class APIController extends Controller
         $valid_ip_addresses[] = '103.111.84.67';
         $valid_ip_addresses[] = '103.111.85.67';
         $environment = config('app.env');
-
         if ($environment == 'production') {
             $whip = new Whip();
             $ip_address = $whip->getValidIpAddress();
@@ -7164,3 +7339,4 @@ class APIController extends Controller
         }
     }
 }
+

@@ -166,8 +166,8 @@
                                 row.push(values.assignee);
                                 row.push(values.assigned_at);
                                 row.push(values.amount);
-                                row.push(values.amount);
-                                row.push(values.amount);
+                                row.push(values.hbl_konnect_cash_excel);
+                                row.push(values.remaining_cash);
                                 row.push(values.rcd_status);
 
                                 body.push(row);

@@ -10,7 +10,7 @@
 			<div class="content-body">
 				<h1 class="mb-1">
 					Retail Make Payments
-				</h1>
+				</h1> 
 
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
@@ -82,6 +82,7 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
+										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Account No.</th>
@@ -173,6 +174,7 @@
 														<th class="border-primary border-darken-1">Delivery</th>
 														<th class="border-primary border-darken-1">Aging</th>
 														<th class="border-primary border-darken-1">Amount</th>
+														<th class="border-primary border-darken-1">Fintech Charges</th>
 														<th class="border-primary border-darken-1">Payable</th>
 													</tr>
 												</thead>
@@ -490,6 +492,9 @@
 					{data:'delivered_shipments', name: 'retail_pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'adjusted_shipments', name: 'retail_pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'ppc.amount', class: 'align-middle text-center total_amount', orderable: false},
+					
+					{data:'retail_fintech_charges', name: 'retail_fintech_charges', class: 'align-middle text-center retail_fintech_charges', orderable: false},
+					
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},
 					{data:'account_number', name: 'rsi.account_number', class: 'align-middle text-center account_no'},
@@ -669,6 +674,10 @@
 					{data:'created_at', name: 'retail_pending_payment_shipments.created_at', class: 'align-middle created_at'},
 					{data:'aging', name: 'aging', class: 'align-middle aging', orderable: false},
 					{data:'amount', name: 'retail_pending_payment_shipments.amount', class: 'align-middle amount'},
+					
+					{data:'fintech_pending_payments', name: 'fintech_pending_payments', class: 'align-middle fintech_pending_payments'},
+					
+
 					{data:'payable', name: 'retail_pending_payment_shipments.payable', class: 'align-middle payable'}
 				],
 				rowCallback: function(row, data, index) {
@@ -898,13 +907,14 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th> <th class="border-primary border-darken-1 align-middle text-center">Fintech Charges</th> <th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
 							details += '<td class="align-middle text-center">' + detail.tracking_number + '</td>';
 							details += '<td class="align-middle text-center">' + detail.type + '</td>';
 							details += '<td class="align-middle text-center">' + detail.amount + '</td>';
+							details += '<td class="align-middle text-center">' + detail.fintech_charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.payable + '</td>';
 							details += '</tr>';
 						});

@@ -306,7 +306,7 @@
                                 $(this).empty().trigger('change');
                                 $(this).prepend('<option value="" selected="selected"></option>').select2({
                                     data: cities_data,
-                                    placeholder: "Select a City"
+                                    placeholder: "Select a Cityy"
                                 });
                                 $(this).val('').trigger('change');
                             });
