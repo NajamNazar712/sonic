@@ -1370,6 +1370,8 @@ class Permission
  			'accounts.substitute_account_management.update.index' => 875,
  			'management.shipment_received.index' => 878,
 
+ 			'return.receiving_sheet.history.index' => 885,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,

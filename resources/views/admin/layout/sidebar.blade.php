@@ -667,6 +667,10 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.return_confirm_otp.index') }}">Return OTP History</a></li>
                                     @endif
+
+                                    @if (session('role_id') == 1 || in_array(885, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.return.receiving_sheet.history.index')}}">Receiving Sheet History</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif
