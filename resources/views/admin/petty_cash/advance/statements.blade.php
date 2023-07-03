@@ -61,17 +61,25 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="creation_date" class="form-control bg-primary border-primary white rounded-right" id="creation_date" placeholder="Creation Date" data-value="">
+                            <input type="text" name="creation_date_from" class="form-control bg-primary border-primary white rounded-right" id="creation_date_from" placeholder="Creation Date (From)" data-value="">
                         </div>
 
                     </div>
-                    <div class="col-2">
+                    <div class="col-4">
+                        <div class="form-group input-group ">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="creation_date_to" class="form-control bg-primary border-primary white rounded-right" id="creation_date_to" placeholder="Creation Date(To)" data-value="">
+                        </div>
+                    </div>
+                </div>
+
+                 <div class="row justify-content-center">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
-{{--                    <div class="col-2">--}}
-{{--                        <button type="button" id="search_station" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Station Approved</button>--}}
-{{--                    </div>--}}
-                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -83,7 +91,8 @@
                         <th class="border-primary border-darken-1">Origin Hub</th>
                         <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date</th>
+                        <th class="border-primary border-darken-1">From</th>
+                        <th class="border-primary border-darken-1">To</th>
                         <th class="border-primary border-darken-1">Total Amount</th>
                         <th class="border-primary border-darken-1">Amount Availed (Only Approved) </th>
                         <th class="border-primary border-darken-1">Balance </th>
@@ -167,18 +176,60 @@
                 width:'100%',
                 allowClear:true
             });
-            var creation_date = $('#creation_date').pickadate({
+            // var creation_date_from = $('#creation_date_from').pickadate({
+            //     firstDay: 1,
+            //     clear: 'Clear',
+            //     format:'dd mmmm, yyyy',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onOpen: function() {
+            //         $('#creation_date_from_root').css('top','40px');
+            //     }
+            // });
+
+             $('#search_form #creation_date_from').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                format:'dd mmmm, yyyy',
+                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#creation_date_root').css('top','40px');
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #creation_date_to').pickadate('picker').set('min', $('#search_form #creation_date_from').pickadate('picker').get('select'));
+                    }
                 }
             });
+
+            // var creation_date_to = $('#creation_date_to').pickadate({
+            //     firstDay: 1,
+            //     clear: 'Clear',
+            //     format:'dd mmmm, yyyy',
+            //     selectYears: true,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd 00:00:00',
+            //     hiddenSuffix: '_formatted',
+            //     onOpen: function() {
+            //         $('#creation_date_to_root').css('top','40px');
+            //     }
+            // });
+
+            $('#search_form #creation_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #creation_date_from').pickadate('picker').set('max', $('#search_form #creation_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -226,7 +277,8 @@
                             head.push('Origin Hub');
                             head.push('Destination Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date');
+                            head.push('From');
+                            head.push('To');
                             head.push('Total Amount');
                             head.push('Amount Availed (Only Approved)');
                             head.push('Balance Amount');
@@ -242,7 +294,8 @@
                                 row.push(values.origin_hub_name);
                                 row.push(values.destination_hub_name);
                                 row.push(values.reference_no);
-                                row.push(values.date);
+                                row.push(values.from);
+                                row.push(values.to);
                                 row.push(values.total_amount);
                                 row.push(values.amount_availed);
                                 row.push(values.balance_amount);
@@ -319,7 +372,7 @@
                     },
                     {
                     extend: 'excel',
-                    title: ' Advance Petty Cash Statements',
+                    title: 'Advance Petty Cash Statements',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -338,19 +391,19 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
-                {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
                 ajax: {
                     url: '{{ route('admin.petty_cash.advance.statements.list') }}',
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_zone = $('#search_zone').val();
-                        d.search_creation_date = $('input[name="creation_date_formatted"]').val();
+                        d.search_creation_date_from = $('input[name="creation_date_from_formatted"]').val();
+                        d.search_creation_date_to = $('input[name="creation_date_to_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'statement_id',
-                order: [12, 'desc'],
+                order: [13, 'desc'],
                 columns: [
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -359,13 +412,14 @@
                     {data: 'origin_hub_name', name: 'o.name', class: 'align-middle origin_hub_name'},
                     {data: 'destination_hub_name', name: 'd.name', class: 'align-middle destination_hub_name'},
                     {data: 'reference_no', name: 'advance_petty_cash_statements.reference_no', class: 'align-middle reference_no'},
-                    {data: 'date', name: 'date', class: 'align-middle date'},
+                    {data: 'from', name: 'from', class: 'align-middle from'},
+                    {data: 'to', name: 'to', class: 'align-middle to'},
                     {data: 'total_amount', name: 'advance_petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'amount_availed', name: 'advance_petty_cash_statements.amount_availed', class: 'align-middle amount_availed'},
                     {data: 'balance_amount', name: 'advance_petty_cash_statements.balance', class: 'align-middle balance_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'advance_petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'status_name', name: 'apcs.name', class: 'align-middle status'},
+                    {data: 'status_name', name: 'apcs.id', class: 'align-middle status'},
                     {data: 'sdn_update_logs', name: '', class: 'text-center align-middle sdn_update_logs', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

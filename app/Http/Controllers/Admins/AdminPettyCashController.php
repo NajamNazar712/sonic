@@ -2549,7 +2549,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('cities as d', 'd.id', '=', 'advance_petty_cash_statements.destination_hub_id')
             ->leftjoin('advance_petty_cash_statement_statuses as apcs','advance_petty_cash_statements.status_id','=','apcs.id')
             ->join('admins as cb', 'cb.id', '=', 'advance_petty_cash_statements.created_by')
-            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as date','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed','advance_petty_cash_statements.balance as balance_amount')
+            ->select('advance_petty_cash_statements.id as statement_id', 'advance_petty_cash_statements.id as statement_link', 'h.name as hub_name','o.name as origin_hub_name','d.name as destination_hub_name', 'advance_petty_cash_statements.reference_no', 'advance_petty_cash_statements.from', 'advance_petty_cash_statements.to', 'cb.name as created_by', 'advance_petty_cash_statements.created_at',  'advance_petty_cash_statements.status_id as status','advance_petty_cash_statements.created_at as created_at','apcs.name as status_name','advance_petty_cash_statements.total_amount as total_amount','advance_petty_cash_statements.amount_availed as amount_availed','advance_petty_cash_statements.balance as balance_amount')
             ->whereIn('advance_petty_cash_statements.status_id', [1, 2]);
 
 
@@ -2580,28 +2580,19 @@ class AdminPettyCashController extends Controller
             ->editColumn('total_amount', function ($shipment) {
                 return number_format($shipment->total_amount);
             })
-            ->editColumn('date', function ($petty) {
-                if($petty->from != null && $petty->to != null) {
-                    return Carbon::parse($petty->from)->toDateString() . ' - ' . Carbon::parse($petty->to)->toDateString();
-                }
-
-                if($petty->date != null)
-                {
-                    return Carbon::parse($petty->date)->toDateString();
+            ->editColumn('from', function ($petty) {
+                if($petty->from != null) {
+                    return Carbon::parse($petty->from)->toDateString();
                 }
 
                 return "-";
             })
-            ->editColumn('status', function ($petty) {
-                $status = '';
-                if ($petty->status == 1) {
-                    $status = 'Created';
-                } else if ($petty->status == 2) {
-                    $status = 'Completed';
-                } else{
-                    $status = '-';
+            ->editColumn('to', function ($petty) {
+                if ($petty->to != null) {
+                    return Carbon::parse($petty->to)->toDateString();
                 }
-                return $status;
+
+                return "-";
             })
             ->addColumn('action', function ($petty) {
                 $route = route('admin.petty_cash.advance.statements.make_detail', ['id' => $petty->statement_id]);
@@ -2632,15 +2623,20 @@ class AdminPettyCashController extends Controller
         if ($zone = $request->get('search_zone')) {
             $petty->where('h.zone_id', '=', $zone);
         }
-        if ($search_date = $request->get('search_creation_date')) {
-            $petty->whereDate('advance_petty_cash_statements.created_at', $search_date);
-        }
-        if ($request->get('search_date_from') && $request->get('search_date_to')) {
-            $from = $request->get('search_date_from');
-            $to = $request->get('search_date_to');
-            $petty->whereBetween('advance_petty_cash_statements.created_at', [$from, $to]);
+        if ($request->get('search_date_from')) {
+            $petty->whereDate('advance_petty_cash_statements.from', Carbon::parse($request->get('search_date_from'))->format('Y-m-d'));
         }
 
+        if ($request->get('search_date_to')) {
+            $petty->whereDate('advance_petty_cash_statements.to',Carbon::parse($request->get('search_date_to'))->format('Y-m-d'));
+        }
+
+        if ($request->get('search_creation_date_from') && $request->get('search_creation_date_to')) {
+            $from = $request->get('search_creation_date_from');
+            $to = $request->get('search_creation_date_to');
+            $petty->whereBetween('advance_petty_cash_statements.created_at', [$from, $to]);
+        }
+       
         return $petty->make(true);
     }
 
@@ -3133,7 +3129,7 @@ class AdminPettyCashController extends Controller
             }
 
             if($request->has('select_statement_sdn') && $request->select_statement_sdn != $petty_cash->sdn_id)
-            {
+            {  
                 $sdn_log = new AdvacncePettyCashSdnLog();
                 $sdn_log->petty_cash_statement_id = $petty_cash->id;
                 $sdn_log->previous_sdn_id = $petty_cash->sdn_id;
@@ -3141,6 +3137,7 @@ class AdminPettyCashController extends Controller
                 $sdn_log->save();
 
                 $petty_cash->sdn_id = $request->select_statement_sdn;
+                $petty_cash->save();
             }
 
             if(count($selected_ids) > 0){
