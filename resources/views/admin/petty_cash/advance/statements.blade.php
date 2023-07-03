@@ -84,7 +84,8 @@
                         <th class="border-primary border-darken-1">Destination Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Date</th>
-                        <th class="border-primary border-darken-1">Amount</th>
+                        <th class="border-primary border-darken-1">Total Amount</th>
+                        <th class="border-primary border-darken-1">Amount Availed</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -226,6 +227,7 @@
                             head.push('Statement Reference No.');
                             head.push('Date');
                             head.push('Total Amount');
+                            head.push('Amount Availed');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Operation Approved By');
@@ -242,6 +244,7 @@
                                 row.push(values.reference_no);
                                 row.push(values.date);
                                 row.push(values.total_amount);
+                                row.push(values.amount_availed);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.operation_approved_by);
@@ -317,7 +320,7 @@
                     },
                     {
                     extend: 'excel',
-                    title: 'Petty Cash Statements',
+                    title: ' Advance Petty Cash Statements',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },'reset'],
@@ -348,7 +351,7 @@
                     }
                 },
                 rowId: 'statement_id',
-                order: [10, 'desc'],
+                order: [11, 'desc'],
                 columns: [
                     {data: 'statement_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -359,6 +362,7 @@
                     {data: 'reference_no', name: 'advance_petty_cash_statements.reference_no', class: 'align-middle reference_no'},
                     {data: 'date', name: 'date', class: 'align-middle date'},
                     {data: 'total_amount', name: 'advance_petty_cash_statements.total_amount', class: 'align-middle total_amount'},
+                    {data: 'amount_availed', name: 'advance_petty_cash_statements.amount_availed', class: 'align-middle amount_availed'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'advance_petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'status_name', name: 'apcs.name', class: 'align-middle status'},
