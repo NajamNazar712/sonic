@@ -3001,7 +3001,7 @@ class AdminPettyCashController extends Controller
                        
                         $petty = $petty_details->petty_cash_statement;
                        
-                        $petty->balance = $petty->total_amount - $petty->amount_availed - $petty_details->amount;
+                        $petty->balance = ($petty->total_amount - $petty->amount_availed) - $petty_details->amount;
                         $petty->amount_availed += $petty_details->amount;
                         $petty->save();
 
