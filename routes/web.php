@@ -2839,6 +2839,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
         });
+
+        Route::prefix('overland')->name('overland.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
+        });
     });
 
     //Reports end

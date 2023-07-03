@@ -11389,4 +11389,106 @@ class AdminReportsController extends Controller
         return $datatables->make(true);
     }
 
+    public function overland_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 149);
+        if (session('department_id') == 7 && (!in_array(session('id'), session('sale_users_bypass')))) {
+            $shippers = DB::connection('reports')->table('users')->whereIn('id', session('tagged_shippers'))->whereIn('status', [3, 4])->select('id', 'name')->get();
+        } else {
+            $shippers = DB::connection('reports')->table('users')->whereIn('status', [3, 4])->select('id', 'name')->get();
+        }
+
+        $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
+        $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
+        $sales_persons = DB::connection('reports')->table('admins')->join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+        $shipping_modes = DB::connection('reports')->table('shipping_modes')->get(['id', 'mode']);
+        $business_categories = DB::connection('reports')->table('business_categories')->select('id', 'name')->get();
+        $sub_segments = SubCategorySegment::select('id', 'name')->get();
+        return view('admin.reports.overland_report')->with(['shippers' => $shippers, 'cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'sales_persons' => $sales_persons, 'business_categories' => $business_categories, 'shipping_modes' => $shipping_modes, 'sub_segments' => $sub_segments]);
+    }
+
+    public function overland_list(Request $request)
+    {
+//        dd(2);
+        $connection = 'reports';
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 150);
+        }
+        $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
+        $arrival_to   = Carbon::parse($request->arrival_time_to)->format('H:i:s');
+
+        $from = $request->get('search_date_from');
+        $from = Carbon::parse($from)->toDateTimeString();
+        $to   = $request->get('search_date_to');
+        $to   = Carbon::parse($to)->toDateTimeString();
+
+        $from = str_replace('00:00:00', $arrival_from, $from);
+        $to   = str_replace('00:00:00', $arrival_to, $to);
+//dd($request->all());
+        $overland = DB::connection($connection)->table('shipments')->join('users as u', 'u.id', '=', 'shipments.user_id')
+            ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
+            ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
+            ->leftJoin('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('user_shipping_infos AS rsi', 'shipments.return_address_id', '=', 'rsi.id')
+            ->leftjoin('cities AS rc', 'rsi.city_id', '=', 'rc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->leftjoin('zones as dz', 'dz.id', '=', 'dc.zone_id')
+            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
+            ->leftjoin('zone_class_cities as zcc', function ($join) use ($connection) {
+                $join->on('z.id', '=', 'zcc.zone_id')
+                    ->on('dc.id', '=', 'zcc.city_id')
+                    ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) { // only fetch max arrival
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
+                    ->where(
+                        'sj.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjj', function ($join) use ($connection) { // only fetch max arrival
+                $join->on('sjj.shipment_id', '=', 'shipments.id')
+                    ->where('sjj.shipper_status_id', 3)
+                    ->where(
+                        'sjj.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 3)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjs', function ($join) use ($connection) { // only fetch max arrival
+                $join->on('sjs.shipment_id', '=', 'shipments.id')
+                    ->where('sjs.shipper_status_id', 4)
+                    ->where(
+                        'sjs.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
+                    );
+            })
+            ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->whereIn('dr.shipper_status_id', [14, 25, 30, 36, 37])
+                    ->where(
+                        'dr.id',
+                        '=',
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+                    );
+            })
+            ->leftjoin('sale_person_tags as spt', function ($join) {
+                $join->on('spt.user_id', '=', 'shipments.user_id')
+                    ->leftjoin('admins as adsp', 'adsp.id', '=', 'spt.admin_id')
+                    ->where('spt.status', '=', 0);
+            })
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city')
+            ->whereIn('shipments.shipper_status_id', [1,2,3,4,5])
+            ->where('u.sub_segment_id',1);
+//            ->whereBetween('sj.created_at', [$from, $to]);
+        dd($overland->get(),$from,$to);
+    }
 }
