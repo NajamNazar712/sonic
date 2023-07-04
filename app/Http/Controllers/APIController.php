@@ -4345,8 +4345,8 @@ class APIController extends Controller
                 });
 
                 if ($request->type == 1) {
-                    if ($request->filled('remark')) {
-                        $remark = $request->remark;
+                    if ($request->filled('remarks')) {
+                        $remark = $request->remarks;
                     } else {
                         $remark = null;
                     }
@@ -4410,8 +4410,8 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
                 } elseif ($request->type == 2) {
 
-                    if ($request->filled('remark')) {
-                        $remark = $request->remark;
+                    if ($request->filled('remarks')) {
+                        $remark = $request->remarks;
                     } else {
                         $remark = null;
                     }
