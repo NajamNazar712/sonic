@@ -417,7 +417,19 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
+        $airway_bill_address_visibility_users = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                    $airway_bill_address_visibility_users = 0;
+                }
+            }
+        }
+
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users]);
     }
 
     public function shipping_modes(Request $request)
@@ -2681,22 +2693,6 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = self::check_origin($value, $shipping_mode_id, $user_id);
-                if ($result) {
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
-            }
-        });
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();

@@ -3391,17 +3391,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::prefix('standard_fintech_charges')->name('standard_fintech_charges.')->group(function () {
-        Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
-        Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
-
-            });
-
-
-
-
-
-
-        //End
+            Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
+        });
 
         Route::prefix('month_closing')->name('month_closing.')->group(function () {
             Route::prefix('types')->name('types.')->group(function () {
@@ -3665,7 +3657,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
 
+        Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
+        });
+
     });
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');

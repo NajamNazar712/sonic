@@ -970,8 +970,19 @@ class APIController extends Controller
                 } else {
                     $consignee_email_address = null;
                 }
-                // $information_display = $request->input('information_display');
-                $information_display = 1;
+
+                $information_display = TRUE;
+
+                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    if ($settings->text != NULL) {
+                        $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                        if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                            $information_display = FALSE;
+                        }
+                    }
+                }
 
                 if ($request->filled('charges_mode_id')) {
                     $charges_mode_id = $request->input('charges_mode_id');

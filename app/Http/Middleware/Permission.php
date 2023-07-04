@@ -1370,6 +1370,9 @@ class Permission
  			'accounts.substitute_account_management.update.index' => 875,
  			'management.shipment_received.index' => 878,
 
+
+ 			'settings.airway_bill_address_visibility.index' => 877,
+
         ],
         'shipper' => [
             'shipment.book.index' => 1,
