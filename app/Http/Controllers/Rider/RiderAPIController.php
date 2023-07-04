@@ -150,7 +150,8 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\ReturnDeliveredToShipperSms;
 
-class RiderAPIController extends Controller
+class
+RiderAPIController extends Controller
 {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -14052,15 +14053,6 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
         }
     }
-    //response:
-    //rider_trax_id
-    //date
-    //checkin_date
-
-
-    //from
-    //to
-    //rider_trax_id optional
 
     public function rider_checkin(Request $request)
     {
