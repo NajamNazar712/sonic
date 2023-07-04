@@ -447,8 +447,8 @@
             }
 
             $('body').on('click','.printreturnnote',function () {
-                var returnnote = $(this).parents('tr').find('td:eq(3)').text();
-                // var returnnote = rowdata.find('td:eq(3)').text();
+                // debugger;
+                var returnnote = $(this).parents('tr').find('.return_note_id').text();
                 print(returnnote);
             });
 
