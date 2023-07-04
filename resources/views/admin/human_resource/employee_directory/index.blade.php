@@ -1234,7 +1234,6 @@
                             head.push('Religion');
                             head.push('Marital Status');
                             head.push('Shift Timing');
-                            head.push('Requested At');
                             head.push('Joining Date');
                             head.push('Last Working Date');
                             head.push('Remarks');
