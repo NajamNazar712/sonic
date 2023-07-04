@@ -7799,7 +7799,7 @@ class ReturnController extends Controller
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $datatable->whereBetween('return_sheets.created_at', [$from, $to]);
+                $datatable->whereBetween('return_sheets.received_at', [$from, $to]);
             }
 
             // rider filter
