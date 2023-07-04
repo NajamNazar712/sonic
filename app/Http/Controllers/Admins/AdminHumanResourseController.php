@@ -559,10 +559,6 @@ class AdminHumanResourseController extends Controller
                     return '-';
                 }
             })
-            ->filterColumn('shift', function ($query, $keyword) {
-                $query->where('ess.start_time', "like", "%" . $keyword . "%")
-                    ->orWhere('ess.end_time', "like", "%" . $keyword . "%");
-            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                     $dropdown = '

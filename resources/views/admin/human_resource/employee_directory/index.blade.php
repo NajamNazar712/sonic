@@ -1563,7 +1563,7 @@
                     {data: 'emergency_contact', name: 'employees.emergency_contact', class: 'align-middle emergency_contact'},
                     {data: 'religion', name: 'er.name', class: 'align-middle religion'},
                     {data: 'martial_status', name: 'ems.name', class: 'align-middle martial_status'},
-                    {data: 'shift', name: 'shift', class: 'align-middle shift'},
+                    {data: 'shift', name: 'shift', class: 'align-middle shift', orderable: false, searchable: false},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
                     {data: 'remarks', name: 'employees.remarks', class: 'align-middle remarks'},
