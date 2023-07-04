@@ -7517,14 +7517,15 @@ class ShipperShipmentBookController extends Controller
                         $area_id = $default_area->id;
                     }
                 }
-                $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
-                if (!$consignee_address_area->exists()) {
-                    $consignee_address_area = new ConsigneeAddressArea();
-                    $consignee_address_area->shipment_id = $shipment_id;
-                    $consignee_address_area->city_area_id = $area_id;
-                    $consignee_address_area->save();
+                if($area_id != null){
+                    $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
+                    if (!$consignee_address_area->exists()) {
+                        $consignee_address_area = new ConsigneeAddressArea();
+                        $consignee_address_area->shipment_id = $shipment_id;
+                        $consignee_address_area->city_area_id = $area_id;
+                        $consignee_address_area->save();
+                    }
                 }
-
 
             }
             return true;
