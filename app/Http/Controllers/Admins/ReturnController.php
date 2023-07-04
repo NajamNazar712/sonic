@@ -7764,6 +7764,12 @@ class ReturnController extends Controller
                 return $consignee_phone;
 
             })
+            ->addColumn('return_note_id_excel',function ($shipper){
+                $return_note_id = str_pad($shipper->return_note_id, 6, '0', STR_PAD_LEFT);
+
+                return $return_note_id;
+
+            })
             ->filterColumn('consignee_phone',function ($query,$keyword){
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {

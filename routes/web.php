@@ -1656,7 +1656,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
         });
 
-        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+        Route::prefix('shipper_return_receiving')->name('shipper_return_receiving.')->group(function () {
             Route::prefix('history')->name('history.')->group(function () {
                 Route::get('', 'Admins\ReturnController@return_sheet_history_index')->name('index');
                 Route::get('list', 'Admins\ReturnController@return_sheet_history_list')->name('list');

@@ -588,7 +588,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
@@ -669,7 +669,7 @@
                                     @endif
 
                                     @if (session('role_id') == 1 || in_array(885, session('permissions')))
-                                        <li><a class="menu-item" href="{{route('admin.return.receiving_sheet.history.index')}}">Receiving Sheet History</a></li>
+                                        <li><a class="menu-item" href="{{route('admin.return.shipper_return_receiving.history.index')}}">Shipper Return Receiving History</a></li>
                                     @endif
                                 </ul>
                             </li>

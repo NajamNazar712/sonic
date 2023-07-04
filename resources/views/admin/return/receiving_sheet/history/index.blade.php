@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Return Sheet History')
+@section('title','Shipper Return Receiving History')
 
 @section('content')
     <h1 class="mb-1">
-        Return Sheet History
+        Shipper Return Receiving History
     </h1>
 
     <div class="card">
@@ -18,7 +18,7 @@
                                 <fieldset class="form-group input-group">
                                     <select name="rider_id" id="rider_id" class="select2 form-control " style="width: 100%">
                                         @foreach($riders as $rider)
-                                            <option value="{{$rider->id}}">{{$rider->name}} ({{$rider->trax_id}})</option>
+                                            <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -27,7 +27,7 @@
                                 <fieldset class="form-group input-group">
                                     <select name="shipper_id" id="shipper_id" class="select2 form-control " style="width: 100%" data-rule-required="true" data-msg-required="Shipper is required">
                                         @foreach($shippers as $shipper)
-                                            <option value="{{$shipper->id}}">{{$shipper->name}} ({{$shipper->id}})</option>
+                                            <option value="{{$shipper->id}}">{{$shipper->name}} - {{$shipper->id}}</option>
                                         @endforeach
                                     </select>
                                 </fieldset>
@@ -69,15 +69,15 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Return Note No.</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Rider TraxID</th>
                         <th class="border-primary border-darken-1">Rider City</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
@@ -171,13 +171,13 @@
             $("#search_form #shipper_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Shipper",
                 width: '100%',
-                clear: true,
+                allowClear:true,
             });
             
             $("#search_form #rider_id").prepend('<option value="" selected></option>').select2({
                 placeholder: "Select Rider",
                 width: '100%',
-                clear: true,
+                allowClear:true,
             });
 
             $('#search_form #search_date_from').pickadate({
@@ -215,13 +215,18 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.receiving_sheet.history.list') }}',
+                        url: '{{ route('admin.return.shipper_return_receiving.history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Return Note No.');
                             head.push('Tracking No.');
                             head.push('Order ID');
+                            head.push('Shipper');
+                            head.push('Rider Name');
+                            head.push('Rider TraxID');
+                            head.push('Rider City');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -235,21 +240,20 @@
                             head.push('Remarks');
                             head.push('Shipper Receiving time');
 
-
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
+                                row.push(values.return_note_id_excel);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
-                                row.push(values.return_note_id);
-                                row.push(values.origin);
-                                row.push(values.destination);
                                 row.push(values.shipper);
                                 row.push(values.rider_name);
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider_city);
+                                row.push(values.origin);
+                                row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone);
@@ -277,7 +281,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Return Sheet History',
+                        title: 'Shipper Return Receiving History',
                         className: 'btn btn-primary datatable_excel_btn d-none',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
@@ -292,7 +296,7 @@
                 serverSide: true,
                 deferLoading: 0,
                 ajax:{
-                    url:'{{ route('admin.return.receiving_sheet.history.list') }}',
+                    url:'{{ route('admin.return.shipper_return_receiving.history.list') }}',
                     data: function (d) {
                         d.rider_id = $('#rider_id').val();
                         d.shipper_id = $('#shipper_id').val();
@@ -301,18 +305,18 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[14, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
+                    {data: 'return_note_id', name: 'return_sheets.return_note_id', class: 'align-middle return_note_id'},
                     {data: 'tracking_number', name: 's.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 's.order_id', class: 'align-middle order_id'},
-                    {data: 'return_note_id', name: 'return_sheets.return_note_id', class: 'align-middle return_note_id'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'rider_name', name: 'rider.name', class: 'align-middle rider_name'},
                     {data: 'rider_trax_id', name: 'rider.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider_city', name: 'rc.name', class: 'align-middle rider_city'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 's.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 's.consignee_phone_number_1', class: 'align-middle consignee_phone'},
@@ -455,6 +459,7 @@
                 },
                 submitHandler: function(form) {
                     table.draw(true);
+                    $('.datatable_excel_btn').removeClass('d-none');
                 }
             });
 
