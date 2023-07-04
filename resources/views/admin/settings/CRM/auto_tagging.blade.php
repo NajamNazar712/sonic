@@ -33,8 +33,7 @@
                 </div>
             </div>
         </div>
-        <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
-         aria-hidden="true">
+    <div class="modal fade text-left" id="AssignAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal" aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -52,7 +51,28 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                        <select name="city_id" id="city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="hub_aread_id" id="hub_aread_id" class="form-control select2">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="case_nature_id" id="case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                            @foreach($case_natures as $case_nature)
+                                <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="case_nature_type_id" id="case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -70,7 +90,7 @@
     </div>
 
 
-    <div class="modal fade text-left" id="EditAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AssignAgentModal"
+    <div class="modal fade text-left" id="EditAgentModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditAgentModal"
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
@@ -91,6 +111,27 @@
                     </div>
                     <div class="form-group">
                         <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="hub_aread_id" id="edit_hub_aread_id" class="form-control select2">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="case_nature" id="edit_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                            @foreach($cities as $city)
+                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <select name="case_nature_type" id="edit_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -130,10 +171,11 @@
         $(document).ready(function() {
 
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
-                // $("agent_id").select2('val', '')
                 $('#agent_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
+                $('#hub_aread_id').val('').trigger('change.select2');
                 $('#case_nature_id').val('').trigger('change.select2');
+                $('#case_nature_type_id').val('').trigger('change.select2');
             });
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -147,6 +189,24 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
+            $('#hub_aread_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Hub Area",
+                allowClear:true,
+                dropdownParent:$('#crm_agent_assign')
+            });
+            $('#case_nature_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature",
+                allowClear:true,
+                dropdownParent:$('#crm_agent_assign')
+            });
+            $('#case_nature_type_id').prepend('<option selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Case Nature Type",
+                allowClear:true,
+                dropdownParent:$('#crm_agent_assign')
+            });
 
             $('#edit_agent_id').select2({
                 width:'100%',
@@ -154,6 +214,21 @@
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_city_id').select2({
+                width:'100%',
+                allowClear:true,
+                dropdownParent:$('#crm_agent_edit')
+            });
+            $('#edit_hub_aread_id').select2({
+                width:'100%',
+                allowClear:true,
+                dropdownParent:$('#crm_agent_edit')
+            });
+            $('#edit_case_nature_id').select2({
+                width:'100%',
+                allowClear:true,
+                dropdownParent:$('#crm_agent_edit')
+            });
+            $('#edit_case_nature_type_id').select2({
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')

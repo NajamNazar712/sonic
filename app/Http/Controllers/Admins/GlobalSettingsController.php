@@ -157,6 +157,8 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\HR\Employee;
+
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -5774,9 +5776,11 @@ class GlobalSettingsController extends Controller
     public function crm_auto_tagging_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 474);
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [9, 10, 11, 33, 55])->where('status', 1)->get(); //37,28 role
+        $operation_depart_ids = Employee::where('department_id', 6)->pluck('id')->toArray();
+        $agents = Admin::select('id', 'name')->whereIn('employee_id', $operation_depart_ids)->where('status', 1)->get(); //37,28 role
         $cities = city::where('status', 1)->get();
-        return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents, 'cities' => $cities]);
+        $case_natures = CrmRequestCaseNature::all();
+        return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents, 'cities' => $cities, 'case_natures' => $case_natures]);
     }
 
     public function crm_auto_tagging_list()
