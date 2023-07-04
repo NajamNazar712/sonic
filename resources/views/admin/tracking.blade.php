@@ -1121,7 +1121,7 @@
                                         shipment += '<a class="btn btn-secondary d-sm-inline-block file" href="' + details.pod_file + '" target="_blank" id=' + id + '><i class="la la-lg la-image align-middle"></i> POD File</a>';
 
                                     }else{
-                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >PPrint</button>';
+                                        shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary print" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print</button>';
                                     }
                                     if((parseInt(roll_id) == 1 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1) || (parseInt(department_id) == 6 && details.order_information.shipping_mode_id == 2 && details.order_information.pieces > 1)){
                                         shipment += '<button class="btn btn-secondary d-sm-inline-block btn btn-secondary ml-1 print_pieces" id=' + id + ' data-booking-type-id=' + details.order_information.booking_type_id + ' shipment_type=' + shipment_type + ' >Print Pieces</button>';
