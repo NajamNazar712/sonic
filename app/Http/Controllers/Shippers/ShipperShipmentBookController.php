@@ -1043,7 +1043,6 @@ class ShipperShipmentBookController extends Controller
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
-
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $watermark_flag = false;
         if ($user_type == 3) {
@@ -1347,6 +1346,7 @@ class ShipperShipmentBookController extends Controller
         $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
         foreach ($ids as $id) {
+//            dd('sss');
             $shipment = Shipment::find($id);
 
             if ($user_type != 2) {
@@ -1357,7 +1357,10 @@ class ShipperShipmentBookController extends Controller
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
 
-                if ($shipment->booking_type_id == 3 && $user_type != 3) {
+                $temp = false;
+
+                if ($shipment->booking_type_id == 3 && $user_type != 3 && $temp == true)
+                {
                     foreach ($shipment->items as $shipment_item) {
                         if ($page_items == 0) {
                             $table_start = '
@@ -1461,7 +1464,10 @@ class ShipperShipmentBookController extends Controller
                             $page_items = 0;
                         }
                     }
-                } else {
+                }
+                else
+                    {
+                        //dd('1');
                     $page_items = $page_items + 3;
                     if ($page_items >= 5) {
                         $page_items = 0;
@@ -1978,7 +1984,8 @@ class ShipperShipmentBookController extends Controller
 
                             $shipment_details .= $table_end;
                         }
-                    } else if ($shipment->booking_type_id == 2) {
+                    }
+                    else if ($shipment->booking_type_id == 2) {
                         $shipment_details .= $table_start;
 
                         $items = $shipment->items;
@@ -2327,8 +2334,122 @@ class ShipperShipmentBookController extends Controller
                             $shipment_details .= $distribution_delivery_performa;
                         }
                     }
+
+                        // todo : for booking type 3
+                        if ($shipment->booking_type_id == 3)
+                        {
+                            foreach ($shipment->items as $shipment_item) {
+                                if ($page_items == 0) {
+                                    $table_start = '
+                    <div class="page position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
+                                } else {
+                                    $table_start = '
+                    <div class="position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
+                                }
+
+                                if ($user_type != 4 && $type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                    ';
+                                } else {
+                                    if ($type != 'pdf') {
+                                        $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                        ';
+                                    } else {
+                                        $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                        ';
+                                    }
+                                }
+                                if ($type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                                <tr>
+                                    <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="color secondary border twice-top"><b>Tracking Number</b></td>
+                                </tr>
+                    ';
+                                } else {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
+                                </tr>
+                    ';
+                                }
+
+                                $table_start .= '
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . '</td>
+                                <td class="color secondary border twice-bottom"><strong>Price</strong></td>
+                                <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
+                                if ($type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                        </div>
+                    ';
+                                } else {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    ';
+                                }
+                                $shipment_details .= $table_start;
+                                $page_items++;
+                                if ($page_items >= 5) {
+                                    $page_items = 0;
+                                }
+                            }
+                        }
+                        // todo : for booking type 3 end
+
                 }
-                //delivery location watermark start
+                            //delivery location watermark start
                             $msg_string = null;
                             $str_arr = null;
                             $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
@@ -2400,7 +2521,7 @@ class ShipperShipmentBookController extends Controller
                                 
                             }
                             
-            //delivery location watermark end
+                            //delivery location watermark end
 
                             
                             //receiving_sheet_print
@@ -2491,12 +2612,14 @@ class ShipperShipmentBookController extends Controller
                    text-transform: uppercase;                  
                    overflow: hidden;
                    position: fixed;
-                   margin-top: -320px;
                    opacity: 0.4;
                    transform: rotate(350deg);
                    font-size: 400%; 
                    color: red; 
-                   font-stretch: extra-expanded;"     
+                   font-stretch: extra-expanded;
+                   top: 20%;
+                   left: 50%;
+                   transform: translate(-50%, -50%) rotate(350deg);"     
                     > ' . $watermark . '  </h1>
                     
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
