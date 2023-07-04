@@ -1226,6 +1226,7 @@
                             head.push('Repalcement Name');
                             head.push('Request/Document Status');
                             head.push('Employee Status');
+                            head.push('Requested At');
                             head.push('Address');
                             head.push('Date of Birth');
                             head.push('Emergency Contact Person');
