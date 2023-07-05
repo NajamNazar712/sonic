@@ -7811,6 +7811,10 @@ class AdminReportsController extends Controller
                 $dn_ids = explode(',', $entry->dn_ids);
                 return DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
             })
+            ->addColumn('hbl_konnect_amount', function ($entry) {
+                $dn_ids = explode(',', $entry->dn_ids);
+                return DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+            })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
                     return round(($entry->delivered_shipments / $entry->shipments_count) * 100, 2);
