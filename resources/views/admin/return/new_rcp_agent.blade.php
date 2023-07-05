@@ -519,7 +519,7 @@
                         title: 'RCP Agent Productivity',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'
+                    },
                 ],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
