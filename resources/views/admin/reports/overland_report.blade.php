@@ -424,7 +424,6 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper Name');
-                            head.push('Sub Segment');
                             head.push('Order ID');
                             head.push('Sub Segment');
                             head.push('Current Status');
