@@ -22,6 +22,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\AgentReturnConfirmation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\HR\Employee;
 use Illuminate\Support\Facades\Hash;
 
 class AgentLoginController extends Controller
@@ -46,120 +47,54 @@ class AgentLoginController extends Controller
         }
         return view('agent.login')->with(['setting' => $settings]);
     }
+
     public function login(Request $request)
     {
-        //validate the form
-        //        $errors = new MessageBag;
         $this->validate($request, [
             'phone_number' => 'required',
             'pin' => 'required|min:4'
         ]);
-        
-        //Attempt to login
-        if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
-            //if Successfull then redirect to intended location
 
-            $admin = Auth::guard('agent');
+        $employee = Admin::where('phone_number', $request->phone_number)->first();
 
-            if ($admin->user()->status == 0) {
-                auth('admin')->logout();
-                return back()->with('info', 'Your Account is Disabled, Contact Admin');
-            }
+        if (gettype($employee) != 'NULL') {
 
-            $id = $admin->id();
-            $role_id = $admin->user()->role_id;
-            $first_login = $admin->user()->first_login;
+            $employee_id = Employee::where('trax_id', $employee->trax_id)->first();
 
-            $hubs = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
-            $shippers = SalePersonTag::where('admin_id', $id)->where('status', 0)->pluck('user_id')->toArray();
-            $assigned_admins = MultipleSaleLead::leftjoin('multiple_sale_taggings as mst', 'mst.lead_id', '=', 'multiple_sale_leads.id')
-                ->leftjoin('sale_person_tags as spt', 'spt.admin_id', '=', 'mst.admin_id')
-                ->where('multiple_sale_leads.admin_id', $id)
-                ->where('spt.status', 0)
-                ->whereNotNull('spt.user_id')->select('spt.user_id');
-            if ($assigned_admins->exists()) {
-                $assigned_admins = $assigned_admins->pluck('spt.user_id')->toArray();
-                $shippers = array_merge($shippers, $assigned_admins);
-            }
-            $KAE = SaleTierTag::where('kam', $id);
-            if ($KAE->exists()) {
-                $KAE = $KAE->pluck('user_id')->toArray();
-                $shippers = array_merge($shippers, $KAE);
-                //$shippers = array_unique($shippers);
-            }
+            if (gettype($employee_id) != 'NULL') {
+                
+                if ($employee_id->staff_category_id === 3) {
 
-            $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
-            $department = AdminRole::find($role_id)->department_id;
-            $sales_coordinator = SalesCommissionUser::where('user_id', $id)->whereIn('sales_commission_users.tier_id', [2, 3])->exists();
-            if (in_array($role_id, [44])) {
-                if (count($hubs) > 0) {
-                    $hub_cities = City::whereIn('hub_id', $hubs)->where('status', 1)->pluck('id')->toArray();
-                    $region_shippers = User::whereNotIn('id', $shippers)->whereIn('city_id', $hub_cities)->pluck('id')->toArray();
-                    if (count($region_shippers) > 0) {
-                        $shippers = array_merge($shippers, $region_shippers);
+                    if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
+                        return redirect()->intended(route('agent.dashboard.index'));
                     }
-                }
-            }
-            //mark login start
-            $check_login = AgentReturnConfirmation::where('admin_id', $id)->where('current_date', Carbon::now()->format("Y-m-d"));
-            if (!$check_login->exists()) {
-                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                    ->where('admin_roles.department_id', 3)->where('a.id', $id);
-                if ($agent_role->exists()) {
-                    $agent_login = new AgentReturnConfirmation;
-                    $agent_login->login_time = Carbon::now();
-                    $agent_login->admin_id = $id;
-                    $agent_login->current_date = Carbon::now()->format("Y-m-d");
-                    $agent_login->save();
+                    $errors = [$this->username() => trans('auth.failed')];
+
+                    return redirect()->back()->withErrors($errors);
+                } else {
+                    $errors = 'You Have To Be Contractual';
+
+                    return redirect()->back()->withErrors($errors);
                 }
             } else {
-                $check_login = $check_login->get()->first();
-                if ($check_login->login_time == NULL) {
-                    $check_login->login_time = Carbon::now();
-                    $check_login->save();
-                }
-            }
-            //mark login end
-            $sale_users_bypass = array();
-            $settings = GlobalSettings::where('type', 'sales_user_restriction_bypass');
-            if ($settings->exists()) {
-                $settings = $settings->first();
-                $sale_users_bypass = array_map('intval', explode(',', $settings->text));
+
+                $errors = 'Employee Category Undefined';
+
+                return redirect()->back()->withErrors($errors);
             }
 
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers, 'sales_coordinator' => $sales_coordinator, 'first_login' => $first_login, 'id' => $id, 'sale_users_bypass' => $sale_users_bypass]);
+        }else{
 
-            //Redirect to Attendence 
-          $employee_id =  $admin->user()->employee_id;
-            if($employee_id)
-            {
-               $employee_attendence =  EmployeeAttendance::where('employee_id',$employee_id);
-                if($employee_attendence->exists())
-                {
-                    $employee_attendence = $employee_attendence->orderBy('attendance_date', 'desc')->first();
-                    $check_attendence = $employee_attendence->where('attendance_date',Carbon::now()->format("Y-m-d"));
-                    
-                    if(!$check_attendence->exists())
-                    {
-                        return redirect()->route('agent.dashboard.index');
-                    }
-                } else 
-                    return redirect()->route('agent.dashboard.index');
-            }
+            $errors = 'Employee Doesnt Exist';
 
-            return redirect()->intended(route('agent.dashboard.index'));
+            return redirect()->back()->withErrors($errors);
         }
-        $errors = [$this->username() => trans('auth.failed')];
-
-        //        $errors = new MessageBag(['password' => ['Email and/or password invalid.']]);
-        return redirect()->back()->withInput($request->only('email', 'remember'))->withErrors($errors);
     }
 
     public function username()
     {
         return 'phone_number';
     }
-
 
     public function logout(Request $request)
     {
@@ -185,6 +120,7 @@ class AgentLoginController extends Controller
         }
         return redirect()->route('agent.login');
     }
+    
     public function credentials(Request $request)
     {
         $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number', $request->phone_number);

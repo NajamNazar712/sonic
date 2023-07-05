@@ -5367,7 +5367,6 @@ class ReturnController extends Controller
      }
 
     public function manual_rcp_sms(Request $request){
-
         if($request->id){
             if($request->send_via == 'auto'){
                 $shipment = Shipment::find($request->id)->id;

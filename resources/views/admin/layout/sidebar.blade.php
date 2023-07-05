@@ -16,6 +16,12 @@ $roles = explode("," , $settings->text);
                 <li><a class="menu-item" href="{{ route('admin.leads.index') }}"><i
                             class="la la-user-plus"></i>Leads</a></li>
             @endif
+
+
+            @if (session('role_id') == 1 || in_array(416, session('permissions')))
+            <li><a class="menu-item" href="{{ route('admin.team_lead.index') }}"><i
+                        class="la la-user-plus"></i>Team Lead</a></li>
+        @endif
             @if (session('role_id') == 1 || in_array(669, session('permissions')))
                 <li><a class="menu-item" href="{{ route('admin.pam_leads.index') }}"><i class="la la-truck"></i>Movit
                         Leads</a></li>

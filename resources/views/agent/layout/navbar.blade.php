@@ -17,40 +17,12 @@
         <div class="navbar-container content">
             <div class="collapse navbar-collapse" id="navbar-mobile">
                 <ul class="nav navbar-nav mr-auto float-left">
-                    <li class="nav-item d-none d-md-block"><a class="nav-link nav-menu-main menu-toggle hidden-xs" id="sidebar_menu" href="#"><i class="ft-menu"></i></a></li>
-                   {{-- <li class="nav-item d-none d-md-flex justify-content-center h4 m-auto"><p class="m-auto white"><span class="d-none d-lg-inline-block">For Assistance Call:</span> <a href="tel:+922138772222" target="_blank" class="text-bold-700 white">021-111-118-729</a></p></li>--}}
-                    <a class="nav-link d-inline-flex align-middle p-1" href="{{ route('admin.attendance.mark') }}" target="_blank">
-                        <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                            <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Attendance</span>
-                            <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-calendar m-0"></i></h2>
-                        </div>
-                    </a>
-                    @if (session('role_id') == 1)
-                        <a class="nav-link d-inline-flex align-middle p-1" href="{{ route('admin.settings.bolt_update_version.index') }}" target="_blank">
-                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Bolt Version Update</span>
-                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-cogs m-0"></i></h2>
-                            </div>
-                        </a>
-                    @endif
+                  
                 </ul>
 
                 <ul class="nav navbar-nav float-right ">
                     <li class="dropdown dropdown-user nav-item">
-                        <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.tracking.index') }}" target="_blank">
-                            <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">Tracking</span>
-                                <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
-                            </div>
-                        </a>
-                        @if(session('role_id') == 1 || in_array(204, session('permissions')))
-                            <a class="nav-link d-inline-flex align-middle p-0" href="{{ route('admin.cx_quick_tracking.cx_index') }}" target="_blank">
-                                <div class="m-0 bg-white primary rounded custom-nav-buttons-padding">
-                                    <span class="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">CX Quick Tracking</span>
-                                    <h2 class="d-inline-block m-0 align-middle primary"><i class="la la-crosshairs m-0"></i></h2>
-                                </div>
-                            </a>
-                        @endif
+                        
                         {{--<a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">--}}
                             {{--<div class="m-0 bg-white primary rounded custom-nav-buttons-padding">--}}
                                 {{--<span class ="d-inline-block d-md-none d-lg-none d-xl-inline-block align-middle font-weight-bold">HELP</span>--}}
@@ -67,19 +39,18 @@
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
-                                
-                            <a class="dropdown-item" href="#" id="adminprofileshow"><span class="menu-title adminprofile"><i class="ft-user"></i> Profile</span></a>
-                            <a class="dropdown-item" href="http://bit.ly/sonic_manuals" target="_blank"><i class="ft-help-circle"></i> HELP</a>
-                            <a class="dropdown-item" href="{{ route('admin.resources.index') }}"><span class="menu-title"><i class="ft-file"></i>Resources</span></a>
-                            <a class="dropdown-item" href="#" id="editprofileshow"><span class="menu-title editprofile"><i class="ft-edit-2"></i>Edit Profile</span></a>
-                            <a class="dropdown-item" href="{{ route('admin.update.profile.password') }}"><span class="menu-title"><i class="ft-edit"></i>Change Pin</span></a>
+                          
+                            
+                 
+                         
 
-                           
+                            <a class="dropdown-item" href="{{route('agent.logout')}}" onclick="event.preventDefault();
+                            document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
+                            <form id="logout-form" action="{{ route('agent.logout') }}" method="POST" style="display: none;">
+                             @csrf
 
-                            <a class="dropdown-item" href="{{route('admin.logout')}}" onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
-                            <form id="logout-form" action="{{ route('admin.logout') }}" method="POST" style="display: none;">
-                            @csrf
+                         
+
                             </form>
                         </div>
                     </li>

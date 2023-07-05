@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFakeStatusesRemarkTable extends Migration
+class CreateRvFakeStatusesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateFakeStatusesRemarkTable extends Migration
      */
     public function up()
     {
-        Schema::create('fake_statuses_remark', function (Blueprint $table) {
+        Schema::create('rv_fake_statuses', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
             $table->timestamps();
@@ -27,6 +27,6 @@ class CreateFakeStatusesRemarkTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fake_statuses_remark');
+        Schema::dropIfExists('rv_fake_statuses');
     }
 }

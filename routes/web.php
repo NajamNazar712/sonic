@@ -586,7 +586,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/login', 'Auth\AdminLoginController@login')->name('login.submit');
     Route::post('/credentials', 'Auth\AdminLoginController@credentials')->name('login.credentials');
     Route::post('/verify_otp', 'Auth\AdminLoginController@verify_otp')->name('login.verify_otp');
-    Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
+    Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied')->middleware('auth:admin');
     Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Admins\AdminDashboardController@index')->name('index');
@@ -3899,6 +3899,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+
+    
+ Route::prefix('team_lead')->name('team_lead.')->group(function () {
+    Route::get('', 'Admins\TeamLeadDashboardController@team_lead_index')->name('index');
+    Route::get('list', 'Admins\TeamLeadDashboardController@team_lead_list')->name('list');
+    Route::post('submit', 'Admins\TeamLeadDashboardController@assign_hub_agent')->name('assign_hub_agent');
+
+});
+
     Route::prefix('leads')->name('leads.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
         Route::get('list', 'Admins\LeadManagementController@list')->name('list');
@@ -4430,7 +4439,11 @@ Route::prefix('agent')->name('agent.')->group(function () {
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Agent\ReturnV2Controller@index')->name('index');
         Route::post('get_shipment_reason', 'Agent\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
-        Route::post('getTicket', 'Agent\ReturnV2Controller@getTicket')->name('get_ticket');
+        Route::post('get_ticket', 'Agent\ReturnV2Controller@get_ticket')->name('get_ticket');
+        Route::get('intercepted_shipment', 'Agent\ReturnV2Controller@get_intercepted_shipment')->name('get_intercepted_shipment');
+        Route::post('submit', 'Agent\ReturnV2Controller@get_submit')->name('get_submit');
+
 
     });
+    Route::post('save_coordinates', 'Admins\AdminController@save_coordinates')->name('save_coordinates');
 });
