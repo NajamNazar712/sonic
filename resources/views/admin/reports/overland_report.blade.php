@@ -36,19 +36,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    @if (session('role_id') == 1 || in_array(261, session('permissions')))
-                        <div class="col-4">
-                            <div class="form-group">
-                                <select name="search_sales_person" class="select2" id="sales_person_select">
-                                    @foreach($sales_persons as $sales)
-                                        <option value="{{ $sales->id }}">{{ $sales->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        </div>
-                    @else
-                        <input type="hidden" name="search_sales_person" value="null">
-                    @endif
+
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
