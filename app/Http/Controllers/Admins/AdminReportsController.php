@@ -11490,7 +11490,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->whereIn('dr.shipper_status_id', [14,20, 25, 30, 36, 37])
+                    ->whereIn('dr.shipper_status_id', [12,14,20, 25, 30, 36, 37])
                     ->where(
                         'dr.id',
                         '=',
@@ -11508,7 +11508,7 @@ class AdminReportsController extends Controller
                 'dr.created_at as delivered_or_returned',
                 'dr.shipper_status_id as dr_status_id'
             )
-            ->whereIn('shipments.shipper_status_id', [1,2,3,4,5,14,20])
+            ->whereIn('shipments.shipper_status_id', [1,2,3,4,5,12,14,20])
             ->where('u.sub_segment_id',1)
             //->where('shipments.id',1724845)
             ->whereBetween('sj.created_at', [$from, $to]);
