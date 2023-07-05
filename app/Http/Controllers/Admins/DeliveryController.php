@@ -1923,8 +1923,11 @@ class DeliveryController extends Controller
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
             ->leftjoin('crm_requests as crm', function ($join) {
                 $join->on('crm.shipment_id', '=', 'shipments.id')
-                    ->whereIn('crm.status_id', [2, 3, 5])
-                    ->where('crm.case_nature_id', 1);
+                    ->where(
+                        'crm.id',
+                        '=',
+                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id and crm_requests.status_id in (2, 3, 5) and crm_requests.case_nature_id = 1)')
+                    );
             })
             ->leftjoin('consolidation_shipments as consolidations', function ($join) {
                 $join->on('consolidations.shipment_id', '=', 'shipments.id')
