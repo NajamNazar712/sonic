@@ -1,17 +1,17 @@
 @extends('admin.layout.master')
-@section('title','Edit Petty Cash Statement')
+@section('title','Edit Advance Petty Cash Statement')
 
 @section('content')
     <h1 class="mb-1">
-        Edit Petty Cash Statement # {{$petty_statement->id}}
+         Edit Advance Petty Cash Statement # {{$petty_statement->id}}
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post" enctype="multipart/form-data">
-                    @method('PUT')
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.advance.statements.edit_make_detail_submit')}}" method="post" enctype="multipart/form-data">
+                    {{--@method('PUT')--}}
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
                     <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement->id}}">
@@ -32,8 +32,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                 </div>
-
-                                <input type="text" name="select_statement_date" disabled data-value="{{$petty_statement->date}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
+                                <input type="text" name="select_statement_date" disabled data-value="{{$petty_statement->from}}" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_statement_date" placeholder="Select Date" data-rule-required="true" data-msg-required="Date is required">
                             </div>
                         </div>
                         <div class="col">
@@ -106,14 +105,14 @@
                             <div class="">
                                 <button id="statement_submit" type="submit"  class="btn btn-primary btn-block" disabled>Update Details</button>
                             </div>
-                                @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
-                                    @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
-                                    <div class="ml-1">
-                                        <button id="statement_approve" type="button"  class="btn btn-primary btn-block"> {{ $petty_statement->status == 1 ? 'Receive Statement' : 'Approve' }}</button>
-                                    </div>
-                                    <div class="ml-1">
-                                        <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>
-                                    </div>
+                            @if((session('role_id') == 1) || in_array(173, session('permissions')) || in_array(190, session('permissions')) || in_array(191, session('permissions')))
+                                @if((session('role_id') == 1) || ($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && (session('department_id') == 6)) || ($petty_statement->status == 2 && session('department_id') == 4))
+{{--                                    <div class="ml-1">--}}
+{{--                                        <button id="statement_approve" type="button"  class="btn btn-primary btn-block">Approve</button>--}}
+{{--                                    </div>--}}
+{{--                                    <div class="ml-1">--}}
+{{--                                        <button id="statement_reject" type="button"  class="btn btn-danger btn-block">Reject</button>--}}
+{{--                                    </div>--}}
                                 @endif
                             @endif
                         </div>
@@ -130,14 +129,14 @@
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Petty Cash Statement Detail Amount</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body  text-center" id="amount_log_table">
 
                 </div>
                 <div class="modal-footer">
-                            <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
                 </div>
 
             </div>
@@ -154,19 +153,19 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <style type="text/css">
         /*.custom-col-width{*/
-            /*min-width: 100px;*/
+        /*min-width: 100px;*/
         /*}*/
         /*th.expense_amount, th.reference_no{*/
-            /*width: 80px;*/
+        /*width: 80px;*/
         /*}*/
         /*.custom-hub-col-width{*/
-            /*min-width: 80px;*/
+        /*min-width: 80px;*/
         /*}*/
         /*.date-col-width{*/
-            /*min-width: 190px;*/
+        /*min-width: 190px;*/
         /*}*/
         /*.date-col-width{*/
-            /*min-width: 200px;*/
+        /*min-width: 200px;*/
         /*}*/
         .total_amount_span{
             font-size: 24px;
@@ -338,51 +337,22 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                @if($petty_statement->sdn != null && $petty_statement->sdn->status != 2)
-                @if(($petty_statement->status == 0 && session('department_id') == 6) || ($petty_statement->status == 1 && session('department_id') == 6))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[
-                        @if($petty_statement->status != 6)
-                            {
-                                title: 'Edit Details',
-                                className: 'btn btn-primary edit_btn',
-                                text: '<i class="la la-plus"></i> Edit Details',
-                                action:function (e) {
-                                    edit_finance();
-                                    $('#statement_submit').attr('disabled', false);
-                                    table.button('.edit_btn').disable();
+                buttons: [{
+                    title: 'Edit Details',
+                    className: 'btn btn-primary edit_btn',
+                    text: '<i class="la la-plus"></i> Edit Details',
+                    action:function (e) {
+                        edit_finance();
+                        $('#statement_submit').attr('disabled', false);
+                        table.button('.edit_btn').disable();
 
-                                }
-                            }
-                    @endif],
-                @elseif(session('role_id') == 1 || ($petty_statement->status <= 2 && (in_array(641, session('permissions')))))
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[
-                        @if($petty_statement->status != 6)
-                            {
-                                title: 'Edit Details',
-                                className: 'btn btn-primary edit_btn',
-                                text: '<i class="la la-plus"></i> Edit Details',
-                                action:function (e) {
-                                    edit_finance();
-                                    $('#statement_submit').attr('disabled', false);
-                                    table.button('.edit_btn').disable();
+                    }
+                },'reset'],
 
-                                }
-                            }
-                        @endif
-                    ,'reset'],
-                @else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
-                @endif
-                @else
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: ['reset'],
-                @endif
                 autoWidth: false,
                 scrollX: true, scrollY:'500px',
-                ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement->id]) }}',
+                ajax: '{{ route('admin.petty_cash.advance.statements.edit_make_detail.list',['id'=>$petty_statement->id]) }}',
                 processing: true,
                 language: {
                     processing: data_table_loader
@@ -596,7 +566,7 @@
                     }).then(function(confirm) {
                         if (confirm) {
                             $.ajax({
-                                url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
+                                url: '{!! route('admin.petty_cash.advance.statements.detail_edit.approve') !!}',
                                 method: 'POST',
                                 data: {
                                     'detail_id': id,
@@ -607,6 +577,7 @@
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     current.parents('td').prev('td').text('Approved');
                                     current.parents('tr').attr('status',2);
+                                    location.reload();
                                 }
                                 else{
                                     toastr.error(data.error, 'Error!', {
@@ -654,7 +625,7 @@
                     }).then(function(confirm) {
                         if (confirm) {
                             $.ajax({
-                                url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
+                                url: '{!! route('admin.petty_cash.advance.statements.detail_edit.reject') !!}',
                                 method: 'POST',
                                 data: {
                                     'detail_id': id,
@@ -688,36 +659,37 @@
                 }
             });
 
-            function edit_ops(){
-                table.rows().nodes().each(function(index) {
-                    var row = table.row(index);
-                    var id = parseInt(row.id());
-                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
-                        $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
-                        $(row.node()).find('td.expense_amount input').attr('disabled',false);
-                        $(row.node()).find('td.reference_no input').attr('disabled',false);
-                        $(row.node()).find('td.remarks textarea').attr('disabled',false);
-                        $(row.node()).find('td.reference_document input').attr('disabled',false);
-                        var index = $.inArray(id, selected_rows);
-                        if(index === -1){
-                            selected_rows.push(id);
-                        }
-                    }
+            // function edit_ops(){
+            //     table.rows().nodes().each(function(index) {
+            //         var row = table.row(index);
+            //         var id = parseInt(row.id());
+            //         if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+            //             $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
+            //             $(row.node()).find('td.expense_amount input').attr('disabled',false);
+            //             $(row.node()).find('td.reference_no input').attr('disabled',false);
+            //             $(row.node()).find('td.remarks textarea').attr('disabled',false);
+            //             $(row.node()).find('td.reference_document input').attr('disabled',false);
+            //             var index = $.inArray(id, selected_rows);
+            //             if(index === -1){
+            //                 selected_rows.push(id);
+            //             }
+            //         }
 
-                });
-            }
+            //     });
+            // }
 
             function edit_finance() {
                 $("#select_statement_sdn").attr('disabled',false);
-                $(".dncc_select").attr('disabled',false);
+                //$(".dncc_select").attr('disabled',false);
                 table.rows().nodes().each(function(index) {
                     var row = table.row(index);
                     var id = parseInt(row.id());
-                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+                    if($(row.node()).attr('status') == 0){
                         $(row.node()).find('td.account_head select').attr('disabled',false);
                         $(row.node()).find('td.account_title select').attr('disabled',false);
                         $(row.node()).find('td.zone select').attr('disabled',false);
                         $(row.node()).find('td.details_of_expense textarea').attr('disabled',false);
+                        $(row.node()).find('td.dncc select').attr('disabled',false);
                         $(row.node()).find('td.expense_amount input').attr('disabled',false);
                         $(row.node()).find('td.reference_no input').attr('disabled',false);
                         $(row.node()).find('td.remarks textarea').attr('disabled',false);
@@ -742,7 +714,7 @@
 
 
                 });
-                $('#statements_total_amount').text(total_amount);
+                //$('#statements_total_amount').text(total_amount);
             });
             $('#statement_approve').on('click', function (e) {
                 e.preventDefault();
@@ -849,7 +821,7 @@
 
                 return true;
             }, $.validator.format("File Size must not exceed {0} bytes."));
-            
+
             $('#statement_reject').on('click',  function (e) {
                 e.preventDefault();
                 var id = '{{$petty_statement->id}}';

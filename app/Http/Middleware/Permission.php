@@ -473,6 +473,10 @@ class Permission
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
 
+			'petty_cash.advance.index' => 881,
+            'petty_cash.advance.statements.index' => 882,
+
+
             'month_closing.pending.index' => 408,
             'month_closing.pending.list' => 408,
             'month_closing.resolved.index' => 409,
@@ -1371,7 +1375,7 @@ class Permission
  			'management.shipment_received.index' => 878,
 
             'reports.overland.index' => 886,
-
+ 			'settings.airway_bill_address_visibility.index' => 877,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
