@@ -7780,6 +7780,11 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            
+            ->filterColumn('return_sheets.remarks', function ($query, $keyword) {
+                return $query->where('return_sheets.remarks', 'like', "%".$keyword."%");
+            })
+
             ->filterColumn('return_sheets.return_note_id', function ($query, $keyword) {
                 return $query->where('return_sheets.return_note_id', '=', $keyword);
             })

@@ -159,10 +159,11 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
 
     <script type="text/javascript">
@@ -284,7 +285,7 @@
                         title: 'Shipper Return Receiving History',
                         className: 'btn btn-primary datatable_excel_btn d-none',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },'reset'
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -324,8 +325,8 @@
                     {data: 'amount', name: 's.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'received_remarks', name: 'return_sheets.remarks', class: 'align-middle received_remarks', orderable: false, searchable: false},
+                    {data: 'status', name: 'ss.id', class: 'align-middle status'},
+                    {data: 'received_remarks', name: 'return_sheets.remarks', class: 'align-middle received_remarks'},
                     {data: 'received_date', name: 'return_sheets.received_at', class: 'align-middle received_date'},
                 ],
                 rowCallback: function(row, data, index) {
