@@ -206,10 +206,12 @@ class ReturnV2Controller extends Controller
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
             $admin_agent = Admin::where('id', Auth::id())->first();
 
+            //if agent already exists
             if($shipment_assign_agent_id->exist()){
+
+                //if shipment already exists update row
                 if ($shipment_assign_agent->exists()) {
                     $shipment_assign_agent = $shipment_assign_agent->first();
-                    
                     $shipment_assign_agent_table_columns = [
                             'rv_assign_agent_status_id' => $request->shipment_status,
                             'rv_assign_agent_sub_status_id' => $request->shipment_reason,
@@ -219,19 +221,57 @@ class ReturnV2Controller extends Controller
                             'rv_fake_status_id' => $request->fake_status,
                             'rv_shipment_agent_id' => $shipment_assign_agent_id,
                             'remarks' => $request->shipment_remarks,
-                            'call_to_id' => $request->calls_to,
+                            'call_to_id' => $request->call_to_id,
                         ];
                     
                         if ($admin_agent->employee->staff_category_id == 3) {
+                            $shipment_assign_agent_id->increment('total_shipments');
+                            $shipment_assign_agent_id->increment('actual_productivity');
+                            
                             $shipment_assign_agent->update(
                                 $shipment_assign_agent_table_columns + ['updated_type_id' => 2] // agent type
                             );
                         } 
                         else {
+                            $shipment_assign_agent_id->increment('already_updated');
                             $shipment_assign_agent->update(
                                 $shipment_assign_agent_table_columns + ['updated_type_id' => 1] // admin type
                             );
                         }
+                }
+
+                else{
+                    // Creating row of new shipment
+                    $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
+                    $rv_shipment_assign_agent->agent_id = Auth::id();
+                    $rv_shipment_assign_agent->shipment_id = $request->shipment_id;
+                    $rv_shipment_assign_agent->rv_assign_agent_status_id = $request->rv_assign_agent_status_id;
+                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $request->rv_assign_agent_sub_status_id;
+                    $rv_shipment_assign_agent->rv_state_id = $request->rv_state_id;
+                    $rv_shipment_assign_agent->is_fake_status = $request->is_fake_status;
+                    $rv_shipment_assign_agent->rv_fake_status_id = $request->rv_fake_status_id;
+                    $rv_shipment_assign_agent->rv_shipment_agent_id = $shipment_assign_agent_id->id;
+                    $rv_shipment_assign_agent->updated_by_id = Auth::id();
+                    $rv_shipment_assign_agent->remarks = $request->remarks;
+                    $rv_shipment_assign_agent->call_to_id  = $request->call_to_id;
+                    $rv_shipment_assign_agent->save();
+
+                    if ($admin_agent->employee->staff_category_id == 3) {
+                        $shipment_assign_agent_id->increment('total_shipments');
+                        $shipment_assign_agent_id->increment('actual_productivity');
+                        
+                        $rv_shipment_assign_agent->save(
+                            $rv_shipment_assign_agent + ['updated_type_id' => 2] // agent type
+                        );
+                    } 
+                    else {
+                        $shipment_assign_agent_id->increment('already_updated');
+
+                        $rv_shipment_assign_agent->save(
+                            $rv_shipment_assign_agent + ['updated_type_id' => 1] // admin type
+                        );
+                    }
+
                 }
             }
 
