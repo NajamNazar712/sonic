@@ -74,7 +74,7 @@ class ReturnV2Controller extends Controller
                 foreach ($shipments as $key => $shipment) {
 
                     # code...
-                    // if agent shipment is open - assigned to differend user
+                    // if agent shipment is open - assigned to different user
                     $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                     if ($shipment_assigned_unassigned_agent->exists()) {
                         $shipment_assigned_unassigned_agent->first();
@@ -182,7 +182,7 @@ class ReturnV2Controller extends Controller
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required',
-            'rv_fake_status_id' => 'required',
+            // 'rv_fake_status_id' => 'required',
 
         ];
 
@@ -197,50 +197,47 @@ class ReturnV2Controller extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 0, 'errors' => $validate->errors()]);
-        } 
-        
-        else {
+        } else {
 
 
             $shipment_assign_agent_id = RvShipmentAgent::where('agent_id', Auth::id())->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
             $admin_agent = Admin::where('id', Auth::id())->first();
 
-            //if agent already exists
-            if($shipment_assign_agent_id->exist()){
 
-                //if shipment already exists update row
-                if ($shipment_assign_agent->exists()) {
+            //if shipment already exists update row
+            if ($shipment_assign_agent->exists()) {
+
+                //if agent already exists
+                if ($shipment_assign_agent_id->exist()) {
                     $shipment_assign_agent = $shipment_assign_agent->first();
                     $shipment_assign_agent_table_columns = [
-                            'rv_assign_agent_status_id' => $request->shipment_status,
-                            'rv_assign_agent_sub_status_id' => $request->shipment_reason,
-                            'rv_state_id' => $request->fake_status_state,
-                            'updated_by_id' => Auth::id(),
-                            'is_fake_status' => $request->fake_status,
-                            'rv_fake_status_id' => $request->fake_status,
-                            'rv_shipment_agent_id' => $shipment_assign_agent_id,
-                            'remarks' => $request->shipment_remarks,
-                            'call_to_id' => $request->call_to_id,
-                        ];
-                    
-                        if ($admin_agent->employee->staff_category_id == 3) {
-                            $shipment_assign_agent_id->increment('total_shipments');
-                            $shipment_assign_agent_id->increment('actual_productivity');
-                            
-                            $shipment_assign_agent->update(
-                                $shipment_assign_agent_table_columns + ['updated_type_id' => 2] // agent type
-                            );
-                        } 
-                        else {
-                            $shipment_assign_agent_id->increment('already_updated');
-                            $shipment_assign_agent->update(
-                                $shipment_assign_agent_table_columns + ['updated_type_id' => 1] // admin type
-                            );
-                        }
-                }
+                        'rv_assign_agent_status_id' => $request->shipment_status,
+                        'rv_assign_agent_sub_status_id' => $request->shipment_reason,
+                        'rv_state_id' => $request->fake_status_state,
+                        'updated_by_id' => Auth::id(),
+                        'is_fake_status' => $request->fake_status,
+                        'rv_fake_status_id' => $request->fake_status,
+                        'rv_shipment_agent_id' => $shipment_assign_agent_id,
+                        'remarks' => $request->shipment_remarks,
+                        'call_to_id' => $request->call_to_id,
+                    ];
 
-                else{
+                    if ($admin_agent->employee->staff_category_id == 3) {
+                        $shipment_assign_agent_id->increment('total_shipments');
+                        $shipment_assign_agent_id->increment('actual_productivity');
+
+                        $shipment_assign_agent->update(
+                            $shipment_assign_agent_table_columns + ['updated_type_id' => 2] // agent type
+                        );
+                    } else {
+                        $shipment_assign_agent_id->increment('already_updated');
+                        $shipment_assign_agent->update(
+                            $shipment_assign_agent_table_columns + ['updated_type_id' => 1] // admin type
+                        );
+                    }
+                    
+                } else {
                     // Creating row of new shipment
                     $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
                     $rv_shipment_assign_agent->agent_id = Auth::id();
@@ -259,24 +256,28 @@ class ReturnV2Controller extends Controller
                     if ($admin_agent->employee->staff_category_id == 3) {
                         $shipment_assign_agent_id->increment('total_shipments');
                         $shipment_assign_agent_id->increment('actual_productivity');
-                        
+
                         $rv_shipment_assign_agent->save(
                             $rv_shipment_assign_agent + ['updated_type_id' => 2] // agent type
                         );
-                    } 
-                    else {
+                    } else {
                         $shipment_assign_agent_id->increment('already_updated');
 
                         $rv_shipment_assign_agent->save(
                             $rv_shipment_assign_agent + ['updated_type_id' => 1] // admin type
                         );
                     }
-
                 }
-            }
+            } 
+            
+            else {
+                // Inserting new record if agent is not found in rv_shipment_agents
+                $rv_shipment_agent  = new RvShipmentAgent;
+                $rv_shipment_agent->admin_id = Auth::id();
+                $rv_shipment_agent->increment('total_shipments');
+                $rv_shipment_agent->increment('actual_productivity');
+                $rv_shipment_agent->save();
 
-            else
-            {
                 // Inserting new row in rv_shipment_assign_agents table
                 $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
                 $rv_shipment_assign_agent->agent_id = Auth::id();

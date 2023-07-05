@@ -16,9 +16,9 @@ class CreateRvShipmentAgentsTable extends Migration
         Schema::create('rv_shipment_agents', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('agent_id')->index();
-            $table->integer('total_shipments');
-            $table->integer('actual_productivity');
-            $table->integer('already_updated');
+            $table->integer('total_shipments')->default(0);
+            $table->integer('actual_productivity')->default(0);
+            $table->integer('already_updated')->nullable();
             $table->string('status')->nullable();
             $table->timestamps();
         });
