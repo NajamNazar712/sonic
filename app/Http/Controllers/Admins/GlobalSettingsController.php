@@ -5787,7 +5787,10 @@ class GlobalSettingsController extends Controller
     {
         $roles = CrmAutoTagUser::join('admins as ad', 'ad.id', '=', 'crm_auto_tag_users.admin_id')
             ->join('cities as c', 'c.id', 'crm_auto_tag_users.city_id')
-            ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status');
+            ->leftJoin('city_areas as ca', 'ca.id', 'crm_auto_tag_users.city_area_id')
+            ->leftJoin('crm_request_case_nature as cn', 'cn.id', 'crm_auto_tag_users.crm_case_nature_id')
+            ->leftJoin('crm_request_case_nature_types as cnt', 'cnt.id', 'crm_auto_tag_users.crm_case_nature_type_id')
+            ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status', 'ca.name as city_area_name', 'cn.name as case_natue', 'cnt.type as case_nature_type');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -5820,9 +5823,66 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
+            })
+            ->editColumn('city_area_name', function ($roles) {
+                if ($roles->city_area_name) {
+                    return $roles->city_area_name;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
+            })
+            ->editColumn('case_natue', function ($roles) {
+                if ($roles->case_natue) {
+                    return $roles->case_natue;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
+            })
+            ->editColumn('case_nature_type', function ($roles) {
+                if ($roles->case_nature_type) {
+                    return $roles->case_nature_type;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
             });
 
         return $datatables->make(true);
+    }
+
+    public function hub_areas(Request $request)
+    {
+        $validations = [
+            'city_id' => 'required|numeric',
+        ];
+
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return [];
+        }
+        
+        $city_id = $request->city_id;
+        $hub_areas = CityArea::where('city_id',$city_id)->select('id','name')->get();
+
+        return $hub_areas;
+    }
+
+    public function case_nature_types(Request $request)
+    {
+        $validations = [
+            'crm_case_nature_id' => 'required|numeric',
+        ];
+
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return [];
+        }
+        
+        $crm_case_nature_id = $request->crm_case_nature_id;
+        $case_nature_types = CrmRequestCaseNatureType::where('nature_id',$crm_case_nature_id)->select('id','type as name')->get();
+
+        return $case_nature_types;
     }
 
     public function crm_auto_tagging_submit(Request $request)
@@ -5859,6 +5919,9 @@ class GlobalSettingsController extends Controller
 
         $crm_agent_data->admin_id = $request->admin_id;
         $crm_agent_data->city_id = $request->city_id;
+        $crm_agent_data->city_area_id = $request->city_area_id;
+        $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
+        $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
         $crm_agent_data->save();
         return redirect()->back()->with('success', 'Agent Updated!');
     }

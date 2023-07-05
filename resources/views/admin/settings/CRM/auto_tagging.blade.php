@@ -23,6 +23,9 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">User</th>
                                     <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Hub Area</th>
+                                    <th class="border-primary border-darken-1">Case Nature</th>
+                                    <th class="border-primary border-darken-1">Case Nature Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -58,21 +61,18 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="hub_aread_id" id="hub_aread_id" class="form-control select2">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
+                        <select name="city_area_id" id="city_area_id" class="form-control select2">
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="case_nature_id" id="case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="case_nature_type_id" id="case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
+                        <select name="crm_case_nature_type_id" id="crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -117,21 +117,21 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="hub_aread_id" id="edit_hub_aread_id" class="form-control select2">
+                        <select name="city_area_id" id="edit_city_area_id" class="form-control select2">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="case_nature" id="edit_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="case_nature_type" id="edit_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
+                        <select name="crm_case_nature_type_id" id="edit_crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -173,9 +173,9 @@
             $('#AssignAgentModal').on('hidden.bs.modal', function () {
                 $('#agent_id').val('').trigger('change.select2');
                 $('#city_id').val('').trigger('change.select2');
-                $('#hub_aread_id').val('').trigger('change.select2');
-                $('#case_nature_id').val('').trigger('change.select2');
-                $('#case_nature_type_id').val('').trigger('change.select2');
+                $('#city_area_id').val('').trigger('change.select2');
+                $('#crm_case_nature_id').val('').trigger('change.select2');
+                $('#crm_case_nature_type_id').val('').trigger('change.select2');
             });
             $('#agent_id').prepend('<option selected></option>').select2({
                 width:'100%',
@@ -189,19 +189,19 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#hub_aread_id').prepend('<option selected></option>').select2({
+            $('#city_area_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Hub Area",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#case_nature_id').prepend('<option selected></option>').select2({
+            $('#crm_case_nature_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
-            $('#case_nature_type_id').prepend('<option selected></option>').select2({
+            $('#crm_case_nature_type_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature Type",
                 allowClear:true,
@@ -218,17 +218,17 @@
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
-            $('#edit_hub_aread_id').select2({
+            $('#edit_city_area_id').select2({
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
-            $('#edit_case_nature_id').select2({
+            $('#edit_crm_case_nature_id').select2({
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
-            $('#edit_case_nature_type_id').select2({
+            $('#edit_crm_case_nature_type_id').select2({
                 width:'100%',
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
@@ -263,11 +263,14 @@
                 },
                 ajax: '{{ route('admin.settings.auto_tagging.list') }}',
                 rowId: 'id',
-                order: [[3, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
                     {data: 'city_name', name: 'c.name', class: 'align-middle city_name'},
+                    {data: 'city_area_name', name: 'ca.name', class: 'align-middle city_area_name'},
+                    {data: 'case_natue', name: 'cn.name', class: 'align-middle case_natue'},
+                    {data: 'case_nature_type', name: 'cnt.type', class: 'align-middle case_nature_type'},
                     {data: 'status', name: 'crm_auto_tag_users.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
@@ -332,6 +335,60 @@
 
             
             
+            $('#city_id').on('change', function() {
+
+                var city_id = $('#city_id').val();
+
+                $('#city_area_id').empty().trigger('change');
+                
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tagging.hub_areas") !!}',
+                    method: 'POST',
+                    data: {
+                        'city_id': city_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (result) {
+
+                    if(result && result.length > 0)
+                    {
+                        $.each(result, function(index, option) {
+                            var newOption = new Option(option.name, option.id); 
+                            console.log(newOption);
+                            $('#city_area_id').append(newOption).trigger('change');
+                        });
+                    }
+                })
+                
+            });
+
+            $('#crm_case_nature_id').on('change', function() {
+
+                var crm_case_nature_id = $('#crm_case_nature_id').val();
+
+                $('#crm_case_nature_type_id').empty().trigger('change');
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tagging.case_nature_types") !!}',
+                    method: 'POST',
+                    data: {
+                        'crm_case_nature_id': crm_case_nature_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (result) {
+
+                    if(result && result.length > 0)
+                    {
+                        $.each(result, function(index, option) {
+                            var newOption = new Option(option.name, option.id); 
+                            console.log(newOption);
+                            $('#crm_case_nature_type_id').append(newOption).trigger('change');
+                        });
+                    }
+                })
+
+            });
+
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
