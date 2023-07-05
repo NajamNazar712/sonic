@@ -1655,6 +1655,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\ReturnController@return_confirm_otp_index')->name('index');
             Route::get('list', 'Admins\ReturnController@return_confirm_otp_list')->name('list');
         });
+
+        Route::prefix('shipper_return_receiving')->name('shipper_return_receiving.')->group(function () {
+            Route::prefix('history')->name('history.')->group(function () {
+                Route::get('', 'Admins\ReturnController@return_sheet_history_index')->name('index');
+                Route::get('list', 'Admins\ReturnController@return_sheet_history_list')->name('list');
+            });
+        });
     });
     
     Route::prefix('debriefing')->name('debriefing.')->group(function () {
@@ -2864,6 +2871,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@quick_scanned_report_list')->name('list');
         });
+
+        Route::prefix('overland')->name('overland.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
+        });
     });
 
     //Reports end
@@ -3416,17 +3428,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::prefix('standard_fintech_charges')->name('standard_fintech_charges.')->group(function () {
-        Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
-        Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
-
-            });
-
-
-
-
-
-
-        //End
+            Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
+        });
 
         Route::prefix('month_closing')->name('month_closing.')->group(function () {
             Route::prefix('types')->name('types.')->group(function () {
@@ -3690,7 +3694,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
 
+        Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
+        });
+
     });
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
@@ -4137,7 +4147,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('rejoin', 'Admins\AdminHumanResourseController@rejoin_employee')->name('rejoin');
             Route::post('pin', 'Admins\AdminHumanResourseController@employee_directory_pin')->name('pin');
             Route::get('', 'Admins\AdminHumanResourseController@employee_directory_index')->name('index');
-            Route::get('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
+            Route::post('list', 'Admins\AdminHumanResourseController@employee_directory_list')->name('list');
             Route::post('approve', 'Admins\AdminHumanResourseController@employee_directory_approve')->name('approve');
             Route::post('required_info', 'Admins\AdminHumanResourseController@employee_directory_required_info')->name('required_info');
             Route::post('approve_individual', 'Admins\AdminHumanResourseController@employee_directory_approve_individual')->name('approve_individual');
