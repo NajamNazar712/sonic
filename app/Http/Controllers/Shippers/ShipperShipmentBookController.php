@@ -141,19 +141,7 @@ class ShipperShipmentBookController extends Controller
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
         
-        $information_display = 1;
-        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            if ($settings->text != NULL) {
-                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
-                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
-                    $information_display = 0;
-                }
-            }
-        }
-
-        dd('book',$information_display);
+        $information_display = $this->information_display_check($user_id);
 
         $shipment = new Shipment();
         $shipment->user_id = $user_id;
@@ -3451,19 +3439,7 @@ class ShipperShipmentBookController extends Controller
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
         
-        $information_display = 1;
-        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
-        if ($settings->exists()) {
-            $settings = $settings->first();
-            if ($settings->text != NULL) {
-                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
-                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
-                    $information_display = 0;
-                }
-            }
-        }
-
-        dd('corp_book',$information_display);
+        $information_display = $this->information_display_check($user_id);
 
         $shipment = new Shipment();
 
@@ -3570,6 +3546,24 @@ class ShipperShipmentBookController extends Controller
         self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
+    }
+
+    // this function is used to show information in airwaybill if user_id exist in airway bill setting screen
+    public function information_display_check($user_id)
+    {
+        $information_display = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array($user_id, $airway_bill_address_visibility_accounts)) {
+                    $information_display = 0;
+                }
+            }
+        }
+
+        return $information_display;
     }
 
     public function corporate_index()
