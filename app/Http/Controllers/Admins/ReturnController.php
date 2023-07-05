@@ -3872,6 +3872,12 @@ class ReturnController extends Controller
         }
     }
 
+
+    // Heading: N/A 
+    // Siderbar: N/A 
+    // URL: admin/return/receive/rn.print
+    // Description: this method is used for print (receive return deliveries) 
+
     public function rrd_print(Request $request){
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -4292,7 +4298,7 @@ class ReturnController extends Controller
 
         }
 
-//        return $shipments;
+        // return $shipments;
 
 
         $html .= '
@@ -4486,7 +4492,7 @@ class ReturnController extends Controller
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins', 'admins.id', '=', 'return_notes.admin_id')
             ->leftjoin('admins as sb', 'sb.id', '=', 'return_notes.updated_by')
-  ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
+        ->leftjoin('city_areas as ca', 'ca.id', '=', 'riders.area_id')
             ->select(['return_notes.id as return_note', 'return_notes.id as return_note_id', 'oc.name as hub', 'riders.name as rider', 'riders.trax_id as rider_id', 'admins.name as assigned_by', 'return_notes.created_at', 'return_notes.shipments_count', 'return_notes.shipments_count as shipments_count_link', 'return_notes.status', 'sb.name as submitted_by', 'return_notes.updated_at', 'return_notes.updated_at as submitted_at', 'return_notes.image', DB::raw('(SELECT COUNT(id) FROM shipments_journey where shipper_status_id in (25,31,38) and reference_1_id = return_notes.id and verification = 1 ) as delivered_to_shipper_count'),'ca.name as area']);
 
 
@@ -7542,6 +7548,128 @@ class ReturnController extends Controller
             $agent_productivity = $agent_productivity->whereIn('a.id',$agent_ids);
         }
         
+        return $datatable->make(true);
+    }
+
+    // Heading: Return Sheet History 
+    // Siderbar: Last Mile > Return > Receiving Sheet History
+    // URL: admin/return/receiving_sheet/history
+    // Description: loading shipment statuses, shipping mode, service type and returning data to view
+
+    public function return_sheet_history_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 677);
+        $shippers = User::select('id','name')->get();
+        $riders = Rider::select('id','trax_id','name')->where('status', 1)->whereNotNull('employee_id')->get();
+        $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.return.receiving_sheet.history.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type, 'shippers' => $shippers, 'riders' => $riders]);
+    }
+    
+    // Return Sheet History List for datatable 
+    public function return_sheet_history_list(Request $request)
+    {
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 678);
+        }
+
+        $shipments = ReturnSheet::join('shipments as s', 's.id', 'return_sheets.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', 'oc.id')
+            ->join('cities AS dc', 's.consignee_city_id', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id' , 'h.id')
+            ->leftJoin('shipping_modes as sm','sm.id','s.shipping_mode_id')
+            ->leftJoin('booking_types as bt','bt.id','s.booking_type_id')
+            ->join('shipment_status as ss','ss.id','s.shipper_status_id')
+            ->join('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', 's.id')
+                    ->where('shipments_journey.id',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and verification = 1)'));
+            })
+            ->join('users as u', 'return_sheets.user_id', 'u.id')
+            ->join('return_notes as rn', 'return_sheets.return_note_id', 'rn.id')
+            ->join('riders as rider','rn.rider_id','rider.id')
+            ->join('cities as rc' ,'rc.id' , 'rider.city_id')
+            ->select('s.id as shId','s.tracking_number','s.tracking_number as tracking','oc.name as origin','dc.name as destination','s.order_id','h.name as hub','s.consignee_name','s.consignee_phone_number_1','s.consignee_phone_number_2','s.consignee_address','s.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date', 'usi.poc', 'shipments_journey.remarks as shipper_remarks', 'return_sheets.remarks as received_remarks', 'return_sheets.received_at as received_date','u.name as shipper','return_sheets.return_note_id', 'rider.name as rider_name', 'rider.trax_id as rider_trax_id', 'rc.name as rider_city')
+            ->whereIn('return_sheets.status_id', [DB::raw(1), DB::raw(2)]);
+
+        $datatable = Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('return_note_id', function ($shipments) {
+                return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($shipments->return_note_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->addColumn('consignee_phone',function ($shipper){
+                $consignee_phone = '';
+                $consignee_phone .= $shipper->consignee_phone_number_1;
+                if($shipper->consignee_phone_number_2 != null){
+                    $consignee_phone .= "| ".$shipper->consignee_phone_number_2;
+                }
+
+                return $consignee_phone;
+
+            })
+            ->addColumn('return_note_id_excel',function ($shipper){
+                $return_note_id = str_pad($shipper->return_note_id, 6, '0', STR_PAD_LEFT);
+
+                return $return_note_id;
+
+            })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            
+            ->filterColumn('return_sheets.remarks', function ($query, $keyword) {
+                return $query->where('return_sheets.remarks', 'like', "%".$keyword."%");
+            })
+
+            ->filterColumn('return_sheets.return_note_id', function ($query, $keyword) {
+                return $query->where('return_sheets.return_note_id', '=', $keyword);
+            })
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = $shipments->remarks;
+                if($remark != null){
+                    return $remark;
+                }
+                else{
+                    return '-';
+                }
+            });
+
+            // date filter
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $datatable->whereBetween('return_sheets.received_at', [$from, $to]);
+            }
+
+            // rider filter
+            if ($request->get('rider_id')) {
+                $rider_id = $request->get('rider_id');
+                $datatable->where('rn.rider_id', $rider_id);
+            }
+
+            // shipper filter
+            if ($request->get('shipper_id')) {
+                $shipper_id = $request->get('shipper_id');
+                $datatable->where('return_sheets.user_id', $shipper_id);
+            }
+            
         return $datatable->make(true);
     }
 }

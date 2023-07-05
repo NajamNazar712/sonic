@@ -140,11 +140,10 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-
+        
+        $information_display = self::information_display_check($user_id);
 
         $shipment = new Shipment();
-
-
         $shipment->user_id = $user_id;
         $shipment->booking_type_id = $service_type_id;
         $shipment->pickup_address_id = $pickup_address_id;
@@ -417,7 +416,19 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
+        $airway_bill_address_visibility_users = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                    $airway_bill_address_visibility_users = 0;
+                }
+            }
+        }
+
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users]);
     }
 
     public function shipping_modes(Request $request)
@@ -2849,22 +2860,6 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = self::check_origin($value, $shipping_mode_id, $user_id);
-                if ($result) {
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
-            }
-        });
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -3611,6 +3606,9 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
+        
+        $information_display = self::information_display_check($user_id);
+
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -3716,6 +3714,24 @@ class ShipperShipmentBookController extends Controller
         self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
+    }
+
+    // this function is used to show information in airwaybill if user_id exist in airway bill setting screen
+    static public function information_display_check($user_id)
+    {
+        $information_display = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array($user_id, $airway_bill_address_visibility_accounts)) {
+                    $information_display = 0;
+                }
+            }
+        }
+
+        return $information_display;
     }
 
     public function corporate_index()
@@ -7685,14 +7701,15 @@ class ShipperShipmentBookController extends Controller
                         $area_id = $default_area->id;
                     }
                 }
-                $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
-                if (!$consignee_address_area->exists()) {
-                    $consignee_address_area = new ConsigneeAddressArea();
-                    $consignee_address_area->shipment_id = $shipment_id;
-                    $consignee_address_area->city_area_id = $area_id;
-                    $consignee_address_area->save();
+                if($area_id != null){
+                    $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
+                    if (!$consignee_address_area->exists()) {
+                        $consignee_address_area = new ConsigneeAddressArea();
+                        $consignee_address_area->shipment_id = $shipment_id;
+                        $consignee_address_area->city_area_id = $area_id;
+                        $consignee_address_area->save();
+                    }
                 }
-
 
             }
             return true;

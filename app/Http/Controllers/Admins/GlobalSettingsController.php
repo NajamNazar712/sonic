@@ -8605,4 +8605,44 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 0, 'error' => 'No data Found']);
         }
     }
+
+    public function airway_bill_address_visibility_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 680);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        $rider_id = null;
+        $airway_bill_address_visibility_accounts = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.airway_bill_address_visibility.index')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'airway_bill_address_visibility_accounts' => $airway_bill_address_visibility_accounts]);
+    }
+
+    public function airway_bill_address_visibility_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'airway_bill_address_visibility_setting';
+                }
+                $settings->setting_value = 0;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
 }

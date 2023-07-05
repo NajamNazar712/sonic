@@ -1160,6 +1160,7 @@ class ShipperReturnController extends Controller
         }
         return redirect()->route('cod.return.sheet.history.index')->with('success', 'Shipment Received Successfully!');
     }
+    
     public function return_sheet_history_index()
     {
         $shipment_status = ShipmentStatus::select('id','name')->whereIn('id', [23, 24, 25, 28, 29, 31, 34, 35, 38, 47, 48,60])->get();
@@ -1167,6 +1168,7 @@ class ShipperReturnController extends Controller
         $service_type = BookingType::all();
         return view('client.return.sheet.history')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
+    
     public function return_sheet_history_list(Request $request)
     {
         $shipments = ReturnSheet::join('shipments as s', 's.id', '=', 'return_sheets.shipment_id')

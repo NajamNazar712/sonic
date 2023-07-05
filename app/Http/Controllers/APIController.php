@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
 use App\Http\Models\Admin\HBLKonnect\RetailNoteHblKonnectTransaction;
@@ -973,8 +974,19 @@ class APIController extends Controller
                 } else {
                     $consignee_email_address = null;
                 }
-                // $information_display = $request->input('information_display');
-                $information_display = 1;
+
+                $information_display = TRUE;
+
+                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    if ($settings->text != NULL) {
+                        $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                        if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                            $information_display = FALSE;
+                        }
+                    }
+                }
 
                 if ($request->filled('charges_mode_id')) {
                     $charges_mode_id = $request->input('charges_mode_id');
@@ -4395,8 +4407,8 @@ class APIController extends Controller
                 });
 
                 if ($request->type == 1) {
-                    if ($request->filled('remark')) {
-                        $remark = $request->remark;
+                    if ($request->filled('remarks')) {
+                        $remark = $request->remarks;
                     } else {
                         $remark = null;
                     }
@@ -4460,8 +4472,8 @@ class APIController extends Controller
                     return response()->json(['status' => 1, 'message' => 'Shipment is already updated']);
                 } elseif ($request->type == 2) {
 
-                    if ($request->filled('remark')) {
-                        $remark = $request->remark;
+                    if ($request->filled('remarks')) {
+                        $remark = $request->remarks;
                     } else {
                         $remark = null;
                     }
@@ -7487,6 +7499,89 @@ class APIController extends Controller
             }
         } else {
             return ['status' => 2, 'message' => 'Access Denied!'];
+        }
+    }
+
+
+    public function staff_checkin(Request $request)
+    {
+
+        $rules = [
+            'from' => ['required', 'date_format:Y/m/d'],
+            'to' => ['required', 'date_format:Y/m/d'],
+            'trax_id' => ['nullable','string']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $from = Carbon::parse($request->from);
+            $to = Carbon::parse($request->to);
+            $today = Carbon::now();
+
+            $total_difference_from = $from;
+            $total_difference_from = $total_difference_from->diff($today)->days;
+            $between_difference_from = $from;
+            $between_difference_from = $between_difference_from->diff($to)->days;
+            if($total_difference_from <= 90){
+                if($between_difference_from <= 45){
+                    $details = array();
+
+                    $trax_id_check = false;
+                    if($request->has('trax_id')){
+                        if($request->trax_id != null && $request->trax_id != ''){
+                            $employee = Employee::where('trax_id', $request->trax_id);
+                            if($employee->exists()){
+                                $employee = $employee->first();
+
+                                $trax_id_check = true;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Employee not found!']);
+                            }
+                        }
+                    }
+
+                    if($trax_id_check == false){
+                        $staff_attendances = EmployeeAttendance::where('employee_type', 1)->whereBetween('attendance_date',[$from,$to]);
+                    }
+                    else{
+                        $staff_attendances = EmployeeAttendance::where('employee_id', $employee->id)->where('employee_type', 1)->whereBetween('attendance_date',[$from,$to]);
+                    }
+
+                    if($staff_attendances->exists()){
+                        $staff_attendances = $staff_attendances->get();
+                        foreach ($staff_attendances as $staff_attendance){
+                            if($trax_id_check == false) {
+                                $employee = Employee::find($staff_attendance->employee_id);
+                            }
+                            if($employee){
+                                if($staff_attendance->clock_in_datetime != null){
+                                    $detail = array('Trax ID' => $employee->trax_id, 'Name' => $employee->name, 'Clock In' => $staff_attendance->clock_in_datetime, 'Clock Out' => $staff_attendance->clock_out_datetime);
+                                    $details[$staff_attendance->attendance_date][] = $detail;
+                                }
+                            }
+                        }
+
+                        return response()->json(['status' => 0, 'data' => $details]);
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Data not found!']);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Date difference range must not exceed 45 days']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
+            }
+
         }
     }
 }
