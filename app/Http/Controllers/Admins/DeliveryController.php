@@ -1053,14 +1053,17 @@ class DeliveryController extends Controller
                             //Urdu
                             NotificationsController::send(135, $note->id, $shipment);
                         } else {
-                              //When Admin Create Delivery Note
-                            $payment_detials = PayfastApiCall::ApiCall($note->id,$shipment);   
-                            $rand            = $payment_detials['unique_key'];
-                            $payment_link    = $payment_detials['payment_link'];
-                            $url             = $payment_detials['url'];
-                            $shipments_id = array_wrap($shipment);
-                            CountFintechCharges::dispatch($shipments_id,$payment_link,$rand,$url);  
-                            NotificationsController::send(12, $note->id, $shipment,$payment_link);   
+                            $environment = config('app.env');
+                            if($environment == 'production' || $environment == 'staging') {
+                                //When Admin Create Delivery Note
+                                $payment_detials = PayfastApiCall::ApiCall($note->id, $shipment);
+                                $rand = $payment_detials['unique_key'];
+                                $payment_link = $payment_detials['payment_link'];
+                                $url = $payment_detials['url'];
+                                $shipments_id = array_wrap($shipment);
+                                CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
+                                NotificationsController::send(12, $note->id, $shipment,$payment_link);
+                            }
                         }
                     } else {
                         $shipment_otp->otp = null;
