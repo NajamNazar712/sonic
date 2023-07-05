@@ -1284,41 +1284,21 @@
                                                                                 containerId: 'toast-bottom-center'
                                                                             });
                                                                 } else {
-                                                                    toastr
-                                                                        .error(
-                                                                            data
-                                                                            .error,
-                                                                            'Error!', {
-                                                                                positionClass: 'toast-top-center',
-                                                                                containerId: 'toast-top-center'
-                                                                            });
+                                                                    $('#AssignAgentModal').modal('hide');
+                                                                    toastr.error(data.error,
+                                                                    'Error!', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
                                                                 }
-                                                                selected_rows
-                                                                    = [];
-                                                                restricted_rows
-                                                                    = [];
-
-                                                                table.rows()
-                                                                    .deselect();
-
-                                                                table.draw(
-                                                                true);
-                                                                table.button(
-                                                                        '.assign'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.confirm'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.re-attempt'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.un-assign'
-                                                                        )
-                                                                    .disable();
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                table.rows().deselect();
+                                                                table.draw( true);
+                                                                table.button( '.assign' ).disable();
+                                                                table.button( '.confirm' ).disable();
+                                                                table.button('.re-attempt').disable();
+                                                                table.button('.un-assign').disable();
 
                                                             });
                                                     } else {
@@ -1378,8 +1358,7 @@
                                                 table.rows().nodes().each(function(index) {
                                                     var row = table.row(index);
 
-                                                    if ($(row.node()).hasClass(
-                                                            'selected')) {
+                                                    if ($(row.node()).hasClass('selected')) {
                                                         var id = parseInt(row.id());
                                                         // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
                                                         // shipment_remarks[id] = remark;
@@ -1414,7 +1393,6 @@
                                                             positionClass: 'toast-bottom-center',
                                                             containerId: 'toast-bottom-center'
                                                         });
-
                                                 });
                                             }
                                         });
@@ -1647,7 +1625,8 @@
                                 });
                             }
                         },
-                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
+
+                        @if(session('role_id') == 1 || in_array(884, session('permissions')))
                         {
                             title: 'Upload',
                             className: 'btn btn-primary excel-upload',
@@ -1656,6 +1635,9 @@
                                 $('#excel_upload_modal').modal('show');
                             }
                         },
+                        @endif
+
+                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
                         {
                             title: 'Upload Agent',
                             className: 'btn btn-primary excel-upload',
@@ -1757,7 +1739,7 @@
                     { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
-                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
                     { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
