@@ -23,7 +23,7 @@
                         </div>
                         <div class="col-4">
                             <fieldset class="form-group">
-                                <select name="select_all_status" id="select_all_status" class="form-control select2">
+                                <select name="select_all_status" id="select_all_status" class="form-control select2" onclick="handleSelectChange()">
                                     @foreach($shipment_statuses as $status)
                                         <option value="{{$status->id}}">{{$status->name}}</option>
                                     @endforeach
@@ -619,6 +619,11 @@
                     $('#password_submit').attr('disabled', false);
                 }
             });
+            function handleSelectChange() {
+                console.log('hi');
+                var selectedValue = document.getElementById("select_all_status").value;
+                console.log("Selected value: " + selectedValue);
+            }
             $('#password_submit').on('click', function () {
                var pass = $('#password_input').val();
                 var delivery_note = $('#delivery_note').val();
@@ -1957,136 +1962,137 @@
                                             '_token': '{{ csrf_token() }}',
                                             'password': password,
                                         }
-                                    }).done(function (data) {
-                                        if (data.status === 1) {
-                                            var tracking_numbers = '';
-                                            var route = '{!! route('admin.tracking.index') !!}';
-                                            UnblockPagePermanently();
-                                            if(data.first_attempt_shipments.length > 0) {
-                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
-                                                    tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                                });
-                                                var html = '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
-                                                html += tracking_numbers;
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                    swal({
-                                                        title: 'RCP First Attempt',
-                                                        content: content,
-                                                        icon: 'warning',
-                                                        buttons: {
-                                                            confirm: {
-                                                                text: 'OK',
-                                                                value: null,
-                                                                visible: true,
-                                                                closeModal: true,
-                                                            }
-                                                        },
-                                                        closeOnClickOutside: false,
-                                                        closeOnEsc: false,
-                                                        dangerMode: true
-                                                    }).then(function (confirm) {
-                                                        if (confirm) {
-                                                            location.reload();
-                                                        } else {
-                                                            location.reload();
-                                                        }
-                                                    });
-
-                                            }
-                                            else{
-                                                 toastr.success(data.success, 'Success!', {
-                                                     positionClass: 'toast-bottom-center',
-                                                     containerId: 'toast-bottom-center'
-                                                 });
-                                                 location.reload();
-                                            }
-
-                                        }
-                                        else if(data.status === 2){
-                                            var invalid_shipmet_flag = false;
-                                            var not_replacement_shipment_flag = false;
-                                            var html = '';
-                                            var title = '';
-                                            var route = '{!! route('admin.tracking.index') !!}';
-                                            if(data.invalid_shipments){
-                                                var tracking_numbers = '';
-                                                $.each(data.invalid_shipments, function(index, tracking_number) {
-                                                    tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                                });
-                                                 html += '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';
-                                                html += tracking_numbers;
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                invalid_shipmet_flag = true;
-                                                var title = "Same Consignee Info";
-                                            }
-                                            if(data.not_replacement_shipments){
-                                                var replacement_tracking_numbers = '';
-                                                $.each(data.not_replacement_shipments, function(index, tracking_number) {
-                                                    replacement_tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                                });
-                                                 html += '<p>Following Shipments Cannot be mark as Replacement - Not Collected due to Booking Type:</p><br>';
-                                                html += replacement_tracking_numbers;
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                not_replacement_shipment_flag = true;
-                                                if(title != ''){
-                                                    title += "/Booking Type Except Replacement";
-                                                }else{
-                                                    title = "Booking Type Except Replacement";
-                                                }
-                                            }
-                                            if(data.first_attempt_shipments.length > 0) {
-                                                var  fa_tracking_number = '';
-                                                $.each(data.first_attempt_shipments, function (index, tracking_number) {
-                                                    fa_tracking_number += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
-                                                });
-                                                 html += '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';
-                                                html += fa_tracking_number;
-                                                content = document.createElement('div');
-                                                content.innerHTML = html;
-                                                invalid_shipmet_flag = true;
-                                                if(title != ''){
-                                                    title += "/RCP First Attempt";
-                                                }else{
-                                                    title = "RCP First Attempt";
-                                                }
-                                            }
-                                            if(invalid_shipmet_flag || not_replacement_shipment_flag) {
-                                                swal({
-                                                    title: title,
-                                                    content: content,
-                                                    icon: 'warning',
-                                                    buttons: {
-                                                        confirm: {
-                                                            text: 'OK',
-                                                            value: null,
-                                                            visible: true,
-                                                            closeModal: true,
-                                                        }
-                                                    },
-                                                    closeOnClickOutside: false,
-                                                    closeOnEsc: false,
-                                                    dangerMode: true
-                                                }).then(function (confirm) {
-                                                    if (confirm) {
-                                                        location.reload();
-                                                    } else {
-                                                        location.reload();
-                                                    }
-                                                });
-                                            }
-                                        }
-                                        else {
-                                            UnblockPagePermanently();
-                                            toastr.error(data.error, 'Error!', {
-                                                positionClass: 'toast-top-center',
-                                                containerId: 'toast-top-center'
-                                            });
-                                            location.reload();
-                                        }
                                     });
+                                    {{--    .done(function (data) {--}}
+                                    {{--    if (data.status === 1) {--}}
+                                    {{--        var tracking_numbers = '';--}}
+                                    {{--        var route = '{!! route('admin.tracking.index') !!}';--}}
+                                    {{--        UnblockPagePermanently();--}}
+                                    {{--        if(data.first_attempt_shipments.length > 0) {--}}
+                                    {{--            $.each(data.first_attempt_shipments, function (index, tracking_number) {--}}
+                                    {{--                tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';--}}
+                                    {{--            });--}}
+                                    {{--            var html = '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';--}}
+                                    {{--            html += tracking_numbers;--}}
+                                    {{--            content = document.createElement('div');--}}
+                                    {{--            content.innerHTML = html;--}}
+                                    {{--                swal({--}}
+                                    {{--                    title: 'RCP First Attempt',--}}
+                                    {{--                    content: content,--}}
+                                    {{--                    icon: 'warning',--}}
+                                    {{--                    buttons: {--}}
+                                    {{--                        confirm: {--}}
+                                    {{--                            text: 'OK',--}}
+                                    {{--                            value: null,--}}
+                                    {{--                            visible: true,--}}
+                                    {{--                            closeModal: true,--}}
+                                    {{--                        }--}}
+                                    {{--                    },--}}
+                                    {{--                    closeOnClickOutside: false,--}}
+                                    {{--                    closeOnEsc: false,--}}
+                                    {{--                    dangerMode: true--}}
+                                    {{--                }).then(function (confirm) {--}}
+                                    {{--                    if (confirm) {--}}
+                                    {{--                        location.reload();--}}
+                                    {{--                    } else {--}}
+                                    {{--                        location.reload();--}}
+                                    {{--                    }--}}
+                                    {{--                });--}}
+
+                                    {{--        }--}}
+                                    {{--        else{--}}
+                                    {{--             toastr.success(data.success, 'Success!', {--}}
+                                    {{--                 positionClass: 'toast-bottom-center',--}}
+                                    {{--                 containerId: 'toast-bottom-center'--}}
+                                    {{--             });--}}
+                                    {{--             location.reload();--}}
+                                    {{--        }--}}
+
+                                    {{--    }--}}
+                                    {{--    else if(data.status === 2){--}}
+                                    {{--        var invalid_shipmet_flag = false;--}}
+                                    {{--        var not_replacement_shipment_flag = false;--}}
+                                    {{--        var html = '';--}}
+                                    {{--        var title = '';--}}
+                                    {{--        var route = '{!! route('admin.tracking.index') !!}';--}}
+                                    {{--        if(data.invalid_shipments){--}}
+                                    {{--            var tracking_numbers = '';--}}
+                                    {{--            $.each(data.invalid_shipments, function(index, tracking_number) {--}}
+                                    {{--                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';--}}
+                                    {{--            });--}}
+                                    {{--             html += '<p>Same consignee details found which are already marked as delivered of following Shipment(s):</p><br>';--}}
+                                    {{--            html += tracking_numbers;--}}
+                                    {{--            content = document.createElement('div');--}}
+                                    {{--            content.innerHTML = html;--}}
+                                    {{--            invalid_shipmet_flag = true;--}}
+                                    {{--            var title = "Same Consignee Info";--}}
+                                    {{--        }--}}
+                                    {{--        if(data.not_replacement_shipments){--}}
+                                    {{--            var replacement_tracking_numbers = '';--}}
+                                    {{--            $.each(data.not_replacement_shipments, function(index, tracking_number) {--}}
+                                    {{--                replacement_tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';--}}
+                                    {{--            });--}}
+                                    {{--             html += '<p>Following Shipments Cannot be mark as Replacement - Not Collected due to Booking Type:</p><br>';--}}
+                                    {{--            html += replacement_tracking_numbers;--}}
+                                    {{--            content = document.createElement('div');--}}
+                                    {{--            content.innerHTML = html;--}}
+                                    {{--            not_replacement_shipment_flag = true;--}}
+                                    {{--            if(title != ''){--}}
+                                    {{--                title += "/Booking Type Except Replacement";--}}
+                                    {{--            }else{--}}
+                                    {{--                title = "Booking Type Except Replacement";--}}
+                                    {{--            }--}}
+                                    {{--        }--}}
+                                    {{--        if(data.first_attempt_shipments.length > 0) {--}}
+                                    {{--            var  fa_tracking_number = '';--}}
+                                    {{--            $.each(data.first_attempt_shipments, function (index, tracking_number) {--}}
+                                    {{--                fa_tracking_number += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';--}}
+                                    {{--            });--}}
+                                    {{--             html += '<p>Return Confirmation Pending Cannot be mark on the following shipments due to First Delivery Attempt</p><br>';--}}
+                                    {{--            html += fa_tracking_number;--}}
+                                    {{--            content = document.createElement('div');--}}
+                                    {{--            content.innerHTML = html;--}}
+                                    {{--            invalid_shipmet_flag = true;--}}
+                                    {{--            if(title != ''){--}}
+                                    {{--                title += "/RCP First Attempt";--}}
+                                    {{--            }else{--}}
+                                    {{--                title = "RCP First Attempt";--}}
+                                    {{--            }--}}
+                                    {{--        }--}}
+                                    {{--        if(invalid_shipmet_flag || not_replacement_shipment_flag) {--}}
+                                    {{--            swal({--}}
+                                    {{--                title: title,--}}
+                                    {{--                content: content,--}}
+                                    {{--                icon: 'warning',--}}
+                                    {{--                buttons: {--}}
+                                    {{--                    confirm: {--}}
+                                    {{--                        text: 'OK',--}}
+                                    {{--                        value: null,--}}
+                                    {{--                        visible: true,--}}
+                                    {{--                        closeModal: true,--}}
+                                    {{--                    }--}}
+                                    {{--                },--}}
+                                    {{--                closeOnClickOutside: false,--}}
+                                    {{--                closeOnEsc: false,--}}
+                                    {{--                dangerMode: true--}}
+                                    {{--            }).then(function (confirm) {--}}
+                                    {{--                if (confirm) {--}}
+                                    {{--                    location.reload();--}}
+                                    {{--                } else {--}}
+                                    {{--                    location.reload();--}}
+                                    {{--                }--}}
+                                    {{--            });--}}
+                                    {{--        }--}}
+                                    {{--    }--}}
+                                    {{--    else {--}}
+                                    {{--        UnblockPagePermanently();--}}
+                                    {{--        toastr.error(data.error, 'Error!', {--}}
+                                    {{--            positionClass: 'toast-top-center',--}}
+                                    {{--            containerId: 'toast-top-center'--}}
+                                    {{--        });--}}
+                                    {{--        location.reload();--}}
+                                    {{--    }--}}
+                                    {{--});--}}
                                 }
                             }
                         });
