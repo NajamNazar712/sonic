@@ -2350,6 +2350,31 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit_petty_cash', 'Admins\AdminPettyCashController@edit_petty_cash')->name('edit_petty_cash');
             Route::post('edit_petty_cash_amount', 'Admins\AdminPettyCashController@edit_petty_cash_amount')->name('edit_petty_cash_amount');
         });
+
+        Route::prefix('advance')->name('advance.')->group(function () {
+            Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_index')->name('index');//todo new
+            Route::post('submit', 'Admins\AdminPettyCashController@advance_petty_cash_submit')->name('submit');//todo new
+            Route::post('check/reference', 'Admins\AdminPettyCashController@advance_petty_cash_statement_check_reference')->name('reference');//todo new
+
+            Route::prefix('statements')->name('statements.')->group(function () {
+                Route::get('', 'Admins\AdminPettyCashController@advance_petty_cash_statements_index')->name('index');//todo new
+                Route::get('list', 'Admins\AdminPettyCashController@advance_petty_cash_statements_list')->name('list');//todo new
+                Route::post('advance_print', 'Admins\AdminPettyCashController@advance_statement_print')->name('advance_print');//todo new
+                Route::post('advance_view/sdn_logs', 'Admins\AdminPettyCashController@advance_sdn_log')->name('advance_sdn_logs'); //todo new
+
+                //make details:
+                Route::get('{id}/make_detail', 'Admins\AdminPettyCashController@advance_add_petty_cash_statement_make_detail')->name('make_detail'); //todo new
+                Route::post('make_detail_submit', 'Admins\AdminPettyCashController@advance_make_petty_cash_statement_detail_submit')->name('make_detail_submit');//todo new
+
+                Route::get('{id}/edit_make_detail', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_make_detail')->name('edit_make_detail'); //todo new
+                Route::get('{id}/edit_make_detail/list', 'Admins\AdminPettyCashController@advance_edit_petty_cash_statement_make_detail_list')->name('edit_make_detail.list'); //todo new
+                Route::post('edit_make_detail_submit', 'Admins\AdminPettyCashController@advance_edit_make_petty_cash_statement_detail_submit')->name('edit_make_detail_submit');//todo new
+
+                Route::post('detail_edit/approve', 'Admins\AdminPettyCashController@detail_edit_petty_cash_statements_approve')->name('detail_edit.approve');//todo new
+                Route::post('detail_edit/reject', 'Admins\AdminPettyCashController@detail_edit_petty_cash_statements_reject')->name('detail_edit.reject');//todo new
+            });
+        });
+
     });
 
     Route::prefix('month_closing')->name('month_closing.')->group(function () {
@@ -3398,17 +3423,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         Route::prefix('standard_fintech_charges')->name('standard_fintech_charges.')->group(function () {
-        Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
-        Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
-
-            });
-
-
-
-
-
-
-        //End
+            Route::get('', 'Admins\GlobalSettingsController@standard_fintech_charges_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@standard_fintech_charges_store')->name('store');
+        });
 
         Route::prefix('month_closing')->name('month_closing.')->group(function () {
             Route::prefix('types')->name('types.')->group(function () {
@@ -3672,7 +3689,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('enable_disable', 'Admins\GlobalSettingsController@star_shippers_enable_disable')->name('enable_disable');
         });
 
+        Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
+        });
+
     });
+
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
