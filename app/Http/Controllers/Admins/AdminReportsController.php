@@ -11637,7 +11637,7 @@ class AdminReportsController extends Controller
                 $datee1 = Carbon::parse($overland->arrived_at_destination_date);
 
                 $shipment_id = $overland->shipment_id;
-                $first_out_for_delivery = ShipmentsJourney::where('shipper_status_id',14)->where('shipment_id',$shipment_id);
+                $first_out_for_delivery = ShipmentsJourney::where('shipper_status_id',5)->where('shipment_id',$shipment_id);
 
                 if($first_out_for_delivery->exists())
                 {
