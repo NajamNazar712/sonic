@@ -782,7 +782,7 @@
 
                                 shipment +=
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
-                                shipment += '<option value="">Select Action</option>';
+                                shipment += '<option value="">Select Action (*)</option>';
 
                                 @foreach ($shipment_statuses as $status)
                                     shipment +=
@@ -792,10 +792,10 @@
                                     '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
 
                                 shipment +=
-                                    '<th><strong><select class="form-control d-none" id="calls_to" name="calls_to" disabled>';
+                                    '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
                                 shipment += '<option value="">Select Call To</option>';
-                                shipment += '<option value="shipper">Shipper</option>';
-                                shipment += '<option value="consignee" selected>Consignee</option>';
+                                shipment += '<option value="1" selected>Consignee</option>';
+                                shipment += '<option value="2">Shipper</option>';
 
 
                                 shipment += '</select></strong></th>';
@@ -1018,7 +1018,7 @@
                         .done(function(data) {
                             if (data.status == 1 && (id == 1 || id == 4)) {
                                 var options = '';
-                                options += '<option value="">Select Reason</option>';
+                                options += '<option value="">Select Reason (*)</option>';
 
                                 $.each(data.reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1032,7 +1032,7 @@
                                     $('.error_message_rv_assign_agent_status').text('')
                                 }
 
-                                $('#calls_to').addClass('d-none');
+                                $('#call_to_id').addClass('d-none');
 
 
 
@@ -1049,10 +1049,10 @@
                                 $('#shipment_reason').show().click();
 
                                 if (id == 5) {
-                                    $('#calls_to').removeClass('d-none');
+                                    $('#call_to_id').removeClass('d-none');
 
                                 } else {
-                                    $('#calls_to').addClass('d-none');
+                                    $('#call_to_id').addClass('d-none');
                                 }
 
                             } else if (data.status == 1 && id == 3) {
@@ -1091,7 +1091,7 @@
                                                     option += 'selected';
                                                 }
 
-                                                option += '>' + city.name + '</option>';
+                                                option += '>    ' + city.name + '</option>';
 
                                                 selectOptions += option;
                                             });
@@ -1118,11 +1118,11 @@
                             } else if (data.status == 1 && id == 3) {
                                 $('.error_message_rv_assign_agent_sub_status').text('')
                                 $('#shipment_reason').hide();
-                                $('#calls_to').addClass('d-none');
+                                $('#call_to_id').addClass('d-none');
 
                             } else {
                                 $('#shipment_reason').hide();
-                                $('#calls_to').addClass('d-none');
+                                $('#call_to_id').addClass('d-none');
 
                             }
                         });
@@ -1180,7 +1180,7 @@
                     var shipment_remarks = $('#shipment_remarks').val();
                     var checkbox = $('#checkbox-id').is(':checked') ? '1' : '0';
                     var fake_status = $('#fake_status_id').val();
-                    var calls_to = $('#calls_to').val();
+                    var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
 
 
@@ -1195,7 +1195,7 @@
                                 'rv_fake_status_id': fake_status,
                                 'remarks': shipment_remarks,
                                 'fake_status_state': checkbox,
-                                'calls_to': calls_to,
+                                'call_to_id': call_to_id,
                                 'image':imageBase64,
                                 'consigneeCity':consigneeCity,
                                 'consigneeName':consigneeName,

@@ -23,6 +23,12 @@ class TeamLeadDashboardController extends Controller
 
         $this->middleware('Permission');
     }
+
+
+    // Heading: Team Leads Management
+    // Sidebar: Team Lead
+    // URL: team_lead
+    // Description: this method is used for Index Page And Get HUbs With Priority.
     public function team_lead_index()
     {
         $hubs = City::where('status', '1')
@@ -36,8 +42,14 @@ class TeamLeadDashboardController extends Controller
             return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
         });
 
+
         return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs]);
     }
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: team_lead/list
+    // Description: this method is used for Listing Employees.
     public function team_lead_list(Request $request)
 
     {
@@ -84,11 +96,6 @@ class TeamLeadDashboardController extends Controller
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
             });
-
-
-
-
-
 
         $environment = config('app.env');
 
@@ -326,10 +333,14 @@ class TeamLeadDashboardController extends Controller
         return $datatable->make(true);
     }
 
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: team_lead/submit
+    // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
         try {
-
             $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id);
             if ($rvAgentAssignHub) {
                 $rvAgentAssignHub->delete();

@@ -206,7 +206,7 @@
 
             if(otp.length == 6){
                 $.ajax({
-                    url: '{!! route('admin.login.verify_otp') !!}',
+                    url: '{!! route('agent.login.verify_otp') !!}',
                     type: 'POST',
                     data: {
                         'phone_number': phone_number,
@@ -243,7 +243,7 @@
 
                 if(otp.length == 6){
                     $.ajax({
-                        url: '{!! route('admin.login.verify_otp') !!}',
+                        url: '{!! route('agent.login.verify_otp') !!}',
                         type: 'POST',
                         data: {
                             'phone_number': phone_number,
@@ -274,7 +274,7 @@
                     phone_number = $('#phone_number').val();
                     pin = $('#pin').val();
                     $.ajax({
-                        url: '{!! route('admin.login.credentials') !!}',
+                        url: '{!! route('agent.login.credentials') !!}',
                         method: 'POST',
                         data: {
                             'phone_number': phone_number,
@@ -306,10 +306,10 @@
                     @if(isset($setting->setting_value) && $setting->setting_value == 0)
                         $('#admin_login_form').submit();
                     @else
-                    phone_number = $('#phone_number').val();
+                    phone_number = $('#phone_number').val();1
                     pin = $('#pin').val();
                     $.ajax({
-                        url: '{!! route('admin.login.credentials') !!}',
+                        url: '{!! route('agent.login.credentials') !!}',
                         method: 'POST',
                         data: {
                             'phone_number': phone_number,
