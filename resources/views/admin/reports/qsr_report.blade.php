@@ -132,6 +132,30 @@
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
+                    {{--todo new--}}
+                    <div class="col-4 ">
+                        <label>Arrival Date From</label>
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From" data-value="{{ Carbon\Carbon::now() }}">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <label>Arrival Date To</label>
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To" data-value="{{ Carbon\Carbon::now() }}">
+                        </div>
+                    </div>
+                    {{--todo new end--}}
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -336,6 +360,41 @@
                 }
             });
 
+            var from_date1 = $('#from_date1').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                max: from_max,
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top','40px');
+                },
+                onSet: function(context) {
+                    var old_date_formatted1 = $('input[name="from_date_formatted1"]').val();
+                    to_date1.pickadate('picker').set('min', new Date(old_date_formatted1),{muted:true});
+                }
+            });
+            var to_date1 = $('#to_date1').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                max: to_max,
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '40px');
+                },
+                onSet: function(context) {
+                    var current_date_formatted1 = $('input[name="to_date_formatted1"]').val();
+                    from_date1.pickadate('picker').set('max',new Date(current_date_formatted1),{muted:true});
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -482,6 +541,8 @@
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
+                        d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
                         d.search_types = $('#search_types').val();
                         d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
