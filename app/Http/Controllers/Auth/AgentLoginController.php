@@ -56,13 +56,11 @@ class AgentLoginController extends Controller
         ]);
 
         $employee = Admin::where('phone_number', $request->phone_number)->first();
-
         if (gettype($employee) != 'NULL') {
 
             $employee_id = Employee::where('trax_id', $employee->trax_id)->first();
-
+            
             if (gettype($employee_id) != 'NULL') {
-                
                 if ($employee_id->staff_category_id === 3) {
 
                     if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
@@ -78,7 +76,7 @@ class AgentLoginController extends Controller
                 }
             } else {
 
-                $errors = 'Employee Category Undefined';
+                $errors = 'Employee Doesnt Exists';
 
                 return redirect()->back()->withErrors($errors);
             }

@@ -206,8 +206,8 @@ class TeamLeadDashboardController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
                         }
                     }
-                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(session('permissions')))) {
+                    if ($result->staff_category_id == 3) {
+                        if ((session('role_id') == 1 || in_array(session('permissions')))) {
 
                             $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
 

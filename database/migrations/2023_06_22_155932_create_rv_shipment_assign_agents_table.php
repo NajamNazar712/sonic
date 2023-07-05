@@ -26,7 +26,7 @@ class CreateRvShipmentAssignAgentsTable extends Migration
             $table->integer('updated_type_id')->index();
             $table->integer('updated_by_id')->index();
             $table->string('remarks');
-            $table->string('call_to');
+            $table->string('call_to_id');
             $table->date('state_date');
             $table->timestamps();
         });
