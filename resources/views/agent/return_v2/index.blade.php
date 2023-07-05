@@ -782,7 +782,7 @@
 
                                 shipment +=
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
-                                shipment += '<option value="">Select Action</option>';
+                                shipment += '<option value="">Select Action (*)</option>';
 
                                 @foreach ($shipment_statuses as $status)
                                     shipment +=
@@ -1018,7 +1018,7 @@
                         .done(function(data) {
                             if (data.status == 1 && (id == 1 || id == 4)) {
                                 var options = '';
-                                options += '<option value="">Select Reason</option>';
+                                options += '<option value="">Select Reason (*)</option>';
 
                                 $.each(data.reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason

@@ -4435,6 +4435,9 @@ Route::prefix('agent')->name('agent.')->group(function () {
     Route::post('/login', 'Auth\AgentLoginController@login')->name('login.submit');
     Route::get('/logout', 'Auth\AgentLoginController@logout')->name('logout');
     Route::post('/logout', 'Auth\AgentLoginController@logout')->name('logout');
+    Route::post('/credentials', 'Auth\AgentLoginController@credentials')->name('login.credentials');
+    Route::post('/verify_otp', 'Auth\AgentLoginController@verify_otp')->name('login.verify_otp');
+
 
     Route::prefix('dashboard')->name('dashboard.')->group(function () {
         Route::get('', 'Agent\ReturnV2Controller@index')->name('index');

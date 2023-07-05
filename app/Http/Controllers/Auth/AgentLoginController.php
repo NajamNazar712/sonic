@@ -4,35 +4,28 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\City;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\Commission\SalesTier;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\SaleTierTag;
-use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\AdminRoleModulePermission;
-use App\Http\Models\AgentReturnConfirmation;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\HR\Employee;
 use Illuminate\Support\Facades\Hash;
 
 class AgentLoginController extends Controller
 {
-    //protected $guard = 'admin';
 
+    
     public function __construct()
     {
         $this->middleware('guest:agent')->except('logout');
     }
+
+
+    // Heading: Virtual RCP Agent Screen
+    // Sidebar: N/A
+    // URL: agent/dashboard
+    // Description: this method is used for login index And For Otp
 
     public function showLoginForm()
     {
@@ -48,6 +41,12 @@ class AgentLoginController extends Controller
         return view('agent.login')->with(['setting' => $settings]);
     }
 
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: agent/login
+    // Description: this method is used for login whose staff_category_id is 3
+
     public function login(Request $request)
     {
         $this->validate($request, [
@@ -55,31 +54,22 @@ class AgentLoginController extends Controller
             'pin' => 'required|min:4'
         ]);
 
-        $employee = Admin::where('phone_number', $request->phone_number)->first();
+        $admin = Admin::where('phone_number', $request->phone_number)->first();
 
-        if (gettype($employee) != 'NULL') {
+        if ($admin) {
 
-            $employee_id = Employee::where('trax_id', $employee->trax_id)->first();
+            $employee = Employee::where('trax_id', $admin->trax_id)->where('staff_category_id',3)->where('status_id', '!=', 2)->first();
 
-            if (gettype($employee_id) != 'NULL') {
-                
-                if ($employee_id->staff_category_id === 3) {
-
-                    if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
-                        return redirect()->intended(route('agent.dashboard.index'));
-                    }
-                    $errors = [$this->username() => trans('auth.failed')];
-
-                    return redirect()->back()->withErrors($errors);
-                } else {
-                    $errors = 'You Have To Be Contractual';
-
-                    return redirect()->back()->withErrors($errors);
+            if ($employee) {
+                if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
+                    return redirect()->intended(route('agent.dashboard.index'));
                 }
+                $errors = [$this->username() => trans('auth.failed')];
+
+                return redirect()->back()->withErrors($errors);
+                
             } else {
-
-                $errors = 'Employee Category Undefined';
-
+                $errors = 'You Have To Be Contractual';
                 return redirect()->back()->withErrors($errors);
             }
 
@@ -91,27 +81,25 @@ class AgentLoginController extends Controller
         }
     }
 
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: N/A
+    // Description: this method is used for error return phone number
     public function username()
     {
         return 'phone_number';
     }
 
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: agent/logout
+    // Description: this method is used for logout Agent
+
     public function logout(Request $request)
     {
         if (Auth::guard('agent')) {
-            //mark logout start
-            $admin = Auth::guard('agent');
-            $check_logout = AgentReturnConfirmation::where('admin_id', $admin->id())->where('current_date', Carbon::now()->format("Y-m-d"));
-            if ($check_logout->exists()) {
-                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                    ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
-                if ($agent_role->exists()) {
-                    $agent_logout = $check_logout->first();
-                    $agent_logout->logout_time = Carbon::now();
-                    $agent_logout->save();
-                }
-            }
-            //mark logout end
+        
             Auth::guard('agent')->logout();
 
             $request->session()->invalidate();
@@ -120,7 +108,13 @@ class AgentLoginController extends Controller
         }
         return redirect()->route('agent.login');
     }
+
+
     
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: agent/credentials
+    // Description: this method is used for Send OTP via Notification Controller
     public function credentials(Request $request)
     {
         $admin = Admin::where('phone_number', $request->phone_number)->orWhere('official_phone_number', $request->phone_number);
@@ -151,6 +145,11 @@ class AgentLoginController extends Controller
         }
     }
 
+
+     // Heading: N/A
+    // Sidebar: N/A
+    // URL: agent/verify_otp
+    // Description: this method is used for Verify OTP
     public function verify_otp(Request $request)
     {
         $environment = config('app.env');

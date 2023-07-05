@@ -180,7 +180,6 @@ class ReturnV2Controller extends Controller
     public function get_submit(Request $request)
     {
 
-        dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required',
