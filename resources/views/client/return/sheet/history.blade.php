@@ -204,7 +204,7 @@
                     {data: 'amount', name: 's.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'ss.id', class: 'align-middle status'},
                     {data: 'received_remarks', name: 'return_sheets.remarks', class: 'align-middle received_remarks', orderable: false, searchable: false},
                     {data: 'received_date', name: 'return_sheets.received_at', class: 'align-middle received_date'},
                 ],
