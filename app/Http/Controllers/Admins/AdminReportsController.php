@@ -11494,7 +11494,7 @@ class AdminReportsController extends Controller
                     ->where(
                         'dr.id',
                         '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37) and shipments_journey.verification = 1)')
+                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(12,14,25,30,36,37))')
                     );
             })
             ->leftjoin('sale_person_tags as spt', function ($join) {
@@ -11557,7 +11557,7 @@ class AdminReportsController extends Controller
                 return $class;
             })
             ->editColumn('delivered_or_returned', function ($overland) {
-                if (in_array($overland->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
+                if (in_array($overland->shipment_status, [12,14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
                     return $overland->delivered_or_returned;
                 } else {
                     return '';
