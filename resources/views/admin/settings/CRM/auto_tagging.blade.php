@@ -118,29 +118,23 @@
                     </div>
                     <div class="form-group">
                         <select name="city_area_id" id="edit_city_area_id" class="form-control select2">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
+                            @foreach($case_natures as $case_nature)
+                                <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
                         <select name="crm_case_nature_type_id" id="edit_crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
-                            @foreach($cities as $city)
-                                <option value="{{ $city->id }}" > {{ $city->name }} </option>
-                            @endforeach
                         </select>
                     </div>
                     
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Tag</button>
+                    <button type="submit" class="btn btn-success" id="assign_agentSubmit">Update</button>
                     <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </form>
@@ -210,26 +204,31 @@
 
             $('#edit_agent_id').select2({
                 width:'100%',
+                placeholder:"Select User",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_city_id').select2({
                 width:'100%',
+                placeholder:"Select City",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_city_area_id').select2({
                 width:'100%',
+                placeholder:"Select Hub Area",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_crm_case_nature_id').select2({
                 width:'100%',
+                placeholder:"Select Case Nature",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_crm_case_nature_type_id').select2({
                 width:'100%',
+                placeholder:"Select Case Nature Type",
                 allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
@@ -263,7 +262,7 @@
                 },
                 ajax: '{{ route('admin.settings.auto_tagging.list') }}',
                 rowId: 'id',
-                order: [[6, 'desc']],
+                order: [[2, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'agent_name', name: 'ad.name', class: 'align-middle agent_name'},
@@ -332,13 +331,10 @@
                     this.api().table().columns.adjust();
                 }
             });
-
-            
-            
+    
             $('#city_id').on('change', function() {
 
                 var city_id = $('#city_id').val();
-
                 $('#city_area_id').empty().trigger('change');
                 
                 $.ajax({
@@ -354,7 +350,6 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            console.log(newOption);
                             $('#city_area_id').append(newOption).trigger('change');
                         });
                     }
@@ -365,7 +360,6 @@
             $('#crm_case_nature_id').on('change', function() {
 
                 var crm_case_nature_id = $('#crm_case_nature_id').val();
-
                 $('#crm_case_nature_type_id').empty().trigger('change');
 
                 $.ajax({
@@ -381,8 +375,57 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            console.log(newOption);
                             $('#crm_case_nature_type_id').append(newOption).trigger('change');
+                        });
+                    }
+                })
+
+            });
+
+            $('#edit_city_id').on('change', function() {
+
+                var edit_city_id = $('#edit_city_id').val();
+                $('#edit_city_area_id').empty().trigger('change');
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tagging.hub_areas") !!}',
+                    method: 'POST',
+                    data: {
+                        'city_id': edit_city_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (result) {
+
+                    if(result && result.length > 0)
+                    {
+                        $.each(result, function(index, option) {
+                            var newOption = new Option(option.name, option.id); 
+                            $('#edit_city_area_id').append(newOption).trigger('change');
+                        });
+                    }
+                })
+
+            });
+
+            $('#edit_crm_case_nature_id').on('change', function() {
+
+                var edit_crm_case_nature_id = $('#edit_crm_case_nature_id').val();
+                $('#edit_crm_case_nature_type_id').empty().trigger('change');
+
+                $.ajax({
+                    url:'{!! route("admin.settings.auto_tagging.case_nature_types") !!}',
+                    method: 'POST',
+                    data: {
+                        'crm_case_nature_id': edit_crm_case_nature_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (result) {
+
+                    if(result && result.length > 0)
+                    {
+                        $.each(result, function(index, option) {
+                            var newOption = new Option(option.name, option.id); 
+                            $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
                         });
                     }
                 })
@@ -399,8 +442,25 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+
+                    $('#city_area_id').empty().trigger('change');
+                    $('#crm_case_nature_type_id').empty().trigger('change');
+
+                    $.each(data.city_areas, function(index, option) {
+                        var newOption = new Option(option.name, option.id); 
+                        $('#edit_city_area_id').append(newOption).trigger('change');
+                    });
+
+                    $.each(data.crm_case_nature_types, function(index, option) {
+                        var newOption = new Option(option.name, option.id); 
+                        $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
+                    });
+
                     $('#edit_agent_id').val(data.agent_id).change();
                     $('#edit_city_id').val(data.city_id).change();
+                    $('#edit_city_area_id').val(data.city_area_id).change();
+                    $('#edit_crm_case_nature_id').val(data.crm_case_nature_id).change();
+                    $('#edit_crm_case_nature_type_id').val(data.crm_case_nature_type_id).change();
                     $('#crm_agent_id').val(data.crm_agent_id);
                     
                     $('#EditAgentModal').modal('show');

@@ -5887,12 +5887,12 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_tagging_submit(Request $request)
     {
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id);
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
         if (!$crm_agent->exists()) {
             CrmAutoTagUser::create($request->all());
             return redirect()->back()->with('success', 'Agent Added!');
         } else {
-            return redirect()->back()->with('error', 'Location already exist, Please edit the Tagged user');
+            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
         }
     }
 
@@ -5903,7 +5903,14 @@ class GlobalSettingsController extends Controller
         $agent_id = $crm_agent_data->admin_id;
         $city_id = $crm_agent_data->city_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id]);
+        $city_area_id = $crm_agent_data->city_area_id;
+        $crm_case_nature_id = $crm_agent_data->crm_case_nature_id;
+        $crm_case_nature_type_id = $crm_agent_data->crm_case_nature_type_id;
+
+        $city_areas = CityArea::where('city_id',$city_id)->select('id','name')->get();
+        $crm_case_nature_types = CrmRequestCaseNatureType::where('nature_id',$crm_case_nature_id)->select('id','type as name')->get();
+        
+        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id, 'city_area_id' => $city_area_id, 'crm_case_nature_id' => $crm_case_nature_id, 'crm_case_nature_type_id' => $crm_case_nature_type_id, 'city_areas' => $city_areas, 'crm_case_nature_types' => $crm_case_nature_types]);
     }
 
     public function crm_auto_tagging_delete(Request $request)
@@ -5915,15 +5922,23 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_tagging_update(Request $request)
     {
-        $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
 
-        $crm_agent_data->admin_id = $request->admin_id;
-        $crm_agent_data->city_id = $request->city_id;
-        $crm_agent_data->city_area_id = $request->city_area_id;
-        $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
-        $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
-        $crm_agent_data->save();
-        return redirect()->back()->with('success', 'Agent Updated!');
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
+        if (!$crm_agent->exists()) {
+            $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
+
+            $crm_agent_data->admin_id = $request->admin_id;
+            $crm_agent_data->city_id = $request->city_id;
+            $crm_agent_data->city_area_id = $request->city_area_id;
+            $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
+            $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
+            $crm_agent_data->save();
+            return redirect()->back()->with('success', 'Agent Updated!');
+        } else {
+            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
+        }
+
+        
     }
 
     public function crm_auto_tagging_enable_disable(Request $request)
