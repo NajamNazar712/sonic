@@ -140,7 +140,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-        dd('book',$information_display);
+        
         $information_display = 1;
         $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
         if ($settings->exists()) {
@@ -152,6 +152,8 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
+
+        dd('book',$information_display);
 
         $shipment = new Shipment();
         $shipment->user_id = $user_id;
@@ -3448,7 +3450,7 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
-        dd('corp_book',$information_display);
+        
         $information_display = 1;
         $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
         if ($settings->exists()) {
@@ -3460,6 +3462,8 @@ class ShipperShipmentBookController extends Controller
                 }
             }
         }
+
+        dd('corp_book',$information_display);
 
         $shipment = new Shipment();
 
