@@ -20,12 +20,13 @@ class CreateRvShipmentAssignAgentDetailsTable extends Migration
             $table->integer('shipment_id')->index();
             $table->integer('rv_assign_agent_status_id')->index()->nullable();
             $table->integer('rv_assign_agent_sub_status_id')->index(null, 'sub_status_index')->nullable();
-            $table->integer('updated_by_admin_id')->index()->nullable();
-            $table->integer('updated_by_user_id')->index()->nullable();
+            $table->integer('rv_state_id')->index()->nullable();
+            $table->integer('updated_type_id')->index()->nullable();
+            $table->integer('updated_by_id')->index()->nullable();
             $table->boolean('is_fake_status')->default(0);
             $table->integer('rv_fake_status_id')->index()->nullable();
             $table->string('remarks');
-            $table->string('call_to');
+            $table->integer('call_to_id')->index();
             $table->timestamps();
         });
     }
