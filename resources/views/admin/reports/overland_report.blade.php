@@ -172,7 +172,7 @@
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Sub Segment</th>
-                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Booked Date</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -439,7 +439,7 @@
                             head.push('Sub Segment');
                             head.push('Order ID');
                             head.push('Sub Segment');
-                            head.push('Status');
+                            head.push('Current Status');
                             head.push('Service Type');
                             head.push('Booked Date');
                             head.push('Arrival Date');
@@ -541,7 +541,7 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
-                order: [[15, '2']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
