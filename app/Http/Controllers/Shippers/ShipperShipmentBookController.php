@@ -2025,7 +2025,9 @@ class ShipperShipmentBookController extends Controller
                     ';
 
                         $shipment_details .= $table_end;
-                    } else if ($shipment->booking_type_id == 3) {
+                    } else
+                        if ($shipment->booking_type_id == 3)
+                    {
                         $shipment_details .= $table_start;
 
                         $item_quantity = 0;
@@ -2604,9 +2606,27 @@ class ShipperShipmentBookController extends Controller
             
 
             if ($watermark_flag) {
+
                 $html .= '
+                    <style>
+                      @media print {
+                          /* Adjust page margins */
+                          @page {
+                            size: A4 portrait;         
+                          }
+                        
+                          /* Prevent page break after the element */
+                          .position-relative {
+                            page-break-after: avoid !important;
+                          }
+                          
+                          /* Adjust other styles as needed */
+                          /* ... */
+                       }
+     
+                   </style>
                   </body>
-                  <div id="watermark_" class="watermark_">
+                  <div id="watermark_" class="pageC watermark_">
                     <h1 style="
                    text-align: center;  
                    text-transform: uppercase;                  
@@ -2625,6 +2645,31 @@ class ShipperShipmentBookController extends Controller
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                   </div>
                   
+                </html>
+            ';
+            }
+            else
+            {
+                $html .= '
+                   <style>
+                  @media print {
+                      /* Adjust page margins */
+                      @page {
+                        size: A4 portrait;         
+                      }
+                    
+                      /* Prevent page break after the element */
+                      .position-relative {
+                        page-break-after: avoid !important;
+                      }
+                      
+                      /* Adjust other styles as needed */
+                      /* ... */
+                   }
+     
+                   </style>
+                </body>
+                
                 </html>
             ';
             }
@@ -6439,7 +6484,7 @@ class ShipperShipmentBookController extends Controller
         $html = '<!doctype html>
             <html lang="en">
               <head>
-                <meta charset="utf-8">
+                <meta charset="utsf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
                 <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
                 <title>Air Waybill Sticker Barcode</title>
