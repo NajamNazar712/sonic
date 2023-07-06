@@ -107,8 +107,9 @@ class ShipperInterceptReBookController extends Controller
                             'shipper_id' => $user_id,
                             'status' => 0,
                             'intercept_type' => $intercept_type,
-                            'admin_id' => null
-							 'city_area_id'=>$city_area_id                        ]);
+                            'admin_id' => null,
+							'city_area_id'=>$city_area_id                        
+                        ]);
                         $shipment->consignee_status_id = 54;
                         $shipment->shipper_status_id = 54;
                         $shipment->intercepted = 1;
