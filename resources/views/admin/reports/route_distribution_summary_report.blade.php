@@ -92,7 +92,7 @@
                             <th class="border-primary border-darken-1">Rider Type</th>
                             <th class="border-primary border-darken-1">Delivery Note</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
-                            <th class="border-primary border-darken-1">HBL KONNECT Amount</th>
+                            <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                             <th class="border-primary border-darken-1">Hub</th>
                             <th class="border-primary border-darken-1">Total Out For Delivery</th>
                             <th class="border-primary border-darken-1">Pending</th>
@@ -295,7 +295,7 @@
                             head.push('Rider Type');
                             head.push('Delivery Note');
                             head.push('DNCC Amount');
-                            head.push('HBL KONNECT Amount');
+                            head.push('HBL Konnect Amount');
                             head.push('Hub');
                             head.push('Total Out For Delivery');
                             head.push('Pending');
