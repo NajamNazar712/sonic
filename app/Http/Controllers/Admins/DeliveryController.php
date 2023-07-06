@@ -1921,7 +1921,7 @@ class DeliveryController extends Controller
                 $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
-
+//dd($statuses);
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->pending_status, 'shipment_update' => $shipment_update, 'undelivered_printed' => $undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage, 'tomorrow' => $tomorrow, 'next3days' => $next3days, 'dayAfterTomorrow' => $dayAfterTomorrow, 'days15FromNow' => $days15fromNow, 'require_password' => $require_password, 'consignee_refused_reasons' => $consignee_refused_reasons]);
             } else {
                 return redirect(route('admin.delivery.receive.index'));
@@ -2239,6 +2239,23 @@ class DeliveryController extends Controller
         $status_id = $request->status;
 
         $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->where('id','!=',23)->orderBy('name')->get();
+
+        if ($status_id == 14)
+        {
+            $delivery_note_id = $request->delivery_note_id;
+            $rider = DeliveryNote::where('id',$delivery_note_id)->select('rider_id');
+            if ($rider->exists())
+            {
+                $rider = $rider->first();
+                $rider_type = Rider::where('id',$rider->rider_id)->select('operation_rider_id');
+                $rider_type = $rider_type->first();
+                if ($rider_type->operation_rider_id == 2)
+                {
+                    return ['status' => 2, 'error' => 'Cannot mark shipment(s) as delivered because of hold in operation delivery note !'];
+                }
+            }
+        }
+
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
