@@ -95,6 +95,7 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\Admin\RiderCategoryByPass;
 use App\Http\Models\ConsigneeShipmentLocation;
 use App\Http\Models\Rider\RiderReturnDelivery;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\Retail\RetailTraxBox;
@@ -148,9 +149,11 @@ use App\Http\Controllers\Retail\RetailRatesCalculationController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
+use App\Http\Models\Admin\TraxPayTransaction;
 use App\ReturnDeliveredToShipperSms;
 
-class RiderAPIController extends Controller
+class
+RiderAPIController extends Controller
 {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -12457,7 +12460,7 @@ class RiderAPIController extends Controller
                         $deliveries['rcp'] = 0;
                     }
                     $deliveries['shipment_id'] = $shipment_id;
-                    
+
                     $deliveries['tracking_number'] = $tracking_number;
 
                     if ($shipment_data->shipper_status_id == 5) {
@@ -12469,7 +12472,7 @@ class RiderAPIController extends Controller
                     else {
                         $shipment_reattempt = NULL;
                     }
-                    
+
                     $deliveries['consignee_name'] = $consignee_name;
                     $deliveries['consignee_address'] = $consignee_address;
                     $deliveries['consignee_phone'] = $consignee_phone;
@@ -12504,8 +12507,27 @@ class RiderAPIController extends Controller
                     } else {
                         $deliveries['delivery_otp'] = 1;
                     }
+
                     $one_link_payment = OneLinkOutForDeliveryShipmentPayment::where('shipment_id', $shipment_id)->where('delivery_note_id', $delivery_note->id);
-                    $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
+                    $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                    ->where('trax_pay_transactions.shipment_id',$shipment_id)
+                    ->where('trax_pay_transactions.delivery_note_id',$delivery_note->id);
+                    $deliveries['payment_link'] = "";
+                    //fintech code 
+                    if($one_link_payment->exists()){
+                        $deliveries['amount_paid'] = 1;
+                    }
+                    else if($fintech_payment->exists()){
+                        $deliveries['amount_paid'] = 1;
+                    }
+                    else{
+                        $deliveries['amount_paid'] = 0;
+                        $payment_link = TraxPayTransaction::where('shipment_id',$shipment_id)->first();
+                        if(!empty($payment_link)){
+                            $deliveries['payment_link'] = $payment_link->link;   
+                        }   
+                    }
+                    // $deliveries['amount_paid'] = ($one_link_payment->exists()) ? 1 : 0;
                     $shipment_location = ConsigneeShipmentLocation::where('shipment_id', $shipment_id);
                     if ($shipment_location->exists()) {
                         $shipment_location = $shipment_location->first();
@@ -13261,19 +13283,19 @@ class RiderAPIController extends Controller
                 AdminFinanceController::done_payment($shipment_id, 1);
             }
         }
-        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
-        if ($return_assign_shipment->exists()) {
+        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
+        // if ($return_assign_shipment->exists()) {
 
-            $return_assign_shipment = $return_assign_shipment->latest()->first();
-            $return_assign_shipment->status = 0;
-            $return_assign_shipment->save();
+        //     $return_assign_shipment = $return_assign_shipment->latest()->first();
+        //     $return_assign_shipment->status = 0;
+        //     $return_assign_shipment->save();
 
-            $return_assign_log = new ReturnAssignedShipmentLogs();
-            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-            $return_assign_log->status = 2;
-            $return_assign_log->assigned_by = 346;
-            $return_assign_log->save();
-        }
+        //     $return_assign_log = new ReturnAssignedShipmentLogs();
+        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //     $return_assign_log->status = 2;
+        //     $return_assign_log->assigned_by = 346;
+        //     $return_assign_log->save();
+        // }
     }
 
     public function return_create_index(Request $request)
@@ -13987,7 +14009,7 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_time_period = RiderRemark::where('rider_id', $request->rider_id)->latest()->first();
-            
+
             if(!isset($rider_time_period) || Carbon::parse($rider_time_period->created_at)->copy()->endOfDay()->isPast()){
                 $rider_remark = new RiderRemark;
                 $rider_remark->rider_id = $request->rider_id;
@@ -13997,8 +14019,8 @@ class RiderAPIController extends Controller
             }else{
                 return response()->json(['status' => 1, 'message' => 'Only One Remarks Is Allowed For A Day']);
             }
-        }   
-           
+        }
+
     }
     public function rider_remark_list(Request $request)
     {
@@ -14050,6 +14072,88 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 0, 'data' => $rider_remarks]);
         } else {
             return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
+        }
+    }
+
+    public function rider_checkin(Request $request)
+    {
+
+        $rules = [
+            'from' => ['required', 'date_format:Y/m/d'],
+            'to' => ['required', 'date_format:Y/m/d'],
+            'trax_id' => ['nullable','string']
+        ];
+
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $from = Carbon::parse($request->from);
+            $to = Carbon::parse($request->to);
+            $today = Carbon::now();
+
+            $total_difference_from = $from;
+            $total_difference_from = $total_difference_from->diff($today)->days;
+            $between_difference_from = $from;
+            $between_difference_from = $between_difference_from->diff($to)->days;
+            if($total_difference_from <= 90){
+                if($between_difference_from <= 45){
+                    $details = array();
+
+                    $trax_id_check = false;
+                    if($request->has('trax_id')){
+                        if($request->trax_id != null && $request->trax_id != ''){
+                            $employee = Employee::where('trax_id', $request->trax_id);
+                            if($employee->exists()){
+                                $employee = $employee->first();
+
+                                $trax_id_check = true;
+                            }
+                            else{
+                                return response()->json(['status' => 1, 'message' => 'Employee not found!']);
+                            }
+                        }
+                    }
+
+                    if($trax_id_check == false){
+                        $rider_attendances = EmployeeAttendance::where('employee_type', 2)->whereBetween('attendance_date',[$from,$to]);
+                    }
+                    else{
+                        $rider_attendances = EmployeeAttendance::where('employee_id', $employee->id)->where('employee_type', 2)->whereBetween('attendance_date',[$from,$to]);
+                    }
+
+                    if($rider_attendances->exists()){
+                        $rider_attendances = $rider_attendances->get();
+                        foreach ($rider_attendances as $rider_attendance){
+                            if($trax_id_check == false) {
+                                $employee = Employee::find($rider_attendance->employee_id);
+                            }
+                            if($employee){
+                                if($rider_attendance->clock_in_datetime != null){
+                                    $detail = array('Trax ID' => $employee->trax_id, 'Name' => $employee->name, 'Clock In' => $rider_attendance->clock_in_datetime);
+                                    $details[$rider_attendance->attendance_date][] = $detail;
+                                }
+                            }
+                        }
+
+                        return response()->json(['status' => 0, 'data' => $details]);
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'message' => 'Data not found!']);
+                    }
+                }
+                else{
+                    return response()->json(['status' => 1, 'message' => 'Date difference range must not exceed 45 days']);
+                }
+            }
+            else{
+                return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
+            }
+
         }
     }
 }

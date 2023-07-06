@@ -1,8 +1,8 @@
 @extends('admin.layout.master')
 @section('title','Completed Deliveries')
 @section('content')
-    <h1 class="mb-1">
-        Completed Deliveries COD
+    <h1 class="mb-1"> 
+        Completed Deliveries COD 
     </h1>
 
     <div class="card">
@@ -88,6 +88,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
@@ -98,6 +99,9 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
+
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
+
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
@@ -153,6 +157,36 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+
+    <div class="modal fade" id="fintech_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Fintech Charges(s)</h4>
+    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+    
+                    <table>
+                        <tr>
+                          <th>Tracking #</th>
+                          <th>Fintech Charges</th>
+                          <th>Created Date</th>
+                        </tr>
+                        <tbody id="shipment_table">
+                        <tbody>
+                      </table>
+                         </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- one link payment details popup -->
     <div class="modal fade" id="one_link_payment_details_modal" data-backdrop="static" role="dialog" aria-labelledby="one_link_payment_details_modal" aria-hidden="true">
@@ -303,6 +337,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
@@ -327,6 +362,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.rider_type);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
@@ -518,6 +554,7 @@
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
@@ -528,6 +565,7 @@
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
+                    { data:'fintech_charges' ,name: 'fintech_charges', class: 'align-middle fintech_charges'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
@@ -951,5 +989,31 @@
             });
 
         });
+
+        function fintechshipmentsshow(event,id){
+    $("#shipment_table").html('');
+    $.ajax({
+        type : 'get',
+        url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
+        data : {id:id},
+        success:function(res){
+            $("#fintech_modal").modal('show');
+            for(let x of res.data){
+                $("#shipment_table").append(`
+                    <tr>
+                    <td>${x.trackingNo}</td>
+                    <td>${x.fintech_charges}</td>
+                    <td>${x.Date}</td>
+                    </tr>
+                `);
+            }
+            
+        }
+        
+    });
+}
+
+
+
     </script>
 @endsection

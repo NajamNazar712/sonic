@@ -1242,6 +1242,7 @@ class AdminMasterCargoController extends Controller
     }
 
     public function history_list(Request $request) {
+
         $bags = Bag::join('cities as oh', 'bags.origin_hub_id', '=', 'oh.id')
             ->join('cities as dh', 'bags.destination_hub_id', '=', 'dh.id')
             ->leftJoin('shipping_modes as sm', 'bags.shipping_mode_id', '=', 'sm.id')
@@ -1318,13 +1319,16 @@ class AdminMasterCargoController extends Controller
         }
 
         if ($tracking_number = $request->get('tracking_number')) {
+            dd("asd2");
             $datatables->join('bag_shipments as bssh', 'bags.id', '=', 'bssh.bag_id')
                 ->join('shipments as s', 'bssh.shipment_id', '=', 's.id')
                 ->where('s.tracking_number', '=', $tracking_number);
         }
 
         if ($bag_number = $request->get('bag_number')) {
-            $datatables->where('bags.seal_number', '=', $bag_number);
+            dd("asd");
+            $datatables->where('bag_number', '=', $bag_number);
+
         }
 
         return $datatables->make(true);

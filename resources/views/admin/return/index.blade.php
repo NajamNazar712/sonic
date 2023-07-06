@@ -112,6 +112,7 @@
                             <th class="border-primary border-darken-1">Consignee Name</th>
                             <th class="border-primary border-darken-1">Consignee Phone</th>
                             <th class="border-primary border-darken-1">Address</th>
+  							<th class="border-primary border-darken-1">Area</th>
                             <th class="border-primary border-darken-1">Sub Station</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             {{--   <th class="border-primary border-darken-1">RCP SMS Count</th> --}}
@@ -609,13 +610,13 @@
                             <input type="text" id="custom_remark" name="custom_remark" class="form-control" placeholder="Enter Other Text">
                         </div>
                         
-                        <div class="form-group text-left">
+                        {{-- <div class="form-group text-left">
                             <select name="call_to" class="form-control select2" id="call_to" data-rule-required="true" 
                                 data-msg-required="Call To is required">
                                 <option value="1">Shippper</option>
                                 <option value="2">Consigneee</option>
                             </select>
-                        </div>
+                        </div> --}}
 
                         <div class="form-group ml-1 ">
                             <button type="submit" name="add" id="btnReturn"
@@ -757,7 +758,7 @@
 
             // update_call_status_modal function
             $('#update_call_status_modal').on('shown.bs.modal', function () {
-                $('#call_to').val('').change();
+                // $('#call_to').val('').change();
                 $('#custom_remark').val('');
                 $('#sub_status_call_finding').val('').change();
                 $('#call_finding_dropdown').val('').change();
@@ -776,7 +777,7 @@
                     call_finding_id: $('#call_finding_dropdown').val(),
                     sub_status_call_finding_id: $('#sub_status_call_finding').val(),
                     custom_remark: $('#custom_remark').val(),
-                    call_to_id: $('#call_to').val(),
+                    // call_to_id: $('#call_to').val(),
                     '_token': '{{ csrf_token() }}'
                     };
                     // AJAX request
@@ -836,7 +837,7 @@
                         modalBody.html('');
 
                         var tableHtml = '<table id="call_history_table" class="table-striped table-bordered" style="width:100%">';
-                        tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Others</th><th>Call To</th><th>Status</th><th>User</th></tr></thead>';
+                        tableHtml += '<thead class="text-center"><tr><th class="p-1">Calling Date</th><th>Calling Time</th><th>Call Findings</th><th>Un Responsive Finding</th><th>Others</th><th>Status</th><th>User</th></tr></thead>';
                         tableHtml += '<tbody class="text-center">';
                         $.each(data, function(index, value) {
                             var updated_at = value.updated_at;
@@ -849,13 +850,13 @@
                             }
                             var status = value.status;
                             var updated_by = value.updated_by;
-                            var call_to_id = value.call_to_id;
-                            if(call_to_id ==1){
-                                call_to_id = 'Shipper'
-                            }
-                            else{
-                                call_to_id = 'Consignee'
-                            }
+                            // var call_to_id = value.call_to_id;
+                            // if(call_to_id ==1){
+                            //     call_to_id = 'Shipper'
+                            // }
+                            // else{
+                            //     call_to_id = 'Consignee'
+                            // }
                             var call_finding_id = value.call_finding_id;
                             if(call_finding_id ==1){
                                 call_finding_id = 'Un-responsive'
@@ -864,7 +865,7 @@
                                 call_finding_id = ''
                             }
 
-                            tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + call_to_id + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
+                            tableHtml += '<tr><td class="p-1">' + trimmedDateTime + '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + remark + '</td><td>' + custom_remarks + '</td><td>' + status + '</td><td>' + updated_by + '</td></tr>';
                         });
 
                         tableHtml += '</tbody></table>';
@@ -930,13 +931,13 @@
                     dropdownParent: $('#update_call_status_form')
                 });
 
-            $('#call_to').prepend('<option value="" selected="selected"></option>')
-                .select2({
-                    width: '100%',
-                    placeholder: 'Select Call To',
-                    allowClear: true,
-                    dropdownParent: $('#update_call_status_form')
-                });
+            // $('#call_to').prepend('<option value="" selected="selected"></option>')
+            //     .select2({
+            //         width: '100%',
+            //         placeholder: 'Select Call To',
+            //         allowClear: true,
+            //         dropdownParent: $('#update_call_status_form')
+            //     });
             
             // update_call_status_modal Validations
 
@@ -1140,7 +1141,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Address');
-                            head.push('Sub Station');
+                            head.push('Area');
                             head.push('Collection Amount');
                             /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -1181,7 +1182,7 @@
                                 row.push(values.consignee_phone_number_1 + '|' + values
                                     .consignee_phone_number_2);
                                 row.push(values.consignee_address);
-                                row.push(values.sub_station);
+                                row.push(values.area_name);
                                 row.push(values.amount);
                                 /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1283,41 +1284,21 @@
                                                                                 containerId: 'toast-bottom-center'
                                                                             });
                                                                 } else {
-                                                                    toastr
-                                                                        .error(
-                                                                            data
-                                                                            .error,
-                                                                            'Error!', {
-                                                                                positionClass: 'toast-top-center',
-                                                                                containerId: 'toast-top-center'
-                                                                            });
+                                                                    $('#AssignAgentModal').modal('hide');
+                                                                    toastr.error(data.error,
+                                                                    'Error!', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
                                                                 }
-                                                                selected_rows
-                                                                    = [];
-                                                                restricted_rows
-                                                                    = [];
-
-                                                                table.rows()
-                                                                    .deselect();
-
-                                                                table.draw(
-                                                                true);
-                                                                table.button(
-                                                                        '.assign'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.confirm'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.re-attempt'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.un-assign'
-                                                                        )
-                                                                    .disable();
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                table.rows().deselect();
+                                                                table.draw( true);
+                                                                table.button( '.assign' ).disable();
+                                                                table.button( '.confirm' ).disable();
+                                                                table.button('.re-attempt').disable();
+                                                                table.button('.un-assign').disable();
 
                                                             });
                                                     } else {
@@ -1377,8 +1358,7 @@
                                                 table.rows().nodes().each(function(index) {
                                                     var row = table.row(index);
 
-                                                    if ($(row.node()).hasClass(
-                                                            'selected')) {
+                                                    if ($(row.node()).hasClass('selected')) {
                                                         var id = parseInt(row.id());
                                                         // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
                                                         // shipment_remarks[id] = remark;
@@ -1413,7 +1393,6 @@
                                                             positionClass: 'toast-bottom-center',
                                                             containerId: 'toast-bottom-center'
                                                         });
-
                                                 });
                                             }
                                         });
@@ -1646,6 +1625,8 @@
                                 });
                             }
                         },
+
+                        @if(session('role_id') == 1 || in_array(884, session('permissions')))
                         {
                             title: 'Upload',
                             className: 'btn btn-primary excel-upload',
@@ -1654,6 +1635,9 @@
                                 $('#excel_upload_modal').modal('show');
                             }
                         },
+                        @endif
+
+                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
                         {
                             title: 'Upload Agent',
                             className: 'btn btn-primary excel-upload',
@@ -1662,6 +1646,7 @@
                                 $('#agent_assign_modal').modal('show');
                             }
                         },
+                        @endif
                         'reset'
                     ],
                 @else
@@ -1734,6 +1719,7 @@
                     { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+	{data: 'area_name', name: 'ca.name', class: 'align-middle area_name',orderable: false,searchable:false},
                     { data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', orderable: false, searchable: false},
                     { data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
@@ -1753,7 +1739,7 @@
                     { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
-                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
                     { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},
