@@ -1183,8 +1183,6 @@
                 var status = statusSelection.val();
                 console.log(statusSelection,status,$('#delivery_note').val());
 
-                    $('#select_all_status option[value="14"]').prop('disabled', true);
-
                 var all_reason = $('#select_all_reason');
                 $.ajax({
                     url:'{!! route('admin.delivery.receive.reason_all') !!}',
