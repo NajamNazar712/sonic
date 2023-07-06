@@ -22,7 +22,7 @@ Route::name('api.')->group(function () {
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
-    Route::post('staff_attendance_details', 'APIController@staff_checkin')->name('staff_attendance_details');
+    Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
 
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');

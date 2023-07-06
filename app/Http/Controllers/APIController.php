@@ -7503,7 +7503,7 @@ class APIController extends Controller
     }
 
 
-    public function staff_checkin(Request $request)
+    public function employee_checkin(Request $request)
     {
 
         $rules = [
@@ -7548,22 +7548,34 @@ class APIController extends Controller
                     }
 
                     if($trax_id_check == false){
-                        $staff_attendances = EmployeeAttendance::where('employee_type', 1)->whereBetween('attendance_date',[$from,$to]);
+                        $employee_attendances = EmployeeAttendance::whereBetween('attendance_date',[$from,$to]);
                     }
                     else{
-                        $staff_attendances = EmployeeAttendance::where('employee_id', $employee->id)->where('employee_type', 1)->whereBetween('attendance_date',[$from,$to]);
+                        $employee_attendances = EmployeeAttendance::where('employee_id', $employee->id)->whereBetween('attendance_date',[$from,$to]);
                     }
 
-                    if($staff_attendances->exists()){
-                        $staff_attendances = $staff_attendances->get();
-                        foreach ($staff_attendances as $staff_attendance){
+                    if($employee_attendances->exists()){
+                        $employee_attendances = $employee_attendances->get();
+                        foreach ($employee_attendances as $employee_attendance){
                             if($trax_id_check == false) {
-                                $employee = Employee::find($staff_attendance->employee_id);
+                                $employee = Employee::find($employee_attendance->employee_id);
                             }
                             if($employee){
-                                if($staff_attendance->clock_in_datetime != null){
-                                    $detail = array('Trax ID' => $employee->trax_id, 'Name' => $employee->name, 'Clock In' => $staff_attendance->clock_in_datetime, 'Clock Out' => $staff_attendance->clock_out_datetime);
-                                    $details[$staff_attendance->attendance_date][] = $detail;
+                                if($employee_attendance->clock_in_datetime != null){
+                                    if($employee_attendance->employee_type == 1){
+                                        $category = 'Staff';
+                                    }
+                                    else if ($employee_attendance->employee_type == 2){
+                                        $category = 'Rider';
+                                    }
+                                    else if ($employee_attendance->employee_type == 3){
+                                        $category = 'Contractual Staff';
+                                    }
+                                    else{
+                                        $category = 'Un-Known';
+                                    }
+                                    $detail = array('Category' => $category, 'Trax ID' => $employee->trax_id, 'Name' => $employee->name, 'Clock In' => $employee_attendance->clock_in_datetime, 'Clock Out' => $employee_attendance->clock_out_datetime);
+                                    $details[$employee_attendance->attendance_date][] = $detail;
                                 }
                             }
                         }
