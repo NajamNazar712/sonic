@@ -25,6 +25,7 @@ class SwichPaymentGatewayApi implements ShouldQueue
      */
     public function __construct($shipments_id )
     {
+        $this->queue = 'switch_payment_gateway';
         $this->shipments_id    = $shipments_id;
     }
 
