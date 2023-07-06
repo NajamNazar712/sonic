@@ -158,7 +158,7 @@ class AdminShipmentScanningHistoryController extends Controller
                             $c = City::find($admin->default_hub_id);
                             ($c) ? $city = $c['name'] : $city = '-';
                             $scanned_by = $admin->name;
-                            $area = $admin->area->name;
+                            $area = ($admin->area_id != null) ? $admin->area->name : '-';
                         }
                         $details[$index]['screen_location'] = $screen_location->name;
                         $details[$index]['account_type'] = $account_type;
