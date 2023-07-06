@@ -66,7 +66,7 @@ class ReturnV2Controller extends Controller
         $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
 
         foreach ($sorted_agents as $key => $agent) {
-            // Assinged hub to priority city and shipper status is 12 which is activate for return shipments
+            // Assigned hub to priority city and shipper status is 12 which is activate for return shipments
             $shipments = Shipment::where('consignee_city_id', $agent['city_id'])->where('shipper_status_id', 12)->orderBy('id', 'ASC')->get();
             // check if shipments exist
             if (count($shipments)) {
@@ -102,6 +102,7 @@ class ReturnV2Controller extends Controller
                         'rv_assign_agent_sub_status_id' => null,
                     ];
 
+                    // creating a new record
                     $this->newRvShipmentAssign($data);
 
                     break 2;
@@ -179,6 +180,7 @@ class ReturnV2Controller extends Controller
 
     public function get_submit(Request $request)
     {
+        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required',
@@ -200,116 +202,124 @@ class ReturnV2Controller extends Controller
         } else {
 
 
-            $shipment_assign_agent_id = RvShipmentAgent::where('agent_id', Auth::id())->first();
+            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
             $admin_agent = Admin::where('id', Auth::id())->first();
-
 
             //if shipment already exists update row
             if ($shipment_assign_agent->exists()) {
 
                 //if agent already exists
-                if ($shipment_assign_agent_id->exist()) {
-                    $shipment_assign_agent = $shipment_assign_agent->first();
+                if ($assign_agent) {
+                    $shipment_assign_agent = $shipment_assign_agent->latest()->first();
                     $shipment_assign_agent_table_columns = [
-                        'rv_assign_agent_status_id' => $request->shipment_status,
-                        'rv_assign_agent_sub_status_id' => $request->shipment_reason,
+                        'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
+                        'rv_fake_status_id' => $request->fake_status,
+                        'remarks' => $request->shipment_remarks,
                         'rv_state_id' => $request->fake_status_state,
+                        'call_to_id' => $request->call_to_id,
                         'updated_by_id' => Auth::id(),
                         'is_fake_status' => $request->fake_status,
-                        'rv_fake_status_id' => $request->fake_status,
-                        'rv_shipment_agent_id' => $shipment_assign_agent_id,
-                        'remarks' => $request->shipment_remarks,
-                        'call_to_id' => $request->call_to_id,
+                        'rv_shipment_agent_id' => $assign_agent->id,
                     ];
-
+                    $assign_agent = $assign_agent->latest()->first();
                     if ($admin_agent->employee->staff_category_id == 3) {
-                        $shipment_assign_agent_id->increment('total_shipments');
-                        $shipment_assign_agent_id->increment('actual_productivity');
+                        $assign_agent->increment('total_shipments');
+                        $assign_agent->increment('actual_productivity');
 
                         $shipment_assign_agent->update(
                             $shipment_assign_agent_table_columns + ['updated_type_id' => 2] // agent type
                         );
                     } else {
-                        $shipment_assign_agent_id->increment('already_updated');
+                        $assign_agent->increment('already_updated');
                         $shipment_assign_agent->update(
                             $shipment_assign_agent_table_columns + ['updated_type_id' => 1] // admin type
                         );
                     }
                     
-                } else {
-                    // Creating row of new shipment
-                    $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
-                    $rv_shipment_assign_agent->agent_id = Auth::id();
-                    $rv_shipment_assign_agent->shipment_id = $request->shipment_id;
-                    $rv_shipment_assign_agent->rv_assign_agent_status_id = $request->rv_assign_agent_status_id;
-                    $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $request->rv_assign_agent_sub_status_id;
-                    $rv_shipment_assign_agent->rv_state_id = $request->rv_state_id;
-                    $rv_shipment_assign_agent->is_fake_status = $request->is_fake_status;
-                    $rv_shipment_assign_agent->rv_fake_status_id = $request->rv_fake_status_id;
-                    $rv_shipment_assign_agent->rv_shipment_agent_id = $shipment_assign_agent_id->id;
-                    $rv_shipment_assign_agent->updated_by_id = Auth::id();
-                    $rv_shipment_assign_agent->remarks = $request->remarks;
-                    $rv_shipment_assign_agent->call_to_id  = $request->call_to_id;
-                    $rv_shipment_assign_agent->save();
+                } //end if agent already exist 
+
+                else {
+                    //Creating row of new agent if agent not found
+                    // dd('1');
+                    $rv_shipment_agent = new RvShipmentAgent();
+                    $rv_shipment_agent->agent_id = Auth::id();
+                    $rv_shipment_agent->save();
+                    
+                    $shipment_assign_agent = $shipment_assign_agent->latest()->first();
+                    $shipment_assign_agent_table_columns = [
+                        'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
+                        'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
+                        'rv_fake_status_id' => $request->fake_status,
+                        'remarks' => $request->shipment_remarks,
+                        'rv_state_id' => $request->fake_status_state,
+                        'call_to_id' => $request->call_to_id,
+                        'updated_by_id' => Auth::id(),
+                        'is_fake_status' => $request->fake_status,
+                        'rv_shipment_agent_id' => $rv_shipment_agent->id,
+                    ];
 
                     if ($admin_agent->employee->staff_category_id == 3) {
-                        $shipment_assign_agent_id->increment('total_shipments');
-                        $shipment_assign_agent_id->increment('actual_productivity');
+                        $rv_shipment_agent->total_shipments = $rv_shipment_agent->total_shipments + 1;
+                        $rv_shipment_agent->actual_productivity = $rv_shipment_agent->actual_productivity + 1;
 
-                        $rv_shipment_assign_agent->save(
-                            $rv_shipment_assign_agent + ['updated_type_id' => 2] // agent type
+                        $shipment_assign_agent->update(
+                            $shipment_assign_agent_table_columns + ['updated_type_id' => 2] // agent type
                         );
-                    } else {
-                        $shipment_assign_agent_id->increment('already_updated');
-
-                        $rv_shipment_assign_agent->save(
-                            $rv_shipment_assign_agent + ['updated_type_id' => 1] // admin type
+                    } 
+                    else {
+                        $rv_shipment_agent->already_updated = $rv_shipment_agent->already_updated + 1;
+                        $shipment_assign_agent->update(
+                            $shipment_assign_agent_table_columns + ['updated_type_id' => 1] // admin type
                         );
                     }
+                    
+                    $rv_shipment_agent->save();
                 }
             } 
             
             else {
-                // Inserting new record if agent is not found in rv_shipment_agents
-                $rv_shipment_agent  = new RvShipmentAgent;
-                $rv_shipment_agent->admin_id = Auth::id();
-                $rv_shipment_agent->increment('total_shipments');
-                $rv_shipment_agent->increment('actual_productivity');
-                $rv_shipment_agent->save();
+                
+                // // Inserting new record if agent is not found in rv_shipment_agents
+                // $rv_shipment_agent  = new RvShipmentAgent;
+                // $rv_shipment_agent->admin_id = Auth::id();
+                // $rv_shipment_agent->increment('total_shipments');
+                // $rv_shipment_agent->increment('actual_productivity');
+                // $rv_shipment_agent->save();
 
-                // Inserting new row in rv_shipment_assign_agents table
-                $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
-                $rv_shipment_assign_agent->agent_id = Auth::id();
-                $rv_shipment_assign_agent->shipment_id = $request->shipment_id;
-                $rv_shipment_assign_agent->rv_assign_agent_status_id = $request->rv_assign_agent_status_id;
-                $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $request->rv_assign_agent_sub_status_id;
-                $rv_shipment_assign_agent->rv_state_id = $request->rv_state_id;
-                $rv_shipment_assign_agent->is_fake_status = $request->is_fake_status;
-                $rv_shipment_assign_agent->rv_fake_status_id = $request->rv_fake_status_id;
-                $rv_shipment_assign_agent->rv_shipment_agent_id = $request->id;
-                $rv_shipment_assign_agent->updated_type_id = $request->updated_type_id;
-                $rv_shipment_assign_agent->updated_by_id = Auth::id();
-                $rv_shipment_assign_agent->remarks = $request->remarks;
-                $rv_shipment_assign_agent->call_to_id  = $request->call_to_id;
-                $rv_shipment_assign_agent->save();
+                // // Inserting new row in rv_shipment_assign_agents table
+                // $rv_shipment_assign_agent  = new RvShipmentAssignAgent;
+                // $rv_shipment_assign_agent->agent_id = Auth::id();
+                // $rv_shipment_assign_agent->shipment_id = $request->shipment_id;
+                // $rv_shipment_assign_agent->rv_assign_agent_status_id = $request->rv_assign_agent_status_id;
+                // $rv_shipment_assign_agent->rv_assign_agent_sub_status_id = $request->rv_assign_agent_sub_status_id;
+                // $rv_shipment_assign_agent->rv_state_id = $request->rv_state_id;
+                // $rv_shipment_assign_agent->is_fake_status = $request->is_fake_status;
+                // $rv_shipment_assign_agent->rv_fake_status_id = $request->rv_fake_status_id;
+                // $rv_shipment_assign_agent->rv_shipment_agent_id = $request->id;
+                // $rv_shipment_assign_agent->updated_type_id = $request->updated_type_id;
+                // $rv_shipment_assign_agent->updated_by_id = Auth::id();
+                // $rv_shipment_assign_agent->remarks = $request->remarks;
+                // $rv_shipment_assign_agent->call_to_id  = $request->call_to_id;
+                // $rv_shipment_assign_agent->save();
             }
 
             //Maintaining Log
-            $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails;
-            $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
-            $rv_shipment_assign_agent_details->agent_id = $shipment_assign_agent->agent_id;
-            $rv_shipment_assign_agent_details->shipment_id = $shipment_assign_agent->shipment_id;
-            $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $shipment_assign_agent->rv_assign_agent_status_id;
-            $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $shipment_assign_agent->rv_assign_agent_sub_status_id;
-            $rv_shipment_assign_agent_details->rv_state_id = $shipment_assign_agent->rv_state_id;
-            $rv_shipment_assign_agent_details->updated_type_id = $shipment_assign_agent->updated_type_id;
-            $rv_shipment_assign_agent_details->updated_by_id = $shipment_assign_agent->updated_by_id;
-            $rv_shipment_assign_agent_details->is_fake_status = $shipment_assign_agent->is_fake_status;
-            $rv_shipment_assign_agent_details->rv_fake_status_id = $shipment_assign_agent->rv_fake_status_id;
-            $rv_shipment_assign_agent_details->remarks = $shipment_assign_agent->remarks;
-            $rv_shipment_assign_agent_details->call_to_id  = $shipment_assign_agent->call_to_id;
-            $rv_shipment_assign_agent_details->save();
+            // $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails;
+            // $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
+            // $rv_shipment_assign_agent_details->agent_id = $shipment_assign_agent->agent_id;
+            // $rv_shipment_assign_agent_details->shipment_id = $shipment_assign_agent->shipment_id;
+            // $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $shipment_assign_agent->rv_assign_agent_status_id;
+            // $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $shipment_assign_agent->rv_assign_agent_sub_status_id;
+            // $rv_shipment_assign_agent_details->rv_state_id = $shipment_assign_agent->rv_state_id;
+            // $rv_shipment_assign_agent_details->updated_type_id = $shipment_assign_agent->updated_type_id;
+            // $rv_shipment_assign_agent_details->updated_by_id = $shipment_assign_agent->updated_by_id;
+            // $rv_shipment_assign_agent_details->is_fake_status = $shipment_assign_agent->is_fake_status;
+            // $rv_shipment_assign_agent_details->rv_fake_status_id = $shipment_assign_agent->rv_fake_status_id;
+            // $rv_shipment_assign_agent_details->remarks = $shipment_assign_agent->remarks;
+            // $rv_shipment_assign_agent_details->call_to_id  = $shipment_assign_agent->call_to_id;
+            // $rv_shipment_assign_agent_details->save();
         }
     }
 }
