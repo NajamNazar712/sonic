@@ -141,7 +141,7 @@
                                 <span class="">Arrival Date From</span>
                             </span>
                             </div>
-                            <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From" data-value="{{ Carbon\Carbon::now() }}">
+                            <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From">
                         </div>
                     </div>
                     <div class="col-4">
@@ -152,7 +152,7 @@
                                 <span class="">Arrival Date To</span>
                             </span>
                             </div>
-                            <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To" data-value="{{ Carbon\Carbon::now() }}">
+                            <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To">
                         </div>
                     </div>
                     {{--todo new end--}}
@@ -323,6 +323,7 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -360,40 +361,79 @@
                 }
             });
 
-            var from_date1 = $('#from_date1').pickadate({
+            var booking_from_date = $('#from_date1').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                max: from_max,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_root').css('top','40px');
-                },
-                onSet: function(context) {
-                    var old_date_formatted1 = $('input[name="from_date1_formatted"]').val();
-                    to_date1.pickadate('picker').set('min', new Date(old_date_formatted1),{muted:true});
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#to_date1').pickadate('picker').set('min', $('#from_date1').pickadate('picker').get('select'));
+                    }
                 }
             });
-            var to_date1 = $('#to_date1').pickadate({
+            var booking_to_date = $('#to_date1').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                max: to_max,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
-                },
-                onSet: function(context) {
-                    var current_date_formatted1 = $('input[name="to_date1_formatted"]').val();
-                    from_date1.pickadate('picker').set('max',new Date(current_date_formatted1),{muted:true});
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#from_date1').pickadate('picker').set('max', $('#to_date1').pickadate('picker').get('select'));
+                    }
                 }
             });
+
+            $('#from_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+            $('#to_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+
+            // $('#from_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+            // $('#to_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -543,6 +583,8 @@
                         d.search_to = $('input[name="to_date_formatted"]').val();
                         d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
                         d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
+                        // d.requested_from_date = $('#from_date1').val();
+                        // d.requested_to_date = $('#to_date1').val();
                         d.search_types = $('#search_types').val();
                         d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
