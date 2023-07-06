@@ -116,7 +116,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status From</span>
                             </span>
                             </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
@@ -126,7 +126,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status To</span>
                             </span>
                             </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
@@ -134,22 +134,22 @@
                     </div>
                     {{--todo new--}}
                     <div class="col-4 ">
-                        <label>Arrival Date From</label>
+                        {{--                        <label>Arrival Date From</label>--}}
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Arrival Date From</span>
                             </span>
                             </div>
                             <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
                     <div class="col-4">
-                        <label>Arrival Date To</label>
+                        {{--                        <label>Arrival Date To</label>--}}
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Arrival Date To</span>
                             </span>
                             </div>
                             <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To" data-value="{{ Carbon\Carbon::now() }}">
