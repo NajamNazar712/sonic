@@ -185,6 +185,9 @@ class AdminReportsController extends Controller
              'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 
              'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 
              'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status']);
+//        ->where('sj.created_at','2023-07-05 17:08:15')
+//            ->get();
+//        dd($shipments);
 
         $type = $request->get('search_types');
 
@@ -347,15 +350,16 @@ class AdminReportsController extends Controller
                 }
             }
         }
+
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatable->whereBetween('journey.created_at', [$from, $to]);
         }
         if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
-            $from = $request->get('arrival_search_to');
-            $to = $request->get('search_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
+            $from1 = $request->get('arrival_search_from');
+            $to1 = $request->get('arrival_search_to');
+            $datatable->whereBetween('journey.created_at', [$from1, $to1]);
         }
         if ($status_id = $request->get('search_shipment_status')) {
             $datatable->where('ss.id', '=', $status_id);

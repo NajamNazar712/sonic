@@ -373,7 +373,7 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    var old_date_formatted1 = $('input[name="from_date_formatted1"]').val();
+                    var old_date_formatted1 = $('input[name="from_date1_formatted"]').val();
                     to_date1.pickadate('picker').set('min', new Date(old_date_formatted1),{muted:true});
                 }
             });
@@ -390,7 +390,7 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    var current_date_formatted1 = $('input[name="to_date_formatted1"]').val();
+                    var current_date_formatted1 = $('input[name="to_date1_formatted"]').val();
                     from_date1.pickadate('picker').set('max',new Date(current_date_formatted1),{muted:true});
                 }
             });
