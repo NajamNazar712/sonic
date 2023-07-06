@@ -14184,7 +14184,7 @@ class RiderAPIController extends Controller
 
             if(count($tracking_number) == count($shipments))
             {   
-                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 2, $request->rider_id);
+                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id);
 
                 return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
             }

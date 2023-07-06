@@ -12755,7 +12755,7 @@ class AdminAPIController extends Controller
                 $details['complaint'] = $crm->id;
             }
 
-            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null);
+            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
 
             $shipment_scanned[] = $details;
         }
