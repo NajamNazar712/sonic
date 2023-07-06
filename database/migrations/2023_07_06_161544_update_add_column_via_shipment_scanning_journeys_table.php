@@ -14,7 +14,7 @@ class UpdateAddColumnViaShipmentScanningJourneysTable extends Migration
     public function up()
     {
         Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->smallInteger('via')->nullable()->after('substitute_user_id')->index();
+            $table->smallInteger('updated_via')->nullable()->after('substitute_user_id')->index();
             $table->index('shipment_id');
             $table->index('screen_location_id');
             $table->index('admin_id');
@@ -31,7 +31,7 @@ class UpdateAddColumnViaShipmentScanningJourneysTable extends Migration
     public function down()
     {
         Schema::table('shipment_scanning_journeys', function (Blueprint $table) {
-            $table->dropColumn('via');
+            $table->dropColumn('updated_via');
             $table->dropIndex('shipment_scanning_journeys_shipment_id_index');
             $table->dropIndex('shipment_scanning_journeys_screen_location_id_index');
             $table->dropIndex('shipment_scanning_journeys_admin_id_index');
