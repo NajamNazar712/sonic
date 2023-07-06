@@ -145,7 +145,7 @@
                                 shipment += '<td>' + history.scanned_by + '</td>';
                                 shipment += '<td>' + history.city + '</td>';
                                 shipment += '<td>' + history.area + '</td>';
-                                shipment += '<td>' + history.via + '</td>';
+                                shipment += '<td>' + history.updated_via + '</td>';
                                 shipment += '<td>' + history.scanned_at + '</td>';
                                 shipment += '<td>' + history.ip_address + '</td>';
                                 shipment += '<td>' + history.latitude + '</td>';

@@ -12,7 +12,7 @@ class ShipmentScanningJourneyController extends Controller
 {
     //User Types 4 -> Retail User
     // via 1 -> Web and via 2 -> App
-    static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL, $piece_id = NULL, $via = NULL ) {
+    static public function add($shipment_id, $screen_location_id, $user_type, $admin_id = NULL, $user_id = NULL, $substitute_user_id = NULL, $piece_id = NULL, $updated_via = NULL ) {
         if(session('role_id') != 1){
             $add_scanning_history = new ShipmentScanningJourney();
             $add_scanning_history->shipment_id = $shipment_id;
@@ -21,7 +21,7 @@ class ShipmentScanningJourneyController extends Controller
             $add_scanning_history->admin_id = $admin_id;
             $add_scanning_history->user_id = $user_id;
             $add_scanning_history->substitute_user_id = $substitute_user_id;
-            $add_scanning_history->via = $via; // via 1 -> Web and via 2 -> App
+            $add_scanning_history->updated_via = $updated_via; // updated_via 1 -> Web and updated_via 2 -> App
             // $add_scanning_history->piece_id = $piece_id;
 
             $whip = new Whip();
