@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\AddV3PickupController;
 use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\CRM\CrmRequestCaseNature;
@@ -13,6 +14,10 @@ use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
 use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Models\V3Pickup\V3PickupRequest;
+use App\Http\Models\V3Pickup\V3PickupRequestAttempt;
+use App\Http\Models\V3Pickup\V3PickupTimeRange;
+use App\Http\Models\V3Pickup\V3PickupType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -64,12 +69,12 @@ class ShipperPickupController extends Controller
 
     public function pickup_list()
     {
-        $pickups = V2PickupRequest::join('users as u', 'v2_pickup_requests.shipper_id', '=', 'u.id')
-            ->join('user_shipping_infos as usi', 'v2_pickup_requests.pickup_address_id', '=', 'usi.id')
+        $pickups = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
+            ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-            ->join('v2_pickup_request_statuses as vprs', 'vprs.id', '=', 'v2_pickup_requests.status_id')
-            ->select('v2_pickup_requests.id', 'v2_pickup_requests.id as pickup_request_id', 'v2_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v2_pickup_requests.booked', 'v2_pickup_requests.received', 'v2_pickup_requests.attempts', 'v2_pickup_requests.status_id', 'v2_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v2_pickup_requests.renew as renew', DB::raw('(SELECT SUM(`vrp`.`shipments`) FROM `v2_rider_pickups` AS `vrp` WHERE `vrp`.`pickup_request_id` = `v2_pickup_requests`.`id`) AS `scanned`'))
-            ->where('v2_pickup_requests.shipper_id', session('user_id'));
+            ->join('v3_pickup_request_statuses as vprs', 'vprs.id', '=', 'v3_pickup_requests.status_id')
+            ->select('v3_pickup_requests.id', 'v3_pickup_requests.id as pickup_request_id', 'v3_pickup_requests.created_at as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'v3_pickup_requests.received', 'v3_pickup_requests.attempts', 'v3_pickup_requests.status_id', 'v3_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v3_pickup_requests.renew as renew', DB::raw('(SELECT SUM(`vrp`.`shipments`) FROM `v3_rider_pickups` AS `vrp` WHERE `vrp`.`pickup_request_id` = `v3_pickup_requests`.`id`) AS `scanned`'))
+            ->where('v3_pickup_requests.shipper_id', session('user_id'));
 
 
         return Datatables::of($pickups)
@@ -99,7 +104,7 @@ class ShipperPickupController extends Controller
             })
             ->addColumn('reason', function ($pickup_request) {
 
-                $attempt_reasons = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('reason_id');
+                $attempt_reasons = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('reason_id');
                 $all_reason = '';
                 if ($attempt_reasons->exists()) {
                     $attempts = $attempt_reasons->pluck('reason_id')->toArray();
@@ -113,7 +118,7 @@ class ShipperPickupController extends Controller
                 return $all_reason;
             })
             ->addColumn('remarks', function ($pickup_request) {
-                $remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('trax_remarks');;
+                $remarks = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('trax_remarks');;
                 $all_remarks = '';
                 if ($remarks->exists()) {
                     $remarks = $remarks->get();
@@ -128,7 +133,7 @@ class ShipperPickupController extends Controller
                 return $all_remarks;
             })
             ->addColumn('shipper_remarks', function ($pickup_request) {
-                $shipper_remarks = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('shipper_remarks');
+                $shipper_remarks = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->id)->whereNotNull('shipper_remarks');
                 $all_shipper_remarks = '';
                 if ($shipper_remarks->exists()) {
                     $shipper_remarks = $shipper_remarks->get();
@@ -143,7 +148,7 @@ class ShipperPickupController extends Controller
                 return $all_shipper_remarks;
             })
             ->addColumn('attempt_date_time', function ($pickup_request) {
-                $attempts = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
+                $attempts = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
                 $all_attempt = '';
                 if ($attempts->exists()) {
                     $attempts = $attempts->get();
@@ -163,7 +168,7 @@ class ShipperPickupController extends Controller
                 $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
                 $renew = '<button type="button" class="dropdown-item renew"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Renew</div></button>';
 
-                $pickup_attempt = V2PickupRequestAttempt::where('pickup_request_id', $pickup_request->pickup_request_id);
+                $pickup_attempt = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->pickup_request_id);
                 $dropdown = '';
                 if ($pickup_attempt->exists() || ($pickup_request->rider_status == 1 && $pickup_request->status_id != 4) || ($pickup_request->status_id == 4 && $pickup_request->renew == 0)) {
                     $dropdown = '
@@ -253,8 +258,7 @@ class ShipperPickupController extends Controller
         }
     }
 
-    public
-    function cancel(Request $request)
+    public function cancel(Request $request)
     {
         $pickup_request = V2PickupRequest::where('id', $request->pickup_request_id)->where('rider_status', 1)->where('status_id', 1);;
 
@@ -361,18 +365,45 @@ class ShipperPickupController extends Controller
     public function add_pickup()
     {
         $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('status', 1)->where('hidden', 0)->get();
+        $pickup_types = V3PickupType::all();
+        $time_ranges = V3PickupTimeRange::all();
         // $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
         // $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
-        return view('client.pickups.add_pickup')->with(['pickup_addresses' => $pickup_addresses]);
-    }
-    public function get_pickup_address(Request $request)
-    {
-        $cityId = $request->input('city_id');
-        $pickup_address = UserShippingInfo::where('city_id', $cityId)->where('status', 1)->get();
-        return response()->json($pickup_address);
+        return view('client.pickups.add_pickup')->with(['pickup_addresses' => $pickup_addresses, 'pickup_types' => $pickup_types, 'time_ranges' => $time_ranges]);
     }
 
     public function add_pickup_submit(Request $request){
-        dd($request);
+        $user_id = session('user_id');
+
+        $pickup_date = $request->pickup_date_formatted;
+        $shipper_id = $user_id;
+        $pickup_address_id = $request->pickup_address_id;
+        $preferred_time_range = $request->preferred_time_range;
+        $pickup_type_id = $request->pickup_type_id;
+        $estimated_weight = $request->estimated_weight;
+        $shipments_count = $request->shipments_count;
+        $remarks = $request->remarks;
+
+        $pickup_address = UserShippingInfo::where('id', $request->pickup_address_id)->where('user_id', $shipper_id)->first();
+
+        if($pickup_address){
+            $vendor = NULL;
+            $city_id = $pickup_address->city->id;
+            if($pickup_address->vendor !== null){
+                $vendor = $pickup_address->vendor;
+            }
+
+            $pickup = V3PickupRequest::where(['shipper_id' => $shipper_id, 'pickup_address_id' => $pickup_address_id, 'status_id' => 1, 'pickup_date' => $pickup_date]);
+            if($pickup->exists()){
+                return redirect()->back()->with('error', 'Pickup request already in process!');
+            }
+            AddV3PickupController::add($shipper_id, $pickup_address_id, $pickup_date, $city_id, $preferred_time_range, $pickup_type_id, $estimated_weight, $shipments_count, $remarks, 0, $shipper_id, $vendor);
+
+            if($request->has('pickup')){
+                AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id);
+            }
+
+            return redirect()->back()->with('success', 'Pickup request added successfully!');
+        }
     }
 }

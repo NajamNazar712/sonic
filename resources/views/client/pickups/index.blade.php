@@ -98,10 +98,6 @@
                     </div>
 
                 </div>
-            </div>
-        </div>
-    </div>
-                </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
@@ -586,10 +582,10 @@
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'pickup_request_id', name: 'v2_pickup_requests.id', class: 'align-middle pickup_request_id'},
-                    {data: 'requested_at', name: 'v2_pickup_requests.created_at', class: 'align-middle requested_at'},
-                    {data: 'booked_button', name: 'v2_pickup_requests.booked', class: 'text-center align-middle booked'},
-                    {data: 'received_button', name: 'v2_pickup_requests.received', class: 'text-center align-middle received'},
+                    {data: 'pickup_request_id', name: 'v3_pickup_requests.id', class: 'align-middle pickup_request_id'},
+                    {data: 'requested_at', name: 'v3_pickup_requests.created_at', class: 'align-middle requested_at'},
+                    {data: 'booked_button', name: 'v3_pickup_requests.booked', class: 'text-center align-middle booked'},
+                    {data: 'received_button', name: 'v3_pickup_requests.received', class: 'text-center align-middle received'},
                     {data: 'scanned_button', name: 'vrp.shipments', class: 'text-center align-middle scanned'},
                     {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
@@ -601,7 +597,7 @@
                     // {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
                     // {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
                     // {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
-                    {data: 'attempts', name: 'v2_pickup_requests.attempts', class: 'align-middle attempt'},
+                    {data: 'attempts', name: 'v3_pickup_requests.attempts', class: 'align-middle attempt'},
                     {data: 'view_details', name: '', class: 'align-middle view_details'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

@@ -549,7 +549,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('view_details', 'Shippers\ShipperPickupController@view_details')->name('view_details');
         Route::get('add', 'Shippers\ShipperPickupController@add_pickup')->name('add');
         Route::post('add', 'Shippers\ShipperPickupController@add_pickup_submit')->name('add');
-        Route::get('get_pickup_address', 'Shippers\ShipperPickupController@get_pickup_address')->name('get_pickup_address');
 
     });
 

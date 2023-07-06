@@ -170,18 +170,15 @@
         $('#pickup_type_id').prepend('<option value="" selected="selected">Select Pickup Shipment Type</option>').select2({
             width: '100%',
             placeholder: 'Select Pickup Shipment Type',
-
         });
         $('#pickup_address_id').prepend('<option value="" selected="selected">Select Pickup Address</option>').select2({
             width: '100%',
             placeholder: 'Select Pickup Address',
-
         });
 
         $('#shippers').prepend('<option value="" selected="selected">Select Shippers</option>').select2({
             width: '100%',
             placeholder: 'Select Shipper',
-
         }).
         bind('select2:select', function() {
             var shipperId = $(this).val();
