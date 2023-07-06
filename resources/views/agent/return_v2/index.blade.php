@@ -1194,7 +1194,7 @@
                                 'rv_assign_agent_sub_status_id': shipment_reason,
                                 'rv_fake_status_id': fake_status,
                                 'remarks': shipment_remarks,
-                                'fake_status_state': checkbox,
+                                'is_fake_status': checkbox,
                                 'call_to_id': call_to_id,
                                 'image':imageBase64,
                                 'consigneeCity':consigneeCity,
