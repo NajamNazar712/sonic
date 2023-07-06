@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\CityArea;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
@@ -12,6 +13,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -180,11 +182,12 @@ use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
-use Illuminate\Validation\Rule;
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
@@ -9474,7 +9477,7 @@ public function payfast_payment(Request $request){
                     if($shippers){
                         $shippers = explode(',', $shippers->text);
                         
-                        if(in_array($result->id,$shippers))
+                        if(in_array($result->id,$shippers) && session('role_id') == 1 || in_array(873, session('permissions')))
                         {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.accounts.substitute_account_management.index', ['id' => $result->id]) . '\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Special Dashboard Account</div></button>';
                         }
@@ -10190,7 +10193,7 @@ public function payfast_payment(Request $request){
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -10212,6 +10215,18 @@ public function payfast_payment(Request $request){
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                         }
                     }
+
+                    if (session('role_id') == 1 || in_array(850, session('permissions'))) {
+                        if ($result->isHub == 1) {
+                            $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-plus-circle"></i></div>
+                                    <div class="col-9 offset-1">Add Areas</div>
+                                </div>                          
+                            </a>';
+                        }
+                    }
+
 
                     $dropdown .= '
                     </div>
@@ -10998,7 +11013,9 @@ public function payfast_payment(Request $request){
 
         $route = $route->get();
 
-        return response()->json($route);
+        $city_areas = CityArea::where('city_id',$city_id)->get();
+        
+        return response()->json(['route' => $route, 'areas' => $city_areas]);
     }
 
     public function addRiderDetails(Request $request)
@@ -12893,6 +12910,9 @@ public function payfast_payment(Request $request){
 
     public function substitute_accounts_list(Request $request,$id) {
 
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
+        }
         $substitute_users = SubstituteUser::join('admins','admins.id','substitute_users.created_by_admin_id')
         ->select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status', 'substitute_users.restriction', 'admins.name as created_by')
         ->where('substitute_users.user_id', $id)
@@ -12916,7 +12936,7 @@ public function payfast_payment(Request $request){
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(664, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(875, session('permissions'))) {
 
                 $dropdown .= $edit_button;
             }
@@ -12970,6 +12990,7 @@ public function payfast_payment(Request $request){
 
     public function substitute_accounts_add_index($shipper_id) {
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
         $permissions = SubstituteUserModulePermission::whereIn('id', [10])->get();
 
         $merged_head_account_ids = MergedSisterAccount::where('user_id',$shipper_id)->pluck('merged_head_id')->toArray();
@@ -12982,8 +13003,6 @@ public function payfast_payment(Request $request){
     }
   
     public function substitute_accounts_add_store(Request $request,$id) {
-
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 663);
 
         $substitute_user = new SubstituteUser();
 
@@ -13080,8 +13099,6 @@ public function payfast_payment(Request $request){
     }
   
     public function substitute_accounts_update_store(Request $request, $shipper_id , $id) {
-
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 664);
 
         $substitute_user = SubstituteUser::find($id);
         $substitute_user->user_id = $shipper_id;
@@ -13314,5 +13331,213 @@ public function payfast_payment(Request $request){
 
     }
 
+
+    public function add_city_sub_area($city_id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 642);
+        $cities = City::where('id',$city_id)->get();
+        $reporting_locations = ReportingLocation::where('status', 1)->where('city_id',$city_id)->get();
+        return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
+    }
+
+    public function add_city_sub_area_ajax(Request $request){
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 643);
+        }
+
+        $city_area = CityArea::where('city_areas.city_id',$request->city_id)
+            ->join('cities as c', 'c.id', '=', 'city_areas.city_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'city_areas.updated_by')
+            ->leftjoin('reporting_locations as rl', 'rl.id', '=', 'city_areas.report_location_id')
+            ->select('city_areas.*','c.location_latitude','c.location_longitude','c.name as city_name','a.name as admin_name','rl.name as relocation_name');
+
+        return Datatables::of($city_area)
+            ->addColumn('location', function ($result) {
+                $location = '<div class="text-center">';
+                if ($result->location_latitude != null && $result->location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('status', function ($result) {
+              if($result->status == 0){
+                  return 'Not Active';
+              }else{
+                  return  'Active';
+              }
+            })
+            ->editColumn('relocation_name', function ($result) {
+                $rl = $result->relocation_name . '-'.$result->city_name;
+                return $rl;
+
+            })
+            ->editColumn('default', function ($result) {
+              if($result->default == 1){
+                  return 'Yes';
+              }else{
+                  return  'No';
+              }
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+                    if (session('role_id') == 1 || in_array(843, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item" 
+                             data-target-id=' . $result->id . ' 
+                             data-target-city_id='.$result->city_id .' 
+                             data-target-report_location_id=' . $result->report_location_id . ' 
+                             data-target-name=' . $result->name . ' 
+                             rel="editcityarea" data-toggle="modal" data-target="#city_area_edit_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Area</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
+                            if($result->status == 0) {
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Active</div></button>';
+                            }else{
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="0"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
+                            }
+                    }
+
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
+                        if($result->detault == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center mark_default" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Mark Default</div></button>';
+                        }
+                    }
+
+
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+
+    }
+
+    public function city_sub_area_post(Request $request){
+
+        $names = [
+            'id' => 'ID',
+            'name' => 'Name',
+            'city_id' => 'City ID',
+            'report_location_id' => 'Reporting ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'check_name' => ':attribute is already exists.',
+            'check_id' => ':attribute with same area and city already exist.',
+            ];
+
+        $rules = [
+            'id' => 'nullable',
+            'name' => 'required|string|max:255|check_name',
+            'city_id' => 'required|string|max:255',
+            'report_location_id' => 'required|string|max:255',
+        ];
+
+
+        Validator::extend('check_name', function ($attribute, $value, $parameters, $validator){
+            $data = $validator->getData();
+            $name = $data['name'];
+            $city_id = $data['city_id'];
+            if(!isset($data['id'])) {
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }else{
+                $id = $data['id'];
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name)->where('id','!=',$id);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+        });
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+
+        if ($validate->passes()) {
+
+            $default_city = CityArea::where('city_id',$request->city_id);
+            $city_area = !isset($request->id) ?  new CityArea() : CityArea::find($request->id);
+            $city_area->city_id  = $request->city_id;
+            $city_area->report_location_id  = $request->report_location_id;
+            $city_area->name  = $request->name;
+            $city_area->updated_by  = auth()->user()->id;
+            $city_area->status  = 1;
+            $city_area->default  = ($default_city->exists()) ? 0 : 1;
+            $city_area->save();
+
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+        }else{
+            $data = response()->json([
+                'status' => 0,
+                'errors' => $validate->errors(),
+                'message' => 'Error',
+            ]);
+        }
+        return $data;
+
+
+    }
+
+    public function city_area_status(Request $request){
+        if(isset($request->id)){
+            $city_area = CityArea::where('id',$request->id)->update(['status'=>$request->status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
+    }
+    public function city_area_default(Request $request){
+        if(isset($request->id)){
+            CityArea::where('id','!=' ,$request->id)->where('city_id',$request->city_id)->update(['default'=>0]);
+            CityArea::where('id',$request->id)->update(['default'=>$request->default_status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
+    }
 }
 

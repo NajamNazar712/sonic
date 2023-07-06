@@ -144,6 +144,7 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
+        'App\Console\Commands\AutoAssignCrmAgentNew',
         ];
 
     /**

@@ -13,6 +13,17 @@
                 @include('client.inc.messages')
 
                 <div id="search_form" class="row mb-2 justify-content-center">
+
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_user" id="search_user" class="form-control select2" multiple="multiple">
+                                <option value="{{$user->id}}">{{$user->name}}</option>
+                                @foreach($sister_users as $sister_user)
+                                    <option value="{{$sister_user->id}}">{{$sister_user->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
                     <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
@@ -56,7 +67,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::now() }}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{$today}}">
                         </div>
                     </div>
                     <div class="col-3 ">
@@ -67,7 +78,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::now() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{$today}}">
                         </div>
 
                     </div>
@@ -187,6 +198,12 @@
                 'allowPlus': false
             });
 
+            $('#search_user').select2({
+                placeholder:'Select User',
+                width:'100%',
+                allowClear:true,
+                
+            });
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select Destination City',
                 width:'100%',
@@ -219,35 +236,48 @@
             });
             var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: false,
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                onClose: function() {
+                    var selectedDate = this.get('select'); // Get the selected date
+
+                    // Calculate the maximum allowed date (two days before the current date)
+                    var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
+
+                    // Compare selected date to the maximum allowed date
+                    if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                        // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 00:00:00' });
                     }
-                }
+                },
+                max: true // Set the maximum date to today
             });
 
             var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: false,
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
-                        $('input[name="arrival_time_from"]').val('12:00 AM');
-                        $('input[name="arrival_time_to"]').val('11:30 PM');
+                onClose: function() {
+                    var selectedDate = this.get('select'); // Get the selected date
+
+                    // Calculate the maximum allowed date (two days before the current date)
+                    var maxAllowedDate = moment().subtract(2, 'days').endOf('day');
+
+                    // Compare selected date to the maximum allowed date
+                    if (selectedDate && selectedDate.pick > maxAllowedDate) {
+                        // If the selected date is after the maximum allowed date, set the selection to the maximum allowed date
+                        this.set('select', maxAllowedDate.toDate(), { format: 'yyyy-mm-dd 23:59:59' });
                     }
-                }
+                },
+                max: true // Set the maximum date to today
             });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -342,6 +372,7 @@
                         'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                     },
                     data: function (d) {
+                        d.users = $('#search_user').val();
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();

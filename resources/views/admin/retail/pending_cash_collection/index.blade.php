@@ -41,6 +41,8 @@
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Assigned Date</th>
                             <th class="border-primary border-darken-1">RNCC Amount</th>
+                            <th class="border-primary border-darken-1">HBL Konnect Amount</th>
+                            <th class="border-primary border-darken-1">Remaining/Cash</th>
                             <th class="border-primary border-darken-1">Status</th>
                             
 {{--                            <th class="border-primary border-darken-1">Action</th>--}}
@@ -69,6 +71,39 @@
             </div>
         </div>
     </div>
+
+    {{-- HBL Konnect Cash  --}}
+    <div class="modal fade" id="hbl_konnect_modal" data-backdrop="static" role="dialog" aria-labelledby="hbl_konnect_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="hbl_konnect_modal_title">Total Transactions</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="hbl_konnect_modal-body text-center">
+                    <table class="table">
+                        <thead>
+                        <tr>
+                            <th>Transaction ID</th>
+                            <th>Amount</th>
+                            <th>Created At</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- HBL Konnect Cash end --}}
 
 @endsection
 @section('css')
@@ -114,6 +149,8 @@
                             head.push('Assigned By');
                             head.push('Assigned Date');
                             head.push('RNCC Amount');
+                            head.push('HBL Konnect Amount');
+                            head.push('Remaining/Cash Amount');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -129,6 +166,8 @@
                                 row.push(values.assignee);
                                 row.push(values.assigned_at);
                                 row.push(values.amount);
+                                row.push(values.hbl_konnect_cash_excel);
+                                row.push(values.remaining_cash);
                                 row.push(values.rcd_status);
 
                                 body.push(row);
@@ -331,6 +370,8 @@
                     { data:'assignee' ,name: 'a.name', class: 'align-middle assignee'},
                     { data:'time' ,name: 'rpn.assigned_at', class: 'align-middle time text-center'},
                     { data:'amount' ,name: 'retail_cash_deposits.total_cash', class: 'align-middle amount'},
+                    { data:'hbl_konnect_cash' ,name: 'retail_cash_deposits.total_cash', class: 'align-middle hbl_konnect_cash', orderable: false, searchable: false},
+                    { data:'remaining_cash' ,name: 'retail_cash_deposits.total_cash', class: 'align-middle remaining_amount'},
                     { data:'rcd_status' ,name: 'retail_cash_deposits.status', class: 'align-middle rcd_status'},
                     // { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
@@ -356,7 +397,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.store') || $(header).is('.code') || $(header).is('.rcd_status')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.store') || $(header).is('.code') || $(header).is('.rcd_status') || $(header).is('.hbl_konnect_cash')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -502,6 +543,38 @@
                         }
                     });
 
+            });
+
+            $('#datatable tbody').on('click','tr td.hbl_konnect_cash button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('.hbl_konnect_modal-body table tbody').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.delivery.cash_collection.retail.hbl_konnect_cash') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'retail_note_id': id
+                    }
+                }).done(function (data) {
+                    if (data) {
+                        var html = '';
+                        if (data.status == 1) {
+                            $.each(data.data, function (index, value) {
+                                html += `<tr>
+                                    <td>${value.transaction_id}</td>
+                                          <td>${value.amount}</td>
+                                                <td>${value.created_at}</td>
+
+                                                <tr>`
+
+                            });
+                        }
+                        console.log(html);
+                        $('.hbl_konnect_modal-body table tbody').html(html);
+                        $('#hbl_konnect_modal').modal('show');
+                    }
+                });
             });
 
         });

@@ -22,7 +22,8 @@ Route::name('api.')->group(function () {
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
-  
+    Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
+
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 
@@ -97,13 +98,13 @@ Route::name('api.')->group(function () {
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
-          Route::prefix('return')->name('return.')->group(function () {
-        Route::prefix('shipments')->name('shipments.')->group(function () {
-            Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
-            Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
-            Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
+        Route::prefix('return')->name('return.')->group(function () {
+            Route::prefix('shipments')->name('shipments.')->group(function () {
+                Route::post('return_shipment_info', 'APIController@return_shipment_info')->name('return_shipment_info');
+                Route::post('received_return_shipments', 'APIController@shipper_received_shipments')->name('received_return_shipments');
+                Route::get('return_shipments_list', 'APIController@return_shipments_list')->name('return_shipments_list');
+            });
         });
-    });
     });
     
   
@@ -646,6 +647,9 @@ Route::name('api.')->group(function () {
         Route::prefix('hbl_konnect')->name('hbl_konnect.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');
             Route::post('transaction_information', 'APIController@hbl_konnect_transactions')->name('transaction_information');
+
+            Route::post('retail_note_information', 'APIController@hbl_konnect_retail_note_cash_collection_information')->name('retail_note_information');
+            Route::post('retail_note_transaction_information', 'APIController@hbl_konnect_retail_note_cash_collection_transactions')->name('retail_note_transaction_information');
         });
         Route::prefix('easypaisa')->name('easypaisa.')->group(function () {
             Route::post('delivery_note_information', 'APIController@hbl_konnect_delivery_note_information')->name('delivery_note_information');

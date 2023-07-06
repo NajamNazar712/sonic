@@ -34,8 +34,8 @@ class PayfastApiCall
             $payment_link = "https://pay-staging.trax.pk/pay/$rand";
         }
         else{
-            $url          = "http://192.168.0.210:80/api/online-transaction-details";
-            $payment_link = "http://192.168.0.210/pay/$rand";
+            $url          = "https://trax-payment-portal.test/api/online-transaction-details";
+            $payment_link = "https://trax-payment-portal.test/pay/$rand";
         }
         $payment_details = ['unique_key' =>$rand, 'url' => $url, 'payment_link' => $payment_link ];
 

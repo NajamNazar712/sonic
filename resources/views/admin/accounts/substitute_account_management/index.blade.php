@@ -65,6 +65,7 @@
                     var params = table.ajax.params();
                     params.start = 0;
                     params.length = -1;
+					params.excel = true;
                     var jsonResult = $.ajax({
                         url: "{{ route("admin.accounts.substitute_account_management.list","$shipper_id") }}",
                         data: params,
@@ -106,7 +107,7 @@
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				scrollX: true, scrollY: '500px',
-				@if (session('role_id') == 1 || count(array_intersect([663], session('permissions'))) !== 0)
+				@if (session('role_id') == 1 || count(array_intersect([874], session('permissions'))) !== 0)
 				buttons: [{
 					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',

@@ -1211,16 +1211,9 @@ class ShipperReportsController extends Controller
 
         if (in_array(session('user_id'), session('mms_shippers'))) {
             $connection = 'reports';
-            $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-            $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
             $from = $request->get('search_date_from');
-            $from = Carbon::parse($from)->toDateTimeString();
             $to = $request->get('search_date_to');
-            $to = Carbon::parse($to)->toDateTimeString();
-
-            $from = str_replace('00:00:00', $arrival_from, $from);
-            $to = str_replace('00:00:00', $arrival_to, $to);
 
             $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -1274,6 +1267,19 @@ class ShipperReportsController extends Controller
                     $sales->where('sj.id', '>=', $from_id)
                         ->where('sj.id', '<=', $to_id);
                 }
+            }
+
+            if ($tracking = $request->get('search_tracking')) {
+                $sales->where('shipments.tracking_number', '=', $tracking);
+            }
+            if ($destination = $request->get('search_destination')) {
+                $sales->where('dc.id', '=', $destination);
+            }
+            if ($hub = $request->get('search_hub')) {
+                $sales->where('h.id', '=', $hub);
+            }
+            if ($status = $request->get('search_status')) {
+                $sales->where('ss.id', '=', $status);
             }
 
             $datatable = Datatables::of($sales)
@@ -1350,20 +1356,6 @@ class ShipperReportsController extends Controller
                     }
                 })
                 ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
-
-            if ($tracking = $request->get('search_tracking')) {
-                $datatable->where('shipments.tracking_number', '=', $tracking);
-            }
-            if ($destination = $request->get('search_destination')) {
-                $datatable->where('dc.id', '=', $destination);
-            }
-            if ($hub = $request->get('search_hub')) {
-                $datatable->where('h.id', '=', $hub);
-            }
-            if ($status = $request->get('search_status')) {
-                $datatable->where('ss.id', '=', $status);
-            }
-
             return $datatable->make(true);
         }
         else{
@@ -1537,10 +1529,15 @@ class ShipperReportsController extends Controller
     public function special_dashboard_mms_index()
     {
         if (session('special_dashboard_user')) {
+            $today = Carbon::now()->subDays(2)->endOfDay();
+            $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
             $cities = DB::connection('reports')->table('cities')->select('id', 'name')->get();
             $hubs = DB::connection('reports')->table('cities')->where('hub', 1)->select('id', 'name')->get();
             $statuses = DB::connection('reports')->table('shipment_status')->whereNotIn('id', [1, 17])->get();
-            return view('client.reports.speical_dashboard_mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses]);
+            $sister_users = DB::connection('reports')->table('substitute_user_merge_sister_account_mappings')->leftjoin('users as u', 'u.id', '=', 'substitute_user_merge_sister_account_mappings.sister_user_id')->where('substitute_user_merge_sister_account_mappings.head_user_id', session('user_id'))->where('substitute_user_merge_sister_account_mappings.substitute_user_id',session('substitute_user_id'))->select('u.id', 'u.name')->get();
+            $user = DB::connection('reports')->table('users')->select('id', 'name')->where('id', session('user_id'))->first();
+
+            return view('client.reports.speical_dashboard_mms')->with(['cities' => $cities, 'hubs' => $hubs, 'statuses' => $statuses, 'today' => $today, 'thirtyday' => $thirtyDays, 'user' => $user, 'sister_users' => $sister_users]);
         } else{
             return redirect()->back()->with('error', 'Not Found!');
         }
@@ -1549,21 +1546,17 @@ class ShipperReportsController extends Controller
     public function special_dashboard_mms_list(Request $request)
     {
         if (session('special_dashboard_user')) {
-
-            $sister_users = session('special_dashboard_sister_user');
+            $sister_users = [session('user_id')];
+            if($request->has('users')){
+                if($request->users != null && $request->users != ''){
+                    $sister_users = $request->users;
+                }
+            }
 
             $connection = 'reports';
-            $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-            $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
             $from = $request->get('search_date_from');
-            $from = Carbon::parse($from)->toDateTimeString();
-
             $to = $request->get('search_date_to');
-            $to = Carbon::parse($to)->toDateTimeString();
-
-            // $from = str_replace('00:00:00', $arrival_from, $from);
-            $to = str_replace('00:00:00', $arrival_to, $to);
 
             $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
                 ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
@@ -1598,11 +1591,7 @@ class ShipperReportsController extends Controller
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
                 ->select('shipments.id as shipment_id','shipments.tracking_number','shipments.order_id as order_id','shipments.tracking_number as tracking_number_link', 'shipments.consignee_name','u.name as shipper','usi.pickup_address as shipper_address','ss.name as current_status','sj.created_at as arrival_date', 'shipments.created_at as booking_date','dc.name as destination','h.name as hub', 'dr.created_at as delivered_or_returned','z.name as zone', 'dc.id as destination_city_id', 'shipments.shipper_status_id as shipment_status', 'dr.receiver_name as received_or_refused_by', 'dr.receiver_cnic as cnic', 'dr.receiver_relationship as relation','ssr.name as reason', 'shipments.consignee_address', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2')
                 ->whereNotIn('shipments.shipper_status_id',[1,17])
-                // ->where('u.id', session('user_id'))
-                ->where(function ($query) use ($sister_users){ 
-                    $query->where('shipments.user_id', session('user_id'))
-                        ->orwhereIn('shipments.user_id', $sister_users);
-                })
+                ->whereIn('u.id', $sister_users)
                 ->whereBetween('sj.created_at', [$from,$to]);
 
             $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
@@ -1619,6 +1608,20 @@ class ShipperReportsController extends Controller
                 }
             }
 
+
+            if ($tracking = $request->get('search_tracking')) {
+                $sales->where('shipments.tracking_number', '=', $tracking);
+            }
+            if ($destination = $request->get('search_destination')) {
+                $sales->where('dc.id', '=', $destination);
+            }
+            if ($hub = $request->get('search_hub')) {
+                $sales->where('h.id', '=', $hub);
+            }
+            if ($status = $request->get('search_status')) {
+                $sales->where('ss.id', '=', $status);
+            }
+
             $datatable = Datatables::of($sales)
                 ->addColumn('aging', function ($shipments){
                     
@@ -1626,59 +1629,11 @@ class ShipperReportsController extends Controller
                     $days = Carbon::now()->diffInDays($from);
 
                     return $days;
-                    // dd($from,$days);
-                    // if ($days == 0) {
-                    //     return "-";
-                    // } else {
-                    //     return $days;
-                    // }
                 })
                 ->editColumn('tracking_number_link', function ($shipments) {
                     $route = route('admin.tracking.index');
                     return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
                 })
-                // ->editColumn('delivered_or_returned', function ($sale) {
-                //     if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                //         return $sale->delivered_or_returned;
-                //     } else {
-                //         return '';
-                //     }
-                // })
-                // ->editColumn('received_or_refused_by', function ($sale) {
-                //     if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                //         $received_or_refused_by = '';
-                //         if($sale->received_or_refused_by){
-                //             $received_or_refused_by = $sale->received_or_refused_by;
-                //         }
-                //         return $received_or_refused_by;
-                //     } else {
-                //         return '';
-                //     }
-                // })
-
-                // ->editColumn('relation', function ($sale) {
-                //     if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                //         $relation = '';
-                //         if($sale->relation){
-                //             $relation = $sale->relation;
-                //         }
-                //         return $relation;
-                //     } else {
-                //         return '';
-                //     }
-                // })
-
-                // ->editColumn('cnic', function ($sale) {
-                //     if (in_array($sale->shipment_status, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46, 25])) {
-                //         $cnic = '';
-                //         if($sale->cnic){
-                //             $cnic = $sale->cnic;
-                //         }
-                //         return $cnic;
-                //     } else {
-                //         return '';
-                //     }
-                // })
                 ->addColumn('consignee_phone', function ($shipments) {
                     return $shipments->consignee_phone_number_1 . "<br>" . $shipments->consignee_phone_number_2;
                 })
@@ -1697,20 +1652,6 @@ class ShipperReportsController extends Controller
                     }
                 })
                 ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
-
-            if ($tracking = $request->get('search_tracking')) {
-                $datatable->where('shipments.tracking_number', '=', $tracking);
-            }
-            if ($destination = $request->get('search_destination')) {
-                $datatable->where('dc.id', '=', $destination);
-            }
-            if ($hub = $request->get('search_hub')) {
-                $datatable->where('h.id', '=', $hub);
-            }
-            if ($status = $request->get('search_status')) {
-                $datatable->where('ss.id', '=', $status);
-            }
-
             return $datatable->make(true);
         }
         else{

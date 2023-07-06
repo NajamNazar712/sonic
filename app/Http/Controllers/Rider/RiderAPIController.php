@@ -152,7 +152,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
 use App\ReturnDeliveredToShipperSms;
 
-class RiderAPIController extends Controller
+class
+RiderAPIController extends Controller
 {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -13282,19 +13283,19 @@ class RiderAPIController extends Controller
                 AdminFinanceController::done_payment($shipment_id, 1);
             }
         }
-        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
-        if ($return_assign_shipment->exists()) {
+        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
+        // if ($return_assign_shipment->exists()) {
 
-            $return_assign_shipment = $return_assign_shipment->latest()->first();
-            $return_assign_shipment->status = 0;
-            $return_assign_shipment->save();
+        //     $return_assign_shipment = $return_assign_shipment->latest()->first();
+        //     $return_assign_shipment->status = 0;
+        //     $return_assign_shipment->save();
 
-            $return_assign_log = new ReturnAssignedShipmentLogs();
-            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-            $return_assign_log->status = 2;
-            $return_assign_log->assigned_by = 346;
-            $return_assign_log->save();
-        }
+        //     $return_assign_log = new ReturnAssignedShipmentLogs();
+        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //     $return_assign_log->status = 2;
+        //     $return_assign_log->assigned_by = 346;
+        //     $return_assign_log->save();
+        // }
     }
 
     public function return_create_index(Request $request)
@@ -14073,15 +14074,6 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
         }
     }
-    //response:
-    //rider_trax_id
-    //date
-    //checkin_date
-
-
-    //from
-    //to
-    //rider_trax_id optional
 
     public function rider_checkin(Request $request)
     {

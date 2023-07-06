@@ -84,6 +84,7 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use App\Http\Models\CorporateDefaultFuelSurcharge;
 use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
 use App\Http\Models\CorporateDefaultRateStatus;
@@ -5512,7 +5513,22 @@ class GlobalSettingsController extends Controller
             $segments = Segment::all();
             $shipment_status = ShipmentStatus::select('id', 'name')->get();
             $shipper_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id', 'u.name')->get();
-            $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+           // $shipper_non_key = SaleTierTag::join('users as u', 'u.id', 'sale_tier_tags.user_id')->WhereNull('kam')->select('u.id', 'u.name')->get();
+            $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                ->where('blacklist', '=', 0)
+                ->get()
+                ->filter(function ($user) {
+                    if(isset($user->sale_tier_tags['user_id'])){
+                        $kam_status = $user->sale_tier_tags['kam'];
+                        if(empty($kam_status)){
+                            return $user;
+                        }
+                    }else{
+                        return $user;
+                    }
+                });
+
 
             $zn = $selected_agent->zones->pluck('zone_id')->toArray();
             $hubs = City::whereIn('zone_id', $zn)->get();
@@ -7537,17 +7553,20 @@ class GlobalSettingsController extends Controller
     public function delivery_area_keyword_store(Request $request)
     {
 
-        $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $request->area_name);
+        $default_hub = isset($request->default_hub) ? $request->default_hub : 0;
+        $area_name = ($default_hub == 1) ? CityArea::find($request->area_name)->name  :  $request->area_name;
+        $city_area_id = ($default_hub == 1) ? $request->area_name  :  null;
+        $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $area_name);
 
         if ($check_exists->exists()) {
             return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
         }
-
         $keywords = explode(',', $request->delivery_area_keyword);
         $delivery_location = new DeliveryLocationMapping;
-        $delivery_location->area_name = $request->area_name;
+        $delivery_location->area_name = $area_name;
         $delivery_location->city_id = $request->city_id;
         $delivery_location->added_by = Auth::id();
+        $delivery_location->city_area_id = $city_area_id;
         $delivery_location->save();
 
         foreach ($keywords as $keyword) {
@@ -7587,8 +7606,9 @@ class GlobalSettingsController extends Controller
             }
 
             $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+            $city_area = CityArea::where('status',1)->get();
 
-            return view('admin.settings.edit_delivery_area', compact('delivery_location_keywords', 'cities', 'delivery_location'));
+            return view('admin.settings.edit_delivery_area', compact('delivery_location_keywords', 'cities', 'delivery_location','city_area'));
         } else {
             return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
         }
@@ -7598,8 +7618,12 @@ class GlobalSettingsController extends Controller
     {
         $delivery_location = DeliveryLocationMapping::find($request->id);
         if ($delivery_location) {
+
+            $default_hub = isset($request->default_hub) ? $request->default_hub : 0;
+            $area_name = ($default_hub == 1) ? CityArea::find($request->area_name)->name  :  $request->area_name;
+            $city_area_id = ($default_hub == 1) ? $request->area_name  :  null;
             if ($delivery_location->city_id != $request->city_id && $delivery_location->area_name != $request->area_name) {
-                $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $request->area_name);
+                $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $area_name);
 
                 if ($check_exists->exists()) {
                     return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
@@ -7608,9 +7632,10 @@ class GlobalSettingsController extends Controller
             DeliveryLocationMappingKeyword::where('mapping_id', $request->id)->delete();
 
             $keywords = explode(',', $request->delivery_area_keyword);
-            $delivery_location->area_name = $request->area_name;
+            $delivery_location->area_name = $area_name;
             $delivery_location->city_id = $request->city_id;
             $delivery_location->updated_by = Auth::id();
+            $delivery_location->city_area_id = $city_area_id;
             $delivery_location->save();
 
             foreach ($keywords as $keyword) {
@@ -8482,6 +8507,16 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+	
+	 public function get_city_area(Request $request){
+        if(isset($request->city_id)) {
+            $city_area = CityArea::where('city_areas.city_id', $request->city_id)->where('status',1)->get();
+            $city = City::find($request->city_id)->hub;
+            return response()->json(['status' => 1, 'data' => $city_area, 'hub'=>$city]);
+        }else{
+            return response()->json(['status' => 0]);
+        }
+    }
 
     /*public function Notification_to_shipper(Request $request)
     {
@@ -8536,7 +8571,12 @@ class GlobalSettingsController extends Controller
         $segments = Segment::all();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipper_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNotNull('kam')->select('u.id','u.name')->get();
-        $shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        //$shipper_non_key = SaleTierTag::join('users as u','u.id','sale_tier_tags.user_id')->WhereNull('kam')->select('u.id','u.name')->get();
+        $shipper_non_key = User::with('sale_tier_tags')
+                ->where('status', '=', 3)
+                 ->where('blacklist', '=', 0)
+                 ->whereDoesntHave('sale_tier_tags')
+                 ->get();
         return view('admin.settings.CRM.add_auto_assign')->with(['agents' => $agents, 'zones' => $zones,'case_natures'=>$case_natures,'segments'=>$segments,'shipper_key'=>$shipper_key,'shipper_non_key'=>$shipper_non_key,'shipment_status'=>$shipment_status]);
     }
     public function global_status(Request $request){
@@ -8563,6 +8603,46 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 1, 'sub_segment' => $sub_business_segment_id]);
         } else {
             return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+
+    public function airway_bill_address_visibility_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 680);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        $rider_id = null;
+        $airway_bill_address_visibility_accounts = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.airway_bill_address_visibility.index')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'airway_bill_address_visibility_accounts' => $airway_bill_address_visibility_accounts]);
+    }
+
+    public function airway_bill_address_visibility_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'airway_bill_address_visibility_setting';
+                }
+                $settings->setting_value = 0;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
 }
