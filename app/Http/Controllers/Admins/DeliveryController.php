@@ -8394,12 +8394,12 @@ class DeliveryController extends Controller
                 $customer_details = Shipment::where('id',$shipment['id'])->first();
         
                 //Parameters
-                $email              = 'info@trax.com';
-                $recipient_email    = 'info@trax.com';
+                $email              = 'info@trax.pk';
+                $recipient_email    = 'info@trax.pk';
                 $Bill_cat           = 'Bill';
                 $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
                 $billing_month      =  date('Y-m');
-                $description        = 'This is demo description';
+                $description        = 'Payment for COD shipment '.$customer_details->tracking_number;
     
                 //request body
                 $request_body  = http_build_query([
