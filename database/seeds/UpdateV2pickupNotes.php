@@ -37,11 +37,14 @@ class UpdateV2pickupNotes extends Seeder
                     $pickup_request_shipment_ids = V2PickupRequestShipment::whereIn('pickup_request_id', $pickup_request_ids)->pluck('shipment_id')->toArray();
 
                     if(count($pickup_request_shipment_ids) > 0){
-                        $shipments_journey = ShipmentsJourney::whereIn('shipment_id', $pickup_request_shipment_ids)->where('shipper_status_id', 53)->get()->groupBy('shipment_id');
+                        $pickup_request_chunk_shipment_ids = array_chunk($pickup_request_shipment_ids, 100);
+                        foreach ($pickup_request_chunk_shipment_ids as $chunk_shipment_ids){
+                            $shipments_journey = ShipmentsJourney::whereIn('shipment_id', $chunk_shipment_ids)->where('shipper_status_id', 53)->get()->groupBy('shipment_id');
 
-                        if($shipments_journey){
-                            foreach ($shipments_journey as $journey){
-                                $total_scanned_by_rider_shipments++;
+                            if($shipments_journey){
+                                foreach ($shipments_journey as $journey){
+                                    $total_scanned_by_rider_shipments++;
+                                }
                             }
                         }
                     }
