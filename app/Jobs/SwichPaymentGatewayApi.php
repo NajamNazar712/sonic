@@ -25,6 +25,7 @@ class SwichPaymentGatewayApi implements ShouldQueue
      */
     public function __construct($shipments_id )
     {
+        $this->queue = 'switch_payment_gateway';
         $this->shipments_id    = $shipments_id;
     }
 
@@ -44,12 +45,12 @@ class SwichPaymentGatewayApi implements ShouldQueue
             $client_secret    = '3854b5d902f0fe5f7e9bca547aad92bc6bb8574ef1656e1788bbc41e41bc7834';
 
             //Parameters
-            $email              = 'info@trax.com';
-            $recipient_email    = 'info@trax.com';
+            $email              = 'info@trax.pk';
+            $recipient_email    = 'info@trax.pk';
             $Bill_cat           = 'Bill';
             $total_amount       =  $customer_details->amount + $customer_details->fintech_charges;
             $billing_month      =  date('Y-m');
-            $description        = 'This is demo description';
+            $description        = 'Payment for COD shipment '.$customer_details->tracking_number;
         
             //request body
             $request_body  = http_build_query([

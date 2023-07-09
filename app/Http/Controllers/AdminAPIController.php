@@ -8332,10 +8332,11 @@ class AdminAPIController extends Controller
                             $response = $this->calculateToDateLeaves($employee, $to_date);
                             if($response['status'] == 1){
                                 $calcDays = $diffDays;
+                                $fiscal_leave_count = $employee->fiscal_leave_count;
                                 if($employee->leave_count < 0) {
                                     $calcDays = $diffDays - ($employee->leave_count);
                                 }
-                                if($calcDays <= $response['data']){
+                                if($calcDays <= $response['data'] || $calcDays <= $fiscal_leave_count){
                                     $employee->leave_count = $employee->leave_count - $diffDays;
                                     $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
                                 } else {

@@ -10870,8 +10870,17 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id','invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
+            ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
+            'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
+            'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
+            'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
+            'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
+            'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 
+            'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
+            'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
+            'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
             ->where('ubi.default_bank', 1);
+
 
         if (session('department_id') == 7 && !in_array(session('id'), session('sale_users_bypass'))) {
             $invoice->whereIn('invoices.user_id', session('tagged_shippers'));
@@ -10903,6 +10912,49 @@ class AdminFinanceController extends Controller
                     }
                 }
             ])
+            ->addColumn('sales_tax_withheld', function ($invoice) {
+                $sales_tax_withheld = DB::table('invoice_adjustments')
+                ->where('invoice_id',$invoice->id)
+                ->where('reason_id',2)
+                ->sum('amount');
+                return $sales_tax_withheld;
+            })
+            ->filterColumn('sales_tax_withheld', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->whereExists(function ($subquery) use ($keyword) {
+                        $subquery->select(DB::raw(1))
+                            ->from('invoice_adjustments')
+                            ->whereRaw('invoice_adjustments.invoice_id = invoices.id')
+                            ->where('invoice_adjustments.reason_id', 2)
+                            ->where('invoice_adjustments.amount', '=', $keyword);
+                    });
+                }
+            })
+            ->addColumn('income_tax_withhold', function ($invoice) {
+                $income_tax_withhold = DB::table('invoice_adjustments')
+                ->where('invoice_id',$invoice->id)
+                ->where('reason_id',1)
+                ->sum('amount');
+                return $income_tax_withhold;
+            })
+            ->filterColumn('income_tax_withhold', function ($query, $keyword) {
+                if ($keyword) {
+                    $query->whereExists(function ($subquery) use ($keyword) {
+                        $subquery->select(DB::raw(1))
+                            ->from('invoice_adjustments')
+                            ->whereRaw('invoice_adjustments.invoice_id = invoices.id')
+                            ->where('invoice_adjustments.reason_id', 1)
+                            ->where('invoice_adjustments.amount', '=', $keyword);
+                    });
+                }
+            })
+            ->addColumn('other_deductions', function ($invoice) {
+                $other_deductions = DB::table('invoice_adjustments')
+                ->where('invoice_id',$invoice->id)
+                ->whereNotIn('reason_id',[1,2])
+                ->sum('amount');
+                return $other_deductions;
+            })
             ->addColumn('shipper', function ($invoice) {
                 if ($invoice->star_status == 1){
                     return '<i class="star_shippers_icon"></i>'.$invoice->shipper.'';
