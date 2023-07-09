@@ -1649,6 +1649,7 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(880, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.rider_picked.index') }}">Rider-Picked Status (W/O Arrival)</a></li>
+                        @endif
                         @if (session('role_id') == 1 || in_array(877, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.quick_scanned_report.index') }}">Quick Scanned Report</a></li>
                         @endif
