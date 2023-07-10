@@ -47,10 +47,9 @@ return [
             'days' => 7,
         ],
         'trax_pay' => [
-            'driver' => 'daily',
+            'driver' => 'single',
             'path' => storage_path('logs/trax_pay.log'),
             'level' => 'debug',
-            'days' => 7,
         ],
         'slack' => [
             'driver' => 'slack',

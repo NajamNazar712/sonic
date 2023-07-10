@@ -180,6 +180,7 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -196,7 +197,8 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Jobs\CountFintechCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use GuzzleHttp\Client;
-use App\Http\Models\Admin\UserFintectCharges;use CreateCityOsaRatesTable;
+use App\Http\Models\Admin\UserFintectCharges;
+use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
 {
@@ -212,6 +214,7 @@ class AdminDashboardController extends Controller
     }
     public function index()
     {
+        Log::channel('trax_pay')->info('oyeeeeee');
 
         /*$stats = array();
         $graph = array();
