@@ -46,6 +46,12 @@ return [
             'level' => 'debug',
             'days' => 7,
         ],
+        'trax_pay' => [
+            'driver' => 'daily',
+            'path' => storage_path('logs/trax_pay.log'),
+            'level' => 'debug',
+            'days' => 7,
+        ],
         'slack' => [
             'driver' => 'slack',
             'url' => env('LOG_SLACK_WEBHOOK_URL'),
