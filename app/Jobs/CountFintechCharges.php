@@ -15,6 +15,8 @@ use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Admin\shipmentFintechCharges;
 use App\Http\Models\Admin\TraxPayTransaction;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Log;
+
 class CountFintechCharges implements ShouldQueue
 
 
@@ -128,7 +130,7 @@ class CountFintechCharges implements ShouldQueue
                 }
             }
             catch(RequestException $e){
-                return $e;
+                Log::info($e);
             }
         }
     }
