@@ -180,7 +180,6 @@ use App\Http\Models\ShippingMode;
 use App\Http\Models\SubCategorySegment;
 use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -214,7 +213,6 @@ class AdminDashboardController extends Controller
     }
     public function index()
     {
-        Log::channel('trax_pay')->info('oyeeeeee');
 
         /*$stats = array();
         $graph = array();
