@@ -1152,7 +1152,6 @@
                     
                     // Get the file input element
                     var inputFile = document.getElementById('replacement_parcel_image');
-                    console.log(inputFile)
                      
                     if (inputFile && inputFile.files && inputFile.files.length > 0) {
                         var file = inputFile.files[0];
@@ -1205,19 +1204,21 @@
                                 'interceptType':interceptType,
                                 'consigneeEmail':consigneeEmail,
                                 'samount':samount
-
-
-
-
                             }
+
                         })
                         .done(function(data) {
                             if (data.status == 0) {
+                                toastr.success(data.success, {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                window.location.reload();
+                            }
+                            // else{
+                            //     $(form).find('button.search').prop('disabled', false);
+
+                            //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            // }    
+                            else{
                                 var errors = data.errors;
-
-                                console.log(checkbox)
-                                console.log(errors);
-
                                 $.each(errors, function(field, messages) {
 
 
@@ -1246,19 +1247,11 @@
                                         }
 
                                     }
-
-
                                 });
                             }
                         })
 
                 });
-
-
-
-             
-
-
             });
         </script>
     @endsection

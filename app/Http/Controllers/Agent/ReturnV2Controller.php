@@ -230,7 +230,7 @@ class ReturnV2Controller extends Controller
             } 
 
             else{
-                return response()->json(['status' => 1, 'success' => 'Something went wrong!']);
+                return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
             }
             
            
