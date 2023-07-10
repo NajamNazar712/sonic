@@ -67,10 +67,8 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
-
-                        <th class="border-primary border-darken-1">Fintech Charges</th>
-
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
@@ -394,8 +392,8 @@
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
                                 row.push(values.transactions_amount);
-                                row.push(values.one_link_payment_count);
                                 row.push(values.cash_amount);
+                                row.push(values.one_link_payment_count);
                                 row.push(values.created_via);
                                 row.push(values.updated_via_app);
                                 row.push(values.last_updated_at);
@@ -460,8 +458,8 @@
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                     { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges'},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
-                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
+                    { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     { data:'updated_via_app' ,name: 'rdns.status', class: 'align-middle updated_via_app'},
                     { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
