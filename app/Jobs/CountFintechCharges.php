@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -126,7 +127,7 @@ class CountFintechCharges implements ShouldQueue
                     }
                 }
             }
-            catch(exception $e){
+            catch(RequestException $e){
                 return $e;
             }
         }
