@@ -550,8 +550,8 @@
                                     <label class="font-medium-2 font-weight-bold block ">Send Message TO</label>
                                     <select name="shipper_consignee" id="shipper_consignee" class="form-control select2"
                                         data-msg-required="Select Shipper/Consignee" data-rule-required="true">
-                                        <option value="shipper">Shipper</option>
-                                        <option value="consignee">Consignee</option>
+                                        <option value="Shipper">Shipper</option>
+                                        <option value="Consignee">Consignee</option>
                                     </select>
                                 </div>
                             </div>

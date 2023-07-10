@@ -205,7 +205,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
 
                        ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
                     //Updating New RcpAssigned Tables for different consignee
-                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                      if ($rcp_assigned_shipment && $rcp_assigned_shipment->exists()) {
 
                          //Assuring if agent is requesting for intercept request status rcp_assigned_agent
@@ -317,7 +317,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                     //    }
 
                        //Updating New RcpAssigned Tables
-                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                      if ($rcp_assigned_shipment->exists()) {
 
                          //Assuring if agent is requesting for intercept request status rcp_assigned_agent

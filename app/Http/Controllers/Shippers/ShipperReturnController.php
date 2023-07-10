@@ -348,7 +348,7 @@ class ShipperReturnController extends Controller
                 //             $return_assign_log->assigned_by = Auth::id();
                 //             $return_assign_log->save();
                 // }
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                 if(session('substitute_user_id') == NULL ){
                     if($rcp_assigned_shipment->exists()){
                         //Shipper is updating the status update rows in rcp_assigned_agent
@@ -450,7 +450,7 @@ class ShipperReturnController extends Controller
                 //         $return_assign_log->assigned_by = Auth::id();
                 //         $return_assign_log->save();
                 //    }
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0);
                 if(session('substitute_user_id') == NULL ){
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -549,7 +549,7 @@ class ShipperReturnController extends Controller
                 //         $return_assign_log->save();
                 //    }
 
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment);
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0);
                 if(session('substitute_user_id') == NULL ){
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -648,7 +648,7 @@ class ShipperReturnController extends Controller
                 //         $return_assign_log->assigned_by = Auth::id();
                 //         $return_assign_log->save();
                 //    }
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                 if(session('substitute_user_id') == NULL ){
                    if($rcp_assigned_shipment->exists()){
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
