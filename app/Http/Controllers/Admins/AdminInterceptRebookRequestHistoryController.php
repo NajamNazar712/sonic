@@ -294,27 +294,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                        $shipment->save();
 
                        ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, Auth::id());
-                    //    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
-                    //    if($return_assign_shipment->exists()){
-
-                    //        $return_assign_shipment = $return_assign_shipment ->latest()->first();
-                    //        $return_assign_shipment->status = 0;
-                    //        $return_assign_shipment->save();
-
-                    //        // Adding row as request intercept with status = 9
-                    //        $return_assign_log = new ReturnAssignedShipmentLogs();
-                    //        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                    //        $return_assign_log->status = 9;
-                    //        $return_assign_log->assigned_by = Auth::id();
-                    //        $return_assign_log->save();
-
-                    //        // Adding another row as approved intercept with status = 10
-                    //        $return_assign_log = new ReturnAssignedShipmentLogs();
-                    //        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                    //        $return_assign_log->status = 10;
-                    //        $return_assign_log->assigned_by = Auth::id();
-                    //        $return_assign_log->save();
-                    //    }
 
                        //Updating New RcpAssigned Tables
                      $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
