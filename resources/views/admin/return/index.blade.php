@@ -1695,7 +1695,7 @@
                 },
                 rowId: 'shId',
                 order: [
-                    [24, 'desc']
+                    [25, 'desc']
                 ],
                 columns: [{
                         data: 'shId',
