@@ -56,7 +56,6 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
-use App\ReturnConfirmationPendingSmsAttempt;
 use App\ReturnDeliveredToShipperSms;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
