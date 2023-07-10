@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\FtlRequest;
 use App\Http\Models\Admin\GlobalSettings;
@@ -150,6 +151,10 @@ class AdminWalkInBookShipmentController extends Controller
         if ($self_collection) {
             ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, NULL, Auth::id());
         }
+
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+        ShipperShipmentBookController::consignee_address_area($shipment_id,$pickup_address_id,$consignee_city_id,$consignee_address);
+        ShipperShipmentBookController::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
     }

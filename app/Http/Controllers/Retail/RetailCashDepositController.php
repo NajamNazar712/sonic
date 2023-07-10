@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Retail;
 
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
 use App\Http\Models\Admin\Retail\RetailCashDepositShipment;
 use App\Http\Models\Admin\Retail\RetailShippingMode;
@@ -72,6 +74,56 @@ class RetailCashDepositController extends Controller
                     $cash_deposit_total_cash += $data['total_cash'];
                 }
                 return number_format(ROUND($cash_deposit_total_cash, 0, PHP_ROUND_HALF_DOWN));
+            })
+            ->addColumn('hbl_konnect_cash', function ($data) {
+                $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);
+
+                $remaining_cash = HblKonnectTransactionRetail::where('retail_note_id',$cash_deposit->id)->select('amount');
+                if ($remaining_cash->exists())
+                {
+                    $remaining_cash = $remaining_cash->get()->toArray();
+                    $sum = array_reduce($remaining_cash, function ($carry, $item) {
+                        return $carry + $item["amount"];
+                    });
+
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $sum . '</button>';
+                }
+                else
+                {
+                    return '-';
+                }
+            })
+            ->addColumn('hbl_konnect_cash_excel', function ($data) {
+                $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);
+
+                $remaining_cash = HblKonnectTransactionRetail::where('retail_note_id',$cash_deposit->id)->select('amount');
+                if ($remaining_cash->exists())
+                {
+                    $remaining_cash = $remaining_cash->get()->toArray();
+                    $sum = array_reduce($remaining_cash, function ($carry, $item) {
+                        return $carry + $item["amount"];
+                    });
+
+                    return $sum ;
+                }
+                else
+                {
+                    return '-';
+                }
+            })
+            ->addColumn('remaining_cash', function ($data) {
+
+                $cash_deposit = RetailCashDeposit::find($data->cash_deposit_id);
+                $remaining_cash = HblKonnectTransactionRetailNote::where('retail_note_id',$cash_deposit->id)->select('cash_amount');
+                if ($remaining_cash->exists())
+                {
+                    $remaining_cash = $remaining_cash->first();
+                    return $remaining_cash->cash_amount;
+                }
+                else
+                {
+                    return '-';
+                }
             })
             ->addColumn('booking_code', function ($data) {
                 return str_pad($data->employee_id, 6, '0', STR_PAD_LEFT);
@@ -355,5 +407,20 @@ class RetailCashDepositController extends Controller
         } else {
             return response()->json(['status' => 1, 'error' => 'Shipments not found!']);
         }
+    }
+
+    public function hbl_konnect_cash(Request $request)
+    {
+        $retail_note = HblKonnectTransactionRetail::where('retail_note_id',$request->retail_note_id);
+        if($retail_note->exists())
+        {
+            $retail_note = $retail_note->get();
+            $data = ['status' => 1,'data' => $retail_note];
+        }
+        else
+        {
+            $data = ['status' => 0];
+        }
+        return $data;
     }
 }

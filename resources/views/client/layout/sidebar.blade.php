@@ -144,6 +144,10 @@
                         <li><a class="menu-item" href="{{ route('cod.reports.adjustments.index') }}">Adjustments</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.weight_reconciliation.index') }}">Weight Reconciliation</a></li>
                         <li><a class="menu-item" href="{{ route('cod.reports.confirmation_pending_report.index') }}">Confirmation Pending Shipment</a></li>
+                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>
+                        @if(session('project_arrival_shipper'))
+                            <li><a class="menu-item" href="{{ route('cod.reports.project_arrival.index') }}">Project Arrival</a></li>
+                        @endif
 
                         @if (in_array(session('user_id'), [7762, 167, 1159, 2035]))
                             <li><a class="menu-item" href="{{ route('cod.reports.delivery_and_return.index') }}">Delivery & Return</a></li>
@@ -159,16 +163,26 @@
                                 <li><a class="menu-item" href="{{ route('cod.reports.daraz_mis.index') }}">Daraz MIS</a></li>
                             @endif
                         @endif
-
-                        @if (in_array(session('user_id'), [15636, 16292, 15587, 17363, 17747, 3324, 1091, 10104]))
-                            <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS</a></li>
+                        @if(session('mms_shippers') != null)
+                            @if (in_array(session('user_id'), session('mms_shippers')))
+                                <li><a class="menu-item" href="{{ route('cod.reports.mms.index') }}">MMS Report</a></li>
+                            @endif
                         @endif
 
-{{--                        <li><a class="menu-item" href="{{ route('cod.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>--}}
                     </ul>
                 </li>
+            @elseif(session('special_dashboard_user'))
+                @if(session('mms_shippers') != null)
+                    @if(in_array(session('user_id'), session('mms_shippers')))
+                        <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-check-square-o"></i>Reports</span></a>
+                            <ul class="menu-content">
+                                    <li><a class="menu-item" href="{{ route('cod.reports.special_dashboard.index') }}">MMS Report</a></li>
+                            </ul>
+                        </li>
+                    @endif
+                @endif
             @endif
-            @if (session('user_type') == 1 || in_array(10, session('permissions')))
+            @if (session('user_type') == 1 || session('special_dashboard_user') || in_array(10, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('cod.crm.request.index') }}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-commenting-o"></i>Requests</span></a></li>
             @endif
 

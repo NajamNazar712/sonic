@@ -3935,6 +3935,7 @@ class AdminAPIController extends Controller
         $employee_id = $request->admin_employee;
         $admins = Admin::find($admin_id);
         if ($admins) {
+            $date = '';
             $response = array();
             $admin_shift = EmployeeShift::where('id', $admins->shift_id);
             if ($admin_shift->exists()) {
@@ -5834,9 +5835,18 @@ class AdminAPIController extends Controller
                         }
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                    if ($pickup_note_requests_count == 0) {
-                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    if($pickup_note_requests_count == 0){
+                        $v2_pickup_note->status = 1;
                     }
+
+                    $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
+                    if(count($pickup_note_pickup_request_ids) > 0){
+                        $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
+                        $v2_pickup_note->arrived_shipments = $arrived_shipments;
+                    }
+                    $v2_pickup_note->save();
                     // NotificationsController::send(4, $shipment_ids);
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
@@ -8322,10 +8332,11 @@ class AdminAPIController extends Controller
                             $response = $this->calculateToDateLeaves($employee, $to_date);
                             if($response['status'] == 1){
                                 $calcDays = $diffDays;
+                                $fiscal_leave_count = $employee->fiscal_leave_count;
                                 if($employee->leave_count < 0) {
                                     $calcDays = $diffDays - ($employee->leave_count);
                                 }
-                                if($calcDays <= $response['data']){
+                                if($calcDays <= $response['data'] || $calcDays <= $fiscal_leave_count){
                                     $employee->leave_count = $employee->leave_count - $diffDays;
                                     $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
                                 } else {
