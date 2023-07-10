@@ -7020,7 +7020,7 @@ class ReturnController extends Controller
         ->leftJoin('cities as destinationcity', 'destinationcity.id', 'shipments.consignee_city_id')
         ->leftJoin('cities as hub', 'hub.id', 'cities.hub_id')
         ->select('dn.id as delivery_note_id', 'riders.name as rider_name', 'riders.trax_id as rider_employee_id', 'shipments.tracking_number as tracking_number','shipments.id as shipment_id' , 'cities.name as origin', 'destinationcity.name as destination','sj.created_at as date', 'rider_deliveries.otp_entered as otp_status','hub.name as hubname')
-        ->whereIn('shipments.shipper_status_id', [12])
+        ->whereIn('sj.shipper_status_id', [12])
         ->whereIn('sj.status_reason_id', [8]);
 
         if($rider = $request->get('rider'))

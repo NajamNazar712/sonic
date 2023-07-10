@@ -4924,7 +4924,9 @@ class DeliveryController extends Controller
                 ->pluck('shipment_id')->toArray(); 
                 $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
                 ->where('fintech_charges','!=','')->count('id');
-                return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+                if($count_fintech_shapment > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,' . $deliveries->delivery_note . ')" >' . $count_fintech_shapment . '</button>';
+                }
             })
 
             ->editColumn('amount', function ($shipment) {
@@ -6823,7 +6825,9 @@ class DeliveryController extends Controller
             $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
             $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
             ->where('fintech_charges','!=','')->count('id');
-            return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+            if($count_fintech_shapment > 0){
+                return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
+            }
         })
 
 
