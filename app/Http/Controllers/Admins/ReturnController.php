@@ -4951,7 +4951,7 @@ class ReturnController extends Controller
                 else
                 {
                     
-                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
+                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
                     // $check_shipment_assigned_status_update = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', '!=', 0)->whereRaw('updated_at < NOW() - INTERVAL 5 MINUTE')->first();
                     // if(!$check_already_assigned && $check_shipment_assigned_status_update){
                     if(!$check_already_assigned){
