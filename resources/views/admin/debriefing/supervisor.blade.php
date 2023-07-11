@@ -55,6 +55,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Delivered Shipments</th>
@@ -321,6 +322,7 @@
                             head.push('S.No');
                             head.push('Delivery Note No.');
                             head.push('Hub');
+                            head.push('Area');
                             head.push('Rider');
                             head.push('No. Of Shipments');
                             head.push('No. Of Delivered Shipments');
@@ -339,6 +341,7 @@
                                 row.push(index + 1);
                                 row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
+                                row.push(values.area);
                                 row.push(values.rider);
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
@@ -389,6 +392,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link'},
                     { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link'},

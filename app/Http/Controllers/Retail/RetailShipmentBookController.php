@@ -218,7 +218,6 @@ class RetailShipmentBookController extends Controller
     }
 
     public function store(Request $request){
-
         if($request->ref == 'Others'){
           $ref = $request->ref_name;
         }else{
@@ -296,6 +295,27 @@ class RetailShipmentBookController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $request->trax_box, $discount, $estimated_weight,$insurance_amount,$packaging);
+
+
+        if($request->has('admin_discount'))
+        {
+            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+                {
+                    $rates['total_charges'] = $rates['total_charges'] - ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
+                }
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+                {
+                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount; // todo: for flat
+                }
+            }
+        }
+
+        if ($rates['total_charges'] <= 0)
+        {
+            return redirect()->back()->with(['error' => 'Total charges cannot be less than zero !']);
+        }
+
        
         if( $rates['charges'] == 0 && $rates['charges_with_discount'] == 0) {
             return redirect()->back()->with(['error' => 'Charges should be greater than zero']);
@@ -427,6 +447,21 @@ class RetailShipmentBookController extends Controller
             }
             $shipper_info->save();
         }
+
+        $admin_id = Auth::id();
+        $center_n_franchise = RetailUser::where('id',$admin_id)->select('category','category_id');
+        if ($center_n_franchise->exists())
+        {
+            $center_n_franchise = $center_n_franchise->first();
+            $cat = $center_n_franchise->category;
+            $cat_id = $center_n_franchise->category_id;
+        }
+        else
+        {
+            $cat = $center_n_franchise = null;
+            $cat_id = $center_n_franchise = null;
+        }
+
         $retail_shipment = new RetailShipment();
         $retail_shipment->shipment_id = $shipment_id;
         $retail_shipment->product_type_id = $request->product;
@@ -452,6 +487,23 @@ class RetailShipmentBookController extends Controller
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = Auth::id();
+        $retail_shipment->category = $cat;
+        $retail_shipment->category_id = $cat_id;
+        if($request->has('admin_discount'))
+        {
+            $retail_shipment->admin_discount = $request->admin_discount;
+        }
+        if($request->has('admin_discount_type'))
+        {
+            if($request->admin_discount_type == 1)
+            {
+                $retail_shipment->admin_discount_type = 0;
+            }
+            elseif ($request->admin_discount_type == 0)
+            {
+                $retail_shipment->admin_discount_type = 1;
+            }
+        }
         $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
@@ -521,6 +573,27 @@ class RetailShipmentBookController extends Controller
         }
 
         $details = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->consignee_city_id, $request->trax_box, $discount, $weight,$insurance_amount,$packaging);
+
+        if($request->has('admin_discount'))
+        {
+            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+                {
+                    $details['total_charges'] = $details['total_charges'] - ($details['total_charges'] * $request->admin_discount)/100; // todo: for %
+                }
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+                {
+                    $details['total_charges'] = $details['total_charges'] - $request->admin_discount; // todo: for flat
+                }
+            }
+        }
+
+        if ($details['total_charges'] <= 0)
+        {
+            return response()->json(['status' => 0, 'error' => 'Total charges should be greater than zero !', 'details' => $details]);
+        }
+
+
         return response()->json(['status' => 1, 'success' => 'Rates Calculated!', 'details' => $details]);
     }
 
@@ -825,13 +898,15 @@ class RetailShipmentBookController extends Controller
                 ';
                     $gst = $shipment->retail->gst;
                     $packaging_and_insurance = $shipment->retail->packaging_charges + $shipment->retail->insurance_charges;
+                    $r_t = ($shipment->retail->admin_discount_type == 1) ? ' %' : (($shipment->retail->admin_discount_type == 0) ? ' Flat' : ' -');
                     $slip .= '
                               <tr>
                                 <td colspan="2" class="color primary border twice-left"><strong>Product</strong></td>
                                 <td colspan="2" class="color primary"><strong>Pieces</strong></td>
                                 <td colspan="1" class="color primary"><strong>Weight</strong></td>
                                 <td colspan="1" class="color primary"><strong>Service Charges</strong></td>
-                                <td colspan="1" class="color primary"><strong>Discount</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Trax Center)</strong></td>
+                                <td colspan="1" class="color primary"><strong>Discount(Consumer)</strong></td>
                                 <td colspan="1" class="color primary"><strong>Charges With Discount</strong></td>
                                 <td colspan="1" class="color primary border"><strong>GST</strong></td>
                                 <td colspan="1" class="color primary border"><strong>Packaging & Insurance </strong></td>
@@ -843,6 +918,7 @@ class RetailShipmentBookController extends Controller
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->estimated_weight) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->weight_charges,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->discount,2) . '</td>
+                                <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->admin_discount,2) .$r_t.'</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($shipment->retail->charges_with_discount,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($gst,2) . '</td>
                                 <td colspan="1" class="border twice-bottom">' . number_format($packaging_and_insurance,2) . '</td>

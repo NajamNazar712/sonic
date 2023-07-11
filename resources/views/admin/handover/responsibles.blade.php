@@ -23,6 +23,7 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Name</th>
                                     <th class="border-primary border-darken-1">Hub</th>
+                                    <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">Created by</th>
                                     <th class="border-primary border-darken-1">Updated by</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -69,6 +70,14 @@
                                             </select>
                                     </fieldset>
                                </div>
+
+                                <div class="col-6 form-group">
+                                    <fieldset class="form-group">
+                                        <select  name="city_area_id" id="city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                             <br>
                             <div class="row justify-content-center">
@@ -117,6 +126,13 @@
                                         </select>
                                     </fieldset>
                                 </div>
+                                <div class="col-6 form-group">
+                                    <fieldset class="form-group">
+                                        <select  name="city_area_id" id="edit_city_area_id" class="form-control select2" data-rule-required="true" data-msg-required="">
+
+                                        </select>
+                                    </fieldset>
+                                </div>
                             </div>
                             <br><br>
                             <div class="row justify-content-center">
@@ -154,6 +170,17 @@
             placeholder: 'Select Hub',
             dropdownParent:$('#add_responsible_form')
         });
+        $('#city_area_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Area',
+            dropdownParent:$('#add_responsible_form')
+        });
+        $('#edit_city_area_id').prepend('<option value="" selected="selected"></option>').select2({
+            width: '100%',
+            placeholder: 'Select Area',
+            dropdownParent:$('#edit_responsible_form')
+        });
+
 
         $( "#add_responsible_form" ).validate({
             errorClass:"danger",
@@ -228,6 +255,8 @@
                         });
 
                         $('#edit_hub').val(hub).trigger('change');
+
+                        get_area(data.responsible.hub_id,true,data.responsible.city_area_id);
                 
                         $('#EditResponsibleModal').modal('show');
 
@@ -270,6 +299,7 @@
                 {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'name', name: 'handover_responsibilities.name', class: 'align-middle name'},
                 {data: 'hub', name: 'c.name', class: 'align-middle hub'},
+                {data: 'area', name: 'ca.name', class: 'align-middle area'},
                 {data: 'created', name: 'a.name', class: 'align-middle created'},
                 {data: 'updated', name: 'u.name', class: 'align-middle updated'},
                 {data: 'status', name: 'handover_responsibilities.status', class: 'align-middle status'},
@@ -375,6 +405,58 @@
             $('#responsible_id').val('');
             $('#edit_name').val('');
         });
+
+        $('#hub').change(function(){
+            var city_id = $(this).val();
+            get_area(city_id,false);
+        });
+
+        function get_area(city_id,edit = false,val = null){
+
+            if(!edit) {
+                $('#city_area_id').empty();
+                $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        let data = [];
+                        $.each(result.city_area, function (index, value) {
+                            data += `<option value="${value.id}">${value.name}</option>`
+                        });
+
+                        $('#city_area_id').prepend(data).select2({
+                            width: '100%',
+                            placeholder: 'Select Area',
+                            dropdownParent: $('#add_responsible_form')
+                        });
+
+                    }
+                })
+            }else{
+
+                $('#edit_city_area_id').empty();
+                $.ajax({
+                    url: '{!! route('admin.handover.responsibles.get_sub_area') !!}',
+                    method: "POST",
+                    data: {city_id: city_id, '_token': '{{ csrf_token() }}',},
+                    success: function (result) {
+                        let data = `<option value="">Select Area</option>`;
+                        $.each(result.city_area, function (index, value) {
+                            data += `<option value="${value.id}">${value.name}</option>`
+                        });
+
+                        $('#edit_city_area_id').prepend(data).select2({
+                            width: '100%',
+                            placeholder: 'Select Area',
+                            dropdownParent: $('#edit_responsible_form')
+                        });
+
+                        $('#edit_city_area_id').val(val).trigger('change');
+                    }
+                })
+            }
+        }
     });
 
 

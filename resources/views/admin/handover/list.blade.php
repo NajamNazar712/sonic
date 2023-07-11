@@ -57,8 +57,10 @@
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">From</th>
+                        <th class="border-primary border-darken-1">From Area</th>
                         <th class="border-primary border-darken-1">From Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">To</th>
+                        <th class="border-primary border-darken-1">To Area</th>
                         <th class="border-primary border-darken-1">To Person Dept/Area/DES</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -188,6 +190,39 @@
                 placeholder:'Select Hub',
                 width:'100%',
                 allowClear:true
+            }).bind("change",function(){
+                var search_from_admin = $('#search_from_admin');
+                var search_to_admin = $('#search_to_admin');
+                let id = $(this).val();
+                search_from_admin.attr("disabled", true);
+                search_to_admin.attr("disabled", true);
+                if(id) {
+                    $.ajax({
+                        url: '{!! route('admin.handover.list.get_user') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_id': id
+                        }
+                    })
+                    .done(function (data) {
+                        search_from_admin.empty();
+                        search_to_admin.empty();
+                        if(data.users.length > 0){
+                            search_from_admin.attr("disabled", false);
+                            search_to_admin.attr("disabled", false);
+                            $.each(data.users, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.name + "</option>";
+                                search_from_admin.append(newOption);
+                                search_to_admin.append(newOption);
+                            });
+                        }else{
+                            search_from_admin.attr("disabled", true);
+                            search_to_admin.attr("disabled", true);
+                        }
+
+                    });
+                }
             });
             $('#search_from_admin').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select From Person',
@@ -253,8 +288,10 @@
                             head.push('Created At');
                             head.push('Created By');
                             head.push('From');
+                            head.push('From Area');
                             head.push('From Person Dept/Area/DES');
                             head.push('To');
+                            head.push('To Area');
                             head.push('To Person Dept/Area/DES');
                             head.push('Hub');
                             head.push('Status');
@@ -270,8 +307,10 @@
                                 row.push(values.created_at);
                                 row.push(values.created_by);
                                 row.push(values.from);
+                                row.push(values.from_area);
                                 row.push(values.from_dept_area_desg);
                                 row.push(values.to);
+                                row.push(values.to_area);
                                 row.push(values.to_dept_area_desg);
                                 row.push(values.hub);
                                 row.push(values.status);
@@ -405,6 +444,9 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                scrollX: true,
+                scrollCollapse: true,
+                width: '100%',
                 select: {
                     info: false,
                     style: 'multi',
@@ -432,8 +474,10 @@
                     {data: 'created_at', name: 'handovers.created_at', class: 'align-middle created_at'},
                     {data: 'created_by', name: 'a.name', class: 'align-middle created_by'},
                     {data: 'from', name: 'hr.name', class: 'align-middle from'},
+                    {data: 'from_area', name: 'c_from.name', class: 'align-middle from_area'},
                     {data: 'from_dept_area_desg', name: 'handovers.from_dept_area_desg', class: 'align-middle from_dept_area_desg'},
                     {data: 'to', name: 'hor.name', class: 'align-middle to'},
+                    {data: 'to_area', name: 'c_to.name', class: 'align-middle to_area'},
                     {data: 'to_dept_area_desg', name: 'handovers.to_dept_area_desg', class: 'align-middle to_dept_area_desg'},
                     {data: 'hub', name: 'c.name', class: 'align-middle text-center hub'},
                     {data: 'status', name: 'hs.name', class: 'align-middle status'},

@@ -21,6 +21,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
@@ -141,6 +142,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Route');
                             head.push('No. Of Shipments');
@@ -156,6 +158,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.rt);
                                 row.push(values.route);
                                 row.push(values.shipments_count);
@@ -218,6 +221,7 @@
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
+                    {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'route', name: 'route', class: 'align-middle route', orderable: false},
                     {data: 'shipments_count_link',name: 'delivery_notes.shipments_count',class: 'align-middle shipments_count_link text-center',orderable: false, searchable: false},

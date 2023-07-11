@@ -51,5 +51,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UsersTableSeeder::class);
         $this->call(UpdateBankNameTableSeeder::class);
         $this->call(UpdatePhoneNumbersTableSeeder::class);
+        $this->call(AddContractualValueInStaffCategory::class);
+        $this->call(AddContractualValueInGlobalSettings::class);
     }
 }

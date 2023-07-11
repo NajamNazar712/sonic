@@ -57,6 +57,7 @@ use App\Http\Models\Admin\RouteManagement;
 use App\Http\Models\Admin\RouteManagementJunction;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\Admin\SalePersonTarget;
+use App\Http\Models\Admin\FintechPaymentType;
 use App\Http\Models\Admin\SalePersonTargetLog;
 use App\Http\Models\Admin\SalePersonTargetDelete;
 use App\Http\Models\Admin\SalePersonTargetSegment;
@@ -83,6 +84,7 @@ use App\Http\Models\Blacklist\BlacklistSettingCondition;
 use App\Http\Models\Blacklist\BlacklistShipmentRange;
 use App\Http\Models\Blacklist\ConsigneeInformation;
 use App\Http\Models\City;
+use App\Http\Models\CityArea;
 use App\Http\Models\CorporateDefaultFuelSurcharge;
 use App\Http\Models\CorporateDefaultHistoryFuelSurcharge;
 use App\Http\Models\CorporateDefaultRateStatus;
@@ -130,6 +132,7 @@ use App\Http\Models\SubCategorySegment;
 use App\Http\Models\TelenorShipmentStatusEstimatedTime;
 use App\Http\Models\Webhook\ShipmentStatusesForShipperWebhook;
 use App\Http\Models\Webhook\ShipmentStatusSubscription;
+use App\Http\Models\Shipment;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\WeightChargeFactorHistory;
 use App\Http\Models\Zone;
@@ -137,6 +140,13 @@ use App\Http\Models\Admin\BookingDestinationMapping;
 use App\Http\Models\Admin\BookingDestinationMappingKeyword;
 use App\Http\Models\Admin\LeadTaggingService;
 use App\Http\Models\ServiceList;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\FintechCompanyCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use App\Http\Models\Admin\UserFintectCharges;
+use App\Jobs\SwichPaymentGatewayApi;
+use Session;
+//End
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -147,7 +157,6 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
-
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -3714,6 +3723,325 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.one_link_charges')->with(['one_linke_payment_charges_ranges' => $one_linke_payment_charges_ranges]);
     }
 
+
+
+    public function setup_fintech_charges_index(){
+        
+        $fintechSetup =  new FintechCompany();
+        return view('admin.settings.fintech.fintech_companies_list');
+    }
+
+
+    public function setup_fintech_charges_show(){
+
+        $fintech_payment_type = new FintechPaymentType();
+        $payment_type = $fintech_payment_type::all();
+        return view('admin.settings.fintech.form',compact('payment_type'));
+    }
+
+    public function setup_fintech_charges_list(){
+        $fintechSetup =  new FintechCompany();
+        $FintechValues = $fintechSetup::leftJoin('admins AS created_by', 'created_by.id', '=', 'fintech_companies.added_by')
+        ->leftJoin('admins AS updated_by', 'updated_by.id', '=', 'fintech_companies.updated_by')
+        ->select(['fintech_companies.*','created_by.name as admin1','updated_by.name as admin2'])
+        ->orderBy('fintech_companies.id','DESC')
+        ->get();
+
+        $datatable = Datatables::of($FintechValues)
+        ->editColumn('status', function ($data) {
+            if ($data->status == 1) {
+                return 'Enable';
+            } else {
+                return 'Disable';
+            }
+        })
+        ->addColumn('action', function ($data) {
+         
+            if(session('role_id') == 1 || in_array(853, session('permissions'))){
+                if($data->status == '1'){
+                 $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-minus-circle"></i> Disabled </a>';
+                }
+                else{
+                    $enable = '<a href="javascript:void(0)" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-plus-circle"></i> Enabled </a>';  
+                }  
+                
+                $edit = '<a href="' .route('admin.settings.fintech_company_charges.edit', $data->id).'" type="button" class="dropdown-item status"><div class="row no-gutters align-items-center"><i class="ft-edit"></i> Edit</a>';
+                $dropdown = '
+                    <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">';
+                    $dropdown .= $edit.$enable;
+                return $dropdown;
+            }
+        });
+
+        
+        
+    return $datatable->make(true);
+    }
+
+    public function change_company_status(Request $req){
+        $FintecCompany = FintechCompany::where('id',$req->id);
+      if($FintecCompany->first()->status == '1'){
+            $FintecCompany->update([
+                'status' =>  '0'   
+            ]);
+            $message =  'Fintech Company has been disable successfully!';
+      }
+      else{
+            $FintecCompany->update([
+                'status' =>  '1'   
+            ]);
+
+            $message =  'Fintech Company has been enable successfully!';
+      }
+    
+      return response()->json([
+        'message' =>$message,
+        'status'=>'200']);
+    }
+
+
+    public function setup_fintech_charges_save(Request $req){
+        if(!empty($req->fintech_range_up)){
+            DB::beginTransaction();
+            try{
+                $FintechSetup =  new FintechCompany();
+                $FintechSetup->company_name  = $req->company_name;
+                $FintechSetup->added_by      = Auth::id();
+                $FintechSetup->updated_by    = Auth::id();
+                $FintechSetup->save();
+                    for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        $charges            =  $req->charges[$i];
+                        $additional_charges =  $req->additional_charges[$i];
+                        $fed_charges        =  $req->fed_tax[$i];
+
+                            if (strpos($charges, '%') !== false) {
+                                $charges_type = 1;
+                                $fintech_charges = str_replace('%', '', $charges);
+                            }
+                            else{
+                                $charges_type = 0;
+                                $fintech_charges = $req->charges[$i];
+                            }
+
+                            if (strpos($additional_charges, '%') !== false) {
+                                $additional_type = 1;
+                                $add_charges = str_replace('%', '', $additional_charges);
+                            }
+                            else{
+                                $additional_type = 0;
+                                $add_charges = $req->additional_charges[$i];
+                            }
+
+                            if (strpos($fed_charges, '%') !== false) {
+                                $fed_type = 1;
+                                $fedd_charges = str_replace('%', '', $fed_charges);
+                            }
+                            else{
+                                $fed_type = 0;
+                                $fedd_charges =  $req->fed_tax[$i];
+                            }
+
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                            $FintechSetupValues =  new FintechCompanyCharges();
+                            $FintechSetupValues->company_Id                        = $FintechSetup->id;
+                            $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges                           = $fintech_charges;
+                            $FintechSetupValues->charges_is_percentage             = $charges_type;
+                            $FintechSetupValues->additional_charges                = $add_charges;
+                            $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
+                            $FintechSetupValues->fed_tax                           = $fedd_charges;
+                            $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
+                            $FintechSetupValues->payment_type_id                   = $req->payment_type[$i];
+                            $FintechSetupValues->save(); 
+                        }
+                    }
+            DB::commit();
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Fintech Company Charges Added');
+            } 
+            catch(exception $e){
+                DB::rollback();
+                return redirect()->back()->with('error', 'error in update');
+            }   
+            // finally{
+            //      return redirect()->back()->with('success', 'Added Successfully');
+            // }
+        } 
+    }
+
+    public function setup_fintech_charges_edit($id){
+        $fintechsetupValues =  new FintechCompanyCharges();
+        $FintechSetup =  new FintechCompany();
+        $fintech_payment_type = new FintechPaymentType();
+        $payment_type = $fintech_payment_type::all();
+        $fintech_company_name = $FintechSetup::where('id',$id)->first();
+        $fintechvalues = $fintechsetupValues::where('company_Id',$id)->get();
+        return view('admin.settings.fintech.form',compact('fintechvalues','fintech_company_name','payment_type'));
+    }
+
+    public function setup_fintech_charges_edit_save(Request $req){
+        // dd($req->all());
+           DB::beginTransaction();
+           try{ 
+                if(!empty($req->fintech_range_up)){
+                    for($i = 0; $i < count($req->fintech_range_up); $i++){
+                        $charges            =  $req->charges[$i];
+                        $additional_charges =  $req->additional_charges[$i];
+                        $fed_charges        =  $req->fed_tax[$i];
+
+                            if (strpos($charges, '%') !== false) {
+                                $charges_type = 1;
+                                $fintech_charges = str_replace('%', '', $charges);
+                            }
+                            else{
+                                $charges_type = 0;
+                                $fintech_charges = $req->charges[$i];
+                            }
+
+                            if (strpos($additional_charges, '%') !== false) {
+                                $additional_type = 1;
+                                $add_charges = str_replace('%', '', $additional_charges);
+                            }
+                            else{
+                                $additional_type = 0;
+                                $add_charges = $req->additional_charges[$i];
+                            }
+
+                            if (strpos($fed_charges, '%') !== false) {
+                                $fed_type = 1;
+                                $fedd_charges = str_replace('%', '', $fed_charges);
+                            }
+                            else{
+                                $fed_type = 0;
+                                $fedd_charges =  $req->fed_tax[$i];
+                            }
+                        if($req->fintech_range_up[$i] != '' &&  $req->fintech_range_down[$i] != '' &&  $req->charges[$i] != '' &&  $req->fed_tax[$i] != ''){
+                            $FintechSetupValues =  new FintechCompanyCharges();
+                            $FintechSetupValues->company_Id                        = $req->company_id;
+                            $FintechSetupValues->range_up                          = $req->fintech_range_up[$i];
+                            $FintechSetupValues->range_down                        = $req->fintech_range_down[$i];
+                            $FintechSetupValues->charges                           = $fintech_charges;
+                            $FintechSetupValues->charges_is_percentage             = $charges_type;
+                            $FintechSetupValues->additional_charges                = $add_charges;
+                            $FintechSetupValues->additional_charges_is_percentage  = $additional_type;
+                            $FintechSetupValues->fed_tax                           = $fedd_charges;
+                            $FintechSetupValues->fed_tax_is_percentage             = $fed_type;
+                            $FintechSetupValues->payment_type_id                   = $req->fintech_payment_type[$i];
+                            $FintechSetupValues->save(); 
+                        }
+                    }
+                }
+                for($j = 0; $j < count($req->IndexID); $j++){
+
+                    $charges            =  $req->charges_edit[$j];
+                    $additional_charges =  $req->additional_charges_edit[$j];
+                    $fed_charges        =  $req->fed_tax_edit[$j];
+
+                        if (strpos($charges, '%') !== false) {
+                            $charges_type = 1;
+                            $fintech_charges = str_replace('%', '', $charges);
+                        }
+                        else{
+                            $charges_type = 0;
+                            $fintech_charges = $req->charges_edit[$j];
+                        }
+
+                        if (strpos($additional_charges, '%') !== false) {
+                            $additional_type = 1;
+                            $add_charges = str_replace('%', '', $additional_charges);
+                        }
+                        else{
+                            $additional_type = 0;
+                            $add_charges = $req->additional_charges_edit[$j];
+                        }
+
+                        if (strpos($fed_charges, '%') !== false) {
+                            $fed_type = 1;
+                            $fedd_charges = str_replace('%', '', $fed_charges);
+                        }
+                        else{
+                            $fed_type = 0;
+                            $fedd_charges =  $req->fed_tax_edit[$j];
+                        }
+                        $FintechSetupValues =  new FintechCompanyCharges();
+                        $FintechSetupValues::where('id',$req->IndexID[$j])->update([
+                            'range_up'                          => $req->fintech_range_up_edit[$j],
+                            'range_down'                        => $req->fintech_range_down_edit[$j],
+                            'charges'                           => $fintech_charges ,
+                            'charges_is_percentage'             => $charges_type,
+                            'additional_charges'                => $add_charges,
+                            'additional_charges_is_percentage'  => $additional_type,
+                            'fed_tax'                           => $fedd_charges,
+                            'fed_tax_is_percentage'             => $fed_type,
+                            'payment_type_id'                   => $req->payment_type[$j]
+                        ]);
+                }
+                $FintechSetup =  new FintechCompany();
+                $FintechSetup::where('id',$req->company_id)->update([
+                    'updated_by' =>  Auth::id(),
+                ]);
+
+            DB::commit();
+            }
+            catch(exception $e){
+                DB::rollback();
+            }   
+            finally{
+                return redirect()->route('admin.settings.fintech_company_charges.index')->with('success', 'Fintech Company Charges Updated'); 
+            }
+           
+        }
+
+        public function standard_fintech_charges_index(){
+            $StandardFintectCharges = new standard_fintech_charges();
+            $value =  $StandardFintectCharges::first();
+            return view('admin.settings.fintech.standard_fintech_charges',compact('value'));
+        }
+
+        public function standard_fintech_charges_store(Request $req){
+        $StandardFintectCharges = new standard_fintech_charges();
+
+        // dd($req->all());
+
+            $validator = Validator::make($req->all(), [
+                'standard_fintech_charges'  => 'required',
+                'standard_FED_Charges'      => 'required',
+            ]);
+    
+            if($validator->fails()){
+                return redirect()->back()->with('error', 'Please Fill out all Fields'); 
+            }
+
+            else{
+                try{
+                    $values = $StandardFintectCharges::where('id','1')->first();
+                    if(!empty($values)){
+                        $StandardFintectCharges->where('id','1')->update([
+                            'standard_fintech_charges'  =>  $req->standard_fintech_charges,
+                            'standard_fed_charges'      =>  $req->standard_FED_Charges,
+                            'updated_by' => Auth::id(),
+                        ]);
+                    }
+                    else{
+                        $StandardFintectCharges->standard_fintech_charges   = $req->standard_fintech_charges;
+                        $StandardFintectCharges->standard_fed_charges       = $req->standard_FED_Charges;
+                        $StandardFintectCharges->created_by = Auth::id();
+                        $StandardFintectCharges->updated_by = Auth::id();
+                        $StandardFintectCharges->save();
+                    }
+                    
+                    return response()->json(['status' => '200']); 
+                }
+                
+                catch(Exception $e){
+                    return redirect()->back()->with('eroor', 'Failed to Save Standard Charges');
+                }
+            }
+        }
+
+    //End
     public function onelink_payment_charges_submit(Request $request)
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 622);
@@ -7225,17 +7553,20 @@ class GlobalSettingsController extends Controller
     public function delivery_area_keyword_store(Request $request)
     {
 
-        $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $request->area_name);
+        $default_hub = isset($request->default_hub) ? $request->default_hub : 0;
+        $area_name = ($default_hub == 1) ? CityArea::find($request->area_name)->name  :  $request->area_name;
+        $city_area_id = ($default_hub == 1) ? $request->area_name  :  null;
+        $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $area_name);
 
         if ($check_exists->exists()) {
             return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
         }
-
         $keywords = explode(',', $request->delivery_area_keyword);
         $delivery_location = new DeliveryLocationMapping;
-        $delivery_location->area_name = $request->area_name;
+        $delivery_location->area_name = $area_name;
         $delivery_location->city_id = $request->city_id;
         $delivery_location->added_by = Auth::id();
+        $delivery_location->city_area_id = $city_area_id;
         $delivery_location->save();
 
         foreach ($keywords as $keyword) {
@@ -7275,8 +7606,9 @@ class GlobalSettingsController extends Controller
             }
 
             $cities = City::where('business_category_id', 1)->where('status', 1)->get();
+            $city_area = CityArea::where('status',1)->get();
 
-            return view('admin.settings.edit_delivery_area', compact('delivery_location_keywords', 'cities', 'delivery_location'));
+            return view('admin.settings.edit_delivery_area', compact('delivery_location_keywords', 'cities', 'delivery_location','city_area'));
         } else {
             return redirect()->back()->with('error', 'Deivery Area Keyword Not Found');
         }
@@ -7286,8 +7618,12 @@ class GlobalSettingsController extends Controller
     {
         $delivery_location = DeliveryLocationMapping::find($request->id);
         if ($delivery_location) {
+
+            $default_hub = isset($request->default_hub) ? $request->default_hub : 0;
+            $area_name = ($default_hub == 1) ? CityArea::find($request->area_name)->name  :  $request->area_name;
+            $city_area_id = ($default_hub == 1) ? $request->area_name  :  null;
             if ($delivery_location->city_id != $request->city_id && $delivery_location->area_name != $request->area_name) {
-                $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $request->area_name);
+                $check_exists = DeliveryLocationMapping::where('city_id', $request->city_id)->where('area_name', $area_name);
 
                 if ($check_exists->exists()) {
                     return redirect()->back()->with('error', 'Entered Delivery Area for the selected city is already Exists!');
@@ -7296,9 +7632,10 @@ class GlobalSettingsController extends Controller
             DeliveryLocationMappingKeyword::where('mapping_id', $request->id)->delete();
 
             $keywords = explode(',', $request->delivery_area_keyword);
-            $delivery_location->area_name = $request->area_name;
+            $delivery_location->area_name = $area_name;
             $delivery_location->city_id = $request->city_id;
             $delivery_location->updated_by = Auth::id();
+            $delivery_location->city_area_id = $city_area_id;
             $delivery_location->save();
 
             foreach ($keywords as $keyword) {
@@ -8170,6 +8507,16 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+	
+	 public function get_city_area(Request $request){
+        if(isset($request->city_id)) {
+            $city_area = CityArea::where('city_areas.city_id', $request->city_id)->where('status',1)->get();
+            $city = City::find($request->city_id)->hub;
+            return response()->json(['status' => 1, 'data' => $city_area, 'hub'=>$city]);
+        }else{
+            return response()->json(['status' => 0]);
+        }
+    }
 
     /*public function Notification_to_shipper(Request $request)
     {
@@ -8256,6 +8603,46 @@ class GlobalSettingsController extends Controller
             return response()->json(['status' => 1, 'sub_segment' => $sub_business_segment_id]);
         } else {
             return response()->json(['status' => 0, 'error' => 'No data Found']);
+        }
+    }
+
+    public function airway_bill_address_visibility_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 680);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $riders = Rider::where('status', 1)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        $rider_id = null;
+        $airway_bill_address_visibility_accounts = array();
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+            $rider_id = $settings->setting_value;
+        }
+        return view('admin.settings.airway_bill_address_visibility.index')->with(['shippers' => $shippers, 'riders' => $riders, 'rider_id' => $rider_id, 'airway_bill_address_visibility_accounts' => $airway_bill_address_visibility_accounts]);
+    }
+
+    public function airway_bill_address_visibility_store(Request $request)
+    {
+        if ($request->has('shippers')) {
+            if (count($request->shippers) > 0) {
+                $shippers = implode(',', $request->shippers);
+                $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'airway_bill_address_visibility_setting';
+                }
+                $settings->setting_value = 0;
+                $settings->text = $shippers;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
         }
     }
 }

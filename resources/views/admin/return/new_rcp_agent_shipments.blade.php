@@ -72,9 +72,9 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Assigned To</th>
                         <th class="border-primary border-darken-1">Assigned Status</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
-                        <th class="border-primary border-darken-1">Agent Status</th>
-                        <th class="border-primary border-darken-1">Agent Status Date</th>
+                        <th class="border-primary border-darken-1">Updated By (Admin, Agent, User/Sub User)</th>
+                        <th class="border-primary border-darken-1">Status (Admin, Agent, User/Sub User)</th>
+                        <th class="border-primary border-darken-1">Status Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -230,9 +230,10 @@
                             head.push('Call Findings');
                             head.push('Arrival Date');
                             head.push('Assigned To');
-                            head.push('Updated By');
-                            head.push('Agent Status');
-                            head.push('Agent Status Date');
+                            head.push('Assigned Status');
+                            head.push('Updated By (Admin, Agent, User/Sub User)');
+                            head.push('Status (Admin, Agent, User/Sub User)');
+                            head.push('Status Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -241,7 +242,6 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
-                                row.push(values.agent_name);
                                 row.push(values.shipper_name); 
                                 row.push(values.origin);
                                 row.push(values.consignee_city);
@@ -255,6 +255,7 @@
                                 row.push(values.call_findings);
                                 row.push(values.arrival_date);
                                 row.push(values.assigned_to);
+                                row.push(values.assigned_status);
                                 row.push(values.updated_by);
                                 row.push(values.agent_status);
                                 row.push(values.agent_status_date);
@@ -287,6 +288,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

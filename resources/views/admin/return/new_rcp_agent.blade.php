@@ -519,7 +519,7 @@
                         title: 'RCP Agent Productivity',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'
+                    },
                 ],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -544,10 +544,10 @@
                 order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'agent_name', name: 'a.name', class: 'align-middle agent_name'},
+                    {data: 'agent_name', orderable: false, name: 'a.name', class: 'align-middle agent_name'},
                     {data: 'agent_category', orderable: false, name: 'e.staff_category_id', class: 'align-middle agent_category'}, 
                     {data: 'start_time', name: 'rcp_assigned_agents.start_time', class: 'align-middle start_time'},
-                    {data: 'end_time', name: 'rcp_assigned_agents.end_time', class: 'align-middle end_time'},
+                    {data: 'end_time', orderable: false, name: 'rcp_assigned_agents.end_time', class: 'align-middle end_time'},
                     {data: 'total_assigning', orderable: false, searchable: false, name: 'rcp_assigned_agents.total_assigning', class: 'align-middle total_assigning'},
                     {data: 'actual_productivity', orderable: false, searchable: false, name: 'rcp_assigned_agents.actual_productivity', class: 'align-middle actual_productivity'},
                     {data: 'reattempt', orderable: false, searchable: false, name: 'rcp_assigned_agents.reattempt', class: 'align-middle reattempt'},
@@ -602,33 +602,33 @@
                     }
                 },
                 initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                // var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
-                    //for removing search filter from columns
-                    if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') 
-                    || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') 
-                    || $(header).is('.productivity')  || $(header).is('.un_assigned') || $(header).is('.already_updated') || $(header).is('.unresponsive_return') ) {
-                        $(td).appendTo($(search));
-                    }
+                // var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                // var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                // var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                // this.api().columns().every(function(column_id) {
+                //     var column = this;
+                //     var header = column.header();
+                //     //for removing search filter from columns
+                //     if ($(header).is('.serial_number') || $(header).is('.total_assigning')  || $(header).is('.actual_productivity') 
+                //     || $(header).is('.reattempt') || $(header).is('.return') || $(header).is('.intercept') || $(header).is('.pending') 
+                //     || $(header).is('.productivity')  || $(header).is('.un_assigned') || $(header).is('.already_updated') || $(header).is('.unresponsive_return') ) {
+                //         $(td).appendTo($(search));
+                //     }
                     
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
+                //     else {
+                //         var current = $(input).appendTo($(search)).on('change', function() {
+                //             column.search($(this).val(), false, false, true).draw();
+                //         }).wrap(td).after(icon);
 
-                        if (column.search()) {
-                            current.val(column.search());
-                        }
-                    }
-                });
+                //         if (column.search()) {
+                //             current.val(column.search());
+                //         }
+                //     }
+                // });
 
-                this.api().table().columns.adjust();
+                // this.api().table().columns.adjust();
                 }
             });
             $('#search_form').validate({

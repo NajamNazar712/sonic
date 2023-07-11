@@ -112,6 +112,7 @@
                             <th class="border-primary border-darken-1">Consignee Name</th>
                             <th class="border-primary border-darken-1">Consignee Phone</th>
                             <th class="border-primary border-darken-1">Address</th>
+  							<th class="border-primary border-darken-1">Area</th>
                             <th class="border-primary border-darken-1">Sub Station</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             {{--   <th class="border-primary border-darken-1">RCP SMS Count</th> --}}
@@ -1140,7 +1141,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Address');
-                            head.push('Sub Station');
+                            head.push('Area');
                             head.push('Collection Amount');
                             /* head.push('RCP SMS Count');*/
                             head.push('Shipping Mode');
@@ -1181,7 +1182,7 @@
                                 row.push(values.consignee_phone_number_1 + '|' + values
                                     .consignee_phone_number_2);
                                 row.push(values.consignee_address);
-                                row.push(values.sub_station);
+                                row.push(values.area_name);
                                 row.push(values.amount);
                                 /*    row.push(values.message_count);*/
                                 row.push(values.mode);
@@ -1283,41 +1284,21 @@
                                                                                 containerId: 'toast-bottom-center'
                                                                             });
                                                                 } else {
-                                                                    toastr
-                                                                        .error(
-                                                                            data
-                                                                            .error,
-                                                                            'Error!', {
-                                                                                positionClass: 'toast-top-center',
-                                                                                containerId: 'toast-top-center'
-                                                                            });
+                                                                    $('#AssignAgentModal').modal('hide');
+                                                                    toastr.error(data.error,
+                                                                    'Error!', {
+                                                                        positionClass: 'toast-top-center',
+                                                                        containerId: 'toast-top-center'
+                                                                    });
                                                                 }
-                                                                selected_rows
-                                                                    = [];
-                                                                restricted_rows
-                                                                    = [];
-
-                                                                table.rows()
-                                                                    .deselect();
-
-                                                                table.draw(
-                                                                true);
-                                                                table.button(
-                                                                        '.assign'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.confirm'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.re-attempt'
-                                                                        )
-                                                                    .disable();
-                                                                table.button(
-                                                                        '.un-assign'
-                                                                        )
-                                                                    .disable();
+                                                                selected_rows = [];
+                                                                restricted_rows = [];
+                                                                table.rows().deselect();
+                                                                table.draw( true);
+                                                                table.button( '.assign' ).disable();
+                                                                table.button( '.confirm' ).disable();
+                                                                table.button('.re-attempt').disable();
+                                                                table.button('.un-assign').disable();
 
                                                             });
                                                     } else {
@@ -1377,8 +1358,7 @@
                                                 table.rows().nodes().each(function(index) {
                                                     var row = table.row(index);
 
-                                                    if ($(row.node()).hasClass(
-                                                            'selected')) {
+                                                    if ($(row.node()).hasClass('selected')) {
                                                         var id = parseInt(row.id());
                                                         // var remark = $(row.node()).find('td.shipment_remarks textarea').val();
                                                         // shipment_remarks[id] = remark;
@@ -1413,7 +1393,6 @@
                                                             positionClass: 'toast-bottom-center',
                                                             containerId: 'toast-bottom-center'
                                                         });
-
                                                 });
                                             }
                                         });
@@ -1646,6 +1625,8 @@
                                 });
                             }
                         },
+
+                        @if(session('role_id') == 1 || in_array(884, session('permissions')))
                         {
                             title: 'Upload',
                             className: 'btn btn-primary excel-upload',
@@ -1654,6 +1635,9 @@
                                 $('#excel_upload_modal').modal('show');
                             }
                         },
+                        @endif
+
+                        @if(session('role_id') == 1 || in_array(316, session('permissions')))
                         {
                             title: 'Upload Agent',
                             className: 'btn btn-primary excel-upload',
@@ -1662,6 +1646,7 @@
                                 $('#agent_assign_modal').modal('show');
                             }
                         },
+                        @endif
                         'reset'
                     ],
                 @else
@@ -1710,7 +1695,7 @@
                 },
                 rowId: 'shId',
                 order: [
-                    [24, 'desc']
+                    [25, 'desc']
                 ],
                 columns: [{
                         data: 'shId',
@@ -1734,6 +1719,7 @@
                     { data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     { data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+	{data: 'area_name', name: 'ca.name', class: 'align-middle area_name',orderable: false,searchable:false},
                     { data: 'sub_station', name: 'dlm.area_name', class: 'align-middle sub_station', orderable: false, searchable: false},
                     { data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     /* {data: 'message_count', name: 'rcps.count', class: 'align-middle message_count'},*/
@@ -1753,7 +1739,7 @@
                     { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
-                    { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
+                    { data: 'assigned_at', name: 'new_ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
                     { data: 'consolidated_id', name: 'consolidations.consolidation_id', class: 'align-middle consolidated_id', orderable: false, searchable: false},

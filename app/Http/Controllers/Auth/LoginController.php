@@ -8,6 +8,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -148,6 +149,14 @@ class LoginController extends Controller
 //                if (PackagingCharge::where('user_id', $user->id)->exists()) {
 //                    $packaging_charges_check = TRUE;
 //                }
+
+                $project_arrival_shipper = ProjectArrivalShipper::where('user_id', $user->id);
+                if($project_arrival_shipper->exists()){
+                    session(['project_arrival_shipper' => 1]);
+                }
+                else{
+                    session(['project_arrival_shipper' => 0]);
+                }
 
                 $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->id);
 

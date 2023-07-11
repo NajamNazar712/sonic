@@ -6,6 +6,8 @@ use App\HandoverShipmentPiece;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\ShipmentPiece;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\CityArea;
 use Illuminate\Http\Request;
 use App\Http\Models\City;
 use App\Http\Models\Shipment;
@@ -281,13 +283,21 @@ class AdminShipmentHandoverController extends Controller
         ->leftjoin('handover_responsibilities as hor','hor.id','=','handovers.to')
         ->leftjoin('handover_shipments as hss','hss.handover_id','=','handovers.id')
         ->leftjoin('shipments as s','s.id','=','hss.shipment_id')
+  ->leftjoin('city_areas as c_from', function ($join) {
+            $join->on('c_from.id', '=', 'hr.city_area_id');
+//                ->where('c_from.default', 1);
+        })
+        ->leftjoin('city_areas as c_to', function ($join) {
+            $join->on('c_to.id', '=', 'hor.city_area_id');
+//                ->where('c_to.default', 1);
+        })
         ->select(['handovers.id as handover_id','a.name as created_by','ad.name as received_by',
         'hr.name as from','hor.name as to','c.name as hub',
         'handovers.shipments as shipment_count','handovers.shipments as total_shipments','hs.name as status',
         'handovers.received as received_shipments',
         'handovers.from_dept_area_desg','handovers.to_dept_area_desg','handovers.received_at','handovers.created_at',
         DB::raw('(select shipments - received_shipments from handovers where handovers.id= handover_id ) as remaining'),
-        DB::raw('SUM(s.pieces) as shipment_pieces'),
+        DB::raw('SUM(s.pieces) as shipment_pieces'),'c_from.name as from_area','c_to.name as to_area'
       ])
       ->orderBy('handovers.id', 'DESC')
       ->groupBy('hss.handover_id');
@@ -635,8 +645,9 @@ class AdminShipmentHandoverController extends Controller
         }
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
+        ->leftjoin('city_areas as ca', 'ca.id', '=', 'a.area_id')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
-        ->select('handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
+        ->select('ca.name as area','handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
 
         $datatable = Datatables::of($responsibles_list)
         ->setRowAttr([
@@ -682,6 +693,7 @@ class AdminShipmentHandoverController extends Controller
         $responsibles->created_by = Auth::id();
         $responsibles->updated_by = Auth::id();
         $responsibles->status = 1;
+        $responsibles->city_area_id = $request->city_area_id;
         $responsibles->save();
         return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Added successfully!"]);
     }
@@ -716,6 +728,7 @@ class AdminShipmentHandoverController extends Controller
              $responsible->name = $request->name;
              $responsible->hub_id = $request->hub;
              $responsible->updated_by = Auth::id();
+             $responsible->city_area_id = $request->city_area_id;
              $responsible->save();
              return redirect()->back()->with(['status'=>1,'success'=>"Responsible has been Edited successfully!"]);
          }
@@ -760,5 +773,37 @@ class AdminShipmentHandoverController extends Controller
         }
 
       }
+    public function sub_area(Request  $request){
 
+        $handover_responsibility = HandoverResponsibilities::with('city_area')->find($request->id);
+
+        if(isset($handover_responsibility->city_area)){
+            return response()->json(['status' => 1, 'sub_area_id' => $handover_responsibility->city_area->name]);
+        }else{
+
+            return response()->json(['status' => 0 ]);
+        }
+
+    }
+
+    public function get_sub_area(Request  $request){
+        if(isset($request->city_id)){
+            $city_area = CityArea::where('city_id',$request->city_id)->where('status',1);
+            if($city_area->exists()){
+                return response()->json(['status' => 1,'city_area'=>$city_area->get()]);
+            }
+        }else{
+            return response()->json(['status' => 0 ]);
+        }
+    }
+    public function get_user(Request  $request){
+        if(isset($request->city_id)){
+            $users = HandoverResponsibilities::where('hub_id',$request->city_id)->where('status',1);
+            if($users->exists()){
+                return response()->json(['status' => 1,'users'=>$users->get()]);
+            }
+        }else{
+            return response()->json(['status' => 0 ]);
+        }
+    }
 }

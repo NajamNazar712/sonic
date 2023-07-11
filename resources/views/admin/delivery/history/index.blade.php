@@ -2,8 +2,8 @@
 @section('title','Delivery Note History')
 @section('content')
     <h1 class="mb-1">
-        Delivery Note History
-    </h1>
+        Delivery Note History 
+    </h1> 
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
@@ -55,6 +55,7 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -67,6 +68,7 @@
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
@@ -101,6 +103,39 @@
         </div>
     </div>
     <!--Shipments popup -->
+
+
+
+    <div class="modal fade" id="fintech_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Fintech Charges(s)</h4>
+    
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+    
+                    <table>
+                        <tr>
+                          <th>Tracking #</th>
+                          <th>Fintech Charges</th>
+                          <th>Created Date</th>
+                        </tr>
+                        <tbody id="shipment_table">
+                        <tbody>
+                      </table>
+                         </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
     <!--Delivered Shipments popup -->
     <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
@@ -312,6 +347,7 @@
                             head.push('Zone');
                             head.push('Rider ID');
                             head.push('Rider');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -342,6 +378,7 @@
                                 row.push(values.zone_name);
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider);
+                                row.push(values.area);
                                 row.push(values.rider_type);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -397,7 +434,7 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[11, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
@@ -406,6 +443,7 @@
                     { data:'zone_name' ,name: 'zn.name', class: 'align-middle zone_name'},
                     { data:'rider_trax_id' ,name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'area' ,name: 'ca.name', class: 'align-middle area'},
                     { data:'rider_type' ,name: 'rt.name', class: 'align-middle rider_type'},
                     { data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
@@ -418,6 +456,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -455,7 +494,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.cash_amount')) {
+                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
@@ -784,5 +823,32 @@
 
 
         });
+
+
+        function fintechshipmentsshow(event,id){
+    $("#shipment_table").html('');
+    $.ajax({
+        type : 'get',
+        url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
+        data : {id:id},
+        success:function(res){
+            $("#fintech_modal").modal('show');
+            for(let x of res.data){
+                $("#shipment_table").append(`
+                    <tr>
+                    <td>${x.trackingNo}</td>
+                    <td>${x.fintech_charges}</td>
+                    <td>${x.Date}</td>
+                    </tr>
+                `);
+            }
+            
+        }
+        
+    });
+}
+
+
+
     </script>
 @endsection

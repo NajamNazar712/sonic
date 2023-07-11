@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\CityArea;
 use App\Http\Controllers\Admins\DwsWeightChargesController;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Controllers\NotificationsController;
@@ -12,6 +13,7 @@ use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\CorporateRateType;
 use App\Http\Models\Admin\CorporateUserPackagingInvoiceLog;
 use App\Http\Models\CorporateDefaultHistoryRateStatus;
+use App\Http\Models\ReportingLocation;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
@@ -180,28 +182,35 @@ use App\Http\Models\WMS\WmsStorageType;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\HR\EmployeeDesignation;
-use Illuminate\Validation\Rule;
+
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use App\Http\Models\Admin\ShipementReceiveDetails;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Jobs\CountFintechCharges;
+use App\Http\Models\Admin\standard_fintech_charges;
+use GuzzleHttp\Client;
+use App\Http\Models\Admin\UserFintectCharges;
 use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
 {
 
     public function __construct()
-    {
-        $this->middleware('auth:admin');
-
-        $this->middleware('Permission');
+    {   $this->middleware('auth:admin')->except('payfast_payment');
+        $this->middleware('Permission')->except('payfast_payment');
     }
 
+
+    public function payfast_payment_details(){
+        return view('payfast-payment-view');
+    }
     public function index()
     {
 
@@ -506,9 +515,88 @@ class AdminDashboardController extends Controller
         return view('admin.simple_dashboard');
     }
 
+public function payfast_payment(Request $request){
+    dd($request->all());
+}
+
+
+    public function user_fintech_charges(Request $req){
+        $UserFintectCharges = new UserFintectCharges();
+        $values =  $UserFintectCharges::where('user_id',$req->userID)->where('status','1')->first();
+        if(!empty($values)){
+            return response()->json([
+                'status' => '200',
+                'data'   => $values,
+            ]);
+        }
+        else{
+            return response()->json([
+                'status' => '404',
+                'data'   => '',
+            ]);
+        }
+    }
+
+    public function add_fintech_charges(Request $req){
+        $UserFintectCharges = new UserFintectCharges();
+        $standard_fintech_charges = standard_fintech_charges::find(1);
+
+        if(!empty($standard_fintech_charges)){
+            if($req->checkboxval == 'false'){
+                $UserFintectCharges::where('user_id',$req->userID)->update([
+                    'status'     => 2,
+                    'updated_by' => session('id')
+                ]); 
+
+                return response()->json([
+                    'status'  => '200',
+                    'message' => 'Fintech Charges Updated Successfully!',
+                ]);
+            }
+            if($req->checkboxval == 'true'){
+                if($standard_fintech_charges->standard_fintech_charges > $req->fintechCharges){
+                    return response()->json([
+                        'status'  => '401',
+                        'message' => 'Shipper Fintech Charges Should be Greater then standard Fintech charges',
+                    ]);
+                }
+                try{
+                    $value =  $UserFintectCharges::where('user_id',$req->userID)->first();
+                    if(!empty($value->user_id)){
+                        $UserFintectCharges::where('user_id',$req->userID)->update([
+                            'fintech_charges'  => $req->fintechCharges,
+                            'status'           => '1',
+                            'updated_by'       => session('id')
+                        ]); 
+                    }
+                    else{
+                        $UserFintectCharges->user_id            = $req->userID;
+                        $UserFintectCharges->fintech_charges    = $req->fintechCharges;
+                        $UserFintectCharges->added_by           = session('id');
+                        $UserFintectCharges->updated_by         = session('id');
+                        $UserFintectCharges->save();
+                    }
+                        return response()->json([
+                            'status'  => '200',
+                            'message' => 'Fintech Charges Updated Successfully!',
+                        ]);
+                }
+                catch(exception $e){
+                    return response()->json([
+                        'message' => 'Charges Not Set',
+                    ]); 
+                }  
+            }
+        }
+        else{
+            return response()->json([
+                'status'  => '401',
+                'message' => 'First Set Standard Fintech Charges then user Charges',
+            ]);
+        }
+    }
     public function statistics_search(Request $request)
     {
-//        return $request;
         $graph = array();
         $destination_id = $request->destination;
         $shipper = $request->shipper;
@@ -527,18 +615,18 @@ class AdminDashboardController extends Controller
                 $comparison_date = $this_date;
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
-                $arrived = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
-                $in_transit = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
-                $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
-                $destination = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
-                $out_for_delivery = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
-                $return_confirm = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
-                $return_delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
-                $pending_shipments = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
-                $pending_return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
+                $booked               = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id, 'shipper_status_id' => 1]);
+                $arrived              = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 2);
+                $in_transit           = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 3);
+                $canceled             = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 17);
+                $destination          = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 4);
+                $out_for_delivery     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 5);
+                $return_confirm       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 20);
+                $return_delivered     = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->where('shipper_status_id', 25);
+                $pending_shipments    = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [6, 7, 8, 9, 13, 15, 18, 51, 52, 56]);
+                $pending_return       = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [21, 22, 23, 24, 26, 27, 28, 29, 57, 60]);
                 $confirmation_pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [12, 54, 55]);
-                $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                $delivered            = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination_id])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
 //                $complaints_launched = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 1)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_in_process = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 2)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
 //                $complaints_closed = CrmRequestStatusHistory::join('crm_requests as cr', 'cr.id', '=', 'crm_request_status_histories.crm_request_id')->where('crm_request_status_histories.status_id', 4)->where('cr.shipper_id', $shipper)->whereDate('crm_request_status_histories.created_at', $comparison_date);
@@ -635,18 +723,18 @@ class AdminDashboardController extends Controller
                     });
                 }
 
-                $graph['booked'][] = $booked->count();
-                $graph['arrived'][] = $arrived->count();
-                $graph['in_transit'][] = $in_transit->count();
-                $graph['canceled'][] = $canceled->count();
-                $graph['delivered'][] = $delivered->count();
-                $graph['destination'][] = $destination->count();
-                $graph['out_for_delivery'][] = $out_for_delivery->count();
-                $graph['return_confirm'][] = $return_confirm->count();
-                $graph['return_delivered'][] = $return_delivered->count();
-                $graph['pending_shipments'][] = $pending_shipments->count();
+                $graph['booked'][]               = $booked->count();
+                $graph['arrived'][]              = $arrived->count();
+                $graph['in_transit'][]           = $in_transit->count();
+                $graph['canceled'][]             = $canceled->count();
+                $graph['delivered'][]            = $delivered->count();
+                $graph['destination'][]          = $destination->count();
+                $graph['out_for_delivery'][]     = $out_for_delivery->count();
+                $graph['return_confirm'][]       = $return_confirm->count();
+                $graph['return_delivered'][]     = $return_delivered->count();
+                $graph['pending_shipments'][]    = $pending_shipments->count();
                 $graph['confirmation_pending'][] = $confirmation_pending->count();
-                $graph['pending_return'][] = $pending_return->count();
+                $graph['pending_return'][]       = $pending_return->count();
 //                $graph['complaints_launched'][] = $complaints_launched->count();
 //                $graph['complaints_in_process'][]  = $complaints_in_process->count();
 //                $graph['complaints_closed'][] = $complaints_closed->count();
@@ -9448,6 +9536,11 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item auto_cancel_days_setting"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-minus-circle"></i></div><div class="col-9 offset-1">Auto Cancel Days</div></button>';
                     }
 
+                    
+                if (session('role_id') == 1 || in_array(855, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
+                }
+
                     $dropdown .= '
                     </div>
                   </div>
@@ -9779,6 +9872,11 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item restrict_order_id"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Restrict Order ID</div></button>';
                 }
 
+
+                if (session('role_id') == 1 || in_array(856, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item add_fintech_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Fintech Charges</div></button>';
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -10096,7 +10194,7 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91,850], session('permissions'))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -10118,6 +10216,18 @@ class AdminDashboardController extends Controller
                             $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                         }
                     }
+
+                    if (session('role_id') == 1 || in_array(850, session('permissions'))) {
+                        if ($result->isHub == 1) {
+                            $dropdown .= '<a target="_blank" class="dropdown-item" href='.route('admin.management.add_city_sub_area', ['id' => $result->id]).'>
+                                <div class="row no-gutters align-items-center">
+                                    <div class="col-2"><i class="ft-plus-circle"></i></div>
+                                    <div class="col-9 offset-1">Add Areas</div>
+                                </div>                          
+                            </a>';
+                        }
+                    }
+
 
                     $dropdown .= '
                     </div>
@@ -10904,7 +11014,25 @@ class AdminDashboardController extends Controller
 
         $route = $route->get();
 
-        return response()->json($route);
+        $city_areas = CityArea::where('city_id',$city_id)->get();
+        
+        return response()->json(['route' => $route, 'areas' => $city_areas]);
+    }
+    
+    public function replacementListAjax(Request $request)
+    {
+        // This is employee list for if staff category type is contractual it return only contractual employees list because pnly contractual can replace contractual employee
+        $employee = Employee::find($request->employee_id);
+        $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')
+        ->where('employee_type_id', $employee->employee_type_id)
+        ->whereNotNull('trax_id');
+        if($employee->staff_category_id == 3){
+
+            $replacement_employees = $replacement_employees->where('staff_category_id', 3);
+        }
+        $replacement_employees = $replacement_employees->get();
+
+        return response()->json(['replacement_employees'=>$replacement_employees]);
     }
 
     public function addRiderDetails(Request $request)
@@ -13220,5 +13348,213 @@ class AdminDashboardController extends Controller
 
     }
 
+
+    public function add_city_sub_area($city_id){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 642);
+        $cities = City::where('id',$city_id)->get();
+        $reporting_locations = ReportingLocation::where('status', 1)->where('city_id',$city_id)->get();
+        return view('admin.management.add_sub_area')->with(['cities' => $cities, 'reporting_locations' => $reporting_locations,'city_id'=>$city_id]);
+    }
+
+    public function add_city_sub_area_ajax(Request $request){
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 643);
+        }
+
+        $city_area = CityArea::where('city_areas.city_id',$request->city_id)
+            ->join('cities as c', 'c.id', '=', 'city_areas.city_id')
+            ->leftjoin('admins as a', 'a.id', '=', 'city_areas.updated_by')
+            ->leftjoin('reporting_locations as rl', 'rl.id', '=', 'city_areas.report_location_id')
+            ->select('city_areas.*','c.location_latitude','c.location_longitude','c.name as city_name','a.name as admin_name','rl.name as relocation_name');
+
+        return Datatables::of($city_area)
+            ->addColumn('location', function ($result) {
+                $location = '<div class="text-center">';
+                if ($result->location_latitude != null && $result->location_longitude != null) {
+                    $location .= '<button type="button" class="btn btn-primary btn-sm"><a class="white" href="http://www.google.com/maps/place/' . $result->location_latitude . ',' . $result->location_longitude . '" target="_blank"><i class="la la-map-marker align-middle"></i></a></button>';
+                    $location .= '</div>';
+                    return $location;
+                } else {
+                    return '-';
+                }
+            })
+            ->editColumn('status', function ($result) {
+              if($result->status == 0){
+                  return 'Not Active';
+              }else{
+                  return  'Active';
+              }
+            })
+            ->editColumn('relocation_name', function ($result) {
+                $rl = $result->relocation_name . '-'.$result->city_name;
+                return $rl;
+
+            })
+            ->editColumn('default', function ($result) {
+              if($result->default == 1){
+                  return 'Yes';
+              }else{
+                  return  'No';
+              }
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+                    if (session('role_id') == 1 || in_array(843, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item" 
+                             data-target-id=' . $result->id . ' 
+                             data-target-city_id='.$result->city_id .' 
+                             data-target-report_location_id=' . $result->report_location_id . ' 
+                             data-target-name=' . $result->name . ' 
+                             rel="editcityarea" data-toggle="modal" data-target="#city_area_edit_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Area</div></button>';
+                    }
+
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
+                            if($result->status == 0) {
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Active</div></button>';
+                            }else{
+                                $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center active_sub_area" rel="0"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Deactivate</div></button>';
+                            }
+                    }
+
+                    if (session('role_id') == 1 || in_array(844, session('permissions'))) {
+                        if($result->detault == 0) {
+                            $dropdown .= '<button type="button" class="dropdown-item"><div class="row no-gutters align-items-center mark_default" rel="1"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Mark Default</div></button>';
+                        }
+                    }
+
+
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                } else {
+                    return '';
+                }
+            })
+            ->make(true);
+
+    }
+
+    public function city_sub_area_post(Request $request){
+
+        $names = [
+            'id' => 'ID',
+            'name' => 'Name',
+            'city_id' => 'City ID',
+            'report_location_id' => 'Reporting ID',
+        ];
+
+        $messages = [
+            'required' => ':attribute is Required.',
+            'required_if' => ':attribute is Required when :other is :value.',
+            'filled' => ':attribute is Optional but cannot be Empty if Present.',
+            'integer' => ':attribute must be an Integer.',
+            'numeric' => ':attribute must be a Number.',
+            'boolean' => ':attribute must be 0 or 1.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'email' => ':attribute must be a Valid Email Address.',
+            'exists' => 'Given :attribute is of Invalid ID.',
+            'unique' => ':attribute is already Present.',
+            'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+            'in' => ':attribute must be No or Yes.',
+            'check_name' => ':attribute is already exists.',
+            'check_id' => ':attribute with same area and city already exist.',
+            ];
+
+        $rules = [
+            'id' => 'nullable',
+            'name' => 'required|string|max:255|check_name',
+            'city_id' => 'required|string|max:255',
+            'report_location_id' => 'required|string|max:255',
+        ];
+
+
+        Validator::extend('check_name', function ($attribute, $value, $parameters, $validator){
+            $data = $validator->getData();
+            $name = $data['name'];
+            $city_id = $data['city_id'];
+            if(!isset($data['id'])) {
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }else{
+                $id = $data['id'];
+                $city_area = CityArea::where('city_id', $city_id)->where('name', $name)->where('id','!=',$id);
+                if ($city_area->exists()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+        });
+
+        $validate = Validator::make($request->all(), $rules, $messages);
+
+
+        if ($validate->passes()) {
+
+            $default_city = CityArea::where('city_id',$request->city_id);
+            $city_area = !isset($request->id) ?  new CityArea() : CityArea::find($request->id);
+            $city_area->city_id  = $request->city_id;
+            $city_area->report_location_id  = $request->report_location_id;
+            $city_area->name  = $request->name;
+            $city_area->updated_by  = auth()->user()->id;
+            $city_area->status  = 1;
+            $city_area->default  = ($default_city->exists()) ? 0 : 1;
+            $city_area->save();
+
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+        }else{
+            $data = response()->json([
+                'status' => 0,
+                'errors' => $validate->errors(),
+                'message' => 'Error',
+            ]);
+        }
+        return $data;
+
+
+    }
+
+    public function city_area_status(Request $request){
+        if(isset($request->id)){
+            $city_area = CityArea::where('id',$request->id)->update(['status'=>$request->status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
+    }
+    public function city_area_default(Request $request){
+        if(isset($request->id)){
+            CityArea::where('id','!=' ,$request->id)->where('city_id',$request->city_id)->update(['default'=>0]);
+            CityArea::where('id',$request->id)->update(['default'=>$request->default_status]);
+            $data = response()->json([
+                'status' => 1,
+                'message' => 'Success',
+            ]);
+
+            return $data;
+        }
+    }
 }
 
