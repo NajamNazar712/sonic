@@ -4970,6 +4970,10 @@ class AdminFinanceController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('users as u', 's.user_id', '=', 'u.id')
             ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_fintech_charges as sfc', function ($join) {
+                $join->on('sfc.shipment_id', '=', 's.id')
+                    ->where('sfc.applied_to', '=', 1);
+            })
             ->leftjoin('consolidation_shipments as consolidations', function ($join) {
                 $join->on('consolidations.shipment_id', '=', 's.id')
                     ->where('consolidations.consolidation_id', '=',
@@ -4980,7 +4984,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id','=',
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
+            ->select('sfc.fintech_charges as fintech_charges', 'pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 's.id as ShipmentID' ,'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.wht', 'pending_payment_shipments.payable', 'consolidations.consolidation_id', 'oc.name as origin', 'u.account_type_id', 's.pickup_address_id','sj.created_at as arrival_date');
 
         if ($request->has('ids')) {
             $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -5010,13 +5014,12 @@ class AdminFinanceController extends Controller
             ])
 
             ->addColumn('fintech_charges', function ($pending_payment_shipments) {
-                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
-                return $fn_charges;
-                
+                // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+                return number_format($pending_payment_shipments->fintech_charges, 2);
             })
             ->addColumn('deductable', function ($pending_payment_shipments) {
-                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
-                return number_format($pending_payment_shipments->charges + $fn_charges + $pending_payment_shipments->gst, 2);
+                // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
+                return number_format($pending_payment_shipments->charges + $pending_payment_shipments->fintech_charges + $pending_payment_shipments->gst, 2);
             })
             ->addColumn('aging', function ($pending_payment_shipments) {
                 $now = Carbon::now()->startOfDay();
@@ -5039,8 +5042,8 @@ class AdminFinanceController extends Controller
                 return number_format($pending_payment_shipment->wht, 2);
             })
             ->editColumn('payable', function ($pending_payment_shipment) {
-                $fn_charges = $this->calculate_fintech_charges($pending_payment_shipment->ShipmentID);
-                return number_format($pending_payment_shipment->payable - $fn_charges, 2);
+                // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipment->ShipmentID);
+                return number_format($pending_payment_shipment->payable - $pending_payment_shipment->fintech_charges, 2);
             })
             ->editColumn('type', function ($pending_payment_shipment) {
                 if ($pending_payment_shipment->type == 0) {
