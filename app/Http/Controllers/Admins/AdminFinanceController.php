@@ -5013,11 +5013,11 @@ class AdminFinanceController extends Controller
                 }
             ])
 
-            ->addColumn('fintech_charges', function ($pending_payment_shipments) {
+            ->editColumn('fintech_charges', function ($pending_payment_shipments) {
                 // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
                 return number_format($pending_payment_shipments->fintech_charges, 2);
             })
-            ->addColumn('deductable', function ($pending_payment_shipments) {
+            ->editColumn('deductable', function ($pending_payment_shipments) {
                 // $fn_charges = $this->calculate_fintech_charges($pending_payment_shipments->ShipmentID);
                 return number_format($pending_payment_shipments->charges + $pending_payment_shipments->fintech_charges + $pending_payment_shipments->gst, 2);
             })
