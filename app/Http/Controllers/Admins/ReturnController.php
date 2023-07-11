@@ -805,9 +805,9 @@ class ReturnController extends Controller
 
         if($request->action == 'un-assign'){
             foreach ($shipment_ids as $shipment){
-                //For New Return Assigned Shipments
+                //if admin is unassigning shipment same day it will update the logs and report
                 $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'));
-
+                
                 if ($rcp_assigned_shipment->exists()) {
                     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                     $rcp_assigned_shipment->assigned_status = 2;
@@ -828,6 +828,24 @@ class ReturnController extends Controller
                     $assign_shipments_logs->status = 2; // Unassign status
                     $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
                     $assign_shipments_logs->save();
+                }
+
+                else{
+                    //if admin is unassigning shipment another day it wont affect on report
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0);
+                    if ($rcp_assigned_shipment->exists()) {
+                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                        $rcp_assigned_shipment->assigned_status = 2;
+                        $rcp_assigned_shipment->save();
+
+                        // Updating Unassign log
+                        $assign_shipments_logs = new RcpAssignedShipmentLog();
+                        $assign_shipments_logs->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                        $assign_shipments_logs->shipment_id = $rcp_assigned_shipment->shipment_id;
+                        $assign_shipments_logs->status = 2; // Unassign status
+                        $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
+                        $assign_shipments_logs->save();
+                    }
                 }
 
             }
