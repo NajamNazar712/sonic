@@ -5189,7 +5189,7 @@ class ReturnController extends Controller
                  //agent already exist (assign_agent_excel)
                 else
                 {
-                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
+                    $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
                     
                     if(!$check_already_assigned){
                         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
