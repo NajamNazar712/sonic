@@ -4941,39 +4941,26 @@ class AdminFinanceController extends Controller
     }
 
     function calculate_fintech_charges_bulk($shipments,$req){
-
-       
-
         if($req == 'pending_payments'){
-            $fintech = PendingPaymentShipment::where('pending_payment_id', $shipments->id)->where('type', 1)->get(); 
+            $fintech = PendingPaymentShipment::where('pending_payment_id', $shipments->id)->where('type', 1)->pluck('shipment_id')->toArray();
         }
-        if($req == 'retail_pending_payments'){
-            $fintech = RetailPendingPaymentShipment::where('retail_pending_payment_id', $shipments->id)->where('type', 1)->get(); 
+        else if($req == 'retail_pending_payments'){
+            $fintech = RetailPendingPaymentShipment::where('retail_pending_payment_id', $shipments->id)->where('type', 1)->pluck('shipment_id')->toArray();
         }
-
-        if($req == 'retail_payment_done'){
-
-           
-            $fintech = RetailDonePaymentShipment::where('retail_done_payment_id', $shipments->id)->where('type', 2)->get(); 
+        else if($req == 'retail_payment_done'){
+            $fintech = RetailDonePaymentShipment::where('retail_done_payment_id', $shipments->id)->where('type', 2)->pluck('shipment_id')->toArray();
         }
-
         else{
-            $fintech = DonePaymentShipment::where('done_payment_id', $shipments->id)->where('type', 0)->get(); 
+            $fintech = DonePaymentShipment::where('done_payment_id', $shipments->id)->where('type', 0)->pluck('shipment_id')->toArray();
         }
 
-      
-        $fintechCharges = [];
-        foreach($fintech as $rows){
-         $values = shipmentFintechCharges::where('shipment_id',$rows->shipment_id)->first();
-         if(!empty($values)){
-             if($values->applied_to == '1'){
-                 $fintechCharges[] = $values->fintech_charges;
-             }
+         $values = shipmentFintechCharges::whereIn('shipment_id',$fintech)->where('applied_to', 1)->sum('fintech_charges');
+         if($values > 0){
+             return  number_format($values,2);
          }
-         
-        }
-        $totalFintechCharges = array_sum($fintechCharges);
-     return  number_format($totalFintechCharges,2);
+         else{
+             return 0;
+         }
     }
 
     public function make_payments_shipment_list(Request $request)
