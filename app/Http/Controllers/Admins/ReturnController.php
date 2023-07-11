@@ -5232,7 +5232,7 @@ class ReturnController extends Controller
                 
                 //If agent row is empty against the tracking number -> Unassign the shipment if the shipment is assigned to an agent 
                 else{
-                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1);
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
 
                     if ($rcp_assigned_shipment->exists()) {
                         $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
