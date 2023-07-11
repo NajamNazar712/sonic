@@ -557,7 +557,7 @@ class ShipperAPIController extends Controller
 
 
                     //When Shipment is marked as Shipment - Return Confirm
-                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                     if(session('substitute_user_id') == NULL ){
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -659,7 +659,7 @@ class ShipperAPIController extends Controller
 
 
                         //When Shipment is requested for Re-Attempt
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if(session('substitute_user_id') == NULL ){
                             if ($rcp_assigned_shipment->exists()) {
                                 $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -829,7 +829,7 @@ class ShipperAPIController extends Controller
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables for Same Consignee Intercept
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if ($rcp_assigned_shipment->exists()) {
                             
                             $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -897,7 +897,7 @@ class ShipperAPIController extends Controller
                             ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
 
                         //Updating New RcpAssigned Tables for different Consignee Intercept
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if ($rcp_assigned_shipment->exists()) {
                                 $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                                 $rcp_assigned_shipment->shipment_status = 7; //intercept request

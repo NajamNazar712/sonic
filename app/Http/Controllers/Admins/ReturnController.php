@@ -1257,7 +1257,7 @@ class ReturnController extends Controller
                         ShipmentsJourneyController::add($shipment, 15, 15, NULL, $remark, NULL, Auth::id());
 
                      //Updating New RcpAssigned Tables
-                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->latest()->first();
+                     $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                     //  if($rcp_assigned_shipment->exists()){
                      if($rcp_assigned_shipment){
 
@@ -1318,7 +1318,7 @@ class ReturnController extends Controller
                     ShipmentsJourneyController::add($request->shipment_id, 15, 15, NULL, $remark, NULL, Auth::id());
 
                          //Updating New RcpAssigned Tables
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if($rcp_assigned_shipment->exists()){
 
                             //Assuring if agent is updating the status update rows in rcp_assigned_agent
@@ -4962,7 +4962,7 @@ class ReturnController extends Controller
                         $check_agent_return_confrimation->increment('pending_shipments');
                         $check_agent_return_confrimation->save();
 
-                        $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1);
+                        $already_assigned = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
@@ -5128,7 +5128,7 @@ class ReturnController extends Controller
                      if($agent_role->exists()){
                          
                          //Check if the same shipment assigned to the same agent doesn't exist & created same day
-                         $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->whereDate('created_at',date('Y-m-d'))->first();
+                         $check_already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'))->first();
                          if(!$check_already_assigned){
                             $agent_return_confrimation = new RcpAssignedAgent;
                             $agent_return_confrimation->admin_id = $agent_id;
@@ -5137,7 +5137,7 @@ class ReturnController extends Controller
                             $agent_return_confrimation->pending_shipments = $agent_return_confrimation->pending_shipments + 1 ;
                             $agent_return_confrimation->save();
 
-                            $already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1);
+                            $already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
@@ -5181,7 +5181,7 @@ class ReturnController extends Controller
                         $check_agent_return_confrimation->increment('pending_shipments');
                         $check_agent_return_confrimation->save();
 
-                        $already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1);
+                        $already_assigned = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                             if($already_assigned->exists()){
                                 $already_assigned = $already_assigned->get();
                                 foreach ($already_assigned as $key => $assigned) {
