@@ -7338,5 +7338,102 @@ class APIController extends Controller
             return ['status' => 2, 'message' => 'Access Denied!'];
         }
     }
+
+    public function shipment_track_consignee_public(Request $request)
+    {
+        $rules = [
+            'tracking_number' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $tracking_numbers = explode(',', $request->tracking_number);
+
+            $tracking = array();
+            $error_exist = 0;
+
+            foreach ($tracking_numbers as $tracking_number) {
+
+                $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+                
+                if ($shipment->exists()) {
+                   
+                    if ($shipment->user->blacklist == 0) {
+                        $details = array();
+                        
+                        $details['tracking_number'] = $tracking_number;
+                        
+                        $shipper = $shipment->user;
+                        $details['shipper']['name'] = $shipper->name;
+
+                        $pickup = $shipment->pickup_address;
+
+                        $details['pickup']['origin'] = $pickup->city->name;
+
+                        $details['consignee']['name'] = $shipment->consignee_name;
+                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $details['consignee']['destination'] = $shipment->consignee_city->name;
+                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        foreach ($shipment->items as $item) {
+                            $item_details = array();
+
+                            $item_details['order_id'] = $shipment->order_id;
+                            $item_details['product_type'] = $item->product->product_name;
+                            $item_details['description'] = $item->description;
+                            $item_details['quantity'] = $item->quantity;
+
+                            $details['order_information']['items'][] = $item_details;
+                        }
+
+                        $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                        $details['order_information']['amount'] = $shipment->amount;
+
+                        foreach ($shipment->shipment_journey as $journey) {
+                            if ($journey->consignee_status_id != null) {
+                                if ($journey->verification) {
+                                    $journey_details = array();
+
+                                    $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                                    $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                                    $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                                    $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                                    $details['tracking_history'][] = $journey_details;
+                                }
+                            }
+                        }
+
+                        $tracking[$shipment->id] = $details;
+                    
+                    } else {
+                        $error_exist = 1;
+                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => 'Invalid Tracking Number '.$tracking_number]]);
+                    }
+                }
+                else{
+                    $error_exist = 1;
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => 'Invalid Tracking Number '.$tracking_number]]); 
+                }
+            }
+
+            
+            if($error_exist)
+            {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Invalid Tracking Number']);
+            }
+            else{
+                return response()->json(['status' => 0, 'message' => 'Tracking of Shipment(s) # ' . $request->tracking_number, 'details' => $tracking]);
+            }
+        }
+    }
 }
 
