@@ -304,6 +304,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                          if($rcp_assigned_shipment->admin_id == Auth::id()){
 
                              $rcp_assigned_shipment->shipment_status = 8; //intercept approved request
+                             $rcp_assigned_shipment->assigned_status = 2; //intercept approved request
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
                              
@@ -322,7 +323,6 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
                              $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
                              $return_assign_log->status = 7; //intercept request
-                             $return_assign_log->assigned_status = 2; //intercept request
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
 
