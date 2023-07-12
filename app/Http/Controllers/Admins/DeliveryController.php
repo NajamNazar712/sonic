@@ -2648,7 +2648,7 @@ class DeliveryController extends Controller
                                     
                                     // Updating tables if the agent exist same day
                                     $check_agent_return_confirmation = RcpAssignedAgent::where('admin_id',$agent_id)->whereDate('created_at',date('Y-m-d'));
-                                    if($check_agent_return_confirmation ->exist()){
+                                    if($check_agent_return_confirmation ->exists()){
                                             $check_agent_return_confirmation = $check_agent_return_confirmation->latest()->first();
                                             $check_agent_return_confirmation->increment('total_shipments');
                                             $check_agent_return_confirmation->increment('assigned_shipments');
