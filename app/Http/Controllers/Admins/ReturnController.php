@@ -806,7 +806,7 @@ class ReturnController extends Controller
         if($request->action == 'un-assign'){
             foreach ($shipment_ids as $shipment){
                 //For New Return Assigned Shipments
-                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0);
+                $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', 0)->whereDate('created_at',date('Y-m-d'));
 
                 if ($rcp_assigned_shipment->exists()) {
                     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
@@ -5221,13 +5221,13 @@ class ReturnController extends Controller
                         $rcp_assigned_shipment->assigned_status = 2;
                         $rcp_assigned_shipment->save();
 
-                        $decrease_assigned_pending_shipments = RcpAssignedAgent::find($rcp_assigned_shipment->rcp_assigned_agent_id);
+                        // $decrease_assigned_pending_shipments = RcpAssignedAgent::find($rcp_assigned_shipment->rcp_assigned_agent_id);
 
-                        if ($decrease_assigned_pending_shipments) {
-                            $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
-                            $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
-                            $decrease_assigned_pending_shipments->save();
-                        }
+                        // if ($decrease_assigned_pending_shipments) {
+                        //     $decrease_assigned_pending_shipments->assigned_shipments = $decrease_assigned_pending_shipments->assigned_shipments - 1;
+                        //     $decrease_assigned_pending_shipments->pending_shipments = $decrease_assigned_pending_shipments->pending_shipments - 1;
+                        //     $decrease_assigned_pending_shipments->save();
+                        // }
 
                         // Updating Unassign log
                         $assign_shipments_logs = new RcpAssignedShipmentLog();
