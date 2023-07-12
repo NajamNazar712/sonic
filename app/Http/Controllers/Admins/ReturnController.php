@@ -5250,20 +5250,21 @@ class ReturnController extends Controller
 
                         $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $id_shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if($rcp_assigned_shipment->exists()){
-                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
-                        $rcp_assigned_shipment->assigned_status = 2;
-                        $rcp_assigned_shipment->save();
+                            $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
 
-                        // Updating Unassign log
-                        $assign_shipments_logs = new RcpAssignedShipmentLog();
-                        $assign_shipments_logs->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                        $assign_shipments_logs->shipment_id = $rcp_assigned_shipment->shipment_id;
-                        $assign_shipments_logs->status = 2; // Unassign status
-                        $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
-                        $assign_shipments_logs->save();
+                            $rcp_assigned_shipment->assigned_status = 2;
+                            $rcp_assigned_shipment->save();
+                            
+                            // Updating Unassign log
+                            $assign_shipments_logs = new RcpAssignedShipmentLog();
+                            $assign_shipments_logs->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            $assign_shipments_logs->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            $assign_shipments_logs->status = 2; // Unassign status
+                            $assign_shipments_logs->admin_id = $rcp_assigned_shipment->admin_id;
+                            $assign_shipments_logs->save();
+
                         }
                     }
-                }
             
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
 
