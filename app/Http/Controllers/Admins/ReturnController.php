@@ -699,7 +699,18 @@ class ReturnController extends Controller
     }
     
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
-        dd($request->all());
+        // dd($request->all());
+        // array:4 [
+        //     "shipment_ids" => array:2 [
+        //       0 => "1725769"
+        //       1 => "1725771"
+        //     ]
+        //     "_token" => "cR2uKpUvmOo4bEMxhnlRG0vg58jvwQUgKdLdpblO"
+        //     "action" => "reattempt"
+        //     "remark" => array:2 [
+        //       1725769 => null
+        //       1725771 => null
+        //     ]
         $shipment_ids = $request->shipment_ids;
 
         if($request->action == 'reattempt'){
