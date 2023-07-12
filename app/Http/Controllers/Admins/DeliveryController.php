@@ -2571,7 +2571,6 @@ class DeliveryController extends Controller
             }
 
             foreach ($shipments as $key => $shipment) {
-                dd($shipment);
                 $consolidation_shipments = ConsolidationShipments::where('shipment_id', $shipment);
                 if (!$consolidation_shipments->exists()) {
                     $statusId = "reason_drop.$shipment";
@@ -2644,10 +2643,10 @@ class DeliveryController extends Controller
                                 $return_assign_shipment = RcpAssignedShipment::where('shipment_id', $shipment)->where('assigned_status', 1)->where('shipment_status', '!=', 0)->latest()->first();
                                 if ($return_assign_shipment) {
 
-                                    //getting the agent id from log 
+                                    //getting the agent id from log to whom this shipment was assigned
                                     $agent_id = RcpAssignedShipmentLog::where('id',$return_assign_shipment->id)->where('status', 1)->first();
                                     
-                                    // Check if the agent exist and created same day
+                                    // Updating tables if the agent exist same day
                                     $check_agent_return_confirmation = RcpAssignedAgent::where('admin_id',$agent_id)->whereDate('created_at',date('Y-m-d'));
                                     if($check_agent_return_confirmation ->exist()){
                                             $check_agent_return_confirmation = $check_agent_return_confirmation->latest()->first();
