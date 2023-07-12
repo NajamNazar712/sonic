@@ -897,17 +897,6 @@ class ReturnController extends Controller
                     $parcel->save();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-                //    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                //    if($return_assign_shipment){
-                //        $return_assign_shipment->status = 0;
-                //        $return_assign_shipment->save();
-
-                //        $return_assign_log = new ReturnAssignedShipmentLogs();
-                //        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                //        $return_assign_log->status = 1;
-                //        $return_assign_log->assigned_by = Auth::id();
-                //        $return_assign_log->save();
-                //    }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
