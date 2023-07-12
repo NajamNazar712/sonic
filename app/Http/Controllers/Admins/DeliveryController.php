@@ -7620,14 +7620,23 @@ class DeliveryController extends Controller
 
                              $rcp_assigned_shipment_request_intercept = $rcp_assigned_shipment_request_intercept ->latest()->first();
                              $rcp_assigned_shipment_request_intercept->shipment_status = 8; //intercept request approval
-                            //  $rcp_assigned_shipment_request_intercept->admin_id = $rcp_assigned_shipment_request_intercept->admin_id;
+                             $rcp_assigned_shipment_request_intercept->assigned_status = 2; //intercept request approval
+
+                             $rcp_assigned_shipment_request_intercept->admin_id = Auth::id();
                              $rcp_assigned_shipment_request_intercept->save();
 
                              $return_assign_log = new RcpAssignedShipmentLog();
                              $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment_request_intercept->id;
                              $return_assign_log->shipment_id = $rcp_assigned_shipment_request_intercept->shipment_id;
                              $return_assign_log->status = 8; //intercept request approval
-                             $return_assign_log->admin_id = $rcp_assigned_shipment_request_intercept->admin_id;
+                             $return_assign_log->admin_id = Auth::id();
+                             $return_assign_log->save();
+
+                             $return_assign_log = new RcpAssignedShipmentLog();
+                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment_request_intercept->id;
+                             $return_assign_log->shipment_id = $rcp_assigned_shipment_request_intercept->shipment_id;
+                             $return_assign_log->status = 2; //unassig shipment
+                             $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
                      }
 
