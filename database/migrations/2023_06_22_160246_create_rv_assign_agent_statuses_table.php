@@ -18,6 +18,7 @@ class CreateRvAssignAgentStatusesTable extends Migration
             $table->integer('shipment_status_id')->nullable()->index();
             $table->integer('call_finding_id')->nullable()->index();
             $table->string('name');
+            $table->string('shipment_status_name');
             $table->boolean('is_active')->default(1);
             $table->timestamps();
         });
