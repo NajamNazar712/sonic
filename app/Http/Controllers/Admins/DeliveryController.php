@@ -2708,7 +2708,7 @@ class DeliveryController extends Controller
                                             $assign_shipments->shipment_id = $shipment;
                                             $assign_shipments->assigned_status = 1;
                                             $assign_shipments->assigned_by = Auth::id();
-                                            $assign_shipments->admin_id = $agent_id->admin_id;
+                                            $assign_shipments->admin_id = $check_agent_return_confirmation->admin_id;
                                             $assign_shipments->save();
                     
                                             //updating logs
@@ -2716,13 +2716,13 @@ class DeliveryController extends Controller
                                             $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
                                             $assign_shipments_logs->shipment_id = $shipment;
                                             $assign_shipments_logs->status = 1;
-                                            $assign_shipments_logs->admin_id = $agent_id->admin_id;
+                                            $assign_shipments_logs->admin_id = $check_agent_return_confirmation->admin_id;
                                             $assign_shipments_logs->save();
                                             }
                                         else{
                                             
                                             $agent_return_confirmation = new RcpAssignedAgent;
-                                            $agent_return_confirmation->admin_id = $agent_id->admin_id;
+                                            $agent_return_confirmation->admin_id = $check_agent_return_confirmation->admin_id;
                                             $agent_return_confirmation->total_shipments = $agent_return_confirmation->total_shipments + 1 ;
                                             $agent_return_confirmation->assigned_shipments = $agent_return_confirmation->assigned_shipments + 1 ;
                                             $agent_return_confirmation->pending_shipments = $agent_return_confirmation->pending_shipments + 1 ;
@@ -2733,7 +2733,7 @@ class DeliveryController extends Controller
                                             $assign_shipments->rcp_assigned_agent_id = $agent_return_confirmation->id;
                                             $assign_shipments->assigned_status = 1;
                                             $assign_shipments->assigned_by = Auth::id();
-                                            $assign_shipments->admin_id = $agent_id->admin_id;
+                                            $assign_shipments->admin_id = $agent_return_confirmation->admin_id;
                                             $assign_shipments->save();
                     
                                             //updating logs
@@ -2741,7 +2741,7 @@ class DeliveryController extends Controller
                                             $assign_shipments_logs->rcp_assigned_shipment_id = $assign_shipments->id;
                                             $assign_shipments_logs->shipment_id = $shipment;
                                             $assign_shipments_logs->status = 1;
-                                            $assign_shipments_logs->admin_id = $agent_id->admin_id;
+                                            $assign_shipments_logs->admin_id = $assign_shipments->admin_id;
                                             $assign_shipments_logs->save();
                                         }
 
