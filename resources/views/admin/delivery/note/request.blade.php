@@ -341,7 +341,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[8, 'desc']],
+                order: [[9, 'desc']],
                 columns: [
                     {
                         orderable: false,
