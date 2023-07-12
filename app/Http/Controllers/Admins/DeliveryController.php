@@ -2695,9 +2695,8 @@ class DeliveryController extends Controller
                                     $agent_id = RcpAssignedShipmentLog::where('rcp_assigned_shipment_id',$return_assign_shipment->id)->where('status', 1)->first();
                                     
                                     // Updating tables if the agent exist same day
-                                    $check_agent_return_confirmation = RcpAssignedAgent::where('admin_id',$agent_id->admin_id)->whereDate('created_at',date('Y-m-d'))->first();
+                                    $check_agent_return_confirmation = RcpAssignedAgent::where('admin_id',$agent_id->admin_id)->whereDate('created_at',date('Y-m-d'))->latest()->first();
                                     if($check_agent_return_confirmation){
-                                            $check_agent_return_confirmation = $check_agent_return_confirmation->latest()->first();
                                             $check_agent_return_confirmation->increment('total_shipments');
                                             $check_agent_return_confirmation->increment('assigned_shipments');
                                             $check_agent_return_confirmation->increment('pending_shipments');
@@ -2722,7 +2721,7 @@ class DeliveryController extends Controller
                                         else{
                                             
                                             $agent_return_confirmation = new RcpAssignedAgent;
-                                            $agent_return_confirmation->admin_id = $check_agent_return_confirmation->admin_id;
+                                            $agent_return_confirmation->admin_id = $agent_id->admin_id;
                                             $agent_return_confirmation->total_shipments = $agent_return_confirmation->total_shipments + 1 ;
                                             $agent_return_confirmation->assigned_shipments = $agent_return_confirmation->assigned_shipments + 1 ;
                                             $agent_return_confirmation->pending_shipments = $agent_return_confirmation->pending_shipments + 1 ;
