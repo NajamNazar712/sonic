@@ -2,13 +2,21 @@
 
 namespace App\Http\Traits;
 
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\OsaChargesLog;
 use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\RvAssignAgentStatus;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 
 trait RvTrait
 {
@@ -532,26 +540,26 @@ trait RvTrait
                         }
                     }
                     ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
-                    if ($return_assign_shipment->exists()) {
+                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
+                    // if ($return_assign_shipment->exists()) {
 
-                        $return_assign_shipment = $return_assign_shipment->latest()->first();
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
+                    //     $return_assign_shipment = $return_assign_shipment->latest()->first();
+                    //     $return_assign_shipment->status = 0;
+                    //     $return_assign_shipment->save();
 
-                        $return_assign_log = new ReturnAssignedShipmentLogs();
-                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        $return_assign_log->status = 2;
-                        $return_assign_log->assigned_by = Auth::id();
-                        $return_assign_log->save();
-                    }
+                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    //     $return_assign_log->status = 2;
+                    //     $return_assign_log->assigned_by = Auth::id();
+                    //     $return_assign_log->save();
+                    // }
                 }
             }
             return ['status' => 1, 'success' => "Shipment successfully updated as ( Return Confirm )"];
         }
     }
 
-    // Updating shipment status (return confirm / Reattemt) from Excel Sheet in Rcp Screen
+    // Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
     public function excel_store(Request $request)
     {
         $names = [
@@ -939,17 +947,17 @@ trait RvTrait
                     $parcel->save();
 
                     ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                    if ($return_assign_shipment) {
-                        $return_assign_shipment->status = 0;
-                        $return_assign_shipment->save();
+                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
+                    // if ($return_assign_shipment) {
+                    //     $return_assign_shipment->status = 0;
+                    //     $return_assign_shipment->save();
 
-                        $return_assign_log = new ReturnAssignedShipmentLogs();
-                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        $return_assign_log->status = 1;
-                        $return_assign_log->assigned_by = Auth::id();
-                        $return_assign_log->save();
-                    }
+                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    //     $return_assign_log->status = 1;
+                    //     $return_assign_log->assigned_by = Auth::id();
+                    //     $return_assign_log->save();
+                    // }
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
@@ -1046,7 +1054,7 @@ trait RvTrait
                         $s_amount = str_replace(",", "", "$request->amount");
                         $amount = (int)$s_amount;
 
-                        //Differebt Consignee
+                        //Different Consignee
                         if ($intercept_type == 1) {
                             InterceptReBookRequest::create([
                                 'shipment_id' => $request->shipment_id,
@@ -1068,7 +1076,10 @@ trait RvTrait
                             $shipment->save();
 
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
-                        } else {
+                        } 
+
+                        //Same Consignee
+                        else {
                             InterceptReBookRequestHistory::create([
                                 'shipment_id' => $request->shipment_id,
                                 'old_consignee_city_id' => $shipment->consignee_city_id,
