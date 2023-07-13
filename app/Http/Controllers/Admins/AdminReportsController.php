@@ -11576,18 +11576,8 @@ class AdminReportsController extends Controller
                     ->on('dc.id', '=', 'zcc.city_id')
                     ->on('zone_classification_id', '=', DB::connection($connection)->raw('IF (shipments.shipping_mode_id IN (1, 4), 1, 2)'));
             })
-            ->leftJoin('shipments_journey as sj', function ($join) use ($connection) { // only fetch max book
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.shipper_status_id', 1)
-                    ->where(
-                        'sj.id',
-                        '=',
-                        DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 1)')
-                    );
-            })
             ->leftJoin('shipments_journey as sja', function ($join) use ($connection) { // only fetch max arrival
                 $join->on('sja.shipment_id', '=', 'shipments.id')
-                    ->where('sja.shipper_status_id', 2)
                     ->where(
                         'sja.id',
                         '=',
@@ -11596,7 +11586,6 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sjb', function ($join) use ($connection) { // only fetch max In transit
                 $join->on('sjb.shipment_id', '=', 'shipments.id')
-                    ->where('sjb.shipper_status_id', 3)
                     ->where(
                         'sjb.id',
                         '=',
@@ -11605,7 +11594,6 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sjc', function ($join) use ($connection) { // only fetch max arrived at destination
                 $join->on('sjc.shipment_id', '=', 'shipments.id')
-                    ->where('sjc.shipper_status_id', 4)
                     ->where(
                         'sjc.id',
                         '=',
@@ -11614,11 +11602,18 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as sjd', function ($join) use ($connection) { // only fetch max arrived at destination
                 $join->on('sjd.shipment_id', '=', 'shipments.id')
-                    ->where('sjd.shipper_status_id', 5)
                     ->where(
                         'sjd.id',
                         '=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sje', function ($join) use ($connection) { // only fetch max arrived at destination
+                $join->on('sje.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sje.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)')
                     );
             })
             ->leftJoin('shipments_journey as dr', function ($join) use ($connection) {
@@ -11635,7 +11630,7 @@ class AdminReportsController extends Controller
                     ->leftjoin('admins as adsp', 'adsp.id', '=', 'spt.admin_id')
                     ->where('spt.status', '=', 0);
             })
-            ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as booked_date', 'sja.created_at as arrival_date','sjb.created_at as intransit_date','sjc.created_at as arrived_at_destination_date','sjd.created_at as out_for_delivery_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id',
+            ->select('shipments.id as shipment_id', 'shipments.tracking_number','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'shipments.created_at as booked_date', 'sja.created_at as arrival_date','sjb.created_at as intransit_date','sjc.created_at as arrived_at_destination_date','sjd.created_at as out_for_delivery_date','sje.created_at as first_out_for_delivery_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'shipments.actual_weight', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id',
                 'z.name as zone','dz.name as destination_zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'u.account_type_id as account_type_id', 'usi.vendor',
                  'shipments.shipment_type', 'rc.name as return_city',
                 'dr.created_at as delivered_or_returned',
@@ -11761,33 +11756,24 @@ class AdminReportsController extends Controller
             })
             ->addColumn('arrive_to_delivery_date_count', function ($overland) {
 
-                if($overland->arrived_at_destination_date == null)
+                if($overland->arrived_at_destination_date == null || $overland->first_out_for_delivery_date == null)
                 {
                     return '-';
                 }
 
-
                 $datee1 = Carbon::parse($overland->arrived_at_destination_date);
+                $datee2 = Carbon::parse($overland->first_out_for_delivery_date);
 
-                $shipment_id = $overland->shipment_id;
-                $first_out_for_delivery = ShipmentsJourney::where('shipper_status_id',5)->where('shipment_id',$shipment_id);
+                $days = $datee1->diffInDaysFiltered(function ($date) {
+                    return $date->dayOfWeek !== Carbon::SUNDAY;
+                }, $datee2);
 
-                if($first_out_for_delivery->exists())
+                if($days > 0 )
                 {
-                    $first_out_for_delivery = $first_out_for_delivery->first();
-                    $datee2 = $first_out_for_delivery->created_at;
-
-                    $days = $datee1->diffInDaysFiltered(function ($date) {
-                        return $date->dayOfWeek !== Carbon::SUNDAY;
-                    }, $datee2);
-
-                    if($days > 0 )
-                    {
-                        return $days;
-                    }
-                    else{
-                        return '-';
-                    }
+                    return $days;
+                }
+                else{
+                    return '-';
                 }
             });
 
