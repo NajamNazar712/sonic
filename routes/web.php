@@ -681,6 +681,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival', 'Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
         Route::post('foodpanda_shipments_arrival', 'Admins\OrderManagementController@foodpanda_shipments_arrival')->name('foodpanda_shipments_arrival');
+        Route::post('shipment_cancel', 'Admins\OrderManagementController@shipment_cancel')->name('shipment_cancel');
+        Route::post('shipment_cancel_reason', 'Admins\OrderManagementController@shipment_cancel_reason')->name('shipment_cancel_reason');
 
         Route::prefix('self_collection')->name('self_collection.')->group(function () {
             Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');

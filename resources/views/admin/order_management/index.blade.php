@@ -315,6 +315,35 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="cancelRemark" data-backdrop="static" tabindex="-1" role="dialog"
+    aria-labelledby="cancelRemark" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Remarks</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <input type="hidden" name="cancel_shipment_id" id="cancel_shipment_id" value="">
+                                <label for="">Remarks</label>
+                                <textarea class="form-control" name="cancel_remarks" id="cancel_remarks" cols="30" rows="10" data-rule-required="true" data-msg-required="Remarks is required"></textarea>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group ml-1">
+                        <button type="submit" name="edit" class="btn btn-primary btn-min-width" id="CancelReasonSubmit">Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -1126,6 +1155,7 @@
                     table.button('.print').enable();
                 }
                 else {
+                   
                     table.button('.shipper_recall').disable();
                     table.button('.print').disable();
                 }
@@ -1149,6 +1179,7 @@
                     $('#shipment_charges_modal_heading span').text(shipment_id);
                 })
             });
+          
 
             $('#case_nature_requests').on('change',function (e) {
             
@@ -1825,7 +1856,89 @@
                 $('#feedback_channel').val('').trigger('change');
                 $('#feedback_description').val('');
             });
+        $('body').on('click', '.shipment_cancel', function () {
+            var shipment_id = $(this).parents('tr').attr('id');
+            $("#cancel_shipment_id").val(shipment_id);
+            swal({
+                text: 'Are you sure, you want to Cancel these Shipment(s)?',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
+                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function (confirm) {
+                if (confirm) {
+                    $.ajax({
+                        url: '{!! route('admin.orders.shipment_cancel') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'shipment_id': shipment_id
+                        }
+                    })
+                    .done(function (data) {
+                        if (data.status == 0) {
+                            $('#cancelRemark').modal('show');
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        
+                        table.button('.print').disable();
 
+                        selected_rows = [];
+
+                        table.rows().deselect();
+
+                        table.draw('false');
+                    });
+                }
+            });
+        });
+        $('#CancelReasonSubmit').on('click',function () {
+                var reason = $('#cancel_remarks').val();
+                var shipment_id = parseInt($('#cancel_shipment_id').val());
+               
+                $.ajax({
+                    url: '{!! route('admin.orders.shipment_cancel_reason') !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        'reason': reason,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if (data.status === 1) {
+                        $('#cancelRemark').modal('hide');
+                        table.draw('false');
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+
+                    } else {
+                        $('#cancelRemark').modal('hide');
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
 
     });
     </script>
