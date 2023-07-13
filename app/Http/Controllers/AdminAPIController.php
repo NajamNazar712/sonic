@@ -12712,7 +12712,7 @@ class AdminAPIController extends Controller
 
             $details = array();
 
-            $details['case_nature_id'] = '-'; // changed from complaint to case_nature_id required by waleed
+            $details['case_nature_id'] = 0; // changed from complaint to case_nature_id required by waleed
             $details['tracking_number'] = $tracking_no;
             $details['amount'] = $shipment->amount;
             $details['shipper'] = $shipment->user->name;
