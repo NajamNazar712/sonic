@@ -7356,6 +7356,7 @@ class APIController extends Controller
             $tracking_numbers = explode(',', $request->tracking_number);
 
             $tracking = array();
+            $invalid_tracking = array();
             $error_exist = 0;
             $invalid_length = 0;
 
@@ -7423,30 +7424,29 @@ class APIController extends Controller
                         
                         } else {
                             $error_exist = 1;
+                            $invalid_tracking[] = $tracking_number;
                         }
                     }
                     else{
                         $error_exist = 1;
+                        $invalid_tracking[] = $tracking_number;
                     }
                 }
                 else{
                     $invalid_length = 1;
+                    $invalid_tracking[] = $tracking_number;
                 }
             }
             
-            
-            if($error_exist == 1)
+            if(($error_exist == 1 || $invalid_length == 1) &&  count($tracking) > 0)
             {
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => 'Invalid Tracking Number '.$request->tracking_number]]);
+                return response()->json(['status' => 2, 'message' => 'Error(s) in Input or Tracking Number must be between 10 and 20 Digits.', 'errors' => ['invalid_tracking_numbers' => $invalid_tracking], 'details' => $tracking]);
             }
-            else if($error_exist == 1 && $invalid_length == 1){
-                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => 'Invalid Tracking Number '.$request->tracking_number]]);
-            }
-            else if($invalid_length == 1){
-                return response()->json(['status' => 2, 'message' => 'Tracking Number must be between 10 and 20 Digits.', 'details' => $tracking]);
+            else if($error_exist == 0 && $invalid_length == 0 &&  count($tracking) > 0){
+                return response()->json(['status' => 1, 'message' => 'Tracking of Shipment(s) # ' . $request->tracking_number, 'details' => $tracking]);
             }
             else{
-                return response()->json(['status' => 1, 'message' => 'Tracking of Shipment(s) # ' . $request->tracking_number, 'details' => $tracking]);
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => $invalid_tracking]]);
             }
         }
     }
