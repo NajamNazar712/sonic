@@ -8,6 +8,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Models\RestrictedCityIntercept;
 use App\Http\Models\RvAssignAgentStatus;
 use App\Http\Models\RvShipmentAssignAgent;
@@ -125,7 +126,7 @@ trait RvTrait
         return true;
     }
 
-    public function changeShipmentStatus($request)
+    protected function changeShipmentStatus($request)
     {
         if ($request->rv_assign_agent_status_id) {
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);
@@ -137,16 +138,16 @@ trait RvTrait
                         $this->reattempt($request);
                         break;
                     case '15': // Shipment - On Hold for Self Collection
-                        # code...
+                        $this->on_hold_for_self_collection($request);
                         break;
                     case '20': // Return - Confirm
-                        # code...
+                        $this->return_confirm($request);
                         break;
-                    case '54': // Return - Confirm
-                        # code...
+                    case '54': // Intercept Requested
+                        $this->intercept($request);
                         break;
                     case null: // Unresponsive
-                        # code...
+                        $this->unresponsive($request);
                         break;
 
                     default:
@@ -158,31 +159,111 @@ trait RvTrait
         }
     }
 
-    public function reattempt($request)
+    protected function return_confirm($request)
     {
-        if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) { // when status_reason is set to OSA & shipper_status set to RV/RCP
-            $parcel->nsa_osa_status = 1;
+        $remarks = $request->remarks;
+        $parcel = Shipment::find($request->shipment_id);
 
-            $parcel->save();
+        $return_reason = $request->single_return_reason_select;
+        $consignee_refused_reasons = $request->consignee_refused_reasons;
+        $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
+        if (!$dispute_check) {
+            return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+        }
+        if ($parcel->booking_type_id == 5) {
+            return ['status' => 0, 'error' => "Reverse Pickup Shipment can not be updated to Return Confirm!"];
+        }
+        if (!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
 
-            ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
 
-            NotificationsController::send(33, $request->shipment_id);
-        } else if ($parcel->shipper_status_id == 52) { // when reattempt has been requested
-            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
 
-            if ($journey && ($journey->status_reason_id == 12)) {
-                $parcel->nsa_osa_status = 1;
 
-                $parcel->save();
+            NotificationsController::send(15, 0, $request->shipment_id);
+            NotificationsController::send(16, 0, $request->shipment_id);
 
-                ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+            if ($parcel->shipment_type == 1) {
+                if ($parcel->booking_type_id != 4) {
+                    ShipmentChargesController::return($request->shipment_id);
+
+                    if ($parcel->packaging_material_request != 1) {
+                        AdminFinanceController::add_payment($request->shipment_id, 1);
+                    }
+                } else {
+                    ShipmentChargesController::walk_in_return($request->shipment_id);
+
+                    $parcel->walk_in_status = 2;
+
+                    $parcel->save();
+
+                    AdminFinanceController::done_payment($request->shipment_id, 1);
+                }
+            }
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+
+            return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
+        }
+        return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
+        
+    }
+    protected function reattempt($request)
+    {
+        $remarks = $request->remarks;
+        $parcel = Shipment::find($request->shipment_id);
+        if ($request->has('charges')) {
+            if ($request->charges != null) {
+                $check = $this->update_estimate_charges($request->shipment_id, $request->charges);
+                if ($check != 0) {
+                    return ['status' => 0, 'error' => "Shipment not found on Estimation Charges"];
+                }
+            } else {
             }
         }
+        
+        if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
+            $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
-        return true;
+            if ($journey) {
+                if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
+                    $parcel->nsa_osa_status = 1;
+
+                    $parcel->save();
+
+                    ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+
+                    NotificationsController::send(33, $request->shipment_id);
+                } else if ($parcel->shipper_status_id == 52) {
+                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+
+                    if ($journey && ($journey->status_reason_id == 12)) {
+                        $parcel->nsa_osa_status = 1;
+
+                        $parcel->save();
+
+                        ShipmentChargesController::nsa_osa_charges($request->shipment_id);
+                    }
+                }
+
+                $parcel->shipper_status_id = 13;
+                $parcel->consignee_status_id = 13;
+                $parcel->save();
+
+                ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remarks, NULL, Auth::id());
+
+                NotificationsController::send(15, 0, $request->shipment_id);
+                NotificationsController::send(16, 0, $request->shipment_id);
+                $reattempt_remarks_col = new ReattemptShipmentStatusRemarks();
+                $reattempt_remarks_col->shipment_id = $request->shipment_id;
+                $reattempt_remarks_col->remarks = 'Manual';
+                $reattempt_remarks_col->save();
+            }
+
+            return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Re-Attempt"];
+        }
+        return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];       
     }
-    public function update_estimatecharges($shipment, $charge)
+    
+    private function update_estimate_charges($shipment, $charge)
     {
         $shipment_id = $shipment;
         $charges = $charge;
