@@ -9,6 +9,9 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\RvFakeStatus;
 use App\Http\Models\RiderDelivery;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\RvAgentAssignHub;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +20,7 @@ use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Models\RvAssignAgentStatus;
 use App\Http\Models\RvShipmentAssignAgentDetails;
+use App\Http\Models\ShipmentsJourney;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
 use Exception;
@@ -227,16 +231,13 @@ class ReturnV2Controller extends Controller
                 // //Maintaining Log in RvTrait
                 // $this->makeRvShipmentAssignAgentDetails($shipment_assign_agent, $request);
 
-                $shipment_ids = $request->shipment_id;
-                $remarks= $request->remarks;
-
-                dd($shipment_ids, $remarks);
-                $this->changeShipmentStatus($request->shipment_reason_id, $shipment_ids, $remarks);
+                // dd($shipment_ids, $remarks);
+                $this->changeShipmentStatus($request);
 
                 if($request->shipment_reason == 'confirm'){
                 }
 
-                switch ($request->shipment_reason_id) {
+                switch ($request->rv_assign_agent_status_id) {
                     case 1: // is for Return confirm - 20 shipment_status_id
                         # code...
                         break;
@@ -260,85 +261,15 @@ class ReturnV2Controller extends Controller
                         # code...
                         break;
                 }
-
                 return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
             } 
 
             else{
                 return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
             }
-            
         }
     }
 
-    public function changeShipmentStatus($shipment_reason_id, $shipment_ids, $remarks) {
-        dd(is_array($shipment_ids));
-        if(!is_array($shipment_ids)){
-            
-        } else {
-
-            foreach ($shipment_ids as $shipment){
-                $parcel = Shipment::find($shipment);
-                if(!in_array($parcel->shipper_status_id, [13, 20])){
-                    $remark_inp = "remark.$shipment";
-                    $remarks = $request->remark[$parcel->id] != null? $request->remark[$parcel->id] : null;
-    
-                    $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->latest('id')->first();
-    
-    
-    
-                    if ($journey) {
-                        if ($parcel->shipper_status_id == 12 && ($journey->status_reason_id == 12)) {
-                            $parcel->nsa_osa_status = 1;
-    
-                            $parcel->save();
-    
-                            ShipmentChargesController::nsa_osa_charges($shipment);
-    
-                            NotificationsController::send(33, $shipment);
-                        }
-                        else if ($parcel->shipper_status_id == 52) {
-                            $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('shipper_status_id', 12)->latest('id')->first();
-    
-                            if ($journey && ($journey->status_reason_id == 12)) {
-                                $parcel->nsa_osa_status = 1;
-    
-                                $parcel->save();
-    
-                                ShipmentChargesController::nsa_osa_charges($shipment);
-                            }
-                        }
-                    }
-    
-                    $parcel->shipper_status_id = 13;
-                    $parcel->consignee_status_id = 13;
-                    $parcel->save();
-    
-                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
-                   $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                   if($return_assign_shipment){
-                       $return_assign_shipment->status = 0;
-                       $return_assign_shipment->save();
-    
-                       $return_assign_log = new ReturnAssignedShipmentLogs();
-                       $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                       $return_assign_log->status = 1;
-                       $return_assign_log->assigned_by = Auth::id();
-                       $return_assign_log->save();
-                   }
-                    NotificationsController::send(15, 0, $shipment);
-                    NotificationsController::send(16, 0, $shipment);
-    
-                    $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
-                    $reattempt_remarks_col->shipment_id = $shipment;
-                    $reattempt_remarks_col->remarks = 'Manual';
-                    $reattempt_remarks_col->save();
-                }
-    
-            }
-        }
-        
-    }
 
     public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
         
