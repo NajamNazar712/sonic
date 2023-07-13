@@ -11639,7 +11639,7 @@ class AdminReportsController extends Controller
             ->whereIn('shipments.shipper_status_id', [1,2,3,4,5,12,14,20])
             ->where('u.sub_segment_id',1)
             //->where('shipments.id',1724845)
-            ->whereBetween('sj.created_at', [$from, $to]);
+            ->whereBetween('shipments.created_at', [$from, $to]);
 
         $datatable = Datatables::of($overland)
 
