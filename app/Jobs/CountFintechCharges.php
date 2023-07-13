@@ -53,84 +53,79 @@ class CountFintechCharges implements ShouldQueue
         if(is_array($valid_shipments)){
             try{
                 foreach($valid_shipments as $valid_shipments_valuse){
-                    $user_id = Shipment::where('id',$valid_shipments_valuse)->first();
-                    $total_cod_amount = Shipment::where('id', $user_id->id)->where(function ($query) {
-                        $query->where('booking_type_id', '!=', 4)
-                            ->orWhere(function ($sub_query) {
-                                $sub_query->where('booking_type_id', '=', 4)
-                                    ->where('charges_mode_id', '=', 2);
-                            });
-                        })->sum('amount');
+                    $shipment = Shipment::where('id',$valid_shipments_valuse)->first();
+                    $total_cod_amount = $shipment->amount;
+
+                    $check = true;
+                    if($shipment->booking_type_id == 4){
+                        if($shipment->charges_mode_id == 2){
+                            $check = true;
+                        }
+                        else{
+                            $check = false;
+                        }
+                    }
+
+                    if($check == true){
                         $fintech_company = FintechCompany::where('id','1');
-                    if($fintech_company->exists()){
-                        $fintech_company_id = $fintech_company->first()->id;
-                    }
-                    else{
-                        $fintech_company_id = '1';
-                    }
-                        $user_fintech_charges     = UserFintectCharges::where('user_id',$user_id->user_id)->where('status','1')->first();
+                        if($fintech_company->exists()){
+                            $fintech_company_id = $fintech_company->first()->id;
+                        }
+                        else{
+                            $fintech_company_id = '1';
+                        }
+                        $user_fintech_charges     = UserFintectCharges::where('user_id',$shipment->user_id)->where('status','1')->first();
                         $standart_fintech_charges = standard_fintech_charges::where('id','1')->first();
-                    if(!empty($user_fintech_charges)){
-                        $charges            = $user_fintech_charges->fintech_charges;
-                        $percentage         = ($total_cod_amount/100) * $charges;
-                        $cal_fed            = ($percentage/100) * $standart_fintech_charges->standard_fed_charges;  
-                        $total_charges      = number_format($percentage + $cal_fed, 2) ;
-                        $charges_applicable = '1';
-                    }  
-                    else{
-                        $standard_charges     = ($total_cod_amount/100) * $standart_fintech_charges->standard_fintech_charges;
-                        $standard_charges_FED = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;
-                        $total_charges        = number_format($standard_charges + $standard_charges_FED, 2) ;
-                        $charges_applicable   = '2';
-                    }
-                    // Shipment::where('id', $user_id->id)->update([
-                    //     'fintech_charges' => $total_charges
-                    // ]);
-                    $shipment_fintech_charges                  =  new shipmentFintechCharges();
-                    $shipment_fintech_charges->shipment_id     =  $user_id->id ;
-                    $shipment_fintech_charges->fintech_charges =  $total_charges;
-                    $shipment_fintech_charges->applied_to      =  $charges_applicable;
-                    $shipment_fintech_charges->save();
-                    $customer_details = Shipment::where('shipments.id',$valid_shipments_valuse)
-                    ->join('cities','shipments.consignee_city_id','cities.id')
-                    ->select(
-                    'shipments.tracking_number as TrankingID', 
-                    'shipments.consignee_name as Name',
-                    'shipments.consignee_address as Address',
-                    'cities.name as city_name')->first();
-                    if($charges_applicable == '1'){
-                        $fintech_charges = 0;
-                    }
-                    else{
-                        $fintech_charges = $total_charges;
-                    }
-                    $traxpaytransaction = new TraxPayTransaction();
-                    $traxpaytransaction::where('shipment_id',$valid_shipments_valuse)->update([
-                        'link'           => $this->payment_link,
-                        'cod_amount'     => $total_cod_amount,
-                        'fintech_amount' => $fintech_charges,
-                    ]);
-                    $request_body  = array(
-                        'payment_link'    => $this->payment_link,
-                        'unique_code'     => $this->unique_key,
-                        'pay_type_id'     => 1,
-                        'fintech_company' => $fintech_company_id,
-                        'cod_amount'      => $total_cod_amount,
-                        'fintech_amount'  => $fintech_charges,
-                    );
-                    $options = [
-                        'form_params' => $request_body,
-                        'http_errors' => false,
-                    ];
-                    $client = new Client();
-                    $response = $client->request('Post', $this->url,$options);
-                    if ($response->getStatusCode() !== 200) {
-                        abort(404, 'URL not found');
+                        if($user_fintech_charges){
+                            $charges            = $user_fintech_charges->fintech_charges;
+                            $percentage         = ($total_cod_amount/100) * $charges;
+                            $cal_fed            = ($percentage/100) * $standart_fintech_charges->standard_fed_charges;
+                            $total_charges      = round($percentage + $cal_fed, 2) ;
+                            $charges_applicable = '1';
+                        }
+                        else{
+                            $standard_charges     = ($total_cod_amount/100) * $standart_fintech_charges->standard_fintech_charges;
+                            $standard_charges_FED = ($standard_charges/100) * $standart_fintech_charges->standard_fed_charges;
+                            $total_charges        = round($standard_charges + $standard_charges_FED, 2) ;
+                            $charges_applicable   = '2';
+                        }
+                        $shipment_fintech_charges                  =  new shipmentFintechCharges();
+                        $shipment_fintech_charges->shipment_id     =  $shipment->id ;
+                        $shipment_fintech_charges->fintech_charges =  $total_charges;
+                        $shipment_fintech_charges->applied_to      =  $charges_applicable;
+                        $shipment_fintech_charges->save();
+                        if($charges_applicable == '1'){
+                            $fintech_charges = 0;
+                        }
+                        else{
+                            $fintech_charges = $total_charges;
+                        }
+                        $traxpaytransaction = new TraxPayTransaction();
+                        $traxpaytransaction::where('shipment_id',$valid_shipments_valuse)->update([
+                            'link'           => $this->payment_link,
+                            'cod_amount'     => $total_cod_amount,
+                            'fintech_amount' => $fintech_charges,
+                        ]);
+                        $request_body  = array(
+                            'payment_link'    => $this->payment_link,
+                            'unique_code'     => $this->unique_key,
+                            'pay_type_id'     => 1,
+                            'fintech_company' => $fintech_company_id,
+                            'cod_amount'      => $total_cod_amount,
+                            'fintech_amount'  => $fintech_charges,
+                        );
+                        $options = [
+                            'form_params' => $request_body,
+                            'http_errors' => false,
+                        ];
+                        $client = new Client();
+                        $response = $client->request('Post', $this->url,$options);
+                        Log::channel('trax_pay')->info('s ' . json_encode($response->getBody()->getContents()));
                     }
                 }
             }
-            catch(RequestException $e){
-                Log::channel('trax_pay')->info($e);
+            catch(Exception $e){
+                Log::channel('trax_pay')->info('e ' . json_encode($e));
             }
         }
     }
