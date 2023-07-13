@@ -20,6 +20,7 @@ class CreateRvAssignAgentStatusesTable extends Migration
             $table->string('name');
             $table->string('shipment_status_name');
             $table->boolean('is_active')->default(1);
+            $table->boolean('is_visible')->default(1);
             $table->timestamps();
         });
     }

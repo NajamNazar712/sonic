@@ -133,10 +133,19 @@ trait RvTrait
             $call_finding_id = $rv_assign_agent_status->call_finding_id; // this is for unresponsive
             if ($rv_assign_agent_status && ($shipment_status_id || $call_finding_id)) {
                 switch ($shipment_status_id) {
-                    case '13': //reattempt
+                    case '13': //Shipment - Re-Attempt
                         $this->reattempt($request);
                         break;
-                    case '20':
+                    case '15': // Shipment - On Hold for Self Collection
+                        # code...
+                        break;
+                    case '20': // Return - Confirm
+                        # code...
+                        break;
+                    case '54': // Return - Confirm
+                        # code...
+                        break;
+                    case null: // Unresponsive
                         # code...
                         break;
 
