@@ -12712,7 +12712,7 @@ class AdminAPIController extends Controller
 
             $details = array();
 
-            $details['complaint'] = '-';
+            $details['case_nature_id'] = '-'; // changed from complaint to case_nature_id required by waleed
             $details['tracking_number'] = $tracking_no;
             $details['amount'] = $shipment->amount;
             $details['shipper'] = $shipment->user->name;
@@ -12752,7 +12752,7 @@ class AdminAPIController extends Controller
             $crm = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
             
             if(isset($crm) && $crm->status_id != 4){
-                $details['complaint'] = $crm->id;
+                $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
 
             ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
