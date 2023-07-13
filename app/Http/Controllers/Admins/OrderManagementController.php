@@ -996,8 +996,8 @@ class OrderManagementController extends Controller
                     // $shipment->save();
 
                     V2AdminPickupsController::cancel($shipment_id);
-
-                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, $reason , Null, Auth::id());
+                    $remarks = "Cancelled By Admin (". Auth::user()->name .')' . $reason;
+                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, $remarks , Null, Auth::id());
 
                     return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
                 // }

@@ -43,9 +43,8 @@ class ShipperShipmentCancelController extends Controller
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('admins as a','a.id','=','shipments_journey.admin_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks as remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions', 'shipments.booking_type_id', 'usi.poc','a.name as admin_name'])
+            ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions', 'shipments.booking_type_id', 'usi.poc'])
             ->where('shipments.shipper_status_id', '=', 17)
             ->where('shipments.user_id', session('user_id'));
 
@@ -72,18 +71,6 @@ class ShipperShipmentCancelController extends Controller
                 }
                 else {
                     return $shipment->shipper;
-                }
-            })
-            ->editColumn('remarks', function ($shipment) {
-               
-                if($shipment->admin_name != null && $shipment->remarks != null)
-                {   
-                    
-                    return  'Cancelled by Admin '.'- '.'('.$shipment->admin_name.') - '.$shipment->remarks;
-                }
-                else
-                {
-                    return $shipment->remarks;
                 }
             })
             ->filterColumn('u.name', function ($query, $keyword) {
