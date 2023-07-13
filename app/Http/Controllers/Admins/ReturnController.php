@@ -174,10 +174,10 @@ class ReturnController extends Controller
             ->leftjoin('rcp_assigned_shipments as new_ras', function ($join) {
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
                     ->where('new_ras.id','=',
-                        DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        and rcp_assigned_shipments.assigned_status = 1)'))
                         // DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        // and rcp_assigned_shipments.assigned_status = 1 and rcp_assigned_shipments.shipment_status = 0)'))
+                        // and rcp_assigned_shipments.assigned_status = 1)'))
+                        DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
+                        and rcp_assigned_shipments.assigned_status = 1 and rcp_assigned_shipments.shipment_status = 0)'))
                         
                         ->where('new_ras.user_id','=',null)
                         ->where('new_ras.shipment_status','!=',3);
