@@ -7123,7 +7123,7 @@ class APIController extends Controller
                 'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
         // parameters
         $user_id          = $shipments->shipper_id;
-        $cod_Amount       = $shipments->cod_amount;
+        $cod_amount       = $shipments->cod_amount;
         $fintechCharges   = $shipments->fintech_amount;
         $delivery_note_id = $shipments->delivery_note_id;
         $shipment_id      = $shipments->shipment_id;
@@ -7156,14 +7156,14 @@ class APIController extends Controller
                 $type = 3;
             }
         // select range of fintech company according to cod amount
-        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
-        ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
+        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_amount)
+        ->where('range_up', '<=', $cod_amount)->where('company_Id',$req->fintech_company)
         ->where('payment_type_id',$type)->first(); 
         
         //Calculate Fintech Charges
         if($select_range->charges_is_percentage == 1){
             $company_chages        = ($select_range->charges) / 100; // company charges
-            $total_company_charges = number_format($company_chages * $cod_Amount,2);
+            $total_company_charges = number_format($company_chages * $cod_amount,2);
         }
         else{
             $total_company_charges = $select_range->charges; // company charges
@@ -7200,12 +7200,12 @@ class APIController extends Controller
             return [$total,$tax];
         }
         //user or Stadard fintech Charges
-        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges_percentage,$fed_percentage);
+        $total_fintech_calculated = calculatepercentage($cod_amount,$fintect_charges_percentage,$fed_percentage);
 
         //Total revenue
         $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
         // return response()->json([
-                // 'cod'             => $cod_Amount, 
+                // 'cod'             => $cod_amount,
                 // 'conpany charges' => $total_company_charges, 
                 // 'company fed'     => $total_company_fed,        
                 // 'company addi'    => $additional_charges,
@@ -7216,10 +7216,11 @@ class APIController extends Controller
                 // 'revenue'         => $revenue   
         //  ]);
         //total amount received   
-        $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
+        $total_amount_received = $cod_amount + $total_fintech_calculated[0];
         $fintech_details = new FintechPaymentDetails();
         $fintech_details->trax_pay_id            = $trax_pay_id;
         $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->cod_amount              = $cod_amount;
         $fintech_details->rider_tip              = $req->tip;
         $fintech_details->rider_id               = $shipments->rider;
         $fintech_details->fintech_company_id     = $req->fintech_company;
