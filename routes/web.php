@@ -1257,6 +1257,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('add', 'Admins\V3Pickup\V3AdminPickupsController@add_pickup_request')->name('add');
         Route::post('get_pickup_address', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_address')->name('get_pickup_address');
         Route::post('add', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_add')->name('add');
+
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_index')->name('index');
+            Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_list')->name('list');
+            Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_assign')->name('assign');
+        });
+
         Route::prefix('history')->name('history.')->group(function () {
             Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@history_pickup_requests')->name('index');
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@history_list')->name('list');

@@ -229,8 +229,6 @@ class AdminPickupsController extends Controller
                         $retail_pickup_note_shipment->save();
                       }
                   }
-                  else{
-                  }
               }
     }
 

@@ -17,9 +17,9 @@ class CreateV2RiderPickupsTable extends Migration
             $table->increments('id');
             $table->timestamps();
             $table->timestamp('added_at');
-            $table->integer('pickup_note_id');
-            $table->integer('pickup_request_id');
-            $table->integer('pickup_type');
+            $table->integer('pickup_note_id')->index();
+            $table->integer('pickup_request_id')->index();
+            $table->integer('pickup_type')->index();
             $table->decimal('start_location_latitude', 10, 6);
             $table->decimal('start_location_longitude', 10, 6);
             $table->decimal('actual_location_latitude', 10, 6);
@@ -29,7 +29,7 @@ class CreateV2RiderPickupsTable extends Migration
             $table->decimal('current_location_longitude', 10, 6)->nullable()->default(NULL);
             $table->decimal('distance_from_current_to_actual', 8, 2)->nullable()->default(NULL);
             $table->integer('shipments')->nullable();
-            $table->integer('pickup_not_pick_reason_id')->nullable()->default(NULL);
+            $table->integer('pickup_not_pick_reason_id')->nullable()->default(NULL)->index();
             $table->string('picture_path')->nullable()->default(NULL);
         });
     }

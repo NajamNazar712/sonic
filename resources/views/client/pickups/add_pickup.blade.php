@@ -115,7 +115,7 @@
                                             <input type="checkbox" name="pickup" class="switch hidden" id="pickup">
                                         </div>
                                     </div>
-                                    <button type="submit" class="btn btn-primary" id="add">Add</button>
+                                    <button type="submit" class="btn btn-primary btn-lg" id="add">Add</button>
                                 </div>
                             </form>
                         </div>

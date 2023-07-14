@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Admins\V2Pickup;
-
+use App\Http\Controllers\Controller;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
@@ -11,14 +11,12 @@ use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
 use App\Http\Models\Shipment;
 use Yajra\Datatables\Datatables;
-use Illuminate\Http\Request as IlluminateRequest;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShipmentPiece;
-use Illuminate\Support\Facades\DB;
-use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use DB;
+use Auth;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\Admin\SalePersonTag;

@@ -3675,7 +3675,7 @@ class ShipperShipmentBookController extends Controller
             $shipment_self_collection->save();
         }
 
-        AdminPickupsController::generate($shipment_id);
+//        AdminPickupsController::generate($shipment_id);
 
         if (session('user_type') != 1) {
             $reference_1_id = Auth::id();

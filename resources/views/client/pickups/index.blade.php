@@ -30,7 +30,7 @@
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">Status</th>
 {{--                        <th class="border-primary border-darken-1">Trax Reason</th>--}}
-{{--                        <th class="border-primary border-darken-1">Trax Remarks</th>--}}
+                        <th class="border-primary border-darken-1">Shipper Remarks</th>
 {{--                        <th class="border-primary border-darken-1">Shipper Remarks</th>--}}
 {{--                        <th class="border-primary border-darken-1">Attempt Date/Time</th>--}}
                         <th class="border-primary border-darken-1">Attempt Count</th>
@@ -481,7 +481,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    {
+                    /*{
                         text: 'Complain',
                         className: 'btn btn-danger complain',
                         enabled: true,
@@ -502,7 +502,7 @@
                                 $('#requested_pickups').html(html_rows);
                             }
                         }
-                    },
+                    },*/
                     {
                         extend: 'excel',
                         title: 'Pickup History',
@@ -584,9 +584,9 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'pickup_request_id', name: 'v3_pickup_requests.id', class: 'align-middle pickup_request_id'},
                     {data: 'requested_at', name: 'v3_pickup_requests.created_at', class: 'align-middle requested_at'},
-                    {data: 'booked_button', name: 'v3_pickup_requests.booked', class: 'text-center align-middle booked'},
+                    {data: 'booked', name: 'v3_pickup_requests.booked', class: 'text-center align-middle booked'},
                     {data: 'received_button', name: 'v3_pickup_requests.received', class: 'text-center align-middle received'},
-                    {data: 'scanned_button', name: 'vrp.shipments', class: 'text-center align-middle scanned'},
+                    {data: 'scanned_button', name: 'v3_pickup_requests.received_wo_scan', class: 'text-center align-middle scanned'},
                     {data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
                     {data: 'vendor', name: 'usi.vendor', class: 'align-middle vendor'},
                     {data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
@@ -594,11 +594,11 @@
                     {data: 'city', name: 'ci.name', class: 'align-middle city'},
                     {data: 'status', name: 'vprs.id', class: 'align-middle status'},
                     // {data: 'reason', name: 'reason', class: 'align-middle reason', orderable: false, searchable: false, width: 200},
-                    // {data: 'remarks', name: 'remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
+                    {data: 'remarks', name: 'v3_pickup_requests.remarks', class: 'align-middle remarks', orderable: false, searchable: false, width: 400},
                     // {data: 'shipper_remarks', name: 'shipper_remarks', class: 'align-middle shipper_remarks', orderable: false, searchable: false, width: 400},
                     // {data: 'attempt_date_time', name: 'attempt_date_time', class: 'align-middle attempt_date_time', orderable: false, searchable: false, width: 400},
                     {data: 'attempts', name: 'v3_pickup_requests.attempts', class: 'align-middle attempt'},
-                    {data: 'view_details', name: '', class: 'align-middle view_details'},
+                    {data: 'view_details', name: '', class: 'align-middle view_details', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -621,7 +621,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.reason') || $(header).is('.view_details') || $(header).is('.remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempt_date_time') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.view_details') || $(header).is('.remarks') || $(header).is('.attempt_date_time') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {

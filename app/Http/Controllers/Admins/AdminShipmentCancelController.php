@@ -300,7 +300,7 @@ class AdminShipmentCancelController extends Controller
 
                 $shipment->save();
 
-                AdminPickupsController::generate($shipment_id);
+//                AdminPickupsController::generate($shipment_id);
 
                 ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
             }
@@ -340,7 +340,7 @@ class AdminShipmentCancelController extends Controller
 
                 $shipment->save();
 
-                AdminPickupsController::generate($shipment->id);
+//                AdminPickupsController::generate($shipment->id);
 
                 ShipmentsJourneyController::add($shipment->id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
                 return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];

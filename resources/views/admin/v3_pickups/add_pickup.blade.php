@@ -107,22 +107,21 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="d-flex justify-content-end align-items-center vh-100">
+                                <div class="d-flex justify-content-center align-items-center vh-100">
                                     <div class="col-6">
                                         <div class="form-group">
                                             <textarea type="text" name="remarks" class="form-control" placeholder="Remarks"></textarea>
                                         </div>
                                     </div>
-
-                                    <div class="col-3">
-                                        <div id="pickup_div" class="form-group text-right p-1 ">
-                                            <label class="d-block">Regular Pickup</label>
+                                </div>
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <div class="col-4">
+                                        <div id="pickup_div" class="form-group text-right p-3">
+                                            <label class="d-block"><strong>Regular Pickup</strong></label>
                                             <input type="checkbox" name="pickup" class="switch hidden" id="pickup">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="text-right">
-                                    <button type="submit" class="btn btn-primary btn-lg" id="add">Add</button>
+                                    <button type="submit" class="btn btn-primary btn-lg" id="add"> Add </button>
                                 </div>
                             </form>
                         </div>
@@ -164,7 +163,6 @@
         $('#preferred_time_range').prepend('<option value="" selected="selected">Select Preferred Time Range</option>').select2({
             width: '100%',
             placeholder: 'Select Preferred Time Range',
-
         });
 
         $('#pickup_type_id').prepend('<option value="" selected="selected">Select Pickup Shipment Type</option>').select2({
@@ -213,15 +211,12 @@
 
         var from_date = $('#pickup_date').pickadate({
             firstDay: 1,
-            // clear: '',
             selectYears: true,
             selectMonths: true,
-            formatSubmit: 'yyyy-mm-dd 00:00:00',
+            formatSubmit: 'yyyy-mm-dd',
             hiddenSuffix: '_formatted',
             min: '{{ Carbon\Carbon::today()}}',
-            onSet: function(context) {
-
-            }
+            onSet: function(context) {}
         });
 
         $('#add_pickup_request').validate({

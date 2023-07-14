@@ -88,7 +88,7 @@ class AutoDeliveryNoteVerify extends Command
                             ShipmentsJourneyController::add($shipments_journey->shipment_id, $shipments_journey->shipper_status_id, $shipments_journey->consignee_status_id, $shipments_journey->status_reason_id, $shipments_journey->remarks, $shipments_journey->user_id, 346, $shipments_journey->reference_1_id, $shipments_journey->reference_2_id, 1, $shipments_journey->received_or_refused_by, $shipments_journey->rider_id);
                             if($shipment->shipper_status_id == 14){
                                 if($shipment->booking_type_id == 1){
-                                        if (($shipment->packaging_material_request == 1 && $shipment->packaging_material_charges != '') || $shipment->packaging_material_request == 0) {
+                                        if (($shipment->packaging_material_request == 1 && $shipment->packaging_material_charges != null) || $shipment->packaging_material_request == 0) {
                                             AdminFinanceController::add_payment($shipment->id, 0);
                                         }
 
