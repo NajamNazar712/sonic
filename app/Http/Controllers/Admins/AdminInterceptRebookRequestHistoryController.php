@@ -304,7 +304,7 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                          if($rcp_assigned_shipment->admin_id == Auth::id()){
 
                              $rcp_assigned_shipment->shipment_status = 8; //intercept approved request
-                             $rcp_assigned_shipment->assigned_status = 2; //intercept approved request
+                            //  $rcp_assigned_shipment->assigned_status = 2; //intercept approved request
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
                              
@@ -334,20 +334,19 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
 
-                             //creating log for intercept approved
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                             $return_assign_log->status = 2; //unassigning shipment from agent
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
+                            //  $return_assign_log = new RcpAssignedShipmentLog();
+                            //  $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            //  $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            //  $return_assign_log->status = 2; //unassigning shipment from agent
+                            //  $return_assign_log->admin_id = Auth::id();
+                            //  $return_assign_log->save();
 
                              }
                              
                             //If admin is updating the status update rcp_assigned_shipment & log
                              else{
                              $rcp_assigned_shipment->shipment_status = 8; //intercept approved
-                             $rcp_assigned_shipment->assigned_status = 2;
+                            //  $rcp_assigned_shipment->assigned_status = 2;
                              $rcp_assigned_shipment->admin_id = Auth::id();
                              $rcp_assigned_shipment->save();
 
@@ -373,13 +372,12 @@ class AdminInterceptRebookRequestHistoryController extends Controller
                              $return_assign_log->admin_id = Auth::id();
                              $return_assign_log->save();
 
-                             //creating log for intercept approved
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                             $return_assign_log->status = 2; //unassigning shipment from agent
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
+                            //  $return_assign_log = new RcpAssignedShipmentLog();
+                            //  $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                            //  $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                            //  $return_assign_log->status = 2; //unassigning shipment from agent
+                            //  $return_assign_log->admin_id = Auth::id();
+                            //  $return_assign_log->save();
                              }
                      }
 
