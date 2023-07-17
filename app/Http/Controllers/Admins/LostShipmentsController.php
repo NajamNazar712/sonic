@@ -603,10 +603,9 @@ class LostShipmentsController extends Controller
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
                         $shipment = Shipment::where('tracking_number', $tracking)
-                        // ->whereNotIn('shipper_status_id', $status_array)
+                        ->whereNotIn('shipper_status_id', $status_array)
                         ->first();
                         if ($shipment->exists()) {
-                            $data = array();
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -646,10 +645,9 @@ class LostShipmentsController extends Controller
                         }
                         $tracking_numbers['Row #' . $row_id] = $tracking;
                         ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
-                        dd($data);
-                        return response()->json(['status' => 1, 'details' => $data]);
                         
                     }
+                    return response()->json(['status' => 1, 'details' => $data]);
                     // dd($data);
                     return redirect()->back()->with(['success' => 'Bulk Lost Update']);
 

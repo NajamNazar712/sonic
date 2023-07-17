@@ -317,27 +317,46 @@
                     success: function(data) {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
-                                id = data.details.shipment.id;
-                                console.log(data.details);
+                                var shipmentData = data.details;
+                                console.log(shipmentData); 
+                                id = data.details;
+                                console.log(id);
                                 var index = $.inArray(id, shipment_ids);
-
-                                if (index === -1) {
-                                    var rowNo = table.rows().count();
-
-                                    var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
-                                    table.draw(false);
-                                    scan_sound(1);
-                                    table.order([0, 'desc']).draw();
-
-                                    shipment_ids.push(data.details.id);
-
-                                    $('#lost_shipment_form button.add').prop('disabled', false);
-
-                                    $('#update_lost_form_submit').prop('disabled', false);
-
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
+                                $.each(shipmentData, function (id, shipment) {
+                                    // $.each(shipmentData, function(id, shipment2){
+                                       
+                                       if (index === -1) {
+                                           var rowNo = table.rows().count();
+       
+                                           var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                           table.row.add([
+                                           rowNo + 1,
+                                           shipment.tracking_number,
+                                           shipment.shipper_name,
+                                           shipment.origin,
+                                           shipment.destination,
+                                           shipment.hub,
+                                           shipment.amount,
+                                           shipment.remarks,
+                                           shipment.mode,
+                                           shipment.service_type,
+                                           action
+                                       ]).node().id = id;
+       
+                                           table.draw(false);
+                                           scan_sound(1);
+                                           table.order([0, 'desc']).draw();
+       
+                                           shipment_ids.push(id);
+       
+                                           $('#lost_shipment_form button.add').prop('disabled', false);
+       
+                                           $('#update_lost_form_submit').prop('disabled', false);
+       
+                                           toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                       }
+                                    // });
+                            });
                             }
                             else{
                                 // Handle error response and display errors
