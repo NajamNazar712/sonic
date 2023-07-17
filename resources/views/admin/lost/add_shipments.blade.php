@@ -293,6 +293,7 @@
 
             submitHandler: function(form) {
                 // Disable the submit button to prevent multiple submissions
+                
                 $('#excel_upload_form button.upload').prop('disabled', true);
 
                 // Get the file input element and selected file
@@ -317,7 +318,7 @@
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 id = data.details.id;
-
+                                
                                 var index = $.inArray(id, shipment_ids);
 
                                 if (index === -1) {

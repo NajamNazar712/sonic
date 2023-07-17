@@ -535,12 +535,13 @@ class LostShipmentsController extends Controller
 
             if (!empty($spreadsheet) || !isset($spreadsheet)) {
                 $rows = array();
+                
                 foreach ($spreadsheet as $spreadsheet_row) {
                     $row = array();
 
                     foreach ($spreadsheet_row as $key => $value) {
                         $row[$fields[$key]] = $value;
-                        // dd($value);
+                       
                     }
 
                     $rows[] = $row;
@@ -602,7 +603,8 @@ class LostShipmentsController extends Controller
                         $shipment = Shipment::where('tracking_number', $tracking)->whereNotIn('shipper_status_id', $status_array)->first();
                         if ($shipment->exists()) {
                             $data = array();
-                            $shipment = $shipment->first();
+                            // $shipment = $shipment->find();
+                            
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -639,7 +641,7 @@ class LostShipmentsController extends Controller
                             $data['mode'] = $shipment->shipping_mode->mode;
                             $data['service_type'] = $shipment->booking_type->booking_type;
                             $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
-
+                            // dd($data);
                             ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
                             return response()->json(['status' => 1, 'details' => $data]);
                         }
