@@ -4,25 +4,42 @@ namespace App\Http\Traits;
 
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\InterceptReBookRequestHistory;
 use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Models\ReturnAssignedShipmentLogs;
+use App\Http\Models\ReturnAssignedShipments;
 use App\Http\Models\RvAssignAgentStatus;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 trait RvTrait
 {
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function getShipmentConsigneeCities($shipment_id)
     {
         if (!empty($shipment_id)) {
@@ -51,7 +68,10 @@ trait RvTrait
         ];
     }
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function newRvShipmentAssign($data)
     {
         try {
@@ -73,6 +93,10 @@ trait RvTrait
         }
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function makeRvShipmentAssignAgentDetails($shipment_assign_agent, $request)
     {
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
@@ -93,6 +117,10 @@ trait RvTrait
         return true;
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     private function shipment_assign_agent_table_columns($request, $assign_agent)
     {
         return [
@@ -108,6 +136,10 @@ trait RvTrait
         ];
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function updateShipmentAssignAgent($request, $assign_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assign_agent);
@@ -126,6 +158,10 @@ trait RvTrait
         return true;
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function changeShipmentStatus($request)
     {
         if ($request->rv_assign_agent_status_id) {
@@ -159,6 +195,10 @@ trait RvTrait
         }
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function return_confirm($request)
     {
         $remarks = $request->remarks;
@@ -176,16 +216,13 @@ trait RvTrait
         if (!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-
-
-
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
 
             if ($parcel->shipment_type == 1) {
                 if ($parcel->booking_type_id != 4) {
                     ShipmentChargesController::return($request->shipment_id);
-
+                    
                     if ($parcel->packaging_material_request != 1) {
                         AdminFinanceController::add_payment($request->shipment_id, 1);
                     }
@@ -204,8 +241,12 @@ trait RvTrait
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
-        
     }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function reattempt($request)
     {
         $remarks = $request->remarks;
@@ -219,7 +260,7 @@ trait RvTrait
             } else {
             }
         }
-        
+
         if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
@@ -260,9 +301,13 @@ trait RvTrait
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Re-Attempt"];
         }
-        return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];       
+        return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
     }
-    
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     private function update_estimate_charges($shipment, $charge)
     {
         $shipment_id = $shipment;
@@ -290,7 +335,10 @@ trait RvTrait
         }
     }
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function add_osa_charges($shipment, $charge) //function to add in logs table //call from reattempt function
     {
         $nsa_charges_log = new OsaChargesLog();
@@ -300,20 +348,25 @@ trait RvTrait
         $nsa_charges_log->save();
     }
 
-    public function assign_agent(Request $request){
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    public function assign_agent(Request $request)
+    {
         $shipment_ids = $request->shipment_ids;
-        if($shipment_ids){
-            foreach ($shipment_ids as $shipment_id){
+        if ($shipment_ids) {
+            foreach ($shipment_ids as $shipment_id) {
                 $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $shipment_id)->where('status', 1)->first();
-                if($check_already_assigned){
+                if ($check_already_assigned) {
                     $check_already_assigned->status = 0;
                     $check_already_assigned->save();
 
-                            $return_assign_log = new ReturnAssignedShipmentLogs();
-                            $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
-                            $return_assign_log->status = 4;
-                            $return_assign_log->assigned_by = Auth::id();
-                            $return_assign_log->save();
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                    $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                    $return_assign_log->status = 4;
+                    $return_assign_log->assigned_by = Auth::id();
+                    $return_assign_log->save();
                 }
                 $assign_shipments = new ReturnAssignedShipments();
                 $assign_shipments->admin_id = $request->admin_id;
@@ -323,50 +376,54 @@ trait RvTrait
                 $assign_shipments->save();
 
                 $return_assign_log = new ReturnAssignedShipmentLogs();
-                            $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
-                            $return_assign_log->status = 0;
-                            $return_assign_log->assigned_by = Auth::id();
-                            $return_assign_log->save();
+                $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                $return_assign_log->status = 0;
+                $return_assign_log->assigned_by = Auth::id();
+                $return_assign_log->save();
 
                 //set record in login/logut table
-                $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
-                
-                if(!$check_agent_return_confrimation->exists()){
+                // $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
 
-                 
-                    $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                     ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
-                     
-                     if($agent_role->exists()){
-                         $agent_return_confrimation = new AgentReturnConfirmation;
-                         $agent_return_confrimation->admin_id = $request->admin_id;
-                         $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                         $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                         $agent_return_confrimation->save();
-                     }
-                 }
-                 else{
-                    $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
-                    $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                    $check_agent_return_confrimation->save();
-                 }
+                // if(!$check_agent_return_confrimation->exists()){
+
+
+                //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                //      ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
+
+                //      if($agent_role->exists()){
+                //          $agent_return_confrimation = new AgentReturnConfirmation;
+                //          $agent_return_confrimation->admin_id = $request->admin_id;
+                //          $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                //          $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                //          $agent_return_confrimation->save();
+                //      }
+                //  }
+                //  else{
+                //     $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
+                //     $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                //     $check_agent_return_confrimation->save();
+                //  }
                 //set record in login/logut table end
-                
+
             }
             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
-        }
-        else{
+        } else {
             return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
         }
     }
 
-    public function unassign_agent(Request $request){
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    public function unassign_agent(Request $request)
+    {
         $shipment_ids = $request->shipment_ids;
 
-        if($request->action == 'un-assign'){
-            foreach ($shipment_ids as $shipment){
+        if ($request->action == 'un-assign') {
+            foreach ($shipment_ids as $shipment) {
                 $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->where('status', 1);
-                if($return_assign_shipment->exists()){
+                if ($return_assign_shipment->exists()) {
                     $return_assign_shipment = $return_assign_shipment->latest()->first();
                     $return_assign_shipment->status = 0;
                     $return_assign_shipment->save();
@@ -379,13 +436,16 @@ trait RvTrait
                     $return_assign_log->save();
                 }
             }
-            return ['status'=>1,'success'=>"Agent Unassigned successfully"];
-
+            return ['status' => 1, 'success' => "Agent Unassigned successfully"];
         }
     }
 
-    //Assigning Unassigning Agents from Excel Sheet
-    public function assign_agent_excel(Request $request){
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Assigning Unassigning Agents from Excel Sheet
+    public function assign_agent_excel(Request $request)
+    {
         $names = [
             'tracking_number' => 'Tracking Number',
             'agent_id' => 'Agent ID'
@@ -406,7 +466,7 @@ trait RvTrait
         ];
         $fields = [0 => 'tracking_number', 1 => 'agent_id'];
 
-        if($file = $request->file('shipments')) {
+        if ($file = $request->file('shipments')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
@@ -417,9 +477,8 @@ trait RvTrait
             $header_correct = TRUE;
 
             foreach ($spreadsheet[0] as $index => $header_value) {
-                if($index == 1){
-                }
-                elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                if ($index == 1) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
                     $header_correct = FALSE;
                     break;
                 }
@@ -427,8 +486,7 @@ trait RvTrait
 
             if (!$header_correct) {
                 return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
-            }
-            else {
+            } else {
                 unset($spreadsheet[0]);
             }
         }
@@ -450,9 +508,9 @@ trait RvTrait
             $tracking_id_row = array();
             foreach ($rows as $key => $row) {
                 $row_id = $key + 2;
-                if(!empty($row['agent_id'])) {
+                if (!empty($row['agent_id'])) {
                     $validate = Validator::make($row, $rules_with_agent, $messages);
-                }else{
+                } else {
                     $validate = Validator::make($row, $rules_without_agent, $messages);
                 }
 
@@ -466,12 +524,10 @@ trait RvTrait
                         if (empty($tracking_ids)) {
                             $tracking_ids[] = $row['tracking_number'];
                             $tracking_id_row[$row['tracking_number']] = $row_id;
-                        }
-                        else {
+                        } else {
                             if (in_array($row['tracking_number'], $tracking_ids)) {
                                 $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                            }
-                            else {
+                            } else {
                                 $tracking_ids[] = $row['tracking_number'];
                                 $tracking_id_row[$row['tracking_number']] = $row_id;
                             }
@@ -480,14 +536,14 @@ trait RvTrait
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
-                    if(!empty($row['agent_id'])) { //if agent = 1 or 2 or 3
+                    if (!empty($row['agent_id'])) { //if agent = 1 or 2 or 3
                         if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->where('a.status', 1)->where('a.id', $row['agent_id'])->exists()) {
                             $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id']; //remove for ticket no 4934
                         }
                     }
                 }
             }
-            if(empty($errors)){
+            if (empty($errors)) {
                 $tracking_numbers = array();
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
@@ -496,14 +552,14 @@ trait RvTrait
 
                     $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
                     $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
-                    if($check_already_assigned){
+                    if ($check_already_assigned) {
                         $check_already_assigned->status = 0;
                         $check_already_assigned->save();
-                                $return_assign_log = new ReturnAssignedShipmentLogs();
-                                $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
-                                $return_assign_log->status = 4;
-                                $return_assign_log->assigned_by = Auth::id();
-                                $return_assign_log->save();
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                        $return_assign_log->status = 4;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
                     }
                     $assign_shipments = new ReturnAssignedShipments();
                     $assign_shipments->admin_id = $agent_id;
@@ -521,65 +577,64 @@ trait RvTrait
 
                     //if agent is !empty
 
-                    if(!empty($agent_id)){
-                        $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
+                    // if(!empty($agent_id)){
+                    //     $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
 
-                        if(!$check_agent_return_confrimation->exists()){
-                            $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                                ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
+                    //     if(!$check_agent_return_confrimation->exists()){
+                    //         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                    //             ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
 
-                            if($agent_role->exists()){
-                                $agent_return_confrimation = new AgentReturnConfirmation;
-                                $agent_return_confrimation->admin_id = $agent_id;
-                                $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                                $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                                $agent_return_confrimation->save();
-                            }
-                        }
-                        else{
-                            $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
-                            $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                            $check_agent_return_confrimation->save();
-                        }
+                    //         if($agent_role->exists()){
+                    //             $agent_return_confrimation = new AgentReturnConfirmation;
+                    //             $agent_return_confrimation->admin_id = $agent_id;
+                    //             $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //             $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                    //             $agent_return_confrimation->save();
+                    //         }
+                    //     }
+                    //     else{
+                    //         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
+                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //         $check_agent_return_confrimation->save();
+                    //     }
 
-                    }else {
-                        //if agent data is empty
-                        $check_agent_return_confrimation = AgentReturnConfirmation::
-                                where('return_assigned_shipment_id', $assign_shipments->id)
-                                    ->orderby('current_date','desc')->first();
-                        if(!empty($check_agent_return_confrimation)) {
-                            $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                            $check_agent_return_confrimation->save();
-                        }
+                    // }else {
+                    //     //if agent data is empty
+                    //     $check_agent_return_confrimation = AgentReturnConfirmation::
+                    //             where('return_assigned_shipment_id', $assign_shipments->id)
+                    //                 ->orderby('current_date','desc')->first();
+                    //     if(!empty($check_agent_return_confrimation)) {
+                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //         $check_agent_return_confrimation->save();
+                    //     }
 
-                    }
+                    // }
                     //set record in login/logut table end
 
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
-
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                     return $row . ': ' . $tracking_number;
                 }, array_keys($tracking_numbers), $tracking_numbers));
 
                 return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
-            }
-            else{
+            } else {
                 $errors = array_map(function ($row, $errors) {
                     return $row . ':' . PHP_EOL . implode(' | ', $errors);
                 }, array_keys($errors), $errors);
 
                 return redirect()->back()->withErrors($errors);
             }
-
-        }
-        else {
+        } else {
             return redirect()->back()->with('error', 'No Shipments in File');
         }
     }
 
 
-    //for bulk shipments
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: for bulk shipments
     public function return_confirm_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
@@ -649,7 +704,10 @@ trait RvTrait
         }
     }
 
-    // Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
     public function excel_store(Request $request)
     {
         $names = [
@@ -813,7 +871,7 @@ trait RvTrait
                                 $shipment_details->save();
                                 ShipmentChargesController::nsa_osa_charges($shipment_details->id);
 
-                                $check = $this->update_estimatecharges($shipment_details->id, $estimation_charges);
+                                $check = $this->update_estimate_charges($shipment_details->id, $estimation_charges);
 
                                 NotificationsController::send(33, $shipment_details->id);
                             } else if ($shipment_details->shipper_status_id == 52) {
@@ -866,6 +924,10 @@ trait RvTrait
         }
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function return_marked_single_status(Request $request)
     {
         $remark = $request->remark;
@@ -928,14 +990,14 @@ trait RvTrait
             $parcel = Shipment::find($request->shipment_id);
             if ($request->has('charges')) {
                 if ($request->charges != null) {
-                    $check = $this->update_estimatecharges($request->shipment_id, $request->charges);
+                    $check = $this->update_estimate_charges($request->shipment_id, $request->charges);
                     if ($check != 0) {
                         return ['status' => 0, 'error' => "Shipment not found on Estimation Charges"];
                     }
                 } else {
                 }
             }
-            
+
             if (!in_array($parcel->shipper_status_id, [13, 20]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
                 $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [12, 52])->latest('id')->first();
 
@@ -994,9 +1056,12 @@ trait RvTrait
         }
     }
 
-    //Working on Reattempt button on top for bulk shipments
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Reattempt for bulk shipments
     public function return_reattempt_status(Request $request)
-    { //update to status 20 for confirm and 13 for re-attempt
+    {
         $shipment_ids = $request->shipment_ids;
 
         if ($request->action == 'reattempt') {
@@ -1061,6 +1126,10 @@ trait RvTrait
         }
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function change_status_to_self_collection(Request $request)
     {
         $shipmentId = $request->shipment_id;
@@ -1111,8 +1180,10 @@ trait RvTrait
         }
     }
 
-
-    // This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
     public function intercept_re_book_update(Request $request)
     {
         $rules = [
@@ -1166,7 +1237,7 @@ trait RvTrait
                             $shipment->save();
 
                             ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, Auth::id());
-                        } 
+                        }
 
                         //Same Consignee
                         else {
@@ -1227,7 +1298,10 @@ trait RvTrait
         }
     }
 
-        // Used in Delivery Controller Approving Intercept Request
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Used in Delivery Controller Approving Intercept Request
     public function approve(Request $request)
     {
         $shipment_ids = $request->ids;
@@ -1323,7 +1397,10 @@ trait RvTrait
         }
     }
 
-    // Used in Delivery Controller Rejecting Intercept Request
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Used in Delivery Controller Rejecting Intercept Request
     public function reject(Request $request)
     {
         $shipment_ids = $request->ids;
@@ -1382,6 +1459,387 @@ trait RvTrait
             return ['status' => 1, 'error' => 'No Shipment Selected'];
         }
     }
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    static public function auto_reattempt_status_for_max_delivery_ratio($shipment_id)
+    {
+        $global_admin = 346;
+
+        $shipment = Shipment::find($shipment_id);
+        if ($shipment) {
+            $reattempt_percentage = ReattemptPercentageForShipper::where('user_id', $shipment->user_id);
+            if ($reattempt_percentage->exists()) {
+                $reattempt_percentage = $reattempt_percentage->first();
+                $percentage = $reattempt_percentage->percentage;
+
+                $check_switch = GlobalSettings::where('type', 'reattempt_flag');
+                if ($check_switch->exists()) {
+                    $check_switch = $check_switch->first();
+                    if ($check_switch->setting_value == 1) {
+                        $check_count = GlobalSettings::where('type', 'reattempt_count');
+                        $count_limit = 2;
+                        if ($check_count->exists()) {
+                            $check_count = $check_count->first();
+                            $count_limit = $check_count->setting_value;
+                        }
+                        if ($count_limit > $reattempt_percentage->count) {
+                            $settings = GlobalSettings::where('type', 'reattempt_percentage');
+                            $percentage_limit = 60;
+
+                            if ($settings->exists()) {
+                                $settings = $settings->first();
+                                $percentage_limit = $settings->setting_value;
+                            }
+                            if ($percentage < $percentage_limit) {
+                                return true;
+                            }
+                            $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+                            if ($journey) {
+                                if (in_array($journey->status_reason_id, [12, 34, 40, 42, 50, 67, 69, 75])) {
+                                    return true;
+                                }
+                            }
+
+                            $shipment->shipper_status_id = 13;
+                            $shipment->consignee_status_id = 13;
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, 'Auto re-attempt status due to better Delivery Ratio', NULL, $global_admin);
+
+                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                            if ($return_assign_shipment) {
+                                $return_assign_shipment->status = 0;
+                                $return_assign_shipment->save();
+
+                                $return_assign_log = new ReturnAssignedShipmentLogs();
+                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                                $return_assign_log->status = 1;
+                                $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                                $return_assign_log->save();
+                            }
+
+                            NotificationsController::send(15, 0, $shipment_id);
+                            NotificationsController::send(16, 0, $shipment_id);
+                            $reattempt_percentage->count += 1;
+                            $reattempt_percentage->save();
+
+                            $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                            $reattempt_remarks_col->shipment_id = $shipment_id;
+                            $reattempt_remarks_col->remarks = 'Automatic';
+                            $reattempt_remarks_col->save();
+                        }
+                    }
+                } else {
+                    $check_count = GlobalSettings::where('type', 'reattempt_count');
+                    $count_limit = 2;
+                    if ($check_count->exists()) {
+                        $check_count = $check_count->first();
+                        $count_limit = $check_count->setting_value;
+                    }
+                    if ($count_limit > $reattempt_percentage->count) {
+                        $settings = GlobalSettings::where('type', 'reattempt_percentage');
+                        $percentage_limit = 60;
+                        if ($settings->exists()) {
+                            $settings = $settings->first();
+                            $percentage_limit = $settings->setting_value;
+                        }
+                        if ($percentage < $percentage_limit) {
+                            return true;
+                        }
+                        $journey = ShipmentsJourney::where('shipment_id', $shipment_id)->where('shipper_status_id', 12)->latest('id')->first();
+                        if ($journey) {
+                            if (in_array($journey->status_reason_id, [12, 34, 40, 42, 50, 67, 69, 75])) {
+                                return true;
+                            }
+                        }
+
+
+                        $shipment->shipper_status_id = 13;
+                        $shipment->consignee_status_id = 13;
+                        $shipment->save();
+
+
+                        ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, 'Auto re-attempt status due to better Delivery Ratio', NULL, $global_admin);
+
+                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                        // if($return_assign_shipment){
+                        //     $return_assign_shipment->status = 0;
+                        //     $return_assign_shipment->save();
+
+                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        //     $return_assign_log->status = 1;
+                        //     $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                        //     $return_assign_log->save();
+                        // }
+
+                        NotificationsController::send(15, 0, $shipment_id);
+                        NotificationsController::send(16, 0, $shipment_id);
+
+                        $reattempt_percentage->count += 1;
+                        $reattempt_percentage->save();
+                        $reattempt_remarks_col = new ReattemptShipmentStatusRemarks;
+                        $reattempt_remarks_col->shipment_id = $shipment_id;
+                        $reattempt_remarks_col->remarks = 'Automatic';
+                        $reattempt_remarks_col->save();
+                    }
+                }
+            }
+        }
+    }
+
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: RetailReturnController's Function for reattempt 
+    public function mark_reattempt(Request $request)
+    {
+        $parcel = Shipment::find($request->shipment_id);
+        if ($parcel) {
+            if ($parcel->shipper_status_id != 52) {
+                if ($parcel->shipper_status_id == 12) {
+                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+
+                    if (session('user_type') != 1) {
+                        $reference_1_id = Auth::id();
+                    } else {
+                        $reference_1_id = null;
+                    }
+                    $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
+                    if ($last_reason->exists()) {
+                        $last_reason = $last_reason->first();
+                        $last_reason_id = $last_reason->status_reason_id;
+                    } else {
+                        $last_reason_id = NULL;
+                    }
+                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
+
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                    if ($return_assign_shipment) {
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 5;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
+                    }
+
+                    if ($journey) {
+                        NotificationsController::send(33, $request->shipment_id);
+                    }
+
+                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                } else {
+                    return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
+                }
+            }
+            return ['status' => 0, 'error' => "Shipment is already updated, Please check tracking!"];
+        }
+        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
+    }
+
+
+    //Shipper Controller Functions
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    public function shipper_return_marked_single_status(Request $request)
+    {
+        $parcel = Shipment::find($request->shipment_id);
+        if ($parcel) {
+            if ($parcel->shipper_status_id == 12) {
+
+                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                $shipment_history = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+
+                ShipmentChargesController::return($request->shipment_id);
+                AdminFinanceController::add_payment($request->shipment_id, 1);
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
+
+                $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id);
+                if ($return_assign_shipment->exists()) {
+                    $return_assign_shipment = $return_assign_shipment->latest()->first();
+                    $return_assign_shipment->status = 0;
+                    $return_assign_shipment->save();
+
+                    $return_assign_log = new ReturnAssignedShipmentLogs();
+                    $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                    $return_assign_log->status = 2;
+                    $return_assign_log->assigned_by = Auth::id();
+                    $return_assign_log->save();
+                }
+                return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
+            }
+            return ['status' => 0, 'error' => "Something went wrong, try again later!"];
+        }
+        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
+    }
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    public function return_reattempt_single_status(Request $request)
+    {
+        $parcel = Shipment::find($request->shipment_id);
+        if ($parcel) {
+            if ($parcel->shipper_status_id != 52) {
+                if ($parcel->shipper_status_id == 12) {
+                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
+                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+
+                    if (session('user_type') != 1) {
+                        $reference_1_id = Auth::id();
+                    } else {
+                        $reference_1_id = null;
+                    }
+                    $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
+                    if ($last_reason->exists()) {
+                        $last_reason = $last_reason->first();
+                        $last_reason_id = $last_reason->status_reason_id;
+                    } else {
+                        $last_reason_id = NULL;
+                    }
+                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
+
+                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                    if ($return_assign_shipment) {
+                        $return_assign_shipment->status = 0;
+                        $return_assign_shipment->save();
+
+                        $return_assign_log = new ReturnAssignedShipmentLogs();
+                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                        $return_assign_log->status = 5;
+                        $return_assign_log->assigned_by = Auth::id();
+                        $return_assign_log->save();
+                    }
+
+                    if ($journey) {
+                        NotificationsController::send(33, $request->shipment_id);
+                    }
+
+                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
+                } else {
+                    return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
+                }
+            }
+            return ['status' => 0, 'error' => "Shipment is already updated, Please check tracking!"];
+        }
+        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
+    }
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: ShipperInterceptRebookcontroller
+    public function shipper_intercept_re_book_update(Request $request)
+    {
+        $rules = [
+            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
+        ];
+        $validate = Validator::make($request->all(), $rules);
+        if ($validate->fails()) {
+            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+        } else {
+            $s_amount = str_replace(",", "", $request->amount);
+            $amount = intval($s_amount);
+            $shipment = Shipment::find($request->shipment_id);
+            $user_id = session('user_id');
+            $intercept_type = $request->consignee;
+
+            $shipment_status = $shipment->status_shipper->name;
+
+            if ($shipment['shipper_status_id'] == 12) {
+                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
+                    if ($shipment['intercepted'] == 1) {
+                        return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
+                    } else {
+                        $s_amount = str_replace(",", "", "$request->amount");
+                        $amount = (int)$s_amount;
+                        if ($intercept_type == 1) {
+                            InterceptReBookRequest::create([
+                                'shipment_id' => $request->shipment_id,
+                                'consignee_city_id' => $request->consignee_city,
+                                'consignee_name' => $request->consignee_name,
+                                'consignee_address' => $request->consignee_address,
+                                'consignee_phone_number_1' => $request->consignee_phone_number_1,
+                                'consignee_phone_number_2' => $request->consignee_phone_number_2,
+                                'consignee_email' => $request->consignee_email,
+                                'amount' => $amount,
+                                'shipper_id' => $user_id,
+                                'status' => 0,
+                                'intercept_type' => $intercept_type,
+                                'admin_id' => Auth::id()
+                            ]);
+                            $shipment->consignee_status_id = 54;
+                            $shipment->shipper_status_id = 54;
+                            $shipment->intercepted = 1;
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
+                        } else {
+
+                            InterceptReBookRequestHistory::create([
+                                'shipment_id' => $request->shipment_id,
+                                'old_consignee_city_id' => $shipment->consignee_city_id,
+                                'new_consignee_city_id' => $request->consignee_city,
+                                'old_consignee_name' => $shipment->consignee_name,
+                                'new_consignee_name' => $request->consignee_name,
+                                'old_consignee_address' => $shipment->consignee_address,
+                                'new_consignee_address' => $request->consignee_address,
+                                'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                                'new_consignee_phone_number_1' => $request->consignee_phone_number_1,
+                                'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                                'new_consignee_phone_number_2' => $request->consignee_phone_number_2,
+                                'old_consignee_email' => $shipment->consignee_email,
+                                'new_consignee_email' => $request->consignee_email,
+                                'old_amount' => $shipment->amount,
+                                'new_amount' => $amount,
+                                'shipper_id' => $user_id,
+                            ]);
+                            $shipment->consignee_status_id = 55;
+                            $shipment->shipper_status_id = 55;
+                            $shipment->intercepted = 1;
+                            $shipment->save();
+
+                            ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
+
+                            if ($request->hasFile('replacement_parcel_image')) {
+                                $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
+                                if ($shipment_parcel_image->exists()) {
+                                    $shipment_parcel_image = $shipment_parcel_image->first();
+                                    Storage::disk('public')->delete($shipment_parcel_image->picture_path);
+                                } else {
+                                    $shipment_parcel_image = new ShipmentReplacementParcelImage();
+                                    $shipment_parcel_image->shipment_id = $request->shipment_id;
+                                }
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
+                                $shipment_parcel_image->picture_path = $picture_path;
+                                $shipment_parcel_image->save();
+                            }
+                        }
+                        return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
+                    }
+                } else {
+                    return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
+                }
+            } else {
+                return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
+            }
+        }
+    }
+
 
 
     //     public function update_rv_assigned_shipment_status($rv_assigned_shipment, $status, $column_name){
