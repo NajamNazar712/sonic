@@ -4256,6 +4256,7 @@ class ReturnController extends Controller
             foreach($request->shipment_ids as $shipments)
             {
                 $shipment = Shipment::find($shipments);
+                $remark = $request->remark[$shipment->id] ?? NULL;
                 $flag = true;
                 $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
                 if($consolidation){
@@ -4286,7 +4287,7 @@ class ReturnController extends Controller
                                     $return_reattempt->save();
                                 }
 
-                                ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, NULL, NULL, Auth::id());
+                                ShipmentsJourneyController::add($is_shipment->id, 13, 13, NULL, $remark, NULL, Auth::id());
                                 if($is_shipment->shipment_type == 1) {
                                     AdminFinanceController::return_confirmed_revert($is_shipment->id, 1);
                                 }
@@ -4307,7 +4308,7 @@ class ReturnController extends Controller
                             }
 
 
-                            ShipmentsJourneyController::add($shipments, 13, 13, NULL, NULL, NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipments, 13, 13, NULL, $remark, NULL, Auth::id());
                             if($shipment->shipment_type == 1){
                                 AdminFinanceController::return_confirmed_revert($shipments, 1);
                             }
