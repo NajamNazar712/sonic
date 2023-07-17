@@ -8,11 +8,13 @@ use Exception;
 use Carbon\Carbon;
 use App\Http\Models\City;
 use Illuminate\Http\Request;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\RvAgentAssignHub;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\ActivityTrailController;
 
 class TeamLeadDashboardController extends Controller
 {
@@ -205,112 +207,31 @@ class TeamLeadDashboardController extends Controller
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    if ($result->request_status_id == 1 || $result->request_status_id == 2) {
-                        if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item approve" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
-
-                            $dropdown .= '<button type="button" class="dropdown-item reject" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Reject</div></button>';
-                        }
-                    }
                     if ($result->staff_category_id == 3) {
                         if ((session('role_id') == 1 || in_array(session('permissions')))) {
 
                             $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
 
-                            if ($result->staff_category_id == 2) {
-                                $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
-                            }
+                         
                         }
+
+                        if ($result->status_id == 1) {
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
+                            }
+
+                        }
+
 
                         if ($result->status_id == 2) {
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                             }
 
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                if ($result->first_inactive == 1) {
-                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
-                                }
-                            }
                         }
                     }
 
-                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
-
-                            if ($result->staff_category_id == 2) {
-                                $dropdown .= '<button type="button" class="dropdown-item convert_intern_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Intern To Staff</div></button>';
-                            }
-                        }
-
-                        if ($result->status_id == 2) {
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
-                            }
-
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                if ($result->first_inactive == 1) {
-                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Staff</div></button>';
-                                }
-                            }
-                        }
-                    }
-
-
-
-                    if ($result->request_status_id == 3 && $result->employee_type_id == 2) {
-                        if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                            $dropdown .= '<button type="button" class="dropdown-item update_rider" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
-                        }
-
-                        if ($result->status_id != 2) {
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                if ($result->active_rider_type_id == 1) {
-                                    $dropdown .= '<button type="button" class="dropdown-item incentive" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Incentive</div></button>';
-                                } else {
-                                    $dropdown .= '<button type="button" class="dropdown-item permanent" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Mark Rider Permanent</div></button>';
-                                }
-                            }
-
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item blacklist" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Blacklist Rider</div></button>';
-                            }
-
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
-
-                                $dropdown .= '<button type="button" class="dropdown-item convert_rider_to_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Convert Rider To Staff</div></button>';
-                            }
-                        }
-
-                        if ($result->status_id == 2 && $result->check_if_rider_present_bit != null) {
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item activate" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
-                            }
-
-                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                if ($result->first_inactive == 1) {
-                                    $dropdown .= '<button type="button" class="dropdown-item rejoin" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Rejoin Rider</div></button>';
-                                }
-                            }
-                        }
-                    }
-
-                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        $route = route("admin.human_resource.employee_directory.edit", $result->employee_id);
-                        $dropdown .= '<button class="dropdown-item update_pin_btn"  data-toggle="modal" data-target="#UpdatePinModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Bolt & Sonic Pin</div></div></button><a href="' . $route . '"><button class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Update Details</div></div></button></a>';
-                    }
-
-                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        if ($result->employee_type_id == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item designation_logs_1" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Designation Change Logs</div></button>';
-                        }
-                    }
-                    if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                        $dropdown .= '<button type="button" class="dropdown-item employee_log" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-eye"></i></div><div class="col-9 offset-1">Employee Log</div></button>';
-                    }
+               
                     $dropdown .= '
                 </div>
               </div>
@@ -360,6 +281,37 @@ class TeamLeadDashboardController extends Controller
         } catch (Exception $ex) {
 
             return redirect()->route('admin.team_lead.index')->with('error', $ex->getMessage());
+        }
+    }
+
+
+    public function deactivate_staff(Request $request)
+    {
+        $get_employee = Employee::where('id', $request->employee_id);
+
+        if($get_employee->exists())
+        {
+            $get_employee->update([
+                'status_id' => '2',
+            ]);
+        }
+
+        $role = Admin::where('id', Auth::id())->first();
+        
+        NotificationsController::send(218, Auth::id(), $role->role->name);
+
+    }
+
+
+    public function activate_staff(Request $request)
+    {
+        $get_employee = Employee::where('id', $request->employee_id);
+
+        if($get_employee->exists())
+        {
+            $get_employee->update([
+                'status_id' => '1',
+            ]);
         }
     }
 }

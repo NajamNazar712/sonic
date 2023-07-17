@@ -1249,6 +1249,120 @@
                 table.draw();
             });
 
+
+            $('body').on('click','.deactivate_staff', function(){
+                var employeeId = $(this).attr('data-id');
+                      swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To De Activate Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Employee is being De Activate',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{{ route('admin.team_lead.deactivate_staff') }}',
+
+                                method: 'POST',
+                                data: {
+                                    'employee_id': employeeId,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function(data) {
+    
+                                swal.close();
+                                table.draw();
+                            });
+                    }
+                });
+                // var id = $(this).data('target-id');
+                // $('#employee_id').val(id);
+                // $('#approveRiderModal').modal('show');
+            });
+
+
+            $('body').on('click','.activate_staff', function(){
+                var employeeId = $(this).attr('data-id');
+                      swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Activate Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Employee is being Activate',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{{ route('admin.team_lead.activate_staff') }}',
+
+                                method: 'POST',
+                                data: {
+                                    'employee_id': employeeId,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            })
+                            .done(function(data) {
+    
+                                swal.close();
+                                table.draw();
+                            });
+                    }
+                });
+                // var id = $(this).data('target-id');
+                // $('#employee_id').val(id);
+                // $('#approveRiderModal').modal('show');
+            });
+
+
+            
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
@@ -1901,12 +2015,12 @@
             });
 
 
-            $('body').on('click', '.deactivate_staff', function(e) {
-                var id = $(this).data('target-id');
-                $('#LastWorkingDayModal .employee_type').val(1);
-                $('#LastWorkingDayModal .employee_id').val(id);
-                $('#LastWorkingDayModal').modal('show');
-            });
+            // $('body').on('click', '.deactivate_staff', function(e) {
+            //     var id = $(this).data('target-id');
+            //     $('#LastWorkingDayModal .employee_type').val(1);
+            //     $('#LastWorkingDayModal .employee_id').val(id);
+            //     $('#LastWorkingDayModal').modal('show');
+            // });
 
 
             $('body').on('click', '.activate', function(e) {
@@ -1970,70 +2084,7 @@
                 });
             });
 
-            $('body').on('click', '.activate_staff', function(e) {
-                var id = $(this).data('target-id');
-                var edit_url = '';
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes to Make Staff Active!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Making Staff Active',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                        // let edit_url = '{!! route('admin.human_resource.employee_directory.edit', ['employee' => ':id']) !!}'.replace(':id', id);
-                        $.ajax({
-                                url: '{!! route('admin.human_resource.employee_directory.staff.activate') !!}',
-                                method: 'POST',
-                                data: {
-                                    'employee_id': id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                            .done(function(data) {
-                                if (data.status == 0) {
-                                    // toastr.success(data.success, 'Success!', {
-                                    //     positionClass: 'toast-bottom-center',
-                                    //     containerId: 'toast-bottom-center',
-                                    // });
-                                    window.location.href = data.route + '?from=staff-profile';
-                                } else {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
-                            });
-                    }
-                });
-            });
-
+      
 
             $('body').on('click', '.convert_rider_to_staff', function(e) {
                 var id = $(this).data('target-id');
