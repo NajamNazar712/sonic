@@ -1220,34 +1220,32 @@
                             else{
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
+                                    $.each(messages, function(index, message) {
+                                        toastr.error(message, 'Error!', {
+                                            positionClass: 'toast-top-center',
+                                            containerId: 'toast-top-center'
+                                        });
 
-
-                                    if (field === 'rv_assign_agent_status_id' && $(
-                                            "#shipment_status").val() === "") {
-                                        var errorMessage = '* Action is Required';
-                                        $('#rv_assign_agent_status_error').text(errorMessage);
-                                        $('#shipment_remarks').css('margin-bottom', '17px');
-                                    }
-
-
-                                    if (field === 'rv_assign_agent_sub_status_id' && $(
-                                            "#shipment_reason").val() === "" && $(
-                                            "#shipment_status").is(':empty') === false) {
-                                        var errorMessage = '* Reason is Required';
-                                        $('#rv_assign_agent_sub_status_error').text(errorMessage);
-                                    }
-
-
-                                    if (field === 'rv_fake_status_id' && $("#fake_status_id")
-                                        .val() === "") {
-                                        if (checkbox == 1) {
-                                            var errorMessage = '* Fake Status is Required';
-                                            $('#rv_assign_agent_fake_status_id_error').text(
-                                                errorMessage);
+                                        if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
+                                            var errorMessage = '* Action is Required';
+                                            $('#rv_assign_agent_status_error').text(errorMessage);
+                                            $('#shipment_remarks').css('margin-bottom', '17px');
                                         }
 
-                                    }
+                                        if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
+                                            var errorMessage = '* Reason is Required';
+                                            $('#rv_assign_agent_sub_status_error').text(errorMessage);
+                                        }
+
+                                        if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
+                                            if (checkbox == 1) {
+                                                var errorMessage = '* Fake Status is Required';
+                                                $('#rv_assign_agent_fake_status_id_error').text(errorMessage);
+                                            }
+                                        }
+                                    });
                                 });
+
                             }
                         })
 

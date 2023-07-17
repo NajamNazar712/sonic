@@ -193,12 +193,11 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_submit(Request $request)
     {
-        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required',
             'is_fake_status' => 'required',
-            'rv_fake_status_id' => 'required_if:is_fake_status,1',
+            'rv_fake_status_id' => 'required_if:is_fake_status, 1',
         ];
 
         $data = [
@@ -212,7 +211,7 @@ class ReturnV2Controller extends Controller
         $validate = Validator::make($data, $validations);
 
         if ($validate->fails()) {
-            return response()->json(['status' => 0, 'errors' => $validate->errors()]);
+            return response()->json(['status' => 1, 'errors' => $validate->errors()]);
         } 
         
         else {
@@ -231,7 +230,7 @@ class ReturnV2Controller extends Controller
             } 
 
             else{
-                return response()->json(['status' => 1, 'error' => 'Something went wrong!']);
+                return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
             }
         }
     }

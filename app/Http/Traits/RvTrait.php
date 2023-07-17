@@ -216,16 +216,13 @@ trait RvTrait
         if (!in_array($parcel->shipper_status_id, [13, 15, 20, 54, 55]) && ($parcel->shipper_status_id == 12 || $parcel->shipper_status_id == 52)) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-
-
-
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
 
             if ($parcel->shipment_type == 1) {
                 if ($parcel->booking_type_id != 4) {
                     ShipmentChargesController::return($request->shipment_id);
-
+                    
                     if ($parcel->packaging_material_request != 1) {
                         AdminFinanceController::add_payment($request->shipment_id, 1);
                     }
