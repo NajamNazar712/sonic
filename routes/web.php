@@ -1471,6 +1471,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('index', 'Admins\LostShipmentsController@lost_add_index')->name('index');
                 Route::post('shipment/info', 'Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
                 Route::post('shipment/store', 'Admins\LostShipmentsController@add_lost_shipments')->name('shipments.store');
+                Route::post('bulk/lost/shipments', 'Admins\LostShipmentsController@bulk_lost_shipments')->name('bulk.lost');
             });
         });
         //Lost Module End

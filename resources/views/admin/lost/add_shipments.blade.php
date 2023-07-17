@@ -12,14 +12,41 @@
                 @include('admin.inc.messages')
 
                 <form id="lost_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="form-group">
-                        <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-                    </div>
-
-                    <div class="form-group ml-1">
-                        <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                    <div class="row align-items-center justify-content-center">
+                        <div class="form-group">
+                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+    
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                        </div>
+                        
                     </div>
                 </form>
+
+                <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
+                    
+
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col">
+                            <div class="form-group">
+                                <input type="file" name="excel" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." id="excel">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group text-left">
+                                <button type="submit" name="upload" class="btn btn-primary" value="upload">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="col ml-auto">
+                            <div class="form-group text-right">
+                                <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+               
 
                 <form id="update_lost_form" action="{{route('admin.delivery.lost.add.shipments.store')}}" class="form-horizontal" method="POST">
                     {{ csrf_field() }}
@@ -182,6 +209,77 @@
             //     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             //     return re.test(email);
             // }
+            $('#excel_upload_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('form'));
+                },
+                submitHandler: function(form) {
+                    $('#excel_upload_form button.upload').prop('disabled', true);
+                    
+                    var tracking_number = $(form).find('#excel').val();
+                    
+                    var file = fileInput.files[0];
+                    alert("Asd");
+                    var tracking_number = file ? file.name : "";
+                   
+
+                    // var fileInput = document.getElementById('tracking_file');
+                    
+                    form.reset();
+                    if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+                        blockPagePermanently();
+                        $.ajax({
+                            url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
+                            method: 'POST',
+                            data: {
+                                'tracking_number': tracking_number,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function(data) {
+                                if (data.status == 1) {
+                                    UnblockPagePermanently();
+                                    id = data.details.id;
+
+                                    var index = $.inArray(id, shipment_ids);
+
+                                    if (index === -1) {
+                                        var rowNo = table.rows().count();
+
+                                        var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+                                        table.draw(false);
+                                        scan_sound(1);
+                                        table.order([0, 'desc']).draw();
+
+                                        shipment_ids.push(data.details.id);
+
+                                        $('#lost_shipment_form button.add').prop('disabled', false);
+
+                                        $('#update_lost_form_submit').prop('disabled', false);
+
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                }
+                                else {
+                                    UnblockPagePermanently();
+                                    $('#lost_shipment_form button.add').prop('disabled', false);
+                                    scan_sound(2);
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                }
+                            });
+                    }
+                    else {
+                        $('#lost_shipment_form button.add').prop('disabled', false);
+                        scan_sound(2);
+                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+
+                    return false;
+                }
+            });
 
             $('#update_lost_form').validate({
                 errorClass: 'danger',
