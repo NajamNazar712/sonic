@@ -195,11 +195,16 @@ class ReturnV2Controller extends Controller
     {
         $validations = [
             'rv_assign_agent_status_id' => 'required',
-            'rv_assign_agent_sub_status_id' => 'required',
             'is_fake_status' => 'required',
-            'rv_fake_status_id' => 'required_if:is_fake_status, 1',
+            'rv_fake_status_id' => 'required_if:is_fake_status,1',
         ];
-
+        
+        if ($request->input('rv_assign_agent_status_id') == 2) {
+            $validations['rv_assign_agent_sub_status_id'] = '';
+        } else {
+            $validations['rv_assign_agent_sub_status_id'] = 'required';
+        }
+        
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
             'rv_assign_agent_sub_status_id' => $request->input('rv_assign_agent_sub_status_id'),
