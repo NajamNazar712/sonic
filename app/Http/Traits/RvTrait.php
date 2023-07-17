@@ -36,7 +36,10 @@ use PhpOffice\PhpSpreadsheet\IOFactory;
 trait RvTrait
 {
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function getShipmentConsigneeCities($shipment_id)
     {
         if (!empty($shipment_id)) {
@@ -65,7 +68,10 @@ trait RvTrait
         ];
     }
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function newRvShipmentAssign($data)
     {
         try {
@@ -87,6 +93,10 @@ trait RvTrait
         }
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function makeRvShipmentAssignAgentDetails($shipment_assign_agent, $request)
     {
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
@@ -107,6 +117,10 @@ trait RvTrait
         return true;
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     private function shipment_assign_agent_table_columns($request, $assign_agent)
     {
         return [
@@ -122,6 +136,10 @@ trait RvTrait
         ];
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function updateShipmentAssignAgent($request, $assign_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assign_agent);
@@ -140,6 +158,10 @@ trait RvTrait
         return true;
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function changeShipmentStatus($request)
     {
         if ($request->rv_assign_agent_status_id) {
@@ -173,6 +195,10 @@ trait RvTrait
         }
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function return_confirm($request)
     {
         $remarks = $request->remarks;
@@ -219,6 +245,11 @@ trait RvTrait
         }
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
     }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     protected function reattempt($request)
     {
         $remarks = $request->remarks;
@@ -276,6 +307,10 @@ trait RvTrait
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     private function update_estimate_charges($shipment, $charge)
     {
         $shipment_id = $shipment;
@@ -303,7 +338,10 @@ trait RvTrait
         }
     }
 
-
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function add_osa_charges($shipment, $charge) //function to add in logs table //call from reattempt function
     {
         $nsa_charges_log = new OsaChargesLog();
@@ -313,6 +351,10 @@ trait RvTrait
         $nsa_charges_log->save();
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function assign_agent(Request $request)
     {
         $shipment_ids = $request->shipment_ids;
@@ -373,6 +415,10 @@ trait RvTrait
         }
     }
 
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function unassign_agent(Request $request)
     {
         $shipment_ids = $request->shipment_ids;
@@ -397,7 +443,10 @@ trait RvTrait
         }
     }
 
-    //Assigning Unassigning Agents from Excel Sheet
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Assigning Unassigning Agents from Excel Sheet
     public function assign_agent_excel(Request $request)
     {
         $names = [
@@ -585,7 +634,10 @@ trait RvTrait
     }
 
 
-    //for bulk shipments
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: for bulk shipments
     public function return_confirm_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
         $shipment_ids = $request->shipment_ids;
@@ -655,7 +707,10 @@ trait RvTrait
         }
     }
 
-    // Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
     public function excel_store(Request $request)
     {
         $names = [
@@ -819,7 +874,7 @@ trait RvTrait
                                 $shipment_details->save();
                                 ShipmentChargesController::nsa_osa_charges($shipment_details->id);
 
-                                $check = $this->update_estimatecharges($shipment_details->id, $estimation_charges);
+                                $check = $this->update_estimate_charges($shipment_details->id, $estimation_charges);
 
                                 NotificationsController::send(33, $shipment_details->id);
                             } else if ($shipment_details->shipper_status_id == 52) {
@@ -872,6 +927,10 @@ trait RvTrait
         }
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function return_marked_single_status(Request $request)
     {
         $remark = $request->remark;
@@ -934,7 +993,7 @@ trait RvTrait
             $parcel = Shipment::find($request->shipment_id);
             if ($request->has('charges')) {
                 if ($request->charges != null) {
-                    $check = $this->update_estimatecharges($request->shipment_id, $request->charges);
+                    $check = $this->update_estimate_charges($request->shipment_id, $request->charges);
                     if ($check != 0) {
                         return ['status' => 0, 'error' => "Shipment not found on Estimation Charges"];
                     }
@@ -1000,9 +1059,12 @@ trait RvTrait
         }
     }
 
-    //Working on Reattempt button on top for bulk shipments
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Reattempt for bulk shipments
     public function return_reattempt_status(Request $request)
-    { //update to status 20 for confirm and 13 for re-attempt
+    {
         $shipment_ids = $request->shipment_ids;
 
         if ($request->action == 'reattempt') {
@@ -1067,6 +1129,10 @@ trait RvTrait
         }
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function change_status_to_self_collection(Request $request)
     {
         $shipmentId = $request->shipment_id;
@@ -1117,8 +1183,10 @@ trait RvTrait
         }
     }
 
-
-    // This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
     public function intercept_re_book_update(Request $request)
     {
         $rules = [
@@ -1233,7 +1301,10 @@ trait RvTrait
         }
     }
 
-    // Used in Delivery Controller Approving Intercept Request
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Used in Delivery Controller Approving Intercept Request
     public function approve(Request $request)
     {
         $shipment_ids = $request->ids;
@@ -1329,7 +1400,10 @@ trait RvTrait
         }
     }
 
-    // Used in Delivery Controller Rejecting Intercept Request
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Used in Delivery Controller Rejecting Intercept Request
     public function reject(Request $request)
     {
         $shipment_ids = $request->ids;
@@ -1389,6 +1463,10 @@ trait RvTrait
         }
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     static public function auto_reattempt_status_for_max_delivery_ratio($shipment_id)
     {
         $global_admin = 346;
@@ -1517,7 +1595,10 @@ trait RvTrait
     }
 
 
-    // Retail Return Controller Function
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: RetailReturnController's Function for reattempt 
     public function mark_reattempt(Request $request)
     {
         $parcel = Shipment::find($request->shipment_id);
@@ -1567,7 +1648,13 @@ trait RvTrait
         return ['status' => 0, 'error' => "Something went wrong, try again later!"];
     }
 
+
     //Shipper Controller Functions
+
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function shipper_return_marked_single_status(Request $request)
     {
         $parcel = Shipment::find($request->shipment_id);
@@ -1600,6 +1687,10 @@ trait RvTrait
         return ['status' => 0, 'error' => "Something went wrong, try again later!"];
     }
 
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
     public function return_reattempt_single_status(Request $request)
     {
         $parcel = Shipment::find($request->shipment_id);
@@ -1649,7 +1740,10 @@ trait RvTrait
         return ['status' => 0, 'error' => "Something went wrong, try again later!"];
     }
 
-    // ShipperInterceptRebookcontroller
+     // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: ShipperInterceptRebookcontroller
     public function shipper_intercept_re_book_update(Request $request)
     {
         $rules = [

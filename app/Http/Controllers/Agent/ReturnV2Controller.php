@@ -37,9 +37,9 @@ class ReturnV2Controller extends Controller
 
 
     // Heading: Virtual RCP Agent Screen
-    // Siderbar: N/A
+    // Sidebar: N/A
     // URL: agent/dashboard
-    // Description: this method is used to retrive Logged User, ShipmentStatus(RV) And Fake Status On Index Page
+    // Description: this method is used to retrieve Logged User, ShipmentStatus(RV) And Fake Status On Index Page
 
     public function index()
     {
@@ -50,9 +50,9 @@ class ReturnV2Controller extends Controller
     }
 
     // Heading: N/A
-    // Siderbar: N/A
+    // Sidebar: N/A
     // URL: agent/dashboard/get_shipment_reason
-    // Description: this method is used to retrive SubStatuses Of Status And Remark Of Call Finding On Index Page
+    // Description: this method is used to retrieve SubStatuses Of Status And Remark Of Call Finding On Index Page
 
     public function get_shipment_reason(Request $request)
     {
@@ -61,6 +61,10 @@ class ReturnV2Controller extends Controller
         return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'status' => 1]);
     }
 
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: 
+    // Description:
     public function get_ticket(Request $request)
     {
         // Get all assigned agent to hubs priority wise
@@ -170,6 +174,11 @@ class ReturnV2Controller extends Controller
             return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
         }
     }
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: 
+    // Description:
     public function get_intercepted_shipment(Request $request)
     {
         $shipment_id = $request->shipment_id;
@@ -178,7 +187,10 @@ class ReturnV2Controller extends Controller
     }
 
 
-
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: 
+    // Description:
     public function get_submit(Request $request)
     {
         // dd($request->all());
@@ -214,25 +226,6 @@ class ReturnV2Controller extends Controller
                 $shipment_assign_agent = $shipment_assign_agent->latest()->first();
 
                 $this->changeShipmentStatus($request);
-
-
-                // //if agent already exists
-                // if ($assign_agent) {
-                //     $assign_agent = $assign_agent->latest()->first();
-                //     $this->updateShipmentAssignAgent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
-                // } //end if agent already exist 
-
-                // else {
-                //     //Creating row of new agent if agent not found
-                //     $rv_shipment_agent = new RvShipmentAgent();
-                //     $rv_shipment_agent->agent_id = Auth::id();
-                //     $rv_shipment_agent->save();
-                //     $this->updateShipmentAssignAgent($request, $rv_shipment_agent, $admin_agent, $shipment_assign_agent);
-                //     $rv_shipment_agent->save();
-                // }
-
-                // //Maintaining Log in RvTrait
-                // $this->makeRvShipmentAssignAgentDetails($shipment_assign_agent, $request);
 
                 return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
             } 
