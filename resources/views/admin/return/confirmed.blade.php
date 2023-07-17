@@ -288,6 +288,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if ( session('role_id') == 1 || in_array(109, session('permissions')) )
                     {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
@@ -365,6 +366,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         extend: 'excel',
                         title: 'Return Confirmed',
