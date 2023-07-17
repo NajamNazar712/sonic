@@ -546,11 +546,13 @@ class LostShipmentsController extends Controller
 
                     $rows[] = $row;
                 }
+                // dd($rows);
 
                 unset($spreadsheet);
                 $errors = array();
                 $tracking_ids = array();
                 $tracking_id_row = array();
+                
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
 
@@ -595,16 +597,16 @@ class LostShipmentsController extends Controller
                 if (empty($errors)) {
                     $tracking_numbers = array();
                     $shipment_ids = array();
-
+                    $check = array();
+                    $data = array(); 
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
-                        // $shipment_details = Shipment::where('tracking_number', $tracking)->first();
-                        $shipment = Shipment::where('tracking_number', $tracking)->whereNotIn('shipper_status_id', $status_array)->first();
+                        $shipment = Shipment::where('tracking_number', $tracking)
+                        // ->whereNotIn('shipper_status_id', $status_array)
+                        ->first();
                         if ($shipment->exists()) {
                             $data = array();
-                            // $shipment = $shipment->find();
-                            
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -631,27 +633,24 @@ class LostShipmentsController extends Controller
                                     }
                                 }
                             }
-                            $data['id'] = $shipment->id;
-                            $data['tracking_number'] = $shipment->tracking_number;
-                            $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
-                            $data['origin'] = $shipment->consignee_city->name;
-                            $data['destination'] = $shipment->pickup_address->city->name;
-                            $data['hub'] = $shipment->pickup_address->city->hub_city->name;
-                            $data['amount'] = number_format($shipment->amount);
-                            $data['mode'] = $shipment->shipping_mode->mode;
-                            $data['service_type'] = $shipment->booking_type->booking_type;
-                            $data['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
-                            // dd($data);
-                            ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
-                            return response()->json(['status' => 1, 'details' => $data]);
+                            $data[$shipment->id]['id'] = $shipment->id;
+                            $data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                            $data[$shipment->id]['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
+                            $data[$shipment->id]['origin'] = $shipment->consignee_city->name;
+                            $data[$shipment->id]['destination'] = $shipment->pickup_address->city->name;
+                            $data[$shipment->id]['hub'] = $shipment->pickup_address->city->hub_city->name;
+                            $data[$shipment->id]['amount'] = number_format($shipment->amount);
+                            $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
+                            $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
+                            $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
                         }
-                        $shipment_id = $shipment->id;
-                        $shipment_ids[] = $shipment_id;
-
-
                         $tracking_numbers['Row #' . $row_id] = $tracking;
+                        ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
+                        dd($data);
+                        return response()->json(['status' => 1, 'details' => $data]);
+                        
                     }
-                   
+                    // dd($data);
                     return redirect()->back()->with(['success' => 'Bulk Lost Update']);
 
                 } else {

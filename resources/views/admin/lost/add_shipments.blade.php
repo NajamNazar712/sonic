@@ -317,8 +317,8 @@
                     success: function(data) {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
-                                id = data.details.id;
-                                
+                                id = data.details.shipment.id;
+                                console.log(data.details);
                                 var index = $.inArray(id, shipment_ids);
 
                                 if (index === -1) {
