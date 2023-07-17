@@ -4256,7 +4256,6 @@ class ReturnController extends Controller
             foreach($request->shipment_ids as $shipments)
             {
                 $shipment = Shipment::find($shipments);
-                // $remark_inp = "remark.$shipment";
                 $remark = isset($request->remark[$shipment->id]) ? $request->remark[$shipment->id] : NULL;
 
                 $flag = true;
