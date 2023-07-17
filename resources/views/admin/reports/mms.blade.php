@@ -374,7 +374,7 @@
                                 row.push(values.rider_id);
                                 row.push(values.rider_name);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                row.push(values.consignee_phone_excel);
                                 row.push(values.consignee_address);
                                 row.push(values.current_status);
                                 row.push(values.reason);

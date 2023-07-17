@@ -191,6 +191,9 @@ class MMSReportController extends Controller
             ->addColumn('consignee_phone', function ($shipments) {
                 return $shipments->consignee_phone_number_1 . "<br>" . $shipments->consignee_phone_number_2;
             })
+            ->addColumn('consignee_phone_excel', function ($shipments) {
+                return $shipments->consignee_phone_number_1 . "," . $shipments->consignee_phone_number_2;
+            })
             ->filterColumn('consignee_phone', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
