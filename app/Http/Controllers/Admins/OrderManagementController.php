@@ -191,7 +191,7 @@ class OrderManagementController extends Controller
                                     <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div>
                                     </button>';
                                 }
-                                if (($shipments->shipper_status_id == 1 || $shipments->shipper_status_id == 53) &&  in_array(888,session('permissions')) ) {
+                                if (($shipments->shipper_status_id == 1 || $shipments->shipper_status_id == 53) &&  session('role_id') == 1 || in_array(888, session('permissions'))) {
                                     $count = +1;
                                     $dropdown .= '
                                     <button type="button" class="shipment_cancel dropdown-item">
