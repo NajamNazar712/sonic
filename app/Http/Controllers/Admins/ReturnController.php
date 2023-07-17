@@ -4256,7 +4256,9 @@ class ReturnController extends Controller
             foreach($request->shipment_ids as $shipments)
             {
                 $shipment = Shipment::find($shipments);
-                $remark = $request->remark[$shipment->id] ?? NULL;
+                $remark_inp = "remark.$shipment";
+                $remark = ($request->has($remark_inp) && $request->remark[$shipment->id] != null)? $request->remark[$shipment->id] : null;
+
                 $flag = true;
                 $consolidation = ConsolidationShipments::where('shipment_id', $shipment->id)->first();
                 if($consolidation){
