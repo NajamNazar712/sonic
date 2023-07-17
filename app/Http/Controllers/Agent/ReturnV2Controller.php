@@ -183,7 +183,7 @@ class ReturnV2Controller extends Controller
     {
         $shipment_id = $request->shipment_id;
         $getData = $this->getShipmentConsigneeCities($shipment_id);
-        return response()->json(['status' => 1, 'shipment' => $getData['shipment'], 'consignee_cities' => $getData['cosignee_cities']]);
+        return response()->json(['status' => 1, 'shipment' => $getData['shipment'], 'consignee_cities' => $getData['consignee_cities']]);
     }
 
 
@@ -195,16 +195,12 @@ class ReturnV2Controller extends Controller
     {
         $validations = [
             'rv_assign_agent_status_id' => 'required',
+            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2,3',
             'is_fake_status' => 'required',
-            'rv_fake_status_id' => 'required_if:is_fake_status,1',
+            'rv_fake_status_id' => 'required_if:is_fake_status, 1',
         ];
-        
-        if ($request->input('rv_assign_agent_status_id') == 2) {
-            $validations['rv_assign_agent_sub_status_id'] = '';
-        } else {
-            $validations['rv_assign_agent_sub_status_id'] = 'required';
-        }
-        
+        //The rv assign agent sub status id field is required unless rv assign agent status id is in 2.
+
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
             'rv_assign_agent_sub_status_id' => $request->input('rv_assign_agent_sub_status_id'),
@@ -220,7 +216,6 @@ class ReturnV2Controller extends Controller
         } 
         
         else {
-
             $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
             $admin_agent = Admin::where('id', Auth::id())->first();

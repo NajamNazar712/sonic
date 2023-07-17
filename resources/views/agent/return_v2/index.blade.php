@@ -243,12 +243,6 @@
                                         data-rule-required="true" data-msg-required="Phone Number is required">
                                 </div>
 
-                                {{-- <div class="form-group">
-                                    <input type="hidden" name="consignee_city_id" value="" id="consignee_city_id"
-                                        class="form-control consignee_city_id" placeholder="Phone Number 1*"
-                                        data-rule-required="true" data-msg-required="Phone Number is required">
-                                </div> --}}
-
                                 <div class="form-group">
                                     <input type="text" name="consignee_phone_number_2" id="consignee_phone_number_2"
                                         class="form-control phone_number" placeholder="Phone Number 2">
@@ -1128,26 +1122,26 @@
                         });
                 });
 
-                var consigneeCity = null;
-                var consigneeName = null;
-                var consigneeAddress = null;
-                var consigneePhoneNumber1 = null;
-                var consigneePhoneNumber2 = null;
-                var interceptType = null;
-                var consigneeEmail = null;
+                var consignee_city = null;
+                var consignee_name = null;
+                var consignee_address = null;
+                var consignee_phone_number_1 = null;
+                var consignee_phone_number_2 = null;
+                var intercept_type = null;
+                var consignee_email = null;
                 var samount = null;
                 var imageBase64 = null; 
 
                 $(document).on('click', '#intercept_update', function(event){
                     event.preventDefault();
                     
-                    consigneeCity = $('#consignee_city').val();
-                    consigneeName = $('#consignee_name').val();
-                    consigneeAddress = $('#consignee_address').val();
-                    consigneePhoneNumber1 = $('#consignee_phone_number_1').val();
-                    consigneePhoneNumber2 = $('#consignee_phone_number_2').val();
-                    interceptType = $('#intercept_type').val();
-                    consigneeEmail = $('#consignee_email').val();
+                    consignee_city = $('#consignee_city').val();
+                    consignee_name = $('#consignee_name').val();
+                    consignee_address = $('#consignee_address').val();
+                    consignee_phone_number_1 = $('#consignee_phone_number_1').val();
+                    consignee_phone_number_2 = $('#consignee_phone_number_2').val();
+                    intercept_type = $('#intercept_type').val();
+                    consignee_email = $('#consignee_email').val();
                     samount = $('#samount').val();
                     
                     // Get the file input element
@@ -1196,13 +1190,13 @@
                                 'is_fake_status': checkbox,
                                 'call_to_id': call_to_id,
                                 'image':imageBase64,
-                                'consigneeCity':consigneeCity,
-                                'consigneeName':consigneeName,
-                                'consigneeAddress':consigneeAddress,
-                                'consigneePhoneNumber1':consigneePhoneNumber1,
-                                'consigneePhoneNumber2':consigneePhoneNumber2,
-                                'interceptType':interceptType,
-                                'consigneeEmail':consigneeEmail,
+                                'consignee_city':consignee_city,
+                                'consignee_name':consignee_name,
+                                'consignee_address':consignee_address,
+                                'consignee_phone_number_1':consignee_phone_number_1,
+                                'consignee_phone_number_2':consignee_phone_number_2,
+                                'intercept_type':intercept_type,
+                                'consignee_email':consignee_email,
                                 'samount':samount
                             }
 
@@ -1220,30 +1214,29 @@
                             else{
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
-                                    $.each(messages, function(index, message) {
-                                        toastr.error(message, 'Error!', {
-                                            positionClass: 'toast-top-center',
-                                            containerId: 'toast-top-center'
-                                        });
-
+                                        var errorMessage;
                                         if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
-                                            var errorMessage = '* Action is Required';
+                                            errorMessage = '* Action is Required';
                                             $('#rv_assign_agent_status_error').text(errorMessage);
                                             $('#shipment_remarks').css('margin-bottom', '17px');
                                         }
-
+                                        
                                         if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
-                                            var errorMessage = '* Reason is Required';
+                                            errorMessage = '* Reason is Required';
                                             $('#rv_assign_agent_sub_status_error').text(errorMessage);
                                         }
-
+                                        
                                         if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
                                             if (checkbox == 1) {
-                                                var errorMessage = '* Fake Status is Required';
+                                                errorMessage = '* Fake Status is Required';
                                                 $('#rv_assign_agent_fake_status_id_error').text(errorMessage);
                                             }
                                         }
-                                    });
+
+                                        // toastr.error(errorMessage, 'Error!', {
+                                        //     positionClass: 'toast-top-center',
+                                        //     containerId: 'toast-top-center'
+                                        // });
                                 });
 
                             }

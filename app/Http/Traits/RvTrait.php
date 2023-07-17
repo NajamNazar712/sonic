@@ -40,32 +40,34 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function getShipmentConsigneeCities($shipment_id)
-    {
-        if (!empty($shipment_id)) {
-            $shipment = Shipment::find($shipment_id);
-            if ($shipment) {
+    protected function getShipmentConsigneeCities($shipment_id){
+        if($shipment_id){
+            $shipment = Shipment::where('id',$shipment_id)->first();
+            if($shipment){
+                if($shipment->shipping_mode_id == 2){
+                    $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
                 $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
                     ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
                     ->select('c.id as id', 'c.name as name')
-                    ->where('shipments.id', $shipment)
+                    ->where('shipments.id', $shipment_id)
+                    ->where('cd.shipping_mode_id',2)
                     ->where('c.status', 1)
-                    ->whereNotNull('c.zone_id');
-                if ($shipment->shipping_mode_id == 2) {
-                    $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
-                    $consignee_cities->where('cd.shipping_mode_id', 2)
-                        ->whereNotIn('c.id', $restricted_cities);
+                    ->whereNotNull('c.zone_id')
+                    ->whereNotIn('c.id', $restricted_cities);
+
                 }
-                $consignee_cities = $consignee_cities->orderBy('c.name')
-                    ->groupBy('c.name')
-                    ->get();
+                else{
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id');
+                }
+                $consignee_cities = $consignee_cities->orderBy('c.name')->groupBy('c.name')->get();
+                return (['shipment' => $shipment, 'consignee_cities' => $consignee_cities]);
             }
         }
-
-        return [
-            'consignee_cities' => $consignee_cities,
-            'shipment' => $shipment,
-        ];
     }
 
     // Heading: N/A
@@ -685,19 +687,6 @@ trait RvTrait
                         }
                     }
                     ShipmentsJourneyController::add($shipment, 20, 20, $return_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
-                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment);
-                    // if ($return_assign_shipment->exists()) {
-
-                    //     $return_assign_shipment = $return_assign_shipment->latest()->first();
-                    //     $return_assign_shipment->status = 0;
-                    //     $return_assign_shipment->save();
-
-                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                    //     $return_assign_log->status = 2;
-                    //     $return_assign_log->assigned_by = Auth::id();
-                    //     $return_assign_log->save();
-                    // }
                 }
             }
             return ['status' => 1, 'success' => "Shipment successfully updated as ( Return Confirm )"];
@@ -1130,7 +1119,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    public function change_status_to_self_collection(Request $request)
+    public function on_hold_for_self_collection(Request $request)
     {
         $shipmentId = $request->shipment_id;
         $remark = $request->remark;
@@ -1184,7 +1173,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
-    public function intercept_re_book_update(Request $request)
+    public function intercept(Request $request)
     {
         $rules = [
             'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
@@ -1216,7 +1205,7 @@ trait RvTrait
                         $amount = (int)$s_amount;
 
                         //Different Consignee
-                        if ($intercept_type == 1) {
+                        if ($request->intercept_type == 1) {
                             InterceptReBookRequest::create([
                                 'shipment_id' => $request->shipment_id,
                                 'consignee_city_id' => $request->consignee_city,
