@@ -185,13 +185,13 @@ class OrderManagementController extends Controller
                         <div class="btn-group">
                             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                             <div class="dropdown-menu dropdown-menu-sm">';
-                                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
+                                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1 && $shipments->shipper_status_id != 53) {
                                     $count = +1;
                                     $dropdown .= '
                                     <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div>
                                     </button>';
                                 }
-                                if (($shipments->shipper_status_id == 1 || $shipments->shipper_status_id == 53) && in_array(session('role_id'), [91,19,106,1])) {
+                                if (($shipments->shipper_status_id == 1 || $shipments->shipper_status_id == 53) &&  in_array(888,session('permissions')) ) {
                                     $count = +1;
                                     $dropdown .= '
                                     <button type="button" class="shipment_cancel dropdown-item">
@@ -750,155 +750,155 @@ class OrderManagementController extends Controller
         return $datatable->make(true);
     }
 
-    public function shipment_cancel(Request $request) {
-        
-        $shipment_id = $request->shipment_id;
+    // public function shipment_cancel(Request $request) {
+    //     dd($request->all());
+    //     $shipment_id = $request->shipment_id;
 
-        if (!empty($shipment_id)) {
-            $valid = FALSE;
+    //     if (!empty($shipment_id)) {
+    //         $valid = FALSE;
 
-            // foreach ($shipment_ids as $shipment_id) {
-                $shipment = Shipment::find($shipment_id);
+    //         // foreach ($shipment_ids as $shipment_id) {
+    //             $shipment = Shipment::find($shipment_id);
                 
-                // && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id
-                if ($shipment && ($shipment->shipper_status_id == 1 || ($shipment->shipper_status_id == 53 ))) {
-                    $valid = TRUE;
-                    // $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
-                    // if($check_walk_in['setting_value'] == $shipment->user->id){
-                        $shipment->shipper_status_id = 17;
-                        $shipment->consignee_status_id = 17;
-                        // dd("asd");
-                        $shipment->save();
-                        ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
-                    // }
-                    // else {
-                    //     if ($shipment->packaging_material_request != 1) {
-                    //         //Consolidated Shipments
-                    //         $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
-                    //         if($consolidated_shipment){
-                    //             $consolidation_id = $consolidated_shipment->consolidation_id;
-                    //             ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
-                    //             $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
-                    //             if(count($remaining_consolidated_shipments) == 1){
-                    //                 ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
-                    //                 Consolidation::where('id', $consolidation_id)->delete();
-                    //             }
-                    //             else{
-                    //                 foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
-                    //                     $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
-                    //                     $new_order_consolidated_shipment->order = $index + 1;
-                    //                     $new_order_consolidated_shipment->save();
-                    //                 }
-                    //                 $consolidation = Consolidation::find($consolidation_id);
-                    //                 $consolidation->count = count($remaining_consolidated_shipments);
-                    //                 if($consolidation->default_shipment_id == $shipment_id){
-                    //                     $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
-                    //                 }
-                    //                 $consolidation->save();
-                    //             }
-                    //         }
-                    //         //Consolidated Shipments
+    //             // && $shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id
+    //             if ($shipment && ($shipment->shipper_status_id == 1 || ($shipment->shipper_status_id == 53 ))) {
+    //                 $valid = TRUE;
+    //                 // $check_walk_in = GlobalSettings::where('type', 'Walk-In')->first();
+    //                 // if($check_walk_in['setting_value'] == $shipment->user->id){
+    //                     $shipment->shipper_status_id = 17;
+    //                     $shipment->consignee_status_id = 17;
+    //                     // dd("asd");
+    //                     $shipment->save();
+    //                     ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
+    //                 // }
+    //                 // else {
+    //                 //     if ($shipment->packaging_material_request != 1) {
+    //                 //         //Consolidated Shipments
+    //                 //         $consolidated_shipment = ConsolidationShipments::where('shipment_id', $shipment_id)->first();
+    //                 //         if($consolidated_shipment){
+    //                 //             $consolidation_id = $consolidated_shipment->consolidation_id;
+    //                 //             ConsolidationShipments::where('id', $consolidated_shipment->id)->delete();
+    //                 //             $remaining_consolidated_shipments = ConsolidationShipments::where('consolidation_id', $consolidation_id)->get();
+    //                 //             if(count($remaining_consolidated_shipments) == 1){
+    //                 //                 ConsolidationShipments::where('consolidation_id', $consolidation_id)->delete();
+    //                 //                 Consolidation::where('id', $consolidation_id)->delete();
+    //                 //             }
+    //                 //             else{
+    //                 //                 foreach ($remaining_consolidated_shipments as $index => $remaining_consolidated_shipment){
+    //                 //                     $new_order_consolidated_shipment = ConsolidationShipments::find($remaining_consolidated_shipment->id);
+    //                 //                     $new_order_consolidated_shipment->order = $index + 1;
+    //                 //                     $new_order_consolidated_shipment->save();
+    //                 //                 }
+    //                 //                 $consolidation = Consolidation::find($consolidation_id);
+    //                 //                 $consolidation->count = count($remaining_consolidated_shipments);
+    //                 //                 if($consolidation->default_shipment_id == $shipment_id){
+    //                 //                     $consolidation->default_shipment_id = $remaining_consolidated_shipments[0]->shipment_id;
+    //                 //                 }
+    //                 //                 $consolidation->save();
+    //                 //             }
+    //                 //         }
+    //                 //         //Consolidated Shipments
 
-                    //         if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
-                    //             $shipment->shipper_status_id = 20;
-                    //             $shipment->consignee_status_id = 20;
+    //                 //         if ($shipment->pickup_address->city->hub_id == $shipment->consignee_city->hub_id) {
+    //                 //             $shipment->shipper_status_id = 20;
+    //                 //             $shipment->consignee_status_id = 20;
 
-                    //             $shipment->save();
+    //                 //             $shipment->save();
 
-                    //             ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+    //                 //             ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                    //             ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
-                    //         } else {
-                    //             $shipment->shipper_status_id = 22;
-                    //             $shipment->consignee_status_id = 22;
+    //                 //             ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+    //                 //         } else {
+    //                 //             $shipment->shipper_status_id = 22;
+    //                 //             $shipment->consignee_status_id = 22;
 
-                    //             $shipment->save();
+    //                 //             $shipment->save();
 
-                    //             ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+    //                 //             ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                    //             ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+    //                 //             ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
 
-                    //             ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id());
-                    //         }
-                    //     }
-                    //     // else {
-                    //     //     $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
-                    //     //     if ($packaging_material_shipment != null) {
-                    //     //         $request_id = $packaging_material_shipment->id;
+    //                 //             ShipmentsJourneyController::add($shipment_id, 22, 22, NULL, NULL, NULL, Auth::id());
+    //                 //         }
+    //                 //     }
+    //                 //     // else {
+    //                 //     //     $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+    //                 //     //     if ($packaging_material_shipment != null) {
+    //                 //     //         $request_id = $packaging_material_shipment->id;
 
-                    //     //         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
+    //                 //     //         $packaging_material_request = PackagingMaterialRequest::where('id', $request_id)->with('city')->first();
 
-                    //     //         if ($packaging_material_shipment->status_id == 3) {
-                    //     //             $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
+    //                 //     //         if ($packaging_material_shipment->status_id == 3) {
+    //                 //     //             $packaging_material_request_details = PackagingMaterialRequestDetail::where('packaging_material_request_id', $request_id)->get();
 
-                    //     //             $hub_id = $packaging_material_request->city->hub_id;
+    //                 //     //             $hub_id = $packaging_material_request->city->hub_id;
 
-                    //     //             $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
+    //                 //     //             $fulfilment_hub = WarehouseFulfilmentHubs::where('hub_id', $hub_id)->first();
 
-                    //     //             $warehouse_id = $fulfilment_hub->warehouse_id;
+    //                 //     //             $warehouse_id = $fulfilment_hub->warehouse_id;
 
-                    //     //             if($packaging_material_request_details){
-                    //     //                 foreach ($packaging_material_request_details as $detail_add) {
-                    //     //                     $type_id = $detail_add->type_id;
-                    //     //                     $type_size_id = $detail_add->type_size_id;
-                    //     //                     $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
+    //                 //     //             if($packaging_material_request_details){
+    //                 //     //                 foreach ($packaging_material_request_details as $detail_add) {
+    //                 //     //                     $type_id = $detail_add->type_id;
+    //                 //     //                     $type_size_id = $detail_add->type_size_id;
+    //                 //     //                     $stock = WarehouseStock::where(['warehouse_id' => $warehouse_id, 'type_id' => $type_id, 'type_size_id' => $type_size_id]);
 
-                    //     //                     $stock = $stock->first();
-                    //     //                     $stock->stock = $stock['stock'] + $detail_add->quantity;
-                    //     //                     $stock->save();
-                    //     //                 }
-                    //     //             }
+    //                 //     //                     $stock = $stock->first();
+    //                 //     //                     $stock->stock = $stock['stock'] + $detail_add->quantity;
+    //                 //     //                     $stock->save();
+    //                 //     //                 }
+    //                 //     //             }
 
-                    //     //             $packaging_request_history_replenished = new PackagingMaterialRequestHistory();
-                    //     //             $packaging_request_history_replenished->packaging_material_request_id = $request_id;
-                    //     //             $packaging_request_history_replenished->status = 5;
-                    //     //             $packaging_request_history_replenished->updated_by = Auth::id();
-                    //     //             $packaging_request_history_replenished->save();
-                    //     //         }
+    //                 //     //             $packaging_request_history_replenished = new PackagingMaterialRequestHistory();
+    //                 //     //             $packaging_request_history_replenished->packaging_material_request_id = $request_id;
+    //                 //     //             $packaging_request_history_replenished->status = 5;
+    //                 //     //             $packaging_request_history_replenished->updated_by = Auth::id();
+    //                 //     //             $packaging_request_history_replenished->save();
+    //                 //     //         }
 
-                    //     //         $shipment->shipper_status_id = 17;
-                    //     //         $shipment->consignee_status_id = 17;
+    //                 //     //         $shipment->shipper_status_id = 17;
+    //                 //     //         $shipment->consignee_status_id = 17;
 
-                    //     //         $shipment->save();
+    //                 //     //         $shipment->save();
 
-                    //     //         ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+    //                 //     //         ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
 
-                    //     //         ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
-
-
-                    //     //         $packaging_material_request->status_id = 6;
-                    //     //         $packaging_material_request->save();
+    //                 //     //         ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, NULL, Auth::id());
 
 
-                    //     //         $packaging_request_history = new PackagingMaterialRequestHistory();
-                    //     //         $packaging_request_history->packaging_material_request_id = $request_id;
-                    //     //         $packaging_request_history->status = 6;
-                    //     //         $packaging_request_history->updated_by = Auth::id();
-                    //     //         $packaging_request_history->save();
-                    //     //     }
-                    //     // }
+    //                 //     //         $packaging_material_request->status_id = 6;
+    //                 //     //         $packaging_material_request->save();
 
-                    //     NotificationsController::send(15, 0, $shipment_id);
-                    //     NotificationsController::send(16, 0, $shipment_id);
 
-                    //     ShipmentChargesController::return($shipment_id);
+    //                 //     //         $packaging_request_history = new PackagingMaterialRequestHistory();
+    //                 //     //         $packaging_request_history->packaging_material_request_id = $request_id;
+    //                 //     //         $packaging_request_history->status = 6;
+    //                 //     //         $packaging_request_history->updated_by = Auth::id();
+    //                 //     //         $packaging_request_history->save();
+    //                 //     //     }
+    //                 //     // }
 
-                    //     AdminFinanceController::add_payment($shipment_id, 1);
-                    // }
-                }
-            // }
+    //                 //     NotificationsController::send(15, 0, $shipment_id);
+    //                 //     NotificationsController::send(16, 0, $shipment_id);
 
-            if ($valid) {
-                return ['status' => 0, 'success' => 'Shipment(s) has been Cancelled'];
-            }
-            else {
-                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
-            }
-        }
-        else {
-            return ['status' => 1, 'error' => 'No Shipment Selected'];
-        }
-    }
+    //                 //     ShipmentChargesController::return($shipment_id);
+
+    //                 //     AdminFinanceController::add_payment($shipment_id, 1);
+    //                 // }
+    //             }
+    //         // }
+
+    //         if ($valid) {
+    //             return ['status' => 0, 'success' => 'Shipment(s) has been Cancelled'];
+    //         }
+    //         else {
+    //             return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+    //         }
+    //     }
+    //     else {
+    //         return ['status' => 1, 'error' => 'No Shipment Selected'];
+    //     }
+    // }
     public function shipment_cancel_reason(Request $request){
         $shipment_id = $request->shipment_id;
         $reason = $request->reason;
@@ -906,8 +906,8 @@ class OrderManagementController extends Controller
             $shipment = Shipment::where('id',$shipment_id);
             // dd($shipment_id,$reason,$shipment->first());
             
-            if($shipment->exists()){
-                $shipment = $shipment->first();
+            $shipment = $shipment->first();
+            if($shipment->exists() && ($shipment->shipper_status_id == 1 || ($shipment->shipper_status_id == 53 ))){
 
                 // if ($shipment->shipper_status_id == 1 && $shipment->shipment_type == 1) {
                     // $other_retail_shipment = OtherRetailShipment::where('shipment_id',$shipment_id);
@@ -994,7 +994,10 @@ class OrderManagementController extends Controller
                     //     }
                     // }
                     // $shipment->save();
-
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+                    // dd("asd");
+                    $shipment->save();
                     V2AdminPickupsController::cancel($shipment_id);
                     $remarks = "Cancelled By Admin (". Auth::user()->name .')' . $reason;
                     ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, $remarks , Null, Auth::id());

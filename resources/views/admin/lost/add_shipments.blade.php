@@ -209,77 +209,162 @@
             //     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             //     return re.test(email);
             // }
-            $('#excel_upload_form').validate({
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('form'));
-                },
-                submitHandler: function(form) {
-                    $('#excel_upload_form button.upload').prop('disabled', true);
+            
+            // $('#excel_upload_form').validate({
+            //     errorClass: 'danger',
+            //     successClass: 'success',
+            //     errorPlacement: function(error, element) {
+            //         error.addClass('w-100').appendTo(element.parents('form'));
+            //     },
+            //     submitHandler: function(form) {
+            //         $('#excel_upload_form button.upload').prop('disabled', true);
                     
-                    var tracking_number = $(form).find('#excel').val();
+            //         var fileInput = $(form).find('#excel').val();
                     
-                    var file = fileInput.files[0];
-                    alert("Asd");
-                    var tracking_number = file ? file.name : "";
+            //         var file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+            //         var tracking_number = file ? file.name : "";
+            //         alert(tracking_number);
+            //         // var file = fileInput.files[0];
+            //         // alert(file);
+            //         // var tracking_number = file ? file.name : "";
                    
 
-                    // var fileInput = document.getElementById('tracking_file');
+            //         // var fileInput = document.getElementById('tracking_file');
                     
-                    form.reset();
-                    if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-                        blockPagePermanently();
-                        $.ajax({
-                            url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
-                            method: 'POST',
-                            data: {
-                                'tracking_number': tracking_number,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                            .done(function(data) {
-                                if (data.status == 1) {
-                                    UnblockPagePermanently();
-                                    id = data.details.id;
+            //         form.reset();
+            //         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+            //             blockPagePermanently();
+            //             $.ajax({
+            //                 url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
+            //                 method: 'POST',
+            //                 data: {
+            //                     'tracking_number': tracking_number,
+            //                     '_token': '{{ csrf_token() }}'
+            //                 }
+            //             })
+            //                 .done(function(data) {
+            //                     if (data.status == 1) {
+            //                         UnblockPagePermanently();
+            //                         id = data.details.id;
 
-                                    var index = $.inArray(id, shipment_ids);
+            //                         var index = $.inArray(id, shipment_ids);
 
-                                    if (index === -1) {
-                                        var rowNo = table.rows().count();
+            //                         if (index === -1) {
+            //                             var rowNo = table.rows().count();
 
-                                        var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-                                        table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
-                                        table.draw(false);
-                                        scan_sound(1);
-                                        table.order([0, 'desc']).draw();
+            //                             var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+            //                             table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+            //                             table.draw(false);
+            //                             scan_sound(1);
+            //                             table.order([0, 'desc']).draw();
 
-                                        shipment_ids.push(data.details.id);
+            //                             shipment_ids.push(data.details.id);
 
-                                        $('#lost_shipment_form button.add').prop('disabled', false);
+            //                             $('#lost_shipment_form button.add').prop('disabled', false);
 
-                                        $('#update_lost_form_submit').prop('disabled', false);
+            //                             $('#update_lost_form_submit').prop('disabled', false);
 
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    }
-                                }
-                                else {
-                                    UnblockPagePermanently();
+            //                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+            //                         }
+            //                     }
+            //                     else {
+            //                         UnblockPagePermanently();
+            //                         $('#lost_shipment_form button.add').prop('disabled', false);
+            //                         scan_sound(2);
+            //                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //                     }
+            //                 });
+            //         }
+            //         else {
+            //             $('#lost_shipment_form button.add').prop('disabled', false);
+            //             scan_sound(2);
+            //             toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            //         }
+
+            //         return false;
+            //     }
+            // });
+            $('#excel_upload_form').validate({
+            errorClass: 'danger',
+            successClass: 'success',
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('form'));
+            },
+
+            submitHandler: function(form) {
+                // Disable the submit button to prevent multiple submissions
+                $('#excel_upload_form button.upload').prop('disabled', true);
+
+                // Get the file input element and selected file
+                var fileInput = $(form).find('#excel')[0];
+                var file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+
+                // Create a new FormData object
+                var formData = new FormData();
+                formData.append('excel', file);
+
+                // Make the AJAX request
+                $.ajax({
+                    url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
+                    method: 'POST',
+                    data: formData,
+                    processData: false, // Prevent automatic processing of data
+                    contentType: false, // Prevent automatic content-type header
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function(data) {
+                        if (data.status == 1) {
+                                UnblockPagePermanently();
+                                id = data.details.id;
+
+                                var index = $.inArray(id, shipment_ids);
+
+                                if (index === -1) {
+                                    var rowNo = table.rows().count();
+
+                                    var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                    table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
+                                    table.draw(false);
+                                    scan_sound(1);
+                                    table.order([0, 'desc']).draw();
+
+                                    shipment_ids.push(data.details.id);
+
                                     $('#lost_shipment_form button.add').prop('disabled', false);
-                                    scan_sound(2);
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                }
-                            });
-                    }
-                    else {
-                        $('#lost_shipment_form button.add').prop('disabled', false);
-                        scan_sound(2);
-                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    }
 
-                    return false;
-                }
-            });
+                                    $('#update_lost_form_submit').prop('disabled', false);
+
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            }
+                            else{
+                                // Handle error response and display errors
+                                var errorMessages = data.errors.join('\n');
+                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
+                                // ...
+                            }
+                        // else {
+                        //     alert(data.error);
+                        //     UnblockPagePermanently();
+                        //     $('#excel_upload_form button.upload').prop('disabled', false);
+                        //     scan_sound(2);
+                        //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        // }
+                    },
+                    error: function(xhr, status, error) {
+                        
+                    },
+                    complete: function() {
+                        // Enable the submit button after request completes
+                        $('#excel_upload_form button.upload').prop('disabled', false);
+                    }
+                });
+
+                return false;
+            }
+        });
+
 
             $('#update_lost_form').validate({
                 errorClass: 'danger',
