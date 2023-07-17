@@ -324,7 +324,7 @@
 
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                var remark = $(row.node()).find('td.remarks input').val();
                                                 shipment_remarks[id] = remark;
                                             }
                                         });
