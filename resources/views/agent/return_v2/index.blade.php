@@ -801,7 +801,10 @@
 
 
                                 shipment +=
-                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" rows="2" placeholder="Remarks"></textarea></strong></th>'
+                                    '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea></strong></th>';
+
+                                shipment +=
+                                '</select></strong><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></th>';
 
 
 
@@ -982,6 +985,13 @@
                     }
                 })
 
+                
+                $(document).on('change', '#shipment_remarks', function() {
+                    if ($("#shipment_remarks").is(':empty') === false) {
+                        $('.error_message_shipment_remarks').text('')
+                    }
+                })
+
 
                 $(document).on('change', '#fake_status_id', function() {
                     if ($("#shipment_reason").is(':empty') === false) {
@@ -992,8 +1002,8 @@
 
                 $(document).on('change', '#shipment_status', function() {
                     $('.error_message_rv_assign_agent_status').text('')
-                    $('.error_message_rv_assign_agent_sub_status').text('')
-                    $("#shipment_remarks").removeAttr("style");
+                    $('.error_message_rv_assign_agent_sub_status').text('');
+                    // $("#shipment_remarks").removeAttr("style");
 
 
                 })
@@ -1215,6 +1225,7 @@
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
                                         var errorMessage;
+                                        console.log(field);
                                         if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
                                             errorMessage = '* Action is Required';
                                             $('#rv_assign_agent_status_error').text(errorMessage);
@@ -1231,6 +1242,11 @@
                                                 errorMessage = '* Fake Status is Required';
                                                 $('#rv_assign_agent_fake_status_id_error').text(errorMessage);
                                             }
+                                        }
+                                        
+                                        if (field === 'remarks' && $("#shipment_remarks").val() === "") {
+                                                errorMessage = '* Remarks is Required';
+                                                $('#shipment_remarks_error').text(errorMessage);
                                         }
 
                                         // toastr.error(errorMessage, 'Error!', {

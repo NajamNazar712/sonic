@@ -24,6 +24,7 @@ use App\Http\Models\ShipmentsJourney;
 use App\RvAssignAgentSubStatus;
 use App\RvShipmentAgent;
 use Exception;
+use Illuminate\Validation\Rule;
 
 class ReturnV2Controller extends Controller
 {
@@ -196,10 +197,13 @@ class ReturnV2Controller extends Controller
         // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
-            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 6', //2  reattempt, 3 intercept, 6 unresponsive
+            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3', //2  reattempt, 3 intercept
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
-            'remarks' => 'required_with:rv_assign_agent_status_id, 6 && required_with:rv_assign_agent_sub_status_id, 7'//if unresponsive and other is selected remark is required
+            // 'remarks' => 'required_if:rv_assign_agent_status_id,6|required_if:rv_assign_agent_sub_status_id,7'//if unresponsive and other is selected remark is required
+            'remarks' => Rule::requiredIf(function () use ($request) {
+                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 7;
+            }),//if unresponsive and other is selected remark is required
         ];
         //The rv assign agent sub status id field is required unless rv assign agent status id is in 2.
         
