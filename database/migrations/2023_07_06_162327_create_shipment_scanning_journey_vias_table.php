@@ -13,11 +13,11 @@ class CreateShipmentScanningJourneyViasTable extends Migration
      */
     public function up()
     {
-        Schema::create('shipment_scanning_journey_vias', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('name');
-            $table->timestamps();
-        });
+        // Schema::create('shipment_scanning_journey_vias', function (Blueprint $table) {
+        //     $table->increments('id');
+        //     $table->string('name');
+        //     $table->timestamps();
+        // });
     }
 
     /**
@@ -27,6 +27,6 @@ class CreateShipmentScanningJourneyViasTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('shipment_scanning_journey_vias');
+        // Schema::dropIfExists('shipment_scanning_journey_vias');
     }
 }
