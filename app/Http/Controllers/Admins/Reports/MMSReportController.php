@@ -65,8 +65,6 @@ class MMSReportController extends Controller
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->leftJoin('shipments_journey as shjr','shjr.shipment_id','=','shipments.id')
-            ->leftJoin('riders as riders','riders.id','=','shjr.rider_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -93,6 +91,7 @@ class MMSReportController extends Controller
                     ->where('dr.id','=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,25,30,36,37,38) and shipments_journey.verification = 1)'));
             })
+            ->leftJoin('riders as riders','riders.id','=','dr.rider_id')
             ->leftjoin('shipment_items as si', function ($join) use ($connection) {
                 $join->on('si.shipment_id', '=', 'shipments.id')
                     ->where('si.id', '=',
