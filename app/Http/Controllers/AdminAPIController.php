@@ -10764,6 +10764,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $admin_id = Auth::id();
             $tracking = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking);
             if ($shipment->exists()) {
