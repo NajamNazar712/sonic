@@ -864,23 +864,13 @@
                                         </table>
                                     `;
                                 $.each(data, function(index,value) {
-                                    remarks = '-';
-                                    updated_at = '-';
-
-                                    if(remarks != null)
-                                    {
-                                        remarks = value.remarks;
-                                    }
-
-                                    if(updated_at != null)
-                                    {
-                                        updated_at = value.updated_at;
-                                    }
+                                    updated_remark = value.remarks ? value.remarks : '-';
+                                    updated_at = value.updated_at ? value.updated_at :'-';
 
                                     remarks_data+=`
                                         <tr>
                                                 <td>${value.seal_number}</td>
-                                                <td>${remarks}</td>
+                                                <td>${updated_remark}</td>
                                                 <td>${value.added_by_name}</td>
                                                 <td>${value.pieces_count}</td>
                                                 <td>${value.created_at}</td>
