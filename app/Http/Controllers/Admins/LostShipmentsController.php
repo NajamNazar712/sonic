@@ -498,7 +498,8 @@ class LostShipmentsController extends Controller
             'integer' => ':attribute must be an Integer.',
         ];
         $rules = [
-            'tracking_number' => ['required', 'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query)use($status_array) {
+            'tracking_number' => ['required', 'max:300',
+            'integer', Rule::exists('shipments', 'tracking_number')->where(function ($query)use($status_array) {
                 $query->whereNotIn('shipper_status_id', $status_array);
             })],
         ];
@@ -539,15 +540,20 @@ class LostShipmentsController extends Controller
                 
                 foreach ($spreadsheet as $spreadsheet_row) {
                     $row = array();
-
+                    
                     foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
+                        if($value != null)
+                        {
+                            $row[$fields[$key]] = $value;
+                        }
                        
                     }
 
                     $rows[] = $row;
                 }
-              unset($spreadsheet);
+                $rows = array_filter($rows);
+                
+                unset($spreadsheet);
                 $errors = array();
                 $error_count = 0;
                 $tracking_ids = array();
@@ -575,10 +581,10 @@ class LostShipmentsController extends Controller
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
                         $shipment = Shipment::where('tracking_number', $tracking)
-                        ->whereNotIn('shipper_status_id', $status_array)
-                        ->first();
+                        ->whereNotIn('shipper_status_id', $status_array)->first();
+                        // dd($shipment);
                         if ($shipment) {
-                            
+                           
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];

@@ -23,7 +23,7 @@
                         
                     </div>
                 </form>
-
+                @if( session('role_id') == 1|| in_array(890, session('permissions')))
                 <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
                     
 
@@ -46,7 +46,7 @@
                         </div>
                     </div>
                 </form>
-               
+               @endif
 
                 <form id="update_lost_form" action="{{route('admin.delivery.lost.add.shipments.store')}}" class="form-horizontal" method="POST">
                     {{ csrf_field() }}
@@ -397,10 +397,8 @@
                                     $("#tracking_error").modal("show");
                                     $.each(data.error, function( key, value ) {
                                         var errorMessage = 'Tracking Number : ' + value.tracking_number + ':<br>' +
-                                        '<span class="error-text">' + value.error_msg + '</span><br>';
+                                        '<span class="error-text">' + value.error_msg + '</span>';
                                         $(".error_msg").append(errorMessage);
-                                        
-                                        $(".error_msg").append('<br>');
                                     });
                                     $("#okButton").on("click", function() {
                                         $("#tracking_error").modal("hide");
