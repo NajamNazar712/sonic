@@ -128,7 +128,7 @@ class ReturnV2Controller extends Controller
                                     ];
 
                                     // creating a new record
-                                    $this->newRvShipmentAssign($data);
+                                    $this->rv_shipment_assign($data);
 
                                     break 2;
                                 }
@@ -249,21 +249,33 @@ class ReturnV2Controller extends Controller
         } 
         
         else {
-            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereDate('');
+            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at',date('Y-m-d'))->first();
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
             $admin_agent = Admin::where('id', Auth::id())->first();
 
-            //if shipment already exists update row
-            if ($shipment_assign_agent->exists()) {
-                $shipment_assign_agent = $shipment_assign_agent->latest()->first();
+            //if agent already exists on same date update row
+            if($assign_agent){
 
-                $this->update_shipment_status($request); //updating status of shipment
-                $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
+            //if shipment already existsW update row
+                if ($shipment_assign_agent->exists()) {
+                    $shipment_assign_agent = $shipment_assign_agent->first();
+
+                    $this->update_shipment_status($request); //updating status of shipment
+                    $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
+                    $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
+
+                    return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                } 
+                else {
+                    
+                    return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
+                }
+            }
+            else{
+                $this->add_shipment_assign_agent($request, $shipment_assign_agent);
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
 
-                return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
-            } else {
-                return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
+
             }
         }
     }

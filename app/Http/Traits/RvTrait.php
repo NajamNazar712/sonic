@@ -26,6 +26,7 @@ use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
 use App\RvAgentCallHistory;
+use App\RvShipmentAgent;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -155,6 +156,28 @@ trait RvTrait
             $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
         }
 
+        $shipment_assign_agent->update($shipment_assign_agent_table_columns);
+
+        return true;
+    }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: this function is updating table rows of rv_shipment_assign_agents
+    protected function add_shipment_assign_agent($request, $shipment_assign_agent)
+    {
+        //updating columns in shipmen assign agent table 
+        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $shipment_assign_agent);
+
+        
+        $add_agent = new RvShipmentAgent();
+        $add_agent->agent_id = $shipment_assign_agent->agent_id;
+        $add_agent->total_shipments  = $add_agent->total_shipments + 1;
+        $add_agent->actual_productivity  = $add_agent->actual_productivity + 1;
+        $add_agent->save();
+
+        $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
         $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
         return true;
