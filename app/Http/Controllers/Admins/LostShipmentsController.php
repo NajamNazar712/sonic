@@ -488,7 +488,6 @@ class LostShipmentsController extends Controller
     // Description: This function is used to upload excel file for bulk lost shipments.
     public function bulk_lost_shipments(Request $request)
     {
-    // dd($request->all()); 
         $status_array = array(1, 5, 11, 14, 17, 21, 23, 25, 26, 28, 30, 31, 32, 34, 36, 37, 38, 49, 50, 51, 56, 60, 61);
         $names = [
             'tracking_number' => 'Tracking Number',
@@ -504,11 +503,11 @@ class LostShipmentsController extends Controller
             })],
         ];
         $fields = [0 => 'tracking_number'];
-
         if ($file = $request->file('excel')) {
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+            // dd($spreadsheet);
         
 
             $header = ['Tracking Number'];
@@ -527,7 +526,9 @@ class LostShipmentsController extends Controller
 
 
                 if (!$header_correct) {
-                    return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+                    
+                    return response()->json(['status' => 2, 'error' => 'Invalid Columns, Kindly follow the Template provided']);
+                    // return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
                     unset($spreadsheet[0]);
                 }
@@ -546,66 +547,38 @@ class LostShipmentsController extends Controller
 
                     $rows[] = $row;
                 }
-                // dd($rows);
-
-                unset($spreadsheet);
+              unset($spreadsheet);
                 $errors = array();
+                $error_count = 0;
                 $tracking_ids = array();
                 $tracking_id_row = array();
-                
+                    
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
-
+                    // dd($row['tracking_number']);
                     $validate = Validator::make($row, $rules, $messages);
-
+                    
                     $validate->setAttributeNames($names);
 
                     if ($validate->fails()) {
+                        
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
-                    if (empty($errors['Row #' . $row_id])) {
-                        if (!empty(trim($row['tracking_number']))) {
-                            if (empty($tracking_ids)) {
-
-                                $tracking_ids[] = $row['tracking_number'];
-                                $tracking_id_row[$row['tracking_number']] = $row_id;
-                            } else {
-                                if (in_array($row['tracking_number'], $tracking_ids)) {
-                                    $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
-                                } else {
-                                    $tracking_ids[] = $row['tracking_number'];
-                                    $tracking_id_row[$row['tracking_number']] = $row_id;
-                                }
-                            }
-                        }
-
-                        // $settings = GlobalSettings::where('type', 'nsa_accounts');
-                        // $nsa_accounts = array();
-                        // if ($settings->exists()) {
-                        //     $settings = $settings->first();
-                        //     $nsa_accounts = array_map('intval', explode(',', $settings->text));
-                        // }
-                        // if (count($nsa_accounts) > 0) {
-                        //     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('user_id', $nsa_accounts)->whereIn('shipper_status_id', [2, 4, 13])->exists()) {
-                        //         $errors['Row #' . $row_id][] = 'Shipment can\'t be updated with Tracking Number #' . $row['tracking_number'];
-                        //     }
-                        // } else {
-                        //     $errors['Row #' . $row_id][] = 'Nsa Account Not Found' . $row['tracking_number'];
-                        // }
-                    }
                 }
-                if (empty($errors)) {
+                //if (empty($errors)) {
                     $tracking_numbers = array();
                     $shipment_ids = array();
                     $check = array();
                     $data = array(); 
+                    $error = array();
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
                         $shipment = Shipment::where('tracking_number', $tracking)
                         ->whereNotIn('shipper_status_id', $status_array)
                         ->first();
-                        if ($shipment->exists()) {
+                        if ($shipment) {
+                            
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -642,25 +615,57 @@ class LostShipmentsController extends Controller
                             $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
                             $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
                             $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+
+                            $tracking_numbers['Row #' . $row_id] = $tracking;
+                            ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
+                           
                         }
-                        $tracking_numbers['Row #' . $row_id] = $tracking;
-                        ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
+                        else
+                        {   
+                            $error[$row_id]['tracking_number'] = $tracking;
+                            $error[$row_id]['error_msg'] = "These Tracking Numbers are Invalid";
+                            
+                        }
+                        // dd($data);
+                       
                         
-                    }
-                    return response()->json(['status' => 1, 'details' => $data]);
+                    }  
+                    $error_count =  count($error);
+                    
+                    return response()->json(['status' => 1, 'details' => $data ,'error_count' => $error_count , 'error' => $error]);
                     // dd($data);
-                    return redirect()->back()->with(['success' => 'Bulk Lost Update']);
+                    // return redirect()->back()->with(['success' => 'Bulk Lost Update']);
 
-                } else {
-                    $errors = array_map(function ($row, $errors) {
-                        return $row . ':' . PHP_EOL . implode(' | ', $errors);
-                    }, array_keys($errors), $errors);
+                // } 
+                // else {
+                //     dd($rows);
+                //     $error['tracking_number'] = $rows['tracking_number'];
+                //     $error['error_msg'] = "These Tracking Numbers are Invalid";
+                //     dd($rows[$key]['tracking_number']);
+                //     // $errors = array_map(function ($row, $errors) {
+                //     //     return $row['tracking_number'] . ':' . PHP_EOL . implode(' | ', $errors);
+                //     // }, array_keys($errors), $errors);
+                    
+                //     $errors = array_map(function ($key, $errors) use ($rows) {
+                    
 
-                    return redirect()->back()->withErrors($errors);
-                }
+                //         if (isset($rows[$key]['tracking_number'])) {
+                //             return $rows[$key]['tracking_number'] . ':' . PHP_EOL . implode(' | ', $errors);
+                //         } else {
+                //             return 'Undefined tracking number' . ':' . PHP_EOL . implode(' | ', $errors);
+                //         }
+                //     }, array_keys($errors), $errors);
+                //     dd($errors);
+
+                //     return redirect()->back()->withErrors($errors); 
+                // }
             } else {
-                return redirect()->back()->with('error', 'No Shipments in File');
+              
+                // dd("1");
+                return response()->json(['status' => 3, 'error' => 'No Shipments in File']);
+                // return redirect()->back()->with('error', 'No Shipments in File');
             }
         }
+      
     }
 }

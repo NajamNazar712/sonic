@@ -81,7 +81,33 @@
             </div>
         </div>
     </div>
-
+    <div class="modal fade text-left" id="tracking_error" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tracking_error"
+    aria-hidden="true">
+   <div class="modal-dialog modal-md" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">ERROR</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body text-center">
+               <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-8">
+                        <span class="error_msg"></span>
+                    </div>
+                    </div>
+                    <div class="row justify-content-center mt-4">
+                        <div class="col-6">
+                            <button type="button" class="btn btn-primary btn-block" id="okButton">OK</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+       </div>
+   </div>
+</div>
 
 @endsection
 
@@ -89,7 +115,11 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-
+<style>
+    .error-text {
+    color: red;
+}
+</style>
 @endsection
 
 @section('js')
@@ -284,13 +314,15 @@
             //         return false;
             //     }
             // });
+            var shipment_ids = [];  
             $('#excel_upload_form').validate({
             errorClass: 'danger',
             successClass: 'success',
+            
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parents('form'));
             },
-
+            
             submitHandler: function(form) {
                 // Disable the submit button to prevent multiple submissions
                 
@@ -299,11 +331,11 @@
                 // Get the file input element and selected file
                 var fileInput = $(form).find('#excel')[0];
                 var file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
-
+                
                 // Create a new FormData object
                 var formData = new FormData();
                 formData.append('excel', file);
-
+                console.log(shipment_ids);
                 // Make the AJAX request
                 $.ajax({
                     url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
@@ -315,17 +347,19 @@
                         'X-CSRF-TOKEN': '{{ csrf_token() }}'
                     },
                     success: function(data) {
+                        
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
-                                console.log(shipmentData); 
+                                var shipmentIDs = Object.keys(shipmentData);
+                                console.log(shipmentIDs); 
                                 id = data.details;
-                                console.log(id);
-                                var index = $.inArray(id, shipment_ids);
-                                $.each(shipmentData, function (id, shipment) {
+                               $.each(shipmentIDs, function (index, id) {
                                     // $.each(shipmentData, function(id, shipment2){
-                                       
+                                        var index = $.inArray(id, shipment_ids);
+                                        
                                        if (index === -1) {
+                                         var shipment = shipmentData[id];
                                            var rowNo = table.rows().count();
        
                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
@@ -343,20 +377,45 @@
                                            action
                                        ]).node().id = id;
        
-                                           table.draw(false);
-                                           scan_sound(1);
-                                           table.order([0, 'desc']).draw();
-       
-                                           shipment_ids.push(id);
-       
-                                           $('#lost_shipment_form button.add').prop('disabled', false);
-       
-                                           $('#update_lost_form_submit').prop('disabled', false);
-       
-                                           toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                       }
+                                        table.draw(false);
+                                        scan_sound(1);
+                                        table.order([0, 'desc']).draw();
+
+                                        shipment_ids.push(id);
+                                        
+    
+                                        $('#lost_shipment_form button.add').prop('disabled', false);
+    
+                                        $('#update_lost_form_submit').prop('disabled', false);
+                                        $("#excel").val("");
+                                    }
                                     // });
-                            });
+                                });
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                               if(data.error_count > 0)
+                                {
+                                    $("#tracking_error").modal("show");
+                                    $.each(data.error, function( key, value ) {
+                                        var errorMessage = 'Tracking Number : ' + value.tracking_number + ':<br>' +
+                                        '<span class="error-text">' + value.error_msg + '</span><br>';
+                                        $(".error_msg").append(errorMessage);
+                                        
+                                        $(".error_msg").append('<br>');
+                                    });
+                                    $("#okButton").on("click", function() {
+                                        $("#tracking_error").modal("hide");
+                                    });
+                                }
+                            }
+                            else if(data.status == 2)
+                            {
+                                var errorMessages = data.error;
+                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
+                            }
+                            else if(data.status == 3)
+                            {
+                                var errorMessages = data.error;
+                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
                             }
                             else{
                                 // Handle error response and display errors
