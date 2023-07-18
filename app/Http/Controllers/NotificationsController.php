@@ -10276,7 +10276,6 @@ class NotificationsController extends Controller
                             $body = str_replace('[role]', $role, $body);
                         }
                         $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
-                        $subject = 'dadad';
                         self::email($subject, $body, $to);
                     }
                 }

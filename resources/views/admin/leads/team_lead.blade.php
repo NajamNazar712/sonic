@@ -172,6 +172,81 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="joiningDateModalLabel">Add Days
+                        <strong>({{ Auth::User()->name }})</strong>
+                    </h5>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="myForm" action="{{ route('admin.team_lead.add_additional_days') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <input type="hidden" value="" id="employee_id" name="employee_id">
+                        <div class="row">
+                            <div class="col">
+                                <fieldset class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span
+                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                        </span>
+                                    </div>
+                                    <input type="text" data-rule-required="true"
+                                        data-msg-required="This Field is required"
+                                        class="form-control bg-primary border-primary white rounded-right pickadate datepicker"
+                                        id="joining_date" placeholder="Add Days" name="add_additional_days">
+                                </fieldset>
+                            </div>
+                        </div>
+                    </div>
+
+                    @if ($employee_additional_days->isNotEmpty())
+                        <div class="card days_show">
+                            <div class="card-header">
+                                <strong>
+                                    <h5 class="card-title" style="font-weight: bold; text-decoration: underline;">Working Days</h5>
+                                </strong>
+                            </div>
+                            <div class="card-body" id="delete_days">
+
+                                @foreach ($employee_additional_days as $employee_additional_day)
+                                    @php
+                                        $workingDay = \Carbon\Carbon::parse($employee_additional_day->working_days)->format('l');
+                                    @endphp
+
+                                    <div class="parent-element">
+
+                                        <a class="btn btn-sm btn-danger float-right delete-icon" title="Delete"
+                                            data-del-id="{{ $employee_additional_day->id }}">
+                                            <i class="fas fa-trash">Delete</i>
+                                        </a>
+                                        <div class="card-title">{{ $employee_additional_day->working_days }}
+                                            ({{ $workingDay }})
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+
+                        </div>
+                    @endif
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <div class="row justify-content-center">
         <div class="col-3" id="dormant_div">
             <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
@@ -486,8 +561,61 @@
     <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/picker.date.js') }}" type="text/javascript"></script>
     <script src="{{ asset('app-assets/vendors/js/pickers/pickadate/legacy.js') }}" type="text/javascript"></script>
 
+
     <script type="text/javascript">
         $(document).ready(function() {
+            $('body').on('click', '.delete-icon', function() {
+                var delId = $(this).data('del-id');
+                var deleteDaysContainer = $('#delete_days');
+                var deleteIcon = $(this);
+
+
+
+                $.ajax({
+                        url: '{{ route('admin.team_lead.delete_additional_days') }}',
+                        type: 'GET',
+                        data: {
+                            'id': delId,
+                        }
+                    })
+                    .done(function(data) {
+
+                        var object = data
+                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
+
+                        console.log(object);
+
+                        // Get the length of the 'object'
+                        var objectLength = 0;
+                        if (Array.isArray(object)) {
+                            objectLength = object.length; // If 'object' is an array
+                        } else if (typeof object === 'object' && object !== null) {
+                            objectLength = Object.keys(object).length; // If 'object' is an object
+                        }
+
+                        if (objectLength == 1) {
+                            $('.days_show').addClass('d-none')
+                        }
+                        if (data.status == 1) {
+                            toastr.success(data.success,
+                                'Success!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+
+                            deleteIcon.closest('.parent-element').remove();
+
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    })
+                    .fail(function(xhr) {
+                        console.log(xhr.statusText);
+                    });
+            });
 
 
             var rv_city = null;
@@ -1250,9 +1378,9 @@
             });
 
 
-            $('body').on('click','.deactivate_staff', function(){
+            $('body').on('click', '.deactivate_staff', function() {
                 var employeeId = $(this).attr('data-id');
-                      swal({
+                swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes To De Activate Employee!',
                     icon: 'warning',
@@ -1285,7 +1413,7 @@
                         });
 
                         $.ajax({
-                            url: '{{ route('admin.team_lead.deactivate_staff') }}',
+                                url: '{{ route('admin.team_lead.deactivate_staff') }}',
 
                                 method: 'POST',
                                 data: {
@@ -1294,7 +1422,7 @@
                                 }
                             })
                             .done(function(data) {
-    
+
                                 swal.close();
                                 table.draw();
                             });
@@ -1306,9 +1434,31 @@
             });
 
 
-            $('body').on('click','.activate_staff', function(){
+            var today = new Date();
+
+            var replacement_last_working_day = $('.datepicker').pickadate({
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_for matted',
+                min: today,
+                onOpen: function() {
+                    var daysToDisable = [2, 3, 4, 5, 6, 7];
+                    this.set('enable', [1]); 
+                    this.set('disable', daysToDisable); 
+                }
+            });
+
+            $('body').on('click', '.add_additional_days', function() {
+                $('#joiningDateModal').modal('show');
+
                 var employeeId = $(this).attr('data-id');
-                      swal({
+
+                $('#employee_id').val(employeeId);
+
+
+            })
+            $('body').on('click', '.activate_staff', function() {
+                var employeeId = $(this).attr('data-id');
+                swal({
                     title: 'Are You Sure?',
                     text: 'Select Yes To Activate Employee!',
                     icon: 'warning',
@@ -1341,7 +1491,7 @@
                         });
 
                         $.ajax({
-                            url: '{{ route('admin.team_lead.activate_staff') }}',
+                                url: '{{ route('admin.team_lead.activate_staff') }}',
 
                                 method: 'POST',
                                 data: {
@@ -1350,7 +1500,7 @@
                                 }
                             })
                             .done(function(data) {
-    
+
                                 swal.close();
                                 table.draw();
                             });
@@ -1362,7 +1512,7 @@
             });
 
 
-            
+
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
@@ -2084,7 +2234,7 @@
                 });
             });
 
-      
+
 
             $('body').on('click', '.convert_rider_to_staff', function(e) {
                 var id = $(this).data('target-id');

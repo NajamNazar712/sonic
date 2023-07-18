@@ -15,8 +15,8 @@ class ShiftTypeSeeder extends Seeder
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('shift_types')->insert(array(
-            array('id' => 1, 'name' => 'Contractual Shift','created_at' => $timestamp, 'updated_at'=>$timestamp ),
-            array('id' => 2, 'name' => 'Employee Shift','created_at' => $timestamp, 'updated_at'=>$timestamp ),
+            array('id' => 1, 'name' => 'Employee Shift','created_at' => $timestamp, 'updated_at'=>$timestamp ),
+            array('id' => 2, 'name' => 'Contractual Shift','created_at' => $timestamp, 'updated_at'=>$timestamp ),
 
         ));
     }
