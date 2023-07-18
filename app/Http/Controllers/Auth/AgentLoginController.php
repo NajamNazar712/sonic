@@ -93,9 +93,9 @@ class AgentLoginController extends Controller
                 } else {
                     if (isset($employee->shift_id)) {
                         $current_time = Carbon::now();
-                        $shift_exist = EmployeeShift::where('id', $employee->shift_id)->exists();
+                        $shift_exist = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id',2)->first();
                         if ($shift_exist) {
-                            $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
+                            // $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
                             $start_time = Carbon::parse($shift_exist->start_time);
                             $end_time = Carbon::parse($shift_exist->end_time);
 
@@ -106,16 +106,16 @@ class AgentLoginController extends Controller
                                 $errors = [$this->username() => trans('auth.failed')];
                                 return redirect()->back()->withErrors($errors);
                             }else{
-                                $errors = 'You are not allowed In This Time Slot';
+                                $errors = 'You are not allowed in this Time Slot';
                                 return redirect()->back()->withErrors($errors);
                             }
 
                         } else {
-                            $errors = 'the employee shift does not exist';
+                            $errors = 'Employee Shift Doesnt Exist';
                             return redirect()->back()->withErrors($errors);                        
                         }
                     } else {
-                        $errors = 'shift does not exist';
+                        $errors = 'Shift Doesnt Exist';
                         return redirect()->back()->withErrors($errors);                          
                     }
                 }
