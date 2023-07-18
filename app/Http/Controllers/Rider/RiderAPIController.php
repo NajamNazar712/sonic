@@ -14165,4 +14165,34 @@ RiderAPIController extends Controller
 
         }
     }
+
+    public function scan_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = explode(',', $request->tracking_number);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->pluck('tracking_number')->toArray();
+
+            if(count($tracking_number) == count($shipments))
+            {   
+                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id);
+
+                return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
+            }
+            else{
+                $tracking_not_found = array_diff($tracking_number, $shipments);
+                return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
+        }
+    }
 }
