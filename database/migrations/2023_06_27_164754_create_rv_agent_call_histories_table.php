@@ -15,12 +15,10 @@ class CreateRvAgentCallHistoriesTable extends Migration
     {
         Schema::create('rv_agent_call_histories', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('agent_id')->index();
-            $table->integer('shipment_id')->index();
+            $table->integer('rv_shipment_assign_agent_id')->index();
             $table->integer('call_finding_id')->index();
-            $table->integer('sub_status_call_finding_id')->index();
             $table->integer('call_to_id')->index();
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->timestamps();
             
         });

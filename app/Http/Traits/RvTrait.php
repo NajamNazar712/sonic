@@ -463,19 +463,22 @@ trait RvTrait
     // Description: 
     protected function unresponsive(Request $request)
     {
-        dd($request->all());
         $shipment = Shipment::find($request->shipment_id);
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->first();
 
         $status = new RvAgentCallHistory();
-        $status->shipment_id = $request->shipment_id;
+        $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
         $status->call_finding_id = $request->call_finding_id;
-        $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
         $status->call_to_id = $request->call_to_id;
-        $status->sub_status_call_finding_remarks = $request->remarks;
-        $status->shipment_status_id = $shipment->shipper_status_id;
+        $status->remarks = $rv_shipment_assign_agent->remarks;
         $status->updated_by = Auth::id();
-
         $status->save();
+
+        $rv_shipment_assign_agent->increment('unresponsive_count');
+        
+        if($rv_shipment_assign_agent->unresponsive_count == 3){
+            $rv_shipment_assign_agent->rv_state_id = 3;
+        }
 
         return response()->json(['status' => 1]);
     }

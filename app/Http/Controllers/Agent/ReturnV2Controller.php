@@ -80,14 +80,14 @@ class ReturnV2Controller extends Controller
                 foreach ($shipments as $key => $shipment) {
 
                     # code...
-                    // if agent shipment is open - assigned to different user
+                    // if agent shipment is open - assigned to any user who comes first
                     $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                     if ($shipment_assigned_unassigned_agent->exists()) {
                         $shipment_assigned_unassigned_agent->first();
                         break 2;
                     }
 
-                    // if agent shipment is unassigned - assigned to same agent only - if close mistakely or in case of lost page
+                    // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
 
                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -194,18 +194,15 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_submit(Request $request)
     {
-        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3', //2  reattempt, 3 intercept
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
-            // 'remarks' => 'required_if:rv_assign_agent_status_id,6|required_if:rv_assign_agent_sub_status_id,7'//if unresponsive and other is selected remark is required
             'remarks' => Rule::requiredIf(function () use ($request) {
                 return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 7;
             }),//if unresponsive and other is selected remark is required
         ];
-        //The rv assign agent sub status id field is required unless rv assign agent status id is in 2.
         
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
@@ -223,7 +220,6 @@ class ReturnV2Controller extends Controller
         } 
         
         else {
-            dd('sadf');
             $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
