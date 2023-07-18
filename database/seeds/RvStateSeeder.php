@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class RvStateSeeder extends Seeder
 {
@@ -18,6 +19,7 @@ class RvStateSeeder extends Seeder
             array('id' => 1, 'name' => 'Assigned','created_at' => $timestamp, 'updated_at'=>$timestamp ),
             array('id' => 2, 'name' => 'UnAssigned','created_at' => $timestamp, 'updated_at'=>$timestamp ),
             array('id' => 3, 'name' => 'Open','created_at' => $timestamp, 'updated_at'=>$timestamp),
+            array('id' => 4, 'name' => 'Completed','created_at' => $timestamp, 'updated_at'=>$timestamp),
 
         ));
     }

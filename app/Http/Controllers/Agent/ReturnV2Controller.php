@@ -27,6 +27,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use Illuminate\Validation\Rule;
 
 class ReturnV2Controller extends Controller
 {
@@ -212,7 +213,7 @@ class ReturnV2Controller extends Controller
     {
         $shipment_id = $request->shipment_id;
         $getData = $this->getShipmentConsigneeCities($shipment_id);
-        return response()->json(['status' => 1, 'shipment' => $getData['shipment'], 'consignee_cities' => $getData['cosignee_cities']]);
+        return response()->json(['status' => 1, 'shipment' => $getData['shipment'], 'consignee_cities' => $getData['consignee_cities']]);
     }
 
 
@@ -222,32 +223,36 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_submit(Request $request)
     {
+        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
+            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3', //2  reattempt, 3 intercept
             'is_fake_status' => 'required',
-            'rv_fake_status_id' => 'required_if:is_fake_status,1',
+            'rv_fake_status_id' => 'required_if:is_fake_status, 1',
+            // 'remarks' => 'required_if:rv_assign_agent_status_id,6|required_if:rv_assign_agent_sub_status_id,7'//if unresponsive and other is selected remark is required
+            'remarks' => Rule::requiredIf(function () use ($request) {
+                return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 7;
+            }),//if unresponsive and other is selected remark is required
         ];
-
-        if ($request->input('rv_assign_agent_status_id') == 2) {
-            $validations['rv_assign_agent_sub_status_id'] = '';
-        } else {
-            $validations['rv_assign_agent_sub_status_id'] = 'required';
-        }
-
+        //The rv assign agent sub status id field is required unless rv assign agent status id is in 2.
+        
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
             'rv_assign_agent_sub_status_id' => $request->input('rv_assign_agent_sub_status_id'),
             'is_fake_status' => $request->input('is_fake_status'),
             'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
-
+            'remarks' => $request->input('remarks') ?? null,
+            
         ];
-
+        
         $validate = Validator::make($data, $validations);
-
+        
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'errors' => $validate->errors()]);
-        } else {
-
+        } 
+        
+        else {
+            dd('sadf');
             $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
@@ -256,7 +261,9 @@ class ReturnV2Controller extends Controller
             if ($shipment_assign_agent->exists()) {
                 $shipment_assign_agent = $shipment_assign_agent->latest()->first();
 
-                $this->changeShipmentStatus($request);
+                $this->update_shipment_status($request); //updating status of shipment
+                $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
+                $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
 
                 return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
             } else {
