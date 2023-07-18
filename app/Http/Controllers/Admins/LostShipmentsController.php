@@ -381,7 +381,7 @@ class LostShipmentsController extends Controller
             }
     }
     public function add_lost_shipments(Request $request){
-        //dd($request);
+        // dd($request);
         $passing_status_array = array(1,14,17,18,25,31,38);
         $shipment_status_for_bags = array(3,21,26,32,49);
         $shipments = explode(',', $request->shipment_ids);
@@ -509,7 +509,7 @@ class LostShipmentsController extends Controller
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
             // dd($spreadsheet);
-        
+            $trackingNumbers = array();
 
             $header = ['Tracking Number'];
 
@@ -544,7 +544,10 @@ class LostShipmentsController extends Controller
                     foreach ($spreadsheet_row as $key => $value) {
                         if($value != null)
                         {
-                            $row[$fields[$key]] = $value;
+                            if (!in_array($value, $trackingNumbers)) {
+                                $trackingNumbers[] = $value;
+                                $row[$fields[$key]] = $value;
+                            }
                         }
                        
                     }
@@ -584,7 +587,6 @@ class LostShipmentsController extends Controller
                         ->whereNotIn('shipper_status_id', $status_array)->first();
                         // dd($shipment);
                         if ($shipment) {
-                           
                             $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                             if(!$dispute_check){
                                 return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -600,16 +602,20 @@ class LostShipmentsController extends Controller
                                 return response()->json(['status' => 0, 'error' => 'Shipment is Out for Delivery !']);
                             } 
                             if($shipment->shipper_status_id != 18) {
+                                // dd($shipment->shipper_status_id);
                                 $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment->id);
                                 if($cargo_manifest_bag_shipments->exists()){
                                     $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
                                     $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
                                     if($bag){
                                         if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
-                                            return response()->json(['status' => 0, 'error' => 'Shipment already marked lost for the current bag']);
+                                            return response()->json(['status' => 4, 'error' => 'Shipment already marked lost for the current bag']);
                                         }
                                     }
                                 }
+                            }
+                            else{
+                                return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!']);
                             }
                             $data[$shipment->id]['id'] = $shipment->id;
                             $data[$shipment->id]['tracking_number'] = $shipment->tracking_number;

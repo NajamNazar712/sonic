@@ -119,6 +119,11 @@
     .error-text {
     color: red;
 }
+label.error {
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+}
 </style>
 @endsection
 
@@ -317,10 +322,11 @@
             var shipment_ids = [];  
             $('#excel_upload_form').validate({
             errorClass: 'danger',
-            successClass: 'success',
+            successClass: 'success', 
+           
             
             errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parents('form'));
+                error.addClass('w-100 mt-0').appendTo(element.parents('form'));
             },
             
             submitHandler: function(form) {
@@ -388,20 +394,26 @@
     
                                         $('#update_lost_form_submit').prop('disabled', false);
                                         $("#excel").val("");
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     // });
                                 });
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                if(data.error_count > 0)
                                 {
                                     $("#tracking_error").modal("show");
+                                    var errorMessage = '<span class="error-text">Invalid Tracking Numbers</span><br>';
                                     $.each(data.error, function( key, value ) {
-                                        var errorMessage = 'Tracking Number : ' + value.tracking_number + ':<br>' +
-                                        '<span class="error-text">' + value.error_msg + '</span>';
+                                        errorMessage += 'Tracking Number : ' + value.tracking_number + ':<br>';
                                         $(".error_msg").append(errorMessage);
                                     });
                                     $("#okButton").on("click", function() {
                                         $("#tracking_error").modal("hide");
+                                        $("#tracking_error .error_msg").empty();
+                                    });
+                                    
+                                    $('#tracking_error').on('hidden.bs.modal', function (e) {
+                                        // Clear the content of the .error_msg element
+                                        $("#tracking_error .error_msg").empty();
                                     });
                                 }
                             }
@@ -411,6 +423,11 @@
                                 toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
                             }
                             else if(data.status == 3)
+                            {
+                                var errorMessages = data.error;
+                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
+                            }
+                            else if(data.status == 4)
                             {
                                 var errorMessages = data.error;
                                 toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
