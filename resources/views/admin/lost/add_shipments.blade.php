@@ -357,16 +357,17 @@ label.error {
                         if (data.status == 1) {
                                 UnblockPagePermanently();
                                 var shipmentData = data.details;
+                               
                                 var shipmentIDs = Object.keys(shipmentData);
                                 console.log(shipmentIDs); 
                                 id = data.details;
                                $.each(shipmentIDs, function (index, id) {
                                     // $.each(shipmentData, function(id, shipment2){
                                         var index = $.inArray(id, shipment_ids);
-                                        
-                                       if (index === -1) {
-                                         var shipment = shipmentData[id];
-                                           var rowNo = table.rows().count();
+                                        var shipment = shipmentData[id];
+                                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
+                                            console.log(shipment.tracking_number);
+                                            var rowNo = table.rows().count();
        
                                            var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
                                            table.row.add([
@@ -396,6 +397,12 @@ label.error {
                                         $("#excel").val("");
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
+                                    else {
+                                        $('#lost_shipment_form button.add').prop('disabled', false);
+                                        scan_sound(2);
+                                        toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                    
                                     // });
                                 });
                                if(data.error_count > 0)
