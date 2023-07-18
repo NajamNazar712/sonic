@@ -13,6 +13,7 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\OsaChargesLog;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Http\Models\Admin\StatusRemark;
 use App\Http\Models\ConsolidationShipments;
 use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\InterceptReBookRequest;
@@ -24,6 +25,7 @@ use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentReplacementParcelImage;
 use App\Http\Models\ShipmentsJourney;
+use App\RvAgentCallHistory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -305,7 +307,7 @@ trait RvTrait
     }
 
     
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -337,7 +339,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: This function is in AdminInterceptRebookRequestHistoryController using to update intercept different Consignee/ Same Consignee
@@ -453,6 +455,29 @@ trait RvTrait
                 return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
             }
         }
+    }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: 
+    protected function unresponsive(Request $request)
+    {
+        dd($request->all());
+        $shipment = Shipment::find($request->shipment_id);
+
+        $status = new RvAgentCallHistory();
+        $status->shipment_id = $request->shipment_id;
+        $status->call_finding_id = $request->call_finding_id;
+        $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
+        $status->call_to_id = $request->call_to_id;
+        $status->sub_status_call_finding_remarks = $request->remarks;
+        $status->shipment_status_id = $shipment->shipper_status_id;
+        $status->updated_by = Auth::id();
+
+        $status->save();
+
+        return response()->json(['status' => 1]);
     }
 
 

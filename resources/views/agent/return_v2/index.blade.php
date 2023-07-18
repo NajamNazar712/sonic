@@ -1031,7 +1031,7 @@
 
 
 
-                            } else if (data.status == 1 && (id == 5)) {
+                            } else if (data.status == 1 && (id == 6)) { //unresponsive
                                 var options = '';
                                 options += '<option value="">Select Reason</option>';
 
@@ -1042,7 +1042,7 @@
                                 $('#shipment_reason').html(options);
                                 $('#shipment_reason').show().click();
 
-                                if (id == 5) {
+                                if (id == 6) {
                                     $('#call_to_id').removeClass('d-none');
 
                                 } else {
