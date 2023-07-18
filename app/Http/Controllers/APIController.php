@@ -7544,5 +7544,75 @@ class APIController extends Controller
 
         }
     }
+
+    public function ideas_payments(Request $request)
+    {
+        dd(1);
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $data = array();
+
+            foreach ($shipments as $shipment) {
+
+                $account_type_id = $shipment->user->account_type_id;
+
+                $done_payment_shipments = $shipment->done_payment_shipments;
+
+                if (!$done_payment_shipments->isEmpty()) {
+                    $data[$shipment->tracking_number] = array();
+
+                    foreach ($done_payment_shipments as $done_payment_shipment) {
+                        $details = array();
+
+                        if ($done_payment_shipment->done_payment->status == 0) {
+                            $details['payment_status'] = 'Processed';
+                        } else if ($done_payment_shipment->done_payment->status == 1) {
+                            $details['payment_status'] = 'Paid';
+                        } else if ($done_payment_shipment->done_payment->status == 2) {
+                            $details['payment_status'] = 'Reverted';
+                        } else {
+                            $details['payment_status'] = 'Unknown';
+                        }
+                        $details['billing_method'] = $shipment->user->account_type->name;
+                        $details['payment_date'] = Carbon::parse($done_payment_shipment->done_payment->created_at)->toDateTimeString();
+                        $details['payment_method'] = 'IBFT';
+                        $details['payment_type'] = $done_payment_shipment->type;
+                        if ($done_payment_shipment->type == 0) {
+                            $details['payment_type'] = 'Delivered';
+                        } else if ($done_payment_shipment->type == 1) {
+                            $details['payment_type'] = 'Returned';
+                        } else {
+                            $details['payment_type'] = 'Adjusted';
+                        }
+                        $details['payment_id'] = $done_payment_shipment->done_payment->id;
+                        if ($account_type_id == 2) {
+                            $details['invoice_ids'] = array();
+                            $details['invoice_ids'] = InvoiceShipment::where('shipment_id', $shipment->id)->groupBy('invoice_id')->pluck('invoice_id')->toArray();
+                        }
+                        $data[$shipment->tracking_number][] = $details;
+                    }
+                }
+            }
+            return response()->json(['status' => 0, 'payments' => $data]);
+        }
+    }
 }
 
