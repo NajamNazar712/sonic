@@ -179,7 +179,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                order: [[ 4, "desc" ]],
+                order: [[6, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {

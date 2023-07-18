@@ -67,10 +67,8 @@
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
-
-                        <th class="border-primary border-darken-1">Fintech Charges</th>
-
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Fintech Charges</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
@@ -436,7 +434,7 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[11, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
@@ -458,7 +456,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges'},
+                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -496,7 +494,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.cash_amount')) {
+                        if ($(header).is('.serial_number') || $(header).is('.cash_amount') || $(header).is('.fintech_shipments_charges')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
