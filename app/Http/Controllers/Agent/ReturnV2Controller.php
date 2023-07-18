@@ -84,9 +84,9 @@ class ReturnV2Controller extends Controller
                 $current_time = Carbon::now();
                 $employee = $employee->first();
 
-                $shift_exist = EmployeeShift::where('id', $employee->shift_id)->exists();
+                $shift_exist = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
                 if ($shift_exist) {
-                    $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
+                    // $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
                     $start_time = Carbon::parse($shift_exist->start_time);
                     $end_time = Carbon::parse($shift_exist->end_time);
                     if ($current_time->between($start_time, $end_time)) {
