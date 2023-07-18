@@ -869,22 +869,22 @@
 
                                     if(remarks != null)
                                     {
-                                        remarks = ${value.remarks};
+                                        remarks = value.remarks;
                                     }
 
                                     if(updated_at != null)
                                     {
-                                        updated_at = ${value.updated_at};
+                                        updated_at = value.updated_at;
                                     }
 
                                     remarks_data+=`
                                         <tr>
                                                 <td>${value.seal_number}</td>
-                                                <td>`.remarks.`</td>
+                                                <td>${remarks}</td>
                                                 <td>${value.added_by_name}</td>
                                                 <td>${value.pieces_count}</td>
                                                 <td>${value.created_at}</td>
-                                                <td>`.updated_at.`</td>
+                                                <td>${updated_at}</td>
                                         </tr>`;
                                 });
 
