@@ -202,7 +202,7 @@
                     }
                 },
                 rowId: 'request_note_id',
-                order: [[9, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {
                         orderable: false,

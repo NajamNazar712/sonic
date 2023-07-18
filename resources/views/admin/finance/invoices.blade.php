@@ -149,7 +149,10 @@
 						<th class="border-primary border-darken-1">Deposit Slip</th>
 						<th class="border-primary border-darken-1">Adjustments</th>
 						<th class="border-primary border-darken-1">Received Amount</th>
-						<th class="border-primary border-darken-1">Tax Amount</th>
+						{{-- <th class="border-primary border-darken-1">Tax Amount</th> --}}
+						<th class="border-primary border-darken-1">Income Tax Withhold</th>
+						<th class="border-primary border-darken-1">Sales Tax Withheld</th>
+						<th class="border-primary border-darken-1">Other Deductions</th>
 						<th class="border-primary border-darken-1">Payment Type</th>
 						<th class="border-primary border-darken-1"></th>
 						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
@@ -554,7 +557,10 @@
 									head.push('Status');
 									head.push('Deposit Date');
 									head.push('Received Amount');
-									head.push('Tax Amount');
+									// head.push('Tax Amount');
+									head.push('Income Tax Withhold');
+									head.push('Sales Tax Withheld');
+									head.push('Other Deductions');
 									head.push('Payment Type');
 
 
@@ -584,7 +590,10 @@
 										row.push(values.status);
 										row.push(values.deposit_date);
 										row.push(values.received_amount);
-										row.push(values.tax_amount);
+										// row.push(values.tax_amount);
+										row.push(values.income_tax_withhold);
+										row.push(values.sales_tax_withheld);
+										row.push(values.other_deductions);
 										row.push(values.payment_type);
 
 										body.push(row);
@@ -786,7 +795,10 @@
 							{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip', orderable: false, searchable: false},
 							{data:'invoice_adjustment', name: 'invoice_adjustment', class: 'align-middle text-center invoice_adjustment', orderable: false, searchable: false},
 							{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
-							{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+							// {data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+							{data:'income_tax_withhold', name: 'income_tax_withhold', class: 'align-middle text-center income_tax_withhold'},
+							{data:'sales_tax_withheld', name: 'sales_tax_withheld', class: 'align-middle text-center sales_tax_withheld'},
+							{data:'other_deductions', name: 'other_deductions', searchable: false, class: 'align-middle text-center other_deductions'},
 							{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
 							{data:'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 						],
@@ -832,7 +844,7 @@
 								var column = this;
 								var header = column.header();
 
-								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip') || $(header).is('.balance_amount')) {
+								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.other_deductions')|| $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip') || $(header).is('.balance_amount')) {
 									$(td).appendTo($(search));
 								}
 								else if($(header).is('.account'))

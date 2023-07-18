@@ -588,7 +588,7 @@
                         @endif
 
                         @if (session('role_id') == 1 ||
-                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849], session('permissions'))) !== 0)
+                                count(array_intersect([44, 47, 48, 49, 126, 566, 600, 643, 675, 781,849,885], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title"
                                         data-i18n="nav.dash.main">Return</span></a>
                                 <ul class="menu-content">
@@ -666,6 +666,10 @@
                                     @if (session('role_id') == 1 || in_array(849, session('permissions')))
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.return.return_confirm_otp.index') }}">Return OTP History</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(885, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.return.shipper_return_receiving.history.index')}}">Shipper Return Receiving History</a></li>
                                     @endif
                                 </ul>
                             </li>
@@ -836,6 +840,24 @@
                                                 href="{{ route('admin.petty_cash.rejected.index') }}">Rejected</a>
                                         </li>
                                     @endif
+                                    @if (session('role_id') == 1 ||count(array_intersect([881,882], session('permissions'))) !== 0)
+                                        <li class=" nav-item"><a href="#"><span class="menu-title">Advance Petty Cash</span></a>
+
+                                            <ul class="menu-content">
+                                                @if (session('role_id') == 1 || in_array(881, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.petty_cash.advance.index') }}">Make</a>
+                                                    </li>
+                                                @endif
+                                                @if (session('role_id') == 1 || in_array(882, session('permissions')))
+                                                    <li><a class="menu-item"
+                                                            href="{{ route('admin.petty_cash.advance.statements.index') }}">Statement</a>
+                                                    </li>
+                                                @endif
+                                            </ul>
+                                        </li>
+                                    @endif
+
 
                                 </ul>
                             </li>
@@ -1249,7 +1271,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,],session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
@@ -1617,19 +1639,28 @@
                                     Wise Summary</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(823, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rider Pickup Report</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.rider_pickup.index') }}">Rider Wise Pickup</a></li>
                         @endif
                         @if (session('role_id') == 1 || in_array(839, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.revenue_report_by_invoice.index') }}">Revenue Report By Invoice</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(879, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.project_arrival.index') }}">Project Arrival</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(880, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.rider_picked.index') }}">Rider-Picked Status (W/O Arrival)</a></li>
+                        @endif
                         @if (session('role_id') == 1 || in_array(877, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.quick_scanned_report.index') }}">Quick Scanned Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(886, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.overland.index') }}">Overland Report</a></li>
                         @endif
                     </ul>
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836,846,861], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([81, 85, 88, 92, 96, 558, 100, 131, 205, 231, 104, 116, 149, 150, 151, 152, 154, 157, 158, 171, 175, 188, 189, 192, 197, 198, 214, 228, 229, 230, 231, 237, 253, 302, 311, 313, 314, 318, 320, 329, 333, 362, 367, 388, 375, 377, 378, 379, 380, 387, 384, 385, 394, 417, 418, 425, 438, 443, 447, 462, 477, 488, 491, 494, 498, 499, 526, 544, 558, 565, 580, 581, 582, 601, 616, 646, 644, 656, 659, 661, 664, 660, 667, 668, 680, 674, 682, 683, 689, 697, 701, 708, 710, 714, 716, 747, 761, 788, 820, 826, 836,846,861,887], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main"><i
                                 class="la la-cogs"></i>Settings</span></a>
                     <ul class="menu-content">
@@ -1780,7 +1811,7 @@
 
                             </li>
                         @endif
-                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256, 375], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([116, 150, 154, 197, 256, 375, 887], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Bookings</span></a>
                                 <ul class="menu-content">
 
@@ -1822,6 +1853,11 @@
                                         <li><a class="menu-item"
                                                 href="{{ route('admin.settings.restrict_cities_intercept.index') }}">Restrict
                                                 Cities For Saver Plus Shipments</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(887, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.airway_bill_address_visibility.index') }}">Airway Bill Address Visibility</a></li>
                                     @endif
                                 </ul>
                             </li>

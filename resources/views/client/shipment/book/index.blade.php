@@ -149,9 +149,14 @@
 												</div>
 											</div>
 										@endif
-										<div id="info_display" style="pointer-events: none;" class="form-group text-center p-1 border border-light rounded">
+										<div id="info_display" class="form-group text-center p-1 border border-light rounded">
 												<label class="d-block">Show Information on Air Waybill</label>
-												<input type="checkbox"  name="information_display" class="switch hidden" id="information_display" checked="checked">
+												@if($airway_bill_address_visibility_users)
+													<input type="checkbox"  name="information_display" class="switch hidden" id="information_display" checked="checked" disabled>
+												@else
+													<input type="checkbox"  name="information_display" class="switch hidden" id="information_display" disabled>
+												@endif
+												
 										</div>
 										{{-- @if($air_waybill != null)
 											<div id="info_display" class="form-group text-center p-1 border border-light rounded">

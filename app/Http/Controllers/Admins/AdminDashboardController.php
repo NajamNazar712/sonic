@@ -196,7 +196,8 @@ use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAcco
 use App\Jobs\CountFintechCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use GuzzleHttp\Client;
-use App\Http\Models\Admin\UserFintectCharges;use CreateCityOsaRatesTable;
+use App\Http\Models\Admin\UserFintectCharges;
+use CreateCityOsaRatesTable;
 
 class AdminDashboardController extends Controller
 {
@@ -11016,6 +11017,22 @@ public function payfast_payment(Request $request){
         $city_areas = CityArea::where('city_id',$city_id)->get();
         
         return response()->json(['route' => $route, 'areas' => $city_areas]);
+    }
+    
+    public function replacementListAjax(Request $request)
+    {
+        // This is employee list for if staff category type is contractual it return only contractual employees list because pnly contractual can replace contractual employee
+        $employee = Employee::find($request->employee_id);
+        $replacement_employees = Employee::select('id', 'name', 'trax_id','last_working_date')
+        ->where('employee_type_id', $employee->employee_type_id)
+        ->whereNotNull('trax_id');
+        if($employee->staff_category_id == 3){
+
+            $replacement_employees = $replacement_employees->where('staff_category_id', 3);
+        }
+        $replacement_employees = $replacement_employees->get();
+
+        return response()->json(['replacement_employees'=>$replacement_employees]);
     }
 
     public function addRiderDetails(Request $request)

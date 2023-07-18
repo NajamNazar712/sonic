@@ -140,11 +140,10 @@ class ShipperShipmentBookController extends Controller
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {
-
+        
+        $information_display = self::information_display_check($user_id);
 
         $shipment = new Shipment();
-
-
         $shipment->user_id = $user_id;
         $shipment->booking_type_id = $service_type_id;
         $shipment->pickup_address_id = $pickup_address_id;
@@ -417,7 +416,19 @@ class ShipperShipmentBookController extends Controller
             }
         }
 
-        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user]);
+        $airway_bill_address_visibility_users = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                    $airway_bill_address_visibility_users = 0;
+                }
+            }
+        }
+
+        return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'multi_piece' => $multi_piece, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes, 'consignee_cities' => $consignee_cities, 'check' => $check, 'charges_modes' => $charges_modes, 'date' => $date, 'air_waybill' => $air_waybill, 'omni_user' => $omni_user, 'airway_bill_address_visibility_users' => $airway_bill_address_visibility_users]);
     }
 
     public function shipping_modes(Request $request)
@@ -1043,7 +1054,6 @@ class ShipperShipmentBookController extends Controller
 
     public static function air_waybill($user_type, $user_id, $ids, $body_only = FALSE, $type = NULL, $shipper_name = NULL, $shipper_phone = NULL, $print_status = NULL)
     {
-
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
         $watermark_flag = false;
         if ($user_type == 3) {
@@ -1347,6 +1357,7 @@ class ShipperShipmentBookController extends Controller
         $check = DeliveryLocationMappingKeyword::pluck('keyword')->toArray();
 
         foreach ($ids as $id) {
+//            dd('sss');
             $shipment = Shipment::find($id);
 
             if ($user_type != 2) {
@@ -1357,7 +1368,10 @@ class ShipperShipmentBookController extends Controller
 
             if ($user_type == 3 || $user_id == $shipment->user_id) {
 
-                if ($shipment->booking_type_id == 3 && $user_type != 3) {
+                $temp = false;
+
+                if ($shipment->booking_type_id == 3 && $user_type != 3 && $temp == true)
+                {
                     foreach ($shipment->items as $shipment_item) {
                         if ($page_items == 0) {
                             $table_start = '
@@ -1461,7 +1475,10 @@ class ShipperShipmentBookController extends Controller
                             $page_items = 0;
                         }
                     }
-                } else {
+                }
+                else
+                    {
+                        //dd('1');
                     $page_items = $page_items + 3;
                     if ($page_items >= 5) {
                         $page_items = 0;
@@ -1978,7 +1995,8 @@ class ShipperShipmentBookController extends Controller
 
                             $shipment_details .= $table_end;
                         }
-                    } else if ($shipment->booking_type_id == 2) {
+                    }
+                    else if ($shipment->booking_type_id == 2) {
                         $shipment_details .= $table_start;
 
                         $items = $shipment->items;
@@ -2018,7 +2036,9 @@ class ShipperShipmentBookController extends Controller
                     ';
 
                         $shipment_details .= $table_end;
-                    } else if ($shipment->booking_type_id == 3) {
+                    } else
+                        if ($shipment->booking_type_id == 3)
+                    {
                         $shipment_details .= $table_start;
 
                         $item_quantity = 0;
@@ -2327,8 +2347,122 @@ class ShipperShipmentBookController extends Controller
                             $shipment_details .= $distribution_delivery_performa;
                         }
                     }
+
+                        // todo : for booking type 3
+                        if ($shipment->booking_type_id == 3)
+                        {
+                            foreach ($shipment->items as $shipment_item) {
+                                if ($page_items == 0) {
+                                    $table_start = '
+                    <div class="page position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
+                                } else {
+                                    $table_start = '
+                    <div class="position-relative"><table class="table table-sm table-bordered border twice">
+                        <tbody>
+            ';
+                                }
+
+                                if ($user_type != 4 && $type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                    ';
+                                } else {
+                                    if ($type != 'pdf') {
+                                        $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto">' . $print_details . '</td>
+                        ';
+                                    } else {
+                                        $table_start .= '
+                                <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . public_path('img/trax_logo_new.png') . '" width="75" class="d-block mx-auto">' . $print_details . '</td>
+                        ';
+                                    }
+                                }
+                                if ($type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                                <tr>
+                                    <td class="color secondary border twice-top twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="color secondary border twice-top"><b>Tracking Number</b></td>
+                                </tr>
+                    ';
+                                } else {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment_item->id, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment_item->id . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment_item->id, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                                <tr>
+                                    <td class="color primary border twice-left"><strong>Type</strong></td>
+                                    <td colspan="2" class="border twice-top">' . $shipment_item->product->product_name . '</td>
+                                    <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                                    <td colspan="1" class="border twice-top">' . $shipment_item->quantity . '</td>
+                                    <td colspan="2" class="border twice-top">Tracking Number</td>
+                                </tr>
+                    ';
+                                }
+
+                                $table_start .= '
+                              <tr>
+                                <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                                <td colspan="2" class="border twice-bottom">' . $shipment_item->description . '</td>
+                                <td class="color secondary border twice-bottom"><strong>Price</strong></td>
+                                <td class="border twice-bottom">Rs ' . number_format($shipment_item->price) . '</td>';
+                                if ($type != 'pdf') {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        <div class="col row align-items-center justify-content-center end_of_air_waybill"><div class="col"><hr></div>
+                      <div class=""><i class="la la-cut la-rotate-180 align-middle"></i></div></div>
+                        </div>
+                    ';
+                                } else {
+                                    $table_start .= '
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                  <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 1.5, 45)) . '" class="d-block mx-auto">
+                                  <span><strong>' . $shipment->tracking_number . '</strong></span>
+                                </td>
+                                <td rowspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
+                                    <img src="data:image/png;base64,' . DNS2D::getBarcodePNG($shipment->tracking_number, 'QRCODE', 4, 4) . '" class="d-block mx-auto">
+                                </td>
+                              </tr>
+                            </tbody>
+                        </table>
+                        </div>
+                    ';
+                                }
+                                $shipment_details .= $table_start;
+                                $page_items++;
+                                if ($page_items >= 5) {
+                                    $page_items = 0;
+                                }
+                            }
+                        }
+                        // todo : for booking type 3 end
+
                 }
-                //delivery location watermark start
+                            //delivery location watermark start
                             $msg_string = null;
                             $str_arr = null;
                             $str_arr = preg_split('/[\s.,-,_,*,?,<,>,!,@,#,$,%,^,&,(,)]+/', $shipment->consignee_address);
@@ -2400,7 +2534,7 @@ class ShipperShipmentBookController extends Controller
                                 
                             }
                             
-            //delivery location watermark end
+                            //delivery location watermark end
 
                             
                             //receiving_sheet_print
@@ -2483,25 +2617,70 @@ class ShipperShipmentBookController extends Controller
             
 
             if ($watermark_flag) {
+
                 $html .= '
+                    <style>
+                      @media print {
+                          /* Adjust page margins */
+                          @page {
+                            size: A4 portrait;         
+                          }
+                        
+                          /* Prevent page break after the element */
+                          .position-relative {
+                            page-break-after: avoid !important;
+                          }
+                          
+                          /* Adjust other styles as needed */
+                          /* ... */
+                       }
+     
+                   </style>
                   </body>
-                  <div id="watermark_" class="watermark_">
+                  <div id="watermark_" class="pageC watermark_">
                     <h1 style="
                    text-align: center;  
                    text-transform: uppercase;                  
                    overflow: hidden;
                    position: fixed;
-                   margin-top: -320px;
                    opacity: 0.4;
                    transform: rotate(350deg);
                    font-size: 400%; 
                    color: red; 
-                   font-stretch: extra-expanded;"     
+                   font-stretch: extra-expanded;
+                   top: 20%;
+                   left: 50%;
+                   transform: translate(-50%, -50%) rotate(350deg);"     
                     > ' . $watermark . '  </h1>
                     
                     <!--<p>Your trial membership will expire in 3 days!</p>-->
                   </div>
                   
+                </html>
+            ';
+            }
+            else
+            {
+                $html .= '
+                   <style>
+                  @media print {
+                      /* Adjust page margins */
+                      @page {
+                        size: A4 portrait;         
+                      }
+                    
+                      /* Prevent page break after the element */
+                      .position-relative {
+                        page-break-after: avoid !important;
+                      }
+                      
+                      /* Adjust other styles as needed */
+                      /* ... */
+                   }
+     
+                   </style>
+                </body>
+                
                 </html>
             ';
             }
@@ -2681,22 +2860,6 @@ class ShipperShipmentBookController extends Controller
             }
         });
 
-        Validator::extend('origin_check', function ($attribute, $value, $parameters, $validator) use ($user_id) {
-            $data = $validator->getData();
-            $shipping_mode_id = $data['shipping_mode_id'];
-            $service_type_id = $data['service_type_id'];
-            if ($value) {
-                if ($service_type_id == 5) {
-                    return true;
-                }
-                $result = self::check_origin($value, $shipping_mode_id, $user_id);
-                if ($result) {
-                    return TRUE;
-                } else {
-                    return FALSE;
-                }
-            }
-        });
 
 //        Validator::extend('check_parcel_value', function ($attribute, $value, $parameters, $validator) use ($user_id) {
 //            $data = $validator->getData();
@@ -3443,6 +3606,9 @@ class ShipperShipmentBookController extends Controller
 
     static public function corporate_book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $delivery_type_id, $same_day_timing_id, $charges_mode_id, $amount, $payment_mode_id, $pieces, $self_collection, $business_category_id, $try_and_buy_charges, $open_shipment, $return_address_id,$parcel_value = null)
     {
+        
+        $information_display = self::information_display_check($user_id);
+
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -3548,6 +3714,24 @@ class ShipperShipmentBookController extends Controller
         self::shipper_address_area($user_shipping_info->city_id,$user_shipping_info->pickup_address,$user_shipping_info->id);
 
         return $shipment_id;
+    }
+
+    // this function is used to show information in airwaybill if user_id exist in airway bill setting screen
+    static public function information_display_check($user_id)
+    {
+        $information_display = 1;
+        $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            if ($settings->text != NULL) {
+                $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                if (in_array($user_id, $airway_bill_address_visibility_accounts)) {
+                    $information_display = 0;
+                }
+            }
+        }
+
+        return $information_display;
     }
 
     public function corporate_index()
@@ -6316,7 +6500,7 @@ class ShipperShipmentBookController extends Controller
         $html = '<!doctype html>
             <html lang="en">
               <head>
-                <meta charset="utf-8">
+                <meta charset="utsf-8">
                 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
                 <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
                 <title>Air Waybill Sticker Barcode</title>
@@ -7517,14 +7701,15 @@ class ShipperShipmentBookController extends Controller
                         $area_id = $default_area->id;
                     }
                 }
-                $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
-                if (!$consignee_address_area->exists()) {
-                    $consignee_address_area = new ConsigneeAddressArea();
-                    $consignee_address_area->shipment_id = $shipment_id;
-                    $consignee_address_area->city_area_id = $area_id;
-                    $consignee_address_area->save();
+                if($area_id != null){
+                    $consignee_address_area = ConsigneeAddressArea::where('shipment_id', $shipment_id);
+                    if (!$consignee_address_area->exists()) {
+                        $consignee_address_area = new ConsigneeAddressArea();
+                        $consignee_address_area->shipment_id = $shipment_id;
+                        $consignee_address_area->city_area_id = $area_id;
+                        $consignee_address_area->save();
+                    }
                 }
-
 
             }
             return true;

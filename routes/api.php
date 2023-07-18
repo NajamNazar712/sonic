@@ -22,7 +22,8 @@ Route::name('api.')->group(function () {
     Route::post('delete_device_token', 'APIController@delete_device_token')->name('delete_device_token');
     Route::post('rcp_sms_from_consignee', 'APIController@rcp_sms_from_consignee')->name('rcp_sms_from_consignee');
 
-  
+    Route::post('employee_attendance_details', 'APIController@employee_checkin')->name('employee_attendance_details');
+
     Route::middleware('APIToken')->group(function () {
         Route::post('verify', 'APIController@verify')->name('verify');
 
@@ -231,10 +232,6 @@ Route::name('api.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
             });
 
-           
-
-
-
             Route::prefix('history')->name('history.')->group(function () {
                 //Obsoleted
                 Route::post('pickup', 'Rider\RiderAPIController@pickups_history')->name('pickup');
@@ -347,6 +344,10 @@ Route::name('api.')->group(function () {
                 Route::post('generate_otp', 'Rider\RiderAPIController@delivery_note_otp_generation')->name('generate_otp');
                 Route::post('verify_otp', 'Rider\RiderAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
+            });
+
+            Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
+                Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
         });
 
@@ -534,6 +535,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
                 Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
                 Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
+            });
+
+            Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
+                Route::post('scan_shipment', 'AdminAPIController@scan_shipment')->name('index');
             });
         });
 
