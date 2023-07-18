@@ -74,7 +74,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function newRvShipmentAssign($data)
+    protected function rv_shipment_assign($data)
     {
         try {
             RvShipmentAssignAgent::updateOrCreate(
@@ -99,7 +99,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function makeRvShipmentAssignAgentDetails($shipment_assign_agent, $request)
+    protected function rv_shipment_assign_agent_details($request, $shipment_assign_agent)
     {
         $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
         $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $shipment_assign_agent->id;
@@ -141,8 +141,8 @@ trait RvTrait
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
-    // Description:
-    protected function updateShipmentAssignAgent($request, $assign_agent, $admin_agent, $shipment_assign_agent)
+    // Description: this function is updating table rows of rv_shipment_assign_agents
+    protected function update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assign_agent);
 
@@ -164,7 +164,7 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function changeShipmentStatus($request)
+    protected function update_shipment_status($request)
     {
         if ($request->rv_assign_agent_status_id) {
             $rv_assign_agent_status = RvAssignAgentStatus::find($request->rv_assign_agent_status_id);

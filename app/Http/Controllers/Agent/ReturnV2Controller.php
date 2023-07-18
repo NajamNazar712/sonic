@@ -108,7 +108,7 @@ class ReturnV2Controller extends Controller
                     ];
 
                     // creating a new record
-                    $this->newRvShipmentAssign($data);
+                    $this->rv_shipment_assign($data);
 
                     break 2;
                 }
@@ -224,7 +224,9 @@ class ReturnV2Controller extends Controller
             if ($shipment_assign_agent->exists()) {
                 $shipment_assign_agent = $shipment_assign_agent->latest()->first();
 
-                $this->changeShipmentStatus($request);
+                $this->update_shipment_status($request); //updating status of shipment
+                $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
+                $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
 
                 return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
             } 
