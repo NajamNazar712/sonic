@@ -2,28 +2,31 @@
 
 namespace App\Http\Controllers\Agent;
 
+use Exception;
+use Carbon\Carbon;
+use App\RvShipmentAgent;
 use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
+use App\RvAssignAgentSubStatus;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\RvFakeStatus;
+use App\Http\Models\EmployeeShift;
 use App\Http\Models\RiderDelivery;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Models\RvAgentAssignHub;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Models\RvAssignAgentStatus;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\SubStatusCallFinding;
-use App\Http\Models\RvAssignAgentStatus;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgentDetails;
-use App\Http\Models\ShipmentsJourney;
-use App\RvAssignAgentSubStatus;
-use App\RvShipmentAgent;
-use Exception;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use Illuminate\Validation\Rule;
 
 class ReturnV2Controller extends Controller
@@ -71,13 +74,29 @@ class ReturnV2Controller extends Controller
         // Get all assigned agent to hubs priority wise
         $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
 
-        foreach ($sorted_agents as $key => $agent) {
-            // Assigned hub to priority city and shipper status is 12 which is activate for return shipments
-            $shipments = Shipment::where('consignee_city_id', $agent['city_id'])->where('shipper_status_id', 12)->orderBy('id', 'ASC')->get();
-            // check if shipments exist
-            if (count($shipments)) {
+        $admin = Admin::where('id', Auth::id());
 
-                foreach ($shipments as $key => $shipment) {
+        if ($admin->exists()) {
+            $admin = $admin->first();
+            $employee = Employee::where('trax_id', $admin->trax_id)->where('staff_category_id', 3)->where('status_id', '!=', 2);
+
+            if ($employee->exists()) {
+                $current_time = Carbon::now();
+                $employee = $employee->first();
+
+                $shift_exist = EmployeeShift::where('id', $employee->shift_id)->exists();
+                if ($shift_exist) {
+                    $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
+                    $start_time = Carbon::parse($shift_exist->start_time);
+                    $end_time = Carbon::parse($shift_exist->end_time);
+                    if ($current_time->between($start_time, $end_time)) {
+                        foreach ($sorted_agents as $key => $agent) {
+                            // Assigned hub to priority city and shipper status is 12 which is activate for return shipments
+                            $shipments = Shipment::where('consignee_city_id', $agent['city_id'])->where('shipper_status_id', 12)->orderBy('id', 'ASC')->get();
+                            // check if shipments exist
+                            if (count($shipments)) {
+
+                                foreach ($shipments as $key => $shipment) {
 
                     # code...
                     // if agent shipment is open - assigned to any user who comes first
@@ -89,90 +108,100 @@ class ReturnV2Controller extends Controller
 
                     // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
 
-                    $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                    if ($shipment_assigned_assigned_agent->exists()) {
-                        $shipment_assigned_assigned_agent->first();
-                        break 2;
-                    }
+                                    $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
+                                    if ($shipment_assigned_assigned_agent->exists()) {
+                                        $shipment_assigned_assigned_agent->first();
+                                        break 2;
+                                    }
 
-                    // Shipment is found and already in working state or return is completed, new shipment will get to agent
-                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                    if ($find_shipment_assigned_agent) {
-                        continue;
-                    }
+                                    // Shipment is found and already in working state or return is completed, new shipment will get to agent
+                                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
+                                    if ($find_shipment_assigned_agent) {
+                                        continue;
+                                    }
 
-                    $data = [
-                        'shipment_id' => $shipment->id,
-                        'rv_state_id' => 1, //Assigned
-                        'rv_assign_agent_status_id' => null,
-                        'rv_assign_agent_sub_status_id' => null,
-                    ];
+                                    $data = [
+                                        'shipment_id' => $shipment->id,
+                                        'rv_state_id' => 1, //Assigned
+                                        'rv_assign_agent_status_id' => null,
+                                        'rv_assign_agent_sub_status_id' => null,
+                                    ];
 
-                    // creating a new record
-                    $this->rv_shipment_assign($data);
+                                    // creating a new record
+                                    $this->newRvShipmentAssign($data);
 
-                    break 2;
-                }
-            }
-        }
+                                    break 2;
+                                }
+                            }
+                        }
 
-        try {
-            $shipper_city = $shipment->pickup_address->city;
-            $shipper_info = $shipment->user;
-            $service_type = $shipment->booking_type;
-            $consignee_city = $shipment->consignee_city;
-            $product_infos = $shipment->items;
-            $shipping_mode = $shipment->shipping_mode;
-            $business_category = $shipment->business_category;
-            $detail_product_infos = [];
+                        try {
+                            $shipper_city = $shipment->pickup_address->city;
+                            $shipper_info = $shipment->user;
+                            $service_type = $shipment->booking_type;
+                            $consignee_city = $shipment->consignee_city;
+                            $product_infos = $shipment->items;
+                            $shipping_mode = $shipment->shipping_mode;
+                            $business_category = $shipment->business_category;
+                            $detail_product_infos = [];
 
-            foreach ($product_infos as $product_info) {
+                            foreach ($product_infos as $product_info) {
 
-                $detail_product = [
-                    'product_name' => $product_info->product->product_name,
-                    'description' => $product_info->description,
-                    'quantity' => $product_info->quantity,
-                    'order_id' => $product_info->shipment->order_id
-                ];
+                                $detail_product = [
+                                    'product_name' => $product_info->product->product_name,
+                                    'description' => $product_info->description,
+                                    'quantity' => $product_info->quantity,
+                                    'order_id' => $product_info->shipment->order_id
+                                ];
 
-                $detail_product_infos[] = $detail_product;
-            }
+                                $detail_product_infos[] = $detail_product;
+                            }
 
 
-            $image_location = [];
+                            $image_location = [];
 
-            $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->first();
-            if ($rider_delivery != null) {
-                if ($rider_delivery->picture_path != null) {
-                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                    if ($exists) {
-                        $image_location['image'] =  asset(Storage::url($rider_delivery->picture_path));
+                            $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->first();
+                            if ($rider_delivery != null) {
+                                if ($rider_delivery->picture_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                    if ($exists) {
+                                        $image_location['image'] =  asset(Storage::url($rider_delivery->picture_path));
+                                    } else {
+                                        $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                    }
+                                }
+                                if ($rider_delivery->audio_path != null) {
+                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                    if ($exists) {
+                                        $image_location['audio'] =  asset(Storage::url($rider_delivery->audio_path));
+                                    } else {
+                                        $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                    }
+                                }
+
+                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                    $image_location['location'] = $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude;
+                                }
+                            }
+
+
+                            if (isset($shipment_assigned_agents)) {
+                                return response()->json(['status' => 1, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
+                            } else {
+                                return response()->json(['status' => 0, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
+                            }
+                        } catch (Exception $ex) {
+                            return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
+                        }
                     } else {
-                        $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                        Auth::logout();
+                        return response()->json(['status' => 3]);
                     }
-                }
-                if ($rider_delivery->audio_path != null) {
-                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
-                    if ($exists) {
-                        $image_location['audio'] =  asset(Storage::url($rider_delivery->audio_path));
-                    } else {
-                        $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
-                    }
-                }
-
-                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
-                    $image_location['location'] = $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude;
+                }else{
+                    Auth::logout();
+                    return response()->json(['status' => 4]);
                 }
             }
-
-
-            if (isset($shipment_assigned_agents)) {
-                return response()->json(['status' => 1, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
-            } else {
-                return response()->json(['status' => 0, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
-            }
-        } catch (Exception $ex) {
-            return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
         }
     }
 
@@ -233,9 +262,7 @@ class ReturnV2Controller extends Controller
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
 
                 return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
-            } 
-
-            else{
+            } else {
                 return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
             }
         }

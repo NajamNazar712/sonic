@@ -945,8 +945,12 @@
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
+                            } else if (data.status == 3) {
+                                window.location.href = "{{ route('agent.login') }}";
+                            }
 
-
+                            else if (data.status == 4) {
+                                window.location.href = "{{ route('agent.login') }}";
                             }
                         })
                 }

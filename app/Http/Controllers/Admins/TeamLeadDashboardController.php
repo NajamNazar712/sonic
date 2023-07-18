@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\EmployeeAdditionalDay;
 use DB;
 use Auth;
 use Exception;
@@ -44,8 +45,9 @@ class TeamLeadDashboardController extends Controller
             return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
         });
 
-
-        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs]);
+        $employee_additional_days = EmployeeAdditionalDay::get();
+        
+        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days'=>$employee_additional_days]);
     }
 
     // Heading: N/A
@@ -220,6 +222,10 @@ class TeamLeadDashboardController extends Controller
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
 
+                            if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
+                            }
+
                         }
 
 
@@ -313,5 +319,39 @@ class TeamLeadDashboardController extends Controller
                 'status_id' => '1',
             ]);
         }
+    }
+
+    public function add_additional_days(Request $request)
+    {
+        $date = date('Y-m-d', strtotime($request->add_additional_days));
+
+        $is_date_assigned = EmployeeAdditionalDay::where('working_days', $date);
+
+        if(!$is_date_assigned->exists()){
+            
+            $employee_additional_days = new EmployeeAdditionalDay();
+    
+            $employee_additional_days->employee_id = $request->employee_id;
+            $employee_additional_days->working_days = $date;
+    
+            $employee_additional_days->save();
+    
+    
+            return redirect()->route('admin.team_lead.index');
+        }else{
+            return redirect()->route('admin.team_lead.index')->with('error', 'Date Already Assigned');
+
+        }
+
+    }
+
+
+
+    public function delete_additional_days(Request $request)
+    {
+        $object = EmployeeAdditionalDay::get();
+        $employee_additional_days = EmployeeAdditionalDay::find($request->id);
+        $employee_additional_days->delete();
+        return response()->json(['status' => 1, 'success'=> 'Successfully Deleted', 'object' => $object]);
     }
 }
