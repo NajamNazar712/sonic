@@ -250,7 +250,7 @@ class ReturnV2Controller extends Controller
         
         else {
             $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->latest()->first();
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereDate('');
             $admin_agent = Admin::where('id', Auth::id())->first();
 
             //if shipment already exists update row

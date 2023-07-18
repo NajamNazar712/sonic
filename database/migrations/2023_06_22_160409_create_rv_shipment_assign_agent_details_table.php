@@ -25,7 +25,7 @@ class CreateRvShipmentAssignAgentDetailsTable extends Migration
             $table->integer('updated_by_id')->index()->nullable();
             $table->boolean('is_fake_status')->default(0);
             $table->integer('rv_fake_status_id')->index()->nullable();
-            $table->string('remarks');
+            $table->string('remarks')->nullable();
             $table->integer('call_to_id')->index();
             $table->timestamps();
         });
