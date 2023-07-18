@@ -65,14 +65,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2">
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_type_id" id="crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
+                        <select name="crm_case_nature_type_id" id="crm_case_nature_type_id" class="form-control select2">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -110,7 +110,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                        <select name="city_id" id="edit_city_id" class="form-control select2" data-rule-required="true" data-msg-required="City is required">
                             @foreach($cities as $city)
                                 <option value="{{ $city->id }}" > {{ $city->name }} </option>
                             @endforeach
@@ -121,14 +121,14 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
+                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2">
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_type_id" id="edit_crm_case_nature_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature Type is required">
+                        <select name="crm_case_nature_type_id" id="edit_crm_case_nature_type_id" class="form-control select2">
                         </select>
                     </div>
                     
@@ -540,7 +540,20 @@
                     form.submit();    
                 }
                 
-                });
+            });
+            
+            $( "#crm_agent_edit" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    form.submit();    
+                }
+                
+            });
+
+            
         });
     </script>
 @endsection

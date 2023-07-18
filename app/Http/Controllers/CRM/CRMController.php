@@ -207,9 +207,11 @@ class CRMController extends Controller
 
                 if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                     $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                    $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
 
                 }else{
                     $crm_city_id = $crm_request->shipment->consignee_city_id;
+                    $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                 }
                 
                 if($crm_request->shipper_id){
@@ -262,47 +264,58 @@ class CRMController extends Controller
 
                     }
                 }
+                
 
                 $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
-                            if($crm_auto_tag_user->exists()){
-    
-                                $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
-                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
-                                if(!empty($tagged_crm_request)){
-                                    if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id
-                                        ]);
-    
-                                        CrmRequestTaggingHistory::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'agent_id' => 306,
-                                            'hub_id' => NULL
-                                        ]);
-                                        NotificationsController::send(31,$crm_request->id);
-                                    }
-                                }
-                                else{
-                                    CrmRequestTagging::create([
-                                        'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 5,
-                                        'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'hub_id' => NULL
-                                    ]);
-    
-                                    CrmRequestTaggingHistory::create([
-                                        'crm_request_id' => $crm_request->id,
-                                        'crm_request_tagging_type_id' => 5,
-                                        'tagged_id' => $crm_auto_tag_user->admin_id,
-                                        'agent_id' => 306,
-                                        'hub_id' => NULL
-                                    ]);
-                                    NotificationsController::send(31,$crm_request->id);
-                                }
+               
+                    if($crm_auto_tag_user->exists()){
+
+                        $crm_auto_tag_user_with_case_details = $crm_auto_tag_user;
+                        $crm_auto_tag_user_with_case_details = $crm_auto_tag_user_with_case_details->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$case_nature_id)->where('crm_case_nature_type_id',$case_nature_type_id);
+
+                        if($crm_auto_tag_user_with_case_details->exists()){
+                            $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
+                        }
+                        else{
+                            $crm_auto_tag_user = $crm_auto_tag_user->first();
+                        }
+                        
+                        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
+                        if(!empty($tagged_crm_request)){
+                            if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
+                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+                                    'crm_request_tagging_type_id' => 5,
+                                    'tagged_id' => $crm_auto_tag_user->admin_id
+                                ]);
+
+                                CrmRequestTaggingHistory::create([
+                                    'crm_request_id' => $crm_request->id,
+                                    'crm_request_tagging_type_id' => 5,
+                                    'tagged_id' => $crm_auto_tag_user->admin_id,
+                                    'agent_id' => 306,
+                                    'hub_id' => NULL
+                                ]);
+                                NotificationsController::send(31,$crm_request->id);
                             }
+                        }
+                        else{
+                            CrmRequestTagging::create([
+                                'crm_request_id' => $crm_request->id,
+                                'crm_request_tagging_type_id' => 5,
+                                'tagged_id' => $crm_auto_tag_user->admin_id,
+                                'hub_id' => NULL
+                            ]);
+
+                            CrmRequestTaggingHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'crm_request_tagging_type_id' => 5,
+                                'tagged_id' => $crm_auto_tag_user->admin_id,
+                                'agent_id' => 306,
+                                'hub_id' => NULL
+                            ]);
+                            NotificationsController::send(31,$crm_request->id);
+                        }
+                    }
             }
         }
 
