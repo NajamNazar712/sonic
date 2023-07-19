@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -2989,6 +2990,7 @@ RiderAPIController extends Controller
                     }
                 }
                 $pickups = 0;
+                $shipments = 0;
                 $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
                 $arrival_cut_off_time = '8';
                 if ($settings->exists()) {
@@ -3022,6 +3024,7 @@ RiderAPIController extends Controller
                     }
 
                     $pickups++;
+                    $shipments = $shipments + $pickup_request->booked;
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 } else {
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -3049,10 +3052,12 @@ RiderAPIController extends Controller
                             if ($existing_pickup_rider == $pickup_note_rider) {
                                 $pickup_request->pickup_note_request->delete();
                                 $pickup_note->pickups = $pickup_note->pickups - 1;
+                                $pickup_note->shipments = $pickup_note->shipments - $pickup_request->booked;
                                 $pickup_note->save();
                             }
                         }
                         $pickups++;
+                        $shipments = $shipments + $pickup_request->booked;
                         if (!in_array($pickup_request_id, $allowed_pickup_requests)) {
                             $allowed_pickup_requests[] = $pickup_request_id;
                         }
@@ -3066,6 +3071,7 @@ RiderAPIController extends Controller
                         $pickup_note = $pickup_note->first();
                         if (!V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->whereIn('pickup_request_id', $allowed_pickup_requests)->exists()) {
                             $pickup_note->pickups += $pickups;
+                            $pickup_note->shipments += $shipments;
 
                             $pickup_note->save();
                         }
@@ -3075,6 +3081,7 @@ RiderAPIController extends Controller
 
                         $pickup_note->rider_id = $rider_id;
                         $pickup_note->pickups = $pickups;
+                        $pickup_note->shipments = $shipments;
                         $pickup_note->save();
 
                         $pickup_note_id = $pickup_note->id;
@@ -9134,6 +9141,13 @@ RiderAPIController extends Controller
 
                             dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
+                            //fintech
+
+                            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                            if(count($unique_codes) > 0){
+                                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                            }
+
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -11304,8 +11318,11 @@ RiderAPIController extends Controller
                                 }
                             }
                         }
-                        $rider_pickup->shipments = $shipment_count;
-                        $rider_pickup->save();
+                        $pickup_note = V2PickupNote::find($request->pickup_note_id);
+                        if($pickup_note){
+                            $pickup_note->shipments_scanned_by_rider = $pickup_note->shipments_scanned_by_rider + $shipment_count;
+                            $pickup_note->save();
+                        }
                         if (count($notification_shipments) > 0) {
                             NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
                         }
@@ -11506,6 +11523,11 @@ RiderAPIController extends Controller
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
                                         dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
+                                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                                        if(count($unique_codes) > 0){
+                                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                                        }
                                     }
 
 

@@ -275,6 +275,38 @@
                     }
                 });
             @endif
+            @if (session('shipment_ids'))
+                debugger;
+                console.log(@json(session('shipment_ids')));
+                var url = '{!! route('admin.v2_pickups.pending.project_arrival_print') !!}';
+                $.ajax({
+                    url: url,
+                    method: 'POST',
+                    data: {
+                        'ids': @json(session('shipment_ids')),
+                        'admin': true,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                .done(function (data) {
+                    var tab = window.open('', '_blank');
+
+                    if (!tab) {
+                        swal({
+                            title: 'Popup Blocker Enabled!',
+                            text: 'Please add this site to your exception list.',
+                            icon: 'error',
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                    }
+                    else {
+                        tab.document.write(data);
+                        tab.document.close();
+                        tab.focus();
+                    }
+                });
+            @endif
 
             function print(id) {
                 var url = '{!! route('cod.shipment.book.print_air_waybill') !!}';

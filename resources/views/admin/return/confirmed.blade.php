@@ -288,6 +288,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if ( session('role_id') == 1 || in_array(109, session('permissions')) )
                     {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
@@ -323,7 +324,7 @@
 
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                var remark = $(row.node()).find('td.remarks input').val();
                                                 shipment_remarks[id] = remark;
                                             }
                                         });
@@ -365,6 +366,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         extend: 'excel',
                         title: 'Return Confirmed',
@@ -487,7 +489,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[25, 'desc']],
+                order: [[26, 'desc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},

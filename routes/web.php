@@ -407,6 +407,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('without_scan_shipments', 'Shippers\ShipperReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
 
         });
+        Route::prefix('project_arrival')->name('project_arrival.')->group(function(){
+            Route::get('', 'Shippers\ShipperReportsController@project_arrival_index')->name('index');
+            Route::get('list', 'Shippers\ShipperReportsController@project_arrival_list')->name('list');
+        });
+
     });
 
     Route::prefix('rates')->name('rates.')->group(function () {
@@ -908,6 +913,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
             Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
             Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
+            Route::get('replacementAjax', 'Admins\AdminDashboardController@replacementListAjax')->name('replacement.ajax');
             Route::post('/add', 'Admins\AdminDashboardController@addRiderDetails')->name('add');
             Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
@@ -1158,6 +1164,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('status/reminder/update', 'Admins\V2Pickup\V2AdminPickupsController@pending_reminder')->name('status.reminder.update');
             Route::post('add_remarks', 'Admins\V2Pickup\V2AdminPickupsController@add_remarks')->name('add_remarks');
             Route::post('all_remarks', 'Admins\V2Pickup\V2AdminPickupsController@all_remarks')->name('all_remarks');
+            Route::post('project_arrival_print', 'Admins\V2Pickup\V2AdminPickupsController@project_arrival_print')->name('project_arrival_print');
         });
         // Receiving Sheet Rout
         Route::prefix('rider_receiving')->name('rider_receiving.')->group(function () {
@@ -2861,11 +2868,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
             
         });
-
-
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function(){
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
             Route::post('list', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_list')->name('list');
+        });
+        Route::prefix('project_arrival')->name('project_arrival.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@project_arrival_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@project_arrival_list')->name('list');
+        });
+        Route::prefix('rider_picked')->name('rider_picked.')->group(function(){
+            Route::get('', 'Admins\AdminReportsController@rider_picked_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rider_picked_list')->name('list');
+            Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_picked_arrival_scanned_shipments')->name('scanned_shipments');
+            Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_picked_arrival_arrived_shipments')->name('arrived_shipments');
         });
         Route::prefix('quick_scanned_report')->name('quick_scanned_report.')->group(function(){
             Route::get('', 'Admins\AdminReportsController@quick_scanned_report_index')->name('index');
@@ -4581,7 +4596,4 @@ Route::prefix('retail')->name('retail.')->group(function () {
         Route::post('mark_reattempt','Retail\RetailReturnController@mark_reattempt')->name('mark_reattempt');
 
     });
-
-
-
 });

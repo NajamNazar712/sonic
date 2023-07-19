@@ -232,7 +232,6 @@ class AdminAPIController extends Controller
         if ($reporting_locations->exists()) {
             $reporting_locations = $reporting_locations->get();
             foreach ($reporting_locations as $reporting_location) {
-                $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
                 $origin = $latitude . ',' . $longitude;
                 $distance = $this->distance($origin, $destination);
@@ -514,7 +513,6 @@ class AdminAPIController extends Controller
                 ->where('e.id', $employee_id);
             if ($reporting_location->exists()) {
                 $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
                 $origin = $request->latitude . ',' . $request->longitude;
                 $distance = $this->distance($origin, $destination);
@@ -5835,9 +5833,18 @@ class AdminAPIController extends Controller
                         }
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                    if ($pickup_note_requests_count == 0) {
-                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    if($pickup_note_requests_count == 0){
+                        $v2_pickup_note->status = 1;
                     }
+
+                    $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
+                    if(count($pickup_note_pickup_request_ids) > 0){
+                        $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
+                        $v2_pickup_note->arrived_shipments = $arrived_shipments;
+                    }
+                    $v2_pickup_note->save();
                     // NotificationsController::send(4, $shipment_ids);
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
@@ -10755,6 +10762,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $admin_id = Auth::id();
             $tracking = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking);
             if ($shipment->exists()) {
@@ -12586,10 +12594,10 @@ class AdminAPIController extends Controller
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
                             ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
-                            $shipment_mtable = Shipment::find($shipment->shipment_id);
+                            $shipment_table = Shipment::find($shipment->shipment_id);
                             $shipment_table->shipper_status_id = 49;
                             $shipment_table->consignee_status_id = 49;
-                            $shipment_table->update();
+                            $shipment_table->save();
 
                             MisroutedHistory::create([
                                 'shipment_id' => $shipment_table->id,

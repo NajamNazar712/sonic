@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Models\CityArea;
 use App\Http\Models\Shipment;
 use Yajra\Datatables\Datatables;
+use Illuminate\Http\Request as IlluminateRequest;
 use App\Http\Models\PickupAction;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
@@ -60,6 +61,7 @@ use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Webhook\InitialChargesWebhookController;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightCharge;
 use App\Http\Models\Admin\WalkInInternationalStandardWeightChargeHub;
+use App\Http\Controllers\Admins\AdminReportsController;
 
 class V2AdminPickupsController extends Controller
 {
@@ -459,6 +461,7 @@ class V2AdminPickupsController extends Controller
         //        }
 
         $pickups = 0;
+        $shipments = 0;
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
         $arrival_cut_off_time = '8';
@@ -500,6 +503,7 @@ class V2AdminPickupsController extends Controller
                 }
 
                 $pickups++;
+                $shipments = $shipments + $pickup_request->booked;
                 self::retail_pickup_assign($pickup_request_id, $rider_id);
             } else {
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -532,10 +536,12 @@ class V2AdminPickupsController extends Controller
                         if ($existing_pickup_rider == $pickup_note_rider) {
                             $pickup_request->pickup_note_request->delete();
                             $pickup_note->pickups = $pickup_note->pickups - 1;
+                            $pickup_note->shipments = $pickup_note->shipments - $pickup_request->booked;
                             $pickup_note->save();
                         }
                     }
                     $pickups++;
+                    $shipments = $shipments + $pickup_request->booked;
                     if (!in_array($pickup_request_id, $allowed_pickup_requests)) {
                         $allowed_pickup_requests[] = $pickup_request_id;
                     }
@@ -555,6 +561,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_note = $pickup_note->first();
                 if (!V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->whereIn('pickup_request_id', $allowed_pickup_requests)->exists()) {
                     $pickup_note->pickups += $pickups;
+                    $pickup_note->shipments += $shipments;
 
                     $pickup_note->save();
                 }
@@ -564,6 +571,7 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_note->rider_id = $rider_id;
                 $pickup_note->pickups = $pickups;
+                $pickup_note->shipments = $shipments;
                 $pickup_note->save();
 
                 $pickup_note_id = $pickup_note->id;
@@ -1266,6 +1274,17 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
+
+
+                $pickup_note_request = $pickup_request->pickup_note_request;
+                if ($pickup_note_request) {
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if ($pickup_note) {
+                        $pickup_note->arrived_shipments = $pickup_note->arrived_shipments + 1;
+                        $pickup_note->save();
+                    }
+                }
             }
         }
         $pickup_note_ids = array();
@@ -1302,7 +1321,9 @@ class V2AdminPickupsController extends Controller
             foreach ($pickup_note_ids as $pickup_note_id) {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
                 if ($pickup_note_requests_count == 0) {
-                    V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    $v2_pickup_note->status = 1;
+                    $v2_pickup_note->save();
                 }
             }
         }
@@ -1346,6 +1367,7 @@ class V2AdminPickupsController extends Controller
                 $pickup_note = $pickup_note->first();
 
                 $pickup_note->pickups += 1;
+                $pickup_note->shipments += $pickup_request->booked;
 
                 $pickup_note->save();
 
@@ -1355,6 +1377,7 @@ class V2AdminPickupsController extends Controller
 
                 $pickup_note->rider_id = $rider_id;
                 $pickup_note->pickups = 1;
+                $pickup_note->shipments = $pickup_request->booked;
                 $pickup_note->save();
 
                 $pickup_note_id = $pickup_note->id;
@@ -1394,6 +1417,7 @@ class V2AdminPickupsController extends Controller
             $pickup_note = $pickup_note->first();
 
             $pickup_note->pickups += 1;
+            $pickup_note->shipments += $pickup_request->booked;
 
             $pickup_note->save();
 
@@ -1423,6 +1447,7 @@ class V2AdminPickupsController extends Controller
 
             $pickup_note->rider_id = $rider_id;
             $pickup_note->pickups = 1;
+            $pickup_note->shipments = $pickup_request->booked;
             $pickup_note->save();
 
             $pickup_note_id = $pickup_note->id;
@@ -2166,14 +2191,27 @@ class V2AdminPickupsController extends Controller
                 $pickup_request->received = $pickup_request->received + 1;
                 $pickup_request->status_id = 2;
                 $pickup_request->save();
+
+
+                $pickup_note_request = $pickup_request->pickup_note_request;
+                if ($pickup_note_request) {
+                    $pickup_note_id = $pickup_note_request->pickup_note_id;
+                    $pickup_note = V2PickupNote::find($pickup_note_id);
+                    if ($pickup_note) {
+                        $pickup_note->arrived_shipments = $pickup_note->arrived_shipments + 1;
+                        $pickup_note->save();
+                    }
+                }
             }
         }
 
         if (!empty($pickup_note_ids)) {
             foreach ($pickup_note_ids as $pickup_note_id) {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                if ($pickup_note_requests_count == 0) {
-                    V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+                if($pickup_note_requests_count == 0){
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    $v2_pickup_note->status = 1;
+                    $v2_pickup_note->save();
                 }
             }
         }
@@ -2818,10 +2856,12 @@ class V2AdminPickupsController extends Controller
                         if ($bookings == 0) {
                             $pickup_note->pickups = $pickup_note->pickups - 1;
                         }
+                        $pickup_note->shipments = $pickup_note->shipments - 1;
 
                         $pickup_note->save();
                     } else {
                         $pickup_note->pickups = 0;
+                        $pickup_note->shipments = 0;
                         $pickup_note->status = 1;
 
                         $pickup_note->save();
@@ -3971,7 +4011,6 @@ class V2AdminPickupsController extends Controller
     public function project_shippers_store(Request $request)
     {
         $shipment_ids = explode(',', $request->shipment_ids);
-
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
             if ($shipment) {
@@ -3987,7 +4026,219 @@ class V2AdminPickupsController extends Controller
                 }
             }
         }
+      
+        return redirect()->back()->with(['success' => 'Project Shipper Receiving Done', 'shipment_ids' => $shipment_ids]);
+    
+        
+    }
+    public function project_arrival_print(Request $request)
+    {
+        // $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-        return redirect()->back()->with(['success' => 'Project Shipper Receiving Done']);
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Project Arrival</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                      .vendor_pickup_row{
+                        background-color: var(--light);
+                      }
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+      ';
+
+        foreach ($request->ids as $id) {
+            $shipment = Shipment::where('shipper_status_id',64)->find($id);
+            $user = User::where('id',$shipment->user_id)->first();
+            // $route = $rider->route;
+            // $route_name = '';
+            // if ($route) {
+            //     $route_name = $route->code . ' (' . $route->start . ' to ' . $route->end . ')';
+            // }
+            $html .= '
+            <table class="table table-sm table-bordered border">
+            <tbody>
+                <tr>
+                <td class="text-center align-middle"><img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mx-auto"></td>
+                <td class="text-center align-middle"><b>Project Arrival</b></td>
+                <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                </tr>
+                <tr>
+            </tbody>
+            </table>
+            ';
+
+            $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Tracking Number</strong></td>
+                            <td class="color primary"><strong>User Name</strong></td>
+                            <td class="color primary"><strong>Order ID</strong></td>
+                            <td class="color primary"><strong>Consignee Name</strong></td>
+                            <td class="color primary"><strong>Destination</strong></td>
+                            <td class="color primary"><strong>COD</strong></td>
+                          </tr>
+            ';
+
+            $serial_number = 1;
+
+            // $pickup_note_requests = $pickup_note->pickup_note_requests;
+            // $reverse_pickup_shipment_ids = array();
+            // foreach ($pickup_note_requests as $pickup_note_request) {
+                // $pickup_request = $pickup_note_request->pickup_request;
+
+                // $shipper = $pickup_request->shipper;
+                // $pickup_address = $pickup_request->pickup_address;
+                $shipments = Shipment::join('cities as des','des.id','shipments.consignee_city_id')
+                    ->join('users as u','u.id','=','shipments.user_id')
+                    ->select('shipments.tracking_number as tracking_number', 'shipments.consignee_name as consignee_name', 'des.name as destination', 'shipments.amount as cod','shipments.order_id as order_id','u.name as user_name')->where('shipments.id',$id)->where('shipper_status_id',64)->get()->toArray();
+//dd($poc);
+                // $pocName = "";
+                // $phoneNo = "";
+                // $names = "";
+                // $i = 0;
+                foreach ($shipments as $data) {
+                    // dd($data);
+                //     if ($i == null) {
+                //         if ($i == 0) {
+                //             $pocName .= '' . $data['poc'];
+                //             $phoneNo .= ' ' . $data['admin_phone_number'] . ',';
+                //             $phoneNo .= '' . $data['phone_number'];
+                //             $names = $data['admin_name'];
+                //             $i++;
+                //         } else {
+                //             $pocName .= ',' . $data['poc'];
+                //             $phoneNo .= ',' . $data['phone_number'];
+                //             $phoneNo .= ',' . $data['admin_phone_number'];
+
+                //         }
+                //     }
+                // }
+                // $color = '';
+                // if ($pickup_address->vendor != null) {
+                //     $color = 'vendor_pickup_row';
+                // }
+
+                $html .= '
+                        <tr>
+                        <td>' . $serial_number . '</td>
+                        <td>' . $data['tracking_number'] . '</td>
+                        <td>' . $data['user_name'] . '</td>
+                        <td>' . $data['order_id'] . '</td>
+                        <td>' . $data['consignee_name'] . '</td>
+                        <td>' . $data['destination'] . '</td>
+                        <td>' . $data['cod'] . '</td>
+                        </tr>
+          ';
+
+                $serial_number++;
+
+                // $pickup_request_shipments = $pickup_request->pickup_request_shipments;
+                // if ($pickup_request_shipments) {
+                //     foreach ($pickup_request_shipments as $pickup_request_shipment) {
+                //         if (Shipment::where('id', $pickup_request_shipment->shipment_id)->where('booking_type_id', 5)->exists()) {
+                //             $reverse_pickup_shipment_ids[] = $pickup_request_shipment->shipment_id;
+                //         }
+                //     }
+                // }
+            }
+
+            $html .= '
+                        </tbody>
+                      </table>
+
+                      <hr>
+                      <br>
+                      <br>
+                      <div class="row">
+                      
+                      <div class="col-4">
+                        No. of Received Shipments : __________________________
+                      </div>
+                      
+                      <div class="col-8 text-right">
+                      Client Signature : ______________________
+                      </div>
+                      </div>
+
+                      <hr>
+        ';
+//             if (count($reverse_pickup_shipment_ids) > 0) {
+//                 $airway_bill_html = '';
+//                 $airway_bill_html = $this->print_air_waybill($reverse_pickup_shipment_ids, $rider->name);
+//                 $html .= $airway_bill_html;
+// //                return response()->json(['status' => 0, 'shipment_ids' => $reverse_pickup_shipment_ids, 'rider_name' => $rider->name]);
+//             }
+        }
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
     }
 }

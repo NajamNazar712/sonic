@@ -864,14 +864,17 @@
                                         </table>
                                     `;
                                 $.each(data, function(index,value) {
+                                    updated_remark = value.remarks ? value.remarks : '-';
+                                    updated_at = value.updated_at ? value.updated_at :'-';
+
                                     remarks_data+=`
                                         <tr>
                                                 <td>${value.seal_number}</td>
-                                                <td>${value.remarks}</td>
+                                                <td>${updated_remark}</td>
                                                 <td>${value.added_by_name}</td>
                                                 <td>${value.pieces_count}</td>
                                                 <td>${value.created_at}</td>
-                                                <td>${value.updated_at}</td>
+                                                <td>${updated_at}</td>
                                         </tr>`;
                                 });
 

@@ -244,7 +244,7 @@ class RetailReturnController extends Controller
                 //         $return_assign_log->assigned_by = Auth::id();
                 //         $return_assign_log->save();
                 //    }
-                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id);
+                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
                    if ($rcp_assigned_shipment->exists()) {
                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                        $rcp_assigned_shipment->shipment_status = 3; //reattempt status

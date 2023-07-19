@@ -489,6 +489,7 @@
                         <div class="row mb-2">
                             {{csrf_field()}}
                             <input type="hidden" name="employee_id" id="employee_id" value="">
+                            <input type="hidden" id="selected_employee_id" value="">
                                 <div class="col"  id="employee_nature_list_group">
                                 <div class="form-group">
                                     <label>Employee Nature<span class="text-danger">*</span></label>
@@ -961,6 +962,32 @@
                 placeholder: "Select Replacement Employee",
                 width:'100%',
                 dropdownParent: $('#employeeRequiredInfoModal')
+            });
+            
+            $('#employee_nature_list').on('change',function () {
+                var replacementlist = $('#replacement_employee_list');
+                var employee_nature_list = $('#employee_nature_list').val();
+                var employee_id = $('#selected_employee_id').val();
+                if(employee_nature_list == 2){
+
+                    $.ajax({
+                        url:'{!! route('admin.management.rider.replacement.ajax') !!}',
+                        type:'GET',
+                        dataType:'json',
+                        data: {
+                            'employee_id':employee_id,
+                        },
+                        success:function (data) {
+                            console.log(data);
+                            replacementlist.empty();
+                            $.each(data.replacement_employees, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.trax_id + ' | '  + value.name +"</option>";
+                                replacementlist.append(newOption);
+                            });
+                            // replacementlist.val(route_id).trigger('change');
+                        }
+                    });
+                }
             });
 
             var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
@@ -1562,7 +1589,7 @@
                         d.area = $('#select_area').val();
                     }
                 },
-                order: [[23, 'desc']],
+                order: [[24, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -1696,7 +1723,7 @@
                         }
                     });
 
-                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'}];
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'},{'id':5,'text':'Contractual'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
@@ -1859,6 +1886,7 @@
                                     }
 
                                     $('#approveStaffForm #employee_id').val(data.employee_id);
+                                    $('#approveStaffForm #selected_employee_id').val(data.employee_id);
 
                                     $('#employeeRequiredInfoModal').modal('show');
                                 }
