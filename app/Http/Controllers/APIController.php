@@ -7590,7 +7590,7 @@ class APIController extends Controller
                     $detail[$tracking_no]['amount paid'] = $result->amount_paid;
                     $detail[$tracking_no]['parcel weight'] = $shipment->actual_weight;
                     $detail[$tracking_no]['city'] = $result->city_name;
-                    $detail[$tracking_no]['gst'] = $shipment->gst;
+                    $detail[$tracking_no]['gst'] = ($shipment->gst) ? $shipment->gst : 0;
                     $detail[$tracking_no]['delivery charges'] = $estimated;
                     $detail[$tracking_no]['delivery date'] = $result->delivered_date;
                     $detail[$tracking_no]['payment date'] = $result->paid_at;
