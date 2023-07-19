@@ -14213,6 +14213,7 @@ RiderAPIController extends Controller
     {
         $rules = [
             'tracking_number' => 'required',
+            'call_from' => 'required',
         ];
 
         $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -14228,9 +14229,14 @@ RiderAPIController extends Controller
             if(!$shipper_status_id){
                 return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
             } else {
+                $data = [
+                    'tracking_number' => $tracking_number,
+                    'call_from' => $request->call_from
+                ];
+
                 switch ($shipper_status_id) {
                     case 1 : //Booked...
-                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly']);
+                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);
                         break;
 
                     case 17 : //Cancelled..
