@@ -11,6 +11,7 @@ use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\Admin\RcpAssignedShipment;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -7562,7 +7563,8 @@ class APIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
             $tracking_number = $request->tracking_number;
 
             $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
@@ -7585,25 +7587,38 @@ class APIController extends Controller
 
                 $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
 
-                $result = Shipment::join('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
-                    ->join('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
+                $result = Shipment::leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
                     ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
                     ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-                    ->select('dps.updated_at as paid_at', 'dps.payable as amount_paid', 'c.name as city_name', 'sj.created_at as delivered_date', 'd.status as payment_status')
+                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at', 'dps.payable as amount_paid', 'c.name as city_name', 'sj.created_at as delivered_date', 'd.status as payment_status')
                     ->where('dps.shipment_id', $shipment->id)
                     ->where('sj.shipper_status_id', 14);
 
                 if ($result->exists()) {
                     $result = $result->first();
-                    $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
-                    $detail[$tracking_no]['amount_paid'] = $result->amount_paid;
+
+                    $check_payment = DonePaymentShipment::where('shipment_id',$result->shipment_id);
+                    if ($check_payment->exists())
+                    {
+                        $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] = ($result->payment_status == 1) ? $result->amount_paid : 0;
+                        $detail[$tracking_no]['payment_date'] = ($result->payment_status == 1) ? $result->paid_at : '-';
+                    }
+                    else
+                    {
+                        $detail[$tracking_no]['payment_status'] =  "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] =  0;
+                        $detail[$tracking_no]['payment_date'] = '-';
+                    }
+
                     $detail[$tracking_no]['parcel_weight'] = $shipment->actual_weight;
                     $detail[$tracking_no]['city'] = $result->city_name;
                     $detail[$tracking_no]['gst'] = ($gst) ? $gst : 0;
                     $detail[$tracking_no]['delivery_charges'] = $estimated;
                     $detail[$tracking_no]['delivery_date'] = $result->delivered_date;
-                    $detail[$tracking_no]['payment_date'] = $result->paid_at;
-                    $detail[$tracking_no]['couriername'] = 'Trax';
+
+                    $detail[$tracking_no]['courier_name'] = 'Trax';
 
                 }
             }
