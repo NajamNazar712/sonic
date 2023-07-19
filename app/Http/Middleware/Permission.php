@@ -963,6 +963,9 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
+            'admin.settings.rv_disable_shippers.index'=> 889,
+            'admin.settings.rv_disable_shippers.store'=> 889,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
