@@ -580,6 +580,9 @@ class LostShipmentsController extends Controller
                     $check = array();
                     $data = array(); 
                     $error = array();
+                    $lost_shipments = array();
+                    $found_lost_shipment = false; 
+
                     foreach ($rows as $key => $row) {
                         $row_id = $key + 2;
                         $tracking = trim($row['tracking_number']);
@@ -609,13 +612,19 @@ class LostShipmentsController extends Controller
                                     $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
                                     if($bag){
                                         if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
+                                          
                                             return response()->json(['status' => 4, 'error' => 'Shipment already marked lost for the current bag']);
                                         }
                                     }
                                 }
                             }
                             else{
-                                return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!']);
+                                $lost_shipments[] = $tracking;
+                                $found_lost_shipment = true;
+                                // $tracking_number =  $tracking_numbers;
+                                // dd($tracking_number);
+                                // return response()->json(['status' => 4, 'error' => $tracking_number]);
+                                // return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!']);
                             }
                             $data[$shipment->id]['id'] = $shipment->id;
                             $data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
@@ -641,10 +650,17 @@ class LostShipmentsController extends Controller
                         // dd($data);
                        
                         
-                    }  
-                    $error_count =  count($error);
+                    }
+                    // $error_count =  count($error);
+                    if ($found_lost_shipment) {
+                        // If any shipment is added to lost shipments, return both the error and the array of lost shipments' tracking numbers
+                        return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!', 'lost_shipments' => $lost_shipments]);
+                    } else {
+                        // If no shipment is added to lost shipments, return only the array of lost shipments' tracking numbers
+                        return response()->json(['status' => 1, 'details' => $data, 'error_count' => count($error), 'error' => $error]);
+                    }
                     
-                    return response()->json(['status' => 1, 'details' => $data ,'error_count' => $error_count , 'error' => $error]);
+                    // return response()->json(['status' => 1, 'details' => $data ,'error_count' => $error_count , 'error' => $error]);
                     // dd($data);
                     // return redirect()->back()->with(['success' => 'Bulk Lost Update']);
 
