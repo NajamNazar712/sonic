@@ -33,7 +33,7 @@
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.4
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.6
 ">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column bg-full-screen-image  menu-expanded blank-page blank-page"

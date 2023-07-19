@@ -12,8 +12,8 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
-                    <div class="col-4">
+                <div  class="row mb-2 justify-content-center" id="track_form">
+                    {{-- <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -30,6 +30,11 @@
                                 @endforeach
                             </select>
                         </fieldset>
+                    </div> --}}
+                    <div class="col-5">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*"  id="tracking_numbers" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
                     </div>
                     <div class="col-5">
                         <fieldset class="form-group">
@@ -69,14 +74,17 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th>
-                            <th class="border-primary border-darken-1">Rider Trax ID</th>
-                            <th class="border-primary border-darken-1">Rider Name</th>
+                            <th class="border-primary border-darken-1">Tracking Numbers</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Origin</th>
-                            <th class="border-primary border-darken-1">Pickup Note ID</th>
-                            <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Project Arrival By</th>
+                            <th class="border-primary border-darken-1">Project Arrival At</th>
+                            <th class="border-primary border-darken-1">Normal Arrival By</th>
+                            <th class="border-primary border-darken-1">Normal Arrival At</th>
+                            {{-- <th class="border-primary border-darken-1">No. of Scanned Shipments</th>
                             <th class="border-primary border-darken-1">No. of Arrived Shipments</th>
-                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th>
+                            <th class="border-primary border-darken-1">Arrival Without Scan Shipments</th> --}}
                         </tr>
                         </thead>
                     </table>
@@ -106,9 +114,12 @@
 @endsection
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <style type="text/css">
         table.dataTable {
             font-size: 12px;
@@ -155,17 +166,28 @@
             width: auto !important;
             text-align: left;
         }
+      
+        .tracking_numbers{
+            width: 100% !important;
+        }
+
     </style>
 @endsection
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+{{-- <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script> --}}
+<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#datatable_wrapper').hide();
+            // $('#datatable_wrapper').hide();
 
 
 
@@ -193,8 +215,8 @@
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -203,15 +225,17 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-
+                    if (context.select) {
+                        $('#track_form #to_date').pickadate('picker').set('min', $('#track_form #from_date').pickadate('picker').get('select'));
+                    }
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
                 max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -220,7 +244,37 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #from_date').pickadate('picker').set('min', $('#track_form #to_date').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function (dropdown) {
+                    dropdown.remove();
+                },
+                onType: function (str) {
+                    var regex = /^[0-9,]+$/;
 
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function (input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
                 }
             });
 
@@ -233,32 +287,30 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.rider_pickup.list') }}',
+                        url: '{{ route('admin.reports.project_arrival.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
                             head.push('S.No');
-                            head.push('Date');
-                            head.push('Rider ID');
-                            head.push('Rider Name');
+                            head.push('Tracking Numbers');
+                            head.push('Shipper');
                             head.push('Origin');
-                            head.push('Pickup Note ID');
-                            head.push('No. of Scanned Shipments');
-                            head.push('No. of Arrived Shipments');
-                            head.push('Arrival Without Scan Shipments');
-
-                            $.each(result.data, function(index, values) {
+                            head.push('Destination');
+                            head.push('Project Arrival By');
+                            head.push('Project Arrival At');
+                            head.push('Normal Arrival By');
+                            head.push('Normal Arrival At');
+                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.date);
-                                row.push(values.rider_id);
-                                row.push(values.rider_name);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
                                 row.push(values.origin);
-                                row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
-                                row.push(values.without_scan_shipments);
-
+                                row.push(values.destination);
+                                row.push(values.project_arrival_by);
+                                row.push(values.project_arrival_at);
+                                row.push(values.normal_arrival_by);
+                                row.push(values.normal_arrival_at);
                                 body.push(row);
                             });
                         },
@@ -276,7 +328,8 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Project Arrival Report',
+                        className: 'btn btn-primary excel',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
@@ -291,26 +344,27 @@
                 },
                 serverSide: true,
                 ajax:{
-                    url: '{{ route('admin.reports.rider_pickup.list') }}',
+                    url: '{{ route('admin.reports.project_arrival.list') }}',
                     data: function (d) {
-                        d.search_hub = $('#search_hub').val();
-                        d.search_rider = $('#search_rider').val();
+                        // d.search_hub = $('#search_hub').val();
+                        // d.search_rider = $('#search_rider').val();
                         d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.tracking_numbers = $('#tracking_numbers').val();
                     }
                 },
-                order: [[1, 'desc']],
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'date' ,name: 'v2_pickup_notes.created_at', class: 'align-middle text-center date'},
-                    { data:'rider_id' ,name: 'r.trax_id', class: 'align-middle text-center rider_id'},
-                    { data:'rider_name' ,name: 'r.name', class: 'align-middle text-center rider_name'},
-                    { data:'origin' ,name: 'c.name', class: 'align-middle text-center origin'},
-                    { data:'pickup_note_id_btn', class: 'align-middle text-center pickup_note'},
-                    { data:'scanned_shipments_btn', class: 'align-middle scanned_shipments', orderable: false, searchable: false},
-                    { data:'arrived_shipments_btn', class: 'align-middle arrived_shipments', orderable: false, searchable: false},
-                    { data:'without_scan_shipments_btn', class: 'align-middle without_scan_shipments', orderable: false, searchable: false},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center shipper'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle text-center shipper'},
+                    { data:'origin',name: 'uo.name', class: 'align-middle text-center origin'},
+                    { data:'destination',name: 'des.name', class: 'align-middle text-center destination'},
+                    { data:'project_arrival_by',name: 'apa.name', class: 'align-middle text-center project_arrival_by'},
+                    { data:'project_arrival_at',name: 'sjpa.created_at', class: 'align-middle text-center project_arrival_at'},
+                    { data:'normal_arrival_by',name: 'aa.name', class: 'align-middle text-center project_arrival_at'},
+                    { data:'normal_arrival_at',name: 'sja.created_at', class: 'align-middle text-center project_arrival_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -332,122 +386,7 @@
                 print(pickup_note_id);
             });
 
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.v2_pickups.pending.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'ids': [id],
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
+           
         });
-
-        function scanned_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.rider_pickup.scanned_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Scanned Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
-        function arrived_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.rider_pickup.arrived_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Arrived Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
-        function without_scan_shipments_popup(pickup_note_id) {
-            if (pickup_note_id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.rider_pickup.without_scan_shipments') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': pickup_note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            $('#shipments_modal .modal-body').html('');
-                            $('#shipments_modal').modal('show');
-                            var shipments = '';
-                            if (data.data) {
-                                var route = '{!! route('admin.tracking.index') !!}';
-                                $.each(data.data, function(index, shipment_data) {
-                                    shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#shipments_modal .modal-body').html(shipments);
-                            $('#shipments_modal_title').html('Without Scan Shipment(s)');
-
-                        }
-                    });
-            }
-        }
-
     </script>
 @endsection

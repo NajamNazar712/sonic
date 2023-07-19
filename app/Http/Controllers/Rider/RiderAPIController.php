@@ -152,7 +152,8 @@ use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
 use App\ReturnDeliveredToShipperSms;
 
-class RiderAPIController extends Controller
+class
+RiderAPIController extends Controller
 {
     private $names = [
         'phone_number' => 'Phone Number',
@@ -2988,6 +2989,7 @@ class RiderAPIController extends Controller
                     }
                 }
                 $pickups = 0;
+                $shipments = 0;
                 $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
                 $arrival_cut_off_time = '8';
                 if ($settings->exists()) {
@@ -3021,6 +3023,7 @@ class RiderAPIController extends Controller
                     }
 
                     $pickups++;
+                    $shipments = $shipments + $pickup_request->booked;
                     self::retail_pickup_assign($pickup_request_id, $rider_id);
                 } else {
                     $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -3048,10 +3051,12 @@ class RiderAPIController extends Controller
                             if ($existing_pickup_rider == $pickup_note_rider) {
                                 $pickup_request->pickup_note_request->delete();
                                 $pickup_note->pickups = $pickup_note->pickups - 1;
+                                $pickup_note->shipments = $pickup_note->shipments - $pickup_request->booked;
                                 $pickup_note->save();
                             }
                         }
                         $pickups++;
+                        $shipments = $shipments + $pickup_request->booked;
                         if (!in_array($pickup_request_id, $allowed_pickup_requests)) {
                             $allowed_pickup_requests[] = $pickup_request_id;
                         }
@@ -3065,6 +3070,7 @@ class RiderAPIController extends Controller
                         $pickup_note = $pickup_note->first();
                         if (!V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->whereIn('pickup_request_id', $allowed_pickup_requests)->exists()) {
                             $pickup_note->pickups += $pickups;
+                            $pickup_note->shipments += $shipments;
 
                             $pickup_note->save();
                         }
@@ -3074,6 +3080,7 @@ class RiderAPIController extends Controller
 
                         $pickup_note->rider_id = $rider_id;
                         $pickup_note->pickups = $pickups;
+                        $pickup_note->shipments = $shipments;
                         $pickup_note->save();
 
                         $pickup_note_id = $pickup_note->id;
@@ -11303,8 +11310,11 @@ class RiderAPIController extends Controller
                                 }
                             }
                         }
-                        $rider_pickup->shipments = $shipment_count;
-                        $rider_pickup->save();
+                        $pickup_note = V2PickupNote::find($request->pickup_note_id);
+                        if($pickup_note){
+                            $pickup_note->shipments_scanned_by_rider = $pickup_note->shipments_scanned_by_rider + $shipment_count;
+                            $pickup_note->save();
+                        }
                         if (count($notification_shipments) > 0) {
                             NotificationsController::send(210, $notification_shipments, $request->pickup_request_id);
                         }
@@ -13282,19 +13292,19 @@ class RiderAPIController extends Controller
                 AdminFinanceController::done_payment($shipment_id, 1);
             }
         }
-        $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
-        if ($return_assign_shipment->exists()) {
+        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id);
+        // if ($return_assign_shipment->exists()) {
 
-            $return_assign_shipment = $return_assign_shipment->latest()->first();
-            $return_assign_shipment->status = 0;
-            $return_assign_shipment->save();
+        //     $return_assign_shipment = $return_assign_shipment->latest()->first();
+        //     $return_assign_shipment->status = 0;
+        //     $return_assign_shipment->save();
 
-            $return_assign_log = new ReturnAssignedShipmentLogs();
-            $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-            $return_assign_log->status = 2;
-            $return_assign_log->assigned_by = 346;
-            $return_assign_log->save();
-        }
+        //     $return_assign_log = new ReturnAssignedShipmentLogs();
+        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+        //     $return_assign_log->status = 2;
+        //     $return_assign_log->assigned_by = 346;
+        //     $return_assign_log->save();
+        // }
     }
 
     public function return_create_index(Request $request)
@@ -14073,15 +14083,6 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'No Remarks Have Been Found']);
         }
     }
-    //response:
-    //rider_trax_id
-    //date
-    //checkin_date
-
-
-    //from
-    //to
-    //rider_trax_id optional
 
     public function rider_checkin(Request $request)
     {
@@ -14162,6 +14163,36 @@ class RiderAPIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
             }
 
+        }
+    }
+
+    public function scan_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = explode(',', $request->tracking_number);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->pluck('tracking_number')->toArray();
+
+            if(count($tracking_number) == count($shipments))
+            {   
+                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id);
+
+                return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
+            }
+            else{
+                $tracking_not_found = array_diff($tracking_number, $shipments);
+                return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
         }
     }
 }

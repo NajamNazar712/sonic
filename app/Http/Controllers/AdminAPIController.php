@@ -5835,9 +5835,18 @@ class AdminAPIController extends Controller
                         }
                     }
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
-                    if ($pickup_note_requests_count == 0) {
-                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
+                    if($pickup_note_requests_count == 0){
+                        $v2_pickup_note->status = 1;
                     }
+
+                    $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
+                    if(count($pickup_note_pickup_request_ids) > 0){
+                        $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
+                        $v2_pickup_note->arrived_shipments = $arrived_shipments;
+                    }
+                    $v2_pickup_note->save();
                     // NotificationsController::send(4, $shipment_ids);
                     $date = Carbon::now()->format('Y_m_d');
                     if ($request->hasFile('image_name')) {
@@ -8323,10 +8332,11 @@ class AdminAPIController extends Controller
                             $response = $this->calculateToDateLeaves($employee, $to_date);
                             if($response['status'] == 1){
                                 $calcDays = $diffDays;
+                                $fiscal_leave_count = $employee->fiscal_leave_count;
                                 if($employee->leave_count < 0) {
                                     $calcDays = $diffDays - ($employee->leave_count);
                                 }
-                                if($calcDays <= $response['data']){
+                                if($calcDays <= $response['data'] || $calcDays <= $fiscal_leave_count){
                                     $employee->leave_count = $employee->leave_count - $diffDays;
                                     $employee->fiscal_leave_count = $employee->fiscal_leave_count - $diffDays;
                                 } else {
@@ -12671,6 +12681,96 @@ class AdminAPIController extends Controller
         CargoManifestDraftBags::where('added_by', Auth::id())->delete();
 
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html' => $success, 'error_html' => $error, 'print' => $print]);
+    }
+    
+    public function scan_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = explode(',', $request->tracking_number);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->pluck('tracking_number')->toArray();
+
+            if(count($tracking_number) == count($shipments))
+            {   
+                $shipment_scanned = self::quick_tracking_shipment_scan($tracking_number, 1, $request->admin_id);
+
+                return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
+            }
+            else{
+                $tracking_not_found = array_diff($tracking_number, $shipments);
+                return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
+        }
+    }
+
+    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id)
+    {
+        $shipment_scanned = array();
+                
+        foreach ($tracking_number as $tracking_no) {
+            $shipment = Shipment::where('tracking_number', $tracking_no)->first();
+
+            $details = array();
+
+            $details['case_nature_id'] = 0; // changed from complaint to case_nature_id required by waleed
+            $details['tracking_number'] = $tracking_no;
+            $details['amount'] = $shipment->amount;
+            $details['shipper'] = $shipment->user->name;
+            $details['consignee_name'] = $shipment->consignee_name;
+            $details['consignee_address'] = $shipment->consignee_address;
+            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
+            $details['status'] = $journey->shipment_status_shipper->name;
+
+            if ($journey->status_reason_id != null) {
+
+                $details['reason'] = $journey->shipment_status_reason->name;
+            } else {
+                $details['reason'] = null;
+            }
+
+            $details['remarks'] = $journey->remarks;
+            $details['status_id'] = $journey->shipper_status_id;
+            $details['current_status_date'] = Carbon::parse($journey->created_at)->toDateTimeString();
+            $details['origin'] = $shipment->pickup_address->city->name;
+            $details['destination'] = $shipment->consignee_city->name;
+
+            $delivery_note_shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+                ->select('delivery_note_shipments.delivery_note_id as delivery_note_id')
+                ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
+                ->orderBy('delivery_note_shipments.delivery_note_id', 'desc');
+
+            if($delivery_note_shipment->exists()){
+                $delivery_note_shipment = $delivery_note_shipment->first();
+                $dn = str_pad($delivery_note_shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
+            }
+            else{
+                $dn = '-';
+            }
+
+            $details['delivery_note_id'] = $dn;
+
+            $crm = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+            
+            if(isset($crm) && $crm->status_id != 4){
+                $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
+            }
+
+            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
+
+            $shipment_scanned[] = $details;
+        }
+
+        return $shipment_scanned;
     }
 
 }

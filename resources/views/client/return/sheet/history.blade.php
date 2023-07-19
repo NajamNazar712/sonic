@@ -27,7 +27,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Received At</th>
+                        <th class="border-primary border-darken-1">Shipper Receiving time</th>
                     </tr>
                     </thead>
                 </table>
@@ -134,7 +134,7 @@
                             head.push('Service Type');
                             head.push('Status');
                             head.push('Remarks');
-                            head.push('Received At');
+                            head.push('Shipper Receiving time');
 
 
                             $.each(result.data, function(index, values) {
@@ -204,7 +204,7 @@
                     {data: 'amount', name: 's.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'ss.id', class: 'align-middle status'},
                     {data: 'received_remarks', name: 'return_sheets.remarks', class: 'align-middle received_remarks', orderable: false, searchable: false},
                     {data: 'received_date', name: 'return_sheets.received_at', class: 'align-middle received_date'},
                 ],

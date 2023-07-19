@@ -691,7 +691,7 @@ class AdminTrackingController extends Controller
                         $details['complaint'] = $crm->id;
                     }
 
-                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null, null, 1);
                     return response()->json(['status' => 1, 'details' => $details]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);

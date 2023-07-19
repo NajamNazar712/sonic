@@ -12,7 +12,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                <div id="search_form" class="row mb-2 justify-content-center">
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
@@ -27,15 +27,6 @@
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}">{{$rider->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-5">
-                        <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
@@ -69,7 +60,7 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Date</th> 
+                            <th class="border-primary border-darken-1">Pickup Date</th> 
                             <th class="border-primary border-darken-1">Rider Trax ID</th>
                             <th class="border-primary border-darken-1">Rider Name</th>
                             <th class="border-primary border-darken-1">Origin</th>
@@ -181,20 +172,14 @@
                 allowClear:true
             });
 
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
-
             var max = '{{ Carbon\Carbon::now() }}';
 
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -203,15 +188,17 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-
+                    if (context.select) {
+                        $('#search_form #to_date').pickadate('picker').set('min', $('#search_form #from_date').pickadate('picker').get('select'));
+                    }
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: max,
-                // format:'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                // format: 'yyyy-mm-dd',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -220,7 +207,9 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-
+                    if (context.select) {
+                        $('#search_form #from_date').pickadate('picker').set('min', $('#search_form #to_date').pickadate('picker').get('select'));
+                    }
                 }
             });
 
@@ -239,7 +228,7 @@
                             head = [];
                             footer = [];
                             head.push('S.No');
-                            head.push('Date');
+                            head.push('Pickup Date');
                             head.push('Rider ID');
                             head.push('Rider Name');
                             head.push('Origin');
@@ -260,11 +249,11 @@
                                 row.push(values.rider_name);
                                 row.push(values.origin);
                                 row.push(values.pickup_note_id);
-                                row.push(values.scanned_shipments);
-                                row.push(values.arrived_shipments);
+                                row.push(values.shipments_scanned_by_rider);
+                                row.push(values.total_arrived_shipments);
                                 row.push(values.without_scan_shipments);
-                                scanned_shipments += values.scanned_shipments;
-                                arrived_shipments += values.arrived_shipments;
+                                scanned_shipments += values.shipments_scanned_by_rider;
+                                arrived_shipments += values.total_arrived_shipments;
                                 without_scan_shipments += values.without_scan_shipments;
                                 body.push(row);
                             });
@@ -294,7 +283,8 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Rider Pickup Report',
+                        title: 'Rider Wise Pickup Report',   
+                        className: 'btn btn-primary excel',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                         footer: true
                     },
@@ -313,7 +303,6 @@
                     data: function (d) {
                         d.search_hub = $('#search_hub').val();
                         d.search_rider = $('#search_rider').val();
-                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -343,8 +332,8 @@
                     var without_scan_shipments_count = 0;
                     
                     $.each(data, function(index, shipment_data) {
-                        scanned_shipments_count += shipment_data.scanned_shipments;
-                        arrived_shipments_count += shipment_data.arrived_shipments;
+                        scanned_shipments_count += shipment_data.shipments_scanned_by_rider;
+                        arrived_shipments_count += shipment_data.total_arrived_shipments;
                         without_scan_shipments_count += shipment_data.without_scan_shipments;
                     });
                     var api = this.api();
@@ -433,7 +422,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
@@ -462,7 +451,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);
@@ -491,7 +480,7 @@
                         if (data.data) {
                             var route = '{!! route('admin.tracking.index') !!}';
                             $.each(data.data, function(index, shipment_data) {
-                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data.tracking_number+' target="_blank">'+shipment_data.tracking_number+'</a></u><br>';
+                                shipments += '<u><a href='+route+'?tracking_number='+shipment_data+' target="_blank">'+shipment_data+'</a></u><br>';
                             });
                         }
                         $('#shipments_modal .modal-body').html(shipments);

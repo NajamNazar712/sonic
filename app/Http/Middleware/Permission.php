@@ -473,6 +473,10 @@ class Permission
             'petty_cash.rejected.index' => 243,
             'petty_cash.rejected.list' => 243,
 
+			'petty_cash.advance.index' => 881,
+            'petty_cash.advance.statements.index' => 882,
+
+
             'month_closing.pending.index' => 408,
             'month_closing.pending.list' => 408,
             'month_closing.resolved.index' => 409,
@@ -624,6 +628,10 @@ class Permission
             'reports.shipper_summary.list' => 794,
 
             'reports.crm_agent_wise_report.index' => 784,
+            'reports.project_arrival.index' => 879,
+            'reports.project_arrival.list' => 879,
+            'reports.rider_picked.index' => 880,
+            'reports.rider_picked.list' => 880,
             'reports.quick_scanned_report.index' => 877,
             'reports.quick_scanned_report.list' => 877,
 
@@ -1368,8 +1376,10 @@ class Permission
  			'accounts.substitute_account_management.index' => 873,
  			'accounts.substitute_account_management.add.index' => 874,
  			'accounts.substitute_account_management.update.index' => 875,
+            'settings.airway_bill_address_visibility.index' => 877,
  			'management.shipment_received.index' => 878,
-
+            'return.shipper_return_receiving.history.index' => 885,
+            'reports.overland.index' => 886,
         ],
         'shipper' => [
             'shipment.book.index' => 1,
