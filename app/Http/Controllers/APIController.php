@@ -7587,12 +7587,14 @@ class APIController extends Controller
 
                 $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
 
-                $result = Shipment::leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
+                $result = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
                     ->leftjoin('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
                     ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
-                    ->join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
-                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at', 'dps.payable as amount_paid', 'c.name as city_name', 'sj.created_at as delivered_date', 'd.status as payment_status')
-                    ->where('dps.shipment_id', $shipment->id)
+                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at',
+                        'dps.payable as amount_paid', 'c.name as city_name',
+                        'sj.created_at as delivered_date', 'd.status as payment_status')
+                    ->where('shipments.id', $shipment->id)
                     ->where('sj.shipper_status_id', 14);
 
                 if ($result->exists()) {
