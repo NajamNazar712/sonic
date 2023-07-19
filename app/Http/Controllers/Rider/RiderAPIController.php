@@ -14230,7 +14230,7 @@ RiderAPIController extends Controller
             } else {
                 switch ($shipper_status_id) {
                     case 1 : //Booked...
-                        return response()->json(['status' => 0, 'message' => 'Shipment scanned successfuly']);
+                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly']);
                         break;
 
                     case 17 : //Cancelled..
