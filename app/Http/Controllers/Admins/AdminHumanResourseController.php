@@ -1341,8 +1341,6 @@ class AdminHumanResourseController extends Controller
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
        $designation_toggle_val = $request->designation_on_off;
-        dd($designation_toggle_val,$request->all());
-
         //return $request->joining_date_formatted;
 
         $request->validate([
