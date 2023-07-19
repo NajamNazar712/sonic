@@ -4456,7 +4456,7 @@ Route::prefix('agent')->name('agent.')->group(function () {
         Route::post('get_shipment_reason', 'Agent\ReturnV2Controller@get_shipment_reason')->name('get_shipment_reason');
         Route::post('get_ticket', 'Agent\ReturnV2Controller@get_ticket')->name('get_ticket');
         Route::get('intercepted_shipment', 'Agent\ReturnV2Controller@get_intercepted_shipment')->name('get_intercepted_shipment');
-        Route::post('submit', 'Agent\ReturnV2Controller@get_submit')->name('get_submit');
+        Route::post('submit', 'Agent\ReturnV2Controller@submit_ticket')->name('submit_ticket');
 
 
     });

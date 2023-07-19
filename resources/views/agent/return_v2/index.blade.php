@@ -1192,7 +1192,7 @@
 
 
                     $.ajax({
-                            url: '{!! route('agent.dashboard.get_submit') !!}',
+                            url: '{!! route('agent.dashboard.submit_ticket') !!}',
                             method: 'POST',
                             data: {
                                 '_token': '{{ csrf_token() }}',

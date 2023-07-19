@@ -498,7 +498,12 @@ trait RvTrait
         $rv_shipment_assign_agent->increment('unresponsive_count');
         
         if($rv_shipment_assign_agent->unresponsive_count == 3){
-            $rv_shipment_assign_agent->rv_state_id = 3;
+            $rv_shipment_assign_agent->rv_state_id = 2;
+        }
+        else if ($rv_shipment_assign_agent->unresponsive_count == 4){
+            $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
+            $shipment  = $shipment->first();
+            $shipment->shipment_status_id = 64; //set shipment status to Shipper Advise Requested 
         }
 
         return response()->json(['status' => 1]);

@@ -220,10 +220,9 @@ class ReturnV2Controller extends Controller
     // Heading: N/A
     // Sidebar: N/A
     // URL: 
-    // Description:
-    public function get_submit(Request $request)
+    // Description: this function is used in agent dashboard for submitting the ticket
+    public function submit_ticket(Request $request)
     {
-        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5', //2  reattempt, 3 intercept, 5 on hold
@@ -251,7 +250,6 @@ class ReturnV2Controller extends Controller
         
         else {
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
-            // $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at',date('Y-m-d'))->first();
             $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at',date('Y-m-d'))->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
 
@@ -260,16 +258,14 @@ class ReturnV2Controller extends Controller
 
             //if shipment already exists update row
                 if ($shipment_assign_agent) {
-
                     $this->update_shipment_status($request); //updating status of shipment
                     $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
-
+        
                     return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                 } 
                 else {
-                    
-                    return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
+                    return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                 }
             }
             else{
