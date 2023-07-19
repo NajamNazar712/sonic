@@ -34,17 +34,17 @@ class GenerateDeliveryOTP implements ShouldQueue
      *
      * @return void
      */
-    public function handle($sms, $name, $otp)
+    public function handle()
     {
         $client = new Client(['base_uri' => 'https://voicegateway.its.com.pk/api', 'http_errors' => FALSE, 'connect_timeout' => 120, 'timeout' => 120]);
 
         $response = $client->get('', [
             'query' => [
                 'Apikey' => '3FAE1AA22D777FDD699758014500ECF6',
-                'Recipient' => $sms->to,
+                'Recipient' => $this->sms->to,
                 'CampId' => '315',
-                'Param1' => $otp,
-                'UniqueId' => $sms->id,
+                'Param1' => $this->otp,
+                'UniqueId' => $this->sms->id,
             ]
         ]);
 
@@ -62,7 +62,7 @@ class GenerateDeliveryOTP implements ShouldQueue
 
         $to = ['muhammad.yousuf@trax.pk'];
         $subject = '[Error] CALL API - ITS';
-        $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
+        $body = 'Unrecognized Error in CALL API.<br/>SMS ID: ' . $this->sms->id . '<br/>Response Received: ' . json_encode($response);
 
         $mail = Mail::to($to)->send(new Notifications($subject, $body));
     }

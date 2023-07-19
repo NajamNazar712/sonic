@@ -9811,6 +9811,7 @@ class NotificationsController extends Controller
                     $to = $shipment->consignee_phone_number_1;
                     // self::sms($body, $to, 1);
                     self::sms_otp($body, $to, $name, $shipment_otp->otp, 3);
+                    // self::sms_otp($body, $to, $name, 21323, 3);
                     if ($shipment->consignee_phone_number_2 != NULL) {
                         $to = $shipment->consignee_phone_number_2;
                         // self::sms($body, $to, 1);
