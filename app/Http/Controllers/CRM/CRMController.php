@@ -11,6 +11,7 @@ use App\Http\Models\CRM\CrmRequestStatusHistory;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\CRM\CrmRequestTaggingHistory;
 use App\Http\Models\SaleTierTag;
+use App\Http\Models\ConsigneeAddressArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\CrmAutoTagUser;
@@ -270,8 +271,7 @@ class CRMController extends Controller
                
                     if($crm_auto_tag_user->exists()){
 
-                        $crm_auto_tag_user_with_case_details = $crm_auto_tag_user;
-                        $crm_auto_tag_user_with_case_details = $crm_auto_tag_user_with_case_details->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$case_nature_id)->where('crm_case_nature_type_id',$case_nature_type_id);
+                        $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
 
                         if($crm_auto_tag_user_with_case_details->exists()){
                             $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();

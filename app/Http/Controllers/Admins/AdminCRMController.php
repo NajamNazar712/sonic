@@ -22,6 +22,7 @@ use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\ConsigneeAddressArea;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmConsigneeInfoPrint;
 use App\Http\Models\CRM\CrmPaymentShipment;
@@ -1959,7 +1960,7 @@ class AdminCRMController extends Controller
             ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
             
             ->addColumn('tagged_to_operation', function($requests){
-                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
                     if($admin){
@@ -3255,15 +3256,25 @@ class AdminCRMController extends Controller
                     }
                         if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                             $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
 
                         }else{
                             $crm_city_id = $crm_request->shipment->consignee_city_id;
+                            $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                         }
                         if($crm_request->case_nature_type_id != 1){
                             $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
                             if($crm_auto_tag_user->exists()){
 
-                                $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
+                                $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
+        
+                                if($crm_auto_tag_user_with_case_details->exists()){
+                                    $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
+                                }
+                                else{
+                                    $crm_auto_tag_user = $crm_auto_tag_user->first();
+                                }
+
                                 $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                                 if(!empty($tagged_crm_request)){
                                     if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
@@ -3991,9 +4002,11 @@ TRAX-Customer Experience';
 
                             if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                                 $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                                $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
     
                             }else{
                                 $crm_city_id = $crm_request->shipment->consignee_city_id;
+                                $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                             }
                             if($crm_request->shipper_id){
                                 $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
@@ -4048,9 +4061,18 @@ TRAX-Customer Experience';
                             if($crm_request->case_nature_type_id != 1){
                             
                                 $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
+                                
                                 if($crm_auto_tag_user->exists()){
+                                    $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
+            
+                                    if($crm_auto_tag_user_with_case_details->exists()){
+                                        $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
+                                    }
+                                    else{
+                                        $crm_auto_tag_user = $crm_auto_tag_user->first();
+                                    }
+                                    
         
-                                    $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
                                     $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                                     if(!empty($tagged_crm_request)){
                                         if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
