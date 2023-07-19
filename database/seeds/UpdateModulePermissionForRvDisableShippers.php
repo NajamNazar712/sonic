@@ -14,8 +14,10 @@ class UpdateModulePermissionForRvDisableShippers extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
 
         DB::table('global_settings')->insert(array(
-            array('type' => 'rv_disable_shippers', 'setting_value' => 1, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp)
-        ));
+            array('type' => 'rv_disable_shippers_excluded_shippers', 'setting_value' => 1, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('type' => 'rv_disable_shippers_only_shippers', 'setting_value' => 1, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('type' => 'rv_disable_shippers_all_shippers', 'setting_value' => 1, 'text' => '', 'created_at' => $timestamp, 'updated_at' => $timestamp)
+          ));
 
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 681, 'screen_name' => 'Rv Disable Shippers', 'action'=> 'View'),

@@ -522,6 +522,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_index')->name('index');
             Route::post('store', 'Shippers\ShipperGlobalSettingsController@receiving_sheet_description_submit')->name('store');
         });
+        
     });
     Route::prefix('consolidation')->name('consolidation.')->group(function () {
         Route::prefix('history')->name('history.')->group(function () {
@@ -2872,6 +2873,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('non_service_area')->name('non_service_area.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@non_service_area_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@non_service_area_store')->name('store');
+        });
+
+        Route::prefix('rv_disable_shippers')->name('rv_disable_shippers.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rv_disable_shippers_index')->name('index');
+            Route::post('store', 'Admins\GlobalSettingsController@rv_disable_shippers_store')->name('store');
         });
 
         Route::prefix('ticker')->name('ticker.')->group(function () {
