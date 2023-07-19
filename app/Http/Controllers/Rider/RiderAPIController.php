@@ -14226,7 +14226,7 @@ RiderAPIController extends Controller
             $tracking_number = $request->tracking_number;
             $shipper_status_id = Shipment::where('tracking_number', $tracking_number)->first()->shipper_status_id ?? NULL;
             if(!$shipper_status_id){
-                return response()->json(['status' => 1, 'message' => 'Shipment not exist']);
+                return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
             } else {
                 switch ($shipper_status_id) {
                     case 1 : //Booked...
