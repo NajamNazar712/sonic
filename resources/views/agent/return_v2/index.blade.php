@@ -275,7 +275,7 @@
                                         <span class="input-group-text">Rs</span>
                                     </div>
 
-                                    <input type="text" name="samount" value="" id="samount"
+                                    <input type="text" name="amount" value="" id="amount"
                                         class="form-control rounded-right amount" placeholder="Collection Amount*"
                                         data-rule-required="true" data-msg-required="Collection Amount is required"
                                         id="amount">
@@ -468,15 +468,15 @@
                         $("#consignee_name").prop('readonly', true);
                         $("#consignee_email").val();
                         $("#consignee_email").prop('readonly', true);
-                        $("#samount").val();
-                        $("#samount").prop('readonly', true);
+                        $("#amount").val();
+                        $("#amount").prop('readonly', true);
                         $("#replacement_parcel_image_div").removeClass("d-none");
                     } else {
                         console.log(this.value)
                         $("#consignee_name").prop('readonly', false);
                         $("#consignee_email").prop('readonly', false);
                         $('#intercept_type').val(1);
-                        $("#samount").prop('readonly', false);
+                        $("#amount").prop('readonly', false);
                         $('#intercept_form').find('#new_city').remove(); // remove the hidden fields if any
                         $('#consignee_city').removeClass('disabled') //remove disable class
                             .prop({
@@ -1086,7 +1086,7 @@
                                                 .shipment.consignee_phone_number_2);
                                             $('input[name="consignee_email"]').val(data.shipment
                                                 .consignee_email);
-                                            $('input[name="samount"]').val(data.shipment.amount);
+                                            $('input[name="amount"]').val(data.shipment.amount);
                                            
 
                                             var selectOptions = '';
@@ -1143,7 +1143,7 @@
                 var consignee_phone_number_2 = null;
                 var intercept_type = null;
                 var consignee_email = null;
-                var samount = null;
+                var amount = null;
                 var imageBase64 = null; 
 
                 $(document).on('click', '#intercept_update', function(event){
@@ -1156,7 +1156,7 @@
                     consignee_phone_number_2 = $('#consignee_phone_number_2').val();
                     intercept_type = $('#intercept_type').val();
                     consignee_email = $('#consignee_email').val();
-                    samount = $('#samount').val();
+                    amount = $('#amount').val();
                     
                     // Get the file input element
                     var inputFile = document.getElementById('replacement_parcel_image');
@@ -1211,7 +1211,7 @@
                                 'consignee_phone_number_2':consignee_phone_number_2,
                                 'intercept_type':intercept_type,
                                 'consignee_email':consignee_email,
-                                'samount':samount
+                                'amount':amount
                             }
 
                         })

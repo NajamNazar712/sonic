@@ -106,7 +106,7 @@ class ReturnV2Controller extends Controller
                         break 2;
                     }
 
-                    // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
+                    // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -223,9 +223,10 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_submit(Request $request)
     {
+        // dd($request->all());
         $validations = [
             'rv_assign_agent_status_id' => 'required',
-            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3', //2  reattempt, 3 intercept
+            'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5', //2  reattempt, 3 intercept, 5 on hold
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
@@ -249,16 +250,16 @@ class ReturnV2Controller extends Controller
         } 
         
         else {
-            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at',date('Y-m-d'))->first();
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
+            // $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at',date('Y-m-d'))->first();
+            $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at',date('Y-m-d'))->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
 
             //if agent already exists on same date update row
             if($assign_agent){
 
-            //if shipment already existsW update row
-                if ($shipment_assign_agent->exists()) {
-                    $shipment_assign_agent = $shipment_assign_agent->first();
+            //if shipment already exists update row
+                if ($shipment_assign_agent) {
 
                     $this->update_shipment_status($request); //updating status of shipment
                     $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
@@ -272,10 +273,10 @@ class ReturnV2Controller extends Controller
                 }
             }
             else{
-                $this->add_shipment_assign_agent($request, $shipment_assign_agent);
+                $this->update_shipment_status($request); //updating status of shipment
+                $this->add_shipment_agent($request, $shipment_assign_agent);
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
-
-
+                return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
             }
         }
     }
