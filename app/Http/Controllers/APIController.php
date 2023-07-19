@@ -7576,6 +7576,14 @@ class APIController extends Controller
                 $estimated = null;
                 $estimated = (($shipment->weight_charges != null) ? $shipment->weight_charges : 0) + (($shipment->cash_handling_charges != null) ? $shipment->cash_handling_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->return_charges != null) ? $shipment->return_charges : 0) + (($shipment->replacement_charges != null) ? $shipment->replacement_charges : 0) + (($shipment->fuel_surcharge != null) ? $shipment->fuel_surcharge : 0) + (($shipment->try_and_buy_charges != null) ? $shipment->try_and_buy_charges : 0) + (($shipment->packaging_material_charges != null) ? $shipment->packaging_material_charges : 0) + (($shipment->intercept_charges != null) ? $shipment->intercept_charges : 0);
 
+                $pickup_address = Shipment::where('tracking_number',$tracking_no)->select('pickup_address_id');
+                $pickup_address = $pickup_address->first();
+                $origin_city = City::find($pickup_address->pickup_address_id);
+
+                $gst = $origin_city->zone->gst;
+
+                $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
+
                 $result = Shipment::join('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
                     ->join('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
                     ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
@@ -7586,15 +7594,15 @@ class APIController extends Controller
 
                 if ($result->exists()) {
                     $result = $result->first();
-                    $detail[$tracking_no]['payment status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
-                    $detail[$tracking_no]['amount paid'] = $result->amount_paid;
-                    $detail[$tracking_no]['parcel weight'] = $shipment->actual_weight;
+                    $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
+                    $detail[$tracking_no]['amount_paid'] = $result->amount_paid;
+                    $detail[$tracking_no]['parcel_weight'] = $shipment->actual_weight;
                     $detail[$tracking_no]['city'] = $result->city_name;
-                    $detail[$tracking_no]['gst'] = ($shipment->gst) ? $shipment->gst : 0;
-                    $detail[$tracking_no]['delivery charges'] = $estimated;
-                    $detail[$tracking_no]['delivery date'] = $result->delivered_date;
-                    $detail[$tracking_no]['payment date'] = $result->paid_at;
-                    $detail[$tracking_no]['courier name'] = 'Trax';
+                    $detail[$tracking_no]['gst'] = ($gst) ? $gst : 0;
+                    $detail[$tracking_no]['delivery_charges'] = $estimated;
+                    $detail[$tracking_no]['delivery_date'] = $result->delivered_date;
+                    $detail[$tracking_no]['payment_date'] = $result->paid_at;
+                    $detail[$tracking_no]['couriername'] = 'Trax';
 
                 }
             }
