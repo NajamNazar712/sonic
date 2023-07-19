@@ -124,18 +124,17 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    private function shipment_assign_agent_table_columns($request, $assign_agent)
+    private function shipment_assign_agent_table_columns($request, $agent)
     {
         return [
             'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
-            'rv_fake_status_id' => $request->fake_status,
-            'remarks' => $request->shipment_remarks,
-            'rv_state_id' => $request->is_fake_status,
+            'rv_fake_status_id' => $request->rv_fake_status_id,
+            'remarks' => $request->remarks,
+            'is_fake_status' => $request->is_fake_status,
             'call_to_id' => $request->call_to_id,
             'updated_by_id' => Auth::id(),
-            'is_fake_status' => $request->fake_status,
-            'rv_shipment_agent_id' => $assign_agent->id,
+            'rv_shipment_agent_id' => $agent->id,
         ];
     }
 
@@ -143,16 +142,16 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description: this function is updating table rows of rv_shipment_assign_agents
-    protected function update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent)
+    protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
-        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assign_agent);
+        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
 
         if ($admin_agent->employee->staff_category_id == 3) {
-            $assign_agent->increment('total_shipments');
-            $assign_agent->increment('actual_productivity');
+            $assigned_agent->increment('total_shipments');
+            $assigned_agent->increment('actual_productivity');
             $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
         } else {
-            $assign_agent->increment('already_updated');
+            $assigned_agent->increment('already_updated');
             $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
         }
 
@@ -164,18 +163,18 @@ trait RvTrait
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
-    // Description: this function is updating table rows of rv_shipment_assign_agents
-    protected function add_shipment_assign_agent($request, $shipment_assign_agent)
+    // Description: this function is new row of rv_shipment_assign_agents
+    protected function add_shipment_agent($request, $shipment_assign_agent)
     {
         //updating columns in shipmen assign agent table 
-        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $shipment_assign_agent);
-
         
         $add_agent = new RvShipmentAgent();
         $add_agent->agent_id = $shipment_assign_agent->agent_id;
         $add_agent->total_shipments  = $add_agent->total_shipments + 1;
         $add_agent->actual_productivity  = $add_agent->actual_productivity + 1;
         $add_agent->save();
+        
+        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $add_agent);
 
         $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
         $shipment_assign_agent->update($shipment_assign_agent_table_columns);
@@ -491,10 +490,9 @@ trait RvTrait
 
         $status = new RvAgentCallHistory();
         $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
-        $status->call_finding_id = $request->call_finding_id;
-        $status->call_to_id = $request->call_to_id;
+        $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
+        $status->call_to_id = $request->call_to_id; //Shipper or Consignee
         $status->remarks = $rv_shipment_assign_agent->remarks;
-        $status->updated_by = Auth::id();
         $status->save();
 
         $rv_shipment_assign_agent->increment('unresponsive_count');
