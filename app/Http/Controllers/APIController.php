@@ -7578,7 +7578,8 @@ class APIController extends Controller
 
                 $pickup_address = Shipment::where('tracking_number',$tracking_no)->select('pickup_address_id');
                 $pickup_address = $pickup_address->first();
-                $origin_city = City::find($pickup_address->pickup_address_id);
+                $city = UserShippingInfo::where('id',$pickup_address->pickup_address_id)->select('city_id')->first();
+                $origin_city = City::find($city->city_id);
 
                 $gst = $origin_city->zone->gst;
 
