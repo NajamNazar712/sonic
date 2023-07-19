@@ -2143,12 +2143,12 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12 align-self-center mt-3">
-                            <h3 class="text-center">Do you want to update designation also !</h3>
+                            <h3 class="text-center">Designation Update !</h3>
                         </div>
                         <div class="col-12 align-self-center text-center">
-                            <label for="admin_discount_type" class="mr-2">Yes</label>
+                            <label for="admin_discount_type" class="mr-2">No</label>
                             <input type="checkbox" id="admin_discount_type" name="admin_discount_type" class="switchery" data-size="sm" data-switchery="true">
-                            <label for="admin_discount_type" class="ml-2">No</label>
+                            <label for="admin_discount_type" class="ml-2">Yes</label>
                             <input id="admin_discount_type1" value="0" name="admin_discount_type1" hidden>
                         </div>
                         <div class="col-12 align-self-center mt-5">
@@ -2157,7 +2157,7 @@
                         <div class="col-12 d-flex justify-content-center">
                             <div class="form-group">
                                 <button type="submit" class="btn btn-primary mr-2" id="submit_profile_no">No</button>
-                                <button type="submit" class="btn btn-primary" id="submit_profile_yes">Submit</button>
+                                <button type="submit" class="btn btn-primary" id="submit_profile_yes">Yes</button>
                             </div>
                         </div>
                     </div>
@@ -2208,17 +2208,18 @@
 
             var toggleValue = false;
             $('#admin_discount_type').change( function () {
-                console.log('clicked');
                 toggleValue = !toggleValue;
                 if(toggleValue)
                 {
                     $('#admin_discount_type1').val("1");
                     $('#designation_on_off').val(toggleValue);
+                    console.log('clicked',toggleValue);;
                 }
                 else
                 {
                     $('#admin_discount_type1').val("0");
                     $('#designation_on_off').val(toggleValue);
+                    console.log('clicked',toggleValue);
                 }
             });
 
@@ -2227,33 +2228,37 @@
                 event.preventDefault();
                 $('#designation_on_off').val(toggleValue);
 
-                $("#submit_profile_yes").click(function() {
-                    console.log('clicked yes !',$('#designation_on_off'),toggleValue);
 
-                    var formData = $('#profile-form').serialize();
+            });
 
-                    console.log(formData);
-                    $.ajax({
-                        url: '{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}',
-                        method: 'POST',
-                        data: formData,
-                    }).done(function (data) {
-                        if (data.status == 0) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-                });
-                $("#submit_profile_no").click(function() {
+            $("#submit_profile_yes").click(function() {
+                console.log('clicked yes !',$('#designation_on_off'),toggleValue);
+
+                var formData = $('#profile-form').serialize();
+
+                console.log(formData);
+                $.ajax({
+                    url: '{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}',
+                    method: 'POST',
+                    data: formData,
+                }).done(function (data) {
+                    if (data.status === 0) {
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
+                    } else if (data.status != 0){
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
                     $("#submit_profile_modal").modal('hide');
                 });
+            });
+
+            $("#submit_profile_no").click(function() {
+                $("#submit_profile_modal").modal('hide');
             });
 
             $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({

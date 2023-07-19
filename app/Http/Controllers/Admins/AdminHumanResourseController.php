@@ -1560,8 +1560,7 @@ class AdminHumanResourseController extends Controller
 
             }
         }
-
-        return redirect()->route('admin.human_resource.employee_directory.index')->with(['success' => 'Employee Profile Updated Successfully']);
+        return response()->json(['status' => 0, 'success' => 'Employee Profile Updated Successfully!']);
     }
 
     public function employee_directory_medical_update(Employee $employee, Request $request)
