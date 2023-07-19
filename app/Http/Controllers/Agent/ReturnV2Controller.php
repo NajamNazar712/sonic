@@ -26,7 +26,9 @@ use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Validation\Rule;
 
 class ReturnV2Controller extends Controller
@@ -90,23 +92,70 @@ class ReturnV2Controller extends Controller
                     $start_time = Carbon::parse($shift_exist->start_time);
                     $end_time = Carbon::parse($shift_exist->end_time);
                     if ($current_time->between($start_time, $end_time)) {
+                        // Assuming $sorted_agents is an array containing agents with their city_id
+
+
+                        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
+                        // If excluded_shippers setting is not found, initialize as an empty array
+                        $excluded_shippers = [];
+
+                        if ($all_shipper_exists) {
+                            $excluded_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+                            // Check if excluded_shippers exists and process it
+                            if ($excluded_shipper->exists()) {
+                                $excluded_shipper = $excluded_shipper->first();
+                                $excluded_shippers = explode(',', $excluded_shipper['text']);
+                            }
+                        }
+
+                        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+                        // If only_shippers setting is not found, initialize as an empty array
+                        $only_shippers = [];
+                        // Check if only_shippers exists and process it
+                        if ($only_shipper->exists()) {
+                            $only_shipper = $only_shipper->first();
+                            $only_shippers = explode(',', $only_shipper['text']);
+                        }
+
                         foreach ($sorted_agents as $key => $agent) {
-                            // Assigned hub to priority city and shipper status is 12 which is activate for return shipments
-                            $shipments = Shipment::where('consignee_city_id', $agent['city_id'])->where('shipper_status_id', 12)->orderBy('id', 'ASC')->get();
+                            // Check if excluded_shippers exists (1 && 1)
+                            if (!empty($excluded_shippers)) {
+                                $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
+                                    ->where('shipper_status_id', 12)
+                                    ->whereIn('user_id', $excluded_shippers)
+                                    ->orderBy('id', 'ASC')
+                                    ->get();
+                            }
+
+                            // Check if only_shippers exists (1 && 0)
+                            if (!empty($only_shippers) && !($all_shipper_exists)) {
+
+                                $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
+                                    ->where('shipper_status_id', 12)
+                                    ->whereNotIn('user_id', $only_shippers)
+                                    ->orderBy('id', 'ASC')
+                                    ->get();
+                            }
+
+                            if($all_shipper_exists && !($excluded_shipper)->exists())
+                            {
+                                $shipments = [];
+                            }
+
                             // check if shipments exist
                             if (count($shipments)) {
 
                                 foreach ($shipments as $key => $shipment) {
 
-                    # code...
-                    // if agent shipment is open - assigned to any user who comes first
-                    $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
-                    if ($shipment_assigned_unassigned_agent->exists()) {
-                        $shipment_assigned_unassigned_agent->first();
-                        break 2;
-                    }
+                                    # code...
+                                    // if agent shipment is open - assigned to any user who comes first
+                                    $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
+                                    if ($shipment_assigned_unassigned_agent->exists()) {
+                                        $shipment_assigned_unassigned_agent->first();
+                                        break 2;
+                                    }
 
-                    // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
+                                    // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
 
                                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                                     if ($shipment_assigned_assigned_agent->exists()) {
@@ -144,6 +193,7 @@ class ReturnV2Controller extends Controller
                             $shipping_mode = $shipment->shipping_mode;
                             $business_category = $shipment->business_category;
                             $detail_product_infos = [];
+                            $rider_details = [];
 
                             foreach ($product_infos as $product_info) {
 
@@ -155,6 +205,17 @@ class ReturnV2Controller extends Controller
                                 ];
 
                                 $detail_product_infos[] = $detail_product;
+                            }
+
+                            $rider_info = RiderDelivery::where('shipment_id', $shipment->id);
+
+                            if($rider_info->exists())
+                            {
+                                $rider_info = $rider_info->first();
+                                $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
+                                $rider_details['attempted_time'] = ($rider_info->created_at)->format('Y/m/d H:i:s');
+                                $rider_details['remarks']= ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                $rider_details['remarks'] = $rider_details['remarks']->remarks;
                             }
 
 
@@ -186,9 +247,9 @@ class ReturnV2Controller extends Controller
 
 
                             if (isset($shipment_assigned_agents)) {
-                                return response()->json(['status' => 1, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
+                                return response()->json(['status' => 1,'rider_details' => $rider_details ,'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
                             } else {
-                                return response()->json(['status' => 0, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
+                                return response()->json(['status' => 0 ,'rider_details' => $rider_details ,'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                             }
                         } catch (Exception $ex) {
                             return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
@@ -197,7 +258,7 @@ class ReturnV2Controller extends Controller
                         Auth::logout();
                         return response()->json(['status' => 3]);
                     }
-                }else{
+                } else {
                     Auth::logout();
                     return response()->json(['status' => 4]);
                 }
@@ -230,52 +291,46 @@ class ReturnV2Controller extends Controller
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
                 return $request->rv_assign_agent_status_id == 6 && $request->rv_assign_agent_sub_status_id == 7;
-            }),//if unresponsive and other is selected remark is required
+            }), //if unresponsive and other is selected remark is required
         ];
-        
+
         $data = [
             'rv_assign_agent_status_id' => $request->input('rv_assign_agent_status_id'),
             'rv_assign_agent_sub_status_id' => $request->input('rv_assign_agent_sub_status_id'),
             'is_fake_status' => $request->input('is_fake_status'),
             'rv_fake_status_id' => $request->input('rv_fake_status_id') ?? null,
             'remarks' => $request->input('remarks') ?? null,
-            
+
         ];
-        
+
         $validate = Validator::make($data, $validations);
-        
+
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'errors' => $validate->errors()]);
-        } 
-        
-        else {
-            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at',date('Y-m-d'))->first();
+        } else {
+            $assign_agent = RvShipmentAgent::where('agent_id', Auth::id())->whereDate('created_at', date('Y-m-d'))->first();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id);
             $admin_agent = Admin::where('id', Auth::id())->first();
 
             //if agent already exists on same date update row
-            if($assign_agent){
+            if ($assign_agent) {
 
-            //if shipment already existsW update row
+                //if shipment already existsW update row
                 if ($shipment_assign_agent->exists()) {
                     $shipment_assign_agent = $shipment_assign_agent->first();
 
                     $this->update_shipment_status($request); //updating status of shipment
-                    $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent); 
+                    $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
 
                     return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
-                } 
-                else {
-                    
+                } else {
+
                     return response()->json(['status' => 1, 'errors' => 'Something went wrong!']);
                 }
-            }
-            else{
+            } else {
                 $this->add_shipment_assign_agent($request, $shipment_assign_agent);
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent);
-
-
             }
         }
     }

@@ -204,8 +204,7 @@
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
 
-                    <form id="intercept_form" class="form-horizontal" 
-                       enctype="multipart/form-data">
+                    <form id="intercept_form" class="form-horizontal" enctype="multipart/form-data">
                         @csrf
                         <div class="form-group col-md-3 mb-2 text-center" style="margin: auto; margin-top:10px;">
                             <select name="consignee" class="select2" id="consignee" data-rule-required="true"
@@ -286,8 +285,8 @@
                         <div class="row mt-2">
                             <div class="col">
                                 <div class="form-group text-center">
-                                    <button type="submit" name="update" id="intercept_update" class="btn btn-primary width-10-per"
-                                        value="Book">Update</button>
+                                    <button type="submit" name="update" id="intercept_update"
+                                        class="btn btn-primary width-10-per" value="Book">Update</button>
                                 </div>
                             </div>
                         </div>
@@ -307,8 +306,8 @@
 
         <style>
             /*.selectize-control {
-               width: 300px !important;
-              }*/
+                   width: 300px !important;
+                  }*/
 
             #horizontal_line {
                 border: none;
@@ -517,6 +516,7 @@
                             }
                         })
                         .done(function(data) {
+                            console.log(data)
                             if (data.shipment != undefined) {
                                 $('#shipment_id_val').val(data.shipment.id)
                                 var shipment = '';
@@ -566,7 +566,8 @@
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Name</strong></td>';
-                                shipment += '<td style="width: 45%;">' + ((data.shipper_info != null && data.shipper_info.name !=
+                                shipment += '<td style="width: 45%;">' + ((data.shipper_info != null && data
+                                    .shipper_info.name !=
                                     null) ? data.shipper_info.name : '----------------') + '</td>';
                                 shipment += '<td><strong>Origin</strong></td>';
                                 shipment += '<td>' + ((data.shipper_city != null && data.shipper_city.name !=
@@ -574,17 +575,18 @@
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';
-                                    shipment += '<td colspan="2"></td>';
-                                    shipment += '</tr>';
-                                    shipment += '</tr>';
-                                    shipment += '<tr>';
-                                        shipment += '<td style="width: 15%;"><strong>Address</strong></td>';
-                                        shipment += '<td style="width: 45%;" colspan="1">' + ((data.shipper_info != null && data.shipper_info
-                                            .address != null) ? data.shipper_info.address : '----------------') +
-                                            '</td>';
-                                            shipment += '<td><strong>Phone No(s).</strong></td>';
-                                            shipment += '<td>' + ((data.shipper_info != null && data.shipper_info.phone !=
-                                                null) ? data.shipper_info.phone : '----------------') + '</td>';
+                                shipment += '<td colspan="2"></td>';
+                                shipment += '</tr>';
+                                shipment += '</tr>';
+                                shipment += '<tr>';
+                                shipment += '<td style="width: 15%;"><strong>Address</strong></td>';
+                                shipment += '<td style="width: 45%;" colspan="1">' + ((data.shipper_info != null &&
+                                        data.shipper_info
+                                        .address != null) ? data.shipper_info.address : '----------------') +
+                                    '</td>';
+                                shipment += '<td><strong>Phone No(s).</strong></td>';
+                                shipment += '<td>' + ((data.shipper_info != null && data.shipper_info.phone !=
+                                    null) ? data.shipper_info.phone : '----------------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -613,7 +615,8 @@
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Address</strong></td>';
-                                shipment += '<td style="width: 45%;" colspan="1">' + data.shipment.consignee_address + '</td>';
+                                shipment += '<td style="width: 45%;" colspan="1">' + data.shipment
+                                    .consignee_address + '</td>';
                                 shipment += '<td><strong>Phone No(s).</strong></td>';
                                 shipment += '<td>' + data.shipment.consignee_phone_number_1 + '</td>';
                                 shipment += '</tr>';
@@ -704,11 +707,16 @@
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
 
-                                shipment += '<th><strong>Reason</strong></th>';
-                                shipment += '<th><strong>Attempted Time</strong></th>';
+                                shipment += '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
 
-                                shipment += '<th><strong>Remarks</strong></th>';
-
+                                shipment += '<td>' + ((data.rider_details.reason.name != null) ? data
+                                    .rider_details.reason.name : '-----------') + '</td>';
+                                shipment += '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
+                                shipment += '<td>' + ((data.rider_details.attempted_time != null) ? data
+                                    .rider_details.attempted_time : '-----------') + '</td>';
+                                shipment += '<th><strong>Remarks: </strong></th>';
+                                shipment += '<td>' + ((data.rider_details.remarks != null) ? data
+                                    .rider_details.remarks : '-----------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
@@ -804,7 +812,7 @@
                                     '<th><strong><textarea class="form-control form-control-sm" id="shipment_remarks" name="shipment_remarks "rows="2" placeholder="Remarks"></textarea></strong></th>';
 
                                 shipment +=
-                                '</select></strong><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></th>';
+                                    '</select></strong><div id="shipment_remarks_error" class="error_message_shipment_remarks error_message"></div></th>';
 
 
 
@@ -947,9 +955,7 @@
                                 });
                             } else if (data.status == 3) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            }
-
-                            else if (data.status == 4) {
+                            } else if (data.status == 4) {
                                 window.location.href = "{{ route('agent.login') }}";
                             }
                         })
@@ -989,7 +995,7 @@
                     }
                 })
 
-                
+
                 $(document).on('change', '#shipment_remarks', function() {
                     if ($("#shipment_remarks").is(':empty') === false) {
                         $('.error_message_shipment_remarks').text('')
@@ -1087,7 +1093,7 @@
                                             $('input[name="consignee_email"]').val(data.shipment
                                                 .consignee_email);
                                             $('input[name="samount"]').val(data.shipment.amount);
-                                           
+
 
                                             var selectOptions = '';
 
@@ -1144,11 +1150,11 @@
                 var intercept_type = null;
                 var consignee_email = null;
                 var samount = null;
-                var imageBase64 = null; 
+                var imageBase64 = null;
 
-                $(document).on('click', '#intercept_update', function(event){
+                $(document).on('click', '#intercept_update', function(event) {
                     event.preventDefault();
-                    
+
                     consignee_city = $('#consignee_city').val();
                     consignee_name = $('#consignee_name').val();
                     consignee_address = $('#consignee_address').val();
@@ -1157,18 +1163,18 @@
                     intercept_type = $('#intercept_type').val();
                     consignee_email = $('#consignee_email').val();
                     samount = $('#samount').val();
-                    
+
                     // Get the file input element
                     var inputFile = document.getElementById('replacement_parcel_image');
-                     
+
                     if (inputFile && inputFile.files && inputFile.files.length > 0) {
                         var file = inputFile.files[0];
                         var reader = new FileReader();
-                        
+
                         reader.onloadend = function() {
-                            imageBase64 = reader.result;                         
+                            imageBase64 = reader.result;
                         }
-                        
+
                         reader.readAsDataURL(file);
                     }
 
@@ -1177,7 +1183,7 @@
                     $('#shipment_status').prop('disabled', true);
                 });
 
-             
+
                 var checkbox = null;
 
                 $(document).on('submit', '#get_submit', function(event) {
@@ -1203,21 +1209,24 @@
                                 'remarks': shipment_remarks,
                                 'is_fake_status': checkbox,
                                 'call_to_id': call_to_id,
-                                'image':imageBase64,
-                                'consignee_city':consignee_city,
-                                'consignee_name':consignee_name,
-                                'consignee_address':consignee_address,
-                                'consignee_phone_number_1':consignee_phone_number_1,
-                                'consignee_phone_number_2':consignee_phone_number_2,
-                                'intercept_type':intercept_type,
-                                'consignee_email':consignee_email,
-                                'samount':samount
+                                'image': imageBase64,
+                                'consignee_city': consignee_city,
+                                'consignee_name': consignee_name,
+                                'consignee_address': consignee_address,
+                                'consignee_phone_number_1': consignee_phone_number_1,
+                                'consignee_phone_number_2': consignee_phone_number_2,
+                                'intercept_type': intercept_type,
+                                'consignee_email': consignee_email,
+                                'samount': samount
                             }
 
                         })
                         .done(function(data) {
                             if (data.status == 0) {
-                                toastr.success(data.success, {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.success(data.success, {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
                                 window.location.reload();
                             }
                             // else{
@@ -1225,38 +1234,44 @@
 
                             //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             // }    
-                            else{
+                            else {
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
-                                        var errorMessage;
-                                        console.log(field);
-                                        if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
-                                            errorMessage = '* Action is Required';
-                                            $('#rv_assign_agent_status_error').text(errorMessage);
-                                            $('#shipment_remarks').css('margin-bottom', '17px');
-                                        }
-                                        
-                                        if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
-                                            errorMessage = '* Reason is Required';
-                                            $('#rv_assign_agent_sub_status_error').text(errorMessage);
-                                        }
-                                        
-                                        if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
-                                            if (checkbox == 1) {
-                                                errorMessage = '* Fake Status is Required';
-                                                $('#rv_assign_agent_fake_status_id_error').text(errorMessage);
-                                            }
-                                        }
-                                        
-                                        if (field === 'remarks' && $("#shipment_remarks").val() === "") {
-                                                errorMessage = '* Remarks is Required';
-                                                $('#shipment_remarks_error').text(errorMessage);
-                                        }
+                                    var errorMessage;
+                                    console.log(field);
+                                    if (field === 'rv_assign_agent_status_id' && $(
+                                            "#shipment_status").val() === "") {
+                                        errorMessage = '* Action is Required';
+                                        $('#rv_assign_agent_status_error').text(errorMessage);
+                                        $('#shipment_remarks').css('margin-bottom', '17px');
+                                    }
 
-                                        // toastr.error(errorMessage, 'Error!', {
-                                        //     positionClass: 'toast-top-center',
-                                        //     containerId: 'toast-top-center'
-                                        // });
+                                    if (field === 'rv_assign_agent_sub_status_id' && $(
+                                            "#shipment_reason").val() === "" && $(
+                                            "#shipment_status").is(':empty') === false) {
+                                        errorMessage = '* Reason is Required';
+                                        $('#rv_assign_agent_sub_status_error').text(errorMessage);
+                                    }
+
+                                    if (field === 'rv_fake_status_id' && $("#fake_status_id")
+                                    .val() === "") {
+                                        if (checkbox == 1) {
+                                            errorMessage = '* Fake Status is Required';
+                                            $('#rv_assign_agent_fake_status_id_error').text(
+                                                errorMessage);
+                                        }
+                                    }
+
+                                    if (field === 'remarks' && $("#shipment_remarks").val() ===
+                                        "") {
+                                        errorMessage = '* Remarks is Required';
+                                        $('#shipment_remarks_error').text(errorMessage);
+                                    }
+
+                                    // toastr.error(errorMessage, 'Error!', {
+                                    //     positionClass: 'toast-top-center',
+                                    //     containerId: 'toast-top-center'
+                                    // });
                                 });
 
                             }
