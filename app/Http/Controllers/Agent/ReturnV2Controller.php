@@ -116,7 +116,7 @@ class ReturnV2Controller extends Controller
                             $only_shipper = $only_shipper->first();
                             $only_shippers = explode(',', $only_shipper['text']);
                         }
-
+                        $shipments = '';
                         foreach ($sorted_agents as $key => $agent) {
                             // Check if excluded_shippers exists (1 && 1)
                             if (!empty($excluded_shippers)) {
@@ -135,52 +135,57 @@ class ReturnV2Controller extends Controller
                                     ->whereNotIn('user_id', $only_shippers)
                                     ->orderBy('id', 'ASC')
                                     ->get();
-                            }
-
-                            if($all_shipper_exists && !($excluded_shipper)->exists())
-                            {
-                                $shipments = [];
-                            }
-
-                            // check if shipments exist
-                            if (count($shipments)) {
-
-                                foreach ($shipments as $key => $shipment) {
-
-                                    # code...
-                                    // if agent shipment is open - assigned to any user who comes first
-                                    $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
-                                    if ($shipment_assigned_unassigned_agent->exists()) {
-                                        $shipment_assigned_unassigned_agent->first();
-                                        break 2;
-                                    }
-
-                                    // if agent shipment is assigned - assigned to same agent only - if close mistakely or in case of lost page
-
-                                    $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                                    if ($shipment_assigned_assigned_agent->exists()) {
-                                        $shipment_assigned_assigned_agent->first();
-                                        break 2;
-                                    }
-
-                                    // Shipment is found and already in working state or return is completed, new shipment will get to agent
-                                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                                    if ($find_shipment_assigned_agent) {
-                                        continue;
-                                    }
-
-                                    $data = [
-                                        'shipment_id' => $shipment->id,
-                                        'rv_state_id' => 1, //Assigned
-                                        'rv_assign_agent_status_id' => null,
-                                        'rv_assign_agent_sub_status_id' => null,
-                                    ];
-
-                                    // creating a new record
-                                    $this->rv_shipment_assign($data);
-
-                                    break 2;
                                 }
+
+                                if($all_shipper_exists && !($excluded_shipper)->exists())
+                                {
+                                    $shipments = [];
+                            }
+                            
+                            // check if shipments exist
+                            if($shipments){
+                                if (count($shipments)) {
+
+                                    foreach ($shipments as $key => $shipment) {
+
+                                        # code...
+                                        // if agent shipment is open - assigned to any user who comes first
+                                        $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
+                                        if ($shipment_assigned_unassigned_agent->exists()) {
+                                            $shipment_assigned_unassigned_agent->first();
+                                            break 2;
+                                        }
+
+                                        // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
+
+                                        $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
+                                        if ($shipment_assigned_assigned_agent->exists()) {
+                                            $shipment_assigned_assigned_agent->first();
+                                            break 2;
+                                        }
+
+                                        // Shipment is found and already in working state or return is completed, new shipment will get to agent
+                                        $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
+                                        if ($find_shipment_assigned_agent) {
+                                            continue;
+                                        }
+
+                                        $data = [
+                                            'shipment_id' => $shipment->id,
+                                            'rv_state_id' => 1, //Assigned
+                                            'rv_assign_agent_status_id' => null,
+                                            'rv_assign_agent_sub_status_id' => null,
+                                        ];
+
+                                        // creating a new record
+                                        $this->rv_shipment_assign($data);
+
+                                        break 2;
+                                    }
+                                }
+                            }
+                            else{
+                                return response()->json(['status' => 1]); //No Shipment Assigned
                             }
                         }
 
