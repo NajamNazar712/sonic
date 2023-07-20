@@ -47,6 +47,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\StationDepositNoteAdjustment;
 use App\Http\Models\Admin\StationDepositNoteLog;
 use App\Http\Models\Admin\StationDepositNoteSlip;
+use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\Admin\Vigilance\VigilanceVerification;
 use App\Http\Models\Admin\Vigilance\VigilanceVerifiedShipment;
 use App\Http\Models\BanksList;
@@ -100,6 +101,7 @@ use App\Jobs\ProcessAgentCallMonitoring;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
 use App\Jobs\ProcessOneLinkExpireDeliveryNote;
 use App\Jobs\ProcessOnelinkRemoveDeliveryNoteShipment;
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\Jobs\RCPSmsToConsignee;
 use App\Jobs\CountFintechCharges;
 use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
@@ -1455,6 +1457,11 @@ class DeliveryController extends Controller
                     if ($count == 0) {
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
                         dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+
+                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                        if(count($unique_codes) > 0){
+                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                        }
                     } else {
                         dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
 
@@ -1479,6 +1486,12 @@ class DeliveryController extends Controller
                         DeliveryNote::where('id', $delivery_note)->update(['shipments_count' => 0, 'total_cod_amount' => $cod, 'status' => 4]);
 
                         dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note));
+
+                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                        if(count($unique_codes) > 0){
+                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                        }
+
                     } else {
                         dispatch(new ProcessOnelinkRemoveDeliveryNoteShipment($delivery_note, $request->shipment_id));
 
@@ -2588,6 +2601,12 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
 
             dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+
+            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+            if(count($unique_codes) > 0){
+                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+            }
+
             $response = array();
             if (count($invalid_reason_shipments) > 0) {
                 $response['invalid_shipments'] = $invalid_reason_shipments;
@@ -2843,6 +2862,11 @@ class DeliveryController extends Controller
             $delivery_note_data->save();
 
             dispatch(new ProcessOneLinkExpireDeliveryNote($delivery_note_id));
+
+            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+            if(count($unique_codes) > 0){
+                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+            }
 
             if (count($invalid_reason_shipments) > 0) {
                 $invalid_shipments = implode(", ", $invalid_reason_shipments);

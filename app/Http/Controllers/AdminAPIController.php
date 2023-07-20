@@ -232,7 +232,6 @@ class AdminAPIController extends Controller
         if ($reporting_locations->exists()) {
             $reporting_locations = $reporting_locations->get();
             foreach ($reporting_locations as $reporting_location) {
-                $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
                 $origin = $latitude . ',' . $longitude;
                 $distance = $this->distance($origin, $destination);
@@ -514,7 +513,6 @@ class AdminAPIController extends Controller
                 ->where('e.id', $employee_id);
             if ($reporting_location->exists()) {
                 $reporting_location = $reporting_location->first();
-                $reporting_location->radius;
                 $destination = $reporting_location->lat . ',' . $reporting_location->long;
                 $origin = $request->latitude . ',' . $request->longitude;
                 $distance = $this->distance($origin, $destination);
@@ -10764,6 +10762,7 @@ class AdminAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+            $admin_id = Auth::id();
             $tracking = $request->tracking;
             $shipment = Shipment::where('tracking_number', $tracking);
             if ($shipment->exists()) {
@@ -12595,10 +12594,10 @@ class AdminAPIController extends Controller
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
                             ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
-                            $shipment_mtable = Shipment::find($shipment->shipment_id);
+                            $shipment_table = Shipment::find($shipment->shipment_id);
                             $shipment_table->shipper_status_id = 49;
                             $shipment_table->consignee_status_id = 49;
-                            $shipment_table->update();
+                            $shipment_table->save();
 
                             MisroutedHistory::create([
                                 'shipment_id' => $shipment_table->id,

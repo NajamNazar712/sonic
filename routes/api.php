@@ -95,6 +95,8 @@ Route::name('api.')->group(function () {
 
         Route::post('payments', 'APIController@payments')->name('payments');
 
+        Route::get('ideas_payments', 'APIController@ideas_payments')->name('ideas_payments');
+
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 

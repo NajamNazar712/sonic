@@ -11,6 +11,7 @@ use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\Admin\RcpAssignedShipment;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -90,6 +91,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\DocBlock\Tags\Uses;
 use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
@@ -7544,7 +7546,90 @@ class APIController extends Controller
 
         }
     }
-    
+
+    public function ideas_payments(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $detail = array();
+
+            foreach ($shipments as $shipment) {
+
+                $tracking_no = $shipment->tracking_number;
+
+                $estimated = null;
+                $estimated = (($shipment->weight_charges != null) ? $shipment->weight_charges : 0) + (($shipment->cash_handling_charges != null) ? $shipment->cash_handling_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->return_charges != null) ? $shipment->return_charges : 0) + (($shipment->replacement_charges != null) ? $shipment->replacement_charges : 0) + (($shipment->fuel_surcharge != null) ? $shipment->fuel_surcharge : 0) + (($shipment->try_and_buy_charges != null) ? $shipment->try_and_buy_charges : 0) + (($shipment->packaging_material_charges != null) ? $shipment->packaging_material_charges : 0) + (($shipment->intercept_charges != null) ? $shipment->intercept_charges : 0);
+
+                $pickup_address = Shipment::where('tracking_number',$tracking_no)->select('pickup_address_id');
+                $pickup_address = $pickup_address->first();
+                $city = UserShippingInfo::where('id',$pickup_address->pickup_address_id)->select('city_id')->first();
+                $origin_city = City::find($city->city_id);
+
+                $gst = $origin_city->zone->gst;
+
+                $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
+
+                $result = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
+                    ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
+                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at',
+                        'dps.payable as amount_paid', 'c.name as city_name',
+                        'sj.created_at as delivered_date', 'd.status as payment_status')
+                    ->where('shipments.id', $shipment->id)
+                    ->where('sj.shipper_status_id', 14);
+
+                if ($result->exists()) {
+                    $result = $result->first();
+
+                    $check_payment = DonePaymentShipment::where('shipment_id',$result->shipment_id);
+                    if ($check_payment->exists())
+                    {
+                        $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] = ($result->payment_status == 1) ? $result->amount_paid : 0;
+                        $detail[$tracking_no]['payment_date'] = ($result->payment_status == 1) ? $result->paid_at : '-';
+                    }
+                    else
+                    {
+                        $detail[$tracking_no]['payment_status'] =  "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] =  0;
+                        $detail[$tracking_no]['payment_date'] = '-';
+                    }
+
+                    $detail[$tracking_no]['parcel_weight'] = $shipment->actual_weight;
+                    $detail[$tracking_no]['city'] = $result->city_name;
+                    $detail[$tracking_no]['gst'] = ($gst) ? $gst : 0;
+                    $detail[$tracking_no]['delivery_charges'] = $estimated;
+                    $detail[$tracking_no]['delivery_date'] = $result->delivered_date;
+
+                    $detail[$tracking_no]['courier_name'] = 'Trax';
+
+                }
+            }
+
+            return response()->json(['status' => 0, 'payments' => $detail]);
+        }
+    }
+
+
     public function shipment_track_consignee_public(Request $request)
     {
         $rules = [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -9140,6 +9141,13 @@ RiderAPIController extends Controller
 
                             dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
+                            //fintech
+
+                            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                            if(count($unique_codes) > 0){
+                                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                            }
+
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -11515,6 +11523,11 @@ RiderAPIController extends Controller
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
                                         dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
+                                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                                        if(count($unique_codes) > 0){
+                                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                                        }
                                     }
 
 
