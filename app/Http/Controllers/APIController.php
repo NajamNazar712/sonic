@@ -11,6 +11,7 @@ use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\Admin\RcpAssignedShipment;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -90,6 +91,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\DocBlock\Tags\Uses;
 use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
@@ -7542,6 +7544,200 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
             }
 
+        }
+    }
+
+    public function ideas_payments(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $detail = array();
+
+            foreach ($shipments as $shipment) {
+
+                $tracking_no = $shipment->tracking_number;
+
+                $estimated = null;
+                $estimated = (($shipment->weight_charges != null) ? $shipment->weight_charges : 0) + (($shipment->cash_handling_charges != null) ? $shipment->cash_handling_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->return_charges != null) ? $shipment->return_charges : 0) + (($shipment->replacement_charges != null) ? $shipment->replacement_charges : 0) + (($shipment->fuel_surcharge != null) ? $shipment->fuel_surcharge : 0) + (($shipment->try_and_buy_charges != null) ? $shipment->try_and_buy_charges : 0) + (($shipment->packaging_material_charges != null) ? $shipment->packaging_material_charges : 0) + (($shipment->intercept_charges != null) ? $shipment->intercept_charges : 0);
+
+                $pickup_address = Shipment::where('tracking_number',$tracking_no)->select('pickup_address_id');
+                $pickup_address = $pickup_address->first();
+                $city = UserShippingInfo::where('id',$pickup_address->pickup_address_id)->select('city_id')->first();
+                $origin_city = City::find($city->city_id);
+
+                $gst = $origin_city->zone->gst;
+
+                $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
+
+                $result = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
+                    ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
+                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at',
+                        'dps.payable as amount_paid', 'c.name as city_name',
+                        'sj.created_at as delivered_date', 'd.status as payment_status')
+                    ->where('shipments.id', $shipment->id)
+                    ->where('sj.shipper_status_id', 14);
+
+                if ($result->exists()) {
+                    $result = $result->first();
+
+                    $check_payment = DonePaymentShipment::where('shipment_id',$result->shipment_id);
+                    if ($check_payment->exists())
+                    {
+                        $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] = ($result->payment_status == 1) ? $result->amount_paid : 0;
+                        $detail[$tracking_no]['payment_date'] = ($result->payment_status == 1) ? $result->paid_at : '-';
+                    }
+                    else
+                    {
+                        $detail[$tracking_no]['payment_status'] =  "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] =  0;
+                        $detail[$tracking_no]['payment_date'] = '-';
+                    }
+
+                    $detail[$tracking_no]['parcel_weight'] = $shipment->actual_weight;
+                    $detail[$tracking_no]['city'] = $result->city_name;
+                    $detail[$tracking_no]['gst'] = ($gst) ? $gst : 0;
+                    $detail[$tracking_no]['delivery_charges'] = $estimated;
+                    $detail[$tracking_no]['delivery_date'] = $result->delivered_date;
+
+                    $detail[$tracking_no]['courier_name'] = 'Trax';
+
+                }
+            }
+
+            return response()->json(['status' => 0, 'payments' => $detail]);
+        }
+    }
+
+    public function shipment_track_consignee_public(Request $request)
+    {
+        $rules = [
+            'tracking_number' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $tracking_numbers = explode(',', $request->tracking_number);
+
+            $tracking = array();
+            $invalid_tracking = array();
+            $error_exist = 0;
+            $invalid_length = 0;
+
+            foreach ($tracking_numbers as $tracking_number) {
+                
+                $tracking_length = strlen($tracking_number);
+
+                if ($tracking_length >=10 && $tracking_length <=20) {
+ 
+                    $shipment = Shipment::where('tracking_number', $tracking_number);
+                    
+                    if ($shipment->exists()) {
+
+                        $shipment = $shipment->first();
+                    
+                        if ($shipment->user->blacklist == 0) {
+                            $details = array();
+                            
+                            $details['tracking_number'] = $tracking_number;
+                            
+                            $shipper = $shipment->user;
+                            $details['shipper']['name'] = $shipper->name;
+
+                            $pickup = $shipment->pickup_address;
+
+                            $details['pickup']['origin'] = $pickup->city->name;
+
+                            $details['consignee']['name'] = $shipment->consignee_name;
+                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                            $details['consignee']['destination'] = $shipment->consignee_city->name;
+                            $details['consignee']['address'] = $shipment->consignee_address;
+
+                            foreach ($shipment->items as $item) {
+                                $item_details = array();
+
+                                $item_details['order_id'] = $shipment->order_id;
+                                $item_details['product_type'] = $item->product->product_name;
+                                $item_details['description'] = $item->description;
+                                $item_details['quantity'] = $item->quantity;
+
+                                $details['order_information']['items'][] = $item_details;
+                            }
+
+                            $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $details['order_information']['amount'] = $shipment->amount;
+
+                            foreach ($shipment->shipment_journey as $journey) {
+                                if ($journey->consignee_status_id != null) {
+                                    if ($journey->verification) {
+                                        $journey_details = array();
+
+                                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                                        $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                                        $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                                        $details['tracking_history'][] = $journey_details;
+                                    }
+                                }
+                            }
+
+                            $tracking[$shipment->id] = $details;
+                        
+                        } else {
+                            $error_exist = 1;
+                            $invalid_tracking[] = $tracking_number;
+                        }
+                    }
+                    else{
+                        $error_exist = 1;
+                        $invalid_tracking[] = $tracking_number;
+                    }
+                }
+                else{
+                    $invalid_length = 1;
+                    $invalid_tracking[] = $tracking_number;
+                }
+            }
+            
+            if(($error_exist == 1 || $invalid_length == 1) &&  count($tracking) > 0)
+            {
+                return response()->json(['status' => 2, 'message' => 'Error(s) in Input or Tracking Number must be between 10 and 20 Digits.', 'errors' => ['invalid_tracking_numbers' => $invalid_tracking], 'details' => $tracking]);
+            }
+            else if($error_exist == 0 && $invalid_length == 0 &&  count($tracking) > 0){
+                return response()->json(['status' => 1, 'message' => 'Tracking of Shipment(s) # ' . $request->tracking_number, 'details' => $tracking]);
+            }
+            else{
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => $invalid_tracking]]);
+            }
         }
     }
 }

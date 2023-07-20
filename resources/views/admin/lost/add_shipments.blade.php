@@ -12,14 +12,41 @@
                 @include('admin.inc.messages')
 
                 <form id="lost_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                    <div class="form-group">
-                        <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
-                    </div>
-
-                    <div class="form-group ml-1">
-                        <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                    <div class="row align-items-center justify-content-center">
+                        <div class="form-group">
+                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+    
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
+                        </div>
+                        
                     </div>
                 </form>
+                @if( session('role_id') == 1|| in_array(890, session('permissions')))
+                <form id="excel_upload_form" class="form-horizontal" method="POST"  novalidate="novalidate" enctype="multipart/form-data">
+                    
+
+                    <div class="row align-items-center justify-content-center">
+                        <div class="col">
+                            <div class="form-group mb-0">
+                                <input type="file" name="excel" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB)." id="excel">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <div class="form-group pt-2 text-left">
+                                <button type="submit" name="upload" class="btn btn-primary" value="upload">Upload</button>
+                            </div>
+                        </div>
+
+                        <div class="col ml-auto">
+                            <div class="form-group text-right">
+                                <a href="{{ asset('file/Bulk Lost Shipments Template.xlsx') }}?v=14_07_2023" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+               @endif
 
                 <form id="update_lost_form" action="{{route('admin.delivery.lost.add.shipments.store')}}" class="form-horizontal" method="POST">
                     {{ csrf_field() }}
@@ -56,13 +83,42 @@
     </div>
 
 
+    <div class="modal fade" id="excel_upload_error" role="dialog" aria-labelledby="excel_upload_error_title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="rider_information_title">Error In Excel File</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-
+<style>
+    .error-text {
+    color: red;
+}
+label.error {
+    display: block;
+    margin-top: 0;
+    padding-top: 0;
+}
+</style>
 @endsection
 
 @section('js')
@@ -178,10 +234,140 @@
                 }
             });
 
-            // function validateEmail(email) {
-            //     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            //     return re.test(email);
-            // }
+            $('#excel_upload_form').validate({
+            errorClass: 'danger',
+            successClass: 'success', 
+           
+            
+            errorPlacement: function(error, element) {
+                error.addClass('w-100 mt-0').appendTo(element.parents('form'));
+            },
+            
+            submitHandler: function(form) {
+                // Disable the submit button to prevent multiple submissions
+                
+                $('#excel_upload_form button.upload').prop('disabled', true);
+
+                // Get the file input element and selected file
+                var fileInput = $(form).find('#excel')[0];
+                var file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
+                
+                // Create a new FormData object
+                var formData = new FormData();
+                formData.append('excel', file);
+                console.log(shipment_ids);
+                // Make the AJAX request
+                $.ajax({
+                    url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
+                    method: 'POST',
+                    data: formData,
+                    processData: false, // Prevent automatic processing of data
+                    contentType: false, // Prevent automatic content-type header
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    },
+                    success: function(data) {
+                        
+                        if (data.status == 1) {
+                                UnblockPagePermanently();
+                                var shipmentData = data.details;
+                                var shipmentAdded = false;
+                                var shipmentIDs = Object.keys(shipmentData);
+                                var shipment;
+                                var alreadyAddedShipments = [];
+                                id = data.details;
+                               $.each(shipmentIDs, function (index, id) {
+                                    // $.each(shipmentData, function(id, shipment2){
+                                        var index = $.inArray(id, shipment_ids);
+                                        shipment = shipmentData[id];
+                                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(shipment.tracking_number)) === -1) {
+                                            console.log(shipment.tracking_number);
+                                            var rowNo = table.rows().count();
+       
+                                           var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
+                                           table.row.add([
+                                           rowNo + 1,
+                                           shipment.tracking_number,
+                                           shipment.shipper_name,
+                                           shipment.origin,
+                                           shipment.destination,
+                                           shipment.hub,
+                                           shipment.amount,
+                                           shipment.remarks,
+                                           shipment.mode,
+                                           shipment.service_type,
+                                           action
+                                       ]).node().id = id;
+       
+                                        table.draw(false);
+                                        scan_sound(1);
+                                        table.order([0, 'desc']).draw();
+
+                                        shipment_ids.push(id);
+                                        shipmentAdded = true;
+
+                                        toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
+                                    }
+                                    else {
+                                        alreadyAddedShipments.push(shipment.tracking_number);
+                                    }
+                                });
+
+                               var text = '<div class="col"><table class="table table-sm table-borderless mb-0">';
+                                text += '<thead><th>S No.</th><th>Tracking Number</th><th>Error</th></thead>';
+                                text += '<tbody>';
+
+                               var error_check = false;
+                               var serial = 0;
+                               if(data.error_count > 0)
+                                {
+                                    error_check = true;
+                                    $.each(data.error, function(key, value) {
+                                        serial++;
+                                        text += '<tbody><td>' + serial + '</td><td>' + value.tracking_number + '</td><td><span class="error-text">' + value.error_msg + '</span></td>';
+                                    });
+                                }
+
+                               if(alreadyAddedShipments.count > 0){
+                                   error_check = true;
+                                   $.each(alreadyAddedShipments, function(key, value) {
+                                       serial++;
+                                       text += '<tbody><td>' + serial + '</td><td>' + value + '</td><td><span class="error-text">Already Scanned</span></td>';
+                                   });
+                               }
+
+                                text += '</tbody></table></div>';
+
+                               if(error_check === true){
+                                   $("#excel_upload_error").modal("show");
+
+                                   $("#excel_upload_error .modal-body").html(text);
+                               }
+                            }
+                            else
+                            {
+                                var errorMessages = data.error;
+                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
+                            }
+
+                        $('#lost_shipment_form button.add').prop('disabled', false);
+
+                        $('#update_lost_form_submit').prop('disabled', false);
+                        $("#excel").val("");
+                    },
+                    error: function(xhr, status, error) {
+                        
+                    },
+                    complete: function() {
+                        // Enable the submit button after request completes
+                        $('#excel_upload_form button.upload').prop('disabled', false);
+                    }
+                });
+
+                return false;
+            }
+        });
+
 
             $('#update_lost_form').validate({
                 errorClass: 'danger',

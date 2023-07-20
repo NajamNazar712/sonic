@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddIndexToRiderIdInShipmentsJourneyTable extends Migration
+class CreateShipmentScanningJourneyViasTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,11 @@ class AddIndexToRiderIdInShipmentsJourneyTable extends Migration
      */
     public function up()
     {
-//        Schema::table('shipments_journey', function (Blueprint $table) {
-//            $table->index('rider_id');
-//        });
+        Schema::create('shipment_scanning_journey_vias', function (Blueprint $table) {
+            $table->increments('id');
+            $table->string('name');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -25,8 +27,6 @@ class AddIndexToRiderIdInShipmentsJourneyTable extends Migration
      */
     public function down()
     {
-        Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->dropIndex(['rider_id']);
-        });
+        Schema::dropIfExists('shipment_scanning_journey_vias');
     }
 }
