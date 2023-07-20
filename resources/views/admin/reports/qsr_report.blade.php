@@ -116,7 +116,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status From</span>
                             </span>
                             </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
@@ -126,12 +126,36 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status To</span>
                             </span>
                             </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
+                    {{--todo new--}}
+                    <div class="col-4 ">
+                        {{--                        <label>Arrival Date From</label>--}}
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="">Arrival Date From</span>
+                            </span>
+                            </div>
+                            <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        {{--                        <label>Arrival Date To</label>--}}
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="">Arrival Date To</span>
+                            </span>
+                            </div>
+                            <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To">
+                        </div>
+                    </div>
+                    {{--todo new end--}}
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -299,6 +323,7 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -335,6 +360,80 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+
+            var booking_from_date = $('#from_date1').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#to_date1').pickadate('picker').set('min', $('#from_date1').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var booking_to_date = $('#to_date1').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#from_date1').pickadate('picker').set('max', $('#to_date1').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#from_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+            $('#to_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+
+            // $('#from_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+            // $('#to_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -482,6 +581,10 @@
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
+                        d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
+                        // d.requested_from_date = $('#from_date1').val();
+                        // d.requested_to_date = $('#to_date1').val();
                         d.search_types = $('#search_types').val();
                         d.search_concerned_hub = $('#search_concerned_hub').val();
                     }

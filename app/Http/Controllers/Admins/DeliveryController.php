@@ -1937,7 +1937,7 @@ class DeliveryController extends Controller
                 $where = array(7, 8, 9, 10, 12, 14, 15, 18, 56);
                 $statuses = ShipmentStatus::whereIn('id', $where)->select('id', 'name')->where('status', 1)->get();
                 $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
-
+//dd($statuses);
                 return view('admin.delivery.receive.add_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->pending_status, 'shipment_update' => $shipment_update, 'undelivered_printed' => $undelivered_printed, 'shipment_statuses' => $statuses, 'percentage' => $percentage, 'tomorrow' => $tomorrow, 'next3days' => $next3days, 'dayAfterTomorrow' => $dayAfterTomorrow, 'days15FromNow' => $days15fromNow, 'require_password' => $require_password, 'consignee_refused_reasons' => $consignee_refused_reasons]);
             } else {
                 return redirect(route('admin.delivery.receive.index'));
@@ -2258,6 +2258,23 @@ class DeliveryController extends Controller
         $status_id = $request->status;
 
         $statuses = ShipmentStatus::find($status_id)->reasons()->select('id', 'name')->where('id','!=',23)->orderBy('name')->get();
+
+        if ($status_id == 14)
+        {
+            $delivery_note_id = $request->delivery_note_id;
+            $rider = DeliveryNote::where('id',$delivery_note_id)->select('rider_id');
+            if ($rider->exists())
+            {
+                $rider = $rider->first();
+                $rider_type = Rider::where('id',$rider->rider_id)->select('operation_rider_id');
+                $rider_type = $rider_type->first();
+                if ($rider_type->operation_rider_id == 2)
+                {
+                    return ['status' => 2, 'error' => 'Cannot mark shipment(s) as delivered because of hold in operation delivery note !'];
+                }
+            }
+        }
+
 
         if (!$statuses->isEmpty()) {
             return response()->json(['status' => 0, 'reasons' => $statuses]);
@@ -9165,7 +9182,9 @@ class DeliveryController extends Controller
     public function rider_request_note_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 610);
-        return view('admin.delivery.rider_request.index');
+        $riders = Rider::select('id', 'name', 'trax_id')->where('status',1)->where('blacklist',0)->get();
+
+        return view('admin.delivery.rider_request.index')->with(['riders' => $riders]);
     }
 
     public function rider_request_note_list(Request $request)
@@ -9182,14 +9201,33 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'r.id')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z', 'c.zone_id', '=', 'z.id')
+            ->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
+            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
             ->where('rider_delivery_note_requests.status', 0)
-            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount', 'rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_delivery_note_requests.updated_at as updated_at', 'ca.name as area')
+            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount', 'rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_delivery_note_requests.updated_at as updated_at', 'ca.name as area', 'r.trax_id as rider_trax_id')
             ->orderBy('rider_delivery_note_requests.id', 'DESC');
 
 
         if (session('role_id') != 1) {
-            $delivery_note_requests = $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', session('hubs'));
+            $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', session('hubs'));
+        }
+
+        if($rider_trax_id = $request->get('rider_trax_id'))
+        {
+            $delivery_note_requests->where('rider_delivery_note_requests.rider_id',$rider_trax_id);
+        }
+
+        if($consignee_phone = $request->get('consignee_phone'))
+        {
+            $delivery_note_requests->where(function ($query) use ($consignee_phone) {
+                $query->where('s.consignee_phone_number_1', $consignee_phone)
+                ->orWhere('s.consignee_phone_number_2', $consignee_phone);
+            });
+        }
+
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $delivery_note_requests->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
         $datatables = Datatables::of($delivery_note_requests)

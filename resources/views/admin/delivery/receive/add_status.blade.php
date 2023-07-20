@@ -619,6 +619,7 @@
                     $('#password_submit').attr('disabled', false);
                 }
             });
+
             $('#password_submit').on('click', function () {
                var pass = $('#password_input').val();
                 var delivery_note = $('#delivery_note').val();
@@ -1180,13 +1181,15 @@
 
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
-                console.log(statusSelection,status);
+                console.log(statusSelection,status,$('#delivery_note').val());
+
                 var all_reason = $('#select_all_reason');
                 $.ajax({
                     url:'{!! route('admin.delivery.receive.reason_all') !!}',
                     type:'POST',
                     dataType:'json',
                     data: {
+                        'delivery_note_id':$('#delivery_note').val(),
                         'status':status,
                         '_token': '{{ csrf_token() }}'
                     }
@@ -1202,7 +1205,13 @@
                             }
                         });
                         all_reason.val('').trigger('change');
-                    }else{
+                    }
+                    else if(data.status == 2)
+                    {
+                        $('#select_all_status').val('').trigger('change');
+                        toastr.error(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                    else{
                         all_reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
