@@ -8469,23 +8469,67 @@ class GlobalSettingsController extends Controller
     public function sms_notification_return_delivered_to_shipper_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 655);
-        $users = User::where('status', '=', 3)->get();
-        $settings = GlobalSettings::where('type', 'returned_shipment_notification')->first();
 
-        if (!isset($settings)) {
-            return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['users' => $users]);
-        } else {
-            $user = explode(',', $settings->text);
-            $selected_roles = User::where('status', 3)->whereIn('id', $user)->pluck('id')->toArray();
-            return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['users' => $users, 'selected_roles' => $selected_roles]);
+        $excluded_shippers = array();
+        $only_shippers = array();
+        $all_shippers = false;
+
+        $bypass_all_shippers = GlobalSettings::where('type', 'returned_shipment_notification');
+        if ($bypass_all_shippers->exists()) {
+            $bypass_all_shippers = $bypass_all_shippers->first();
+            $all_shippers = $bypass_all_shippers->setting_value;
         }
+
+        $bypass_only_shipper = GlobalSettings::where('type', 'returned_shipment_notification');
+
+        if ($bypass_only_shipper->exists()) {
+            $bypass_only_shipper = $bypass_only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $bypass_only_shipper->text));
+        }
+
+        $bypass_excluded_shippers = GlobalSettings::where('type', 'returned_shipment_notification');
+
+        if ($bypass_excluded_shippers->exists()) {
+            $bypass_excluded_shippers = $bypass_excluded_shippers->first();
+            $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers]);
     }
 
     public function sms_notification_return_delivered_to_shipper_update(Request $request)
     {
+        if ($request->has('all_shipper_toggle'))
+        {
+            if ($request->all_shipper_toggle == 'on')
+            {
+                $users = $request->excluded_users;
+                if (is_array($users)) {
+                    $users = implode(',', $users);
+                }
 
-        if ($request->has('users')) {
-            $users = $request->users;
+                $settings = GlobalSettings::where('type', 'returned_shipment_notification');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $settings->text = $users;
+                    $settings->setting_value = 1;
+                    $settings->save();
+                }
+                else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'returned_shipment_notification';
+                    $settings->text = $users;
+                    $settings->setting_value = 1;
+                    $settings->save();
+                }
+            }
+        }
+        else if ($request->has('only_users'))
+        {
+            $users = $request->only_users;
             if (is_array($users)) {
                 $users = implode(',', $users);
             }
@@ -8494,15 +8538,17 @@ class GlobalSettingsController extends Controller
 
             if ($settings->exists()) {
                 $settings = $settings->first();
-            } else {
+                $settings->text = $users;
+                $settings->setting_value = 0;
+                $settings->save();
+            }
+            else {
                 $settings = new GlobalSettings();
                 $settings->type = 'returned_shipment_notification';
+                $settings->text = $users;
                 $settings->setting_value = 0;
+                $settings->save();
             }
-
-            $settings->text = $users;
-            $settings->save();
-
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');

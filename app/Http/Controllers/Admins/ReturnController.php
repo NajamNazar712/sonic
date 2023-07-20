@@ -3308,7 +3308,7 @@ class ReturnController extends Controller
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
-                        //for ticker start
+                        //for return ticker start
                         $return_delivered_to_shipper_ticker = ReturnDeliveredToShipperTicker::where(['return_note_id'=>$request->return_note_id,'user_id' => $parcel->user_id,'shipment_id' => $parcel->id,'status' => 0]);
                         if(!$return_delivered_to_shipper_ticker->exists()){
                             $return_delivered_ticker = new ReturnDeliveredToShipperTicker();
@@ -3318,17 +3318,18 @@ class ReturnController extends Controller
                             $return_delivered_ticker->status = 0;
                             $return_delivered_ticker->save();
                         }
-                        //for ticker end
+                        //for return ticker end
 
-                        //for sms start
+                        //for return sms start
                         $users = GlobalSettings::where('type', 'returned_shipment_notification');
-                        if($users->exists()) {
+                        if ($users->exists()) {
                             $users = $users->first();
                             $current_users = $users->text;
                             $c_user = explode(',', $current_users);
-                            if(in_array($parcel->user_id,$c_user)){
-                                $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id'=>$request->return_note_id,'user_id' => $parcel->user_id,'shipment_id' => $parcel->id,'status' => 0]);
-                                if(!$return_delivered_to_shipper->exists()){
+                            $all_users_or_not = $users->setting_value;
+                            if ($all_users_or_not == 1 && empty($users->text)) {
+                                $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id' => $request->return_note_id, 'user_id' => $parcel->user_id, 'shipment_id' => $parcel->id, 'status' => 0]);
+                                if (!$return_delivered_to_shipper->exists()) {
                                     $return_delivered = new ReturnDeliveredToShipperSms();
                                     $return_delivered->return_note_id = $request->return_note_id;
                                     $return_delivered->user_id = $parcel->user_id;
@@ -3337,8 +3338,36 @@ class ReturnController extends Controller
                                     $return_delivered->save();
                                 }
                             }
+                            else if ($all_users_or_not == 1 && !empty($users->text)) {
+                                if (!in_array($parcel->user_id, $c_user)) {
+
+                                    $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id' => $request->return_note_id, 'user_id' => $parcel->user_id, 'shipment_id' => $parcel->id, 'status' => 0]);
+                                    if (!$return_delivered_to_shipper->exists()) {
+                                        $return_delivered = new ReturnDeliveredToShipperSms();
+                                        $return_delivered->return_note_id = $request->return_note_id;
+                                        $return_delivered->user_id = $parcel->user_id;
+                                        $return_delivered->shipment_id = $parcel->id;
+                                        $return_delivered->status = 0;
+                                        $return_delivered->save();
+                                    }
+                                }
+                            }
+                            else if ($all_users_or_not == 0) {
+                                if (in_array($parcel->user_id, $c_user)) {
+
+                                    $return_delivered_to_shipper = ReturnDeliveredToShipperSms::where(['return_note_id' => $request->return_note_id, 'user_id' => $parcel->user_id, 'shipment_id' => $parcel->id, 'status' => 0]);
+                                    if (!$return_delivered_to_shipper->exists()) {
+                                        $return_delivered = new ReturnDeliveredToShipperSms();
+                                        $return_delivered->return_note_id = $request->return_note_id;
+                                        $return_delivered->user_id = $parcel->user_id;
+                                        $return_delivered->shipment_id = $parcel->id;
+                                        $return_delivered->status = 0;
+                                        $return_delivered->save();
+                                    }
+                                }
+                            }
                         }
-                        //for sms end
+                        //for return sms end
 
 
 //                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
