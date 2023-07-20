@@ -81,60 +81,27 @@
             </div>
         </div>
     </div>
-<div class="modal fade text-left" id="tracking_error" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tracking_error"
-    aria-hidden="true">
-   <div class="modal-dialog modal-md" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">ERROR</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body text-center">
-               <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-8">
-                        <span class="error_msg"></span>
-                    </div>
-                    </div>
-                    <div class="row justify-content-center mt-4">
-                        <div class="col-6">
-                            <button type="button" class="btn btn-primary btn-block" id="okButton">OK</button>
-                        </div>
-                    </div>
+
+
+    <div class="modal fade" id="excel_upload_error" role="dialog" aria-labelledby="excel_upload_error_title" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="rider_information_title">Error In Excel File</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
-       </div>
-   </div>
-</div>
-<div class="modal fade text-left" id="tracking_alert" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="tracking_error"
-    aria-hidden="true">
-   <div class="modal-dialog modal-md" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Alert</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body text-center">
-               <div class="container">
-                <div class="row justify-content-center">
-                    <div class="col-8">
-                        <span class="alert_msg"></span>
-                    </div>
-                    </div>
-                    <div class="row justify-content-center mt-4">
-                        <div class="col-6">
-                            <button type="button" class="btn btn-primary btn-block" id="okAlert">OK</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-       </div>
-   </div>
-</div>
+        </div>
+    </div>
 
 @endsection
 
@@ -267,86 +234,6 @@ label.error {
                 }
             });
 
-            // function validateEmail(email) {
-            //     var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            //     return re.test(email);
-            // }
-            
-            // $('#excel_upload_form').validate({
-            //     errorClass: 'danger',
-            //     successClass: 'success',
-            //     errorPlacement: function(error, element) {
-            //         error.addClass('w-100').appendTo(element.parents('form'));
-            //     },
-            //     submitHandler: function(form) {
-            //         $('#excel_upload_form button.upload').prop('disabled', true);
-                    
-            //         var fileInput = $(form).find('#excel').val();
-                    
-            //         var file = fileInput.files && fileInput.files.length > 0 ? fileInput.files[0] : null;
-            //         var tracking_number = file ? file.name : "";
-            //         alert(tracking_number);
-            //         // var file = fileInput.files[0];
-            //         // alert(file);
-            //         // var tracking_number = file ? file.name : "";
-                   
-
-            //         // var fileInput = document.getElementById('tracking_file');
-                    
-            //         form.reset();
-            //         if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-            //             blockPagePermanently();
-            //             $.ajax({
-            //                 url: '{!! route('admin.delivery.lost.add.bulk.lost') !!}',
-            //                 method: 'POST',
-            //                 data: {
-            //                     'tracking_number': tracking_number,
-            //                     '_token': '{{ csrf_token() }}'
-            //                 }
-            //             })
-            //                 .done(function(data) {
-            //                     if (data.status == 1) {
-            //                         UnblockPagePermanently();
-            //                         id = data.details.id;
-
-            //                         var index = $.inArray(id, shipment_ids);
-
-            //                         if (index === -1) {
-            //                             var rowNo = table.rows().count();
-
-            //                             var action = '<a href="javascript:void(0);" class="btn btn-icon btn-danger removerow"><i class="la la-close"></i></a>';
-            //                             table.row.add([rowNo + 1, data.details.tracking_number, data.details.shipper_name, data.details.origin, data.details.destination, data.details.hub, data.details.amount, data.details.remarks,data.details.mode,data.details.service_type, action]).node().id = data.details.id;
-            //                             table.draw(false);
-            //                             scan_sound(1);
-            //                             table.order([0, 'desc']).draw();
-
-            //                             shipment_ids.push(data.details.id);
-
-            //                             $('#lost_shipment_form button.add').prop('disabled', false);
-
-            //                             $('#update_lost_form_submit').prop('disabled', false);
-
-            //                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-            //                         }
-            //                     }
-            //                     else {
-            //                         UnblockPagePermanently();
-            //                         $('#lost_shipment_form button.add').prop('disabled', false);
-            //                         scan_sound(2);
-            //                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //                     }
-            //                 });
-            //         }
-            //         else {
-            //             $('#lost_shipment_form button.add').prop('disabled', false);
-            //             scan_sound(2);
-            //             toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-            //         }
-
-            //         return false;
-            //     }
-            // });
-            var shipment_ids = [];  
             $('#excel_upload_form').validate({
             errorClass: 'danger',
             successClass: 'success', 
@@ -387,9 +274,7 @@ label.error {
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
                                 var shipment;
-                                console.log(shipmentIDs); 
                                 id = data.details;
-                                var alreadyAddedShipments = []; 
                                $.each(shipmentIDs, function (index, id) {
                                     // $.each(shipmentData, function(id, shipment2){
                                         var index = $.inArray(id, shipment_ids);
@@ -418,193 +303,57 @@ label.error {
                                         table.order([0, 'desc']).draw();
 
                                         shipment_ids.push(id);
-                                        shipmentAdded = true; 
-    
-                                        $('#lost_shipment_form button.add').prop('disabled', false);
-    
-                                        $('#update_lost_form_submit').prop('disabled', false);
-                                        $("#excel").val("");
+                                        shipmentAdded = true;
+
+                                        toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
                                         // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
                                     else {
-                                        alreadyAddedShipments.push(shipment.tracking_number); // Step 3: Add the tracking number to the array
-                                        $("#tracking_alert").modal("show");
-
-                                    var errorMessage = '<span class="error-text">Shipments already exist</span><br>';
-                                    $.each(alreadyAddedShipments, function (index, trackingNumber) {
-                                        errorMessage += 'Tracking Number: ' + trackingNumber + '<br>';
-                                    });
-                                    $(".alert_msg").html(errorMessage);
-
-                                    $("#okAlert").on("click", function() {
-                                        $("#tracking_alert").modal("hide");
-                                        $("#tracking_alert .alert_msg").empty();
-                                        uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when closing the modal
-                                    });
-
-                                        $('#tracking_alert').on('hidden.bs.modal', function(e) {
-                                            // Clear the content of the .error_msg element
-                                            $("#tracking_alert .alert_msg").empty();
-                                            uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when hiding the modal
-                                        });
+                                        alreadyAddedShipments.push(shipment.tracking_number);
                                     }
-                                    // else 
-                                    // {
-                                    //             //Add Modal 
-                                    //             alert(id);
-                                                
-                                    //         $("#tracking_alert").modal("show");
-                                    //         var uniqueTrackingNumbers = [];
-                                    //         var errorMessage = '<span class="error-text">Shipments already exists</span><br>';
-                                    //         // alert(shipment.tracking_number);
-                                    //         // $.each(shipmentIDs, function(key, value) {
-                                    //         //     // Check if the tracking number is not in the uniqueTrackingNumbers list
-                                    //         //     if (!uniqueTrackingNumbers.includes(shipment.tracking_number)) {
-                                    //             errorMessage += 'Tracking Number : ' + shipment.tracking_number + ':<br>';
-                                    //             // Add the tracking number to the uniqueTrackingNumbers list
-                                    //             // uniqueTrackingNumbers.push(shipment.tracking_number);
-                                    //         //     }
-                                    //         // });
-
-                                    //         $(".alert_msg").html(errorMessage);
-
-                                    //         $("#okButton").on("click", function() {
-                                    //             $("#tracking_alert").modal("hide");
-                                    //             $("#tracking_alert .alert_msg").empty();
-                                    //             uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when closing the modal
-                                    //         });
-
-                                    //         $('#tracking_alert').on('hidden.bs.modal', function(e) {
-                                    //             // Clear the content of the .error_msg element
-                                    //             $("#tracking_alert .alert_msg").empty();
-                                    //             uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when hiding the modal
-                                    //         });
-
-                                    //     // $('#lost_shipment_form button.add').prop('disabled', false);
-                                    //     // scan_sound(2);
-                                    //     // toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                                    // }
-                                    
-                                    // });
                                 });
-                                if (shipmentAdded) {
-                                    // Show toastr.success if any shipment was added successfully
-                                    toastr.success(data.success, 'Success!', { positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center' });
-                                } else {
-                                   
-                                    // Show toastr.error if no shipment was added
-                                    // alert(shipment.tracking_number);
-                                    // $('#lost_shipment_form button.add').prop('disabled', false);
-                                    // scan_sound(2);
-                                    // toastr.error('Shipment has been added already', 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
-                                }
+
+                               var text = '<div class="col"><table class="table table-sm table-borderless mb-0">';
+                                text += '<thead><th>S No.</th><th>Tracking Number</th><th>Error</th></thead>';
+                                text += '<tbody>';
+
+                               var error_check = false;
+                               var serial = 0;
                                if(data.error_count > 0)
                                 {
-                                    // $("#tracking_error").modal("show");
-                                    // var errorMessage = '<span class="error-text">Invalid Tracking Numbers</span><br>';
-                                    // $.each(data.error, function( key, value ) {
-                                    //     errorMessage += 'Tracking Number : ' + value.tracking_number + '<br>';
-                                    //     $(".error_msg").append(errorMessage);
-                                    // });
-                                    // $("#okButton").on("click", function() {
-                                    //     $("#tracking_error").modal("hide");
-                                    //     $("#tracking_error .error_msg").empty();
-                                    // });
-                                    
-                                    // $('#tracking_error').on('hidden.bs.modal', function (e) {
-                                    //     // Clear the content of the .error_msg element
-                                    //     $("#tracking_error .error_msg").empty();
-                                    // });
-
-                                    $("#tracking_error").modal("show");
-                                    var uniqueTrackingNumbers = [];
-                                    var errorMessage = '<span class="error-text">Invalid Tracking Numbers</span><br>';
-                                    
+                                    error_check = true;
                                     $.each(data.error, function(key, value) {
-                                        // Check if the tracking number is not in the uniqueTrackingNumbers list
-                                        if (!uniqueTrackingNumbers.includes(value.tracking_number)) {
-                                        errorMessage += 'Tracking Number : ' + value.tracking_number + '<br>';
-                                        // Add the tracking number to the uniqueTrackingNumbers list
-                                        uniqueTrackingNumbers.push(value.tracking_number);
-                                        }
+                                        serial++;
+                                        text += '<tbody><td>' + serial + '</td><td>' + value.tracking_number + '</td><td><span class="error-text">' + value.error_msg + '</span></td>';
                                     });
-
-                                $(".error_msg").html(errorMessage);
-
-                                $("#okButton").on("click", function() {
-                                    $("#tracking_error").modal("hide");
-                                    $("#tracking_error .error_msg").empty();
-                                    uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when closing the modal
-                                });
-
-                                $('#tracking_error').on('hidden.bs.modal', function(e) {
-                                    // Clear the content of the .error_msg element
-                                    $("#tracking_error .error_msg").empty();
-                                    uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when hiding the modal
-                                });
                                 }
+
+                               if(alreadyAddedShipments.count > 0){
+                                   error_check = true;
+                                   $.each(alreadyAddedShipments, function(key, value) {
+                                       serial++;
+                                       text += '<tbody><td>' + serial + '</td><td>' + value + '</td><td><span class="error-text">Already Scanned</span></td>';
+                                   });
+                               }
+
+                                text += '</tbody></table></div>';
+
+                               if(error_check === true){
+                                   $("#excel_upload_error").modal("show");
+
+                                   $("#excel_upload_error .modal-body").html(text);
+                               }
                             }
-                            else if(data.status == 2)
+                            else
                             {
                                 var errorMessages = data.error;
                                 toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
                             }
-                            else if(data.status == 3)
-                            {
-                                var errorMessages = data.error;
-                                toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
-                            }
-                            else if(data.status == 4)
-                            {
-                                // var errorMessages = data.error;
-                                // toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
-                                const lostShipments = data.lost_shipments;
-                                // alert(lostShipments);
-                                $("#tracking_error").modal("show");
-                                    var uniqueTrackingNumbers = [];
-                                    var errorMessage = '<span class="error-text">Shipment already added to lost shipments!</span><br>';
-                                    
-                                    // $.each(data.error, function(key, value) {
-                                        // Check if the tracking number is not in the uniqueTrackingNumbers list
-                                        // if (!uniqueTrackingNumbers.includes(value.tracking_number)) {
-                                        // errorMessage += 'Tracking Number : ' + errorMessages + '<br>';
-                                        // Add the tracking number to the uniqueTrackingNumbers list
-                                        // uniqueTrackingNumbers.push(value.tracking_number);
-                                        // }
-                                    // });
-                                           
-                                    $.each(lostShipments, function(index, tracking_number) {
-                                        errorMessage += 'Tracking Number : ' + tracking_number + '<br>';
-                                    });
 
-                                    $(".error_msg").html(errorMessage);
+                        $('#lost_shipment_form button.add').prop('disabled', false);
 
-                                    $("#okButton").on("click", function() {
-                                        $("#tracking_error").modal("hide");
-                                        $("#tracking_error .error_msg").empty();
-                                        // uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when closing the modal
-                                    });
-
-                                    $('#tracking_error').on('hidden.bs.modal', function(e) {
-                                        // Clear the content of the .error_msg element
-                                        $("#tracking_error .error_msg").empty();
-                                        // uniqueTrackingNumbers = []; // Clear the list of unique tracking numbers when hiding the modal
-                                    });
-                            
-                            }
-                            else{
-                                // Handle error response and display errors
-                                // var errorMessages = data.errors.join('\n');
-                                // toastr.error(errorMessages, 'Error!', { positionClass: 'toast-top-center', containerId: 'toast-top-center' });
-                                // // ...
-                            }
-                        // else {
-                        //     alert(data.error);
-                        //     UnblockPagePermanently();
-                        //     $('#excel_upload_form button.upload').prop('disabled', false);
-                        //     scan_sound(2);
-                        //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                        // }
+                        $('#update_lost_form_submit').prop('disabled', false);
+                        $("#excel").val("");
                     },
                     error: function(xhr, status, error) {
                         

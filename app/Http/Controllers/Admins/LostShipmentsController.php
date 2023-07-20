@@ -508,7 +508,6 @@ class LostShipmentsController extends Controller
             $spreadsheet = IOFactory::createReaderForFile($file);
             $spreadsheet->setReadDataOnly(true);
             $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
-            // dd($spreadsheet);
             $trackingNumbers = array();
 
             $header = ['Tracking Number'];
@@ -529,7 +528,6 @@ class LostShipmentsController extends Controller
                 if (!$header_correct) {
                     
                     return response()->json(['status' => 2, 'error' => 'Invalid Columns, Kindly follow the Template provided']);
-                    // return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
                 } else {
                     unset($spreadsheet[0]);
                 }
@@ -558,13 +556,9 @@ class LostShipmentsController extends Controller
                 
                 unset($spreadsheet);
                 $errors = array();
-                $error_count = 0;
-                $tracking_ids = array();
-                $tracking_id_row = array();
                     
                 foreach ($rows as $key => $row) {
                     $row_id = $key + 2;
-                    // dd($row['tracking_number']);
                     $validate = Validator::make($row, $rules, $messages);
                     
                     $validate->setAttributeNames($names);
@@ -574,126 +568,91 @@ class LostShipmentsController extends Controller
                         $errors['Row #' . $row_id] = $validate->errors()->all();
                     }
                 }
-                //if (empty($errors)) {
-                    $tracking_numbers = array();
-                    $shipment_ids = array();
-                    $check = array();
-                    $data = array(); 
-                    $error = array();
-                    $lost_shipments = array();
-                    $found_lost_shipment = false; 
+                $tracking_numbers = array();
+                $data = array();
+                $error = array();
 
-                    foreach ($rows as $key => $row) {
-                        $row_id = $key + 2;
-                        $tracking = trim($row['tracking_number']);
-                        $shipment = Shipment::where('tracking_number', $tracking)
-                        ->whereNotIn('shipper_status_id', $status_array)->first();
-                        // dd($shipment);
-                        if ($shipment) {
-                            $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
-                            if(!$dispute_check){
-                                return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $tracking = trim($row['tracking_number']);
+                    $shipment = Shipment::where('tracking_number', $tracking)
+                    ->whereNotIn('shipper_status_id', $status_array)->first();
+                    if ($shipment) {
+                        $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
+                        if(!$dispute_check){
+                            $error[$row_id]['tracking_number'] = $tracking;
+                            $error[$row_id]['error_msg'] = "Shipment is in Dispute! For further assistance, please contact QA (CX)";
+
+                            continue;
+                        }
+                        $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
+                        if($journey){
+                            $verification = $journey->verification;
+                            if($verification == 0){
+                                $error[$row_id]['tracking_number'] = $tracking;
+                                $error[$row_id]['error_msg'] = "Shipment is unverified!";
+
+                                continue;
                             }
-                            $journey=  ShipmentsJourney::where('shipment_id',$shipment->id)->latest('id')->first();
-                            if($journey){
-                                $verification = $journey->verification;
-                                if($verification == 0){
-                                return response()->json(['status' => 0, 'error' => 'Shipment is unverified!']);
-                                }
-                            }
-                            if($shipment->shipper_status_id == 5){
-                                return response()->json(['status' => 0, 'error' => 'Shipment is Out for Delivery !']);
-                            } 
-                            if($shipment->shipper_status_id != 18) {
-                                // dd($shipment->shipper_status_id);
-                                $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment->id);
-                                if($cargo_manifest_bag_shipments->exists()){
-                                    $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
-                                    $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
-                                    if($bag){
-                                        if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
-                                          
-                                            return response()->json(['status' => 4, 'error' => 'Shipment already marked lost for the current bag']);
-                                        }
+                        }
+                        if($shipment->shipper_status_id == 5){
+                            $error[$row_id]['tracking_number'] = $tracking;
+                            $error[$row_id]['error_msg'] = "Shipment is Out for Delivery!";
+
+                            continue;
+                        }
+                        if($shipment->shipper_status_id != 18) {
+                            $cargo_manifest_bag_shipments = CargoManifestBagShipments::where('shipment_id', $shipment->id);
+                            if($cargo_manifest_bag_shipments->exists()){
+                                $cargo_manifest_bag_shipments = $cargo_manifest_bag_shipments->latest()->first();
+                                $bag = CargoManifestBag::find($cargo_manifest_bag_shipments->cargo_manifest_bag_id);
+                                if($bag){
+                                    if(ManifestBagLostShipment::where('bag_id',$bag->id)->where('shipment_id',$shipment->id)->exists()){
+                                        $error[$row_id]['tracking_number'] = $tracking;
+                                        $error[$row_id]['error_msg'] = "Shipment already marked lost for the current bag!";
+
+                                        continue;
                                     }
                                 }
                             }
-                            else{
-                                $lost_shipments[] = $tracking;
-                                $found_lost_shipment = true;
-                                // $tracking_number =  $tracking_numbers;
-                                // dd($tracking_number);
-                                // return response()->json(['status' => 4, 'error' => $tracking_number]);
-                                // return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!']);
-                            }
-                            $data[$shipment->id]['id'] = $shipment->id;
-                            $data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
-                            $data[$shipment->id]['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
-                            $data[$shipment->id]['origin'] = $shipment->consignee_city->name;
-                            $data[$shipment->id]['destination'] = $shipment->pickup_address->city->name;
-                            $data[$shipment->id]['hub'] = $shipment->pickup_address->city->hub_city->name;
-                            $data[$shipment->id]['amount'] = number_format($shipment->amount);
-                            $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
-                            $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
-                            $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
-
-                            $tracking_numbers['Row #' . $row_id] = $tracking;
-                            ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
-                           
                         }
-                        else
-                        {   
+                        else{
                             $error[$row_id]['tracking_number'] = $tracking;
-                            $error[$row_id]['error_msg'] = "These Tracking Numbers are Invalid";
-                            
+                            $error[$row_id]['error_msg'] = "Shipment already added to lost shipments!";
+
+                            continue;
                         }
-                        // dd($data);
-                       
-                        
+                        $data[$shipment->id]['id'] = $shipment->id;
+                        $data[$shipment->id]['tracking_number'] = $shipment->tracking_number;
+                        $data[$shipment->id]['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
+                        $data[$shipment->id]['origin'] = $shipment->consignee_city->name;
+                        $data[$shipment->id]['destination'] = $shipment->pickup_address->city->name;
+                        $data[$shipment->id]['hub'] = $shipment->pickup_address->city->hub_city->name;
+                        $data[$shipment->id]['amount'] = number_format($shipment->amount);
+                        $data[$shipment->id]['mode'] = $shipment->shipping_mode->mode;
+                        $data[$shipment->id]['service_type'] = $shipment->booking_type->booking_type;
+                        $data[$shipment->id]['remarks'] = '<input class="form-control form-control-sm" name="remarks[' . $shipment->id. ']" placeholder="Enter Remarks">';
+
+                        $tracking_numbers['Row #' . $row_id] = $tracking;
+                        ShipmentScanningJourneyController::add($shipment->id, 11, 1, Auth::id(), null,null);
+
                     }
-                    // $error_count =  count($error);
-                    if ($found_lost_shipment) {
-                        // If any shipment is added to lost shipments, return both the error and the array of lost shipments' tracking numbers
-                        return response()->json(['status' => 4, 'error' => 'Shipment already added to lost shipments!', 'lost_shipments' => $lost_shipments]);
-                    } else {
-                        // If no shipment is added to lost shipments, return only the array of lost shipments' tracking numbers
-                        return response()->json(['status' => 1, 'details' => $data, 'error_count' => count($error), 'error' => $error]);
+                    else
+                    {
+                        $error[$row_id]['tracking_number'] = $tracking;
+                        $error[$row_id]['error_msg'] = "These Tracking Numbers are Invalid";
+
+                        continue;
                     }
-                    
-                    // return response()->json(['status' => 1, 'details' => $data ,'error_count' => $error_count , 'error' => $error]);
-                    // dd($data);
-                    // return redirect()->back()->with(['success' => 'Bulk Lost Update']);
-
-                // } 
-                // else {
-                //     dd($rows);
-                //     $error['tracking_number'] = $rows['tracking_number'];
-                //     $error['error_msg'] = "These Tracking Numbers are Invalid";
-                //     dd($rows[$key]['tracking_number']);
-                //     // $errors = array_map(function ($row, $errors) {
-                //     //     return $row['tracking_number'] . ':' . PHP_EOL . implode(' | ', $errors);
-                //     // }, array_keys($errors), $errors);
-                    
-                //     $errors = array_map(function ($key, $errors) use ($rows) {
-                    
-
-                //         if (isset($rows[$key]['tracking_number'])) {
-                //             return $rows[$key]['tracking_number'] . ':' . PHP_EOL . implode(' | ', $errors);
-                //         } else {
-                //             return 'Undefined tracking number' . ':' . PHP_EOL . implode(' | ', $errors);
-                //         }
-                //     }, array_keys($errors), $errors);
-                //     dd($errors);
-
-                //     return redirect()->back()->withErrors($errors); 
-                // }
+                }
+                // If no shipment is added to lost shipments, return only the array of lost shipments' tracking numbers
+                return response()->json(['status' => 1, 'details' => $data, 'error_count' => count($error), 'error' => $error]);
             } else {
-              
-                // dd("1");
                 return response()->json(['status' => 3, 'error' => 'No Shipments in File']);
-                // return redirect()->back()->with('error', 'No Shipments in File');
             }
         }
-      
+        else {
+            return response()->json(['status' => 3, 'error' => 'File Not Found!']);
+        }
     }
 }
