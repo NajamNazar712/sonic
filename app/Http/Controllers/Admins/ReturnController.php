@@ -57,6 +57,7 @@ use App\Http\Models\RcpManualSms;
 use App\Http\Models\Zone;
 use App\Jobs\RCPSmsToConsignee;
 use App\ReturnDeliveredToShipperSms;
+use App\ReturnDeliveredToShipperTicker;
 use Carbon\Carbon;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Http\Request;
@@ -3307,8 +3308,20 @@ class ReturnController extends Controller
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);
                         ReturnNoteShipment::where(['return_note_id' => $request->return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
-                        $users = GlobalSettings::where('type', 'returned_shipment_notification');
+                        //for ticker start
+                        $return_delivered_to_shipper_ticker = ReturnDeliveredToShipperTicker::where(['return_note_id'=>$request->return_note_id,'user_id' => $parcel->user_id,'shipment_id' => $parcel->id,'status' => 0]);
+                        if(!$return_delivered_to_shipper_ticker->exists()){
+                            $return_delivered_ticker = new ReturnDeliveredToShipperTicker();
+                            $return_delivered_ticker->return_note_id = $request->return_note_id;
+                            $return_delivered_ticker->user_id = $parcel->user_id;
+                            $return_delivered_ticker->shipment_id = $parcel->id;
+                            $return_delivered_ticker->status = 0;
+                            $return_delivered_ticker->save();
+                        }
+                        //for ticker end
 
+                        //for sms start
+                        $users = GlobalSettings::where('type', 'returned_shipment_notification');
                         if($users->exists()) {
                             $users = $users->first();
                             $current_users = $users->text;
@@ -3325,6 +3338,7 @@ class ReturnController extends Controller
                                 }
                             }
                         }
+                        //for sms end
 
 
 //                        $packaging_material_shipment = PackagingMaterialRequest::where('tracking_number', $parcel->tracking_number)->first();
@@ -3397,7 +3411,9 @@ class ReturnController extends Controller
                             }
                         }
 
-                    } else if ($parcel->booking_type_id == 3) {
+                    }
+                    else if ($parcel->booking_type_id == 3)
+                    {
                         ShipmentsJourneyController::add($shipment, 38, 38, NULL, NULL, NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 38, 'consignee_status_id' => 38]);
@@ -3422,7 +3438,8 @@ class ReturnController extends Controller
                             }
                         }
 
-                    } else {
+                    }
+                    else {
                         ShipmentsJourneyController::add($shipment, 25, 25, NULL, ($request->has($shipment_remark) ? $request->remarks[$shipment] : null), NULL, Auth::id(), $request->return_note_id, NULL, 1, ($request->has($received_or_refused_by) ? $request->received_or_refused_by[$shipment] : null));
 
                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 25, 'consignee_status_id' => 25]);

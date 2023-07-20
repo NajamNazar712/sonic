@@ -9,6 +9,7 @@ use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
 use App\ReturnDeliveredToShipperSms;
+use App\ReturnDeliveredToShipperTicker;
 use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -70,6 +71,7 @@ class NotificationReturnedDeliveredToShipper extends Command
         NotificationsController::send(216, $return_deliverd_to_shippers);
 
         ReturnDeliveredToShipperSms::where('status',0)->whereBetween('created_at', [$from, $to])->update(['status' => 1]);
+        ReturnDeliveredToShipperTicker::where('status',0)->whereBetween('created_at', [$from, $to])->update(['status' => 1]);
 
     }
 }
