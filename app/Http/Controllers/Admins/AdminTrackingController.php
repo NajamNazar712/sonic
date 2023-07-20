@@ -194,7 +194,7 @@ class AdminTrackingController extends Controller
 
                     $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                         ->where('trax_pay_transactions.shipment_id',$shipment->id)
-                        ->orderBy('id', 'desc');
+                        ->orderBy('fintech_payment_details.id', 'desc');
 
                     if($fintech_payment->exists()){
                         $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
@@ -1127,7 +1127,7 @@ class AdminTrackingController extends Controller
 
                         $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
                             ->where('trax_pay_transactions.shipment_id',$shipment->id)
-                            ->orderBy('id', 'desc');
+                            ->orderBy('fintech_payment_details.id', 'desc');
 
                         if($fintech_payment->exists()){
                             $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
