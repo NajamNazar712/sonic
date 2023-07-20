@@ -201,12 +201,12 @@ class AdminTrackingController extends Controller
                     }
 
                     if ($shipment->booking_type_id != 4) {
-                        $details['order_information']['amount'] = number_format($shipment->amount). ' - ' . $fintech_paid;
+                        $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                     } else {
                         if ($shipment->charges_mode_id == 1) {
                             $details['order_information']['amount'] = 0;
                         } else {
-                            $details['order_information']['amount'] = number_format($shipment->amount). ' - ' . $fintech_paid;
+                            $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                         }
                     }
 
