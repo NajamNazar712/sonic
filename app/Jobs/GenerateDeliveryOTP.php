@@ -23,7 +23,7 @@ class GenerateDeliveryOTP implements ShouldQueue
      */
     public function __construct(SMS $sms, string $name, int $otp)
     {
-        $this->queue = 'sms_otp';
+        $this->queue = 'generate_delivery_otp';
         $this->sms = $sms;
         $this->name = $name;
         $this->otp = $otp;
