@@ -279,7 +279,7 @@ class ReturnController extends Controller
 
             )
 
-            ->whereIn('shipments.shipper_status_id', [12, 65])
+            ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
             ->groupBy('shipments.id');
             
 
