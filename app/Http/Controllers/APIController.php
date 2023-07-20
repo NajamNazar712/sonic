@@ -7629,7 +7629,6 @@ class APIController extends Controller
         }
     }
 
-
     public function shipment_track_consignee_public(Request $request)
     {
         $rules = [
