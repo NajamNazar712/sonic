@@ -486,6 +486,7 @@ trait RvTrait
     protected function unresponsive(Request $request)
     {
         $shipment = Shipment::find($request->shipment_id);
+        $user_id = $shipment->user_id;
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->first();
 
         $status = new RvAgentCallHistory();
@@ -499,16 +500,18 @@ trait RvTrait
         
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if($rv_shipment_assign_agent->unresponsive_count == 3){
-            $rv_shipment_assign_agent->rv_state_id = 2;
+            $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
             $shipment  = $shipment->first();
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
+
+            ShipmentsJourneyController::add($shipment, 54, 54, NULL, NULL, $user_id, Auth::id());
         }
 
-        //if unresponsive count 4 & rv_state_id is 1 (Open) then shipment status will be auto return confirm
+        //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
         else if ($rv_shipment_assign_agent->unresponsive_count == 4 && $rv_shipment_assign_agent->rv_state_id  == 1){
             $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
-            $rv_shipment_assign_agent->rv_assign_agent_status_id = 1; //return confirm
+            $rv_shipment_assign_agent->rv_assign_agent_status_id = 3; //return confirm
         }
         return response()->json(['status' => 1]);
     }

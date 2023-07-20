@@ -518,6 +518,7 @@
                         .done(function(data) {
                             if (data.shipment != undefined) {
                                 $('#shipment_id_val').val(data.shipment.id)
+                                console.log(data.rider_details);
                                 var shipment = '';
 
                                 shipment +=

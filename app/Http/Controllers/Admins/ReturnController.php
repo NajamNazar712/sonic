@@ -263,7 +263,7 @@ class ReturnController extends Controller
                 'rider_deliveries.otp_entered as rider_otp_entered',
                 'dc.id as destination_city_id',
                 'sts.status as star_status',
-                'ad.name as agent_name',
+                'ad.name as agent_name'
             )
 
             ->whereIn('shipments.shipper_status_id', [12, 52])
