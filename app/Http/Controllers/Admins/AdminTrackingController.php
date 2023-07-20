@@ -11,6 +11,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
@@ -189,13 +190,23 @@ class AdminTrackingController extends Controller
                     $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                     $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
+                    $fintech_paid = '';
+
+                    $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                        ->where('trax_pay_transactions.shipment_id',$shipment->id)
+                        ->orderBy('id', 'desc');
+
+                    if($fintech_payment->exists()){
+                        $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                    }
+
                     if ($shipment->booking_type_id != 4) {
-                        $details['order_information']['amount'] = number_format($shipment->amount);
+                        $details['order_information']['amount'] = number_format($shipment->amount). ' - ' . $fintech_paid;
                     } else {
                         if ($shipment->charges_mode_id == 1) {
                             $details['order_information']['amount'] = 0;
                         } else {
-                            $details['order_information']['amount'] = number_format($shipment->amount);
+                            $details['order_information']['amount'] = number_format($shipment->amount). ' - ' . $fintech_paid;
                         }
                     }
 
@@ -1112,13 +1123,23 @@ class AdminTrackingController extends Controller
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
+                        $fintech_paid = '';
+
+                        $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                            ->where('trax_pay_transactions.shipment_id',$shipment->id)
+                            ->orderBy('id', 'desc');
+
+                        if($fintech_payment->exists()){
+                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                        }
+
                         if ($shipment->booking_type_id != 4) {
-                            $details['order_information']['amount'] = number_format($shipment->amount);
+                            $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                         } else {
                             if ($shipment->charges_mode_id == 1) {
                                 $details['order_information']['amount'] = 0;
                             } else {
-                                $details['order_information']['amount'] = number_format($shipment->amount);
+                                $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                             }
                         }
 
