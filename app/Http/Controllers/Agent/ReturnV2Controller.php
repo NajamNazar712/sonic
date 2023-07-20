@@ -122,7 +122,7 @@ class ReturnV2Controller extends Controller
                             if (!empty($excluded_shippers)) {
 
                                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                                    ->where('shipper_status_id', 12)
+                                    ->whereIn('shipper_status_id', [7,8,9,15,12,65])
                                     ->whereIn('user_id', $excluded_shippers)
                                     ->orderBy('id', 'ASC')
                                     ->get();
@@ -132,7 +132,7 @@ class ReturnV2Controller extends Controller
                             if (!empty($only_shippers) && !($all_shipper_exists)) {
 
                                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                                    ->where('shipper_status_id', 12)
+                                    ->whereIn('shipper_status_id', [7,8,9,15,12,65])
                                     ->whereNotIn('user_id', $only_shippers)
                                     ->orderBy('id', 'ASC')
                                     ->get();
