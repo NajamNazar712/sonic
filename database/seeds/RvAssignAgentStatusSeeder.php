@@ -7,7 +7,7 @@ class RvAssignAgentStatusSeeder extends Seeder
     /**
      * Run the database seeds.
      *
-     * @return void
+     * @return voidp
      */
     public function run()
     {
@@ -21,7 +21,7 @@ class RvAssignAgentStatusSeeder extends Seeder
             array('id'=> 4, 'shipment_status_id'=> 55,'name' => 'Intercept Approved', 'shipment_status_name' => 'Intercept Approved','call_finding_id'=> NULL, 'created_at' => $timestamp, 'updated_at'=>$timestamp, 'is_visible'=> 0 ),
             array('id'=> 5, 'shipment_status_id'=> 15,'name' => 'On Hold', 'shipment_status_name' => 'Shipment - On Hold for Self Collection','call_finding_id'=> NULL, 'created_at' => $timestamp, 'updated_at'=>$timestamp, 'is_visible'=> 1 ),
             array('id'=> 6, 'shipment_status_id'=> NULL,'name' => 'Unresponsive', 'shipment_status_name' => 'Unresponsive','call_finding_id'=> 1, 'created_at' => $timestamp, 'updated_at'=>$timestamp, 'is_visible'=> 1 ),
-            array('id'=> 7,'shipment_status_id' => 65, 'name' => 'Shipper Advised Requested', 'call_finding_id' => NULL, 'is_active' => 1, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'is_visible' => 1),
+            array('id'=> 7, 'shipment_status_id' => 65, 'name' => 'Shipper Advised Requested', 'shipment_status_name' => 'Shipper Advised Requested', 'call_finding_id' => NULL, 'created_at' => $timestamp, 'updated_at'=>$timestamp, 'is_visible'=> 0 ),
         ));
     }
 }
