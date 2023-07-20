@@ -142,6 +142,7 @@ class ReturnV2Controller extends Controller
                                 $shipments = [];
                             }
 
+                            // dd($shipments);
                             // check if shipments exist
                             if (count($shipments)) {
 

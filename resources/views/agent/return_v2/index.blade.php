@@ -516,7 +516,7 @@
                             }
                         })
                         .done(function(data) {
-                            console.log(data)
+                            console.log(data.shipment != undefined)
                             if (data.shipment != undefined) {
                                 $('#shipment_id_val').val(data.shipment.id)
                                 var shipment = '';

@@ -83,6 +83,7 @@ use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentOtp;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
@@ -104,15 +105,21 @@ class ReturnController extends Controller
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
-
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
-
         $sub_status_call_finding = SubStatusCallFinding::all();
+        $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
+        $percentage_reason_validation_required = (count($reason_validation_required)/count(Shipment::get()) * 100);
+        $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->get();
+        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/count(Shipment::get()) * 100);
+        $total_of_shipments = count($reason_validation_required) + count($shipper_advised_requested);
+        $percentage_total_of_shipment = (($total_of_shipments)/count(Shipment::get()) * 100);
+        $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
+        $percentage_unresponsive_count = (count($unresponsive_count)/count(RvShipmentAssignAgent::get()) * 100);
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 3)
-            ->where('a.status', 1)->get();
-        return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding]);
+            ->where('a.status', 1)->get();  
+        return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'percentage_total_of_shipment'=>$percentage_total_of_shipment,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
     }
 
     public function return_marked_list(Request $request)
@@ -121,6 +128,7 @@ class ReturnController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 86);
         }
+
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->leftjoin('rcp_tat_options as tat_options', 'tat_options.id', '=', 'u.rcp_tat_option_id')
@@ -202,16 +210,16 @@ class ReturnController extends Controller
                     );
             })
 
-            ->leftJoin('rv_shipment_assign_agents', function ($join) {
-                $join->on('rv_shipment_assign_agents.shipment_id', '=', 'shipments.id')
+            ->leftJoin('rv_shipment_assign_agents as rvsaa', function ($join) {
+                $join->on('rvsaa.shipment_id', '=', 'shipments.id')
                     ->where(
-                        'rv_shipment_assign_agents.id',
+                        'rvsaa.id',
                         '=',
                         DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id)')
                     );
             })
 
-            ->leftjoin('admins as ad', 'ad.id', '=', 'rv_shipment_assign_agents.agent_id')
+            ->leftjoin('admins as ad', 'ad.id', '=', 'rvsaa.agent_id')
             ->leftjoin('star_shippers as sts', 'sts.user_id', '=', 'u.id')
 
             ->select(
@@ -243,6 +251,7 @@ class ReturnController extends Controller
                 'usi.vendor as vendor_name',
                 'usi.poc',
                 DB::raw('count(sret.shipment_id) as reattempts'),
+
                 'shipments_journey.remarks as shipper_remarks',
                 'shipments.shipper_status_id as current_status_id',
                 'crm.id as complaint',
@@ -264,10 +273,15 @@ class ReturnController extends Controller
                 'dc.id as destination_city_id',
                 'sts.status as star_status',
                 'ad.name as agent_name',
+                'rvsaa.unresponsive_count as rvsaa_count',
+                'rvsaa.rv_assign_agent_status_id as rvsaa_status',
+                'rvsaa.updated_at as rvsaa_updated_at',
+
             )
 
-            ->whereIn('shipments.shipper_status_id', [12, 52])
+            ->whereIn('shipments.shipper_status_id', [12, 65])
             ->groupBy('shipments.id');
+            
 
 
         if (session('department_id') == 7) {
@@ -527,6 +541,14 @@ class ReturnController extends Controller
                 }
                 return isset($delivery_area) ? $delivery_area : '-';
             })
+
+            ->addColumn('unresponsive_call_time', function($shipments){
+                if($shipments->rvsaa_status === 6){
+                    return $shipments->rvsaa_updated_at;
+                }else{
+                    return '------';
+                }
+            })
             ->addColumn("action", function ($result) {
 
                 if ($result->reason_id == 12)
@@ -602,6 +624,22 @@ class ReturnController extends Controller
             $datatable->where('sm.id', '=', $mode);
         }
 
+        if ($request->get('search_rvr_value_div') === "1") {
+            $datatable->where('shipments.shipper_status_id',12);
+        }
+
+        if ($request->get('search_sar_value_div') === "2") {
+            $datatable->where('shipments.shipper_status_id',65);
+        }
+
+        if ($request->get('search_total_value_div') === "3") {
+            $datatable->whereIn('shipments.shipper_status_id',[12,65]);
+        }
+
+        if ($request->get('search_unresponsive_value_div') === "4") {
+            $datatable->where('rvsaa.unresponsive_count', '>', 0);
+        }
+        
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
             return $query->where('sts.status', 1);
         })
