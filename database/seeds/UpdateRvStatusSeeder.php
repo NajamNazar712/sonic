@@ -13,10 +13,11 @@ class UpdateRvStatusSeeder extends Seeder
      * @return void
      */
     public function run()
-    {
-        DB::table('rv_assign_agent_statuses')->insert(array(
-            array('shipment_status_id' => 64, 'name' => 'Shipper Advised Requested', 'call_finding_id' => NULL, 'is_active' => 1, 'created_at' => Carbon::now(), 'updated_at' => Carbon::now(), 'is_visible' => 1),
-        ));
+    {   
+
+        ShipmentStatus::create([
+            'id'=> 65 ,'code' => 'R-SAR', 'name' => 'Shipment - Shipper Advise Requested','description'=> '', 'created_at' => Carbon::now(),'updated_at' => Carbon::now()
+        ]);
 
         ShipmentStatus::where('id', 12)->update(['code' => 'R-VR', 'name' => 'Shipment - Reason Validation Required', 'updated_at' => Carbon::now()]);
     }

@@ -135,6 +135,7 @@
                             <th class="border-primary border-darken-1">Assigned By</th>
                             <th class="border-primary border-darken-1">Consolidation</th>
                             <th class="border-primary border-darken-1">Consolidated IDs</th>
+
                             <th class="border-primary border-darken-1">Actions</th>
                         </tr>
                     </thead>
@@ -1752,7 +1753,7 @@
                     { data: 'confirmation_on', name: '',  class: 'align-middle confirmation_on', orderable: false, searchable: false},
                     { data: 'delivery_attempt', name: '', class: 'align-middle reattempts', orderable: false, searchable: false},
                     { data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts', orderable: false, searchable: false},
-                    { data: 'assigned_agent', name: 'asad.name', class: 'align-middle assigned_agent'},
+                    { data: 'agent_name', name: 'ad.name', class: 'align-middle assigned_agent'},
                     { data: 'assigned_at', name: 'ras.created_at', class: 'align-middle assigned_at'},
                     { data: 'assigned_by', name: 'asadby.name', class: 'align-middle assigned_by'},
                     { data: 'consolidation', name: 'consolidation', class: 'align-middle consolidation', orderable: false, searchable: false},
