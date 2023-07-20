@@ -49,8 +49,11 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Status Date Time</th>
                                     <th class="border-primary border-darken-1">Status By</th>
+                                    <th class="border-primary border-darken-1">Shipper Name</th>
+                                    <th class="border-primary border-darken-1">COD Value</th>
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
+                                    <th class="border-primary border-darken-1">Trax Id</th>
                                     <th class="border-primary border-darken-1">Last Scanned By</th>
                                     <th class="border-primary border-darken-1">Last Scanned At</th>
                                     <th class="border-primary border-darken-1">Handover Note</th>
@@ -265,8 +268,11 @@
                     {data: 'status', name: 'shipment_positions.status', class: 'align-middle status'},
                     {data: 'status_at', name: 'shipment_positions.status_at', class: 'align-middle status_at'},
                     {data: 'status_by', name: 'shipment_positions.status_by', class: 'align-middle status_by'},
+                    {data: 'shipper_name', name: 'u.name', class: 'align-middle shipper_name'},
+                    {data: 'cod_value', name: 's.amount', class: 'align-middle shipper_name'},
                     {data: 'screen_location', name: 'shipment_positions.screen_location', class: 'align-middle screen_location'},
                     {data: 'city', name: 'shipment_positions.city', class: 'align-middle city'},
+                    {data: 'trax_id', name: 'trax_id', class: 'align-middle trax_id'},
                     {data: 'scanned_by', name: 'shipment_positions.scanned_by', class: 'align-middle scanned_by'},
                     {data: 'scanned_at', name: 'shipment_positions.scanned_at', class: 'align-middle scanned_at'},
                     {data: 'handover_note', name: 'shipment_positions.handover_note', class: 'align-middle handover_note'},
