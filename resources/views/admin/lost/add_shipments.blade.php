@@ -274,6 +274,7 @@ label.error {
                                 var shipmentAdded = false;
                                 var shipmentIDs = Object.keys(shipmentData);
                                 var shipment;
+                                var alreadyAddedShipments = [];
                                 id = data.details;
                                $.each(shipmentIDs, function (index, id) {
                                     // $.each(shipmentData, function(id, shipment2){
