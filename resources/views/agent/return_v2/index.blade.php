@@ -516,9 +516,9 @@
                             }
                         })
                         .done(function(data) {
-                            console.log(data.shipment != undefined)
                             if (data.shipment != undefined) {
                                 $('#shipment_id_val').val(data.shipment.id)
+                                console.log(data.rider_details);
                                 var shipment = '';
 
                                 shipment +=
@@ -946,7 +946,7 @@
                                 shipment += '</form>'
                                 $('#tracking').append(shipment);
                                 scan_sound(1);
-                            } else if (data.status == 2) {
+                            } else if (data.status == 1) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Assigned";
                                 toastr.error(error, 'Error!', {
