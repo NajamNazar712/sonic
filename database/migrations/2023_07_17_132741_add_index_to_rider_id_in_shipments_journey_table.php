@@ -13,9 +13,9 @@ class AddIndexToRiderIdInShipmentsJourneyTable extends Migration
      */
     public function up()
     {
-        Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->index('rider_id');
-        });
+//        Schema::table('shipments_journey', function (Blueprint $table) {
+//            $table->index('rider_id');
+//        });
     }
 
     /**

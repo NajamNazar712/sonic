@@ -12808,7 +12808,7 @@ class AdminAPIController extends Controller
                 $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
             }
 
-            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
+//            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
 
             $shipment_scanned[] = $details;
         }
