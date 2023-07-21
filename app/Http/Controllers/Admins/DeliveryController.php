@@ -9216,23 +9216,28 @@ class DeliveryController extends Controller
             $delivery_note_requests->where('rider_delivery_note_requests.rider_id',$rider_trax_id);
         }
 
-        if($consignee_phone = $request->get('consignee_phone'))
+        if($consignee_phone = $request->get('consignee_phone') || $tracking_numbers = $request->get('tracking_numbers'))
         {
             $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
-            ->leftjoin('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
-            ->where(function ($query) use ($consignee_phone) {
-                $query->where('s.consignee_phone_number_1', $consignee_phone)
-                ->orWhere('s.consignee_phone_number_2', $consignee_phone);
-            })
-            ->groupBy('rider_delivery_note_requests.id');
+            ->leftjoin('shipments as s', 's.id', '=', 'rdnrs.shipment_id');
+
+            if($consignee_phone = $request->get('consignee_phone'))
+            {
+                $delivery_note_requests->where(function ($query) use ($consignee_phone) {
+                    $query->where('s.consignee_phone_number_1', $consignee_phone)
+                    ->orWhere('s.consignee_phone_number_2', $consignee_phone);
+                });
+                
+            }
+
+            if ($tracking_numbers = $request->get('tracking_numbers')) {
+                $delivery_note_requests->whereIn('s.tracking_number', explode(',', $tracking_numbers))->groupBy('rider_delivery_note_requests.id');
+            }
+
+            $delivery_note_requests->groupBy('rider_delivery_note_requests.id');
         }
 
-        if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
-            ->leftjoin('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
-            ->whereIn('s.tracking_number', explode(',', $tracking_numbers))
-            ->groupBy('rider_delivery_note_requests.id');
-        }
+        
 
         $datatables = Datatables::of($delivery_note_requests)
             ->editColumn('amount', function ($delivery_note_requests) {
