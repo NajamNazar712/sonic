@@ -568,7 +568,6 @@ trait RvTrait
     // Description:
     public function assign_agent(Request $request)
     {
-        dd($request->all());
         $shipment_ids = $request->shipment_ids;
         if ($shipment_ids) {
             foreach ($shipment_ids as $shipment_id) {
