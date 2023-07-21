@@ -2229,9 +2229,7 @@
                 $('#designation_on_off').val(toggleValue);
             });
 
-            $("#submit_profile_yes").click(function() {
-                console.log('clicked yes !',$('#designation_on_off'),toggleValue);
-
+            $("#submit_profile_yes").click(function () {
                 var formData = $('#profile-form').serialize();
 
                 $.ajax({
@@ -2240,20 +2238,26 @@
                     data: formData,
                 })
                     .done(function (data) {
-                    if (data.status === 0) {
-                        toastr.success(data.success, 'Success!', {
-                            positionClass: 'toast-bottom-center',
-                            containerId: 'toast-bottom-center'
-                        });
-                    } else if (data.status != 0){
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    $("#submit_profile_modal").modal('hide');
-                });
-                $("#admin_discount_type").prop("checked", false);
+                        if (data.status === 0) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                        } else if (data.status != 0) {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                        $("#submit_profile_modal").modal('hide');
+
+                        if ($('#admin_discount_type').prop("checked")) {
+                            $('#admin_discount_type').click();
+                        } else {
+                            console.log("Checkbox is not checked");
+                        }
+                    });
             });
 
             $("#submit_profile_no").click(function() {
