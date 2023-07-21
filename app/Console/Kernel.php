@@ -188,6 +188,11 @@ class Kernel extends ConsoleKernel
                 ->runInBackground();
             }
         }
+        
+        //rv agent cron jobs start
+        $schedule->command('agent:changestatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        
+        //rv agent cron jobs end
 
         $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
 

@@ -504,8 +504,9 @@ trait RvTrait
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
             $shipment  = $shipment->first();
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
+            $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
 
-            ShipmentsJourneyController::add($shipment, 54, 54, NULL, NULL, $user_id, Auth::id());
+            ShipmentsJourneyController::add($shipment, 65, 65, NULL, NULL, $user_id, Auth::id());
         }
 
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
@@ -572,17 +573,10 @@ trait RvTrait
             foreach ($shipment_ids as $shipment_id) {
                 $check_already_assigned = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->first();
                 if ($check_already_assigned) {
-                    $check_already_assigned->status = 0;
-                    $check_already_assigned->save();
-
-                    $return_assign_log = new RvShipmentAssignAgentDetails();
-                    $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
-                    $return_assign_log->status = 4;
-                    $return_assign_log->assigned_by = Auth::id();
-                    $return_assign_log->save();
+                    return response()->json(['status' => 1, 'error' => 'Shipments Already Assigned']);
                 }
                 $assign_shipments = new RvShipmentAssignAgent();
-                $assign_shipments->admin_id = $request->admin_id;
+                $assign_shipments->agent_id = $request->admin_id;
                 $assign_shipments->shipment_id = $shipment_id;
                 $assign_shipments->status = 1;
                 $assign_shipments->assigned_by = Auth::id();
