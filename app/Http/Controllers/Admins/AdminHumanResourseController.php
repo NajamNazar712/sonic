@@ -1386,7 +1386,7 @@ class AdminHumanResourseController extends Controller
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
         if ($role_flag == true) {
-            if ($designation_toggle_val == true) {
+            if ($designation_toggle_val == 'true') {
                 if ($employee->designation_id != $request->designation) {
                     $designation_logs = new EmployeeDesignationLog();
                     $designation_logs->updated_by = Auth::id();

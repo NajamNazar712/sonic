@@ -2227,8 +2227,6 @@
                 $("#submit_profile_modal").modal('show');
                 event.preventDefault();
                 $('#designation_on_off').val(toggleValue);
-
-
             });
 
             $("#submit_profile_yes").click(function() {
@@ -2241,7 +2239,8 @@
                     url: '{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}',
                     method: 'POST',
                     data: formData,
-                }).done(function (data) {
+                })
+                    .done(function (data) {
                     if (data.status === 0) {
                         toastr.success(data.success, 'Success!', {
                             positionClass: 'toast-bottom-center',
