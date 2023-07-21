@@ -9219,7 +9219,7 @@ class DeliveryController extends Controller
         if($consignee_phone = $request->get('consignee_phone'))
         {
             $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
-            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
             ->where(function ($query) use ($consignee_phone) {
                 $query->where('s.consignee_phone_number_1', $consignee_phone)
                 ->orWhere('s.consignee_phone_number_2', $consignee_phone);
@@ -9228,7 +9228,7 @@ class DeliveryController extends Controller
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
             $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
-            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
             ->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
