@@ -10309,6 +10309,63 @@ class NotificationsController extends Controller
                     }       
                 }
 
+                else if ($id == 218) {
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    $email_to = $reference_1_id['email_to'];
+
+                    $shipper = $reference_1_id['shipper_name']; 
+                    $tagged_by = $reference_1_id['admin_name']; 
+                    $old_sales_person = $reference_1_id['old_sales_person'];
+                    $old_sales_person_date = $reference_1_id['old_sales_person_date'];
+                    $new_sales_person = $reference_1_id['new_sales_person']; 
+                    
+                    $old_sales_person_email = $reference_1_id['old_sales_person_email'];
+
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Sales Person</th> 
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Tag Date</th> 
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Sales Person</th>';
+                    $html .= '</tr></thead><tbody>';
+
+                    $to = array();
+                    $cc = array('Waqas@trax.pk', 'shahrukh.raheem@trax.pk', 'khan.usama@trax.pk');
+                    
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
+                    if ($old_sales_person != null) {
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $old_sales_person . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $old_sales_person_date . '</td>';
+                    } else {
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">-</td>';
+                    }
+                    
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $new_sales_person . '</td>';
+                    $html .= '</tr>';
+
+                    $to = $email_to;
+                    
+
+                    if ($old_sales_person_email) {
+                        $cc[] = $old_sales_person_email;
+                    }
+                    
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+                    
+                    self::email($subject, $body, $to, $cc);    
+                 }
+
             }
         }
     }
