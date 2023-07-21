@@ -9201,8 +9201,6 @@ class DeliveryController extends Controller
             ->leftjoin('city_areas as ca', 'ca.id', '=', 'r.id')
             ->join('rider_types', 'rider_types.id', '=', 'r.rider_type_id')
             ->join('zones as z', 'c.zone_id', '=', 'z.id')
-            ->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
-            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
             ->where('rider_delivery_note_requests.status', 0)
             ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.id as request_note_id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as hub', 'ro.code as code', 'ro.start as start', 'ro.end as end', 'rider_delivery_note_requests.total_cod_amount as amount', 'rider_delivery_note_requests.shipment_count as shipments_count', 'rider_delivery_note_requests.shipment_count as shipments_count_link', 'z.name as zone_name', 'r.operation_rider_id', 'r.rider_type_id', 'rider_types.name as rt', 'ad.name as admin_name', 'rider_delivery_note_requests.updated_at as updated_at', 'ca.name as area', 'r.trax_id as rider_trax_id')
@@ -9220,14 +9218,18 @@ class DeliveryController extends Controller
 
         if($consignee_phone = $request->get('consignee_phone'))
         {
-            $delivery_note_requests->where(function ($query) use ($consignee_phone) {
+            $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
+            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
+            ->where(function ($query) use ($consignee_phone) {
                 $query->where('s.consignee_phone_number_1', $consignee_phone)
                 ->orWhere('s.consignee_phone_number_2', $consignee_phone);
             });
         }
 
         if ($tracking_numbers = $request->get('tracking_numbers')) {
-            $delivery_note_requests->whereIn('s.tracking_number', explode(',', $tracking_numbers));
+            $delivery_note_requests->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
+            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
+            ->whereIn('s.tracking_number', explode(',', $tracking_numbers));
         }
 
         $datatables = Datatables::of($delivery_note_requests)
