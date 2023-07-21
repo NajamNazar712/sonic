@@ -187,6 +187,9 @@ class AdminReportsController extends Controller
              'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 
              'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 
              'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status']);
+//        ->where('sj.created_at','2023-07-05 17:08:15')
+//            ->get();
+//        dd($shipments);
 
         $type = $request->get('search_types');
 
@@ -349,13 +352,19 @@ class AdminReportsController extends Controller
                 }
             }
         }
+
         if ($request->get('search_from') && $request->get('search_to')) {
             $from = $request->get('search_from');
             $to = $request->get('search_to');
             $datatable->whereBetween('journey.created_at', [$from, $to]);
         }
+        if ($request->get('arrival_search_from') && $request->get('arrival_search_to')) {
+            $from1 = $request->get('arrival_search_from');
+            $to1 = $request->get('arrival_search_to');
+            $datatable->whereBetween('sj.created_at', [$from1, $to1]);
+        }
+
         if ($status_id = $request->get('search_shipment_status')) {
-            //            dd($status_id);
             $datatable->where('ss.id', '=', $status_id);
         }
 
@@ -7812,6 +7821,10 @@ class AdminReportsController extends Controller
             ->addColumn('dncc_amount', function ($entry) {
                 $dn_ids = explode(',', $entry->dn_ids);
                 return DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+            })
+            ->addColumn('hbl_konnect_amount', function ($entry) {
+                $dn_ids = explode(',', $entry->dn_ids);
+                return DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {

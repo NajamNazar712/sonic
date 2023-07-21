@@ -6728,146 +6728,159 @@ class ReturnController extends Controller
             $valid_shipments = Shipment::whereIn('id', $shipments)->whereIn('shipper_status_id', $pending_status)->pluck('id');
             $shipments_count = count($valid_shipments);
             if ($shipments_count != 0) {
-                $valid_shipments = $valid_shipments->toArray();
-                $invalid_shipments = array_diff($shipments, $valid_shipments);
+                if($return_request->status != 1){
+
+                    $valid_shipments = $valid_shipments->toArray();
+                    $invalid_shipments = array_diff($shipments, $valid_shipments);
 //                Shipment::whereIn('id', $valid_shipments)->update(['shipper_status_id' => 23, 'consignee_status_id' => 23]);
-                // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
-                //     $query->where('booking_type_id', '!=', 4)
-                //         ->orWhere(function ($sub_query) {
-                //             $sub_query->where('booking_type_id', '=', 4)
-                //                 ->where('charges_mode_id', '=', 2);
-                //         });
-                // })->sum('amount');
-                $order = false;
-                if ($return_request->ordering) {
-                    $order = true;
-                }
-                $normal_rider = TRUE;
-                $rider_id = $return_request->rider_id;
-                $rider = Rider::find($rider_id);
-                $hub_id = $return_request->hub_id;
-                $route_id = $return_request->route_id;
-                $note = ReturnNote::create([
-                    'hub_id' => $hub_id,
-                    'rider_id' => $rider_id,
-                    'route_id' => $route_id,
-                    'shipments_count' => $shipments_count,
-                    'admin_id' => $admin,
-                    // 'total_cod_amount' => $total_cod_amount,
-                    'last_updated_at' => Carbon::now(),
-                    'ordering' => $order,
-                    'created_via_app' => 1,
-                    'request_note_id' => $return_request->id
-                ]);
-                if ($note) {
-                    if (!$order) {  //Default
-                        sort($valid_shipments); //sort_valid_shipments;
+                    // $total_cod_amount = Shipment::whereIn('id', $valid_shipments)->where(function ($query) {
+                    //     $query->where('booking_type_id', '!=', 4)
+                    //         ->orWhere(function ($sub_query) {
+                    //             $sub_query->where('booking_type_id', '=', 4)
+                    //                 ->where('charges_mode_id', '=', 2);
+                    //         });
+                    // })->sum('amount');
+
+
+                    $return_request->status = 1;
+                    $return_request->approved_by = $admin;
+                    $return_request->approved_at = Carbon::today();
+                    $return_request->save();
+
+                    $order = false;
+                    if ($return_request->ordering) {
+                        $order = true;
                     }
-                    $serial = 1;
-                    foreach ($valid_shipments as $shipment) {
-                        ReturnNoteShipment::create([
-                            'return_note_id' => $note->id,
-                            'shipment_id' => $shipment,
-                            'ordering' => $serial
-                        ]);
-                        $serial++;
-                    }
-
-                    foreach ($valid_shipments as $shipment) {
-                        $shipment_data = Shipment::find($shipment);
-                        if (in_array($shipment, $open_box_ids)) {
-                            $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
-                            if ($shipment_detail) {
-                                $shipment_detail->is_open = 1;
-                                $shipment_detail->save();
-                            }
-
-                            $shipment_data->open_box = 1;
-                            $shipment_data->save();
-
-                            ShipmentOpenBoxJourneyController::add($shipment, 3, $admin);
+                    $normal_rider = TRUE;
+                    $rider_id = $return_request->rider_id;
+                    $rider = Rider::find($rider_id);
+                    $hub_id = $return_request->hub_id;
+                    $route_id = $return_request->route_id;
+                    $note = ReturnNote::create([
+                        'hub_id' => $hub_id,
+                        'rider_id' => $rider_id,
+                        'route_id' => $route_id,
+                        'shipments_count' => $shipments_count,
+                        'admin_id' => $admin,
+                        // 'total_cod_amount' => $total_cod_amount,
+                        'last_updated_at' => Carbon::now(),
+                        'ordering' => $order,
+                        'created_via_app' => 1,
+                        'request_note_id' => $return_request->id
+                    ]);
+                    if ($note) {
+                        if (!$order) {  //Default
+                            sort($valid_shipments); //sort_valid_shipments;
+                        }
+                        $serial = 1;
+                        foreach ($valid_shipments as $shipment) {
+                            ReturnNoteShipment::create([
+                                'return_note_id' => $note->id,
+                                'shipment_id' => $shipment,
+                                'ordering' => $serial
+                            ]);
+                            $serial++;
                         }
 
-                        $old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment)->where('status', '>', 0)->orderBy('return_note_id', 'desc');
+                        foreach ($valid_shipments as $shipment) {
+                            $shipment_data = Shipment::find($shipment);
+                            if (in_array($shipment, $open_box_ids)) {
+                                $shipment_detail = ShipmentDetail::where('shipment_id', $shipment)->where('is_open', '=', 0)->first();
+                                if ($shipment_detail) {
+                                    $shipment_detail->is_open = 1;
+                                    $shipment_detail->save();
+                                }
 
-                        if ($old_return_note_id->exists()) {
-                            $old_return_note_id = $old_return_note_id->first();
+                                $shipment_data->open_box = 1;
+                                $shipment_data->save();
 
-                            if (ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status', 0)->exists()) {
-                                $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('verification', 0)->latest()->first();
-                                if ($journey) {
-                                    ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, $admin, $journey->reference_1_id, NULL, 1, $journey->received_or_refused_by);
+                                ShipmentOpenBoxJourneyController::add($shipment, 3, $admin);
+                            }
+
+                            $old_return_note_id = ReturnNoteShipment::where('shipment_id', $shipment)->where('status', '>', 0)->orderBy('return_note_id', 'desc');
+
+                            if ($old_return_note_id->exists()) {
+                                $old_return_note_id = $old_return_note_id->first();
+
+                                if (ReturnNote::where('id', $old_return_note_id->return_note_id)->where('status', 0)->exists()) {
+                                    $journey = ShipmentsJourney::where('shipment_id', $shipment)->where('verification', 0)->latest()->first();
+                                    if ($journey) {
+                                        ShipmentsJourneyController::add($journey->shipment_id, $journey->shipper_status_id, $journey->consignee_status_id, $journey->status_reason_id, $journey->remarks, $journey->user_id, $admin, $journey->reference_1_id, NULL, 1, $journey->received_or_refused_by);
+                                    }
                                 }
                             }
-                        }
 
-                        $shipper_status_id = 23;
-                        $consignee_status_id = 23;
+                            $shipper_status_id = 23;
+                            $consignee_status_id = 23;
 
-                        if($shipment_data->booking_type_id == 2){
-                            $shipper_status_id = 28;
-                            $consignee_status_id = 28;
-                        }
-
-                        if($shipment_data->booking_type_id == 3){
-                            $shipper_status_id = 34;
-                            $consignee_status_id = 34;
-                        }
-
-                        $shipment_data->shipper_status_id = $shipper_status_id;
-                        $shipment_data->consignee_status_id = $consignee_status_id;
-                        $shipment_data->save();
-
-                        ShipmentsJourneyController::add($shipment, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
-
-                        $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
-                        if ($handover_shipments->exists()) {
-                            $handover_shipments = $handover_shipments->first();
-                            $handover_shipments->status = 2;
-                            $handover_shipments->save();
-                            $handover_count = HandoverShipments::where('status', 1)->where('handover_id', $handover_shipments->handover_id)->count();
-                            if ($handover_count == 0) {
-                                $handover = Handover::find($handover_shipments->handover_id);
-                                $handover->received_by = $admin;
-                                $handover->received_at = Carbon::now();
-                                $handover->received = $handover->received + 1;
-                                $handover->status_id = 4;
-                                $handover->save();
+                            if($shipment_data->booking_type_id == 2){
+                                $shipper_status_id = 28;
+                                $consignee_status_id = 28;
                             }
-                            HandoverShipmentJourneyController::add($shipment, $handover_shipments->handover_id, 2);
+
+                            if($shipment_data->booking_type_id == 3){
+                                $shipper_status_id = 34;
+                                $consignee_status_id = 34;
+                            }
+
+                            $shipment_data->shipper_status_id = $shipper_status_id;
+                            $shipment_data->consignee_status_id = $consignee_status_id;
+                            $shipment_data->save();
+
+                            ShipmentsJourneyController::add($shipment, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, $admin, $note->id, $note->rider_id);
+
+                            $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
+                            if ($handover_shipments->exists()) {
+                                $handover_shipments = $handover_shipments->first();
+                                $handover_shipments->status = 2;
+                                $handover_shipments->save();
+                                $handover_count = HandoverShipments::where('status', 1)->where('handover_id', $handover_shipments->handover_id)->count();
+                                if ($handover_count == 0) {
+                                    $handover = Handover::find($handover_shipments->handover_id);
+                                    $handover->received_by = $admin;
+                                    $handover->received_at = Carbon::now();
+                                    $handover->received = $handover->received + 1;
+                                    $handover->status_id = 4;
+                                    $handover->save();
+                                }
+                                HandoverShipmentJourneyController::add($shipment, $handover_shipments->handover_id, 2);
+                            }
+
                         }
 
+                        $process_one_link['shipment_ids'] = $valid_shipments;
+                        $process_one_link['delivery_note_id'] = $note->id;
+                        dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
+                    }
+                    NotificationsController::send(40, $note->id);
+                    if ($normal_rider) {
+                        NotificationsController::app_notification(5, $rider_id, 2, $note->id);
                     }
 
-                    $process_one_link['shipment_ids'] = $valid_shipments;
-                    $process_one_link['delivery_note_id'] = $note->id;
-                    dispatch(new ProcessOneLinkDeliveryNoteShipment($process_one_link));
-                }
-                NotificationsController::send(40, $note->id);
-                if ($normal_rider) {
-                    NotificationsController::app_notification(5, $rider_id, 2, $note->id);
-                }
+                    //rider attendance
+                    if ($rider->operation_rider_id == 1 && $rider->employee_id != null) {
+                        EmployeeAttendanceController::riders_attendance_mark($rider_id);
+                    }
+                    //rider attendance end
 
-                //rider attendance
-                if ($rider->operation_rider_id == 1 && $rider->employee_id != null) {
-                    EmployeeAttendanceController::riders_attendance_mark($rider_id);
+                    //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
+                    $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->select('rider_category_id', 'id')->latest()->first();
+                    if ($rider_bypass_type) {
+                        $rider_bypass_id = $rider_bypass_type->id;
+                        RiderCategoryByPass::where('rider_id', $rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
+                    }
+                    //todo end
+                    $return_request->status = 1;
+                    $return_request->approved_by = $admin;
+                    $return_request->approved_at = Carbon::today();
+                    $return_request->save();
+                    RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
+                    RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
+                    return redirect()->back()->with('success', 'Return note has been Approved successfully' . PHP_EOL . 'Return Note ID: ' . $note->id);
                 }
-                //rider attendance end
-
-                //todo : update status 1 to 2 (take wo next time jbtk na aae jbtk rider cat ki request dubara na daljae)
-                $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->select('rider_category_id', 'id')->latest()->first();
-                if ($rider_bypass_type) {
-                    $rider_bypass_id = $rider_bypass_type->id;
-                    RiderCategoryByPass::where('rider_id', $rider_id)->where('id', $rider_bypass_id)->update(["status" => 2]);
+                else{
+                    return redirect()->back()->with('error', 'Return Note Already Approved!');
                 }
-                //todo end
-                $return_request->status = 1;
-                $return_request->approved_by = $admin;
-                $return_request->approved_at = Carbon::today();
-                $return_request->save();
-                RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $valid_shipments)->update(['status' => 1]);
-                RiderReturnNoteRequestShipment::where('request_note_id', $return_request->id)->whereIn('shipment_id', $invalid_shipments)->update(['status' => 3]);
-                return redirect()->back()->with('success', 'Return note has been Approved successfully' . PHP_EOL . 'Return Note ID: ' . $note->id);
             } else {
                 $return_request->status = 3;
                 $return_request->updated_by = $admin;

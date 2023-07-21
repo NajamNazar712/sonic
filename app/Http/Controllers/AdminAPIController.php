@@ -11071,17 +11071,61 @@ class AdminAPIController extends Controller
     }
 
     public function delivery_note_requests(Request $request){
+
+        $rules = [
+            'admin_role_id' => ['nullable'],
+            'admin_hubs' => ['nullable'],
+            'rider_trax_id' => ['nullable'],
+            'rider_name' => ['nullable'],
+            'consignee_phone' => ['nullable'],
+            'tracking_number' => ['nullable'],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+        $validate->setAttributeNames($this->names);
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } 
+
         $role_id = $request->admin_role_id;
         $admin_hubs = $request->admin_hubs;
+
+        $rider_trax_id = $request->rider_trax_id;
+        $rider_name = $request->rider_name;
+        $consignee_phone = $request->consignee_phone;
+        $tracking_number = $request->tracking_number;
+
         $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
             ->join('cities as c', 'c.id', '=', 'rider_delivery_note_requests.hub_id')
             ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
+            ->leftjoin('rider_delivery_note_request_shipments as rdnrs', 'rdnrs.request_note_id', '=', 'rider_delivery_note_requests.id')
+            ->join('shipments as s', 's.id', '=', 'rdnrs.shipment_id')
             ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
             ->where('rider_delivery_note_requests.status', 0)
             ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as city_name', 'ro.junction as junction', 'ro.start as start', 'ro.end as end')->orderBy('rider_delivery_note_requests.id', 'DESC');
         if($role_id != 1){
             $delivery_note_requests = $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', $admin_hubs);
         }
+
+        if($rider_trax_id != null){
+            $delivery_note_requests = $delivery_note_requests->where('r.trax_id',$rider_trax_id);
+        }
+
+        if($rider_name != null){
+            $delivery_note_requests = $delivery_note_requests->where('r.name',$rider_name);
+        }
+
+        if($consignee_phone != null){
+            $delivery_note_requests->where(function ($query) use ($consignee_phone) {
+                $query->where('s.consignee_phone_number_1', $consignee_phone)
+                ->orWhere('s.consignee_phone_number_2', $consignee_phone);
+            });
+        }
+
+        if ($tracking_number != null) {
+            $delivery_note_requests->where('s.tracking_number', $tracking_number);
+        }
+
+
         if($delivery_note_requests->exists()){
             $delivery_note_requests = $delivery_note_requests->get();
             $data = array();
@@ -12680,6 +12724,96 @@ class AdminAPIController extends Controller
         CargoManifestDraftBags::where('added_by', Auth::id())->delete();
 
         return redirect()->route('admin.cargo_manifest.create')->with(['success_html' => $success, 'error_html' => $error, 'print' => $print]);
+    }
+    
+    public function scan_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = explode(',', $request->tracking_number);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->pluck('tracking_number')->toArray();
+
+            if(count($tracking_number) == count($shipments))
+            {   
+                $shipment_scanned = self::quick_tracking_shipment_scan($tracking_number, 1, $request->admin_id);
+
+                return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
+            }
+            else{
+                $tracking_not_found = array_diff($tracking_number, $shipments);
+                return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
+        }
+    }
+
+    public static function quick_tracking_shipment_scan($tracking_number, $user_type, $admin_or_rider_id)
+    {
+        $shipment_scanned = array();
+                
+        foreach ($tracking_number as $tracking_no) {
+            $shipment = Shipment::where('tracking_number', $tracking_no)->first();
+
+            $details = array();
+
+            $details['case_nature_id'] = 0; // changed from complaint to case_nature_id required by waleed
+            $details['tracking_number'] = $tracking_no;
+            $details['amount'] = $shipment->amount;
+            $details['shipper'] = $shipment->user->name;
+            $details['consignee_name'] = $shipment->consignee_name;
+            $details['consignee_address'] = $shipment->consignee_address;
+            $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest('id')->first();
+            $details['status'] = $journey->shipment_status_shipper->name;
+
+            if ($journey->status_reason_id != null) {
+
+                $details['reason'] = $journey->shipment_status_reason->name;
+            } else {
+                $details['reason'] = null;
+            }
+
+            $details['remarks'] = $journey->remarks;
+            $details['status_id'] = $journey->shipper_status_id;
+            $details['current_status_date'] = Carbon::parse($journey->created_at)->toDateTimeString();
+            $details['origin'] = $shipment->pickup_address->city->name;
+            $details['destination'] = $shipment->consignee_city->name;
+
+            $delivery_note_shipment = Shipment::leftjoin('delivery_note_shipments', 'delivery_note_shipments.shipment_id', '=', 'shipments.id')
+                ->select('delivery_note_shipments.delivery_note_id as delivery_note_id')
+                ->where('delivery_note_shipments.shipment_id', '=', $shipment->id)
+                ->orderBy('delivery_note_shipments.delivery_note_id', 'desc');
+
+            if($delivery_note_shipment->exists()){
+                $delivery_note_shipment = $delivery_note_shipment->first();
+                $dn = str_pad($delivery_note_shipment->delivery_note_id, 6, '0', STR_PAD_LEFT);;
+            }
+            else{
+                $dn = '-';
+            }
+
+            $details['delivery_note_id'] = $dn;
+
+            $crm = CrmRequest::where('shipment_id',$shipment->id)->latest()->first();
+            
+            if(isset($crm) && $crm->status_id != 4){
+                $details['case_nature_id'] = $crm->id; // changed from complaint to case_nature_id required by waleed
+            }
+
+//            ShipmentScanningJourneyController::add($shipment->id, 8, $user_type, $admin_or_rider_id, null, null, null, 2);
+
+            $shipment_scanned[] = $details;
+        }
+
+        return $shipment_scanned;
     }
 
 }

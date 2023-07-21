@@ -14178,4 +14178,80 @@ RiderAPIController extends Controller
 
         }
     }
+
+    public function scan_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = explode(',', $request->tracking_number);
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->pluck('tracking_number')->toArray();
+
+            if(count($tracking_number) == count($shipments))
+            {   
+                $shipment_scanned = AdminApiController::quick_tracking_shipment_scan($tracking_number, 5, $request->rider_id);
+
+                return ['status' => 0, 'message' => 'Scanned Sucessfully!', 'data' => $shipment_scanned];
+            }
+            else{
+                $tracking_not_found = array_diff($tracking_number, $shipments);
+                return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
+        }
+    }
+
+    public function scan_rider_picked_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+            'call_from' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+            $shipper_status_id = Shipment::where('tracking_number', $tracking_number)->first()->shipper_status_id ?? NULL;
+            if(!$shipper_status_id){
+                return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
+            } else {
+                $data = [
+                    'tracking_number' => $tracking_number,
+                    'call_from' => $request->call_from
+                ];
+
+                switch ($shipper_status_id) {
+                    case 1 : //Booked...
+                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);
+                        break;
+
+                    case 17 : //Cancelled..
+                        return response()->json(['status' => 1, 'message' => 'Shipment is cancelled']);
+                        break;
+
+                    case 53 : //Rider Picked...
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already rider picked']);
+                        break;
+
+                    default:
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not on booked status']);
+                        break;
+                }
+            }
+        }
+    }
 }
