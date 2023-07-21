@@ -50,7 +50,7 @@
                                     <th class="border-primary border-darken-1">Status Date Time</th>
                                     <th class="border-primary border-darken-1">Status By</th>
                                     <th class="border-primary border-darken-1">Shipper Name</th>
-                                    <th class="border-primary border-darken-1">COD Value</th>
+                                    <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Last Scanned Location</th>
                                     <th class="border-primary border-darken-1">Last Scanned City</th>
                                     <th class="border-primary border-darken-1">Trax Id</th>
@@ -188,8 +188,11 @@
                             head.push('Status');
                             head.push('Status Date Time');
                             head.push('Status By');
+                            head.push('Shipper Name');
+                            head.push('COD Amount');
                             head.push('Last Scanned Location');
                             head.push('Last Scanned City');
+                            head.push('Trax Id');
                             head.push('Last Scanned By');
                             head.push('Last Scanned At');
                             head.push('Handover Note');
@@ -211,8 +214,11 @@
                                 row.push(values.status);
                                 row.push(values.status_at);
                                 row.push(values.status_by);
+                                row.push(values.shipper_name);
+                                row.push(values.cod_value);
                                 row.push(values.screen_location);
                                 row.push(values.city);
+                                row.push(values.trax_id);
                                 row.push(values.scanned_by);
                                 row.push(values.scanned_at);
                                 row.push(values.handover_note);
