@@ -190,7 +190,7 @@ class Kernel extends ConsoleKernel
         }
         
         //rv agent cron jobs start
-        $schedule->command('agent:changestatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('agent:changeStatus')->everyFiveMinutes()->withoutOverlapping()->runInBackground();
         
         //rv agent cron jobs end
 
