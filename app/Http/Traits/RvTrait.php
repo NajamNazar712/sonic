@@ -81,12 +81,14 @@ trait RvTrait
             RvShipmentAssignAgent::updateOrCreate(
                 [
                     'shipment_id' => $data['shipment_id'],
+                    'shipments_journey_id' => $data['shipments_journey_id'],
                 ],
                 [
                     'agent_id' => Auth::id(),
                     'rv_state_id' => $data['rv_state_id'] ?? 1,
                     'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
                     'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
+                    'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
                 ]
 
             );

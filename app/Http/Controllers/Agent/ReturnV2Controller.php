@@ -169,9 +169,14 @@ class ReturnV2Controller extends Controller
                                     if ($find_shipment_assigned_agent) {
                                         continue;
                                     }
+                                    $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->id)
+                                    ->latest()->first();
+
+                                    // if last shipment journey id  match with shipment journey id add continue
 
                                     $data = [
                                         'shipment_id' => $shipment->id,
+                                        'shipments_journey_id' => $shipments_journey_id,
                                         'rv_state_id' => 1, //Assigned
                                         'rv_assign_agent_status_id' => null,
                                         'rv_assign_agent_sub_status_id' => null,
