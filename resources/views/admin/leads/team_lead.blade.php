@@ -179,7 +179,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="joiningDateModalLabel">Add Days
-                        <strong>({{ Auth::User()->name }})</strong>
+                        {{-- <strong>({{ Auth::User()->name }})</strong> --}}
                     </h5>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -212,7 +212,8 @@
                         <div class="card days_show">
                             <div class="card-header">
                                 <strong>
-                                    <h5 class="card-title" style="font-weight: bold; text-decoration: underline;">Working Days</h5>
+                                    <h5 class="card-title" style="font-weight: bold; text-decoration: underline;">Working
+                                        Days</h5>
                                 </strong>
                             </div>
                             <div class="card-body" id="delete_days">
@@ -228,7 +229,8 @@
                                             data-del-id="{{ $employee_additional_day->id }}">
                                             <i class="fas fa-trash">Delete</i>
                                         </a>
-                                        <div class="card-title">{{ $employee_additional_day->working_days }}
+                                        <div class="card-title" id="used_dates">
+                                            {{ $employee_additional_day->working_days }}
                                             ({{ $workingDay }})
                                         </div>
                                     </div>
@@ -287,6 +289,8 @@
             </div>
         </div>
     </div>
+
+
     <div class="row justify-content-center">
 
     </div>
@@ -568,9 +572,6 @@
                 var delId = $(this).data('del-id');
                 var deleteDaysContainer = $('#delete_days');
                 var deleteIcon = $(this);
-
-
-
                 $.ajax({
                         url: '{{ route('admin.team_lead.delete_additional_days') }}',
                         type: 'GET',
@@ -580,8 +581,7 @@
                     })
                     .done(function(data) {
 
-                        var object = data
-                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
+                        var object = data.object; // Assuming 'data.object' contains the array or object you want to get the length of
 
                         console.log(object);
 
@@ -1434,28 +1434,41 @@
             });
 
 
+            var used_date;
+
+            var employee_working_days = @json($employee_additional_days); 
+
+            console.log(employee_working_days)
+            $('body').on('click', '.add_additional_days', function() {
+                $('#joiningDateModal').modal('show');
+                var employeeId = $(this).attr('data-id');
+                var employee = $(this).attr('data-ename');
+                $('#joiningDateModalLabel').html('Add Days <strong>(' + employee + ')</strong>');
+                $('#employee_id').val(employeeId);
+
+                for (var i = 0; i < employee_working_days.length; i++) {
+                    var workingDayObj = employee_working_days[i];
+                    var workingDay = workingDayObj.working_days;
+                    var used_date = workingDay.replace(')', '').split('(')[0].trim();
+                    var picker = replacement_last_working_day.pickadate('picker');
+                    picker.set('disable', [new Date(used_date)]);
+                }
+            });
+
             var today = new Date();
 
             var replacement_last_working_day = $('.datepicker').pickadate({
                 formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_for matted',
+                hiddenSuffix: '_formatted',
                 min: today,
+                disable: [],
                 onOpen: function() {
                     var daysToDisable = [2, 3, 4, 5, 6, 7];
-                    this.set('enable', [1]); 
-                    this.set('disable', daysToDisable); 
+                    this.set('enable', [1]);
+                    this.set('disable', daysToDisable);
                 }
             });
 
-            $('body').on('click', '.add_additional_days', function() {
-                $('#joiningDateModal').modal('show');
-
-                var employeeId = $(this).attr('data-id');
-
-                $('#employee_id').val(employeeId);
-
-
-            })
             $('body').on('click', '.activate_staff', function() {
                 var employeeId = $(this).attr('data-id');
                 swal({
