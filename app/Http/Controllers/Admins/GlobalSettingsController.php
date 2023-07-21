@@ -8480,14 +8480,14 @@ class GlobalSettingsController extends Controller
             $all_shippers = $bypass_all_shippers->setting_value;
         }
 
-        $bypass_only_shipper = GlobalSettings::where('type', 'returned_shipment_notification');
+        $bypass_only_shipper = GlobalSettings::where('type', 'returned_shipment_notification')->where('setting_value',0);
 
         if ($bypass_only_shipper->exists()) {
             $bypass_only_shipper = $bypass_only_shipper->first();
             $only_shippers = array_map('intval', explode(',', $bypass_only_shipper->text));
         }
 
-        $bypass_excluded_shippers = GlobalSettings::where('type', 'returned_shipment_notification');
+        $bypass_excluded_shippers = GlobalSettings::where('type', 'returned_shipment_notification')->where('setting_value',1);
 
         if ($bypass_excluded_shippers->exists()) {
             $bypass_excluded_shippers = $bypass_excluded_shippers->first();
