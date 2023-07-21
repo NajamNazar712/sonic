@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Admins;
 
 use App\EmployeeAdditionalDay;
 use DB;
-use Auth;
 use Exception;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -16,6 +15,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\RvAgentAssignHub;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\RvShipmentAssignAgentDetails;
+use App\Http\Models\Shipment;
+use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Illuminate\Support\Facades\Auth;
 
 class TeamLeadDashboardController extends Controller
 {
@@ -353,5 +359,282 @@ class TeamLeadDashboardController extends Controller
         $employee_additional_days = EmployeeAdditionalDay::find($request->id);
         $employee_additional_days->delete();
         return response()->json(['status' => 1, 'success'=> 'Successfully Deleted', 'object' => $object]);
+    }
+
+    
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description:
+    public function assign_agent(Request $request)
+    {
+        $shipment_ids = $request->shipment_ids;
+        if ($shipment_ids) {
+            foreach ($shipment_ids as $shipment_id) {
+                $check_already_assigned = RvShipmentAssignAgent::where('shipment_id', $shipment_id)->where('rv_state_id', 1)->first();
+                if ($check_already_assigned) {
+                    return response()->json(['status' => 1, 'error' => 'Shipments Already Assigned']);
+                }
+                $assign_shipments = new RvShipmentAssignAgent();
+                $assign_shipments->agent_id = $request->admin_id;
+                $assign_shipments->shipment_id = $shipment_id;
+                $assign_shipments->status = 1;
+                $assign_shipments->assigned_by = Auth::id();
+                $assign_shipments->save();
+
+                $return_assign_log = new RvShipmentAssignAgentDetails();
+                $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                $return_assign_log->status = 0;
+                $return_assign_log->assigned_by = Auth::id();
+                $return_assign_log->save();
+
+                // // set record in login/logout table
+                // $check_agent_return_confirmation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
+
+                // if(!$check_agent_return_confirmation->exists()){
+
+
+                //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                //      ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
+
+                //      if($agent_role->exists()){
+                //          $agent_return_confirmation = new AgentReturnConfirmation;
+                //          $agent_return_confirmation->admin_id = $request->admin_id;
+                //          $agent_return_confirmation->return_assigned_shipment_id = $assign_shipments->id;
+                //          $agent_return_confirmation->current_date = Carbon::now()->format("Y-m-d");
+                //          $agent_return_confirmation->save();
+                //      }
+                //  }
+                //  else{
+                //     $check_agent_return_confirmation = $check_agent_return_confirmation->get()->first();
+                //     $check_agent_return_confirmation->return_assigned_shipment_id = $assign_shipments->id;
+                //     $check_agent_return_confirmation->save();
+                //  }
+                // // set record in login/logout table end
+
+            }
+            return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+        } else {
+            return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
+        }
+    }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Unassigning shipment from agent 
+    public function unassign_agent(Request $request)
+    {
+        $shipment_ids = $request->shipment_ids;
+
+        if ($request->action == 'un-assign') {
+            foreach ($shipment_ids as $shipment) {
+                $rv_unassign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment)->where('rv_state_id', 1);
+                if ($rv_unassign_agent->exists()) {
+                    $rv_unassign_agent = $rv_unassign_agent->latest()->first();
+                    $rv_unassign_agent->rv_state_id = 2;
+                    $rv_unassign_agent->updated_by_id = Auth::id();
+                    $rv_unassign_agent->save();
+
+
+                    $return_assign_log = new RvShipmentAssignAgentDetails();
+                    $return_assign_log->rv_shipment_assign_agent_id = $rv_unassign_agent->id;
+                    $return_assign_log->rv_state_id = 2;
+                    $return_assign_log->updated_by_id = Auth::id();
+                    $return_assign_log->save();
+                }
+            }
+            return ['status' => 1, 'success' => "Agent Unassigned successfully"];
+        }
+    }
+
+    // Heading: N/A
+    // Siderbar: N/A
+    // URL: 
+    // Description: Assigning Unassigning Agents from Excel Sheet
+    public function assign_agent_excel(Request $request)
+    {
+        $names = [
+            'tracking_number' => 'Tracking Number',
+            'agent_id' => 'Agent ID'
+        ];
+        $messages = [
+            'required' => ':attribute is Required.',
+            'integer' => ':attribute must be an Integer.',
+            'digits_between' => ':attribute must be between :min and :max Digits.',
+            'unique' => ':attribute is already Present.'
+        ];
+        $rules_with_agent = [
+            'tracking_number' => ['required', 'integer'],
+            'agent_id' => ['required', 'integer']
+        ];
+
+        $rules_without_agent = [
+            'tracking_number' => ['required', 'integer']
+        ];
+        $fields = [0 => 'tracking_number', 1 => 'agent_id'];
+
+        if ($file = $request->file('shipments')) {
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+            $header = ['Tracking Number', 'Agent ID'];
+        }
+        if (isset($spreadsheet)) {
+            $header_correct = TRUE;
+
+            foreach ($spreadsheet[0] as $index => $header_value) {
+                if ($index == 1) {
+                } elseif (!isset($header[$index]) || $header_value != $header[$index]) {
+                    $header_correct = FALSE;
+                    break;
+                }
+            }
+
+            if (!$header_correct) {
+                return redirect()->back()->with('error', 'Invalid Columns, Kindly follow the Template provided');
+            } else {
+                unset($spreadsheet[0]);
+            }
+        }
+        if (!empty($spreadsheet) || !isset($spreadsheet)) {
+            $rows = array();
+            foreach ($spreadsheet as $spreadsheet_row) {
+                $row = array();
+
+                foreach ($spreadsheet_row as $key => $value) {
+                    $row[$fields[$key]] = $value;
+                }
+
+                $rows[] = $row;
+            }
+
+            unset($spreadsheet);
+            $errors = array();
+            $tracking_ids = array();
+            $tracking_id_row = array();
+            foreach ($rows as $key => $row) {
+                $row_id = $key + 2;
+                if (!empty($row['agent_id'])) {
+                    $validate = Validator::make($row, $rules_with_agent, $messages);
+                } else {
+                    $validate = Validator::make($row, $rules_without_agent, $messages);
+                }
+
+                $validate->setAttributeNames($names);
+
+                if ($validate->fails()) {
+                    $errors['Row #' . $row_id] = $validate->errors()->all();
+                }
+                if (empty($errors['Row #' . $row_id])) {
+                    if (!empty(trim($row['tracking_number']))) {
+                        if (empty($tracking_ids)) {
+                            $tracking_ids[] = $row['tracking_number'];
+                            $tracking_id_row[$row['tracking_number']] = $row_id;
+                        } else {
+                            if (in_array($row['tracking_number'], $tracking_ids)) {
+                                $errors['Row #' . $row_id][] = 'Same Tracking Number as of Row #' . $tracking_id_row[$row['tracking_number']];
+                            } else {
+                                $tracking_ids[] = $row['tracking_number'];
+                                $tracking_id_row[$row['tracking_number']] = $row_id;
+                            }
+                        }
+                    }
+                    if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
+                        $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
+                    }
+                    if (!empty($row['agent_id'])) { //if agent = 1 or 2 or 3
+                        if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->where('a.status', 1)->where('a.id', $row['agent_id'])->exists()) {
+                            $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id']; //remove for ticket no 4934
+                        }
+                    }
+                }
+            }
+            if (empty($errors)) {
+                $tracking_numbers = array();
+                foreach ($rows as $key => $row) {
+                    $row_id = $key + 2;
+                    $shipment_id = trim($row['tracking_number']); //111
+                    $agent_id = trim($row['agent_id']); //22
+
+                    $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
+                    // $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
+                    // if ($check_already_assigned) {
+                    //     $check_already_assigned->status = 0;
+                    //     $check_already_assigned->save();
+                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                    //     $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
+                    //     $return_assign_log->status = 4;
+                    //     $return_assign_log->assigned_by = Auth::id();
+                    //     $return_assign_log->save();
+                    // }
+                    // $assign_shipments = new ReturnAssignedShipments();
+                    // $assign_shipments->admin_id = $agent_id;
+                    // $assign_shipments->shipment_id =  $id_shipment->id;
+                    // $assign_shipments->status = !empty($agent_id) ? 1 : 0;
+                    // $assign_shipments->assigned_by = Auth::id();
+                    // $assign_shipments->save();
+
+                    // $return_assign_log = new ReturnAssignedShipmentLogs();
+                    // $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
+                    // $return_assign_log->status = !empty($agent_id) ? 0 : 4;
+                    // $return_assign_log->assigned_by = Auth::id();
+                    // $return_assign_log->save();
+
+
+                    //if agent is !empty
+
+                    // if(!empty($agent_id)){
+                    //     $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
+
+                    //     if(!$check_agent_return_confrimation->exists()){
+                    //         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+                    //             ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
+
+                    //         if($agent_role->exists()){
+                    //             $agent_return_confrimation = new AgentReturnConfirmation;
+                    //             $agent_return_confrimation->admin_id = $agent_id;
+                    //             $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //             $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
+                    //             $agent_return_confrimation->save();
+                    //         }
+                    //     }
+                    //     else{
+                    //         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
+                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //         $check_agent_return_confrimation->save();
+                    //     }
+
+                    // }else {
+                    //     //if agent data is empty
+                    //     $check_agent_return_confrimation = AgentReturnConfirmation::
+                    //             where('return_assigned_shipment_id', $assign_shipments->id)
+                    //                 ->orderby('current_date','desc')->first();
+                    //     if(!empty($check_agent_return_confrimation)) {
+                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
+                    //         $check_agent_return_confrimation->save();
+                    //     }
+
+                    // }
+                    //set record in login/logut table end
+
+                    $tracking_numbers['Row #' . $row_id] = $shipment_id;
+                }
+                $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
+                    return $row . ': ' . $tracking_number;
+                }, array_keys($tracking_numbers), $tracking_numbers));
+
+                return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Updated with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            } else {
+                $errors = array_map(function ($row, $errors) {
+                    return $row . ':' . PHP_EOL . implode(' | ', $errors);
+                }, array_keys($errors), $errors);
+
+                return redirect()->back()->withErrors($errors);
+            }
+        } else {
+            return redirect()->back()->with('error', 'No Shipments in File');
+        }
     }
 }
