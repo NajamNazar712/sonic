@@ -2143,7 +2143,7 @@
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-12 align-self-center mt-3">
-                            <h3 class="text-center">Designation Update !</h3>
+                            <h3 class="text-center">Update Designation !</h3>
                         </div>
                         <div class="col-12 align-self-center text-center">
                             <label for="admin_discount_type" class="mr-2">No</label>
@@ -2156,8 +2156,8 @@
                         </div>
                         <div class="col-12 d-flex justify-content-center">
                             <div class="form-group">
-                                <button type="submit" class="btn btn-primary mr-2" id="submit_profile_no">No</button>
-                                <button type="submit" class="btn btn-primary" id="submit_profile_yes">Yes</button>
+{{--                                <button type="submit" class="btn btn-primary mr-2" id="submit_profile_no">No</button>--}}
+                                <button type="submit" class="btn btn-primary" id="submit_profile_yes">Submit</button>
                             </div>
                         </div>
                     </div>
@@ -2234,7 +2234,6 @@
 
                 var formData = $('#profile-form').serialize();
 
-                console.log(formData);
                 $.ajax({
                     url: '{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}',
                     method: 'POST',
@@ -2254,6 +2253,7 @@
                     }
                     $("#submit_profile_modal").modal('hide');
                 });
+                $("#admin_discount_type").prop("checked", false);
             });
 
             $("#submit_profile_no").click(function() {
