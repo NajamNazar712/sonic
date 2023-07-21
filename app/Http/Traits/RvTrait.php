@@ -146,6 +146,9 @@ trait RvTrait
     {
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
 
+
+        $shipmentAssignAgentTableColumns['rv_state_id'] = ($request->rv_assign_agent_status_id == 6) ? 2 : 4;
+
         if ($admin_agent->employee->staff_category_id == 3) {
             $assigned_agent->increment('total_shipments');
             $assigned_agent->increment('actual_productivity');
@@ -274,6 +277,7 @@ trait RvTrait
                 $reattempt_remarks_col->shipment_id = $request->shipment_id;
                 $reattempt_remarks_col->remarks = 'Manual';
                 $reattempt_remarks_col->save();
+                
             }
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Re-Attempt"];
@@ -497,6 +501,7 @@ trait RvTrait
         $status->save();
 
         $rv_shipment_assign_agent->increment('unresponsive_count');
+        $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
         
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if($rv_shipment_assign_agent->unresponsive_count == 3){

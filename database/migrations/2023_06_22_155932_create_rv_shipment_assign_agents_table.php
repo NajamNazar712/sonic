@@ -17,6 +17,8 @@ class CreateRvShipmentAssignAgentsTable extends Migration
             $table->increments('id');
             $table->integer('agent_id')->index();
             $table->integer('shipment_id')->index();
+            $table->integer('shipments_journey_id')->index();
+            $table->integer('shipment_id')->index();
             $table->integer('rv_assign_agent_status_id')->index()->nullable();
             $table->integer('rv_assign_agent_sub_status_id')->index()->nullable();
             $table->integer('rv_state_id')->index();
@@ -29,6 +31,7 @@ class CreateRvShipmentAssignAgentsTable extends Migration
             $table->integer('call_to_id')->default(0);
             $table->date('state_date');
             $table->integer('unresponsive_count')->default(0);
+            $table->dateTime('unresponsive_attempt_time')->nullable();
             $table->timestamps();
         });
     }
