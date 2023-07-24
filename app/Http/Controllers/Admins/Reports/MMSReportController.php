@@ -112,11 +112,9 @@ class MMSReportController extends Controller
 
             if ($to_id->exists()) {
                 $to_id = $to_id->first()->id;
-                if($to_id){
-                    $sales->where('sj.id', '>=', $from_id)
-                        ->where('sj.id', '<=', $to_id);
-                }
 
+                $sales->where('sj.id', '>=', $from_id)
+                    ->where('sj.id', '<=', $to_id);
             }
         }
 
