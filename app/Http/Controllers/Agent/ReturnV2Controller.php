@@ -169,9 +169,14 @@ class ReturnV2Controller extends Controller
                                     if ($find_shipment_assigned_agent) {
                                         continue;
                                     }
+                                    $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->id)
+                                    ->latest()->first();
+
+                                    // if last shipment journey id  match with shipment journey id add continue
 
                                     $data = [
                                         'shipment_id' => $shipment->id,
+                                        'shipments_journey_id' => $shipments_journey_id->id,
                                         'rv_state_id' => 1, //Assigned
                                         'rv_assign_agent_status_id' => null,
                                         'rv_assign_agent_sub_status_id' => null,
@@ -213,15 +218,16 @@ class ReturnV2Controller extends Controller
                             if (isset($rider_info)) {
                                 $rider_info = $rider_info->first();
                                 $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
-                                $rider_details['attempted_time'] = ($rider_info->created_at)->format('Y/m/d H:i:s');
+                                $rider_details['reason'] =   $rider_details['reason'] ?   $rider_details['reason'] : '-';
+                                $rider_details['attempted_time'] = (isset($rider_info->created_at)) ?  ($rider_info->created_at)->format('Y/m/d H:i:s') :'-';
                                 $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                                $rider_details['remarks'] = $rider_details['remarks']->remarks;
+                                $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
                             }
 
                             else{
-                                $rider_details['reason'] = '-----------';
-                                $rider_details['attempted_time'] = '-----------';
-                                $rider_details['remarks'] = '-----------';
+                                $rider_details['reason'] = '-';
+                                $rider_details['attempted_time'] = '-';
+                                $rider_details['remarks'] = '-';
                             }
 
 
