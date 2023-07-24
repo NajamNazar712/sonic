@@ -275,8 +275,7 @@ class ReturnController extends Controller
                 'ad.name as agent_name',
                 'rvsaa.unresponsive_count as rvsaa_count',
                 'rvsaa.rv_assign_agent_status_id as rvsaa_status',
-                'rvsaa.updated_at as rvsaa_updated_at',
-
+                'rvsaa.updated_at as rvsaa_updated_at'
             )
 
             ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])

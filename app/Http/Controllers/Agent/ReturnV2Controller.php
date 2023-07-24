@@ -238,7 +238,9 @@ class ReturnV2Controller extends Controller
                                     if ($exists) {
                                         $image_location['image'] =  asset(Storage::url($rider_delivery->picture_path));
                                     } else {
-                                        $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                        // $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                        $image_location['image'] = '-----';
+
                                     }
                                 }
                                 if ($rider_delivery->audio_path != null) {
@@ -246,7 +248,9 @@ class ReturnV2Controller extends Controller
                                     if ($exists) {
                                         $image_location['audio'] =  asset(Storage::url($rider_delivery->audio_path));
                                     } else {
-                                        $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                        // $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                        $image_location['audio'] = '-----';
+
                                     }
                                 }
 
