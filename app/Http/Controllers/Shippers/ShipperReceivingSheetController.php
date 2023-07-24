@@ -55,7 +55,7 @@ class ShipperReceivingSheetController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
-            if ($shipment->shipper_status_id != 1) {
+            if (!in_array($shipment->shipper_status_id,[1,64])) {
                 unset($shipment_ids[$key]);
 
                 // return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
@@ -154,7 +154,7 @@ class ShipperReceivingSheetController extends Controller
             ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
             ->leftjoin('users as u', 'shipments.user_id', '=', 'u.id')
             ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet', 'rs.id AS receiving_sheet_no','shipments.amount', 'u.name as user', 'u.id as user_id', 'shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as consignee_phone_no', 'shipments.consignee_address as address', 'shipments.shipper_status_id as status_id', 'shipments.special_instructions as special_instructions', 'oc.id as origin_id', 'dc.id as destination_id')
-            ->where('shipments.shipper_status_id', 1)
+            ->whereIn('shipments.shipper_status_id', [1,64])
             ->where('shipments.packaging_material_request', 0)
             ->where(function ($query) {
                 $query->whereNull('rs.status')->orWhere('rs.status', 0);
