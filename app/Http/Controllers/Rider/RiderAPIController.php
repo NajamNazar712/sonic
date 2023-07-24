@@ -14254,6 +14254,8 @@ RiderAPIController extends Controller
             $delivery_note_data->last_updated_at = Carbon::now();
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->save();
+
+            return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!']);
         }
     }
 }
