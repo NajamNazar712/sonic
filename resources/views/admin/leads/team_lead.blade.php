@@ -581,7 +581,8 @@
                     })
                     .done(function(data) {
 
-                        var object = data.object; // Assuming 'data.object' contains the array or object you want to get the length of
+                        var object = data
+                        .object; // Assuming 'data.object' contains the array or object you want to get the length of
 
                         console.log(object);
 
@@ -611,6 +612,9 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+
+                        // window.location.href = "{{route("admin.team_lead.index")}}";
+
                     })
                     .fail(function(xhr) {
                         console.log(xhr.statusText);
@@ -1436,7 +1440,7 @@
 
             var used_date;
 
-            var employee_working_days = @json($employee_additional_days); 
+            var employee_working_days = @json($employee_additional_days);
 
             console.log(employee_working_days)
             $('body').on('click', '.add_additional_days', function() {
