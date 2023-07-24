@@ -176,7 +176,7 @@ class ReturnV2Controller extends Controller
 
                                     $data = [
                                         'shipment_id' => $shipment->id,
-                                        'shipments_journey_id' => $shipments_journey_id,
+                                        'shipments_journey_id' => $shipments_journey_id->id,
                                         'rv_state_id' => 1, //Assigned
                                         'rv_assign_agent_status_id' => null,
                                         'rv_assign_agent_sub_status_id' => null,

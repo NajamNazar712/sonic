@@ -41,23 +41,22 @@ trait RvTrait
     // Siderbar: N/A
     // URL: 
     // Description:
-    protected function getShipmentConsigneeCities($shipment_id){
-        if($shipment_id){
-            $shipment = Shipment::where('id',$shipment_id)->first();
-            if($shipment){
-                if($shipment->shipping_mode_id == 2){
+    protected function getShipmentConsigneeCities($shipment_id)
+    {
+        if ($shipment_id) {
+            $shipment = Shipment::where('id', $shipment_id)->first();
+            if ($shipment) {
+                if ($shipment->shipping_mode_id == 2) {
                     $restricted_cities = RestrictedCityIntercept::pluck('city_id')->toArray();
-                $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
-                    ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
-                    ->select('c.id as id', 'c.name as name')
-                    ->where('shipments.id', $shipment_id)
-                    ->where('cd.shipping_mode_id',2)
-                    ->where('c.status', 1)
-                    ->whereNotNull('c.zone_id')
-                    ->whereNotIn('c.id', $restricted_cities);
-
-                }
-                else{
+                    $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
+                        ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
+                        ->select('c.id as id', 'c.name as name')
+                        ->where('shipments.id', $shipment_id)
+                        ->where('cd.shipping_mode_id', 2)
+                        ->where('c.status', 1)
+                        ->whereNotNull('c.zone_id')
+                        ->whereNotIn('c.id', $restricted_cities);
+                } else {
                     $consignee_cities = Shipment::leftjoin('city_deliveries as cd', 'cd.booking_type_id', '=', 'shipments.booking_type_id')
                         ->leftjoin('cities as c', 'c.id', '=', 'cd.city_id')
                         ->select('c.id as id', 'c.name as name')
@@ -90,13 +89,27 @@ trait RvTrait
                     'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
                     'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
                 ]
-
             );
+
+            $rv_shipment_assign_agent_id = RvShipmentAssignAgent::max('id');
+
+            RvShipmentAssignAgentDetails::create([
+                'rv_shipment_assign_agent_id' => $rv_shipment_assign_agent_id,
+                'shipment_id' => $data['shipment_id'],
+                'shipments_journey_id' => $data['shipments_journey_id'],
+                'agent_id' => Auth::id(),
+                'rv_state_id' => $data['rv_state_id'] ?? 1,
+                'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
+                'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
+                'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
+            ]);
+
             return true;
         } catch (\Throwable $th) {
             return ['status' => 0, 'error' => $th->getMessage()];
         }
     }
+
 
     // Heading: N/A
     // Siderbar: N/A
@@ -172,13 +185,13 @@ trait RvTrait
     protected function add_shipment_agent($request, $shipment_assign_agent)
     {
         //updating columns in shipmen assign agent table 
-        
+
         $add_agent = new RvShipmentAgent();
         $add_agent->agent_id = $shipment_assign_agent->agent_id;
         $add_agent->total_shipments  = $add_agent->total_shipments + 1;
         $add_agent->actual_productivity  = $add_agent->actual_productivity + 1;
         $add_agent->save();
-        
+
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $add_agent);
 
         $shipment_assign_agent_table_columns['updated_type_id'] = 2; // agent type
@@ -279,14 +292,13 @@ trait RvTrait
                 $reattempt_remarks_col->shipment_id = $request->shipment_id;
                 $reattempt_remarks_col->remarks = 'Manual';
                 $reattempt_remarks_col->save();
-                
             }
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Re-Attempt"];
         }
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Reattempted!"];
     }
-    
+
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -313,7 +325,7 @@ trait RvTrait
             if ($parcel->shipment_type == 1) {
                 if ($parcel->booking_type_id != 4) {
                     ShipmentChargesController::return($request->shipment_id);
-                    
+
                     if ($parcel->packaging_material_request != 1) {
                         AdminFinanceController::add_payment($request->shipment_id, 1);
                     }
@@ -334,7 +346,7 @@ trait RvTrait
         return ['status' => 0, 'error' => "Shipment is in different status, Cannot mark it as Return - Confirm!"];
     }
 
-    
+
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -493,7 +505,7 @@ trait RvTrait
     {
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
-        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->first();
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
 
         $status = new RvAgentCallHistory();
         $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
@@ -504,9 +516,9 @@ trait RvTrait
 
         $rv_shipment_assign_agent->increment('unresponsive_count');
         $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
-        
+
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
-        if($rv_shipment_assign_agent->unresponsive_count == 3){
+        if ($rv_shipment_assign_agent->unresponsive_count == 3) {
             $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
             $shipment  = $shipment->first();
@@ -517,7 +529,7 @@ trait RvTrait
         }
 
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
-        else if ($rv_shipment_assign_agent->unresponsive_count == 4 && $rv_shipment_assign_agent->rv_state_id  == 1){
+        else if ($rv_shipment_assign_agent->unresponsive_count == 4 && $rv_shipment_assign_agent->rv_state_id  == 1) {
             $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 3; //return confirm
         }
@@ -846,7 +858,7 @@ trait RvTrait
     }
 
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: for bulk shipments
@@ -906,7 +918,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: Updating shipment status (return confirm / Reattempt) from Excel Sheet in Rcp Screen
@@ -1126,7 +1138,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -1233,7 +1245,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: Reattempt for bulk shipments
@@ -1293,7 +1305,7 @@ trait RvTrait
     }
 
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: Used in Delivery Controller Approving Intercept Request
@@ -1378,7 +1390,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: Used in Delivery Controller Rejecting Intercept Request
@@ -1441,7 +1453,7 @@ trait RvTrait
         }
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -1547,7 +1559,7 @@ trait RvTrait
     }
 
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: RetailReturnController's Function for reattempt 
@@ -1590,7 +1602,7 @@ trait RvTrait
 
     //Shipper Controller Functions
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -1613,7 +1625,7 @@ trait RvTrait
         return ['status' => 0, 'error' => "Something went wrong, try again later!"];
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description:
@@ -1639,7 +1651,7 @@ trait RvTrait
                         $last_reason_id = NULL;
                     }
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-                    
+
                     if ($journey) {
                         NotificationsController::send(33, $request->shipment_id);
                     }
@@ -1654,7 +1666,7 @@ trait RvTrait
         return ['status' => 0, 'error' => "Something went wrong, try again later!"];
     }
 
-     // Heading: N/A
+    // Heading: N/A
     // Siderbar: N/A
     // URL: 
     // Description: ShipperInterceptRebookcontroller

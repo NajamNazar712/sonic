@@ -18,7 +18,7 @@ class CreateRvShipmentAssignAgentsTable extends Migration
             $table->integer('agent_id')->index();
             $table->integer('shipment_id')->index();
             $table->integer('shipments_journey_id')->index();
-            $table->integer('shipment_id')->index();
+            $table->integer('last_shipments_journey_id')->index();
             $table->integer('rv_assign_agent_status_id')->index()->nullable();
             $table->integer('rv_assign_agent_sub_status_id')->index()->nullable();
             $table->integer('rv_state_id')->index();
