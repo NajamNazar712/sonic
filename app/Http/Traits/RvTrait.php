@@ -160,10 +160,7 @@ trait RvTrait
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
-
-
-        $shipmentAssignAgentTableColumns['rv_state_id'] = ($request->rv_assign_agent_status_id == 6) ? 2 : 4;
-
+        
         if ($admin_agent->employee->staff_category_id == 3) {
             $assigned_agent->increment('total_shipments');
             $assigned_agent->increment('actual_productivity');
@@ -172,6 +169,9 @@ trait RvTrait
             $assigned_agent->increment('already_updated');
             $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
         }
+        
+        //if shipment status is unresponsive set rv_state as unassign (2) else set as completed(4)
+        $shipment_assign_agent_table_columns['rv_state_id'] = ($request->rv_assign_agent_status_id == 6) ? 2 : 4;
 
         $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
@@ -519,7 +519,7 @@ trait RvTrait
 
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-            $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
+            // $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
             $shipment  = $shipment->first();
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
@@ -530,7 +530,7 @@ trait RvTrait
 
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
         else if ($rv_shipment_assign_agent->unresponsive_count == 4 && $rv_shipment_assign_agent->rv_state_id  == 1) {
-            $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
+            // $rv_shipment_assign_agent->rv_state_id = 2; //unassign 
             $rv_shipment_assign_agent->rv_assign_agent_status_id = 3; //return confirm
         }
         return response()->json(['status' => 1]);
