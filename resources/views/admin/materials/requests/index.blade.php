@@ -15,29 +15,29 @@
                 <div class="container">
                     <div class="row">
                         <div class="col-md-4">
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                    <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                            </span>
+                                </div>
+                                <input type="text" name="requested_from_date"
+                                    class="form-control bg-primary border-primary white rounded-right"
+                                    id="requested_from_date" placeholder="Requested Date From">
+                            </div>
                         </div>
-                        <input type="text" name="requested_from_date"
-                               class="form-control bg-primary border-primary white rounded-right"
-                               id="requested_from_date" placeholder="Requested Date From">
-                    </div>
-                </div>
                         <div class="col-md-4">
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                    <span class="la la-calendar-o small-calender-icon"></span>
-                                                    </span>
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o small-calender-icon"></span>
+                                                            </span>
+                                </div>
+                                <input type="text" name="requested_to_date"
+                                    class="form-control bg-primary border-primary white rounded-right"
+                                    id="requested_to_date" placeholder="Requested Date To">
+                            </div>
                         </div>
-                        <input type="text" name="requested_to_date"
-                               class="form-control bg-primary border-primary white rounded-right"
-                               id="requested_to_date" placeholder="Requested Date To">
-                    </div>
-                </div>
                         <div class="col-md-2">
                             <div class="form-group input-group" style="margin-top: -20px ">
                                 <button type="button" id="search_filter_btn"
@@ -45,7 +45,7 @@
                                             class="la la-search" style="margin-right: 10px"></i> Search
                                 </button>
                             </div>
-                    </div>
+                        </div>
                     </div>
                 </div>
                 
