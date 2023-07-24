@@ -530,6 +530,7 @@ Route::name('api.')->group(function () {
                 Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
                 Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
+                Route::post('note_requests_v2', 'AdminAPIController@delivery_note_requests_v2')->name('note_requests');
                 Route::post('reject', 'AdminAPIController@delivery_note_requests_reject')->name('reject');
                 Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
