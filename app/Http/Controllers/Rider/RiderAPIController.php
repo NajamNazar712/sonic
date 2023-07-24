@@ -13182,7 +13182,7 @@ RiderAPIController extends Controller
                 $shipment_otp->longitude = $request->longitude;
                 $shipment_otp->save();
                 NotificationsController::send(192, $rider_id, $shipment_id);
-                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
+                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully through call!', 'otp' => $otp]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
             }
