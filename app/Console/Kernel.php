@@ -144,6 +144,8 @@ class Kernel extends ConsoleKernel
 		'App\Console\Commands\CreateInvoiceOriginWise',
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
+        'App\Console\Commands\AgentUnassignedTicket ',
+
         ];
 
     /**
@@ -186,6 +188,16 @@ class Kernel extends ConsoleKernel
                 $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
                 ->dailyAt($dailyAt)
                 ->runInBackground();
+            }
+        }
+
+        $employee_shifts = EmployeeShift::where('shift_type_id', 2)->get();
+        if(count($employee_shifts)){
+            foreach($employee_shifts as $employee_shift)
+            {
+                // run after 30 mins from the employee_shift ends, to unassign ticket from the contractual employees
+                $dailyAt = Carbon::parse($employee_shift->end_time)->addMinutes(30)->format('H:i:s');
+                $schedule->command('agent:unassignedTicket')->dailyAt($dailyAt)->runInBackground();
             }
         }
         

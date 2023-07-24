@@ -229,7 +229,7 @@ class TeamLeadDashboardController extends Controller
                             }
 
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename='.$result->employee_name.' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
                             }
 
                         }
