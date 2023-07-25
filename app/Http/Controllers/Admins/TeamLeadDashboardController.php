@@ -101,6 +101,7 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', Auth::id())
             ->where('employees.is_line_manager', 0)
+            ->where('et.id', 1)
             ->groupBy('staff.id')
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
