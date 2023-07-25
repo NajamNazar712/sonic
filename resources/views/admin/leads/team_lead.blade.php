@@ -241,7 +241,6 @@
                 <th class="border-primary border-darken-1">Phone Number</th>
                 <th class="border-primary border-darken-1">Official Email</th>
                 <th class="border-primary border-darken-1">Employee Type</th>
-                <th class="border-primary border-darken-1">Rider Main Category</th>
                 <th class="border-primary border-darken-1">Incentive Amount</th>
                 <th class="border-primary border-darken-1">Designation</th>
                 <th class="border-primary border-darken-1">Department</th>
@@ -1077,11 +1076,6 @@
                         data: 'employee_type',
                         name: 'et.name',
                         class: 'align-middle employee_type'
-                    },
-                    {
-                        data: 'rider_main_category',
-                        name: 'rmc.name',
-                        class: 'align-middle rider_main_category'
                     },
                     {
                         data: 'incentive_amount',
