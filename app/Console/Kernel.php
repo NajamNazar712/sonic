@@ -145,6 +145,7 @@ class Kernel extends ConsoleKernel
         'App\Console\Commands\InvalidEmailVisit',
         'App\Console\Commands\NotificationReturnedDeliveredToShipper',
         // 'App\Console\Commands\AgentUnassignedTicket ',
+        'App\Console\Commands\AgentSarNotification',
 
         ];
 
