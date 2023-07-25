@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Leads Management')
+@section('title', 'Team Lead Management')
 
 @section('content')
     <h1 class="mb-1">

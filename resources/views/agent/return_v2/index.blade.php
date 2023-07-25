@@ -17,7 +17,7 @@
                             <div class="border-primary">
                                 <div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290"></div>
                                 <div class="d-flex flex-wrap align-items-center bg-primary">
-                                    <div class="font-medium-3 white" style="margin-left: 575px";>Virtual RCP Agent Screen
+                                    <div class="font-medium-3 white" style="margin:auto;";>Virtual RCP Agent Screen
                                     </div>
                                 </div>
 
@@ -956,6 +956,13 @@
                                 window.location.href = "{{ route('agent.login') }}";
                             } else if (data.status == 4) {
                                 window.location.href = "{{ route('agent.login') }}";
+                            } else if (data.status == 2) {
+                                $('#get_ticket_button').prop('disabled', false);
+                                var error = "No Shipment Assigned";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
                             }
                         })
                 }
@@ -1029,7 +1036,7 @@
                             }
                         })
                         .done(function(data) {
-                            if (data.status == 1 && (id == 1 || id == 4)) {
+                            if (data.status == 1 && (id == 1 || id == 5)) {
                                 var options = '';
                                 options += '<option value="">Select Reason (*)</option>';
 

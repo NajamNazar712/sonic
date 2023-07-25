@@ -23,14 +23,14 @@ class RvAssignAgentSubStatusSeeder extends Seeder
             array('name' => 'Number Not Pertain to Consignee','rv_assign_agent_status_id'=> 1,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Refused after opening the shipment','rv_assign_agent_status_id'=> 1,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
             array('name' => 'Delay in Delivery','rv_assign_agent_status_id'=> 1,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Mark for self collection','rv_assign_agent_status_id'=> 4,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'NSA / OSA Hold','rv_assign_agent_status_id'=> 4, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Hold','rv_assign_agent_status_id'=> 4, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Invalid','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Powered Off','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Not Answered','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Hang up by Customer','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
-            array('name' => 'Number Busy','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Mark for self collection','rv_assign_agent_status_id'=> 5,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'NSA / OSA Hold','rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Hold','rv_assign_agent_status_id'=> 5, 'is_active'=> 0, 'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Invalid','rv_assign_agent_status_id'=> 6,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Powered Off','rv_assign_agent_status_id'=> 6,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Not Answered','rv_assign_agent_status_id'=> 6,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Hang up by Customer','rv_assign_agent_status_id'=> 6,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
+            array('name' => 'Number Busy','rv_assign_agent_status_id'=> 6,'is_active'=>1,'created_at' => $timestamp, 'updated_at' => $timestamp),
         ));
     }
 }
