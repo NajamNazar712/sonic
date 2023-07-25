@@ -10,7 +10,6 @@
 
     @include('admin.inc.messages')
 
-
     <div class="row justify-content-center">
         <div class="col-3" id="total_leads_div">
             <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
@@ -175,78 +174,7 @@
 
     <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="joiningDateModalLabel">Add Days
-                        {{-- <strong>({{ Auth::User()->name }})</strong> --}}
-                    </h5>
 
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <form id="myForm" action="{{ route('admin.team_lead.add_additional_days') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <input type="hidden" value="" id="employee_id" name="employee_id">
-                        <div class="row">
-                            <div class="col">
-                                <fieldset class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                        <span
-                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                            <span class="la la-calendar-o small-calender-icon"></span>
-                                        </span>
-                                    </div>
-                                    <input type="text" data-rule-required="true"
-                                        data-msg-required="This Field is required"
-                                        class="form-control bg-primary border-primary white rounded-right pickadate datepicker"
-                                        id="joining_date" placeholder="Add Days" name="add_additional_days">
-                                </fieldset>
-                            </div>
-                        </div>
-                    </div>
-
-                    @if ($employee_additional_days->isNotEmpty())
-                        <div class="card days_show">
-                            <div class="card-header">
-                                <strong>
-                                    <h5 class="card-title" style="font-weight: bold; text-decoration: underline;">Working
-                                        Days</h5>
-                                </strong>
-                            </div>
-                            <div class="card-body" id="delete_days">
-
-                                @foreach ($employee_additional_days as $employee_additional_day)
-                                    @php
-                                        $workingDay = \Carbon\Carbon::parse($employee_additional_day->working_days)->format('l');
-                                    @endphp
-
-                                    <div class="parent-element">
-
-                                        <a class="btn btn-sm btn-danger float-right delete-icon" title="Delete"
-                                            data-del-id="{{ $employee_additional_day->id }}">
-                                            <i class="fas fa-trash">Delete</i>
-                                        </a>
-                                        <div class="card-title" id="used_dates">
-                                            {{ $employee_additional_day->working_days }}
-                                            ({{ $workingDay }})
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-
-                        </div>
-                    @endif
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-primary">Save</button>
-                    </div>
-                </form>
-            </div>
-        </div>
     </div>
 
     <div class="row justify-content-center">
@@ -289,6 +217,8 @@
             </div>
         </div>
     </div>
+    <input type="hidden" class="datepicker">
+
 
 
     <div class="row justify-content-center">
@@ -383,6 +313,10 @@
         href="{{ asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css') }}">
     <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
     <style>
+        .error-message {
+            color: red
+        }
+
         table.dataTable {
             font-size: 12px;
         }
@@ -582,7 +516,7 @@
                     .done(function(data) {
 
                         var object = data
-                        .object; // Assuming 'data.object' contains the array or object you want to get the length of
+                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
 
                         console.log(object);
 
@@ -613,7 +547,7 @@
                             });
                         }
 
-                        // window.location.href = "{{route("admin.team_lead.index")}}";
+                        window.location.href = "{{ route('admin.team_lead.index') }}";
 
                     })
                     .fail(function(xhr) {
@@ -650,6 +584,7 @@
 
 
             });
+
 
 
 
@@ -1437,40 +1372,136 @@
                 // $('#approveRiderModal').modal('show');
             });
 
+            var employeeId = null;
 
-            var used_date;
 
-            var employee_working_days = @json($employee_additional_days);
-
-            console.log(employee_working_days)
             $('body').on('click', '.add_additional_days', function() {
-                $('#joiningDateModal').modal('show');
                 var employeeId = $(this).attr('data-id');
                 var employee = $(this).attr('data-ename');
-                $('#joiningDateModalLabel').html('Add Days <strong>(' + employee + ')</strong>');
-                $('#employee_id').val(employeeId);
 
-                for (var i = 0; i < employee_working_days.length; i++) {
-                    var workingDayObj = employee_working_days[i];
-                    var workingDay = workingDayObj.working_days;
-                    var used_date = workingDay.replace(')', '').split('(')[0].trim();
-                    var picker = replacement_last_working_day.pickadate('picker');
-                    picker.set('disable', [new Date(used_date)]);
-                }
-            });
+                // Add the AJAX call here
+                $.ajax({
+                    url: '{!! route('admin.team_lead.get_updated_day') !!}',
+                    type: 'GET', // Change to 'GET' or 'POST' depending on your server-side setup
+                    data: {
+                        employee_id: employeeId, // Sending the employeeId as data to Laravel
+                        // Add any other data you want to send to Laravel here
+                    },
+                    dataType: 'json',
+                }).done(function(response) {
+                    // This function will be called when the AJAX request is successful
+                    // Loop through the data and dynamically create the HTML content
+                    var modalContent = `
+        
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="joiningDateModalLabel">Add Days
+                    <strong>(${employee})</strong>
+                </h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="myForm">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" value="${employeeId}" name="employee_id" id="employee_id_d">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <fieldset class="form-group input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                        <span class="la la-calendar-o small-calender-icon"></span>
+                                    </span>
+                                </div>
+                                <input type="text" data-rule-required="true"
+                                    data-msg-required="This Field is required"
+                                    class="form-control bg-primary border-primary white rounded-right pickadate datepicker"
+                                    id="add_days_employee" placeholder="Add Days" name="add_additional_days">
+                                    </fieldset>
+                                    <div class="error-message"></div>
 
-            var today = new Date();
 
-            var replacement_last_working_day = $('.datepicker').pickadate({
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                min: today,
-                disable: [],
-                onOpen: function() {
-                    var daysToDisable = [2, 3, 4, 5, 6, 7];
-                    this.set('enable', [1]);
-                    this.set('disable', daysToDisable);
-                }
+                        </div>
+                    </div>
+                </div>
+`;
+
+                    if (response.employee_additional_days && response.employee_additional_days
+                        .length > 0) {
+                        modalContent += `
+        <div class="card days_show">
+            <div class="card-header">
+                <strong>
+                    <h5 class="card-title" style="font-weight: bold; text-decoration: underline;">Working Days</h5>
+                </strong>
+            </div>
+            <div class="card-body" id="delete_days">
+    `;
+                        $.each(response.employee_additional_days, function(index,
+                            employee_additional_day) {
+                            var workingDay = new Date(employee_additional_day.working_days);
+                            var formattedWorkingDay = workingDay.toLocaleDateString(
+                                'en-US', {
+                                    weekday: 'long'
+                                });
+
+                            modalContent += `
+        <div class="parent-element">
+            <a class="btn btn-sm btn-danger float-right delete-icon" title="Delete" data-del-id="${employee_additional_day.id}">
+                Delete
+            </a>
+            <div class="card-title" id="used_dates">
+                ${employee_additional_day.working_days} (${formattedWorkingDay})
+            </div>
+        </div>
+        `;
+                        });
+
+                        modalContent += `
+            </div>
+        </div>
+    `;
+                    }
+
+                    modalContent += `
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id='save_additional_days'>Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+`;
+
+                    // Set the dynamically created content to the modal body
+                    $('#joiningDateModal').html(modalContent);
+                    $('#joiningDateModal').modal('show');
+
+                    var today = new Date();
+
+                    var replacement_last_working_day = $('.datepicker').pickadate({
+                        formatSubmit: 'yyyy-mm-dd',
+                        hiddenSuffix: '_formatted',
+                        min: today,
+                        disable: [],
+                        onOpen: function() {
+                            var daysToDisable = [2, 3, 4, 5, 6, 7];
+                            this.set('enable', [1]);
+                            this.set('disable', daysToDisable);
+                        }
+                    });
+
+                    for (var i = 0; i < response.employee_additional_days.length; i++) {
+                        var workingDayObj = response.employee_additional_days[i];
+                        var workingDay = workingDayObj.working_days;
+                        var picker = replacement_last_working_day.pickadate('picker');
+                        picker.set('disable', [new Date(workingDay)]);
+                    }
+                }).fail(function(xhr, status, error) {
+
+                });
             });
 
             $('body').on('click', '.activate_staff', function() {
@@ -1658,6 +1689,41 @@
                     edit_Rider_function(this, true);
                 }
             });
+
+
+
+            $('body').on('click', '#save_additional_days', function(e) {
+                var id = $('#employee_id_d').val();
+                var dates = $('#add_days_employee').val();
+                e.preventDefault();
+                $.ajax({
+                        url: '{!! route('admin.team_lead.add_additional_days') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            employee_id: id,
+                            add_additional_days: dates,
+
+                        },
+                        dataType: 'json',
+                    })
+                    .done(function(response) {
+                        if (response.status == 0) {
+                            window.location.href = "{{ route('admin.team_lead.index') }}";
+
+                        } else if (response.status == 2) {
+                            $('.error-message').text('Please Select Date')
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        // Handle the error response from the server
+                        alert('Error: ' + error);
+                        console.log(xhr.responseText); // You can inspect the error response here
+                    });
+
+            });
+
+
 
             $('body').on('click', '.reject', function(e) {
                 var id = $(this).data('target-id');

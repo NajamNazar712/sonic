@@ -52,8 +52,8 @@ class TeamLeadDashboardController extends Controller
         });
 
         $employee_additional_days = EmployeeAdditionalDay::get();
-        
-        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days'=>$employee_additional_days]);
+
+        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days' => $employee_additional_days]);
     }
 
     // Heading: N/A
@@ -100,7 +100,7 @@ class TeamLeadDashboardController extends Controller
             ->select(['r.name as check_if_rider_present_bit', 'r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name', 'employees.shift_id as shift_id', 'employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id', 'er_rt.name as rider_type', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'rmc.name as rider_main_category', 'employees.rider_type_id as rider_type_id', 'ed.name as designation', 'r.id as rider_id', 'staff.id as staff_id', 'eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid', \Illuminate\Support\Facades\DB::raw('GROUP_CONCAT(rvab.city_id ORDER BY rvab.priority) as rv_city')])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', Auth::id())
-
+            ->where('employees.is_line_manager', 0)
             ->groupBy('staff.id')
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
@@ -219,8 +219,6 @@ class TeamLeadDashboardController extends Controller
                         if ((session('role_id') == 1 || in_array(session('permissions')))) {
 
                             $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
-
-                         
                         }
 
                         if ($result->status_id == 1) {
@@ -229,9 +227,8 @@ class TeamLeadDashboardController extends Controller
                             }
 
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename='.$result->employee_name.' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
                             }
-
                         }
 
 
@@ -239,11 +236,10 @@ class TeamLeadDashboardController extends Controller
                             if (session('role_id') == 1 || in_array(652, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                             }
-
                         }
                     }
 
-               
+
                     $dropdown .= '
                 </div>
               </div>
@@ -289,7 +285,6 @@ class TeamLeadDashboardController extends Controller
             }
 
             return redirect()->route('admin.team_lead.index')->with('success', 'Assigned SuccessFully');
-
         } catch (Exception $ex) {
 
             return redirect()->route('admin.team_lead.index')->with('error', $ex->getMessage());
@@ -301,17 +296,15 @@ class TeamLeadDashboardController extends Controller
     {
         $get_employee = Employee::where('id', $request->employee_id);
 
-        if($get_employee->exists())
-        {
+        if ($get_employee->exists()) {
             $get_employee->update([
                 'status_id' => '2',
             ]);
         }
 
         $role = Admin::where('id', Auth::id())->first();
-        
-        NotificationsController::send(218, Auth::id(), $role->role->name);
 
+        NotificationsController::send(218, Auth::id(), $role->role->name);
     }
 
 
@@ -319,8 +312,7 @@ class TeamLeadDashboardController extends Controller
     {
         $get_employee = Employee::where('id', $request->employee_id);
 
-        if($get_employee->exists())
-        {
+        if ($get_employee->exists()) {
             $get_employee->update([
                 'status_id' => '1',
             ]);
@@ -329,39 +321,51 @@ class TeamLeadDashboardController extends Controller
 
     public function add_additional_days(Request $request)
     {
-        $date = date('Y-m-d', strtotime($request->add_additional_days));
+        try {
+            $validations = [
+                'employee_id' => 'required',
+                'add_additional_days' => 'required',
+            ];
 
-        $is_date_assigned = EmployeeAdditionalDay::where('working_days', $date);
+            $validate = Validator::make($request->all(), $validations);
 
-        if(!$is_date_assigned->exists()){
-            
-            $employee_additional_days = new EmployeeAdditionalDay();
-    
-            $employee_additional_days->employee_id = $request->employee_id;
-            $employee_additional_days->working_days = $date;
-    
-            $employee_additional_days->save();
-    
-    
-            return redirect()->route('admin.team_lead.index');
-        }else{
-            return redirect()->route('admin.team_lead.index')->with('error', 'Date Already Assigned');
+            if ($validate->fails()) {
+                return response()->json(['status' => 2, 'errors' => $validate->errors()]);
+            } else {
+                $date = date('Y-m-d', strtotime($request->add_additional_days));
 
+                $is_date_assigned = EmployeeAdditionalDay::where('employee_id', $request->employee_id)->where('working_days', $date);
+
+                if (!$is_date_assigned->exists()) {
+
+                    $employee_additional_days = new EmployeeAdditionalDay();
+
+                    $employee_additional_days->employee_id = $request->employee_id;
+                    $employee_additional_days->working_days = $date;
+
+                    $employee_additional_days->save();
+
+                    session()->flash('success', 'Assigned Successfully');
+
+                    return response()->json(['status' => 0, 'message' => 'Assigned Successfully']);
+                } else {
+                    return response()->json(['status' => 1, 'message' => 'Already Assigned']);
+                }
+            }
+        } catch (\Throwable $th) {
+            return response()->json(['status' => 3, 'errors' => $th->getMessage()]);
         }
-
     }
-
-
 
     public function delete_additional_days(Request $request)
     {
         $object = EmployeeAdditionalDay::get();
         $employee_additional_days = EmployeeAdditionalDay::find($request->id);
         $employee_additional_days->delete();
-        return response()->json(['status' => 1, 'success'=> 'Successfully Deleted', 'object' => $object]);
+        return response()->json(['status' => 1, 'success' => 'Successfully Deleted', 'object' => $object]);
     }
 
-    
+
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -636,5 +640,11 @@ class TeamLeadDashboardController extends Controller
         } else {
             return redirect()->back()->with('error', 'No Shipments in File');
         }
+    }
+    public function get_updated_day(Request $request)
+    {
+        $employee_additional_days = EmployeeAdditionalDay::where('employee_id', $request->employee_id)->get();
+
+        return response()->json(['employee_additional_days' => $employee_additional_days]);
     }
 }
