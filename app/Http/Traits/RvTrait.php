@@ -146,6 +146,7 @@ trait RvTrait
         return [
             'rv_assign_agent_status_id' => $request->rv_assign_agent_status_id,
             'rv_assign_agent_sub_status_id' => $request->rv_assign_agent_sub_status_id,
+            'rv_state_id' => 4,
             'rv_fake_status_id' => $request->rv_fake_status_id,
             'remarks' => $request->remarks,
             'is_fake_status' => $request->is_fake_status,
@@ -155,6 +156,24 @@ trait RvTrait
         ];
     }
 
+    public function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
+    {
+        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->latest()->first();
+
+        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
+        if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
+            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
+            $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
+            
+        }
+        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 4) {
+            $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 3; //set status to return confirm
+            $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = 4; //set sub status to consignee unavailable
+        }
+        return $shipment_assign_agent_table_columns;
+        
+    }
+
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
@@ -162,7 +181,7 @@ trait RvTrait
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
         
-        $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
+        $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
         
         if ($admin_agent->employee->staff_category_id == 3) {
             $assigned_agent->increment('total_shipments');
@@ -172,9 +191,6 @@ trait RvTrait
             $assigned_agent->increment('already_updated');
             $shipment_assign_agent_table_columns['updated_type_id'] = 1; // admin type
         }
-        
-        //if shipment status is unresponsive set rv_state as unassign (2) else set as completed(4)
-        $shipment_assign_agent_table_columns['rv_state_id'] = ($request->rv_assign_agent_status_id == 6) ? 2 : 4;
 
         $shipment_assign_agent->update($shipment_assign_agent_table_columns);
 
@@ -534,22 +550,22 @@ trait RvTrait
 
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if ($rv_shipment_assign_agent->unresponsive_count == 3) {
-            $rv_shipment_assign_agent->rv_assign_agent_status_id = 7; //set status to Shipper Advise Requested 
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
             $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
-
+            
         }
         
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
-        else if ($rv_shipment_assign_agent->unresponsive_count == 4 && $rv_shipment_assign_agent->rv_state_id  == 1) {
-            $rv_shipment_assign_agent->rv_assign_agent_status_id = 3; //return confirm
+        else if ($rv_shipment_assign_agent->unresponsive_count == 4) {
+            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
         }
 
         //updating the shipment status to unresponsive(65) in shipments table
         Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
 
         //updating the shipment status to unresponsive(65) in shipments journey table
-        ShipmentsJourneyController::add($request->shipment_id, 65, 65, NULL, NULL, $user_id, Auth::id());
+        ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
         return response()->json(['status' => 1]);
     }
 
