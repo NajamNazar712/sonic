@@ -2080,6 +2080,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
+            Route::post('enable_disable', 'Admins\UserManagementController@role_status')->name('enable_disable');
 
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
