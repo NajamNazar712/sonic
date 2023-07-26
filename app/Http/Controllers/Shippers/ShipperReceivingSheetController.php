@@ -859,7 +859,7 @@ class ShipperReceivingSheetController extends Controller
                         }
                     }
                 }
-                if ($shipment->shipper_status_id != 1) {
+                if (!in_array($shipment->shipper_status_id,[1,64])) {
                     return ['status' => 1, 'error' => $shipment->tracking_number . ' can no longer be added to a Receiving Sheet'];
                 }
 
@@ -1218,6 +1218,7 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function shipments_excel_store(Request $request){
+//        dd($request->all());
         $user_id = session('user_id');
         $pickup_address_id = $request->pickup_address;
         if(!$pickup_address_id){
@@ -1245,7 +1246,7 @@ class ShipperReceivingSheetController extends Controller
 
         $rules = [
             'tracking_number' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id, $pickup_address_id) {
-                $query->where('user_id', $user_id)->where('shipper_status_id', 1)->where('pickup_address_id', $pickup_address_id);
+                $query->where('user_id', $user_id)->whereIn('shipper_status_id', [1,64])->where('pickup_address_id', $pickup_address_id);
             })]
         ];
 
@@ -1312,11 +1313,10 @@ class ShipperReceivingSheetController extends Controller
                 return redirect()->back()->withErrors($errors);
             }
             else{
-
                 $shipment_ids = array();
                 $receiving_sheet_id = NULL;
                 foreach($rows as $key => $row){
-                    $shipment = Shipment::where('tracking_number', $row['tracking_number'])->where('shipper_status_id', 1)->first();
+                    $shipment = Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [1,64])->first();
                     if(session('user_type') == 2){
                         if(session('restriction') == 1){
                             $sub_check = SubstituteUserShipment::where('substitute_user_id', Auth::id())->where('shipment_id', $shipment->id);
@@ -1389,7 +1389,7 @@ class ShipperReceivingSheetController extends Controller
                         $confirmation_shipments[] = $confirmation_shipment;
                     }
 
-                    dispatch(new ProcessGulAhmedShipmentConfirmation($confirmation_shipments));
+                    dispatch(new ProcesssGulAhmedShipmentConfirmation($confirmation_shipments));
                 }
 
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
