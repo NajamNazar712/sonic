@@ -2891,6 +2891,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
         });
+
+        Route::prefix('operations_performance')->name('operations_performance.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@operations_performance_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@operations_performance_list')->name('list');
+        });
     });
 
     //Reports end
