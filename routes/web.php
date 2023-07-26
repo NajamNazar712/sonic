@@ -3713,6 +3713,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
         });
+        Route::prefix('background_image')->name('background_image.')->group(function () {
+            // Route::view('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::get('', 'Admins\GlobalSettingsController@background_image_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
+        });
 
     });
 
