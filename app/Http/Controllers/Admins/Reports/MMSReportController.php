@@ -51,20 +51,21 @@ class MMSReportController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 567);
         }
-        $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
-        $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
+        // $arrival_from = Carbon::parse($request->arrival_time_from)->format('H:i:s');
+        // $arrival_to = Carbon::parse($request->arrival_time_to)->format('H:i:s');
 
         $from = $request->get('search_date_from');
         $from = Carbon::parse($from)->toDateTimeString();
         $to = $request->get('search_date_to');
         $to = Carbon::parse($to)->toDateTimeString();
 
-        $from = str_replace('00:00:00', $arrival_from, $from);
-        $to = str_replace('00:00:00', $arrival_to, $to);
+        // $from = str_replace('00:00:00', $arrival_from, $from);
+        // $to = str_replace('00:00:00', $arrival_to, $to);
+
 
         $sales = DB::connection($connection)->table('shipments')->join('users as u','u.id','=','shipments.user_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -77,6 +78,7 @@ class MMSReportController extends Controller
             })
             ->leftJoin('shipments_journey as sj', function ($join) use ($connection) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.shipper_status_id', 2)
                     ->where('sj.id','=',
                         DB::connection($connection)->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
@@ -103,20 +105,26 @@ class MMSReportController extends Controller
             ->whereIn('u.id', $special_shippers)
             ->whereBetween('sj.created_at', [$from,$to]);
 
+            
+            
         $from_id = DB::connection($connection)->table('shipments_journey')->select('id')->where('created_at', '>=', $from);
         if ($from_id->exists()) {
             $from_id = $from_id->first()->id;
 
-            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('MAX(id) as id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+            
 
+            $to_id = DB::connection($connection)->table('shipments_journey')->select(DB::raw('id'))->where('created_at', '>=', $from)->where('created_at', '<=', $to);
+
+            
             if ($to_id->exists()) {
-                $to_id = $to_id->first()->id;
+                $to_id = $to_id->latest()->first()->id;
 
                 $sales->where('sj.id', '>=', $from_id)
-                    ->where('sj.id', '<=', $to_id);
+                ->where('sj.id', '<=', $to_id);    
             }
         }
 
+        
 //        if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
 //            $now = Carbon::now();
 //            $yesterday = Carbon::now()->subDays(3);
