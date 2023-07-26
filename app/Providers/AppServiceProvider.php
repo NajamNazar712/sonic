@@ -7,6 +7,7 @@ use App\DailyVisit;
 use App\Http\Models\Admin\AdminsScreenList;
 use App\Http\Models\Admin\NotificationReturnedDeliveredToShipper;
 use App\ReturnDeliveredToShipperSms;
+use App\ReturnDeliveredToShipperTicker;
 use Carbon\Carbon;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -49,8 +50,8 @@ class AppServiceProvider extends ServiceProvider
                 $from =  Carbon::now()->startOfDay()->toDateTimeString();
                 $to = Carbon::parse($from)->endOfDay()->toDateTimeString();
 
-                $shipper_return_notes = ReturnDeliveredToShipperSms::where('user_id',session('user_id'))->where('status',1)
-                ->whereBetween('return_delivered_to_shipper_sms.created_at',[$from,$to]);
+                $shipper_return_notes = ReturnDeliveredToShipperTicker::where('user_id',session('user_id'))->where('status',1)
+                ->whereBetween('return_delivered_to_shipper_tickers.created_at',[$from,$to]);
                 if($shipper_return_notes->exists()){
                     $shipper_return_notes = $shipper_return_notes->get();
 
