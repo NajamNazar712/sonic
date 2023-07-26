@@ -12132,11 +12132,15 @@ public function payfast_payment(Request $request){
                 $send_to_emails = [$poc, $kam, $ref];
                 $notification_data['email_to'] = Admin::whereIn('id',$send_to_emails)->pluck('email')->toArray();
                 $notification_data['admin_name'] = Admin::find(Auth::id())->name;
-                $notification_data['new_sales_person'] = Admin::find($kam)->name;
+                $notification_data['new_poc_person'] = Admin::find($poc)->name;
+                $notification_data['new_kam_person'] = Admin::find($kam)->name;
+                $notification_data['new_ref_person'] = Admin::find($ref)->name;
 
-                $notification_data['old_sales_person'] = null;
-                $notification_data['old_sales_person_date'] = null;
-                $notification_data['old_sales_person_email'] = null;
+                $notification_data['old_poc_person'] = '-';
+                $notification_data['old_kam_person'] = '-';
+                $notification_data['old_ref_person'] = '-';
+                $notification_data['old_person_date'] = '-';
+                $notification_data['old_person_email'] = null;
                 
                 foreach ($shipper_ids as $shipper_id) {    
                     $shipper_name = User::find($shipper_id)->name;
@@ -12149,11 +12153,13 @@ public function payfast_payment(Request $request){
                     if ($sale_tier->exists()) {
                         $sale_tier = $sale_tier->first();
 
-                        
-                        $old_kam = Admin::find($sale_tier->kam);
-                        $notification_data['old_sales_person'] = $old_kam->name;
-                        $notification_data['old_sales_person_date'] = $sale_tier->created_at;
-                        $notification_data['old_sales_person_email'] = $old_kam->email;
+                        $send_cc_emails = [$sale_tier->poc, $sale_tier->kam, $sale_tier->ref];
+                        $notification_data['old_person_email'] = Admin::whereIn('id',$send_cc_emails)->pluck('email')->toArray();
+
+                        $notification_data['old_poc_person'] = Admin::find($sale_tier->poc)->name;
+                        $notification_data['old_kam_person'] = Admin::find($sale_tier->kam)->name;
+                        $notification_data['old_ref_person'] = Admin::find($sale_tier->ref)->name;
+                        $notification_data['old_person_date'] = $sale_tier->created_at;
 
                         $sale_tier_history = new SaleTierTagHistory();
                         $sale_tier_history->sale_tier_tag_id = $sale_tier->id;
