@@ -40,7 +40,7 @@
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
                         <form id="profile-form" class="form form-horizontal" method="post"
-{{--                              action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate"--}}
+                              action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate"
                             >
                             @csrf
                             <input type="hidden" name="intended_url" value="{{ $intended_url }}">
@@ -456,11 +456,15 @@
                                         <button id="cancel-button-profile"  type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
-                                        <button type="submit" class="btn btn-primary">
+                                        <button class="btn btn-primary" id="profile-form_update">
                                             Update
+                                        </button>
+                                        <button type="submit" class="btn btn-primary d-none" id="update-form-finallay">
+                                            Update Form
                                         </button>
                                     </div>
                                 </div>
+
                             </div>
                         </form>
                     </div>
@@ -2223,42 +2227,14 @@
                 }
             });
 
-            $("#profile-form").submit(function (event) {
+            $("#profile-form_update").click(function (event) {
                 $("#submit_profile_modal").modal('show');
                 event.preventDefault();
                 $('#designation_on_off').val(toggleValue);
             });
 
             $("#submit_profile_yes").click(function () {
-                var formData = $('#profile-form').serialize();
-
-                $.ajax({
-                    url: '{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}',
-                    method: 'POST',
-                    data: formData,
-                })
-                    .done(function (data) {
-                        window.location.reload(true);
-                        // if (data.status === 0) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                        // } else if (data.status != 0) {
-                        //     toastr.error(data.error, 'Error!', {
-                        //         positionClass: 'toast-top-center',
-                        //         containerId: 'toast-top-center'
-                        //     });
-                        // }
-                        //
-                        // $("#submit_profile_modal").modal('hide');
-                        //
-                        // if ($('#admin_discount_type').prop("checked")) {
-                        //     $('#admin_discount_type').click();
-                        // } else {
-                        //     console.log("Checkbox is not checked");
-                        // }
-                    });
+                $('#update-form-finallay').click();
             });
 
             $("#submit_profile_no").click(function() {
