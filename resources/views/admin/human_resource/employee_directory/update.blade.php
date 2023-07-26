@@ -2238,25 +2238,26 @@
                     data: formData,
                 })
                     .done(function (data) {
-                        if (data.status === 0) {
+                        window.location.reload(true);
+                        // if (data.status === 0) {
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
                             });
-                        } else if (data.status != 0) {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-
-                        $("#submit_profile_modal").modal('hide');
-
-                        if ($('#admin_discount_type').prop("checked")) {
-                            $('#admin_discount_type').click();
-                        } else {
-                            console.log("Checkbox is not checked");
-                        }
+                        // } else if (data.status != 0) {
+                        //     toastr.error(data.error, 'Error!', {
+                        //         positionClass: 'toast-top-center',
+                        //         containerId: 'toast-top-center'
+                        //     });
+                        // }
+                        //
+                        // $("#submit_profile_modal").modal('hide');
+                        //
+                        // if ($('#admin_discount_type').prop("checked")) {
+                        //     $('#admin_discount_type').click();
+                        // } else {
+                        //     console.log("Checkbox is not checked");
+                        // }
                     });
             });
 
