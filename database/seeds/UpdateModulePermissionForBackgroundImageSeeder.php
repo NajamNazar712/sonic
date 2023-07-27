@@ -18,7 +18,7 @@ class UpdateModulePermissionForBackgroundImageSeeder extends Seeder
             array('id' => 683, 'screen_name' => 'Background Image', 'action'=> 'View'),
         ));
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
-        DB::table('admins_screen_list')->insert( array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Support > Background Image', 'url'=>'admin.settings.background_image.index', 'permission_id' => 891)
+        DB::table('admins_screen_list')->insert(array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings  >  Support  >  Background Image', 'url'=>'admin.settings.background_image.index', 'permission_id' => 891)
         );
     }
 }

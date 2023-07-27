@@ -8650,6 +8650,7 @@ class GlobalSettingsController extends Controller
 
     public function background_image_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 683);
         $background_image = BackgroundImage::orderBy('id', 'ASC')->get();
         return view('admin.settings.background_image')->with(['id' => 1, 'background_image' => $background_image]);
     }
