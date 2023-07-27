@@ -45,15 +45,15 @@ class TeamLeadDashboardController extends Controller
             ->where('hub', '1')
             ->select('id', 'name')
             ->get();
-
         $sortedHubs = $hubs->sortBy(function ($hub) {
             $agentAssignHub = $hub->agentAssignHub->first();
             return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
         });
-
         $employee_additional_days = EmployeeAdditionalDay::get();
+        $number_of_rv_tickets = RvShipmentAssignAgent::get();
 
-        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days' => $employee_additional_days]);
+
+        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days' => $employee_additional_days, 'number_of_rv_tickets' => $number_of_rv_tickets]);
     }
 
     // Heading: N/A
@@ -63,6 +63,8 @@ class TeamLeadDashboardController extends Controller
     public function team_lead_list(Request $request)
 
     {
+
+        // dd($request->all());
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
@@ -71,7 +73,6 @@ class TeamLeadDashboardController extends Controller
             ->join('employee_genders as eg', 'eg.id', '=', 'employees.employee_gender_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
             ->leftjoin('admins as staff', 'staff.trax_id', '=', 'employees.trax_id')
-
             ->leftjoin('riders as r', 'r.trax_id', '=', 'employees.trax_id')
             ->leftjoin('rider_requests as rr', 'rr.id', '=', 'employees.rider_request_id')
             ->leftjoin('rider_types as rr_rt', 'rr_rt.id', '=', 'rr.rider_type_id')
@@ -84,6 +85,7 @@ class TeamLeadDashboardController extends Controller
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
             ->leftjoin('employees as r_emp', 'r_emp.id', '=', 'employees.replacement_employee_id')
+            ->leftjoin('rv_shipment_assign_agents as rsaa', 'rsaa.agent_id', 'staff.id')
             ->leftjoin('employee_bank_informations as eb', function ($join) {
                 $join->on('eb.employee_id', '=', 'employees.id')
                     ->where('eb.id', '=', \Illuminate\Support\Facades\DB::raw('(select max(id) from employee_bank_informations where employee_bank_informations.employee_id = employees.id)'));
@@ -97,7 +99,7 @@ class TeamLeadDashboardController extends Controller
 
 
 
-            ->select(['r.name as check_if_rider_present_bit', 'r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name', 'employees.shift_id as shift_id', 'employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id', 'er_rt.name as rider_type', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'rmc.name as rider_main_category', 'employees.rider_type_id as rider_type_id', 'ed.name as designation', 'r.id as rider_id', 'staff.id as staff_id', 'eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid', \Illuminate\Support\Facades\DB::raw('GROUP_CONCAT(rvab.city_id ORDER BY rvab.priority) as rv_city')])
+            ->select([\Illuminate\Support\Facades\DB::raw('GROUP_CONCAT(rsaa.shipment_id ORDER BY rsaa.id) as shipments'), 'r.name as check_if_rider_present_bit', 'r.ccd as ccd', 'r.rider_category_id as category_id', 'r.route_id as route_id', 'r.operation_rider_id as operation_id', 'r.blacklist as blacklist_rider', 'rr_rt.id as inactive_rider_type_id', 'rr_rt.name as inactive_rider_type', 'r_rt.id as active_rider_type_id', 'r_rt.name as active_rider_type', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'eg.name as gender', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'ers.name as request_status', 'es.name as status', 'employees.created_at as requested_at', 'employees.pin as pin', 'employees.address as address', 'employees.guardian_name as father_name', 'ads.name as department_name', 'employees.shift_id as shift_id', 'employees.first_inactive', 'employees.rider_sub_category as rider_sub_category', 'employees.rider_main_category as rider_main_category_id', 'er_rt.name as rider_type', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'rmc.name as rider_main_category', 'employees.rider_type_id as rider_type_id', 'ed.name as designation', 'r.id as rider_id', 'staff.id as staff_id', 'eb.iban as iban', 'ez.id as zone_id', 'ez.name as zone_name', 'r.incentive_amount', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'r_emp.trax_id as r_trax_id', 'r_emp.name as r_name', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid', \Illuminate\Support\Facades\DB::raw('GROUP_CONCAT(rvab.city_id ORDER BY rvab.priority) as rv_city')])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', Auth::id())
             ->where('employees.is_line_manager', 0)
@@ -107,6 +109,9 @@ class TeamLeadDashboardController extends Controller
                 $q->where('r.blacklist', '=', 0)
                     ->orWhere('r.blacklist', '=', null);
             });
+
+
+        // dd($employees->get());
 
         $environment = config('app.env');
 
@@ -125,6 +130,25 @@ class TeamLeadDashboardController extends Controller
             if ($filter_line_manager == 1) {
                 $employees = $employees->where('employees.is_line_manager', 1);
             }
+        }
+
+        if ($request->get('number_of_tickets_input') == '1') {
+
+            $shipmentIdsArray = $employees->pluck('shipments')->toArray();
+
+            $filteredArray = array_filter($shipmentIdsArray, function ($value) {
+                return $value !== null;
+            });
+
+            $resultArray = [];
+
+            foreach ($filteredArray as $value) {
+                $resultArray[] = explode(',', $value);
+            }
+            
+            $mergedArray = array_merge(...$resultArray);
+
+            $employees = $employees->whereIn('rsaa.shipment_id', $mergedArray);
         }
 
 
@@ -192,6 +216,22 @@ class TeamLeadDashboardController extends Controller
             ->editColumn('employee_name', function ($user) {
                 return $user->employee_name;
             })
+
+            ->editColumn('shipments', function ($user) {
+                $shipment = explode(',', $user->shipments);
+
+                if(empty($shipment[0]))
+                {
+                    return '--';
+                }else{
+
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . count($shipment) . '</button>';
+
+
+                }
+                // return count($shipment);
+                
+            })
             ->filterColumn('ads.name', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -226,12 +266,11 @@ class TeamLeadDashboardController extends Controller
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
+                            if (session('role_id') == 1 || in_array(session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
+                            }
+                        }
 
-                        }
-                        
-                        if (session('role_id') == 1 || in_array(session('permissions'))) {
-                            $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
-                        }
 
                         if ($result->status_id == 2) {
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
@@ -361,9 +400,9 @@ class TeamLeadDashboardController extends Controller
 
     public function delete_additional_days(Request $request)
     {
+
         $object = EmployeeAdditionalDay::get();
-        $employee_additional_days = EmployeeAdditionalDay::find($request->id);
-        $employee_additional_days->delete();
+        EmployeeAdditionalDay::whereIn('id', $request->ids)->delete();
         return response()->json(['status' => 1, 'success' => 'Successfully Deleted', 'object' => $object]);
     }
 

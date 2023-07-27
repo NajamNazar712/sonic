@@ -10,8 +10,12 @@
 
     @include('admin.inc.messages')
 
+
+    <input type="text" id="number_of_tickets_input" value="">
+    <input type="text" id="number_of_available_agents_input" value="">
+
     <div class="row justify-content-center">
-        <div class="col-3" id="total_leads_div">
+        <div class="col-3" id="number_of_tickets_div">
             <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
                 <div class="card-content">
                     <div class="card-body">
@@ -21,7 +25,7 @@
                             </div>
                             <div class="media-body text-white text-right">
                                 <h3 class="text-white">
-                                    <p id="total_leads" class="d-inline">2</p> (100%)
+                                    <p id="total_leads" class="d-inline">{{ count($number_of_rv_tickets) }}</p>
                                 </h3>
                                 <span>Overall Number of Tickets (RCP count) </span>
                             </div>
@@ -30,7 +34,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-3" id="received_leads_div">
+        <div class="col-3" id="number_of_available_agents_div">
             <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
                 <div class="card-content">
                     <div class="card-body">
@@ -232,6 +236,7 @@
                 <th class="border-primary border-darken-1">S No.</th>
                 <th class="border-primary border-darken-1">Employee ID</th>
                 <th class="border-primary border-darken-1">Old Employee ID</th>
+                <th class="border-primary border-darken-1">Assigned Shipments</th>
                 <th class="border-primary border-darken-1">Employee Name</th>
                 <th class="border-primary border-darken-1">Father Name</th>
                 <th class="border-primary border-darken-1">Gender</th>
@@ -502,56 +507,65 @@
     <script type="text/javascript">
         $(document).ready(function() {
             $('body').on('click', '.delete-icon', function() {
+                var Ids = [];
                 var delId = $(this).data('del-id');
+                $("#multiple_delete:checked").each(function() {
+                    Ids.push($(this).val());
+                });
+
                 var deleteDaysContainer = $('#delete_days');
                 var deleteIcon = $(this);
-                $.ajax({
-                        url: '{{ route('admin.team_lead.delete_additional_days') }}',
-                        type: 'GET',
-                        data: {
-                            'id': delId,
-                        }
-                    })
-                    .done(function(data) {
+                    $.ajax({
+                            url: '{{ route('admin.team_lead.delete_additional_days') }}',
+                            type: 'GET',
+                            data: {
+                                'ids': Ids,
+                            }
+                        })
+                        .done(function(data) {
 
-                        var object = data
-                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
+                            var object = data
+                                .object; // Assuming 'data.object' contains the array or object you want to get the length of
 
-                        console.log(object);
+                            console.log(object);
 
-                        // Get the length of the 'object'
-                        var objectLength = 0;
-                        if (Array.isArray(object)) {
-                            objectLength = object.length; // If 'object' is an array
-                        } else if (typeof object === 'object' && object !== null) {
-                            objectLength = Object.keys(object).length; // If 'object' is an object
-                        }
+                            // Get the length of the 'object'
+                            var objectLength = 0;
+                            if (Array.isArray(object)) {
+                                objectLength = object.length; // If 'object' is an array
+                            } else if (typeof object === 'object' && object !== null) {
+                                objectLength = Object.keys(object).length; // If 'object' is an object
+                            }
 
-                        if (objectLength == 1) {
-                            $('.days_show').addClass('d-none')
-                        }
-                        if (data.status == 1) {
-                            toastr.success(data.success,
-                                'Success!', {
+                            if (objectLength == 1) {
+                                $('.days_show').addClass('d-none')
+                            }
+                            if (data.status == 1) {
+                                toastr.success(data.success,
+                                    'Success!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+
+                                deleteIcon.closest('.parent-element').remove();
+
+                            } else {
+                                toastr.error(data.error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
+                            }
 
-                            deleteIcon.closest('.parent-element').remove();
+                            window.location.href = "{{ route('admin.team_lead.index') }}";
 
-                        } else {
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-
-                        window.location.href = "{{ route('admin.team_lead.index') }}";
-
-                    })
-                    .fail(function(xhr) {
-                        console.log(xhr.statusText);
-                    });
+                        })
+                        .fail(function(xhr) {
+                            toastr.error('Please Select',
+                                    'Error  !', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                        });
             });
 
 
@@ -1002,6 +1016,9 @@
                         d.search_line_manager = $('#search_line_manager').val();
                         d.filter_line_manager = $('#filter_line_manager').val();
                         d.search_origin = $('#search_origin').val();
+                        d.number_of_tickets_input = $('#number_of_tickets_input').val();
+                        d.number_of_available_agents_input = $('#number_of_available_agents_input').val();
+
                     }
                 },
                 order: [
@@ -1028,6 +1045,12 @@
                     {
                         data: 'old_trax_id',
                         name: 'employees.old_trax_id',
+                        class: 'align-middle old_trax_id'
+                    },
+
+                    {
+                        data: 'shipments',
+                        name: 'rsaa.shipment_id',
                         class: 'align-middle old_trax_id'
                     },
                     {
@@ -1311,6 +1334,21 @@
             });
 
 
+
+            $('#number_of_tickets_div').on('click', function(){
+                $('#number_of_tickets_input').val(1);
+                $('#number_of_available_agents_input').val('');
+
+                table.draw();
+            })
+
+            $('#number_of_available_agents_div').on('click', function(){
+                $('#number_of_available_agents_input').val(2);
+                $('#number_of_tickets_input').val('');
+
+                table.draw();
+            })
+
             $('body').on('click', '.deactivate_staff', function() {
                 var employeeId = $(this).attr('data-id');
                 swal({
@@ -1443,10 +1481,10 @@
 
                             modalContent += `
         <div class="parent-element">
-            <a class="btn btn-sm btn-danger float-right delete-icon" title="Delete" data-del-id="${employee_additional_day.id}">
-                Delete
-            </a>
-            <div class="card-title" id="used_dates">
+            
+           
+                <div class="card-title" id="used_dates">
+                    <input type="checkbox" value="${employee_additional_day.id}" id="multiple_delete">
                 ${employee_additional_day.working_days} (${formattedWorkingDay})
             </div>
         </div>
@@ -1454,6 +1492,9 @@
                         });
 
                         modalContent += `
+                        <a class="btn btn-sm btn-danger float-left delete-icon" title="Delete">
+                Delete
+                </a>
             </div>
         </div>
     `;
