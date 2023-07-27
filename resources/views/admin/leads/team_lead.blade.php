@@ -11,29 +11,35 @@
     @include('admin.inc.messages')
 
 
-    <input type="text" id="number_of_tickets_input" value="">
-    <input type="text" id="number_of_available_agents_input" value="">
+   
+    <input type="hidden" class="datepicker">
+    <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
+        aria-hidden="true">
 
-    <div class="row justify-content-center">
-        <div class="col-3" id="number_of_tickets_div">
-            <div class="card bg-gradient-directional-booked_shipments pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="icon-grid text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="total_leads" class="d-inline">{{ count($number_of_rv_tickets) }}</p>
-                                </h3>
-                                <span>Overall Number of Tickets (RCP count) </span>
-                            </div>
-                        </div>
-                    </div>
+    </div>
+
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog"
+        aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <input type="hidden" id="number_of_available_agents_input">
+    <div class="row justify-content-center">
         <div class="col-3" id="number_of_available_agents_div">
             <div class="card bg-gradient-directional-complaints_launched pull-up cursor-pointer">
                 <div class="card-content">
@@ -44,8 +50,7 @@
                             </div>
                             <div class="media-body text-white text-right">
                                 <h3 class="text-white">
-                                    <p id="received_leads" class="d-inline">1</p> (<p id="received_percentage"
-                                        class="d-inline">3</p>%)
+                                    <p id="received_leads" class="d-inline">{{ count($number_of_available_agents) }}</p>
                                 </h3>
                                 <span>Online/ Available Agents </span>
                             </div>
@@ -54,179 +59,6 @@
                 </div>
             </div>
         </div>
-        <div class="col-3" id="in_process_div">
-            <div class="card bg-gradient-directional-in_transit pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="in_process" class="d-inline">3</p> (<p id="in_process_percentage"
-                                        class="d-inline">3</p>%)
-                                </h3>
-                                <span>Pending Tickets</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-3" id="in_process_activation_div">
-            <div class="card bg-gradient-directional-out_for_delivery pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="icon-clock text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="in_process_activation" class="d-inline">4</p>
-                                    (<p id="in_process_for_activation_percentage" class="d-inline">4</p>
-                                    %)
-                                </h3>
-                                <span>Closed Tickets</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-    </div>
-    <div class="row justify-content-center">
-        <div class="col-3" id="dead_leads_div">
-            <div class="card bg-gradient-directional-pending_shipments pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="icon-close text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="dead_leads" class="d-inline">5</p> (<p id="dead_percentage" class="d-inline">5
-                                    </p>%)
-                                </h3>
-                                <span>No. of Connected Calls.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-3" id="activated_leads_div">
-            <div class="card bg-gradient-directional-return_delivered pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="icon-check text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="active_leads" class="d-inline">6</p>
-                                    (<p id="active_percentage" class="d-inline">6</p>%)
-                                </h3>
-                                <span>No. of Unresponsive Calls</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-3" id="lead_time_ratio_div">
-            <div class="card bg-gradient-directional-return_confirm pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="la la-calculator text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white" id="dead_ratio">7</h3>
-                                <span>No. of Re-attempt updated</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-3" id="lead_time_ratio_div">
-            <div class="card bg-gradient-directional-destination pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="la la-calculator text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white" id="active_ratio">8</h3>
-                                <span>No. of Return Confirm updated</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
-        aria-hidden="true">
-
-    </div>
-
-    <div class="row justify-content-center">
-        <div class="col-3" id="dormant_div">
-            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="dormant" class="d-inline">9</p>
-                                </h3>
-                                <span>No. of Intercept updated.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-3" id="updated_id">
-            <div class="card bg-gradient-directional-pending_confirmation pull-up cursor-pointer">
-                <div class="card-content">
-                    <div class="card-body">
-                        <div class="media d-flex">
-                            <div class="align-self-center">
-                                <i class="la la-hourglass text-white font-large-2 float-left"></i>
-                            </div>
-                            <div class="media-body text-white text-right">
-                                <h3 class="text-white">
-                                    <p id="dormant" class="d-inline">9</p>
-                                </h3>
-                                <span>No. of Self-collection updated.</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <input type="hidden" class="datepicker">
-
-
-
-    <div class="row justify-content-center">
-
     </div>
 
     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -236,7 +68,6 @@
                 <th class="border-primary border-darken-1">S No.</th>
                 <th class="border-primary border-darken-1">Employee ID</th>
                 <th class="border-primary border-darken-1">Old Employee ID</th>
-                <th class="border-primary border-darken-1">Assigned Shipments</th>
                 <th class="border-primary border-darken-1">Employee Name</th>
                 <th class="border-primary border-darken-1">Father Name</th>
                 <th class="border-primary border-darken-1">Gender</th>
@@ -261,6 +92,7 @@
                 <th class="border-primary border-darken-1">Last Working Date</th>
                 <th class="border-primary border-darken-1">Remarks</th>
                 <th class="border-primary border-darken-1">Confirmation Status</th>
+                <th class="border-primary border-darken-1">Available</th>
                 <th class="border-primary border-darken-1"></th>
             </tr>
         </thead>
@@ -515,57 +347,57 @@
 
                 var deleteDaysContainer = $('#delete_days');
                 var deleteIcon = $(this);
-                    $.ajax({
-                            url: '{{ route('admin.team_lead.delete_additional_days') }}',
-                            type: 'GET',
-                            data: {
-                                'ids': Ids,
-                            }
-                        })
-                        .done(function(data) {
+                $.ajax({
+                        url: '{{ route('admin.team_lead.delete_additional_days') }}',
+                        type: 'GET',
+                        data: {
+                            'ids': Ids,
+                        }
+                    })
+                    .done(function(data) {
 
-                            var object = data
-                                .object; // Assuming 'data.object' contains the array or object you want to get the length of
+                        var object = data
+                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
 
-                            console.log(object);
+                        console.log(object);
 
-                            // Get the length of the 'object'
-                            var objectLength = 0;
-                            if (Array.isArray(object)) {
-                                objectLength = object.length; // If 'object' is an array
-                            } else if (typeof object === 'object' && object !== null) {
-                                objectLength = Object.keys(object).length; // If 'object' is an object
-                            }
+                        // Get the length of the 'object'
+                        var objectLength = 0;
+                        if (Array.isArray(object)) {
+                            objectLength = object.length; // If 'object' is an array
+                        } else if (typeof object === 'object' && object !== null) {
+                            objectLength = Object.keys(object).length; // If 'object' is an object
+                        }
 
-                            if (objectLength == 1) {
-                                $('.days_show').addClass('d-none')
-                            }
-                            if (data.status == 1) {
-                                toastr.success(data.success,
-                                    'Success!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-
-                                deleteIcon.closest('.parent-element').remove();
-
-                            } else {
-                                toastr.error(data.error, 'Error!', {
+                        if (objectLength == 1) {
+                            $('.days_show').addClass('d-none')
+                        }
+                        if (data.status == 1) {
+                            toastr.success(data.success,
+                                'Success!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
-                            }
 
-                            window.location.href = "{{ route('admin.team_lead.index') }}";
+                            deleteIcon.closest('.parent-element').remove();
 
-                        })
-                        .fail(function(xhr) {
-                            toastr.error('Please Select',
-                                    'Error  !', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                        });
+                        } else {
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+
+                        window.location.href = "{{ route('admin.team_lead.index') }}";
+
+                    })
+                    .fail(function(xhr) {
+                        toastr.error('Please Select',
+                            'Error  !', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                    });
             });
 
 
@@ -728,6 +560,7 @@
                             head.push('Last Working Date');
                             head.push('Remarks');
                             head.push('Confirmation Status');
+                            head.push('Available');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -759,6 +592,7 @@
                                 row.push(values.last_working_date);
                                 row.push(values.remarks);
                                 row.push(values.confirmation_status);
+                                row.push(values.attendance_date);
 
                                 body.push(row);
                             });
@@ -1016,7 +850,6 @@
                         d.search_line_manager = $('#search_line_manager').val();
                         d.filter_line_manager = $('#filter_line_manager').val();
                         d.search_origin = $('#search_origin').val();
-                        d.number_of_tickets_input = $('#number_of_tickets_input').val();
                         d.number_of_available_agents_input = $('#number_of_available_agents_input').val();
 
                     }
@@ -1048,11 +881,7 @@
                         class: 'align-middle old_trax_id'
                     },
 
-                    {
-                        data: 'shipments',
-                        name: 'rsaa.shipment_id',
-                        class: 'align-middle old_trax_id'
-                    },
+             
                     {
                         data: 'employee_name',
                         name: 'employees.name',
@@ -1175,6 +1004,12 @@
                         name: 'employees.confirmation_status',
                         class: 'align-middle confirmation_status'
                     },
+
+                    {
+                        data: 'attendance_date',
+                        name: 'ea.attendance_date',
+                        class: 'align-middle confirmation_status'
+                    },
                     {
                         data: 'action',
                         name: 'action',
@@ -1209,11 +1044,7 @@
                         '</select>';
 
 
-                    var employee_confirmation_status =
-                        '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' +
-                        '<option value="2">Probation</option>' +
-                        '<option value="1">Permanent</option>' +
-                        '</select>';
+                 
                     var rider_main_categories =
                         '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
                         '</select>';
@@ -1246,11 +1077,6 @@
                                 }).wrap(td);
                         } else if ($(header).is('.rider_main_category')) {
                             $(rider_main_categories).appendTo($(search))
-                                .on('change', function() {
-                                    column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else if ($(header).is('.confirmation_status')) {
-                            $(employee_confirmation_status).appendTo($(search))
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
@@ -1328,6 +1154,8 @@
                 }
             });
 
+
+
             $("#filter_line_manager_btn").on('click', function() {
                 $("#filter_line_manager").val(1);
                 table.draw();
@@ -1335,19 +1163,19 @@
 
 
 
-            $('#number_of_tickets_div').on('click', function(){
-                $('#number_of_tickets_input').val(1);
-                $('#number_of_available_agents_input').val('');
-
-                table.draw();
-            })
-
-            $('#number_of_available_agents_div').on('click', function(){
+            $('#number_of_available_agents_div').on('click', function() {
                 $('#number_of_available_agents_input').val(2);
-                $('#number_of_tickets_input').val('');
+                
 
                 table.draw();
             })
+
+
+        
+
+
+
+
 
             $('body').on('click', '.deactivate_staff', function() {
                 var employeeId = $(this).attr('data-id');
@@ -1538,6 +1366,38 @@
 
                 });
             });
+
+            var route = '{!! route('admin.tracking.index') !!}';
+
+            $('body').on('click', '.assigned_shipment', function() {
+
+                $('#shipments_modal').modal('show');
+
+                $('#shipments_modal .modal-body').html('');
+
+
+                var shipment = $(this).attr('data-assigned')
+
+                var shipmentArray = shipment.split(',');
+
+                var anchorTagsWithUnderlines = '';
+
+                for (var i = 0; i < shipmentArray.length; i++) {
+                    var shipmentNumber = shipmentArray[i].trim();
+                    anchorTagsWithUnderlines += '<p><a href=' + route + '?tracking_number=' +
+                        shipmentNumber + ' style="text-decoration: underline;">' + shipmentNumber +
+                        '</a></p>';
+                    shipmentNumber + '</a>';
+
+                    if (i < shipmentArray.length - 1) {
+                        anchorTagsWithUnderlines += ', ';
+                    }
+                }
+
+                $('#shipments_modal .modal-body').html(anchorTagsWithUnderlines);
+
+
+            })
 
             $('body').on('click', '.activate_staff', function() {
                 var employeeId = $(this).attr('data-id');
