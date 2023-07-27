@@ -52,25 +52,24 @@ class TeamLeadDashboardController extends Controller
             ->where('hub', '1')
             ->select('id', 'name')
             ->get();
+
         $sortedHubs = $hubs->sortBy(function ($hub) {
             $agentAssignHub = $hub->agentAssignHub->first();
             return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
         });
+
         $employee_additional_days = EmployeeAdditionalDay::get();
-        
+
         $number_of_available_agents = Employee::where('line_manager_id', Auth::id())->where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-        ->where('attendance_date', '=', $today)
-        ->whereIn('id', function ($query) {
-            $query->select(DB::raw('MAX(id)'))
-                ->from('employee_attendances')
-                ->groupBy('employee_id');
-        })
-        ->get();
-    
-
-        // dd($Attendance);
+            ->where('attendance_date', '=', $today)
+            ->whereIn('id', function ($query) {
+                $query->select(DB::raw('MAX(id)'))
+                    ->from('employee_attendances')
+                    ->groupBy('employee_id');
+            })
+            ->get();
 
         return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
@@ -82,7 +81,6 @@ class TeamLeadDashboardController extends Controller
         $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / count(RvShipmentAssignAgent::get()) * 100);
         $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
         $number_of_closed_ticket_percentage = round((count($number_of_closed_tickets) / count(RvShipmentAssignAgent::get()) * 100));
-
         $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
         $number_of_connected_calls_percentage = round((count($number_of_connected_calls) / count(RvShipmentAssignAgent::get()) * 100));
         $number_of_unresponsive_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
@@ -150,16 +148,28 @@ class TeamLeadDashboardController extends Controller
         $datatable = Datatables::of($assigned_agent_shipment)
             ->editColumn('status', function ($assigned_agent_shipment) {
                 $status = RvAssignAgentStatus::where('id', $assigned_agent_shipment->status)->first();
-                return ($status['name']);
+                if ($status['name']) {
+                    return $status['name'];
+                } else {
+                    return '-----';
+                }
             })
 
             ->editColumn('sub_status', function ($assigned_agent_shipment) {
                 $sub_status = RvAssignAgentSubStatus::where('id', $assigned_agent_shipment->sub_status)->first();
-                return ($sub_status['name']);
+                if ($sub_status['name']) {
+                    return $sub_status['name'];
+                } else {
+                    return '-----';
+                }
             })
             ->editColumn('state', function ($assigned_agent_shipment) {
                 $state = RvState::where('id', $assigned_agent_shipment->state)->first();
-                return ($state['name']);
+                if ($state['name']) {
+                    return $state['name'];
+                } else {
+                    return '-----';
+                }
             })
 
             ->editColumn('updated_by', function ($assigned_agent_shipment) {
@@ -184,7 +194,7 @@ class TeamLeadDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
 
-        $currentDate = Carbon::now()->format('Y-m-d'); 
+        $currentDate = Carbon::now()->format('Y-m-d');
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->join('employee_genders as eg', 'eg.id', '=', 'employees.employee_gender_id')
@@ -247,21 +257,16 @@ class TeamLeadDashboardController extends Controller
         if ($line_manager = $request->get('search_line_manager')) {
             $employees = $employees->where('employees.line_manager_id', $line_manager);
         }
+
         if ($filter_line_manager = $request->get('filter_line_manager')) {
             if ($filter_line_manager == 1) {
                 $employees = $employees->where('employees.is_line_manager', 1);
             }
         }
 
-
-
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
         }
-
-
-
-
 
         $datatable = Datatables::of($employees)
             ->setRowAttr([
