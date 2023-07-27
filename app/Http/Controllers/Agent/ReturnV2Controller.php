@@ -170,12 +170,12 @@ class ReturnV2Controller extends Controller
                                     if ($find_shipment_assigned_agent) {
                                         continue;
                                     }
-                                    $shipments_journey_id = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
 
                                     // if last shipment journey id  match with shipment journey id add continue
                                     $data = [
                                         'shipment_id' => $shipment->id,
-                                        'shipments_journey_id' => $shipments_journey_id->id,
+                                        'shipments_journey_id' => $shipments_journey->id,
                                         'rv_state_id' => 1, //Assigned
                                         'rv_assign_agent_status_id' => null,
                                         'rv_assign_agent_sub_status_id' => null,
@@ -338,7 +338,8 @@ class ReturnV2Controller extends Controller
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
 
                     return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
-                } else {
+                } 
+                else {
                     return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                 }
             } else {

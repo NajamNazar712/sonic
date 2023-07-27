@@ -77,19 +77,51 @@ trait RvTrait
     protected function rv_shipment_assign($data)
     {
         try {
-            RvShipmentAssignAgent::updateOrCreate(
-                [
-                    'shipment_id' => $data['shipment_id'],
-                    'shipments_journey_id' => $data['shipments_journey_id'],
-                ],
-                [
-                    'agent_id' => Auth::id(),
-                    'rv_state_id' => $data['rv_state_id'] ?? 1,
-                    'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
-                    'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
-                    'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
-                ]
-            );
+
+            $completed_shipments = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->where('rv_state_id', 4)->latest()->first();
+            if ($completed_shipments) {
+                $new_shipment = new RvShipmentAssignAgent();
+                $new_shipment->agent_id = Auth::id();
+                $new_shipment->shipment_id = $data['shipment_id'];
+                $new_shipment->rv_state_id =  1;
+                $new_shipment->rv_assign_agent_status_id =  null;
+                $new_shipment->rv_assign_agent_sub_status_id = null;
+                $new_shipment->shipments_journey_id = $data['shipments_journey_id'];
+                $new_shipment->last_shipments_journey_id = $data['shipments_journey_id'];
+                $new_shipment->save();
+            } else if (!$completed_shipments) {
+                $new_shipment = new RvShipmentAssignAgent();
+                $new_shipment->agent_id = Auth::id();
+                $new_shipment->shipment_id = $data['shipment_id'];
+                $new_shipment->rv_state_id =  1;
+                $new_shipment->rv_assign_agent_status_id =  null;
+                $new_shipment->rv_assign_agent_sub_status_id = null;
+                $new_shipment->shipments_journey_id = $data['shipments_journey_id'];
+                $new_shipment->last_shipments_journey_id = $data['shipments_journey_id'];
+                $new_shipment->save();
+            } else {
+                $completed_shipments->agent_id = Auth::id();
+                $completed_shipments->shipment_id = $data['shipment_id'];
+                $completed_shipments->rv_state_id = $data['rv_state_id'];
+                $completed_shipments->rv_assign_agent_status_id = $data['rv_assign_agent_sub_status_id'];
+                $completed_shipments->shipments_journey_id = $data['shipments_journey_id'];
+                $completed_shipments->last_shipments_journey_id = $data['shipments_journey_id'];
+                $completed_shipments->update();
+            }
+
+            // RvShipmentAssignAgent::updateOrCreate(
+            //     [
+            //         'shipment_id' => $data['shipment_id'],
+            //         'shipments_journey_id' => $data['shipments_journey_id'],
+            //     ],
+            //     [
+            //         'agent_id' => Auth::id(),
+            //         'rv_state_id' => $data['rv_state_id'] ?? 1,
+            //         'rv_assign_agent_status_id' => $data['rv_assign_agent_status_id'] ?? null,
+            //         'rv_assign_agent_sub_status_id' => $data['rv_assign_agent_sub_status_id'] ?? null,
+            //         'last_shipments_journey_id' => $data['shipments_journey_id'] ?? null,
+            //     ]
+            // );
 
             $rv_shipment_assign_agent_id = RvShipmentAssignAgent::max('id');
 
@@ -156,22 +188,20 @@ trait RvTrait
         ];
     }
 
-    public function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
+    protected function update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent)
     {
-        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id',$request->shipment_id)->latest()->first();
+        $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
         if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
-            
-        }
-        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 4) {
+
+        } else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 4) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 3; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = 4; //set sub status to consignee unavailable
         }
         return $shipment_assign_agent_table_columns;
-        
     }
 
     // Heading: N/A
@@ -180,9 +210,9 @@ trait RvTrait
     // Description: this function is updating table rows of rv_shipment_assign_agents
     protected function update_shipment_assign_agent($request, $assigned_agent, $admin_agent, $shipment_assign_agent)
     {
-        
+
         $shipment_assign_agent_table_columns = $this->update_unresponsive_shipments_status($request, $shipment_assign_agent, $assigned_agent);
-        
+
         if ($admin_agent->employee->staff_category_id == 3) {
             $assigned_agent->increment('total_shipments');
             $assigned_agent->increment('actual_productivity');
@@ -275,7 +305,7 @@ trait RvTrait
             }
         }
 
-            if(in_array($parcel->shipper_status_id, [ 7, 8, 9, 12, 15, 52, 65])){
+        if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) {
             $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->whereIn('shipper_status_id', [7, 8, 9, 12, 15, 52, 65])->latest('id')->first();
 
             if ($journey) {
@@ -345,7 +375,7 @@ trait RvTrait
         // 52 = Shipment - Re-Attempt Requested
         // 65 = Shipment - Shipper Advise Requested
 
-        if (in_array($parcel->shipper_status_id, [ 7, 8, 9, 12, 15, 52, 65])) {
+        if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) {
 
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             NotificationsController::send(15, 0, $request->shipment_id);
@@ -433,9 +463,9 @@ trait RvTrait
             if ($crm_request->exists()) {
                 $crm = true;
             }
-        
+
             // if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
-            if (in_array($shipment->shipper_status_id,[ 7, 8, 9, 12, 15, 52, 65]) || $crm == true) {
+            if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) {
                 if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
                     if ($shipment['intercepted'] == 1) {
 
@@ -552,9 +582,9 @@ trait RvTrait
         if ($rv_shipment_assign_agent->unresponsive_count == 3) {
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
             $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
-            
+
         }
-        
+
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
         else if ($rv_shipment_assign_agent->unresponsive_count == 4) {
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
@@ -1371,212 +1401,46 @@ trait RvTrait
     // Heading: N/A
     // Siderbar: N/A
     // URL: 
-    // Description: RetailReturnController's Function for reattempt 
-    public function mark_reattempt(Request $request)
+    // Description: this function is updating table rows of rv_shipment_assign_agents from shipper side
+    protected function shipment_status_update_shipper($request, $rv_assign_agent_status_id, $get_rv_state_id, $updated_rv_state_id)
     {
-        $parcel = Shipment::find($request->shipment_id);
-        if ($parcel) {
-            if ($parcel->shipper_status_id != 52) {
-                if ($parcel->shipper_status_id == 12) {
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
+        $rv_shipment_assign_agents = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)
+            ->where('rv_assign_agent_status_id', $rv_assign_agent_status_id)
+            ->where('rv_state_id', $get_rv_state_id)
+            ->latest()->first();
 
-                    if (session('user_type') != 1) {
-                        $reference_1_id = Auth::id();
-                    } else {
-                        $reference_1_id = null;
-                    }
-                    $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
-                    if ($last_reason->exists()) {
-                        $last_reason = $last_reason->first();
-                        $last_reason_id = $last_reason->status_reason_id;
-                    } else {
-                        $last_reason_id = NULL;
-                    }
-                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-                    if ($journey) {
-                        NotificationsController::send(33, $request->shipment_id);
-                    }
+        if ($rv_shipment_assign_agents) {
+            $rv_shipment_assign_agents->rv_state_id = $updated_rv_state_id;
+            $rv_shipment_assign_agents->updated_type_id = 3; //Shipper
+            $rv_shipment_assign_agents->updated_by_id = Auth::id();
+            $rv_shipment_assign_agents->update();
 
-                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
-                } else {
-                    return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
-                }
-            }
-            return ['status' => 0, 'error' => "Shipment is already updated, Please check tracking!"];
-        }
-        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
-    }
-
-
-    //Shipper Controller Functions
-
-    // Heading: N/A
-    // Siderbar: N/A
-    // URL: 
-    // Description:
-    public function shipper_return_marked_single_status(Request $request)
-    {
-        $parcel = Shipment::find($request->shipment_id);
-        if ($parcel) {
-            if ($parcel->shipper_status_id == 12) {
-
-                Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                $shipment_history = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
-
-                ShipmentChargesController::return($request->shipment_id);
-                AdminFinanceController::add_payment($request->shipment_id, 1);
-                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $request->remark, session('user_id'), NULL);
-                return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
-            }
-            return ['status' => 0, 'error' => "Something went wrong, try again later!"];
-        }
-        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
-    }
-
-    // Heading: N/A
-    // Siderbar: N/A
-    // URL: 
-    // Description:
-    public function return_reattempt_single_status(Request $request)
-    {
-        $parcel = Shipment::find($request->shipment_id);
-        if ($parcel) {
-            if ($parcel->shipper_status_id != 52) {
-                if ($parcel->shipper_status_id == 12) {
-                    $journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->where('shipper_status_id', 12)->where('status_reason_id', 12)->latest('id')->first();
-                    Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 52, 'consignee_status_id' => 52]);
-
-                    if (session('user_type') != 1) {
-                        $reference_1_id = Auth::id();
-                    } else {
-                        $reference_1_id = null;
-                    }
-                    $last_reason = ShipmentsJourney::where('shipment_id', $parcel->id)->orderBy('id', 'DESC');
-                    if ($last_reason->exists()) {
-                        $last_reason = $last_reason->first();
-                        $last_reason_id = $last_reason->status_reason_id;
-                    } else {
-                        $last_reason_id = NULL;
-                    }
-                    ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
-
-                    if ($journey) {
-                        NotificationsController::send(33, $request->shipment_id);
-                    }
-
-                    return response()->json(['status' => 1, 'success' => "Shipment has been requested for Re-Attempt, Please note that this is subjected to final confirmation by Customer Experience!"]);
-                } else {
-                    return ['status' => 0, 'error' => "Shipment is already updated for Re-attempt!"];
-                }
-            }
-            return ['status' => 0, 'error' => "Shipment is already updated, Please check tracking!"];
-        }
-        return ['status' => 0, 'error' => "Something went wrong, try again later!"];
-    }
-
-    // Heading: N/A
-    // Siderbar: N/A
-    // URL: 
-    // Description: ShipperInterceptRebookcontroller
-    public function shipper_intercept_re_book_update(Request $request)
-    {
-        $rules = [
-            'replacement_parcel_image' => ['nullable', 'mimes:png,jpeg,jpg'],
-        ];
-        $validate = Validator::make($request->all(), $rules);
-        if ($validate->fails()) {
-            return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
+            $rv_shipment_assign_agent_details  = new RvShipmentAssignAgentDetails();
+            $rv_shipment_assign_agent_details->rv_shipment_assign_agent_id = $rv_shipment_assign_agents->id;
+            $rv_shipment_assign_agent_details->agent_id = $rv_shipment_assign_agents->agent_id;
+            $rv_shipment_assign_agent_details->shipments_journey_id = $rv_shipment_assign_agents->shipments_journey_id;
+            $rv_shipment_assign_agent_details->last_shipments_journey_id = $rv_shipment_assign_agents->last_shipments_journey_id;
+            $rv_shipment_assign_agent_details->shipment_id = $rv_shipment_assign_agents->shipment_id;
+            $rv_shipment_assign_agent_details->rv_assign_agent_status_id = $rv_shipment_assign_agents->rv_assign_agent_status_id;
+            $rv_shipment_assign_agent_details->rv_assign_agent_sub_status_id = $rv_shipment_assign_agents->rv_assign_agent_sub_status_id;
+            $rv_shipment_assign_agent_details->rv_state_id = $rv_shipment_assign_agents->rv_state_id;
+            $rv_shipment_assign_agent_details->updated_type_id = 3; //Shipper
+            $rv_shipment_assign_agent_details->updated_by_id = Auth::id();
+            $rv_shipment_assign_agent_details->is_fake_status = $rv_shipment_assign_agents->is_fake_status;
+            $rv_shipment_assign_agent_details->rv_fake_status_id = $rv_shipment_assign_agents->rv_fake_status_id;
+            $rv_shipment_assign_agent_details->remarks = $rv_shipment_assign_agents->remarks;
+            $rv_shipment_assign_agent_details->call_to_id  = $rv_shipment_assign_agents->call_to_id;
+            $rv_shipment_assign_agent_details->save();
+            return true;
         } else {
-            $s_amount = str_replace(",", "", $request->amount);
-            $amount = intval($s_amount);
-            $shipment = Shipment::find($request->shipment_id);
-            $user_id = session('user_id');
-            $intercept_type = $request->consignee;
-
-            $shipment_status = $shipment->status_shipper->name;
-
-            if ($shipment['shipper_status_id'] == 12) {
-                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
-                    if ($shipment['intercepted'] == 1) {
-                        return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
-                    } else {
-                        $s_amount = str_replace(",", "", "$request->amount");
-                        $amount = (int)$s_amount;
-                        if ($intercept_type == 1) {
-                            InterceptReBookRequest::create([
-                                'shipment_id' => $request->shipment_id,
-                                'consignee_city_id' => $request->consignee_city,
-                                'consignee_name' => $request->consignee_name,
-                                'consignee_address' => $request->consignee_address,
-                                'consignee_phone_number_1' => $request->consignee_phone_number_1,
-                                'consignee_phone_number_2' => $request->consignee_phone_number_2,
-                                'consignee_email' => $request->consignee_email,
-                                'amount' => $amount,
-                                'shipper_id' => $user_id,
-                                'status' => 0,
-                                'intercept_type' => $intercept_type,
-                                'admin_id' => Auth::id()
-                            ]);
-                            $shipment->consignee_status_id = 54;
-                            $shipment->shipper_status_id = 54;
-                            $shipment->intercepted = 1;
-                            $shipment->save();
-
-                            ShipmentsJourneyController::add($request->shipment_id, 54, 54, NULL, NULL, $user_id, NULL);
-                        } else {
-
-                            InterceptReBookRequestHistory::create([
-                                'shipment_id' => $request->shipment_id,
-                                'old_consignee_city_id' => $shipment->consignee_city_id,
-                                'new_consignee_city_id' => $request->consignee_city,
-                                'old_consignee_name' => $shipment->consignee_name,
-                                'new_consignee_name' => $request->consignee_name,
-                                'old_consignee_address' => $shipment->consignee_address,
-                                'new_consignee_address' => $request->consignee_address,
-                                'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
-                                'new_consignee_phone_number_1' => $request->consignee_phone_number_1,
-                                'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
-                                'new_consignee_phone_number_2' => $request->consignee_phone_number_2,
-                                'old_consignee_email' => $shipment->consignee_email,
-                                'new_consignee_email' => $request->consignee_email,
-                                'old_amount' => $shipment->amount,
-                                'new_amount' => $amount,
-                                'shipper_id' => $user_id,
-                            ]);
-                            $shipment->consignee_status_id = 55;
-                            $shipment->shipper_status_id = 55;
-                            $shipment->intercepted = 1;
-                            $shipment->save();
-
-                            ShipmentsJourneyController::add($request->shipment_id, 55, 55, NULL, NULL, $user_id, NULL);
-
-                            if ($request->hasFile('replacement_parcel_image')) {
-                                $shipment_parcel_image = ShipmentReplacementParcelImage::where('shipment_id', $request->shipment_id);
-                                if ($shipment_parcel_image->exists()) {
-                                    $shipment_parcel_image = $shipment_parcel_image->first();
-                                    Storage::disk('public')->delete($shipment_parcel_image->picture_path);
-                                } else {
-                                    $shipment_parcel_image = new ShipmentReplacementParcelImage();
-                                    $shipment_parcel_image->shipment_id = $request->shipment_id;
-                                }
-                                $time = Carbon::now()->toDateString();
-                                $picture_path = 'replacement_parcel/' . $request->shipment_id . '_' . $time . '.png';
-                                Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_parcel_image));
-                                $shipment_parcel_image->picture_path = $picture_path;
-                                $shipment_parcel_image->save();
-                            }
-                        }
-                        return redirect()->route('cod.return.pending.index')->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
-                    }
-                } else {
-                    return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
-                }
-            } else {
-                return redirect()->route('cod.return.pending.index')->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
-            }
+            return ['status' => 1, 'error' => 'No Shipment ID Found'];
         }
     }
+
+
+
+
+
 
 
 

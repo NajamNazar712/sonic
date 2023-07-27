@@ -15,7 +15,7 @@ class AgentSarNotification extends Command
      *
      * @var string
      */
-    protected $signature = 'agent:SarNotification ';
+    protected $signature = 'agent:SarNotification';
 
     /**
      * The console command description.
@@ -53,24 +53,37 @@ class AgentSarNotification extends Command
             $currentDateTime = Carbon::now();
         
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
-            $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
-                ->where('rv_state_id', 2)
-                ->where('updated_at', '<', $currentDateTime->subHours(4)); // Check if 4 hours have passed
-        
-            // If All Conditions Are Being Met and 4 hours Have Passed, then send Email Notification to shipper to take action on the shipment 
-            if ($shipmentsToUpdate->exists()) {
+            $sendEmail = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
+            ->where('rv_state_id', 2)
+            ->where('unresponsive_count', 3)
+            ->where('updated_at', '<', $currentDateTime->subHours(4))
+            ->where('unresponsive_email_count', '<', 6)
+            ->get(); // Check if 4 hours have passed
+
+            // If there are shipments that meet the conditions, send Email Notification to shipper for each shipment
+            if ($sendEmail->isNotEmpty()) {
                 NotificationsController::send(220, 0);
-            } 
-            
+
+                foreach ($sendEmail as $shipment) {
+
+                    // Increment the unresponsive_email_count for each shipment after sending the email
+                    $shipment->increment('unresponsive_email_count');
+                }
+
+            }
             else {
                 // Else If there is no response from the shipper within 24 hours of the "Shipper Advise Requested" status being set on the shipment, 
                 // the system will automatically update the shipment status to "Return Confirm."
                 $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                     ->where('rv_state_id', 2)
-                    ->where('updated_at', '<', $currentDateTime->subHours(24)); // Check if 24 hours have passed
+                    ->where('unresponsive_count', 3)
+                    ->where('unresponsive_email_count', 6)
+                    ->get(); // Check if unresponsive_email_count 6 which means that 24 hours have passed
         
-                if ($shipmentsToUpdate->exists()) {
-                    $shipmentsToUpdate->update(['rv_assign_agent_status_id' => 3]); // Update the status to "Return Confirm"
+                if ($shipmentsToUpdate->isNotEmpty()) {
+                    foreach ($shipmentsToUpdate as $shipment) {
+                        $shipment->update(['rv_assign_agent_status_id' => 3]);
+                    }
                 }
             }
         } catch (\Throwable $th) {

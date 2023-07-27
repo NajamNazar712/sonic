@@ -31,6 +31,7 @@ class CreateRvShipmentAssignAgentsTable extends Migration
             $table->integer('call_to_id')->default(0);
             $table->date('state_date');
             $table->integer('unresponsive_count')->default(0);
+            $table->integer('unresponsive_email_count')->default(0);
             $table->dateTime('unresponsive_attempt_time')->nullable();
             $table->timestamps();
         });

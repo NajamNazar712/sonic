@@ -523,7 +523,7 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
-                                url:"{{route('cod.return.pending.marked.status.single')}}",
+                                url:"{{route('cod.return.pending.marked.status')}}",
                                 method:'POST',
                                 data:{
                                     'shipment_id':row_id,
