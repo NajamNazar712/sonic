@@ -11,6 +11,40 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                <form id="track_form" class="mb-1 justify-content-center" novalidate="novalidate">
+                    <div class="row justify-content-center">
+                        <div class="col-md-3">
+                            <fieldset class="form-group">
+                                <select name="rider_trax_id" id="rider_trax_id" class="form-control select2">
+                                    @foreach($riders as $rider)
+                                        <option value="{{$rider->id}}">{{$rider->name}} - ({{$rider->trax_id}})</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-md-3">
+                            <fieldset class="form-group">
+                                <input type="text" name="consignee_phone" id="consignee_phone" class="form-control consignee_phone" placeholder="Consignee Phone">
+                            </fieldset>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <input type="text" name="tracking_numbers" class="dt_search tracking_numbers" id="tracking_numbers"
+                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-2">
+                            <div class="form-group justify-content-center">
+                                <button id="datatable_filter_btn btn-sm" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                            class="la la-search"></i> Search
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -21,6 +55,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Rider Trax ID</th>
                         <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -65,6 +100,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
     <style>
         table.dataTable {
@@ -117,12 +153,11 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
-            type="text/javascript"></script>
-
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -142,6 +177,7 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Rider');
+                            head.push('Rider Trax ID');
                             head.push('Area');
                             head.push('Rider Type');
                             head.push('Route');
@@ -158,6 +194,7 @@
                                 row.push(values.hub);
                                 row.push(values.zone_name);
                                 row.push(values.rider);
+                                row.push(values.rider_trax_id);
                                 row.push(values.area);
                                 row.push(values.rt);
                                 row.push(values.route);
@@ -200,12 +237,13 @@
                 ajax: {
                     url: '{{ route('admin.delivery.rider_request.list') }}',
                     data: function (d) {
-                        d.delivery_note_number = $('#scan_delivery_note').val();
-                        d.search_tracking = $('#search_tracking').val();
+                        d.rider_trax_id = $('#rider_trax_id').val();
+                        d.consignee_phone = $('#consignee_phone').val();
+                        d.tracking_numbers = $('#tracking_numbers').val();
                     }
                 },
                 rowId: 'request_note_id',
-                order: [[9, 'desc']],
+                order: [[10, 'desc']],
                 columns: [
                     {
                         orderable: false,
@@ -221,6 +259,7 @@
                     {data: 'hub', name: 'c.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
                     {data: 'rider', name: 'r.name', class: 'align-middle rider'},
+                    {data: 'rider_trax_id', name: 'r.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'route', name: 'route', class: 'align-middle route', orderable: false},
@@ -293,6 +332,11 @@
                 }
             });*/
 
+            $('#rider_trax_id').prepend('<option value="" selected></option>').select2({
+                width:'100%',
+                placeholder:"Select Rider",
+                allowClear:true,
+            });
 
             var route = '{!! route('admin.tracking.index') !!}';
 
@@ -446,6 +490,46 @@
                 }
 
             }
+
+            //Selectize
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 6 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                },
+            });
+
+            $('#track_form .consignee_phone').inputmask({
+                'mask': '9999-9999999',
+                'clearIncomplete': true
+            });
+
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                table.draw();
+            });
 
         });
     </script>

@@ -1347,8 +1347,9 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_profile_update(Employee $employee, Request $request)
     {
-       
-//        return $request->joining_date_formatted;
+       $designation_toggle_val = $request->designation_on_off;
+        //return $request->joining_date_formatted;
+
         $request->validate([
             'personal_number' => [Rule::unique('employees', 'phone_number')->ignore($employee->id), Rule::unique('employees', 'official_phone_number')->ignore($employee->id)],
             'official_number' => 'bail|nullable|' . Rule::unique('employees', 'phone_number')->ignore($employee->id) . '|' . Rule::unique('employees', 'official_phone_number')->ignore($employee->id) . '',
@@ -1391,17 +1392,19 @@ class AdminHumanResourseController extends Controller
         $employee->cnic = $request->cnic;
         $employee->cnic_issue_date = $request->cnic_issue_date_formatted;
         $employee->cnic_expiry_date = $request->cnic_expiry_date_formatted;
-        if($role_flag == true){
-            if ($employee->designation_id != $request->designation) {
-                $designation_logs = new EmployeeDesignationLog();
-                $designation_logs->updated_by = Auth::id();
-                $designation_logs->designation_id = $employee->designation_id;
-                $designation_logs->employee_id = $employee->id;
-                $designation_logs->save();
-            }
+        if ($role_flag == true) {
+            if ($designation_toggle_val == 'true') {
+                if ($employee->designation_id != $request->designation) {
+                    $designation_logs = new EmployeeDesignationLog();
+                    $designation_logs->updated_by = Auth::id();
+                    $designation_logs->designation_id = $employee->designation_id;
+                    $designation_logs->employee_id = $employee->id;
+                    $designation_logs->save();
+                }
 
-            $employee->designation_id = $request->designation;
-            $employee->department_id = ($request->has('department')) ? $request->department : 6;
+                $employee->designation_id = $request->designation;
+                $employee->department_id = ($request->has('department')) ? $request->department : 6;
+            }
         }
         $employee->city_id = $request->city;
         $employee->zone_id = $request->zone;
@@ -1462,26 +1465,30 @@ class AdminHumanResourseController extends Controller
                 $admin = $admin->first();
 
                 if ($admin->designation_id != $employee->designation_id) {
-                    AdminHub::where('admin_id', $admin->id)->delete();
+                    if ($designation_toggle_val == true) {
+                        AdminHub::where('admin_id', $admin->id)->delete();
 
-                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
-                    if (count($hubs) == 0) {
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $employee->city->hub_city->id;
-                        $admin_hub->save();
-                    } else {
-                        foreach ($hubs as $hub) {
+                        $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+                        if (count($hubs) == 0) {
                             $admin_hub = new AdminHub();
                             $admin_hub->admin_id = $admin->id;
-                            $admin_hub->hub_id = $hub->hub_id;
+                            $admin_hub->hub_id = $employee->city->hub_city->id;
                             $admin_hub->save();
+                        } else {
+                            foreach ($hubs as $hub) {
+                                $admin_hub = new AdminHub();
+                                $admin_hub->admin_id = $admin->id;
+                                $admin_hub->hub_id = $hub->hub_id;
+                                $admin_hub->save();
+                            }
                         }
                     }
                 }
-                if($role_flag == true) {
-                    $admin->designation_id = $employee->designation_id;
-                    $admin->role_id = $employee->designation->role_id ?? 79;
+                if ($role_flag == true) {
+                    if ($designation_toggle_val == true) {
+                        $admin->designation_id = $employee->designation_id;
+                        $admin->role_id = $employee->designation->role_id ?? 79;
+                    }
                 }
                 $admin->phone_number = $employee->phone_number;
                 $admin->official_phone_number = $employee->official_phone_number;
@@ -1560,8 +1567,7 @@ class AdminHumanResourseController extends Controller
 
             }
         }
-
-        return redirect()->route('admin.human_resource.employee_directory.index')->with(['success' => 'Employee Profile Updated Successfully']);
+        return redirect()->route('admin.human_resource.employee_directory.index')->with(['success' => 'Employee Updated Successfully !']);
     }
 
     public function employee_directory_medical_update(Employee $employee, Request $request)
