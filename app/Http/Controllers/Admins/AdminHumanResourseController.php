@@ -2870,7 +2870,7 @@ class AdminHumanResourseController extends Controller
 
     public function designation_roles(Request $request)
     {
-        $roles = AdminRole::where('department_id', $request->department_id)->where('status',1)->get();
+        $roles = AdminRole::where('department_id', $request->department_id)->where('is_active',1)->get();
 
         return response()->json(['status' => 1, 'roles' => $roles]);
     }

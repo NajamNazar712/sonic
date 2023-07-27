@@ -274,10 +274,10 @@ class UserManagementController extends Controller
 
     public function user_add_index() {
         if (!in_array(session('role_id'), [1, 58])) {
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('status',1)->where('department_id', session('department_id'))->get();
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('is_active',1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('status',1)->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->get();
         }
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
@@ -412,10 +412,10 @@ class UserManagementController extends Controller
 
     public function user_update_index($id) {
         if (!in_array(session('role_id'), [1, 58])) {
-            $roles = AdminRole::with('department')->where('status',1)->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->where('status',1)->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->get();
         }
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
@@ -490,7 +490,7 @@ class UserManagementController extends Controller
                 ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
             }
             $super_admins = [3, 5, 7, 665];
-            $hr_roles = AdminRole::where('department_id', 10)->where('status',1)->pluck('id')->toArray();
+            $hr_roles = AdminRole::where('department_id', 10)->where('is_active',1)->pluck('id')->toArray();
             if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
                 $admin->role_id = $request->input('role_id');
                 $admin->designation_id = $request->input('designation_id');
@@ -575,11 +575,11 @@ class UserManagementController extends Controller
     public function role_list(Request $request) {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
         ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-        ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.status', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
+        ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
-        ->addColumn('status', function($role) {
-            if($role->status == 1)
+        ->addColumn('is_active', function($role) {
+            if($role->is_active == 1)
             {
                 return 'Enabled';
             }
@@ -589,7 +589,7 @@ class UserManagementController extends Controller
         })
         ->addColumn('action', function($role) {
             if (session('role_id') == 1 || in_array(87, session('permissions'))) {
-                if($role->status == 1)
+                if($role->is_active == 1)
                 {
                     $enable_disable = '<button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
                 }
@@ -620,19 +620,19 @@ class UserManagementController extends Controller
 
         if ($admin_role) {
 
-            if( $admin_role->status == 1)
+            if( $admin_role->is_active == 1)
             {
-                $admin_role->status = 0;
+                $admin_role->is_active = 0;
                 $admin_role->save();
             }
             else{
-                $admin_role->status = 1;
+                $admin_role->is_active = 1;
                 $admin_role->save();
             }
             
 
 
-            if ($request->status) {
+            if ($request->is_active) {
                 return ['status' => 0, 'success' => 'Role has been enabled'];
             }
             else {

@@ -231,7 +231,7 @@
 					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admin_roles.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
-					{data: 'status', name: 'admin_roles.status', class: 'align-middle status'},
+					{data: 'is_active', name: 'admin_roles.is_active', class: 'align-middle is_active'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {

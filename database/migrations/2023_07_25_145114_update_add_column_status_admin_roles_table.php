@@ -14,7 +14,7 @@ class UpdateAddColumnStatusAdminRolesTable extends Migration
     public function up()
     {
         Schema::table('admin_roles', function (Blueprint $table) {
-            $table->smallInteger('status')->default(1);
+            $table->smallInteger('is_active')->default(1);
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateAddColumnStatusAdminRolesTable extends Migration
     public function down()
     {
         Schema::table('admin_roles', function (Blueprint $table) {
-            $table->dropColumn('status');
+            $table->dropColumn('is_active');
         });
     }
 }
