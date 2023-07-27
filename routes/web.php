@@ -4188,6 +4188,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
                 Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
+                Route::post('convert-to-contractual', 'Admins\AdminHumanResourseController@convert_staff_to_contractual')->name('convert');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');
