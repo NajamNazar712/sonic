@@ -8657,14 +8657,16 @@ class GlobalSettingsController extends Controller
     {
         
         $request->validate([
-            'upload_image_1' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+            'upload_image' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+        ],[
+            'upload_image.max' => 'The image must be less than 2 Megabytes.',
         ]);
 
-        if (!$request->hasFile('upload_image_1')) {
+        if (!$request->hasFile('upload_image')) {
             return redirect()->back()->with(['error' => 'No Image Provided']);
         }
 
-        if ($request->hasFile('upload_image_1')) {
+        if ($request->hasFile('upload_image')) {
             if ($request->has('background_image_id_1')) {
                 $image_id = $request->get('background_image_id_1');
                 $background_image = BackgroundImage::find($image_id);
@@ -8676,13 +8678,13 @@ class GlobalSettingsController extends Controller
             }
 
             $picture_path = 'background_image/' . $background_image->id . '.png';
-            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image_1));
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image));
             $background_image->picture_path = $picture_path;
             $background_image->version = carbon::now();
             $background_image->background_image_screen_id = 1;
             
             $background_image->save();
         }
-        return redirect()->back()->with(['success' => 'Images Uploaded!']);
+        return redirect()->back()->with(['success' => 'Image Uploaded!']);
     }
 }

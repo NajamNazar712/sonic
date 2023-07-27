@@ -13,7 +13,7 @@
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
-            <div class="card-header"><h2 class="mb-1">Background Image</h2></div>
+            <div class="card-header"><h2 class="mb-1">Upload Image</h2></div>
             <div class="card-body">
                 <form id="documents_form" class="form form-horizontal" action="{{route('admin.settings.background_image.store')}}" method="post" enctype="multipart/form-data">
                     @csrf
@@ -23,8 +23,8 @@
                                 <table class="table table-sm table-bordered text-center" id="Image_table">
                                     <tbody>
                                     <tr style="height: 50px">
-                                        <td class="align-middle"><h6><b>Image # 1</b></h6></td>
-                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image_1"  id="upload_image_1"></td>
+                                        <td class="align-middle"><h6><b>Image</b></h6></td>
+                                        <td class="align-middle"><input class="form-control form-control-sm" type="file" name="upload_image"  id="upload_image"></td>
                                         @if(isset($background_image[0]))
                                             <input type="hidden" class="form-control form-control-sm" name="background_image_id_1" id="background_image_id" value="{{$background_image[0]->id}}">
                                             <td class="align-middle view" ><a class="white" ><button type="button" class="btn btn-primary btn-sm" data-link="{{asset(Storage::url($background_image[0]->picture_path))}}">View</button></a></td>
@@ -51,7 +51,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="picture_modal_title">Picture</h4>
+                    <h4 class="modal-title" id="picture_modal_title">Image</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -110,7 +110,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    var image_1 = $('#upload_image_1').val();
+                    var image_1 = $('#upload_image').val();
                     if((image_1 !== "" && image_1 != null)){
                         swal({
                             title: 'Are You Sure?',
