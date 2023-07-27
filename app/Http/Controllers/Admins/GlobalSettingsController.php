@@ -8660,6 +8660,7 @@ class GlobalSettingsController extends Controller
             'upload_image' => 'nullable|mimes:jpeg,png,jpg|max:2048',
         ],[
             'upload_image.max' => 'The image must be less than 2 Megabytes.',
+            'upload_image.mimes' => 'The upload image must be a file of type jpeg, png, jpg.',
         ]);
 
         if (!$request->hasFile('upload_image')) {
