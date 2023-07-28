@@ -41,7 +41,7 @@
                                                             </div>
                                                             <div class="media-body text-white text-right">
                                                                 <h3 class="text-white">
-                                                                    <p id="total_leads" class="d-inline">{{ count($number_of_rv_tickets) }}</p>
+                                                                    <p id="total_leads" class="d-inline">{{ ($number_of_rv_tickets) }}</p>
                                                                 </h3>
                                                                 <span>Overall Number of Tickets (RCP count) </span>
                                                             </div>
