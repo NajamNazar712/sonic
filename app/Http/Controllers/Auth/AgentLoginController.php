@@ -54,28 +54,28 @@ class AgentLoginController extends Controller
             'phone_number' => 'required',
             'pin' => 'required|min:4'
         ]);
-    
+
         $admin = Admin::where('phone_number', $request->phone_number)->first();
-            if ($admin) {
+        if ($admin) {
             $employee = Employee::where('trax_id', $admin->trax_id)
                 ->where('staff_category_id', 3)
                 ->where('status_id', '!=', 2)
                 ->first();
 
-    
+
             if ($employee) {
                 $today = Carbon::today();
                 if ($today->dayOfWeek === Carbon::SUNDAY) {
                     $current_time = Carbon::now();
                     $is_sunday_exist = EmployeeAdditionalDay::where('working_days', $today->format('Y-m-d'))->where('employee_id', $employee->id)->exists();
-    
+
                     if ($is_sunday_exist) {
                         $min_start_time = EmployeeShift::where('shift_type_id', 2)->orderBy('start_time', 'asc')->first();
                         $min_start_time = Carbon::parse($min_start_time->start_time);
-    
+
                         $max_end_time = EmployeeShift::where('shift_type_id', 2)->orderBy('end_time', 'desc')->first();
                         $max_end_time = Carbon::parse($max_end_time->end_time);
-    
+
                         if ($current_time->between($min_start_time, $max_end_time)) {
                             if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
                                 return redirect()->intended(route('agent.dashboard.index'));
@@ -92,42 +92,30 @@ class AgentLoginController extends Controller
                     }
                 } else {
                     if (isset($employee->shift_id)) {
-                        $shift_exist = null; 
+                        $shift_exist = null;
                         $current_time = Carbon::now();
-                        $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id',2)->get();
+                        $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->get();
 
-                        foreach($shift_exists as $shift_exist)
-                        {
-                            if($current_time->between(Carbon::parse($shift_exist['start_time']), Carbon::parse($shift_exist['end_time']))){
-                                $shift_exist = $shift_exist; 
+                        foreach ($shift_exists as $shift_exist) {
+                            if ($current_time->between(Carbon::parse($shift_exist['start_time']), Carbon::parse($shift_exist['end_time']))) {
+                                $shift_exist = $shift_exist;
                                 break;
-                            }else{
-                                $errors = 'No Shift Found That Match Time Slot';
+                            } else {
+                                $errors = 'No Shift Exists That Matches Your Time Slot';
                                 return redirect()->back()->withErrors($errors);
                             }
                         }
                         if ($shift_exist) {
-                            $start_time = Carbon::parse($shift_exist->start_time);
-                            $end_time = Carbon::parse($shift_exist->end_time);
-
-                            if($current_time->between($start_time, $end_time)){
-                                if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
-                                    return redirect()->intended(route('agent.dashboard.index'));
-                                }
-                                $errors = [$this->username() => trans('auth.failed')];
-                                return redirect()->back()->withErrors($errors);
-                            }else{
-                                $errors = 'You are not allowed in this Time Slot';
-                                return redirect()->back()->withErrors($errors);
+                            if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
+                                return redirect()->intended(route('agent.dashboard.index'));
                             }
-
                         } else {
-                            $errors = 'Employee Shift Doesnt Exist';
-                            return redirect()->back()->withErrors($errors);                        
+                            $errors = 'You Are Not Allowed To Login At This Time';
+                            return redirect()->back()->withErrors($errors);
                         }
                     } else {
                         $errors = 'Shift Doesnt Exist';
-                        return redirect()->back()->withErrors($errors);                          
+                        return redirect()->back()->withErrors($errors);
                     }
                 }
             } else {
@@ -139,7 +127,7 @@ class AgentLoginController extends Controller
             return redirect()->back()->withErrors($errors);
         }
     }
-    
+
     // Heading: N/A
     // Sidebar: N/A
     // URL: N/A
