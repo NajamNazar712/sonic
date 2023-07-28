@@ -56,12 +56,12 @@ class AgentLoginController extends Controller
         ]);
     
         $admin = Admin::where('phone_number', $request->phone_number)->first();
-    
-        if ($admin) {
+            if ($admin) {
             $employee = Employee::where('trax_id', $admin->trax_id)
                 ->where('staff_category_id', 3)
                 ->where('status_id', '!=', 2)
                 ->first();
+
     
             if ($employee) {
                 $today = Carbon::today();
@@ -92,10 +92,21 @@ class AgentLoginController extends Controller
                     }
                 } else {
                     if (isset($employee->shift_id)) {
+                        $shift_exist = null; 
                         $current_time = Carbon::now();
-                        $shift_exist = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id',2)->first();
+                        $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id',2)->get();
+
+                        foreach($shift_exists as $shift_exist)
+                        {
+                            if($current_time->between(Carbon::parse($shift_exist['start_time']), Carbon::parse($shift_exist['end_time']))){
+                                $shift_exist = $shift_exist; 
+                                break;
+                            }else{
+                                $errors = 'No Shift Found That Match Time Slot';
+                                return redirect()->back()->withErrors($errors);
+                            }
+                        }
                         if ($shift_exist) {
-                            // $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
                             $start_time = Carbon::parse($shift_exist->start_time);
                             $end_time = Carbon::parse($shift_exist->end_time);
 
