@@ -78,21 +78,21 @@ class TeamLeadDashboardController extends Controller
     {
         $number_of_rv_tickets = RvShipmentAssignAgent::get();
         $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
-        $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / count(RvShipmentAssignAgent::get()) * 100);
+        $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
-        $number_of_closed_ticket_percentage = round((count($number_of_closed_tickets) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_closed_ticket_percentage = round(count($number_of_closed_tickets) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
-        $number_of_connected_calls_percentage = round((count($number_of_connected_calls) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_connected_calls_percentage = round(count($number_of_connected_calls) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_unresponsive_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
-        $number_of_unresponsive_percentage = round((count($number_of_unresponsive_call) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_unresponsive_percentage = round(count($number_of_unresponsive_call) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_reattempt_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 2)->get();
-        $number_of_reattempt_percentage = round((count($number_of_reattempt_call) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_reattempt_percentage = round(count($number_of_reattempt_call) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_return_confirm_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 1)->get();
-        $number_of_return_confirm_percentage = round((count($number_of_return_confirm_call) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_return_confirm_percentage = round(count($number_of_return_confirm_call) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_intercept_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 3)->get();
-        $number_of_intercept_percentage = round((count($number_of_intercept_call) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_intercept_percentage = round(count($number_of_intercept_call) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
         $number_of_self_collection_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 5)->get();
-        $number_of_self_collection_percentage = round((count($number_of_self_collection_call) / count(RvShipmentAssignAgent::get()) * 100));
+        $number_of_self_collection_percentage = round(count($number_of_self_collection_call) / (count(RvShipmentAssignAgent::get()) >= 0) ? count(RvShipmentAssignAgent::get()) : 1 * 100);
 
         return view('admin.rv_assign_shipments.index')->with(['number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
     }
