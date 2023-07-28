@@ -68,6 +68,8 @@ class ReturnV2Controller extends Controller
         return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'status' => 1]);
     }
 
+
+
     // Heading: N/A
     // Sidebar: N/A
     // URL: 
@@ -84,6 +86,8 @@ class ReturnV2Controller extends Controller
             $employee_attendance->attendance_date = date('Y-m-d');
             $employee_attendance->clock_in = date('H:i:s');
             $employee_attendance->employee_type = $admin->employee_type ? $admin->employee_type : '1';
+            $employee_attendance->clock_in_latitude = session('latitude');
+            $employee_attendance->clock_in_longitude = session('longitude');
             $employee_attendance->save();
         }
     }
