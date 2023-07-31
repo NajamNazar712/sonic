@@ -482,6 +482,7 @@ class TeamLeadDashboardController extends Controller
 
     public function add_additional_days(Request $request)
     {
+
         try {
             $validations = [
                 'employee_id' => 'required',

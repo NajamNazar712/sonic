@@ -397,6 +397,8 @@
             });
 
 
+
+
             var rv_city = null;
 
             var table = $('#datatable').DataTable();
@@ -425,6 +427,36 @@
 
 
             });
+
+
+            $('body').on('click', '#save_additional_days', function(e) {
+                var id = $('#employee_id_d').val();
+                var dates = $('#add_days_employee').val();
+                e.preventDefault();
+                $.ajax({
+                        url: '{!! route('admin.team_lead.add_additional_days') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            employee_id: id,
+                            add_additional_days: dates,
+                        },
+                        dataType: 'json',
+                    })
+                    .done(function(response) {
+                        if (response.status == 0) {
+                            window.location.href = "{{ route('admin.team_lead.index') }}";
+                        } else if (response.status == 2) {
+                            $('.error-message').text('Please Select Date');
+                        }
+                    })
+                    .fail(function(xhr, status, error) {
+                        // Handle the error response from the server
+                        alert('Error: ' + error);
+                        console.log(xhr.responseText); // You can inspect the error response here
+                    });
+            });
+
 
 
 
@@ -841,7 +873,7 @@
                         d.filter_line_manager = $('#filter_line_manager').val();
                         d.search_origin = $('#search_origin').val();
                         d.number_of_available_agents_input = $('#number_of_available_agents_input')
-                        .val();
+                            .val();
 
                     }
                 },
@@ -1528,7 +1560,5 @@
 
 
         });
-        
-        
     </script>
 @endsection
