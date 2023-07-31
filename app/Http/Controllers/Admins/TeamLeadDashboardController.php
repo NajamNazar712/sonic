@@ -379,13 +379,11 @@ class TeamLeadDashboardController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                     if ($result->staff_category_id == 3) {
-                        if ((session('role_id') == 1 || in_array(session('permissions')))) {
-
-                            $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
-                        }
+            
 
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
+                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(session('permissions'))) {

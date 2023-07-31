@@ -591,7 +591,7 @@
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
-                                shipment += '</tbody>';
+                                shipment += '</tbody>'; 
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
@@ -603,9 +603,13 @@
                                 shipment += '<tbody>';
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Name</strong></td>';
-                                shipment += '<td style="width: 45%;">' + data.shipment.consignee_name + '</td>';
+                                shipment += '<td style="width: 45%;">' + ((data.shipment.consignee_name != null &&
+                                        data.shipment.consignee_name
+                                         != null) ? data.shipment.consignee_name : '----------------') + '</td>';
                                 shipment += '<td><strong>Origin</strong></td>';
-                                shipment += '<td>' + data.consignee_city.name + '</td>';
+                                shipment += '<td>' +  ((data.consignee_city.name != null &&
+                                        data.consignee_city.name
+                                         != null) ? data.consignee_city.name : '----------------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';

@@ -62,7 +62,6 @@ class AgentLoginController extends Controller
                 ->where('status_id', '!=', 2)
                 ->first();
 
-
             if ($employee) {
                 $today = Carbon::today();
                 if ($today->dayOfWeek === Carbon::SUNDAY) {
@@ -92,25 +91,20 @@ class AgentLoginController extends Controller
                     }
                 } else {
                     if (isset($employee->shift_id)) {
-                        $shift_exist = null;
                         $current_time = Carbon::now();
-                        $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->get();
+                        $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
 
-                        foreach ($shift_exists as $shift_exist) {
-                            if ($current_time->between(Carbon::parse($shift_exist['start_time']), Carbon::parse($shift_exist['end_time']))) {
-                                $shift_exist = $shift_exist;
-                                break;
-                            } else {
-                                $errors = 'No Shift Exists That Matches Your Time Slot';
-                                return redirect()->back()->withErrors($errors);
-                            }
-                        }
-                        if ($shift_exist) {
+                        $start_time = Carbon::parse($shift_exists->start_time);
+                        $end_time = Carbon::parse($shift_exists->end_time);
+                        
+                        if ($current_time->between($start_time, $end_time)) {
                             if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
                                 return redirect()->intended(route('agent.dashboard.index'));
                             }
+                            $errors = [$this->username() => trans('auth.failed')];
+                            return redirect()->back()->withErrors($errors);
                         } else {
-                            $errors = 'You Are Not Allowed To Login At This Time';
+                            $errors = 'You are not allowed in this Time Slot';
                             return redirect()->back()->withErrors($errors);
                         }
                     } else {
