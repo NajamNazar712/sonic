@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Retail;
 
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -230,16 +233,37 @@ class RetailReturnController extends Controller
                     }
                     ShipmentsJourneyController::add($request->shipment_id, 52, 52, $last_reason_id, $request->remark, session('user_id'), NULL, $reference_1_id);
                     
-                    $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
-                   if($return_assign_shipment){
-                       $return_assign_shipment->status = 0;
-                       $return_assign_shipment->save();
+                //     $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $request->shipment_id)->latest()->first();
+                //    if($return_assign_shipment){
+                //        $return_assign_shipment->status = 0;
+                //        $return_assign_shipment->save();
 
-                       $return_assign_log = new ReturnAssignedShipmentLogs();
-                        $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        $return_assign_log->status = 5;
-                        $return_assign_log->assigned_by = Auth::id();
-                        $return_assign_log->save();
+                //        $return_assign_log = new ReturnAssignedShipmentLogs();
+                //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                //         $return_assign_log->status = 5;
+                //         $return_assign_log->assigned_by = Auth::id();
+                //         $return_assign_log->save();
+                //    }
+                   $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $request->shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
+                   if ($rcp_assigned_shipment->exists()) {
+                       $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                       $rcp_assigned_shipment->shipment_status = 3; //reattempt status
+                       $rcp_assigned_shipment->admin_id = Auth::id();
+                       $rcp_assigned_shipment->save();
+
+                       //updating already_updated & pending of agent if shipment is updated by shipper 
+                       $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                       $already_updated = $rcp_assigned_agent->increment('already_updated');
+                       $rcp_assigned_agent->decrement('pending_shipments');
+                       $rcp_assigned_agent->save();
+
+
+                       $return_assign_log = new RcpAssignedShipmentLog ();
+                       $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                       $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                       $return_assign_log->status = 3; //reattempt status
+                       $return_assign_log->admin_id = Auth::id();
+                       $return_assign_log->save();
                    }
                    
                     if($journey){

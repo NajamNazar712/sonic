@@ -88,10 +88,18 @@ class ProcessShipmentBookingDBPriority implements ShouldQueue
             $pickup_address_id = $this->booking['pickup_address_id'];
             $pickup_city_id = UserShippingInfo::find($this->booking['pickup_address_id'])->city_id;
 
-            if (strtolower($this->booking['information_display']) == 'yes') {
-                $information_display = TRUE;
-            } else {
-                $information_display = FALSE;
+
+            $information_display = TRUE;
+
+            $settings = GlobalSettings::where('type', 'airway_bill_address_visibility_setting');
+            if ($settings->exists()) {
+                $settings = $settings->first();
+                if ($settings->text != NULL) {
+                    $airway_bill_address_visibility_accounts = array_map('intval', explode(',', $settings->text));
+                    if (in_array(session('user_id'), $airway_bill_address_visibility_accounts)) {
+                        $information_display = FALSE;
+                    }
+                }
             }
 
             $consignee_city_id = City::where('name', $this->booking['consignee_city_name'])->first()->id;

@@ -60,8 +60,10 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Bag Number</th>
                                     <th class="border-primary border-darken-1">Shipments</th>
+                                    <th class="border-primary border-darken-1">Pieces</th>
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
+                                    <th class="border-primary border-darken-1">Remarks</th>
                                    {{-- <th class="border-primary border-darken-1">Bag Weight</th>--}}
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -84,13 +86,21 @@
                                             </div>
                                             <div class="modal-body">
                                                 <div class="row">
-                                                    <div class="col-4">
+                                                    <div class="col-2">
                                                         <div class="form-group">
+                                                            <label>Total Weight</label>
                                                             <input type="text" name="total_weight" placeholder="Total Weight*" readonly class="form-control" id="total_weight">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-2">
+                                                        <div class="form-group">
+                                                            <label>Total Pieces</label>
+                                                            <input type="text" name="pieces" placeholder="Total Pieces*" readonly class="form-control" id="pieces">
                                                         </div>
                                                     </div>
                                                     <div class="col-4">
                                                         <div class="form-group">
+                                                            <label>Shipment Mode</label>
                                                             <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
                                                                 @foreach($shipping_modes as $mode)
                                                                     <option value="{{$mode->id}}"> {{$mode->mode}} </option>
@@ -100,6 +110,7 @@
                                                     </div>
                                                     <div class="col-4">
                                                         <div class="form-group">
+                                                            <label>Route Name</label>
                                                             <input type="text" name="route_name" placeholder="Route Name*" class="form-control" data-rule-required="true" id="route_name" data-msg-required="Route Name is Required" data-rule-minlength="3" data-msg-minlength="Route Name must be atleast 3 character long">
                                                         </div>
                                                     </div>
@@ -385,8 +396,10 @@
                     {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'bag_number', name: 'cargo_manifest_draft_bags.seal_number', class: 'align-middle bag_number'},
                     {data:'shipments_count', name: 'cargo_manifest_draft_bags.shipments_count', class: 'align-middle shipments_count'},
+                    {data:'pieces_count', name: 'cargo_manifest_draft_bags.pieces_count', class: 'align-middle pieces_count'},
                     {data:'origin', name: 'c.name', class: 'align-middle origin'},
                     {data:'destination', name: 'd.name', class: 'align-middle destination'},
+                    {data:'remarks', name: 'cargo_manifest_draft_bags.remarks', class: 'align-middle remarks'},
                     {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -413,12 +426,17 @@
 
                 $("#cargo_details #route_name").val('');
 
+                var remarks = {};
+                $('.remarks textarea').each(function() {
+                    remarks[$(this).attr('ref')] = $(this).val();
+                });
                 blockPagePermanently();
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.cargo_details') !!}',
                     method: 'POST',
                     data: {
                         'bag_ids': bag_ids,
+                        remarks,
                         '_token': '{{ csrf_token() }}'
                     },
                     timeout: 30000,
@@ -432,9 +450,10 @@
                     success: function (data) {
                         if(data.status == 0) {
 
-
+                            let pieces = data.details.pieces;
                             $('#cargo_details').modal('show');
                             $('#cargo_details form #bag_ids').val(bag_ids);
+                            $('#cargo_details form #pieces').val(pieces);
 
                             $('#cargo_details form #vehicle_number').html("");
                             $.each(data.details.vehicles, function (index, vehicle) {

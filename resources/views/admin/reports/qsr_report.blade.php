@@ -116,7 +116,7 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status From</span>
                             </span>
                             </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{ Carbon\Carbon::now() }}">
@@ -126,12 +126,36 @@
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
+                                <span class="">Current Status To</span>
                             </span>
                             </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::now() }}">
                         </div>
                     </div>
+                    {{--todo new--}}
+                    <div class="col-4 ">
+                        {{--                        <label>Arrival Date From</label>--}}
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="">Arrival Date From</span>
+                            </span>
+                            </div>
+                            <input type="text" name="from_date1" class="form-control bg-primary border-primary white rounded-right" id="from_date1" placeholder="Arrival Date From">
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        {{--                        <label>Arrival Date To</label>--}}
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="">Arrival Date To</span>
+                            </span>
+                            </div>
+                            <input type="text" name="to_date1" class="form-control bg-primary border-primary white rounded-right" id="to_date1" placeholder="Arrival Date To">
+                        </div>
+                    </div>
+                    {{--todo new end--}}
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -154,6 +178,8 @@
                         <th class="border-primary border-darken-1">Total Attempt</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Cargo Status</th>
+                        <th class="border-primary border-darken-1">Bag Seal Number</th>
+                        <th class="border-primary border-darken-1">Bag Status</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Last Status Date</th>
@@ -297,6 +323,7 @@
                 width: '100%',
                 placeholder: 'Sub Segment*'
             });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -334,6 +361,80 @@
                 }
             });
 
+            var booking_from_date = $('#from_date1').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#to_date1').pickadate('picker').set('min', $('#from_date1').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            var booking_to_date = $('#to_date1').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function (context) {
+                    if (context.select) {
+                        $('#from_date1').pickadate('picker').set('max', $('#to_date1').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#from_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+            $('#to_date1').change(function() {
+                console.log('jjj');
+                var selectedOption = $(this).val();
+                if (selectedOption != null)
+                {
+                    $('#from_date').val(null).trigger('change');
+                    $('#to_date').val(null).trigger('change');
+                    // console.log(selectedOption);
+                }
+            });
+
+            // $('#from_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+            // $('#to_date').change(function() {
+            //     console.log('jjj');
+            //     var selectedOption = $(this).val();
+            //     if (selectedOption != null)
+            //     {
+            //         $('#from_date1').val(null).trigger('change');
+            //         $('#to_date1').val(null).trigger('change');
+            //         // console.log(selectedOption);
+            //     }
+            // });
+
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -365,6 +466,8 @@
                             head.push('Total Attempt');
                             head.push('History Status');
                             head.push('Cargo Status');
+                            head.push('Bag Seal Number');
+                            head.push('Bag Status');
                             head.push('Service Type');
                             head.push('Arrival');
                             head.push('Last Status Date');
@@ -403,6 +506,8 @@
                                 row.push(values.total_attempt);
                                 row.push(values.history_status);
                                 row.push(values.cargo_status);
+                                row.push(values.seal_number);
+                                row.push(values.bag_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
@@ -476,12 +581,16 @@
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.arrival_search_from = $('input[name="from_date1_formatted"]').val();
+                        d.arrival_search_to = $('input[name="to_date1_formatted"]').val();
+                        // d.requested_from_date = $('#from_date1').val();
+                        // d.requested_to_date = $('#to_date1').val();
                         d.search_types = $('#search_types').val();
                         d.search_concerned_hub = $('#search_concerned_hub').val();
                     }
                 },
                 rowId: 'shId',
-                order: [[13, 'desc']],
+                order: [[17, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -496,6 +605,8 @@
                     {data: 'total_attempt' ,name: 'total_attempt', class: 'align-middle total_attempt'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'cargo_status', name: 'cargo_status.name', class: 'align-middle history_status'},
+                    {data: 'seal_number', name: 'cmb.seal_number', class: 'align-middle history_status'},
+                    {data: 'bag_status', name: 'bs.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\CityArea;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\OperationRidersCategory;
@@ -236,7 +237,7 @@ class RiderManagementController extends Controller
             'ccd' => ($request->has('ccd_rider_checkbox') ? 1 : 0),
             'pin' => bcrypt($request->pin),
             'dummy_pin' => $request->pin,
-            'created_by' => Auth::id(),
+  'area_id'=>$request->area,            'created_by' => Auth::id(),
             'trax_id' => $trax_id,
             'rider_type_id' => $type,
             'shift_id' => 1,
@@ -259,6 +260,7 @@ class RiderManagementController extends Controller
             $employee->rider_main_category = $request->rider_main_category;
             $employee->rider_sub_category = $request->rider_category;
             $employee->rider_type_id = $type;
+            $employee->area_id = $request->area;
             $employee->save();
 
             $rider->employee_id = $employee->id;
@@ -294,7 +296,8 @@ class RiderManagementController extends Controller
         $operation_rider_ids =  OperationRidersCategory::all();
         $shifts =  EmployeeShift::where('status', 1)->get();
         $reporting_locations = ReportingLocation::where('status', 1)->get();
-        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations]);
+  $areas_list = CityArea::where('city_id',$rider->city_id)->select('id','name')->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id' => $id, 'cities' => $city, 'categories' => $category, 'rider' => $rider, 'routes' => $route, 'route_types' => $route_types, 'operation_rider_ids' => $operation_rider_ids, 'type' => $type, 'shifts' => $shifts, 'main_category' => $main_category, 'reporting_locations' => $reporting_locations,'areas_list' => $areas_list]);
     }
     public function editRiderDetails(Request $request, $id)
     {
@@ -326,6 +329,7 @@ class RiderManagementController extends Controller
         $rider->address = $request->address;
         $rider->trax_id = $request->trax_id;
         $rider->incentive_amount = $request->incentive_amount;
+        $rider->area_id = $request->area;
         $rider->shift_id = 1;
 
         $rider->rider_category_id = $request->rider_category;
@@ -387,6 +391,7 @@ class RiderManagementController extends Controller
             $employee->address = $rider->address;
             $employee->pin = $rider->dummy_pin;
             $employee->shift_id = $rider->shift_id;
+            $employee->area_id = $rider->area_id;
 
             $employee->rider_main_category = $request->rider_category;
             $employee->rider_sub_category = $request->rider_main_category;

@@ -17,30 +17,89 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <div class="text-center">
-                                <form id="bag_type_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <select name="bag_type" class="select2" id="bag_type">
-                                            <option value="" selected="selected"></option>
-                                            <option value="0">All</option>
-                                            <option value="1">Normal</option>
-                                            <option value="2">Return</option>
-                                        </select>
-                                    </div>
-                                </form>
+                             <form id="search_form" class="row mb-2 justify-content-center" novalidate="novalidate">
 
-                                <form id="tracking_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
-                                    </div>
-                                </form>
+                                        <fieldset class="col-2">
+                                            <fieldset class="form-group">
+                                                <select name="bag_type"  id="bag_type"   class="form-control select2">
+                                                    <option value="" selected="selected"></option>
+                                                    <option value="0">All</option>
+                                                    <option value="1">Normal</option>
+                                                    <option value="2">Return</option>
+                                                </select>
+                                            </fieldset>
+                                        </fieldset>
+                                        <fieldset class="col-2">
+                                            <div class="form-group">
+                                                <input type="text" name="tracking_number" id="tracking_number" class="form-control tracking_number" placeholder="Tracking Number" >
+                                            </div>
+                                        </fieldset>
+                                        <fieldset class="col-2">
+                                            <div class="form-group ">
+                                                <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
+                                            </div>
+                                        </fieldset>
 
-                                <form id="bag_number_search_form" class="d-inline-block form-inline ml-1 mb-1 justify-content-center" novalidate="novalidate">
-                                    <div class="form-group">
-                                        <input type="text" name="bag_number" class="form-control bag_number" id="bag_number" placeholder="Bag Number">
-                                    </div>
+
+
+                                 <fieldset class="col-2 ">
+
+                                     <select name="search_origin" id="search_origin"
+                                             class="form-control select2 col-4">
+                                         <option value="">Select origin</option>
+                                         @foreach($hubs as $hub)
+                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                         @endforeach
+                                     </select>
+                                 </fieldset>
+
+                                 <fieldset class="col-2 ">
+
+                                     <select name="search_destination" id="search_destination"
+                                             class="form-control select2 col-4">
+                                         <option value="">Select destination</option>
+                                         @foreach($hubs as $hub)
+                                             <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                         @endforeach
+                                     </select>
+                                 </fieldset>
+
+                                 <fieldset class="col-3">
+                                     <div class="form-group input-group ">
+                                         <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                         </div>
+                                         <input type="text" name="search_date_from"
+                                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                id="search_date_from" placeholder="Select From Date" data-value="{{ Carbon\Carbon::now() }}">
+                                     </div>
+                                 </fieldset>
+                                 <fieldset class="col-3">
+                                     <div class="form-group input-group">
+                                         <div class="input-group-prepend">
+                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o"></span>
+                                                    </span>
+                                         </div>
+                                         <input type="text" name="search_date_to"
+                                                class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                id="search_date_to" placeholder="Select To Date" data-value="{{ Carbon\Carbon::now() }}">
+                                     </div>
+                                 </fieldset>
+
+
+                                        <fieldset class="col-1">
+                                            <div class="form-group">
+                                                <button type="button" id="search_filter_btn"
+                                                        class="btn btn-block btn-outline-info btn-min-width"><i
+                                                            class="la la-search"></i>
+                                                    Search
+                                                </button>
+                                            </div>
+                                        </fieldset>
                                 </form>
-                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -73,7 +132,8 @@
         </div>
     </div>
 
-    <div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="short_received_shipments" aria-hidden="true">
+    <div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="short_received_shipments"
+         aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
@@ -116,28 +176,32 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css"
+          href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+            type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
+        $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
+                if (this.context.length) {
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -167,7 +231,7 @@
                             head.push('Status');
 
 
-                            $.each(result.data, function(index, values) {
+                            $.each(result.data, function (index, values) {
                                 row = [];
 
                                 row.push(index + 1);
@@ -196,7 +260,7 @@
 
                     return {body: body, header: head};
                 }
-            } );
+            });
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -205,7 +269,7 @@
                         title: 'Bags History',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },'reset'],
+                    }, 'reset'],
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -215,42 +279,82 @@
                     processing: data_table_loader
                 },
                 serverSide: true,
+                deferLoading: 0,
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.bags.history.list') }}',
                     data: function (d) {
-                        d.bag_type = $('#bag_type_search_form #bag_type').val();
-                        d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
-                        d.bag_number = $('#bag_number_search_form #bag_number').val();
+                        d.bag_type = $('#search_form #bag_type').val();
+                        d.tracking_number = $('#search_form #tracking_number').val();
+                        d.bag_number = $('#search_form #bag_number').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
                     }
                 },
                 rowId: 'id',
                 order: [[14, 'desc']],
                 columns: [
-                    {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {
+                        data: 'serial_number',
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 1,
+                        render: function (data, type, row) {
+                            return '';
+                        }
+                    },
                     {data: 'seal_number', name: 'cargo_manifest_bags.seal_number', class: 'align-middle seal_number'},
                     {data: 'bag_type', name: 'cargo_manifest_bags.type', class: 'align-middle bag_type'},
                     {data: 'origin', name: 'oh.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dh.name', class: 'align-middle destination'},
                     {data: 'manifest_id', name: 'cm.id', class: 'align-middle manifest_id'},
-                    {data: 'shipments', name: 'cargo_manifest_bags.shipments', class: 'align-middle text-center shipments'},
-                    {data: 'lost_shipments', name: 'cargo_manifest_bags.lost_shipments', class: 'align-middle text-center lost_shipments'},
-                    {data: 'junctions', name: 'junctions', class: 'align-middle text-center junctions',orderable: false},
-                    {data: 'short_received_shipments', name: 'short_received_shipments', class: 'align-middle text-center short_received_shipments'},
+                    {
+                        data: 'shipments',
+                        name: 'cargo_manifest_bags.shipments',
+                        class: 'align-middle text-center shipments'
+                    },
+                    {
+                        data: 'lost_shipments',
+                        name: 'cargo_manifest_bags.lost_shipments',
+                        class: 'align-middle text-center lost_shipments'
+                    },
+                    {
+                        data: 'junctions',
+                        name: 'junctions',
+                        class: 'align-middle text-center junctions',
+                        orderable: false
+                    },
+                    {
+                        data: 'short_received_shipments',
+                        name: 'short_received_shipments',
+                        class: 'align-middle text-center short_received_shipments'
+                    },
                     {data: 'shipping_mode', name: 'sm.id', class: 'align-middle shipping_mode'},
                     {data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
-                    {data: 'shipments_weight', name: 'cargo_manifest_bags.shipments_weight', class: 'align-middle shipments_weight'},
-                    {data: 'actual_weight', name: 'cargo_manifest_bags.actual_weight', class: 'align-middle actual_weight'},
+                    {
+                        data: 'shipments_weight',
+                        name: 'cargo_manifest_bags.shipments_weight',
+                        class: 'align-middle shipments_weight'
+                    },
+                    {
+                        data: 'actual_weight',
+                        name: 'cargo_manifest_bags.actual_weight',
+                        class: 'align-middle actual_weight'
+                    },
                     {data: 'transitted_at', name: 'cargo_manifest_bags.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'received_at', name: 'cargo_manifest_bags.received_at', class: 'align-middle received_at'},
                     {data: 'status', name: 'bs.id', class: 'align-middle status'},
                 ],
-                rowCallback: function(row, data, index) {
+                rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
+                initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -265,44 +369,41 @@
                         '<option value="2">Return</option>' +
                         '</select>';
 
-                    this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function (column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.shipping_mode')){
+                        } else if ($(header).is('.shipping_mode')) {
                             $(mode_drop_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.transport_mode')){
+                                }).wrap(td);
+                        } else if ($(header).is('.transport_mode')) {
                             $(transport_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.vendor')){
+                                }).wrap(td);
+                        } else if ($(header).is('.vendor')) {
                             $(vendor_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }else if($(header).is('.status')){
+                                }).wrap(td);
+                        } else if ($(header).is('.status')) {
                             $(status_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.bag_type')){
+                                }).wrap(td);
+                        } else if ($(header).is('.bag_type')) {
                             $(bag_type_select).appendTo($(search))
-                                .on( 'change', function () {
+                                .on('change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                                }).wrap(td);
+                        } else {
+                            var current = $(input).appendTo($(search)).on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
-
                             if (column.search()) {
                                 current.val(column.search());
                             }
@@ -330,15 +431,14 @@
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
                                     });
-                                }
-                                else {
+                                } else {
                                     tab.document.write(data);
                                     tab.document.close();
                                     tab.focus();
                                 }
                             });
                     });
-                    $('#datatable tbody').on('click', 'tr td.shipments button', function() {
+                    $('#datatable tbody').on('click', 'tr td.shipments button', function () {
                         var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                         $('#shipments .modal-body').html('');
@@ -351,7 +451,7 @@
                                 'seal_number': seal_number
                             }
                         })
-                            .done(function(data) {
+                            .done(function (data) {
                                 if (data) {
                                     var head = '';
                                     var tracking_numbers = '';
@@ -361,8 +461,8 @@
                                         '<span aria-hidden="true">×</span>\n' +
                                         '</button>';
 
-                                    $.each(data, function(index, tracking_number) {
-                                        tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    $.each(data, function (index, tracking_number) {
+                                        tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                                     });
 
                                     $('#shipments .modal-header').html(head);
@@ -374,7 +474,7 @@
                     });
                     $("#bag_type_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Type",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -385,9 +485,9 @@
                     });
 
                     $("#mode_select").prepend('<option value="" selected></option>').select2({
-                        data:data1,
+                        data: data1,
                         placeholder: "Select Shipping Mode",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -399,9 +499,9 @@
                     });
 
                     $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data2,
+                        data: data2,
                         placeholder: "Select Status",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -413,9 +513,9 @@
                     });
 
                     $("#transport_select").prepend('<option value="" selected></option>').select2({
-                        data:data3,
+                        data: data3,
                         placeholder: "Select Transport",
-                        width:'100%',
+                        width: '100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
@@ -426,48 +526,100 @@
             var route = '{!! route('admin.tracking.index') !!}';
 
 
-            $('#bag_type_search_form #bag_type').select2({
-                width: '125px',
-                placeholder: 'Bag Type'
-            }).bind('change', function() {
-                table.draw();
+            /*           $('#tracking_number_search_form').bind('submit', function(e) {
+                            e.preventDefault();
+
+                            length = $('#tracking_number_search_form #tracking_number').val().length;
+
+                            if (length == 0 || length >= 12) {
+                                table.draw();
+                            }
+                        });*/
+
+            /* $('#tracking_number_search_form #tracking_number').inputmask({
+                 'alias': 'integer',
+                 'allowMinus': false,
+                 'allowPlus': false
+             }).bind('input', function() {
+                 if (this.value.length == 0 || this.value.length >= 6) {
+                     table.draw();
+                 }
+             });*/
+
+            /* $('#bag_number_search_form').bind('submit', function(e) {
+                 e.preventDefault();
+
+                 table.draw();
+             });
+
+             $('#bag_number_search_form #bag_number').inputmask({
+                 'alias': 'integer',
+                 'allowMinus': false,
+                 'allowPlus': false
+             }).bind('input', function() {
+                 table.draw();
+             });*/
+
+            $('#search_origin').select2({
+                placeholder: 'Select Origin',
+                width: '100%',
+                allowClear: false
+            });
+            $('#search_destination').select2({
+                placeholder: 'Select Destination',
+                width: '100%',
+                allowClear: false
             });
 
-            $('#tracking_number_search_form').bind('submit', function(e) {
-                e.preventDefault();
-
-                length = $('#tracking_number_search_form #tracking_number').val().length;
-
-                if (length == 0 || length >= 12) {
-                    table.draw();
-                }
+            $('#bag_type').select2({
+                placeholder: 'Select Bag Type',
+                width: '100%',
+                allowClear: false
             });
 
-            $('#tracking_number_search_form #tracking_number').inputmask({
+            $('#tracking_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 6) {
-                    table.draw();
-                }
             });
 
-            $('#bag_number_search_form').bind('submit', function(e) {
-                e.preventDefault();
-
-                table.draw();
-            });
-
-            $('#bag_number_search_form #bag_number').inputmask({
+            $('#bag_number').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
-            }).bind('input', function() {
-                table.draw();
             });
 
-            $('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
+            var currentDate = '{{ \Carbon\Carbon::now()->format("Y-m-d") }}';
+            var from_date = $('#search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:01',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
+                        $('#search_date_to').pickadate('picker').set('max', currentDate);
+                    }
+                }
+            });
+
+            var to_date = $('#search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.short_received_shipments button', function () {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                 $('#short_received_shipments .modal-body').html('');
@@ -480,7 +632,7 @@
                         'seal_number': seal_number
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data) {
                             var head = '';
                             var tracking_numbers = '';
@@ -490,8 +642,8 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            $.each(data, function (index, tracking_number) {
+                                tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                             });
 
                             $('#short_received_shipments .modal-header').html(head);
@@ -502,7 +654,7 @@
                     });
             });
 
-            $('#datatable tbody').on('click', 'tr td.lost_shipments button', function() {
+            $('#datatable tbody').on('click', 'tr td.lost_shipments button', function () {
                 var seal_number = table.row($(this).parents('tr')).data().seal_number;
 
                 $('#lost_shipments .modal-body').html('');
@@ -515,7 +667,7 @@
                         'seal_number': seal_number
                     }
                 })
-                    .done(function(data) {
+                    .done(function (data) {
                         if (data) {
                             var head = '';
                             var tracking_numbers = '';
@@ -525,8 +677,8 @@
                                 '<span aria-hidden="true">×</span>\n' +
                                 '</button>';
 
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            $.each(data, function (index, tracking_number) {
+                                tracking_numbers += '<u><a href=' + route + '?tracking_number=' + tracking_number + ' target="_blank">' + tracking_number + '</a></u><br>';
                             });
 
                             $('#lost_shipments .modal-header').html(head);
@@ -536,7 +688,12 @@
                         }
                     });
             });
+            $('#search_filter_btn').on('click', function () {
+                table.draw(true);
+            });
+
         });
+
         $('#datatable tbody').on('click', '.manifest_id', function () {
             var manifest_id = table.row($(this).parents('tr')).data().manifest_id;
             console.log(manifest_id);
@@ -559,14 +716,12 @@
                             closeOnClickOutside: false,
                             closeOnEsc: false
                         });
-                    }
-                    else {
+                    } else {
                         tab.document.write(data);
                         tab.document.close();
                         tab.focus();
                     }
                 });
         });
-
     </script>
 @endsection

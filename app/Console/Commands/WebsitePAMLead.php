@@ -50,11 +50,11 @@ class WebsitePAMLead extends Command
             $base_uri = 'website.test/api/';
         }
         $client = new Client(['base_uri' => $base_uri, 'http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
-        $response = $client->post('pam_leads', [
-            'form_params' => [
-                "token" => 'TraxOnlinePvtLtdAYWD',
-            ]
-        ]);
+            $response = $client->post('pam_leads', [
+                'form_params' => [
+                    "token" => 'TraxOnlinePvtLtdAYWD',
+                ]
+            ]);
         $response = $response->getBody()->getContents();
         $response = json_decode($response);
         if($response->status == 0){

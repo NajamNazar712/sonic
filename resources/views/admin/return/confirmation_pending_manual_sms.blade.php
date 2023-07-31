@@ -16,14 +16,13 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Shipment</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">SMS Recipient</th>
                         <th class="border-primary border-darken-1">Consignee/Shipper Name</th>
                         <th class="border-primary border-darken-1">Consignee/Shipper Phone</th>
                         <th class="border-primary border-darken-1">Message</th>
                         <th class="border-primary border-darken-1">Date/Time</th>
                         <th class="border-primary border-darken-1">Agent name</th>
-                        <th class="border-primary border-darken-1">Status</th>
                     </tr>
                     </thead>
                 </table>
@@ -130,28 +129,26 @@
                         success: function (result) {
                             head = [];
                             head.push('S. No.');
-                            head.push('Shipment ID');
+                            head.push('Tracking Number');
                             head.push('SMS Recipient');
                             head.push('Consignee/Shipper Name');
                             head.push('Consignee/Shipper Phone');
                             head.push('Message');
                             head.push('Date/Time');
-                            head.push('Agent name');
-                            head.push('Status');
+                            head.push('Agent Name');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.shipment_id);
+                                row.push(values.tracking);
                                 row.push(values.recipient);
                                 row.push(values.recipient_name);
                                 row.push(values.phone);
                                 row.push(values.message_excel);
                                 row.push(values.datetime);
                                 row.push(values.agent_name);
-                                row.push(values.status);
                                 body.push(row);
                             });
                         },
@@ -194,14 +191,13 @@
                 ],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, class: 'align-middle text-center serial_number',targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'shipment_id', name: 'rcp_manual_sms.shipment_id', class: 'align-middle text-center shipment_id'},
+                    {data: 'tracking_number', name: 'tracking_number', class: 'align-middle text-center tracking_number'},
                     {data: 'recipient', name: 'rcp_manual_sms.recipient', class: 'align-middle text-center recipient',orderable: false},
                     {data: 'recipient_name', name: 'rcp_manual_sms.recipient_name', class: 'align-middle text-center recipient_name'},
                     {data: 'phone', name: 'rcp_manual_sms.phone', class: 'align-middle text-center phone'},
                     {data: 'message', name: 'rcp_manual_sms.message', class: 'align-middle message',orderable: false},
                     {data: 'datetime', name: 'rcp_manual_sms.created_at', class: 'align-middle text-center datetime'},
                     {data: 'agent_name', name: 'agent.name', class: 'align-middle text-center agent_name'},
-                    {data: 'status', name: 'sms.status', class: 'align-middle text-center status',orderable: false},
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
