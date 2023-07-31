@@ -9789,7 +9789,7 @@ class NotificationsController extends Controller
                     $name = '';
                     $rider = Rider::find($rider_id);
                     $shipment = Shipment::find($shipment_id);
-                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today());
 
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
