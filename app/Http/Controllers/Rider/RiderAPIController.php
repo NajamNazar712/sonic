@@ -13108,26 +13108,21 @@ RiderAPIController extends Controller
         } else {
             $rider_id = $request->rider_id;
             $shipment_id = $request->shipment_id;
+            $otp = mt_rand(100000, 999999);
             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today());
-            if (!$shipment_otp->exists()) {
-                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
-                $otp = mt_rand(100000, 999999);
-                if ($shipment_otp->exists()) {
-                    $shipment_otp = $shipment_otp->first();
-                } else {
-                    $shipment_otp = new ShipmentOtp();
-                    $shipment_otp->shipment_id = $shipment_id;
-                }
-                $shipment_otp->otp = $otp;
-                $shipment_otp->rider_id = $rider_id;
-                $shipment_otp->latitude = $request->latitude;
-                $shipment_otp->longitude = $request->longitude;
-                $shipment_otp->save();
-                NotificationsController::send(192, $rider_id, $shipment_id);
-                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
+            if ($shipment_otp->exists()) {
+                $shipment_otp = $shipment_otp->first();
             } else {
-                return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
+                $shipment_otp = new ShipmentOtp();
+                $shipment_otp->shipment_id = $shipment_id;
             }
+            $shipment_otp->otp = $otp;
+            $shipment_otp->rider_id = $rider_id;
+            $shipment_otp->latitude = $request->latitude;
+            $shipment_otp->longitude = $request->longitude;
+            $shipment_otp->save();
+            NotificationsController::send(192, $rider_id, $shipment_id);
+            return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
         }
     }
 
