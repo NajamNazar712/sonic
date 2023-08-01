@@ -5057,18 +5057,15 @@ class ReturnController extends Controller
             {
                 foreach ($shipment_ids as $shipment_id) 
                 {
-                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                    //this function checks if the shipper is included not and and assign the shipment to agent
+                    $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
 
-                    $data = [
-                        'agent_id' =>$request->admin_id,
-                        'shipment_id' => $shipment_id,
-                        'shipments_journey_id' => $shipments_journey->id,
-                        'rv_state_id' => 1, //Assigned
-                        'rv_assign_agent_status_id' => null,
-                        'rv_assign_agent_sub_status_id' => null,
-                    ];
-
-                    $this->rv_shipment_assign($data); 
+                    if($include_shippers ==true){
+                        return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'error' => 'Shipper is disabled']);
+                    }
                 }
                 return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
             }
@@ -5195,25 +5192,21 @@ class ReturnController extends Controller
                     $this->rv_unassign_agents(null, $shipment_id);
 
 
-                    //if agent is !empty
-
+                    //if agent row is not empty
                     if (!empty($agent_id)) {
                         
                             // Get all assigned agent to hubs priority wise
                         $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
                         if($sorted_agents->isNotEmpty())
                         {
-                            $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                            $data = [
-                                'agent_id' =>$agent_id,
-                                'shipment_id' => $shipment_id,
-                                'shipments_journey_id' => $shipments_journey->id,
-                                'rv_state_id' => 1, //Assigned
-                                'rv_assign_agent_status_id' => null,
-                                'rv_assign_agent_sub_status_id' => null,
-                            ];
-                            $this->rv_shipment_assign($shipment_id);
-                            $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                            $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
+
+                            if($include_shippers ==true){
+                                $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                            }
+                            else{
+                                return redirect()->back()->with('error', 'Shipper is disabled');
+                            }
                         }
                         else{
                             return redirect()->back()->with('error', 'Hub is not assigned to the agent');

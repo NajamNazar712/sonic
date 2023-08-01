@@ -130,83 +130,87 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
 
-
-                        try {
-                            $shipper_city = $shipment->pickup_address->city;
-                            $shipper_info = $shipment->user;
-                            $service_type = $shipment->booking_type;
-                            $consignee_city = $shipment->consignee_city;
-                            $product_infos = $shipment->items;
-                            $shipping_mode = $shipment->shipping_mode;
-                            $business_category = $shipment->business_category;
-                            $detail_product_infos = [];
-                            $rider_details = [];
-
-                            foreach ($product_infos as $product_info) {
-
-                                $detail_product = [
-                                    'product_name' => $product_info->product->product_name,
-                                    'description' => $product_info->description,
-                                    'quantity' => $product_info->quantity,
-                                    'order_id' => $product_info->shipment->order_id
-                                ];
-
-                                $detail_product_infos[] = $detail_product;
-                            }
-
-                            $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->first();
-
-                            if (isset($rider_info)) {
-                                $rider_info = $rider_info->first();
-                                $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
-                                $rider_details['reason'] =   $rider_details['reason'] ?   $rider_details['reason'] : '-';
-                                $rider_details['attempted_time'] = (isset($rider_info->created_at)) ?  ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
-                                $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-                                $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
-                            } else {
-                                $rider_details['reason'] = '-';
-                                $rider_details['attempted_time'] = '-';
-                                $rider_details['remarks'] = '-';
-                            }
-
-
-                            $image_location = [];
-
-                            $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->first();
-                            if ($rider_delivery != null) {
-                                if ($rider_delivery->picture_path != null) {
-                                    $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
-                                    if ($exists) {
-                                        $image_location['image'] =  asset(Storage::url($rider_delivery->picture_path));
-                                    } else {
-                                        // $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
-                                        $image_location['image'] = '-----';
+                        if($shipment){
+                            
+                            try {
+                                $shipper_city = $shipment->pickup_address->city;
+                                $shipper_info = $shipment->user;
+                                $service_type = $shipment->booking_type;
+                                $consignee_city = $shipment->consignee_city;
+                                $product_infos = $shipment->items;
+                                $shipping_mode = $shipment->shipping_mode;
+                                $business_category = $shipment->business_category;
+                                $detail_product_infos = [];
+                                $rider_details = [];
+    
+                                foreach ($product_infos as $product_info) {
+    
+                                    $detail_product = [
+                                        'product_name' => $product_info->product->product_name,
+                                        'description' => $product_info->description,
+                                        'quantity' => $product_info->quantity,
+                                        'order_id' => $product_info->shipment->order_id
+                                    ];
+    
+                                    $detail_product_infos[] = $detail_product;
+                                }
+    
+                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->first();
+    
+                                if (isset($rider_info)) {
+                                    $rider_info = $rider_info->first();
+                                    $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
+                                    $rider_details['reason'] =   $rider_details['reason'] ?   $rider_details['reason'] : '-';
+                                    $rider_details['attempted_time'] = (isset($rider_info->created_at)) ?  ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
+                                    $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                                    $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
+                                } else {
+                                    $rider_details['reason'] = '-';
+                                    $rider_details['attempted_time'] = '-';
+                                    $rider_details['remarks'] = '-';
+                                }
+    
+    
+                                $image_location = [];
+    
+                                $rider_delivery = RiderDelivery::where('shipment_id', $shipment->id)->first();
+                                if ($rider_delivery != null) {
+                                    if ($rider_delivery->picture_path != null) {
+                                        $exists = Storage::disk('public')->exists($rider_delivery->picture_path);
+                                        if ($exists) {
+                                            $image_location['image'] =  asset(Storage::url($rider_delivery->picture_path));
+                                        } else {
+                                            // $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
+                                            $image_location['image'] = '-----';
+                                        }
+                                    }
+                                    if ($rider_delivery->audio_path != null) {
+                                        $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
+                                        if ($exists) {
+                                            $image_location['audio'] =  asset(Storage::url($rider_delivery->audio_path));
+                                        } else {
+                                            // $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
+                                            $image_location['audio'] = '-----';
+                                        }
+                                    }
+    
+                                    if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
+                                        $image_location['location'] = $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude;
                                     }
                                 }
-                                if ($rider_delivery->audio_path != null) {
-                                    $exists = Storage::disk('public')->exists($rider_delivery->audio_path);
-                                    if ($exists) {
-                                        $image_location['audio'] =  asset(Storage::url($rider_delivery->audio_path));
-                                    } else {
-                                        // $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
-                                        $image_location['audio'] = '-----';
-                                    }
+    
+    
+                                if (isset($shipment_assigned_agents)) {
+                                    return response()->json(['status' => 1, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
+                                } else {
+                                    return response()->json(['status' => 0, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                                 }
-
-                                if ($rider_delivery->actual_location_latitude != null && $rider_delivery->actual_location_longitude != null) {
-                                    $image_location['location'] = $rider_delivery->actual_location_latitude . ',' . $rider_delivery->actual_location_longitude;
-                                }
+                            } catch (Exception $ex) {
+                                return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
                             }
-
-
-                            if (isset($shipment_assigned_agents)) {
-                                return response()->json(['status' => 1, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
-                            } else {
-                                return response()->json(['status' => 0, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
-                            }
-                        } catch (Exception $ex) {
-                            return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
                         }
+
+                        
                     } else {
                         Auth::logout();
                         return response()->json(['status' => 3]);
