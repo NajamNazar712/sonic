@@ -53,7 +53,13 @@ class ReturnV2Controller extends Controller
         $user = Auth::user();
         $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
         $fake_status_remarks = RvFakeStatus::get();
-        return view('agent.return_v2.index')->with(['user' => $user, 'shipment_statuses' => $shipment_statuses, 'fake_status_remarks' => $fake_status_remarks]);
+        $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
+        $agent = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->get();
+        $unresponsive_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->count();
+        $reattempt_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->count();
+        $refused_on_call = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 1)->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->count();
+
+        return view('agent.return_v2.index')->with(['user' => $user, 'shipment_statuses' => $shipment_statuses, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
     }
 
     // Heading: N/A
@@ -124,7 +130,7 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
 
-                        
+
                         try {
                             $shipper_city = $shipment->pickup_address->city;
                             $shipper_info = $shipment->user;

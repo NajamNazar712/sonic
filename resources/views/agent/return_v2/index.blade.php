@@ -49,7 +49,7 @@
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
-                                                            <td class="text-center"><strong>50</strong></td>
+                                                            <td class="text-center"><strong>{{count( $agent_total_tickets) }}</strong></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -66,7 +66,7 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>50</strong></td>
+                                                                            <td class="text-center"><strong>{{ $reattempt_count }}</strong></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -81,7 +81,7 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>50</strong></td>
+                                                                            <td class="text-center"><strong>{{ $refused_on_call }}</strong></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -96,7 +96,7 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>50</strong></td>
+                                                                            <td class="text-center"><strong>{{ $unresponsive_count }}</strong></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>

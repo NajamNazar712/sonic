@@ -94,7 +94,6 @@ class AgentLoginController extends Controller
                         $current_time = Carbon::now();
                         $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
                         if (isset($shift_exists)) {
-
                             $start_time = Carbon::parse($shift_exists->start_time);
                             $end_time = Carbon::parse($shift_exists->end_time);
 
