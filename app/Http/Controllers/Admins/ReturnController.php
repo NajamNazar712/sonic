@@ -112,24 +112,20 @@ class ReturnController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
+        $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
+        $total_shipments = count(Shipment::get()) > 0 ? count(Shipment::get()) : 1;
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         $sub_status_call_finding = SubStatusCallFinding::all();
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
-        $percentage_reason_validation_required = (count($reason_validation_required)/count(Shipment::get()) * 100);
+        $percentage_reason_validation_required = (count($reason_validation_required)/($total_shipments) * 100);
         $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->get();
-        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/count(Shipment::get()) * 100);
+        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/($total_shipments) * 100);
         $total_of_shipments = count($reason_validation_required) + count($shipper_advised_requested);
-        $percentage_total_of_shipment = (($total_of_shipments)/count(Shipment::get()) * 100);
+        $percentage_total_of_shipment = (($total_of_shipments)/($total_shipments) * 100);
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
-        if ($unresponsive_count->isEmpty()) {
-            $percentage_unresponsive_count = 0;
-        }
-        else{
-            $total_shipments_count = RvShipmentAssignAgent::count();
-            $percentage_unresponsive_count = (count($unresponsive_count) / $total_shipments_count) * 100;
-        }
+        $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
         $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
             ->where('admin_roles.department_id', 3)
             ->where('a.status', 1)->get();  
