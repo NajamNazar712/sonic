@@ -85,7 +85,6 @@ class ReturnV2Controller extends Controller
             if ($employee->exists()) {
                 $current_time = Carbon::now();
                 $employee = $employee->first();
-
                 $shift_exist = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
                 if ($shift_exist) {
                     // $shift_exist =  EmployeeShift::where('id', $employee->shift_id)->first();
@@ -93,8 +92,8 @@ class ReturnV2Controller extends Controller
                     $end_time = Carbon::parse($shift_exist->end_time);
                     if ($current_time->between($start_time, $end_time)) {
                         // Assuming $sorted_agents is an array containing agents with their city_id
-
-
+                        
+                        
                         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
                         // If excluded_shippers setting is not found, initialize as an empty array
                         $excluded_shippers = [];
@@ -107,7 +106,7 @@ class ReturnV2Controller extends Controller
                                 $excluded_shippers = explode(',', $excluded_shipper['text']);
                             }
                         }
-
+                        
                         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
                         // If only_shippers setting is not found, initialize as an empty array
                         $only_shippers = [];
@@ -127,10 +126,10 @@ class ReturnV2Controller extends Controller
                                 ->whereIn('user_id', $excluded_shippers)
                                 ->orderBy('id', 'ASC')
                                 ->get();
-                                }
-                                
-                                // Check if only_shippers exists (1 && 0)
-                                if (!empty($only_shippers) && !($all_shipper_exists)) {
+                            }
+                            
+                            // Check if only_shippers exists (1 && 0)
+                            if (!empty($only_shippers) && !($all_shipper_exists)) {
                                     
                                     $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
                                     ->whereIn('shipper_status_id', [7,8,9,15,12,65])
@@ -174,6 +173,7 @@ class ReturnV2Controller extends Controller
 
                                     // if last shipment journey id  match with shipment journey id add continue
                                     $data = [
+                                        'agent_id' => Auth::id(),
                                         'shipment_id' => $shipment->id,
                                         'shipments_journey_id' => $shipments_journey->id,
                                         'rv_state_id' => 1, //Assigned
