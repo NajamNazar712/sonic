@@ -5553,11 +5553,13 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('sj.created_at', [$from, $to]);
 
             if ($from_to_ids) {
                 $datatable->where('sj.id', '>=', $from_id)
                     ->where('sj.id', '<=', $to_id);
+            }
+            else{
+                $datatable->whereBetween('sj.created_at', [$from, $to]);
             }
         }
 
