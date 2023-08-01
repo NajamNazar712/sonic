@@ -120,6 +120,7 @@ class ReturnV2Controller extends Controller
                         // Assuming $sorted_agents is an array containing agents with their city_id
 
                         $agent_id = Auth::id();
+                        $shipment = [];
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
 

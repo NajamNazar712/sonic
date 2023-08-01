@@ -93,23 +93,25 @@ class AgentLoginController extends Controller
                     if (isset($employee->shift_id)) {
                         $current_time = Carbon::now();
                         $shift_exists = EmployeeShift::where('id', $employee->shift_id)->where('shift_type_id', 2)->first();
+                        if (isset($shift_exists)) {
 
-                        $start_time = Carbon::parse($shift_exists->start_time);
-                        $end_time = Carbon::parse($shift_exists->end_time);
-                        
-                        if ($current_time->between($start_time, $end_time)) {
-                            if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
-                                return redirect()->intended(route('agent.dashboard.index'));
+                            $start_time = Carbon::parse($shift_exists->start_time);
+                            $end_time = Carbon::parse($shift_exists->end_time);
+
+                            if ($current_time->between($start_time, $end_time)) {
+                                if (Auth::guard('agent')->attempt(['phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember) || Auth::guard('agent')->attempt(['official_phone_number' => $request->phone_number, 'password' => $request->pin], $request->remember)) {
+                                    return redirect()->intended(route('agent.dashboard.index'));
+                                }
+                                $errors = [$this->username() => trans('auth.failed')];
+                                return redirect()->back()->withErrors($errors);
+                            } else {
+                                $errors = 'You are not allowed in this Time Slot';
+                                return redirect()->back()->withErrors($errors);
                             }
-                            $errors = [$this->username() => trans('auth.failed')];
-                            return redirect()->back()->withErrors($errors);
                         } else {
-                            $errors = 'You are not allowed in this Time Slot';
+                            $errors = 'Shift Doesnt Exist';
                             return redirect()->back()->withErrors($errors);
                         }
-                    } else {
-                        $errors = 'Shift Doesnt Exist';
-                        return redirect()->back()->withErrors($errors);
                     }
                 }
             } else {
