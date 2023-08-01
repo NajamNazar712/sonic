@@ -118,103 +118,12 @@ class ReturnV2Controller extends Controller
                     $end_time = Carbon::parse($shift_exist->end_time);
                     if ($current_time->between($start_time, $end_time)) {
                         // Assuming $sorted_agents is an array containing agents with their city_id
+
+                        $agent_id = Auth::id();
+
+                        $shipment = $this->included_shippers($sorted_agents, $agent_id);
+
                         
-                        
-                        $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
-                        // If excluded_shippers setting is not found, initialize as an empty array
-                        $excluded_shippers = [];
-
-                        if ($all_shipper_exists) {
-                            $excluded_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
-                            // Check if excluded_shippers exists and process it
-                            if ($excluded_shipper->exists()) {
-                                $excluded_shipper = $excluded_shipper->first();
-                                $excluded_shippers = explode(',', $excluded_shipper['text']);
-                            }
-                        }
-                        
-                        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
-                        // If only_shippers setting is not found, initialize as an empty array
-                        $only_shippers = [];
-                        // Check if only_shippers exists and process it
-                        if ($only_shipper->exists()) {
-                            $only_shipper = $only_shipper->first();
-                            $only_shippers = explode(',', $only_shipper['text']);
-                        }
-
-                        foreach ($sorted_agents as $key => $agent) {
-                            // Check if excluded_shippers exists (1 && 1)
-                            if (!empty($excluded_shippers)) {
-
-                                $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                                // ->where('id',1724928)
-                                ->whereIn('shipper_status_id', [7,8,9,15,12,65])
-                                ->whereIn('user_id', $excluded_shippers)
-                                ->orderBy('id', 'ASC')
-                                ->get();
-                            }
-                            
-                            // Check if only_shippers exists (1 && 0)
-                            if (!empty($only_shippers) && !($all_shipper_exists)) {
-                                    
-                                    $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                                    ->whereIn('shipper_status_id', [7,8,9,15,12,65])
-                                    ->whereNotIn('user_id', $only_shippers)
-                                    ->orderBy('id', 'ASC')
-                                    ->get();
-                            }
-
-                            if ($all_shipper_exists && !($excluded_shipper)->exists()) {
-                                $shipments = [];
-                            }
-
-
-                            // check if shipments exist
-                            if (count($shipments)) {
-
-                                foreach ($shipments as $key => $shipment) {
-
-                                    # code...
-                                    // if agent shipment is open - assigned to any user who comes first
-                                    $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
-                                    if ($shipment_assigned_unassigned_agent->exists()) {
-                                        $shipment_assigned_unassigned_agent->first();
-                                        break 2;
-                                    }
-
-                                    // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
-
-                                    $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
-                                    if ($shipment_assigned_assigned_agent->exists()) {
-                                        $shipment_assigned_assigned_agent->first();
-                                        break 2;
-                                    }
-
-                                    // Shipment is found and already in working state or return is completed, new shipment will get to agent
-                                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                                    if ($find_shipment_assigned_agent) {
-                                        continue;
-                                    }
-                                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
-
-                                    // if last shipment journey id  match with shipment journey id add continue
-                                    $data = [
-                                        'agent_id' => Auth::id(),
-                                        'shipment_id' => $shipment->id,
-                                        'shipments_journey_id' => $shipments_journey->id,
-                                        'rv_state_id' => 1, //Assigned
-                                        'rv_assign_agent_status_id' => null,
-                                        'rv_assign_agent_sub_status_id' => null,
-                                    ];
-
-                                    // creating a new record
-                                    $this->rv_shipment_assign($data);
-
-                                    break 2;
-                                }
-                            }
-                        }
-
                         try {
                             $shipper_city = $shipment->pickup_address->city;
                             $shipper_info = $shipment->user;
