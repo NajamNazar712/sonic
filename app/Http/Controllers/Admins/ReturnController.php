@@ -198,6 +198,7 @@ class ReturnController extends Controller
             ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
             ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
+            ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
 
             // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
             // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
@@ -229,9 +230,9 @@ class ReturnController extends Controller
              'raa.admin_id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name')
+             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name','rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
 
-            ->whereIn('shipments.shipper_status_id', [12,52])
+            ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
@@ -585,6 +586,22 @@ class ReturnController extends Controller
         }
         if($mode = $request->get('search_shipping_mode')){
             $datatable->where('sm.id', '=', $mode);
+        }
+
+        if ($request->get('search_rvr_value_div') === "1") {
+            $datatable->where('shipments.shipper_status_id',12);
+        }
+
+        if ($request->get('search_sar_value_div') === "2") {
+            $datatable->where('shipments.shipper_status_id',65);
+        }
+
+        if ($request->get('search_total_value_div') === "3") {
+            $datatable->whereIn('shipments.shipper_status_id',[12,65]);
+        }
+
+        if ($request->get('search_unresponsive_value_div') === "4") {
+            $datatable->where('rvsaa.unresponsive_count', '>', 0);
         }
 
         $datatable->when($request->get('star_shipper_filter') == 1, function ($query) {
@@ -6832,23 +6849,10 @@ class ReturnController extends Controller
     public function call_status_history(Request $request)
     {
 
-        $shipment = StatusRemark::leftJoin('sub_status_call_findings', 'sub_status_call_findings.id', 'status_remarks.sub_status_call_finding_id')
-            ->leftJoin('shipment_status', 'shipment_status.id', 'status_remarks.shipment_status_id')
-            ->leftJoin('admins', 'admins.id', 'status_remarks.updated_by')
-            ->where('status_remarks.shipment_id', $request->shipment_id)
-
-            // ->select(
-            //     'status_remarks.updated_at as updated_at',
-            //     'status_remarks.updated_by as updated_by',
-            //     'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks',
-            //     'status_remarks.call_to_id as call_to_id',
-            //     'status_remarks.updated_at as updated_at',
-            //     'status_remarks.call_finding_id as call_finding_id',
-            //     'sub_status_call_findings.remark as remark',
-            //     'shipment_status.name as status',
-            //     'admins.name as updated_by'
-            // )
-            // ->orderBy('status_remarks.updated_at', 'desc')->limit(10)->get();
+        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
+        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
+        ->leftJoin('admins','admins.id','status_remarks.updated_by')
+        ->where('status_remarks.shipment_id',$request->shipment_id)
 
         ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
         'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',

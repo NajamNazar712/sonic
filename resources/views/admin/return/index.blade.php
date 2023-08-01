@@ -2068,8 +2068,8 @@
                             searchable: false
                         },
                         {
-                            data: 'agent_name',
-                            name: 'ad.name',
+                            data: 'assigned_agent',
+                            name: 'asad.name',
                             class: 'align-middle assigned_agent'
                         },
                         {
@@ -2104,8 +2104,8 @@
                             searchable: false
                         },
                         {
-                            data: 'unresponsive_call_time',
-                            name: 'unresponsive_call_time',
+                            data: 'unresponsive_attempt_time',
+                            name: 'rvsaa.unresponsive_attempt_time',
                             class: 'align-middle consolidated_id',
                             orderable: false,
                             searchable: false
