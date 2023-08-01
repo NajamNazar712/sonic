@@ -276,7 +276,7 @@
                         else{
 
                             UnblockPagePermanently();
-                            toastr.error(data.message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         }
                     });
                 }
