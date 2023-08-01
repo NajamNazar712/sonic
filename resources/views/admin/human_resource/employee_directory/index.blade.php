@@ -2836,6 +2836,67 @@
                     }
                 });
             });
+            
+            $('body').on('click', '.convert_staff_to_contractual', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Staff An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Staff To Contractual!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert_contractual') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
 
             $('#search_filter_btn').on('click',function () {
                 table.draw(true);

@@ -5249,7 +5249,7 @@ class AdminHumanResourseController extends Controller
 
                     $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
 
-                    return response()->json(['status' => 0, 'success' => 'Intern Converted To Staff Successfully']);
+                    return response()->json(['status' => 0, 'success' => 'Staff Converted To Contractual Successfully']);
                 }
                 return response()->json(['status' => 1, 'error' => 'Employee already a Staff']);
             }
