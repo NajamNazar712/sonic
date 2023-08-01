@@ -334,6 +334,8 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+        
             $('body').on('click', '.delete-icon', function() {
                 var Ids = [];
                 var delId = $(this).data('del-id');
