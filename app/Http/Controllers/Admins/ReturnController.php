@@ -5181,19 +5181,26 @@ class ReturnController extends Controller
                     //if agent is !empty
 
                     if (!empty($agent_id)) {
-
-                        $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                        $data = [
-                            'agent_id' =>$agent_id,
-                            'shipment_id' => $shipment_id,
-                            'shipments_journey_id' => $shipments_journey->id,
-                            'rv_state_id' => 1, //Assigned
-                            'rv_assign_agent_status_id' => null,
-                            'rv_assign_agent_sub_status_id' => null,
-                        ];
-                        $this->rv_shipment_assign($shipment_id);
                         
-                    $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                            // Get all assigned agent to hubs priority wise
+                        $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
+                        if($sorted_agents->isNotEmpty())
+                        {
+                            $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                            $data = [
+                                'agent_id' =>$agent_id,
+                                'shipment_id' => $shipment_id,
+                                'shipments_journey_id' => $shipments_journey->id,
+                                'rv_state_id' => 1, //Assigned
+                                'rv_assign_agent_status_id' => null,
+                                'rv_assign_agent_sub_status_id' => null,
+                            ];
+                            $this->rv_shipment_assign($shipment_id);
+                            $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                        }
+                        else{
+                            return redirect()->back()->with('error', 'Hub is not assigned to the agent');
+                        }
                 }
             }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
