@@ -2894,7 +2894,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('operations_performance')->name('operations_performance.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@operations_performance_index')->name('index');
-            Route::post('list', 'Admins\AdminReportsController@operations_performance_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
     });
 
