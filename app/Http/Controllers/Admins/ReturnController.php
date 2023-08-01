@@ -5052,33 +5052,20 @@ class ReturnController extends Controller
         $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
         if($sorted_agents->isNotEmpty())
         {
-
-            // dd($shipment);
             $shipment_ids = $request->shipment_ids;
             if ($shipment_ids)
             {
                 foreach ($shipment_ids as $shipment_id) 
                 {
-                    // $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-
+                    //this function checks if the shipper is included not and and assign the shipment to agent
                     $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
 
-                    // if($include_shippers ==true){
-
-                    //     $data = [
-                    //         'agent_id' =>$agent_id,
-                    //         'shipment_id' => $shipment_id,
-                    //         'shipments_journey_id' => $shipments_journey->id,
-                    //         'rv_state_id' => 1, //Assigned
-                    //         'rv_assign_agent_status_id' => null,
-                    //         'rv_assign_agent_sub_status_id' => null,
-                    //     ];
-    
-                    //     $this->rv_shipment_assign($data); 
-                    // }
-                    // else{
-                    //     return response()->json(['status' => 1, 'error' => 'Shipper is disabled']);
-                    // }
+                    if($include_shippers ==true){
+                        return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                    }
+                    else{
+                        return response()->json(['status' => 1, 'error' => 'Shipper is disabled']);
+                    }
                 }
                 return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
             }
