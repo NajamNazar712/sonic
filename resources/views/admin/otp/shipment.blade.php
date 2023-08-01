@@ -38,6 +38,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">OTP</th>
                         <th class="border-primary border-darken-1">Rider</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Location</th>
                         <th class="border-primary border-darken-1">Generated At</th>
                     </tr>
@@ -142,6 +143,7 @@
                         head.push('Tracking No.');
                         head.push('OTP');
                         head.push('Rider');
+                        head.push('Area');
                         head.push('Generated At');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -149,6 +151,7 @@
                             row.push(values.tracking_number);
                             row.push(values.otp);
                             row.push(values.rider_name);
+                            row.push(values.area);
                             row.push(values.generated_at);
                             body.push(row);
                         });
@@ -191,6 +194,7 @@
                 {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle name'},
                 {data: 'otp', name: 'shipment_otps.dbf_otp', class: 'align-middle otp'},
                 {data: 'rider_name', name: 'r.name', class: 'align-middle rider_name'},
+                {data: 'area', name: 'ca.name', class: 'align-middle area'},
                 {data: 'location', name: 'location', class: 'align-middle location', orderable: false, searchable: false},
                 {data: 'generated_at', name: 'shipment_otps.updated_at', class: 'align-middle generated_at'},
 

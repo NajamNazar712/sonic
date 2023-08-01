@@ -2,7 +2,7 @@
 @section('title','Create Delivery Note')
 
 @section('content')
-    <h1 class="mb-1">
+    <h1 class="mb-1"> 
         Create Delivery Note
     </h1>
 

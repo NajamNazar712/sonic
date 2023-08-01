@@ -3040,6 +3040,7 @@ class AdminPickupsController extends Controller
             }
 
             $pickups = 0;
+            $shipments = 0;
 
             $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
             $arrival_cut_off_time = '8';
@@ -3075,6 +3076,7 @@ class AdminPickupsController extends Controller
                 $pickup_request_attempt->save();
 
                 $pickups++;
+                $shipments = $shipments + $pickup_request->booked;
                 V2AdminPickupsController::retail_pickup_assign($pickup_request_id, $rider_id);
             }else{
                 $pickup_request = V2PickupRequest::find($pickup_request_id);
@@ -3102,6 +3104,7 @@ class AdminPickupsController extends Controller
                         }
                     }
                     $pickups++;
+                    $shipments = $shipments + $pickup_request->booked;
                     V2AdminPickupsController::retail_pickup_assign($pickup_request_id, $rider_id);
                 }
 
@@ -3113,6 +3116,7 @@ class AdminPickupsController extends Controller
                     $pickup_note = $pickup_note->first();
                     if(!V2PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request_id)->exists()){
                         $pickup_note->pickups += $pickups;
+                        $pickup_note->shipments += $shipments;
 
                         $pickup_note->save();
 
@@ -3125,6 +3129,7 @@ class AdminPickupsController extends Controller
 
                     $pickup_note->rider_id = $rider_id;
                     $pickup_note->pickups = $pickups;
+                    $pickup_note->shipments = $shipments;
                     $pickup_note->save();
 
                     $pickup_note_id = $pickup_note->id;

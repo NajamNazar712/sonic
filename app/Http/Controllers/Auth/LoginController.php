@@ -8,6 +8,7 @@ use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CorporateDefaultRateStatus;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\InternationalUsersInformation;
+use App\Http\Models\ProjectArrivalShipper;
 use App\Http\Models\RateStatus;
 use App\Http\Models\ShipmentPrebook;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -26,6 +27,7 @@ use App\Http\Models\Shipper\ShipperAirWaybillSettings;
 use App\Http\Models\Admin\NpsSurvey;
 use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
+use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
 
 class LoginController extends Controller
 {
@@ -66,7 +68,13 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
+        // dd(1);
         $attempt = Auth::guard('web')->attempt($this->credentials($request), $request->filled('remember'));
+
+        
+        // dd($request->all());
+
+
 
         if ($attempt) {
             session(['user_type' => 1]);
@@ -101,6 +109,10 @@ class LoginController extends Controller
     protected function authenticated(Request $request, $user)
     {
         $packaging_charges_check = TRUE;
+        $user_info = SubstituteUser::where('email',$request->email)->first();
+        $user_info_id = ($user_info) ? $user_info->id : NULL;  
+       
+        session(['substitute_user_id' => $user_info_id]);
 
         if (session('user_type') == 1) {
             if ($user->blacklist) {
@@ -138,6 +150,14 @@ class LoginController extends Controller
 //                    $packaging_charges_check = TRUE;
 //                }
 
+                $project_arrival_shipper = ProjectArrivalShipper::where('user_id', $user->id);
+                if($project_arrival_shipper->exists()){
+                    session(['project_arrival_shipper' => 1]);
+                }
+                else{
+                    session(['project_arrival_shipper' => 0]);
+                }
+
                 $air_waybill_settings = ShipperAirWaybillSettings::where('user_id', $user->id);
 
                 if ($air_waybill_settings->exists()) {
@@ -169,8 +189,25 @@ class LoginController extends Controller
             }
 
             $shipper_user_id = $user->id;
+
+            session(['special_dashboard_user' => 0]);
+            session(['special_dashboard_sister_user' => []]);
         }
         else {
+
+            if($user_info_id && $user_info->is_created_by_admin == 1)
+            {
+                session(['special_dashboard_user' => 1]);
+                
+                $sister_accounts = SubstituteUserMergeSisterAccountMapping::where('substitute_user_id',$user_info_id)->pluck('sister_user_id')->toArray();
+
+                session(['special_dashboard_sister_user' => $sister_accounts]);
+            }
+            else{
+                session(['special_dashboard_user' => 0]);
+                session(['special_dashboard_sister_user' => []]);
+            }
+            
             $shipper = User::find($user->user_id);
 
             if ($shipper->blacklist) {
@@ -317,6 +354,15 @@ class LoginController extends Controller
                 session(['nps_survey' => $nps->id]);
             }
         }
+
+        $mms_shippers = array();
+        $setting = GlobalSettings::where('type', 'mms_setting')->select('text')->first();
+        if ($setting) {
+            $mms_shippers = array_map('intval',explode(',' , $setting->text));
+          
+        }
+
+        session(['mms_shippers' => $mms_shippers]);
 
         return redirect()->route('cod.welcome');
     }

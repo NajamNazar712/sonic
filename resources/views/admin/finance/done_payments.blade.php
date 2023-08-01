@@ -161,6 +161,7 @@
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
 										<th class="border-primary border-darken-1">Adjusted Shipments</th>
+										<th class="border-primary border-darken-1">Fintech Charges</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
@@ -807,6 +808,9 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
+					
+					{data:'done_fintech_charges', name: 'done_fintech_charges', class: 'align-middle text-center done_fintech_charges', orderable: false},
+					
 					{data:'total_amount', name: 'dpc.amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'dpc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'dpc.gst', class: 'align-middle text-center total_gst', orderable: false},
@@ -1255,6 +1259,7 @@
                         }
                     });
 			}
+			
             $('#datatable tbody').on('click', 'tr td.payment_id button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
                 if(id){

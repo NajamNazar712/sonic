@@ -158,6 +158,23 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
 
         $rates = RetailRatesCalculationController::rates($shipping_mode_check, $business_category_id, $pickup_city_id, $consignee_city_id, $trax_box_id, $discount, $estimated_weight,$insurance_amount,$packaging_charges);
 
+        if(isset($this->booking['admin_discount']) && isset($this->booking['admin_discount_type']))
+        {
+            if ($this->booking['admin_discount'] > 0) {
+                if ($this->booking['admin_discount_type'] ==  2)
+                {
+                    $rates['total_charges'] = $rates['total_charges'] - $this->booking['admin_discount']; // todo: for flat
+                }
+                elseif ($this->booking['admin_discount_type'] ==  1)
+                {
+                    $rates['total_charges'] = ($rates['total_charges'] * $this->booking['admin_discount'])/100; //todo: for %
+                }
+
+            }
+        }
+
+
+
         $charges_mode_id = $this->booking['charges_mode_id'];
 //        if($shipping_mode_check == 3){
 //            $amount = str_replace(',', '', $this->booking['cod']);
@@ -272,7 +289,20 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         $retail_shipment->breadth = $breadth;
         $retail_shipment->height = $height;
         $retail_shipment->retail_user_id = $this->booking['retail_user_id'];
-        $retail_shipment->save();
+        if(isset($this->booking['admin_discount']) && isset($this->booking['admin_discount_type']))
+        {
+            if ($this->booking['admin_discount_type'] == 1)
+            {
+                $admin_discount_type = 1; //todo for %
+            }
+            elseif($this->booking['admin_discount_type'] == 2)
+            {
+                $admin_discount_type = 0; // todo: for flat
+            }
+            $retail_shipment->admin_discount = $this->booking['admin_discount'];
+            $retail_shipment->admin_discount_type = $admin_discount_type;
+        }
+            $retail_shipment->save();
 
         $shipment = Shipment::find($shipment_id);
         if($shipment->charges_mode_id != 2) {

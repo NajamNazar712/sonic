@@ -548,6 +548,19 @@ class RetailAPIController extends Controller
             }
 
             $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $weight,$insurance_amount, intval($packaging));
+
+            if($request->has('admin_discount'))
+            {
+                if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount;
+                }
+            }
+
+            if ($rates['total_charges'] <= 0)
+            {
+                return response()->json(['status' => 1, 'error' => 'Total charges should be greater than zero !']);
+            }
+
             return response()->json(['status' => 0, 'rates' => $rates]);
         }
         return response()->json(['status' => 1, 'message' => "Invalid User"]);
@@ -644,7 +657,25 @@ class RetailAPIController extends Controller
         }
 
         $rates = RetailRatesCalculationController::rates($request->shipping_mode_id, $request->business_category_id, $pickup_city_id, $request->city_id, $trax_box_id, $discount, $estimated_weight, $insurance_amount, $packaging);
-       
+
+        if($request->has('admin_discount'))
+        {
+            if ($request->filled('admin_discount') && $request->admin_discount > 0) {
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+                {
+                    $rates['total_charges'] = ($rates['total_charges'] * $request->admin_discount)/100; //todo: for %
+                }
+                if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+                {
+                    $rates['total_charges'] = $rates['total_charges'] - $request->admin_discount; // todo: for flat
+                }
+            }
+        }
+
+        if ($rates['total_charges'] <= 0)
+        {
+            return response()->json(['status' => 1, 'error' => 'Total charges should be greater than zero !']);
+        }
      
         $charges = $rates["total_charges"];
         if ($shipping_mode_check == 3) {
@@ -758,12 +789,25 @@ class RetailAPIController extends Controller
         $retail_shipment->weight_charges = $rates['charges_without_gst'];
         $retail_shipment->gst = $rates['gst_charges'];
         $retail_shipment->retail_user_id = $retail_user_id;
+        if($request->has('admin_discount'))
+        {
+            $retail_shipment->admin_discount = $request->admin_discount;
+
+            if ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  1)
+            {
+                $retail_shipment->admin_discount_type = 1; // todo: for %
+            }
+            elseif ($request->has('admin_discount_type1') && $request->admin_discount_type1 ==  0)
+            {
+                $retail_shipment->admin_discount_type = 0; // todo: for flat
+            }
+        }
         $retail_shipment->save();
 
 
         $date = Carbon::today()->toDateString();
         $cash_deposit = RetailCashDeposit::whereDate('created_at', $date)->where('category', $category)->where('retail_user_id', $retail_user_id);
-        ;
+
         if ($cash_deposit->exists()) {
             $cash_deposit = $cash_deposit->first();
             $total_shipments = $cash_deposit->total_cn + 1;

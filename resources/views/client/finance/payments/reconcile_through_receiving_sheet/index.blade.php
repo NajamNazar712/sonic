@@ -77,13 +77,14 @@
 
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				scrollX: true, scrollY: '500px',
 				buttons: [{
 					extend: 'excel',
 					title: 'Payments Reconcile through Receiving Sheet',
 					className:'btn btn-primary',
 					text: '<i class="la la-file-excel-o"></i> Excel'
 				}, 'reset'],
-				scrollX: true,
+
 				lengthMenu: [[10, 50, 100, 500, 1000, -1], [10, 50, 100, 500, 1000, 'All']],
 				pageLength: 10,
 				pagingType: 'full_numbers',

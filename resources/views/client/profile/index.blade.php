@@ -178,6 +178,7 @@
                                                 <th class="border-primary border-darken-1">Vendor</th>
                                                 <th class="border-primary border-darken-1">Phone Number</th>
                                                 <th class="border-primary border-darken-1">City</th>
+                                                <th class="border-primary border-darken-1">City Area</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
                                                 <th class="border-primary border-darken-1">Brand Name</th>
                                                 <th class="border-primary border-darken-1">Status</th>
@@ -851,6 +852,7 @@
                     {data: 'vendor', name: 'vendor'},
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
+                    {data: 'city_area_name', name: 'ca.name'},
                     {data: 'email', name: 'email'},
                     {data: 'pickup_brand_name', name: 'pickup_brand_name'},
                     {data: 'status',orderable: false, name: 'status',class:'status'},

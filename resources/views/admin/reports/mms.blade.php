@@ -18,6 +18,7 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
+                    @if(!empty($shippers))
                     <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
@@ -27,6 +28,7 @@
                             </select>
                         </fieldset>
                     </div>
+                    @endif
 
                     <div class="col-4">
                         <fieldset class="form-group">
@@ -111,6 +113,8 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Order ID</th>
+                        <th class="border-primary border-darken-1">Rider ID</th>
+                        <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Consignee Address</th>
@@ -344,6 +348,8 @@
                             head.push('Tracking No.');
                             head.push('Shipper');
                             head.push('Order ID');
+                            head.push('Rider ID');
+                            head.push('Rider Name');
                             head.push('Consignee Name');
                             head.push('Consignee Phone');
                             head.push('Consignee Address');
@@ -365,8 +371,10 @@
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
                                 row.push(values.order_id);
+                                row.push(values.rider_id);
+                                row.push(values.rider_name);
                                 row.push(values.consignee_name);
-                                row.push(values.consignee_phone);
+                                row.push(values.consignee_phone_excel);
                                 row.push(values.consignee_address);
                                 row.push(values.current_status);
                                 row.push(values.reason);
@@ -427,12 +435,14 @@
                         d.arrival_time_to= $('input[name="arrival_time_to"]').val();
                     }
                 },
-                order: [[9, 'desc']],
+                order: [[11, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'rider_id' ,name: 'riders.trax_id', class: 'align-middle rider_id'},
+                    { data:'rider_name' ,name: 'riders.name', class: 'align-middle rider_name'},
                     { data:'consignee_name' ,name:'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone' ,name:'consignee_phone', class: 'align-middle consignee_phone'},
                     { data:'consignee_address' ,name:'shipments.consignee_address', class: 'align-middle consignee_address'},

@@ -9,6 +9,7 @@ use App\Http\Traits\RvTrait;
 use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
 use App\RvAssignAgentSubStatus;
+use Illuminate\Validation\Rule;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use App\Http\Models\RvFakeStatus;
@@ -20,16 +21,16 @@ use App\Http\Models\RvAgentAssignHub;
 use App\Http\Models\ShipmentsJourney;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Models\RvAssignAgentStatus;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\ShipmentStatusReason;
 use Illuminate\Support\Facades\Validator;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\Admin\SubStatusCallFinding;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
-use App\Http\Models\ShipmentStatusReason;
-use Illuminate\Validation\Rule;
 
 class ReturnV2Controller extends Controller
 {
@@ -67,6 +68,30 @@ class ReturnV2Controller extends Controller
         return response()->json(['reasons' => $reasons, 'unresponsive_reasons' => $unresponsive_reasons, 'status' => 1]);
     }
 
+
+
+    // Heading: N/A
+    // Sidebar: N/A
+    // URL: 
+    // Description: Mark Attendance For Employee
+    public function mark_attendance($admin)
+    {
+        $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
+
+        if ($employee_attendance->exists()) {
+            $employee_attendance->update(['clock_in' => date('H:i:s')]);
+        } else {
+            $employee_attendance = new EmployeeAttendance();
+            $employee_attendance->employee_id = $admin->employee_id;
+            $employee_attendance->attendance_date = date('Y-m-d');
+            $employee_attendance->clock_in = date('H:i:s');
+            $employee_attendance->employee_type = $admin->employee_type ? $admin->employee_type : '1';
+            $employee_attendance->clock_in_latitude = session('latitude');
+            $employee_attendance->clock_in_longitude = session('longitude');
+            $employee_attendance->save();
+        }
+    }
+
     // Heading: N/A
     // Sidebar: N/A
     // URL: 
@@ -80,6 +105,7 @@ class ReturnV2Controller extends Controller
 
         if ($admin->exists()) {
             $admin = $admin->first();
+            $this->mark_attendance($admin);
             $employee = Employee::where('trax_id', $admin->trax_id)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             if ($employee->exists()) {
@@ -142,7 +168,7 @@ class ReturnV2Controller extends Controller
                                 $shipments = [];
                             }
 
-                       
+
                             // check if shipments exist
                             if (count($shipments)) {
 
@@ -213,17 +239,15 @@ class ReturnV2Controller extends Controller
                             }
 
                             $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->first();
-                            
+
                             if (isset($rider_info)) {
                                 $rider_info = $rider_info->first();
                                 $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
                                 $rider_details['reason'] =   $rider_details['reason'] ?   $rider_details['reason'] : '-';
-                                $rider_details['attempted_time'] = (isset($rider_info->created_at)) ?  ($rider_info->created_at)->format('Y/m/d H:i:s') :'-';
+                                $rider_details['attempted_time'] = (isset($rider_info->created_at)) ?  ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
                                 $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                                 $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
-                            }
-
-                            else{
+                            } else {
                                 $rider_details['reason'] = '-';
                                 $rider_details['attempted_time'] = '-';
                                 $rider_details['remarks'] = '-';
@@ -241,7 +265,6 @@ class ReturnV2Controller extends Controller
                                     } else {
                                         // $image_location['image'] = Storage::disk('s3')->temporaryUrl($rider_delivery->picture_path, now()->addMinutes(5));
                                         $image_location['image'] = '-----';
-
                                     }
                                 }
                                 if ($rider_delivery->audio_path != null) {
@@ -251,7 +274,6 @@ class ReturnV2Controller extends Controller
                                     } else {
                                         // $image_location['audio'] = Storage::disk('s3')->temporaryUrl($rider_delivery->audio_path, now()->addMinutes(5));
                                         $image_location['audio'] = '-----';
-
                                     }
                                 }
 
@@ -338,8 +360,7 @@ class ReturnV2Controller extends Controller
                     $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
 
                     return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
-                } 
-                else {
+                } else {
                     return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                 }
             } else {
@@ -350,7 +371,6 @@ class ReturnV2Controller extends Controller
             }
         }
     }
-
 }
 
 

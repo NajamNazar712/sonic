@@ -6,6 +6,9 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Http\Models\ReturnAssignedShipments;
@@ -73,15 +76,38 @@ class ReattemptShipmentStatusController extends Controller
     
                             ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, 'Auto re-attempt status due to better Delivery Ratio', NULL, $global_admin);
     
-                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
-                            if($return_assign_shipment){
-                                $return_assign_shipment->status = 0;
-                                $return_assign_shipment->save();
+                            // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                            // if($return_assign_shipment){
+                            //     $return_assign_shipment->status = 0;
+                            //     $return_assign_shipment->save();
     
-                                $return_assign_log = new ReturnAssignedShipmentLogs();
-                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                $return_assign_log->status = 1;
-                                $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                            //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                            //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            //     $return_assign_log->status = 1;
+                            //     $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                            //     $return_assign_log->save();
+                            // }
+
+                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_id);
+                            if ($rcp_assigned_shipment->exists()) {
+                                $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                                $rcp_assigned_shipment->shipment_status = 3; //reattempt status
+                                $rcp_assigned_shipment->admin_id = $global_admin;
+                                $rcp_assigned_shipment->save();
+
+                                // Since this function is just approving the reattempt request we dont need to update the agent row
+                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                // $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                // $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                // $rcp_assigned_agent->decrement('pending_shipments');
+                                // $rcp_assigned_agent->save();
+
+
+                                $return_assign_log = new RcpAssignedShipmentLog();
+                                $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                $return_assign_log->status = 3; //reattempt status
+                                $return_assign_log->admin_id = $global_admin;
                                 $return_assign_log->save();
                             }
     
@@ -137,15 +163,37 @@ class ReattemptShipmentStatusController extends Controller
     
                             ShipmentsJourneyController::add($shipment_id, 13, 13, NULL, 'Auto re-attempt status due to better Delivery Ratio', NULL, $global_admin);
     
-                            $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
-                            if($return_assign_shipment){
-                                $return_assign_shipment->status = 0;
-                                $return_assign_shipment->save();
+                            // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_id)->latest()->first();
+                            // if($return_assign_shipment){
+                            //     $return_assign_shipment->status = 0;
+                            //     $return_assign_shipment->save();
     
-                                $return_assign_log = new ReturnAssignedShipmentLogs();
-                                $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                $return_assign_log->status = 1;
-                                $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                            //     $return_assign_log = new ReturnAssignedShipmentLogs();
+                            //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
+                            //     $return_assign_log->status = 1;
+                            //     $return_assign_log->assigned_by = $return_assign_shipment->assigned_by;
+                            //     $return_assign_log->save();
+                            // }
+
+                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_id)->where('assigned_status', 1)->where('shipment_status', 0);
+                            if ($rcp_assigned_shipment->exists()) {
+                                $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                                $rcp_assigned_shipment->shipment_status = 3; //reattempt status
+                                $rcp_assigned_shipment->admin_id = $global_admin;
+                                $rcp_assigned_shipment->save();
+
+                                //updating already_updated & pending of agent if shipment is updated by shipper 
+                                $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                $rcp_assigned_agent->decrement('pending_shipments');
+                                $rcp_assigned_agent->save();
+
+
+                                $return_assign_log = new RcpAssignedShipmentLog ();
+                                $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                $return_assign_log->status = 3; //reattempt status
+                                $return_assign_log->admin_id = $global_admin;
                                 $return_assign_log->save();
                             }
     
