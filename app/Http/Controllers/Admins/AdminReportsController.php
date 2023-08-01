@@ -11946,7 +11946,6 @@ class AdminReportsController extends Controller
                 foreach ($shipments as $key => $shipment) {
 
                     $data[$key]['s_no'] =$key+1;
-                    $data[$key]['shipment_id'] = $shipment->shipment_id;
                     $data[$key]['tracking_number'] = $shipment->tracking_number;
                     $data[$key]['account_no'] = $shipment->account_no;
                     $data[$key]['shipper'] = $shipment->shipper;
@@ -11965,18 +11964,18 @@ class AdminReportsController extends Controller
                     $data[$key]['arrival_date'] = $shipment->arrival_date;
                     $data[$key]['quantity'] = $shipment->quantity;
                     $data[$key]['weight'] = $shipment->weight;
-                    $data[$key]['first_admin_name'] = '-';
                     $data[$key]['first_admin_trax_id'] = '-';
-                    $data[$key]['first_rider_name'] = '-';
+                    $data[$key]['first_admin_name'] = '-';
                     $data[$key]['first_rider_trax_id'] = '-';
+                    $data[$key]['first_rider_name'] = '-';
                     $data[$key]['first_status_hub'] = '-';
                     $data[$key]['first_status'] = '-';
                     $data[$key]['first_reason'] = '-';
                     $data[$key]['first_status_date'] = '-';
-                    $data[$key]['current_admin_name'] = '-';
                     $data[$key]['current_admin_trax_id'] = '-';
-                    $data[$key]['current_rider_name'] = '-';
+                    $data[$key]['current_admin_name'] = '-';
                     $data[$key]['current_rider_trax_id'] = '-';
+                    $data[$key]['current_rider_name'] = '-';
                     $data[$key]['current_status_hub'] = '-';
                     $data[$key]['current_status'] =  '-';
                     $data[$key]['current_reason'] = '-';
@@ -12226,8 +12225,9 @@ class AdminReportsController extends Controller
                         }
                     }
                 }
-    
-                $data_header[0] = ['S. No.', 'Shipment ID', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin', 'First Admin Trax ID', 'First Rider', 'First Rider Trax ID', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin', 'Current Admin Trax ID', 'Current Rider', 'Current Rider Trax ID', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrive at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrive at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                
                 $data = array_merge($data_header, $data);
     
                 // creating excel header fonts
