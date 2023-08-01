@@ -11922,7 +11922,7 @@ class AdminReportsController extends Controller
             }
 
             if ($search_hub = $request->get('search_hub')) {
-                $shipments->where('och.id', $search_hub)->orWhere('dch.id', $search_hub);
+                $shipments->where('dch.id', $search_hub);
             }
 
             if ($search_status = $request->get('search_status')) {
