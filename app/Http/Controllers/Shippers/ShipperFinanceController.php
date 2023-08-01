@@ -8,6 +8,7 @@ use App\Http\Models\InvoiceForReimbursement;
 use App\Http\Models\InvoiceStatus;
 use App\Http\Models\Notification;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Sister_account\MergedSisterAccountMapping;
 use App\Http\Models\Zone;
@@ -83,6 +84,17 @@ class ShipperFinanceController extends Controller
         $datatables = Datatables::of($done_payments)
             ->addColumn('id_padded', function ($done_payment) {
                 return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('count_fintech_shipments', function ($done_payment) {
+                $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $done_payment->id)->pluck('shipment_id')->toArray();
+                $count_fintech_shipments = Shipment::whereIn('id', $done_payment_shipments)
+                    ->where('fintech_charges','!=','')->count('id');
+                if($count_fintech_shipments > 0){
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $count_fintech_shipments . '</button>';
+                }
+                else{
+                    return 0;
+                }
             })
             ->filterColumn('done_payments.id', function ($query, $keyword) {
                 return $query->where('done_payments.id', '=', $keyword);
@@ -276,6 +288,23 @@ class ShipperFinanceController extends Controller
         }
 
         return $tracking_numbers;
+    }
+
+    public function payments_fintech_shipments(Request $request)
+    {
+
+        $delivery_note_shipment = DonePaymentShipment::join('shipments','done_payment_shipments.shipment_id','shipments.id')
+            ->where('done_payment_shipments.done_payment_id', $request->id)
+            ->select('shipments.tracking_number as tracking_number', 'shipments.amount as cod_amount',
+                'shipments.fintech_charges as fintech_charges','shipments.received_amount as received_amount',
+                'shipments.created_at as created_at')->where('shipments.fintech_charges','!=','')->get();
+
+        if(count($delivery_note_shipment) != 0){
+            return response()->json([
+                'status' => '200',
+                'data'   => $delivery_note_shipment,
+            ]);
+        }
     }
 
     public function payments_details_print(Request $request)

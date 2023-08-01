@@ -319,6 +319,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('delivered_shipments', 'Shippers\ShipperFinanceController@payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Shippers\ShipperFinanceController@payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('fintech_shipments', 'Shippers\ShipperFinanceController@payments_fintech_shipments')->name('fintech_shipments');
             Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
 
