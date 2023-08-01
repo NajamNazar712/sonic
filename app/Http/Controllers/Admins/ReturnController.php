@@ -88,6 +88,7 @@ use App\Http\Models\Handover\HandoverShipments;
 use App\Http\Models\Rider\RiderDeliveryNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Models\RvAgentAssignHub;
 use App\Http\Models\RvShipmentAssignAgent;
 use App\Http\Models\ShipmentDetail;
 use App\Http\Models\ShipmentOtp;
@@ -5030,28 +5031,40 @@ class ReturnController extends Controller
 
         return $html;
     }
-    public function assign_agent(Request $request){
-        $shipment_ids = $request->shipment_ids;
-        if ($shipment_ids) {
-            foreach ($shipment_ids as $shipment_id) {
-                $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+    public function assign_agent(Request $request)
+    {
+        $agent_id = $request->admin_id;
 
-                $data = [
-                    'agent_id' =>$request->admin_id,
-                    'shipment_id' => $shipment_id,
-                    'shipments_journey_id' => $shipments_journey->id,
-                    'rv_state_id' => 1, //Assigned
-                    'rv_assign_agent_status_id' => null,
-                    'rv_assign_agent_sub_status_id' => null,
-                ];
+        // Get all assigned agent to hubs priority wise
+        $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
+        if($sorted_agents->isNotEmpty())
+        {
+            $shipment_ids = $request->shipment_ids;
+            if ($shipment_ids)
+            {
+                foreach ($shipment_ids as $shipment_id) 
+                {
+                    $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
 
-                $this->rv_shipment_assign($data); 
+                    $data = [
+                        'agent_id' =>$request->admin_id,
+                        'shipment_id' => $shipment_id,
+                        'shipments_journey_id' => $shipments_journey->id,
+                        'rv_state_id' => 1, //Assigned
+                        'rv_assign_agent_status_id' => null,
+                        'rv_assign_agent_sub_status_id' => null,
+                    ];
+
+                    $this->rv_shipment_assign($data); 
+                }
+                return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+            }
+            else{
+                return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
+            }
         }
-            return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
-        }
-
         else{
-            return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
+            return response()->json(['status' => 1, 'error' => 'Hub is not assigned to this agent']);
         }
     }
 
