@@ -410,7 +410,7 @@ class ShipperReturnController extends Controller
 
                     // Update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to completed(4)
                     request()->request->add(['shipment_id' => $shipment]);
-                    $this->shipment_status_update_shipper($shipment, 7, 2, 4);
+                    $this->shipment_status_update_shipper($request, 7, 2, 4);
                 }
             }
 
@@ -484,7 +484,7 @@ class ShipperReturnController extends Controller
 
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                     request()->request->add(['shipment_id' => $shipment]);
-                    $this->shipment_status_update_shipper($shipment, 7, 2, 3);
+                    $this->shipment_status_update_shipper($request, 7, 2, 3);
 
 
                     if ($parcel->shipper_status_id == 12 && ($journey['status_reason_id'] == 12)) {
