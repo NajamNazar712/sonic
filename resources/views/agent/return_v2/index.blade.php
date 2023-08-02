@@ -108,6 +108,7 @@
                                         </div>
                                     </div>
 
+                                    <input type="hidden" id="trax_id" value="{{ $user->trax_id }}">
                                     <div class="row justify-content-between">
                                         <div class="col-2">
                                             <h6 class="mt-2">Agent Employee ID</h6>
@@ -1205,7 +1206,9 @@
                     var fake_status = $('#fake_status_id').val();
                     var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
+                    var trax_id = $('#trax_id').val();
 
+                    console.log(trax_id)
 
                     $.ajax({
                             url: '{!! route('agent.dashboard.submit_ticket') !!}',
@@ -1227,7 +1230,9 @@
                                 'consignee_phone_number_2':consignee_phone_number_2,
                                 'intercept_type':intercept_type,
                                 'consignee_email':consignee_email,
-                                'amount':amount
+                                'amount':amount,
+                                'trax_id':trax_id
+
                             }
 
                         })
@@ -1238,12 +1243,10 @@
                                     containerId: 'toast-bottom-center'
                                 });
                                 window.location.reload();
+                            } else if(data.status == 2){
+                                window.location.href = "{{ route('agent.login') }}";
                             }
-                            // else{
-                            //     $(form).find('button.search').prop('disabled', false);
-
-                            //     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                            // }    
+                          
                             else {
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {

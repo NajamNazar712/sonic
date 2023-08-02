@@ -12816,4 +12816,32 @@ class AdminAPIController extends Controller
         return $shipment_scanned;
     }
 
+    public function get_staff_working_shift(Request $request) {
+
+        $rules = [
+            'staff_category_id' => 'required'
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $shifts = EmployeeShift::where('id', '!=', 1);
+            $shifts = $request->staff_category_id == 3 ? $shifts->where('shift_type_id', '2') : $shifts->where('shift_type_id', '!=', '2');
+            $shifts = $shifts->select('id', 'name', 'start_time', 'end_time')->get();
+
+            $shift_data = array();
+            foreach ($shifts as $shift) {
+                $datum = array();
+                $datum['id'] = $shift->id;
+                $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
+                $shift_data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'shifts' => $shift_data]);
+        }
+    }
+
 }

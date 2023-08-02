@@ -385,6 +385,7 @@ Route::name('api.')->group(function () {
             Route::post('attachment_delete', 'AdminAPIController@admin_attachments_delete')->name('attachment_delete');
             Route::post('attachment_check', 'AdminAPIController@admin_attachments_check')->name('attachment_check');
             Route::post('get_line_managers', 'AdminAPIController@get_line_managers')->name('get_line_managers');
+            Route::post('get_working_shift', 'AdminAPIController@get_staff_working_shift')->name('get_working_shift');
         });
 
         Route::middleware('AdminAPIToken')->group(function () {
