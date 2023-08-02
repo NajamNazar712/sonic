@@ -1454,24 +1454,25 @@ class AdminHumanResourseController extends Controller
             if ($admin->exists()) {
                 $admin = $admin->first();
 
-                if ($admin->designation_id != $employee->designation_id) {
-                    AdminHub::where('admin_id', $admin->id)->delete();
+//                if ($admin->designation_id != $employee->designation_id) {
+//                    AdminHub::where('admin_id', $admin->id)->delete();
+//
+//                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+//                    if (count($hubs) == 0) {
+//                        $admin_hub = new AdminHub();
+//                        $admin_hub->admin_id = $admin->id;
+//                        $admin_hub->hub_id = $employee->city->hub_city->id;
+//                        $admin_hub->save();
+//                    } else {
+//                        foreach ($hubs as $hub) {
+//                            $admin_hub = new AdminHub();
+//                            $admin_hub->admin_id = $admin->id;
+//                            $admin_hub->hub_id = $hub->hub_id;
+//                            $admin_hub->save();
+//                        }
+//                    }
+//                }
 
-                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
-                    if (count($hubs) == 0) {
-                        $admin_hub = new AdminHub();
-                        $admin_hub->admin_id = $admin->id;
-                        $admin_hub->hub_id = $employee->city->hub_city->id;
-                        $admin_hub->save();
-                    } else {
-                        foreach ($hubs as $hub) {
-                            $admin_hub = new AdminHub();
-                            $admin_hub->admin_id = $admin->id;
-                            $admin_hub->hub_id = $hub->hub_id;
-                            $admin_hub->save();
-                        }
-                    }
-                }
                 if($role_flag == true) {
                     $admin->designation_id = $employee->designation_id;
                     $admin->role_id = $employee->designation->role_id ?? 79;
