@@ -4494,6 +4494,7 @@ RiderAPIController extends Controller
             $datum = array();
             $datum['id'] = $shift->id;
             $datum['name'] = $shift->name . ' (' . $shift->start_time . ' - ' . $shift->end_time . ') ';
+            $datum['shift_type_id'] = $shift->shift_type_id;
             $shift_data[] = $datum;
         }
 
