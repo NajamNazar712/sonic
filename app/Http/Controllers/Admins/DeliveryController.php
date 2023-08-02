@@ -9796,8 +9796,8 @@ class DeliveryController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 650);
 
-        $today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
-        $delivery_note = DeliveryNote::where('created_at', '=>', $today)->first();
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
         $delivery_note_id = $delivery_note->id;
 
         // $delivery_notes_id = DB::table('delivery_notes')
@@ -9821,8 +9821,8 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 651);
         }
 
-        $today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
-        $delivery_note = DeliveryNote::where('created_at', '=>', $today)->first();
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
         $delivery_note_id = $delivery_note->id;
 
         $shipments = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -9857,8 +9857,8 @@ class DeliveryController extends Controller
     {
         $rider_id = $request->rider_id;
 
-        $today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
-        $delivery_note = DeliveryNote::where('created_at', '=>', $today)->first();
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
         $delivery_note_id = $delivery_note->id;
 
         if($rider_id){
