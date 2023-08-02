@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\Admin\shipmentFintechCharges;
 use App\Http\Models\BanksList;
 use App\Http\Models\Invoice;
 use App\Http\Models\InvoiceForReimbursement;
@@ -307,6 +308,23 @@ class ShipperFinanceController extends Controller
         }
     }
 
+
+    function calculate_fintech_charges($shipment_id)
+    {
+
+        $fintechCharges = shipmentFintechCharges::where('shipment_id',$shipment_id);
+        $fn_charges = 0;
+        if($fintechCharges->exists()){
+            $fintechCharges = $fintechCharges->first();
+            if($fintechCharges->applied_to == '1'){
+                $fn_charges = $fintechCharges->fintech_charges;
+            }
+
+        }
+        // dd($fn_charges);
+        return $fn_charges;
+    }
+
     public function payments_details_print(Request $request)
     {
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
@@ -464,9 +482,13 @@ class ShipperFinanceController extends Controller
         $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
+        $total_fintech_charges = [];
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
+
+            $done_fintech_charges = $this->calculate_fintech_charges($shipment->shipment_id);
+            $total_fintech_charges = $total_fintech_charges + $done_fintech_charges;
 
             $shipment_weight = $shipment->actual_weight;
             $weight_charges = $shipment->weight_charges;
@@ -517,6 +539,7 @@ class ShipperFinanceController extends Controller
                               <td>' . ((1 == 1 && $done_payment_shipment->type == 0 && $done_payment_shipment->charges != 0) ? number_format($shipment->cash_handling_charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->type != 2 && $done_payment_shipment->charges != 0) ? number_format($shipment->nsa_osa_charges, 2) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable, 2) : '0') . '</td>
+                              <td>' .  number_format($done_fintech_charges, 2) . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->charges, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->gst, 2) : '0') . '</td>
                               <td>' . ((1 == 1 && $done_payment_shipment->charges != 0) ? number_format($done_payment_shipment->wht, 2) : '0') . '</td>
@@ -576,7 +599,9 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_nsa_osa_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_adjustments, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_fintech_charges, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_charges, 2) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_gst, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_wht, 2) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount - $total_payable, 2) . '</strong></td>
@@ -619,6 +644,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                               <td class="color primary"><strong>OSA Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Adjustments (PKR)</strong></td>
+                              <td class="color primary"><strong>Fintech Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Total Charges (PKR)</strong></td>
                               <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>WHT</strong></td>
@@ -683,6 +709,10 @@ class ShipperFinanceController extends Controller
                                     <tr>
                                         <td class="color secondary"><strong>Total GST</strong></td>
                                         <td>' . number_format($total_gst, 2) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Fintech</strong></td>
+                                        <td>' . number_format($total_fintech_charges, 2) . '</td>
                                     </tr>
                                     <tr>
                                         <td class="color secondary"><strong>Total WHT (Deductable)</strong></td>
