@@ -264,8 +264,9 @@ class ReturnV2Controller extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'errors' => $validate->errors()]);
-        } else {
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
+        } 
+        else {
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->first();
             $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
@@ -283,7 +284,9 @@ class ReturnV2Controller extends Controller
                 } else {
                     return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                 }
-            } else {
+            } 
+            
+            else {
                 $this->update_shipment_status($request); //updating status of shipment
                 $this->add_shipment_agent($request, $shipment_assign_agent);
                 $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);

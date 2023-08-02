@@ -1658,7 +1658,9 @@ class ReturnController extends Controller
                     }
                     $shipment_details = Shipment::where('tracking_number',$tracking)->first();
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment_details->id)->latest('id')->first();
-                    if($status == 0){ //return confirm
+
+                    //return confirm
+                    if($status == 0){ 
                         if($shipment_details->booking_type_id == 5){
                             continue;
                         }
@@ -1686,30 +1688,16 @@ class ReturnController extends Controller
 
                         ShipmentsJourneyController::add($shipment_details->id, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-                        //Uploading shipments with Return Confirm status Upload Agent Button on Rcp Screen
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_details->id)->where('assigned_status',1)->where('shipment_status', 0);
-                        if($rcp_assigned_shipment->exists()){
-                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
-                            $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                             $rcp_assigned_shipment->admin_id = Auth::id();
-                             $rcp_assigned_shipment->save();
- 
-                             //updating already_updated & pending of agent if shipment is updated by admin 
-                             $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                             $already_updated = $rcp_assigned_agent->increment('already_updated');
-                             $rcp_assigned_agent->decrement('pending_shipments');
-                             $rcp_assigned_agent->save();
- 
- 
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                             $return_assign_log->status = 4; //return confirm status
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
-                            }
 
+                        //updating rows in RvShipmentAssignAgent as Return Confirm
+                        $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
+                        if($rcp_assigned_shipment->exists()){
+                        request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks]);
+                        $this->return_confirm($request);
+                        }
                     }
+
+                    // Reattempt
                     else if($status == 1){
                         $journey = ShipmentsJourney::where('shipment_id', $shipment_details->id)->where('shipper_status_id', 12)->latest('id')->first();
                         if ($journey) {
@@ -1737,28 +1725,12 @@ class ReturnController extends Controller
                         $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-                        //Uploading shipments with Reattempt status Upload Agent Button on Rcp Screen
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment_details->id)->where('assigned_status',1)->where('shipment_status', 0);
+                        //updating rows in RvShipmentAssignAgent as Return Confirm
+                        $rcp_assigned_shipment = RvShipmentAssignAgent::where('shipment_id', $shipment_details->id)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                         if($rcp_assigned_shipment->exists()){
-                            $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
-                            $rcp_assigned_shipment->shipment_status = 3; //reattempt status
-                             $rcp_assigned_shipment->admin_id = Auth::id();
-                             $rcp_assigned_shipment->save();
- 
-                             //updating already_updated & pending of agent if shipment is updated by admin 
-                             $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                             $already_updated = $rcp_assigned_agent->increment('already_updated');
-                             $rcp_assigned_agent->decrement('pending_shipments');
-                             $rcp_assigned_agent->save();
- 
- 
-                             $return_assign_log = new RcpAssignedShipmentLog();
-                             $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->shipment_id = $rcp_assigned_shipment->id;
-                             $return_assign_log->status = 3; //reattempt status
-                             $return_assign_log->admin_id = Auth::id();
-                             $return_assign_log->save();
-                            }
+                        request()->request->add(['shipment_id'=>$shipment_details->id,'remarks'=>$remarks, 'charges'=>$estimation_charges]);
+                        $this->reattempt($request);
+                        }
 
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);

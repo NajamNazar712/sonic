@@ -469,19 +469,6 @@ class ShipperReturnController extends Controller
                     }
                     ShipmentsJourneyController::add($shipment, 52, 52, $last_reason_id, $remarks, session('user_id'), NULL, $reference_1_id);
 
-                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment)->latest()->first();
-                    // if($return_assign_shipment){
-                    //     $return_assign_shipment->status = 0;
-                    //     $return_assign_shipment->save();
-
-                    //         $return_assign_log = new ReturnAssignedShipmentLogs();
-                    //         $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                    //         $return_assign_log->status = 5;
-                    //         $return_assign_log->assigned_by = Auth::id();
-                    //         $return_assign_log->save();
-                    // }
-
-
                     //update the assigned shipment where rv_assign_agent_status is 7 (Shipper Advised Requested) & rv_state_id is 2 (UnAssigned) update it to open(3)
                     request()->request->add(['shipment_id' => $shipment]);
                     $this->shipment_status_update_shipper($request, 7, 2, 3);
