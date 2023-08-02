@@ -686,6 +686,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival', 'Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
         Route::post('foodpanda_shipments_arrival', 'Admins\OrderManagementController@foodpanda_shipments_arrival')->name('foodpanda_shipments_arrival');
+        Route::post('shipment_cancel', 'Admins\OrderManagementController@shipment_cancel')->name('shipment_cancel');
+        Route::post('shipment_cancel_reason', 'Admins\OrderManagementController@shipment_cancel_reason')->name('shipment_cancel_reason');
 
         Route::prefix('self_collection')->name('self_collection.')->group(function () {
             Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
@@ -1476,6 +1478,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('index', 'Admins\LostShipmentsController@lost_add_index')->name('index');
                 Route::post('shipment/info', 'Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
                 Route::post('shipment/store', 'Admins\LostShipmentsController@add_lost_shipments')->name('shipments.store');
+                Route::post('bulk/lost/shipments', 'Admins\LostShipmentsController@bulk_lost_shipments')->name('bulk.lost');
             });
         });
         //Lost Module End
@@ -4190,6 +4193,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
                 Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
+                Route::post('convert-to-contractual', 'Admins\AdminHumanResourseController@convert_staff_to_contractual')->name('convert_contractual');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');

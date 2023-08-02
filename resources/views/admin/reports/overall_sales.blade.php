@@ -173,6 +173,7 @@
                         <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Order ID</th>
+                        <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remark</th>
@@ -466,6 +467,7 @@
                             head.push('Sub Segment');
                             head.push('Vendor');
                             head.push('Order ID');
+                            head.push('First Attempt Date');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remark');
@@ -521,6 +523,7 @@
                                 row.push(values.sub_segment);
                                 row.push(values.vendor);
                                 row.push(values.order_id);
+                                row.push(values.first_attempt_date);
                                 row.push(values.current_status);
                                 row.push(values.reason);
                                 row.push(values.remark);
@@ -620,7 +623,7 @@
                         d.search_shipping_mode = $('#search_shipping_mode').val();
                     }
                 },
-                order: [[15, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -629,6 +632,7 @@
                     { data:'sub_segment' ,name: 'scs.name', class: 'align-middle sub_segment'},
                     { data:'vendor' ,name: 'usi.vendor', class: 'align-middle vendor'},
                     { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
+                    { data:'first_attempt_date' ,name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'reason' ,name:'reason', class: 'align-middle reason'},
                     { data: 'remark' ,name:'remark', class: 'align-middle remark'},
