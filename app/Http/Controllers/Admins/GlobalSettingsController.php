@@ -157,6 +157,8 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\BackgroundImage;
+
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -8469,23 +8471,67 @@ class GlobalSettingsController extends Controller
     public function sms_notification_return_delivered_to_shipper_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 655);
-        $users = User::where('status', '=', 3)->get();
-        $settings = GlobalSettings::where('type', 'returned_shipment_notification')->first();
 
-        if (!isset($settings)) {
-            return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['users' => $users]);
-        } else {
-            $user = explode(',', $settings->text);
-            $selected_roles = User::where('status', 3)->whereIn('id', $user)->pluck('id')->toArray();
-            return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['users' => $users, 'selected_roles' => $selected_roles]);
+        $excluded_shippers = array();
+        $only_shippers = array();
+        $all_shippers = false;
+
+        $bypass_all_shippers = GlobalSettings::where('type', 'returned_shipment_notification');
+        if ($bypass_all_shippers->exists()) {
+            $bypass_all_shippers = $bypass_all_shippers->first();
+            $all_shippers = $bypass_all_shippers->setting_value;
         }
+
+        $bypass_only_shipper = GlobalSettings::where('type', 'returned_shipment_notification')->where('setting_value',0);
+
+        if ($bypass_only_shipper->exists()) {
+            $bypass_only_shipper = $bypass_only_shipper->first();
+            $only_shippers = array_map('intval', explode(',', $bypass_only_shipper->text));
+        }
+
+        $bypass_excluded_shippers = GlobalSettings::where('type', 'returned_shipment_notification')->where('setting_value',1);
+
+        if ($bypass_excluded_shippers->exists()) {
+            $bypass_excluded_shippers = $bypass_excluded_shippers->first();
+            $excluded_shippers = array_map('intval', explode(',', $bypass_excluded_shippers->text));
+        }
+
+        $shippers = User::select('id', 'name')->where('status', 3)->get();
+
+        return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers]);
     }
 
     public function sms_notification_return_delivered_to_shipper_update(Request $request)
     {
+        if ($request->has('all_shipper_toggle'))
+        {
+            if ($request->all_shipper_toggle == 'on')
+            {
+                $users = $request->excluded_users;
+                if (is_array($users)) {
+                    $users = implode(',', $users);
+                }
 
-        if ($request->has('users')) {
-            $users = $request->users;
+                $settings = GlobalSettings::where('type', 'returned_shipment_notification');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                    $settings->text = $users;
+                    $settings->setting_value = 1;
+                    $settings->save();
+                }
+                else {
+                    $settings = new GlobalSettings();
+                    $settings->type = 'returned_shipment_notification';
+                    $settings->text = $users;
+                    $settings->setting_value = 1;
+                    $settings->save();
+                }
+            }
+        }
+        else if ($request->has('only_users'))
+        {
+            $users = $request->only_users;
             if (is_array($users)) {
                 $users = implode(',', $users);
             }
@@ -8494,15 +8540,17 @@ class GlobalSettingsController extends Controller
 
             if ($settings->exists()) {
                 $settings = $settings->first();
-            } else {
+                $settings->text = $users;
+                $settings->setting_value = 0;
+                $settings->save();
+            }
+            else {
                 $settings = new GlobalSettings();
                 $settings->type = 'returned_shipment_notification';
+                $settings->text = $users;
                 $settings->setting_value = 0;
+                $settings->save();
             }
-
-            $settings->text = $users;
-            $settings->save();
-
         }
 
         return redirect()->back()->with('success', 'Settings Updated!');
@@ -8644,5 +8692,47 @@ class GlobalSettingsController extends Controller
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
+    }
+
+    public function background_image_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 683);
+        $background_image = BackgroundImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.background_image')->with(['id' => 1, 'background_image' => $background_image]);
+    }
+    public function background_image_store(Request $request)
+    {
+        
+        $request->validate([
+            'upload_image' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+        ],[
+            'upload_image.max' => 'The image must be less than 2 Megabytes.',
+            'upload_image.mimes' => 'The upload image must be a file of type jpeg, png, jpg.',
+        ]);
+
+        if (!$request->hasFile('upload_image')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image')) {
+            if ($request->has('background_image_id_1')) {
+                $image_id = $request->get('background_image_id_1');
+                $background_image = BackgroundImage::find($image_id);
+                Storage::disk('public')->delete($background_image->picture_path);
+            } else {
+
+                $background_image = new BackgroundImage();
+                $background_image->save();
+            }
+
+            $picture_path = 'background_image/' . $background_image->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image));
+            $background_image->picture_path = $picture_path;
+            $background_image->version = carbon::now();
+            $background_image->background_image_screen_id = 1;
+            
+            $background_image->save();
+        }
+        return redirect()->back()->with(['success' => 'Image Uploaded!']);
     }
 }
