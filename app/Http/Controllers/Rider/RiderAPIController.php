@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -9140,6 +9141,13 @@ RiderAPIController extends Controller
 
                             dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
+                            //fintech
+
+                            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                            if(count($unique_codes) > 0){
+                                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                            }
+
                             $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
                             if ($rider_delivery_note_status->exists()) {
                                 $rider_delivery_note_status = $rider_delivery_note_status->first();
@@ -11515,6 +11523,11 @@ RiderAPIController extends Controller
                                         DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
                                         dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
+                                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                                        if(count($unique_codes) > 0){
+                                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                                        }
                                     }
 
 
@@ -13169,7 +13182,7 @@ RiderAPIController extends Controller
                 $shipment_otp->longitude = $request->longitude;
                 $shipment_otp->save();
                 NotificationsController::send(192, $rider_id, $shipment_id);
-                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
+                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully through call!', 'otp' => $otp]);
             } else {
                 return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
             }
@@ -14192,6 +14205,52 @@ RiderAPIController extends Controller
             else{
                 $tracking_not_found = array_diff($tracking_number, $shipments);
                 return ['status' => 1, 'message' => 'Tracking Number Not found', 'tracking_number' => $tracking_not_found];
+            }
+        }
+    }
+
+    public function scan_rider_picked_shipment(Request $request)
+    {
+        $rules = [
+            'tracking_number' => 'required',
+            'call_from' => 'required',
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+            $shipper_status_id = Shipment::where('tracking_number', $tracking_number)->first()->shipper_status_id ?? NULL;
+            if(!$shipper_status_id){
+                return response()->json(['status' => 1, 'message' => 'Invalid tracking number']);
+            } else {
+                $data = [
+                    'tracking_number' => $tracking_number,
+                    'call_from' => $request->call_from
+                ];
+
+                switch ($shipper_status_id) {
+                    case 1 : //Booked...
+                        return response()->json(['status' => 0, 'success_message' => 'Shipment scanned successfuly', 'data' => $data]);
+                        break;
+
+                    case 17 : //Cancelled..
+                        return response()->json(['status' => 1, 'message' => 'Shipment is cancelled']);
+                        break;
+
+                    case 53 : //Rider Picked...
+                        return response()->json(['status' => 1, 'message' => 'Shipment is already rider picked']);
+                        break;
+
+                    default:
+                        return response()->json(['status' => 1, 'message' => 'Shipment is not on booked status']);
+                        break;
+                }
             }
         }
     }

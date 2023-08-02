@@ -365,7 +365,7 @@
 
             var booking_from_date = $('#from_date1').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -380,7 +380,7 @@
             });
             var booking_to_date = $('#to_date1').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,

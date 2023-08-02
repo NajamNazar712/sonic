@@ -315,6 +315,35 @@
             </div>
         </div>
     </div>
+    <div class="modal fade text-left" id="cancelRemark" data-backdrop="static" tabindex="-1" role="dialog"
+    aria-labelledby="cancelRemark" aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="myModalLabel8">Remarks</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <input type="hidden" name="cancel_shipment_id" id="cancel_shipment_id" value="">
+                                {{-- <label for="">Remarks</label> --}}
+                                <textarea class="form-control black-border" name="cancel_remarks" id="cancel_remarks" cols="30" rows="10" data-rule-required="true" data-msg-required="Remarks is required" placeholder="Enter Remarks*"></textarea>
+                                <span id="cancel_remarks_error" class="text-danger cancel-error-message"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group ml-1">
+                        <button type="submit" name="edit" class="btn btn-primary btn-min-width" id="CancelReasonSubmit">Submit
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 
 
@@ -346,6 +375,12 @@
             border-color: #5587b4 !important;
             color: #FFFFFF;
         }
+        .cancel-error-message {
+            color: red;
+        }
+        .black-border {
+    border: 1px solid black;
+    }
     </style>
 @endsection
 
@@ -1126,6 +1161,7 @@
                     table.button('.print').enable();
                 }
                 else {
+                   
                     table.button('.shipper_recall').disable();
                     table.button('.print').disable();
                 }
@@ -1149,6 +1185,7 @@
                     $('#shipment_charges_modal_heading span').text(shipment_id);
                 })
             });
+          
 
             $('#case_nature_requests').on('change',function (e) {
             
@@ -1825,7 +1862,185 @@
                 $('#feedback_channel').val('').trigger('change');
                 $('#feedback_description').val('');
             });
+        $('body').on('click', '.shipment_cancel', function () {
+            var shipment_id = $(this).parents('tr').attr('id');
+            $('#cancelRemark').modal('show');
+            $("#cancel_shipment_id").val(shipment_id);
+            // var reason = $('#cancel_remarks').val();
+            // var shipment_id = parseInt($('#cancel_shipment_id').val());
+            // swal({
+            //     text: 'Are you sure, you want to Cancel these Shipment(s)?',
+            //     icon: 'warning',
+            //     buttons: {
+            //         cancel: {
+            //             text: 'No',
+            //             value: null,
+            //             visible: true,
+            //             closeModal: true,
+            //         },
+            //         confirm: {
+            //             text: 'Yes',
+            //             value: true,
+            //             visible: true,
+            //             closeModal: true
+            //         }
+            //     },
+            //     closeOnClickOutside: false,
+            //     closeOnEsc: false,
+            //     dangerMode: true
+            // }).then(function (confirm) {
+                // if (confirm) {
+                    // $.ajax({
+                    //     url: '{!! route('admin.orders.shipment_cancel') !!}',
+                    //     method: 'POST',
+                    //     data: {
+                    //         '_token': '{{ csrf_token() }}',
+                    //         'shipment_id': shipment_id,
+                    //         'reason': reason
+                    //     }
+                    // })
+                    // .done(function (data) {
+                    //     if (data.status == 0) {
+                           
+                    //         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    //     }
+                    //     else {
+                    //         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    //     }
+                        
+                    //     table.button('.print').disable();
 
+                    //     selected_rows = [];
+
+                    //     table.rows().deselect();
+
+                    //     table.draw('false');
+                    // });
+                // }
+            // });
+        });
+        
+        $('#CancelReasonSubmit').on('click',function () {
+            var reason = $('#cancel_remarks').val();
+            var shipment_id = $(this).parents('tr').attr('id');
+
+            var shipment_id = parseInt($('#cancel_shipment_id').val());
+        
+            // swal({
+            //     text: 'Are you sure, you want to Cancel these Shipment(s)?',
+            //     icon: 'warning',
+            //     buttons: {
+            //         cancel: {
+            //             text: 'No',
+            //             value: null,
+            //             visible: true,
+            //             closeModal: true,
+            //         },
+            //         confirm: {
+            //             text: 'Yes',
+            //             value: true,
+            //             visible: true,
+            //             closeModal: true
+            //         }
+            //     },
+            //     closeOnClickOutside: false,
+            //     closeOnEsc: false,
+            //     dangerMode: true
+            // }).then(function (confirm) {
+                // if (confirm) {
+                    // $.ajax({
+                    //     url: '{!! route('admin.orders.shipment_cancel') !!}',
+                    //     method: 'POST',
+                    //     data: {
+                    //         '_token': '{{ csrf_token() }}',
+                    //         'shipment_id': shipment_id,
+                    //         'reason': reason
+                    //     }
+                    // })
+                    // .done(function (data) {
+                    //     if (data.status == 0) {
+                           
+                    //         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    //     }
+                    //     else {
+                    //         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    //     }
+                        
+                    //     table.button('.print').disable();
+
+                    //     selected_rows = [];
+
+                    //     table.rows().deselect();
+
+                    //     table.draw('false');
+                    // });
+                // }
+            // });
+            if (validateRemarks()) {
+            $.ajax({
+                url: '{!! route('admin.orders.shipment_cancel_reason') !!}',
+                method: 'POST',
+                data: {
+                    'shipment_id': shipment_id,
+                    'reason': reason,
+                    '_token': '{{ csrf_token() }}'
+                }
+            }).done(function (data) {
+                if (data.status === 1) {
+                    
+                    table.draw('false');
+                    toastr.success(data.success, 'Success!', {
+                        positionClass: 'toast-bottom-center',
+                        containerId: 'toast-bottom-center'
+                    });
+                    
+                    
+                } else {
+                    
+                    toastr.error(data.error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+                $('#cancelRemark').modal('hide')
+               
+            });
+        }
+        });
+        // Initialize form validation
+        $('#cancelRemark').validate({
+            rules: {
+                cancel_remarks: {
+                    required: true
+                }
+            },
+            messages: {
+                cancel_remarks: {
+                    required: 'Remarks is required'
+                }
+            },
+            errorPlacement: function(error, element) {
+                error.appendTo($('#cancel_remarks_error'));
+            }
+        });
+        $('#cancelRemark').on('hide.bs.modal', function (e) {
+           $('#cancel_remarks').val('');
+           $('#cancel_remarks').removeClass('is-invalid');
+           $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
+       });
+       function validateRemarks() {
+        var remarks = $('#cancel_remarks').val().trim();
+
+        if (remarks === '') {
+            $('#cancel_remarks').addClass('is-invalid');
+            $('#cancel_remarks_error').text('Remark is required').addClass('cancel-error-message');
+            return false;
+        } else {
+            $('#cancel_remarks').removeClass('is-invalid');
+            $('#cancel_remarks_error').text('').removeClass('cancel-error-message');
+            return true;
+        }
+    }
 
     });
     </script>
