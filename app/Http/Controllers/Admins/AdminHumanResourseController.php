@@ -1129,7 +1129,6 @@ class AdminHumanResourseController extends Controller
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
-                dd($employee);
                 if (in_array($employee->request_status_id, [1, 2])) {
                     if ($employee->trax_id == null) {
                         if ($employee->employee_type_id == 1) {
