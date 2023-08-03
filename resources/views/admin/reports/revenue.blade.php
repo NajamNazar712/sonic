@@ -172,6 +172,7 @@
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Fintech Charges</th>
+                        <th class="border-primary border-darken-1">Fintech Revenue</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
                         <th class="border-primary border-darken-1">Packing Charges</th>
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
@@ -423,6 +424,8 @@
                             head.push('Packaging Charges');
                             head.push('Fuel Surcharge');
                             head.push('Return Charges');
+                            head.push('Fintech Charges');
+                            head.push('Fintech Revenue');
                             head.push('Replacement Charges');
                             head.push('Packing Charges');
                             head.push('Try & Buy Charges');
@@ -465,6 +468,8 @@
                                 row.push(values.packaging_material_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
+                                row.push(values.fintech_charges);
+                                row.push(values.fintech_revenue);
                                 row.push(values.replacement_charges);
                                 row.push(values.packaging_charges);
                                 row.push(values.try_and_buy_charges);
@@ -559,6 +564,7 @@
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'fintech_charges' ,name: 'shipments.fintech_charges', class: 'align-middle fintech_charges'},
+                    { data:'fintech_revenue' ,name: 'fintech_revenue', class: 'align-middle fintech_revenue', orderable: false, searchable: false},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
                     { data:'packaging_charges' ,name: 'shipments.packaging_charges', class: 'align-middle packaging_charges'},
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
