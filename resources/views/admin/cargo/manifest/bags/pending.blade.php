@@ -48,7 +48,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                     class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                    id="search_date_from" placeholder="Done Payment From Date" title="Arrival From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                                    id="search_date_from" placeholder="Arrival From Date" title="Arrival From Date" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
                                         <div class="col">
@@ -60,7 +60,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_to"
                                                     class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                    id="search_date_to" placeholder="Done Payment To Date" title="Arrival To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                                    id="search_date_to" placeholder="Arrival To Date" title="Arrival To Date" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
 
@@ -136,7 +136,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
@@ -150,7 +150,7 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {

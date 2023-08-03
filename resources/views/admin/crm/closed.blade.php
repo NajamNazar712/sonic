@@ -16,18 +16,49 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
-                            <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                                <div class="form-group">
-                                    <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
-                                           placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 ">
+                                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <input type="text" name="tracking_numbers" class="dt_search tracking_numbers"
+                                                    placeholder="Tracking Number(s)" data-tags-input-name="tracking_number">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group input-group ">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_from"
+                                                    class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                    id="search_date_from" placeholder="Status From Date" title="Status From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_to"
+                                                    class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                    id="search_date_to" placeholder="Status To Date" title="Status To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group justify-content-center">
+                                                <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
+                                                            class="la la-search"></i> Search
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-                                <div class="form-group justify-content-center">
-                                    <button id="datatable_filter_btn" type="submit" class="ml-1 btn btn-outline-primary btn-min-width"><i
-                                                class="la la-search"></i> Search
-                                    </button>
-                                </div>
-                            </form>
+                            </div>
 
                             <div class="col justify-content-end">
                                 <div class="card-header">
@@ -84,6 +115,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+
     <style type="text/css">
         .selectize-control {
             width: 300px !important;
@@ -102,9 +135,41 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            var search_date_to = $('#track_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #search_date_from').pickadate('picker').set('max', $('#track_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#track_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#track_form #search_date_to').pickadate('picker').set('min', $('#track_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if ( this.context.length ) {
                     body = [];
@@ -314,7 +379,9 @@
                     url: '{{ route('admin.crm.closed.list') }}',
                     data: function (d) {
                         d.tracking_numbers = $('#track_form .tracking_numbers').val();
-
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        
                         d.star_shipper_filter = $('#star_shippers_filter').val();
                     }
                 },
