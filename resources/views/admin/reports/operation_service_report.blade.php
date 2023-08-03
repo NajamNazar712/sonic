@@ -108,7 +108,7 @@
                             </div>
                             <input type="text" name="booking_date_from"
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="booking_date_from" placeholder="Booking Date (From)">
+                                   id="booking_date_from" placeholder="Booking Date (From)" title="Booking Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -120,7 +120,7 @@
                             </div>
                             <input type="text" name="booking_date_to"
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="booking_date_to" placeholder="Booking Date Date (To)">
+                                   id="booking_date_to" placeholder="Booking Date Date (To)" title="Booking Date Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                    
@@ -426,6 +426,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

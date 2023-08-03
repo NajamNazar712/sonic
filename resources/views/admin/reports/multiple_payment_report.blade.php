@@ -12,15 +12,44 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-                        <div class="form-group ml-1">
-                            <input type="text" class="input-group form-control" name="search_tracking_number" id="search_tracking_number" placeholder="Tracking Number">
-                        </div>
-                        <div class="form-group ml-1">
-                            <button type="submit" id="search_filter_btn" class="btn btn-primary">Search</button>
-                        </div>
-                    </form>
-
+                    <div class="col-12 ">
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <div class="col-3 mt-1">
+                                <div class="form-group ml-1">
+                                    <input type="text" class="input-group form-control" name="search_tracking_number" id="search_tracking_number" placeholder="Tracking Number">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_from"
+                                        class="form-control pickadate bg-primary border-primary white rounded-right"
+                                        id="search_date_from" placeholder="Done Payment From Date" title="Done Payment From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_to"
+                                        class="form-control pickadate bg-primary border-primary white rounded-right"
+                                        id="search_date_to" placeholder="Done Payment To Date" title="Done Payment To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col-2 mt-1">
+                                <div class="form-group ml-1">
+                                    <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -41,6 +70,7 @@
                         <th class="border-primary border-darken-1">Packaging Material Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Payable</th>
+                        <th class="border-primary border-darken-1">Done Payment Date</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -105,6 +135,10 @@
             width: auto !important;
             text-align: left;
         }
+
+        #search_tracking_number{
+            width: 100%;
+        }
     </style>
 @endsection
 @section('js')
@@ -118,6 +152,35 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -146,6 +209,7 @@
                             head.push('Packaging Material Charges');
                             head.push('GST');
                             head.push('Total Payable');
+                            head.push('Done Payment Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -165,6 +229,7 @@
                                 row.push(values.packaging_material_charges);
                                 row.push(values.gst);
                                 row.push(values.total_payable);
+                                row.push(values.created_at);
 
                                 body.push(row);
                             });
@@ -191,6 +256,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -199,6 +265,8 @@
                     url: '{{ route('admin.reports.multiple_payment_report.list') }}',
                     data: function (d) {
                         d.tracking_number = $('#tracking_number_search_form #search_tracking_number').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[2, 'desc']],
@@ -218,7 +286,8 @@
                     {data:'nsa_osa_charges' ,name: 's.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     {data: 'packaging_material_charges', name: 's.packaging_material_charges', class: 'align-middle packaging_material_charges'},
                     {data: 'gst', name: 'done_payment_shipments.gst', class: 'align-middle gst'},
-                    {data: 'total_payable', name: 'done_payment_shipments.payable', class: 'align-middle total_payable'}
+                    {data: 'total_payable', name: 'done_payment_shipments.payable', class: 'align-middle total_payable'},
+                    {data: 'created_at', name: 'done_payment_shipments.created_at', class: 'align-middle created_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -271,6 +340,10 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                 }
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
 
         });

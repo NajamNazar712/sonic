@@ -11,6 +11,45 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-12 ">
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_from"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_from" placeholder="Transit From Date" title="Transit From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col-3 mt-1">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_to"
+                                           class="form-control pickadate bg-primary border-primary white rounded-right"
+                                           id="search_date_to" placeholder="Transit To Date" title="Transit To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            
+                            <div class="col-2 mt-1">
+                                <div class="form-group">
+                                    <button type="button" id="search_filter_btn"
+                                            class="btn btn-block btn-outline-info btn-min-width"><i class="la la-search"></i>
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -105,6 +144,34 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             function print(id) {
                 $.ajax({
                     url: '{!! route('admin.cargo_manifest.print') !!}',
@@ -197,12 +264,23 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 autoWidth: false,
                 language: {
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.reports.manifest.short_received_shipments.list') }}',
+                ajax: {
+                    url: '{{ route('admin.reports.manifest.short_received_shipments.list') }}',
+                    method: 'GET',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
                 order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -227,6 +305,10 @@
             $('#datatable tbody').on('click','tr td.manifest_id_link button.print',function () {
                 var manifest_id = parseInt(table.row($(this).parents('tr')).data().manifest_id);
                 print(manifest_id);
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
 
         });

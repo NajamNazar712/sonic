@@ -25,7 +25,7 @@
 								</div>
 								<input type="text" name="invoice_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_from" placeholder="Invoicing Date From">
+									   id="invoice_from" placeholder="Invoicing Date From" title="Invoicing Date From" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -37,7 +37,7 @@
 								</div>
 								<input type="text" name="invoice_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_to" placeholder="Invoicing Date To">
+									   id="invoice_to" placeholder="Invoicing Date To" title="Invoicing Date To" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-2">
@@ -73,7 +73,7 @@
 								</div>
 								<input type="text" name="generation_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_from" placeholder="Generation Date From">
+									   id="generation_from" placeholder="Generation Date From" title="Generation Date From" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -85,7 +85,7 @@
 								</div>
 								<input type="text" name="generation_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_to" placeholder="Generation Date To">
+									   id="generation_to" placeholder="Generation Date To" title="Generation Date To" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-2">
@@ -751,6 +751,7 @@
 						pageLength: 50,
 						pagingType: 'full_numbers',
 						processing: true,
+						deferLoading: 0,
 						language: {
 							processing: data_table_loader
 						},

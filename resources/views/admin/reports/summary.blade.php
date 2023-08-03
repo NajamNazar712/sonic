@@ -66,7 +66,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{$thirtyday}}">
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" title="Date From" data-rule-required="true" data-msg-required="Date(From) is required" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -76,7 +76,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                                     </div>
-                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{$today}}">
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" title="Date To" data-rule-required="true" data-msg-required="Date(To) is required" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
 
@@ -519,6 +519,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

@@ -27,7 +27,7 @@
                                             </div>
                                             <input type="text" name="transit_from_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="transit_from_date" placeholder="Transit Date From">
+                                                   id="transit_from_date" placeholder="Transit Date From" title="Transit Date From" data-value="{{ Carbon\Carbon::today() }}">
                                         </div>
                                     </div>
                                     <div class="col">
@@ -39,7 +39,7 @@
                                             </div>
                                             <input type="text" name="transit_to_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="transit_to_date" placeholder="Transit Date To">
+                                                   id="transit_to_date" placeholder="Transit Date To" title="Transit Date To" data-value="{{ Carbon\Carbon::today() }}">
                                         </div>
                                     </div>
                                     <div class="col">
@@ -379,6 +379,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

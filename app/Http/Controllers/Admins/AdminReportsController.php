@@ -5050,7 +5050,20 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 168);
         }
-        $payments = DB::connection('reports')->table('done_payment_shipments')->join('shipments as s', 's.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges', 's.insurance_charges as insurance_charges', 's.return_charges as return_charges', 's.fuel_surcharge as fuel_surcharge', 's.replacement_charges as replacement_charges', 's.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status', 's.nsa_osa_charges as nsa_osa_charges']);
+        $payments = DB::connection('reports')->table('done_payment_shipments')->join('shipments as s', 's.id', '=', 'done_payment_shipments.shipment_id')->select(['s.tracking_number as tracking_number', 's.actual_weight as actual_weight', 's.cash_handling_charges as cash_handling_charges', 's.insurance_charges as insurance_charges', 's.return_charges as return_charges', 's.fuel_surcharge as fuel_surcharge', 's.replacement_charges as replacement_charges', 's.packaging_material_charges as packaging_material_charges', 'done_payment_shipments.done_payment_id as payment_id', 'done_payment_shipments.gst as gst', 'done_payment_shipments.amount as amount', 'done_payment_shipments.payable as total_payable', 'done_payment_shipments.type as status', 's.nsa_osa_charges as nsa_osa_charges', 'done_payment_shipments.created_at']);
+
+
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $payments->whereBetween('done_payment_shipments.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $payments->whereDate('done_payment_shipments.created_at', $from);
+            }
+        }
+
         $datatable = Datatables::of($payments)
             ->addColumn('id_padded', function ($shipments) {
                 return str_pad($shipments->payment_id, 6, '0', STR_PAD_LEFT);
@@ -9849,7 +9862,20 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'cmbs.shipment_id')
             ->select('s.tracking_number as tracking_number', 'cargo_manifest_bags.id as bag', 'oc.name as origin', 'dc.name as destination', 'sm.mode as shipping_mode', 'cargo_manifest_bags.type as bag_type', 'cm.id as manifest_id', 'cm.created_at as transited_at', 'cargo_manifest_bags.seal_number')
             ->where('cargo_manifest_bags.status_id', 9)
-            ->whereIn('s.shipper_status_id', [3, 21])->get();
+            ->whereIn('s.shipper_status_id', [3, 21, 26, 32]);
+
+            if ($request->get('search_date_from')) {
+                if ($request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $short_received_shipments->whereBetween('cm.created_at', [$from, $to]);
+                } else {
+                    $from = $request->get('search_date_from');
+                    $short_received_shipments->whereDate('cm.created_at', $from);
+                }
+            }
+
+        $short_received_shipments = $short_received_shipments->get();
 
         $datatables = Datatables::of($short_received_shipments)
             ->editColumn('tracking_number_link', function ($shipments) {
