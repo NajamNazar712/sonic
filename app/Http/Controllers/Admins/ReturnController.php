@@ -5161,16 +5161,19 @@ class ReturnController extends Controller
                     $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                     $shipment_id = $shipment->id;
 
+                    //if agent row is empty unassign the shipment id 
                     $this->rv_unassign_agents(null, $shipment_id);
 
 
-                    //if agent row is not empty
+                    //if agent row is not empty assign the shipment to an agent
                     if (!empty($agent_id)) {
                         
-                            // Get all assigned agent to hubs priority wise
+                        // Get all assigned agent to hubs priority wise
                         $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
                         if($sorted_agents->isNotEmpty())
                         {
+                            
+                            // included_shippers is checking if the shipper is included and assign the shipment to an agent
                             $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
 
                             if($include_shippers ==true){
