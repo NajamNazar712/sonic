@@ -3717,6 +3717,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
         });
+        Route::prefix('background_image')->name('background_image.')->group(function () {
+            // Route::view('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::get('', 'Admins\GlobalSettingsController@background_image_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
+        });
 
     });
 
@@ -4189,6 +4194,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
                 Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
+                Route::post('convert-to-contractual', 'Admins\AdminHumanResourseController@convert_staff_to_contractual')->name('convert_contractual');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');

@@ -178,7 +178,22 @@ class AdminReportsController extends Controller
                 })
             ->leftjoin('cargo_manifest_bag_statuses as cargo_status', 'cargo_status.id', '=', 'cmb.status_id')
             ->leftjoin('bag_statuses as bs', 'bs.id', '=', 'cmb.status_id')
-
+            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
+                $join->on('sjfa.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjfa.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjrp', function ($join) use ($connection) {
+                $join->on('sjrp.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjrp.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53)')
+                    );
+            })
             ->select(['z.name  as zone', 'p.product_name as product_type', 'si.description as description', 'ssr.name as reason', 'sjr.remarks as remarks', 
             'ss.name as status', 'shipments.id as shId', 'shipments.tracking_number', 'shipments.tracking_number as tracking_number_link', 'u.name as shipper', 
             'ss.name as history_status', 'bt.booking_type as service_type', 'sj.created_at as arrival', 'oc.name as origin', 'dc.name as destination', 
@@ -188,7 +203,7 @@ class AdminReportsController extends Controller
             'cmbh.name as current_hub_name', 'cmbh.id as current_hub_id', 'shipments.shipper_status_id as shipper_status_id',
              'cr.missing_product_price as missing_product_price', 'cr.id as crm_request_id', 'cr.damage_product_price as damage_product_price', 
              'crs.name as crm_request_status', 'crcn.name as crm_request_case_nature', 'crcnt.type as crm_request_case_nature_type', 
-             'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status']);
+             'adjustment.adjustment_amount as adjusted_amount', 'scs.name as sub_segment', 'cargo_status.name as cargo_status', 'cmb.seal_number as seal_number', 'bs.name as bag_status','sjfa.created_at as first_attempt_date','sjrp.created_at as rider_picked_status_date']);
 //        ->where('sj.created_at','2023-07-05 17:08:15')
 //            ->get();
 //        dd($shipments);
@@ -3306,7 +3321,15 @@ class AdminReportsController extends Controller
             ->leftjoin('riders as r', 'r.id', '=', 'sj.rider_id')
             ->join('business_categories as bc', 'bc.id', '=', 'shipments.business_category_id')
             ->join('sub_category_segments as scs', 'u.sub_segment_id', '=', 'scs.id')
-            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number','shipments.fintech_charges as fintech_charges','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment')
+            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
+                $join->on('sjfa.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjfa.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5)')
+                    );
+            })
+            ->select('invoices.invoice_number', 'r.name as ridername', 'ssr.name as reason', 'sjr.remarks as remark', 'p.product_name as category', 'si.description as description', 'shipments.id as shipment_id', 'shipments.tracking_number','shipments.fintech_charges as fintech_charges','shipments.order_id as order_id', 'shipments.tracking_number as tracking_number_link', 'u.id as account_no', 'u.name as shipper', 'usi.pickup_address as shipper_address', 'ss.name as current_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.amount as s_collection_amount', 'sps.name as payment_status', 'pps.amount as p_collection_amount', 'shipments.actual_weight', 'shipments.weight_charges', 'shipments.cash_handling_charges', 'shipments.insurance_charges', 'shipments.return_charges', 'shipments.replacement_charges', 'shipments.fuel_surcharge', 'shipments.try_and_buy_charges', 'shipments.packaging_material_charges', 'pps.gst as p_gst', 'pps.charges as p_total_charges', 'pps.payable as p_net_payable', 'dps.amount as d_collection_amount', 'dps.gst as d_gst', 'dps.charges as d_total_charges', 'dps.payable as d_net_payable', 'sm.mode as shipping_mode', 'sm.id as shipping_mode_id', 'shipments.chargeable_weight', 'dr.created_at as delivered_or_returned', 'z.name as zone', 'zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'dps.done_payment_id as payment_id', 'shipments.booking_type_id', 'usi.poc', 'adsp.name as sales_person', 'shipments.shipper_status_id as shipment_status', 'shipments.nsa_osa_charges', 'u.account_type_id as account_type_id', 'pis.gst as pis_gst', 'is.gst as is_gst', 'shipments.packaging_charges', 'dr.received_or_refused_by', 'shipments.special_instructions', 'shipments.intercept_charges', 'bc.name as business_shipment_type', 'ibs.international_tracking_number', 'usi.vendor', 'dr.shipper_status_id as dr_status_id', 'shipments.shipment_type', 'rc.name as return_city', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'dr.cnic as dr_cnic', 'dr.relation as dr_relation', 'shipments.consignee_address as consignee_address', 'scs.name as sub_segment','sjfa.created_at as first_attempt_date')
             ->whereNotIn('shipments.shipper_status_id', [1, 17])
             ->whereNotIn('u.id', [8761, 9358])
             ->whereBetween('sj.created_at', [$from, $to]);
@@ -6984,7 +7007,23 @@ class AdminReportsController extends Controller
                     );
             })
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'sjr.status_reason_id')
-            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date']);
+            ->leftJoin('shipments_journey as sjfa', function ($join) use ($connection) {
+                $join->on('sjfa.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjfa.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 5)')
+                    );
+            })
+            ->leftJoin('shipments_journey as sjrp', function ($join) use ($connection) {
+                $join->on('sjrp.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'sjrp.id',
+                        '=',
+                        DB::connection($connection)->raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id  = 53)')
+                    );
+            })
+            ->select(['ssr.name as reason', 'sjr.remarks as remark', 'shipments.id as shipment_id', 'shipments.order_id', 'shipments.tracking_number', 'shipments.amount as collection_amount', 'ss.name as current_status', 'sps.name as payment_status', 'bt.booking_type as service_type', 'sj.created_at as arrival_date', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone1', 'shipments.consignee_phone_number_2 as phone2', 'shipments.consignee_address', 'shipments.created_at as booking_date', 'usi.vendor', DB::raw('(select count(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5) as total_attempt'), 'h.name as hub', 'sju.created_at as last_status_date', 'sjfa.created_at as first_attempt_date','sjrp.created_at as rider_picked_status_date']);
         /*  if( $request->get('search_shipper')){
               $shipments->where('shipments.user_id', '=',$request->get('search_shipper'));
           }else{
