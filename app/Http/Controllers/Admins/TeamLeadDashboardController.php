@@ -200,7 +200,7 @@ class TeamLeadDashboardController extends Controller
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->join('employee_genders as eg', 'eg.id', '=', 'employees.employee_gender_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
-            ->leftjoin('admins as staff', 'staff.trax_id', '=', 'employees.trax_id')
+            ->leftjoin('admins as staff', 'staff.CNIC', '=', 'employees.CNIC')
             ->leftjoin('riders as r', 'r.trax_id', '=', 'employees.trax_id')
             ->leftjoin('rider_requests as rr', 'rr.id', '=', 'employees.rider_request_id')
             ->leftjoin('rider_types as rr_rt', 'rr_rt.id', '=', 'rr.rider_type_id')
@@ -236,7 +236,7 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.line_manager_id', Auth::id())
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
-            ->where('employees.trax_id','!=', null)
+            // ->where('employees.trax_id','!=', null)
             ->groupBy('staff.id')
             ->where(function ($q) {
                 $q->where('r.blacklist', '=', 0)
