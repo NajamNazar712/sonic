@@ -11985,7 +11985,7 @@ class AdminReportsController extends Controller
                     $data[$key]['return_reason'] = '-';
                     $data[$key]['transit_date'] = '-';
                     $data[$key]['transit_status'] = '-';
-                    $data[$key]['arrive_at_destination_date'] = '-';
+                    $data[$key]['arrived_at_destination_date'] = '-';
                     $data[$key]['rcp_confirm_date'] = '-';
                     $data[$key]['first_attempt_lead_days'] = '-';
                     $data[$key]['transit_lead_days'] = '-';
@@ -12015,7 +12015,7 @@ class AdminReportsController extends Controller
                             }
     
                             $data[$key]['first_admin_name'] = $admin->name;
-                            $data[$key]['first_admin_trax_id'] = $admin->rider_trax_id;
+                            $data[$key]['first_admin_trax_id'] = $admin->trax_id;
     
                         }
                         else if($first_status_journey->rider_id != null){
@@ -12027,7 +12027,7 @@ class AdminReportsController extends Controller
                             }
     
                             $data[$key]['first_rider_name'] = $rider->name;
-                            $data[$key]['first_rider_trax_id'] = $rider->rider_trax_id;
+                            $data[$key]['first_rider_trax_id'] = $rider->trax_id;
                         }
                        
     
@@ -12186,7 +12186,7 @@ class AdminReportsController extends Controller
     
                     if($arrived_at_destination_journey)
                     {
-                        $data[$key]['arrive_at_destination_date'] = $arrived_at_destination_journey->created_at;
+                        $data[$key]['arrived_at_destination_date'] = $arrived_at_destination_journey->created_at;
                     }
     
                     $rcpconfirm_date_journey = DB::connection($connection)->table('shipments_journey')->where('shipment_id', $shipment->shipment_id)->where(
@@ -12226,7 +12226,7 @@ class AdminReportsController extends Controller
                     }
                 }
 
-                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrive at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
+                $data_header[0] = ['S. No.', 'Tracking No.', 'Account No.', 'Shipper', 'Sub Segment', 'Order ID', 'Origin', 'Origin Hub', 'Origin Zone', 'Destination', 'Destination Hub', 'Destination Zone', 'Shipping Mode', 'Service Type', 'Category', 'Description', 'Arrival Date', 'Quantity', 'Weight', 'First Admin Trax ID', 'First Admin', 'First Rider Trax ID', 'First Rider', 'First Status Hub', 'First Status', 'First Reason', 'First Status Date', 'Current Admin Trax ID', 'Current Admin', 'Current Rider Trax ID', 'Current Rider', 'Current Status Hub', 'Current Status', 'Current Reason', 'Current Remark', 'Current Status Date', 'Total Attempt', 'Return Reason', 'Tansit Date', 'Transit Status', 'Arrived at Destination Date', 'RCP Confirm Date', 'First Attempt Lead Days', 'Transit Lead Days', 'Last Status Lead Days'];
                 
                 $data = array_merge($data_header, $data);
     
