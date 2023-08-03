@@ -10437,9 +10437,10 @@ class AdminAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $shipment = Shipment::where('tracking_number', $request->tracking);
+            $operation_rider_id = Rider::where('id', $request->rider_id)->first()->operation_rider_id;
             if ($shipment->exists()) {
                 $shipment_status_id = $shipment->first()->shipper_status_id ?? NULL;
-                if ($shipment_status_id == NULL || $shipment_status_id == 13) {
+                if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
                     return response()->json(['status' => 1, 'message' => 'Shipment cannot be added because it is on Re-Attempt Status']);
                 } else {
                     $role_id = $request->admin_role_id;
