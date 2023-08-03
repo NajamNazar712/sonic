@@ -112,7 +112,7 @@ class ReturnV2Controller extends Controller
         if ($admin->exists()) {
             $admin = $admin->first();
             $this->mark_attendance($admin);
-            $employee = Employee::where('trax_id', $admin->trax_id)->where('staff_category_id', 3)->where('status_id', '!=', 2);
+            $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             if ($employee->exists()) {
                 $current_time = Carbon::now();
@@ -273,7 +273,7 @@ class ReturnV2Controller extends Controller
             $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
             $admin_agent = Admin::where('id', Auth::id())->first();
             $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
-            $employee = Employee::where('trax_id', $request->trax_id)->first();
+            $employee = Employee::where('phone_number', $request->phone_number)->first();
             $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
 
             // Check Employee Shift Time

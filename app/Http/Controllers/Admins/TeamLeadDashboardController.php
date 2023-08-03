@@ -364,8 +364,9 @@ class TeamLeadDashboardController extends Controller
             })
 
             ->editColumn('attendance_date', function ($user) {
+                // dd($user);
                 $date = Carbon::parse($user->attendance_date);
-                if ($date->isToday()) {
+                if ($date->isToday() && isset($user->attendance_date)) {
                     return "Online";
                 } else {
                     return "Offline";
@@ -463,9 +464,9 @@ class TeamLeadDashboardController extends Controller
             ]);
         }
 
-        $role = Admin::where('id', Auth::id())->first();
-
-        NotificationsController::send(218, Auth::id(), $role->role->name);
+        $role = Admin::whereIn('role_id', [6,63,70])->pluck('email')->toArray();
+        $employee = Employee::where('id', $request->employee_id)->first();
+        NotificationsController::send(218, $employee, $role);
     }
 
 
@@ -485,7 +486,7 @@ class TeamLeadDashboardController extends Controller
 
         try {
             $validations = [
-                'employee_id' => 'required',
+                'employee_id' => 'required', 
                 'add_additional_days' => 'required',
             ];
 
