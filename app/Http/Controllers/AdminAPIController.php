@@ -10440,7 +10440,7 @@ class AdminAPIController extends Controller
             if ($shipment->exists()) {
                 $shipment_status_id = $shipment->first()->shipper_status_id ?? NULL;
                 if ($shipment_status_id == NULL || $shipment_status_id == 13) {
-                    return response()->json(['status' => 1, 'message' => 'Error']);
+                    return response()->json(['status' => 1, 'message' => 'Shipment cannot be added because it is on Re-Attempt Status']);
                 } else {
                     $role_id = $request->admin_role_id;
                     $admin_hubs = $request->admin_hubs;
