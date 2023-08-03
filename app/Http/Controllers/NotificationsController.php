@@ -370,77 +370,6 @@ class NotificationsController extends Controller
                     }
 
                     self::sms($body, $to);
-                } else if ($id == 220) {
-
-                    $emailShipments = [];
-
-                    foreach ($reference_1_id as $user) {
-                        $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
-                        $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
-
-                        
-                        foreach ($emails as $email) {
-                            if (!isset($emailShipments[$email])) {
-                                $emailShipments[$email] = [];
-                            }
-                            $emailShipments[$email][] = $user->shipment_id;
-                                                 
-                        }
-                    }
-
-                    $htmlHeader = '<table style="width:100%;">';
-                    $htmlHeader .= '<thead><tr>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cn</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Order ID</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee Name</th> 
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consginee Address</th> 
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone No</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Collection Amount</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Undelivered Reason</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Calling Status</th>
-                ';
-                    $htmlHeader .= '</tr></thead><tbody>';
-
-                    foreach ($emailShipments as $email => $shipments) {
-                        $html = $htmlHeader;
-
-                        foreach ($shipments as $rv_shipment) {
-                            $shipment = Shipment::find($rv_shipment);
-                            $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
-                            $shipment_journey = ShipmentsJourney::whereIn('id', $shipment_journey)->latest()->first();
-                            $rv_shipment = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->first();
-
-                            $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->id . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->order_id) ? $shipment->order_id : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_name) ? $shipment->consignee_name : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_address) ? $shipment->consignee_address : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->phone_number_1) ? $shipment->phone_number_1 : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->destination_city->name) ? $shipment->destination_city->name : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->amount) ? $shipment->amount : '---') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment_journey->shipment_status_reason->name) ? $shipment_journey->shipment_status_reason->name : '---') . '</td>';
-
-                            if ($rv_shipment->rv_assign_agent_status_id == 6) {
-
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
-                            } else {
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . 'NO Reason' . '</td>';
-
-                            }
-                            $html .= '</tr>';
-                        }
-
-                        $html .= '</tbody></table>';
-
-                        // Use $html to replace [preview] in the email body
-                        $body = str_replace('[preview]', $html, $notification->body);
-
-                        // Send the email to the user with all their shipments
-                        self::email($subject, $body, $email);
-                    }
-
-
                 } else if ($id == 3) {
                     $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
                     $shipment = Shipment::find($reference_1_id);
@@ -10367,20 +10296,7 @@ class NotificationsController extends Controller
                     // $user_ids = $reference_1_id->pluck('user_id')->toArray();
                     // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
                     // ReturnDeliveredToShipperSms::insert($notify);
-                } else if ($id == 218) {
-                    $role = $reference_2_id;
-                    $admin = Admin::find($reference_1_id);
-                    if ($admin && $role) {
-                        if (strpos($body, '[admin]') !== FALSE) {
-                            $body = str_replace('[admin]', $admin->name, $body);
-                        }
-                        if (strpos($body, '[role]') !== FALSE) {
-                            $body = str_replace('[role]', $role, $body);
-                        }
-                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
-                        self::email($subject, $body, $to);
-                    }
-                } else if ($id == 217) {
+                }  else if ($id == 217) {
                     $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions', 'fintech_payment_details.trax_pay_id', 'trax_pay_transactions.id')
                         ->join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')
                         ->select(
@@ -10407,6 +10323,94 @@ class NotificationsController extends Controller
                         $to = '03110127222';
                         // self::sms($body, $to);
                     }
+                }
+
+                else if ($id == 218) {
+                    $role = $reference_2_id;
+                    $admin = Admin::find($reference_1_id);
+                    if ($admin && $role) {
+                        if (strpos($body, '[admin]') !== FALSE) {
+                            $body = str_replace('[admin]', $admin->name, $body);
+                        }
+                        if (strpos($body, '[role]') !== FALSE) {
+                            $body = str_replace('[role]', $role, $body);
+                        }
+                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
+                        self::email($subject, $body, $to);
+                    }
+                }
+
+                else if ($id == 220) {
+
+                    $emailShipments = [];
+
+                    foreach ($reference_1_id as $user) {
+                        $shipment = Shipment::where('id', $user->shipment_id)->pluck('user_id')->toArray();
+                        $emails = User::whereIn('id', $shipment)->pluck('email')->toArray();
+
+                        
+                        foreach ($emails as $email) {
+                            if (!isset($emailShipments[$email])) {
+                                $emailShipments[$email] = [];
+                            }
+                            $emailShipments[$email][] = $user->shipment_id;
+                                                 
+                        }
+                    }
+
+                    $htmlHeader = '<table style="width:100%;">';
+                    $htmlHeader .= '<thead><tr>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Cn</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Order ID</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consignee Name</th> 
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Consginee Address</th> 
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Phone No</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Destination</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Collection Amount</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Undelivered Reason</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Calling Status</th>
+                ';
+                    $htmlHeader .= '</tr></thead><tbody>';
+
+                    foreach ($emailShipments as $email => $shipments) {
+                        $html = $htmlHeader;
+
+                        foreach ($shipments as $rv_shipment) {
+                            $shipment = Shipment::find($rv_shipment);
+                            $shipment_journey = $shipment->shipment_journey->pluck('id')->toArray();
+                            $shipment_journey = ShipmentsJourney::whereIn('id', $shipment_journey)->latest()->first();
+                            $rv_shipment = RvShipmentAssignAgent::where('shipment_id', $rv_shipment)->first();
+
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->id . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->order_id) ? $shipment->order_id : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_name) ? $shipment->consignee_name : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->consignee_address) ? $shipment->consignee_address : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->phone_number_1) ? $shipment->phone_number_1 : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->destination_city->name) ? $shipment->destination_city->name : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment->amount) ? $shipment->amount : '---') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($shipment_journey->shipment_status_reason->name) ? $shipment_journey->shipment_status_reason->name : '---') . '</td>';
+
+                            if ($rv_shipment->rv_assign_agent_status_id == 6) {
+
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
+                            } else {
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . 'NO Reason' . '</td>';
+
+                            }
+                            $html .= '</tr>';
+                        }
+
+                        $html .= '</tbody></table>';
+
+                        // Use $html to replace [preview] in the email body
+                        $body = str_replace('[preview]', $html, $notification->body);
+
+                        // Send the email to the user with all their shipments
+                        self::email($subject, $body, $email);
+                    }
+
+
                 }
 
             }
