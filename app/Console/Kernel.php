@@ -155,335 +155,335 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-//        $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
-//
-//        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
-//        // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
-//        $schedule->command('inactive_employee:resign_date')->dailyAt('05:00')->runInBackground();
-//        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
-//        $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
-//        $schedule->command('email:invalidemailvisit')->dailyAt('6:00')->runInBackground();
-//        $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
-//        $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
-//        $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
-//        $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
-//        if($shifts){
-//            foreach($shifts as $shift)
-//            {
-//                // run 1 hour before from the shift ends, to get save from the next day switch as well
-//                $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
-//                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
-//                ->dailyAt($dailyAt)
-//                ->runInBackground();
-//
-//                // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
-//                $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
-//                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
-//                ->dailyAt($dailyAt)
-//                ->runInBackground();
-//            }
-//        }
-//
-//        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+        $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
+
+        $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
+        $schedule->command('inactive_employee:resign_date')->dailyAt('05:00')->runInBackground();
+        $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();
+        $schedule->command('month:average')->dailyAt('06:00')->runInBackground();
+        $schedule->command('hubwise:split')->dailyAt('06:00')->runInBackground();
+        $schedule->command('count:pendingpaymentshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('email:onholdshipments')->dailyAt('06:00')->runInBackground();
+        $schedule->command('shipper:payment')->twiceDaily(1,13)->runInBackground();
+        $schedule->command('email:dailyvisitweeklyreport')->weeklyOn(1, '6:00')->runInBackground();
+        $schedule->command('email:invalidemailvisit')->dailyAt('6:00')->runInBackground();
+        $schedule->command('month:average-destination')->dailyAt('06:00')->runInBackground();
+        $schedule->command('reversion_delivered:report')->dailyAt('04:00')->runInBackground();
+        $schedule->command('email:weeklyattendancesummary')->weeklyOn(1,'09:00')->runInBackground();
+        $schedule->command('employee:penalty')->monthlyOn(21,'08:00')->runInBackground();
+        $shifts = EmployeeShift::whereIn('id', [2,3,4,5,6])->get();
+        if($shifts){
+            foreach($shifts as $shift)
+            {
+                // run 1 hour before from the shift ends, to get save from the next day switch as well
+                $dailyAt = Carbon::parse($shift->end_time)->subHour(1)->format('H:i:s');
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'web')
+                ->dailyAt($dailyAt)
+                ->runInBackground();
+
+                // run after 30 mins from the shift starts, to notify employee to mark attendance if forgets
+                $dailyAt = Carbon::parse($shift->start_time)->addMinutes(30)->format('H:i:s');
+                $schedule->command('employee:attendanceadjustment', [$shift->id], 'app')
+                ->dailyAt($dailyAt)
+                ->runInBackground();
+            }
+        }
+
+        $settings = GlobalSettings::where('type', 'pickup_arrival_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $arrival_cut_off_time = $settings->setting_value . ':00';
+        }
+        else {
+            $arrival_cut_off_time = FALSE;
+        }
+
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $daily_pickup_sales_cron_time = $settings->setting_value . ':00';
+        }
+        else {
+            $daily_pickup_sales_cron_time = FALSE;
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($daily_pickup_sales_cron_time) {
+            $schedule->command('email:dailypickupsalesreport')->dailyAt($daily_pickup_sales_cron_time);
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('pickup:notpickedjourney')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
+            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($arrival_cut_off_time) {
+            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
+        }
+
+        if ($daily_pickup_sales_cron_time) {
+//            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+//            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+//            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
+        }
+
+
+        $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
+        $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
+
+
+        $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
+        $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
+        $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
+        $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
+        $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
+        $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
+        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+        $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
+        $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
+
+        $schedule->command('saleperson:numbersrm')->dailyAt('07:30')->runInBackground();
+        $schedule->command('saleperson:numbersindividual')->dailyAt('07:30')->runInBackground();
+
+        $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
+        $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
+        $schedule->command('auto:endSession')->dailyAt('22:00')->runInBackground();
+
+
+        $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
+        }
+
+        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('email:notattemptedagingreport')->dailyAt($time)->runInBackground();
+        }
+        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
+        $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
+
+        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
+
+        $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
+
+        $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
+        $schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
+        $schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
+        $schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $rdts_time = $settings->setting_value . ':00';
+
+            $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
+        }
+
+//        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
+//        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
+
+
+        $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
+        $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
+
+//        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
+//        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
+
+//		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
+//      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
+
+//        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
+        $schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
+        $schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
+
+        $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
+
+        $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
+
+        $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
+
+        $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
+        $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'completed_aging_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $completed_aging_report_time = $settings->setting_value . ':00';
+            $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time)->runInBackground();
+            $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time)->runInBackground();
+        }
+
+        $settings = GlobalSettings::where('type', 'zero_charges_report_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $zero_charges_report_time = $settings->setting_value . ':00';
+            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time)->runInBackground();
+        }
+//        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
 //
 //        if ($settings->exists()) {
 //            $settings = $settings->first();
 //
-//            $arrival_cut_off_time = $settings->setting_value . ':00';
+//            $station_recovery_cron_time = $settings->setting_value . ':00';
+//            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
 //        }
-//        else {
-//            $arrival_cut_off_time = FALSE;
-//        }
-//
-//        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $daily_pickup_sales_cron_time = $settings->setting_value . ':00';
-//        }
-//        else {
-//            $daily_pickup_sales_cron_time = FALSE;
-//        }
-//
-//        if ($arrival_cut_off_time) {
-//            $schedule->command('arrival:autonotpicked')->dailyAt($arrival_cut_off_time);
-//        }
-//
-//        if ($daily_pickup_sales_cron_time) {
-//            $schedule->command('email:dailypickupsalesreport')->dailyAt($daily_pickup_sales_cron_time);
-//        }
-//
-//        if ($arrival_cut_off_time) {
-//            $schedule->command('pickup:notpickedjourney')->dailyAt($arrival_cut_off_time);
-//            $schedule->command('pickup:autocancel')->dailyAt($arrival_cut_off_time);
-//            $schedule->command('pickup:regenerate')->dailyAt($arrival_cut_off_time);
-//            $schedule->command('pickuprequest:cancel')->dailyAt($arrival_cut_off_time);
-//        }
-//
-//        if ($arrival_cut_off_time) {
-//            $schedule->command('pickup:report')->dailyAt($arrival_cut_off_time);
-//        }
-//
-//        if ($daily_pickup_sales_cron_time) {
-////            $schedule->command('email:dailypickupsalesreportrm')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
-////            $schedule->command('email:dailypickupsalesreportindividual')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
-////            $schedule->command('email:dailypickupsalesreportindividualforkae')->dailyAt($daily_pickup_sales_cron_time)->runInBackground();
-//        }
-//
-//
-//        $schedule->command('attendance:markabsent')->dailyAt('12:30')->runInBackground();
-//        $schedule->command('telenor:shipmentStatus')->dailyAt('08:00')->runInBackground();
-//
-//
-//        $schedule->command('email:activitytraillog')->dailyAt('2:00')->runInBackground();
-//        $schedule->command('sms:clear')->everyTenMinutes()->withoutOverlapping()->runInBackground();
-//        $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
-//        $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
-//        $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
-//        $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('email:outstandingshipments')->dailyAt('10:00')->runInBackground();
-//        $schedule->command('keyaccount:dashboard')->dailyAt('4:00')->runInBackground();
-//
-//        $schedule->command('saleperson:numbersrm')->dailyAt('07:30')->runInBackground();
-//        $schedule->command('saleperson:numbersindividual')->dailyAt('07:30')->runInBackground();
-//
-//        $schedule->command('month:averagerm')->dailyAt('07:30')->runInBackground();
-//        $schedule->command('month:averageindividual')->dailyAt('07:30')->runInBackground();
-//        $schedule->command('auto:endSession')->dailyAt('22:00')->runInBackground();
-//
-//
-//        $schedule->command('reimbursement_invoice:generate')->monthlyOn(1, '00:30')->runInBackground();
-//
-//        $settings = GlobalSettings::where('type', 'auto_invoice_generation_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $time = $settings->setting_value . ':00';
-//
-//            $schedule->command('invoice:generate')->dailyAt($time)->runInBackground();
-//        }
-//
-//        $settings = GlobalSettings::where('type', 'not_attempted_cron_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $time = $settings->setting_value . ':00';
-//
-//            $schedule->command('email:notattemptedagingreport')->dailyAt($time)->runInBackground();
-//        }
-//        // $schedule->command('hourlyupdate:operationforecast')->cron('0 */2 * * *')->withoutOverlapping()->runInBackground();
-//        $schedule->command('email:shortreceivedhubwise')->cron('0 * * * *')->withoutOverlapping()->runInBackground();
-//
-//        $schedule->command('archive:returnnoteimage')->dailyAt('00:00')->runInBackground();
-//
-//        $schedule->command('archive:stationdepositnoteimage')->dailyAt('00:00')->runInBackground();
-//
-//        $schedule->command('archive:pettycashimage')->dailyAt('00:00')->runInBackground();
-//        $schedule->command('email:debriefingemail')->dailyAt('01:00')->runInBackground();
-//        $schedule->command('qareport:pettycash')->dailyAt('10:00')->runInBackground();
-//        $schedule->command('shipments:self_collection')->dailyAt('09:00')->runInBackground();
-//
-//        $settings = GlobalSettings::where('type', 'return_delivered_to_shipper_cut_off_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $rdts_time = $settings->setting_value . ':00';
-//
-//            $schedule->command('email:returndeliveredtoshipper')->dailyAt($rdts_time)->runInBackground();
-//        }
-//
-////        $schedule->command('pickuprequest:clear')->everyFifteenMinutes()->withoutOverlapping()->runInBackground();
-////        $schedule->command('pickupnote:clear')->everyThirtyMinutes()->withoutOverlapping()->runInBackground();
-//
-//
-//        $schedule->command('email:negativebalanceshippersalesperson')->weeklyOn(1, '8:00')->runInBackground();
-//        $schedule->command('email:weeklyincompletedocumentsshipper')->weeklyOn(1, '8:00')->runInBackground();
-//
-////        $schedule->command('overnight:cargo_report')->dailyAt('12:00')->runInBackground();
-////        $schedule->command('overland:cargo_report')->dailyAt('16:00')->runInBackground();
-//
-////		$schedule->command('accounts:reconciliationcurrent')->monthly()->days([1,14,28])->runInBackground();
-////      $schedule->command('accounts:reconciliationcurrent')->cron('0 0 1,14,28 * *'); //another solution
-//
-////        $schedule->command('business:projectionandretention')->dailyAt('08:00')->runInBackground();
-//        $schedule->command('crm:delayindelivery')->dailyAt('08:00')->runInBackground();
-//        $schedule->command('crm:paymentcomplainautomation')->dailyAt('08:00')->runInBackground();
-//
-//        $schedule->command('archive:riderdeliveryimage')->dailyAt('08:00')->runInBackground();
-//
-//        $schedule->command('blacklist:consigneeratiocalculate')->weeklyOn(7, '5:00')->runInBackground();
-//
-//        $schedule->command('shipmentemail:cancel')->dailyAt('8:00')->runInBackground();
-//
-//        $schedule->command('report:donepayment')->dailyAt('17:30')->runInBackground();
-//        $schedule->command('report:retaildonepayment')->dailyAt('17:30')->runInBackground();
-//
-//        $settings = GlobalSettings::where('type', 'completed_aging_report_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $completed_aging_report_time = $settings->setting_value . ':00';
-//            $schedule->command('completedAging:report')->dailyAt($completed_aging_report_time)->runInBackground();
-//            $schedule->command('pendingCashCollection:report')->dailyAt($completed_aging_report_time)->runInBackground();
-//        }
-//
-//        $settings = GlobalSettings::where('type', 'zero_charges_report_time');
-//
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//
-//            $zero_charges_report_time = $settings->setting_value . ':00';
-//            $schedule->command('zeroCharges:report')->dailyAt($zero_charges_report_time)->runInBackground();
-//        }
-////        $settings = GlobalSettings::where('type', 'station_recovery_cron_time');
-////
-////        if ($settings->exists()) {
-////            $settings = $settings->first();
-////
-////            $station_recovery_cron_time = $settings->setting_value . ':00';
-////            $schedule->command('report:stationrecovery')->dailyAt($station_recovery_cron_time);
-////        }
-//        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
-//        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
-//        $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
-////        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
-//        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//            $cut_off_time = $settings->setting_value . ':00';
-//            $schedule->command('summary:reversepickup')->dailyAt($cut_off_time)->runInBackground();
-//            $schedule->command('overall:vendorpickup')->dailyAt($cut_off_time)->runInBackground();
-//        }
-//        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
-////        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
-////        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
-//        $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
-//
-//        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
-//        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
-//
-//        $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
-////        $schedule->command('website:pamleads')->hourly()->runInBackground();
-//
-//        $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
-////        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
-//        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
-//        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
-//        $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
-//        $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
-//
-//
-//        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
-//        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
-//        $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
-//
-//        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
-//        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
-//        $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
-//
-//
-//        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
-//        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
-//        $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
-////        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
-//        $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
-//
-//        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//            $cut_off_time = $settings->setting_value . ':00';
-//            $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
-//        }
-//
-//        /*$settings = GlobalSettings::where('type', 'dhl_sync_time_1');
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//            $time_1 = $settings->setting_value . ':00';
-//            $schedule->command('dhl:shipmentstatussync')->dailyAt( $time_1)->runInBackground();
-//        }
-//        $settings = GlobalSettings::where('type', 'dhl_sync_time_2');
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//            $time_2 = $settings->setting_value . ':00';
-//            $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
-//        }*/
-//
-//        $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
-//        $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
-//
-//        $schedule->command('email:shipmentbookedkhaddi')->hourly()->runInBackground();
-//
-//        $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
-//        $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
-//        $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
-//        $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
-//
-//        $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
-////        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
-//        $schedule->command('email:RiderDeactivateAutomaticallyAndGenerateEmail')->dailyAt('03:30')->runInBackground();
-//
-//        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
-//        if ($settings->exists()) {
-//            $settings = $settings->first();
-//            $hour = $settings->setting_value;
-//            $hourly = '0 */'. $hour .' * * *';
-//            $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
-//        }
-//
-//		//$incentive_date = SalesIncentiveDate::first();
-//		//        if($incentive_date){
-//		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
-//		//        }
-////        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
-//        $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
-//
-//        $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
-//
-//        $schedule->command('employee_directory:documents_update')->dailyAt('12:00')->runInBackground();
-//
-//        $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
-//        $schedule->command('crm:count')->dailyAt('17:30')->runInBackground();
-//        $schedule->command('crm:autohighaging')->dailyAt('09:00')->runInBackground();
-//        $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
-//        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
-//
-//        $cron = DB::table('global_settings')->where('type','rcp_sms_cron_time')->select('text')->first();
-//        $cron_time = isset($cron->text) ? $cron->text : "12:00";
-//        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
-//
-//        $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
-//        $every_first_july = '0 0 1 7 *';
-//        $schedule->command('employee:leave_count_fiscal')->cron($every_first_july)->runInBackground();
-//        $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
-//
-//
-//        $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
-//        $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
-//        $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
-//
-//        $auto_delivery_note_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
-//        if ($auto_delivery_note_time->exists()) {
-//            $auto_delivery_note_time = $auto_delivery_note_time->first();
-//            $hour = $auto_delivery_note_time->text;
-//            $schedule->command('auto:deliverynoteverification')->dailyAt($hour)->runInBackground();
-//        }
-//
-//
-//		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
-//
-//		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
+        $schedule->command('shipment:onholdtoshipper')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:outstandingsdnreport')->dailyAt('09:00')->runInBackground();
+        $schedule->command('email:telenorsalesreport')->dailyAt('09:00')->runInBackground();
+//        $schedule->command('api:visionsoft')->dailyAt('04:00')->runInBackground();
+        $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('summary:reversepickup')->dailyAt($cut_off_time)->runInBackground();
+            $schedule->command('overall:vendorpickup')->dailyAt($cut_off_time)->runInBackground();
+        }
+        $schedule->command('email:notpickedshipperssummary')->dailyAt('08:00')->runInBackground();
+//        $schedule->command('telenor:call')->twiceDaily(13, 16)->runInBackground();
+//        $schedule->command('telenor:callresponse')->twiceDaily(15, 18)->runInBackground();
+        $schedule->command('email:overlandagingreport')->dailyAt('12:00')->runInBackground();
+
+        $schedule->command('email:pendingdeliveryreport')->dailyAt('01:00')->runInBackground();
+        $schedule->command('email:receivedeliveryreport')->dailyAt('01:00')->runInBackground();
+
+        $schedule->command('website:leads')->everyFiveMinutes()->runInBackground();
+//        $schedule->command('website:pamleads')->hourly()->runInBackground();
+
+        $schedule->command('generate:usersotp')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('email:revenuereport')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:revenuereport')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+        $schedule->command('email:RevenueReportDailyBasis')->dailyAt('06:00')->runInBackground();
+
+
+        $schedule->command('email:revenuereportbydeliverydate')->monthlyOn(1, '01:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:revenuereportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+        $schedule->command('email:retailsalesreport')->monthlyOn(1, '02:00')->runInBackground();
+        $schedule->command('email:retailsalesreportcutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+
+
+        $schedule->command('email:retailsalesreportbydeliverydate')->monthlyOn(1, '03:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliverycutoffdays')->monthlyOn(26, '00:00')->runInBackground();
+        $schedule->command('email:retailsalesreportbydeliveryremainingdays')->monthlyOn(1, '00:00')->runInBackground();
+//        $schedule->command('verify:usersotp')->monthlyOn(15, '00:00')->runInBackground();
+        $schedule->command('auto:birthdaymessage')->dailyAt('00:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'rider_incentive_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $cut_off_time = $settings->setting_value . ':00';
+            $schedule->command('incentive:riders')->dailyAt($cut_off_time)->runInBackground();
+        }
+
+        /*$settings = GlobalSettings::where('type', 'dhl_sync_time_1');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_1 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt( $time_1)->runInBackground();
+        }
+        $settings = GlobalSettings::where('type', 'dhl_sync_time_2');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $time_2 = $settings->setting_value . ':00';
+            $schedule->command('dhl:shipmentstatussync')->dailyAt($time_2)->runInBackground();
+        }*/
+
+        $schedule->command('crm:escalation')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:escalationtagging')->dailyAt('06:00')->runInBackground();
+
+        $schedule->command('email:shipmentbookedkhaddi')->hourly()->runInBackground();
+
+        $schedule->command('email:riderwisepickup')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:inactiveriderreport')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:emailofreturnconfirmtokams')->dailyAt('03:00')->runInBackground();
+        $schedule->command('returnsheet:receive')->dailyAt('05:00')->runInBackground();
+
+        $schedule->command('sms:retry_otp')->everyMinute()->withoutOverlapping()->runInBackground();
+//        $schedule->command('Reset:AdminPasswordMonthly')->monthlyOn(1, '06:00')->runInBackground();
+        $schedule->command('email:RiderDeactivateAutomaticallyAndGenerateEmail')->dailyAt('03:30')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'last_mile_cron_time');
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $hour = $settings->setting_value;
+            $hourly = '0 */'. $hour .' * * *';
+            $schedule->command('report:lastmilestatus')->cron($hourly)->withoutOverlapping()->runInBackground();
+        }
+
+		//$incentive_date = SalesIncentiveDate::first();
+		//        if($incentive_date){
+		//            $schedule->command('report:SalesIncentive')->monthlyOn($incentive_date->cron_day, '03:00')->runInBackground();
+		//        }
+//        $schedule->command('crm:autoassign')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:autoassign_new')->dailyAt('17:00')->runInBackground();
+
+        $schedule->command('sum:pendingpayments')->dailyAt('6:00')->runInBackground();
+
+        $schedule->command('employee_directory:documents_update')->dailyAt('12:00')->runInBackground();
+
+        $schedule->command('email:dwsarrival')->dailyAt('17:00')->runInBackground();
+        $schedule->command('crm:count')->dailyAt('17:30')->runInBackground();
+        $schedule->command('crm:autohighaging')->dailyAt('09:00')->runInBackground();
+        $schedule->command('shipper:short_of_business')->dailyAt('8:00')->runInBackground();
+        $schedule->command('calculate:reattemptpercentage')->dailyAt('19:30')->runInBackground();
+
+        $cron = DB::table('global_settings')->where('type','rcp_sms_cron_time')->select('text')->first();
+        $cron_time = isset($cron->text) ? $cron->text : "12:00";
+        $schedule->command('sms:rcp_sms_to_consignee_reattempt')->dailyAt($cron_time)->runInBackground();
+
+        $schedule->command('employee:leave_count')->monthlyOn(1, '00:00')->runInBackground();
+        $every_first_july = '0 0 1 7 *';
+        $schedule->command('employee:leave_count_fiscal')->cron($every_first_july)->runInBackground();
+        $schedule->command('employee:confirmation_days')->dailyAt('09:00')->runInBackground();
+
+
+        $schedule->command('comment:dailycrmclaimshipments')->dailyAt('14:00')->runInBackground();
+        $schedule->command('rider:fuel_allocation')->dailyAt('04:00')->runInBackground();
+        $schedule->command('api:visionsoftexcel')->dailyAt('07:00')->runInBackground();
+
+        $auto_delivery_note_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
+        if ($auto_delivery_note_time->exists()) {
+            $auto_delivery_note_time = $auto_delivery_note_time->first();
+            $hour = $auto_delivery_note_time->text;
+            $schedule->command('auto:deliverynoteverification')->dailyAt($hour)->runInBackground();
+        }
+
+
+		$schedule->command('invoice:revenueoriginwise')->weeklyOn(7, '1:00')->runInBackground();
+
+		$schedule->command('sms:returned_delivered_sms')->dailyAt('11:00')->runInBackground();
     }
     /**
      * Register the commands for the application.
