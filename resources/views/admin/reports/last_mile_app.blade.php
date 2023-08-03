@@ -87,31 +87,6 @@
                                 </div>
                             </div>
 
-                            <div class="col-5 mt-1">
-                                <div class="form-group input-group ">
-                                    <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
-                                    </div>
-                                    <input type="text" name="search_update_date_from"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_update_date_from" placeholder="Update Date (From)" title="Update Date (From)" data-value="{{ Carbon\Carbon::today() }}">
-                                </div>
-                            </div>
-                            <div class="col-5 mt-1">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                <span class="la la-calendar-o"></span>
-                                            </span>
-                                    </div>
-                                    <input type="text" name="search_update_date_to"
-                                           class="form-control pickadate bg-primary border-primary white rounded-right"
-                                           id="search_update_date_to" placeholder="Update Date (To)" title="Update Date (To)" data-value="{{ Carbon\Carbon::today() }}">
-                                </div>
-                            </div>
-
                             <div class="col-2 mt-1">
                                 <div class="form-group">
                                     <button type="button" id="search_filter_btn"
@@ -458,32 +433,6 @@
                 }
             });
 
-            $('#search_form #search_update_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_update_date_to').pickadate('picker').set('min', $('#search_form #search_update_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            $('#search_form #search_update_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_update_date_from').pickadate('picker').set('max', $('#search_form #search_update_date_to').pickadate('picker').get('select'));
-                    }
-                }
-            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -593,8 +542,6 @@
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        d.search_update_date_from = $('input[name="search_update_date_from_formatted"]').val();
-                        d.search_update_date_to = $('input[name="search_update_date_to_formatted"]').val();
 
                     }
                 },

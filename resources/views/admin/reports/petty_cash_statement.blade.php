@@ -41,18 +41,14 @@
                             </select>
                         </fieldset>
                     </div>
-
                     <div class="col-4">
-
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-
-                            <input type="text" name="search_date_created" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_created" placeholder="Date (Creation Date)" title="Date (Creation Date)" data-value="{{ Carbon\Carbon::today() }}">
-                        </div>
+                        <fieldset class="form-group">
+                            <select name="search_status" id="search_status" class="form-control select2">
+                                    <option value="3">Created</option>
+                                    <option value="2">Approved</option>
+                                    <option value="1">Rejected</option>
+                            </select>
+                        </fieldset>
                     </div>
                     <div class="col-4 ">
 
@@ -78,39 +74,7 @@
                         </div>
 
                     </div>
-                    <div class="col-4 ">
-
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-
-                            <input type="text" name="checked_search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_from" placeholder="Checked Date (From)" title="Checked Date (From)" data-value="{{ Carbon\Carbon::today() }}">
-                        </div>
-                    </div>
-                    <div class="col-4 ">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-
-                            <input type="text" name="checked_search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="checked_search_date_to" placeholder="Checked Date (To)" title="Checked Date (To)" data-value="{{ Carbon\Carbon::today() }}">
-                        </div>
-
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_status" id="search_status" class="form-control select2">
-                                    <option value="3">Created</option>
-                                    <option value="2">Approved</option>
-                                    <option value="1">Rejected</option>
-                            </select>
-                        </fieldset>
-                    </div>
+                   
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -290,16 +254,6 @@
                 allowClear:true
             });
 
-            $('#search_date_created').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                }
-            });
             $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -326,32 +280,7 @@
                     }
                 }
             });
-            $('#checked_search_date_from').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#checked_search_date_to').pickadate('picker').set('min', $('#checked_search_date_from').pickadate('picker').get('select'));
-                    }
-                }
-            });
-            $('#checked_search_date_to').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onSet: function(context) {
-                    if (context.select) {
-                        $('#checked_search_date_from').pickadate('picker').set('max', $('#checked_search_date_to').pickadate('picker').get('select'));
-                    }
-                }
-            });
+            
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     blockPagePermanently();
@@ -465,11 +394,8 @@
                         d.search_title = $('#search_title').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
-                        d.search_date_created = $('input[name="search_date_created_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
-                        d.checked_search_date_from = $('input[name="checked_search_date_from_formatted"]').val();
-                        d.checked_search_date_to = $('input[name="checked_search_date_to_formatted"]').val();
                     }
                 },
                 order: [[13, 'desc']],

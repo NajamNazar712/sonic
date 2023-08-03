@@ -13,17 +13,17 @@
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_cargo_no" id="search_cargo_no" placeholder="Search Cargo Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
@@ -32,7 +32,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $city)
@@ -41,7 +41,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
                                 @foreach($shippimg_modes as $shippimg_mode)
@@ -49,18 +49,6 @@
                                 @endforeach
                             </select>
                         </fieldset>
-                    </div>
-                    <div class="col-4">
-
-                            <div class="form-group input-group ">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-                            <input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" title="Transit Date" data-value="{{ Carbon\Carbon::today() }}">
-                            </div>
-
                     </div>
                     <div class="col-3 ">
                         <div class="form-group">
@@ -75,13 +63,25 @@
                     </div>
                     <div class="col-3">
 
+                            <div class="form-group input-group ">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+                            <input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" title="Transit Date"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                            </div>
+
+                    </div>
+                    <div class="col-3">
+
                             <div class="form-group input-group">
                                 <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                                 </div>
-                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" title="Received Date" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" title="Received Date"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                             </div>
 
                     </div>
@@ -95,7 +95,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                         </div>
                     </div>
                     <div class="col-3 ">
@@ -106,7 +106,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                         </div>
 
                     </div>

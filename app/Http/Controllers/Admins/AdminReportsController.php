@@ -4041,9 +4041,7 @@ class AdminReportsController extends Controller
                 $petty->where('petty_cash_statement_details.status', $status);
             }
         }
-        if ($search_date = $request->get('search_date_created')) {
-            $petty->whereDate('pcs.created_at', $search_date);
-        }
+        
         if ($head = $request->get('search_head')) {
             $petty->where('pch.id', '=', $head);
         }
@@ -4053,14 +4051,9 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $petty->whereBetween('petty_cash_statement_details.created_at', [$from, $to]);
+            $petty->whereBetween('pcs.created_at', [$from, $to]);
         }
 
-        if ($request->get('checked_search_date_from') && $request->get('checked_search_date_to')) {
-            $checked_from = $request->get('checked_search_date_from');
-            $checked_to = $request->get('checked_search_date_to');
-            $petty->whereBetween('pcs.checked_at', [$checked_from, $checked_to]);
-        }
         return $petty->make(true);
     }
 
@@ -9376,11 +9369,7 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
         }
-        if ($request->get('search_update_date_from') && $request->get('search_update_date_to')) {
-            $ufrom = $request->get('search_update_date_from');
-            $uto = $request->get('search_update_date_to');
-            $datatable->whereBetween('delivery_notes.status_updated_at', [$ufrom, $uto]);
-        }
+       
         return $datatable->make(true);
     }
 
@@ -10120,11 +10109,7 @@ class AdminReportsController extends Controller
             $to = $request->get('arrival_date_to');
             $datatable->whereBetween('sj.created_at', [$from, $to]);
         }
-        if ($request->get('booking_date_from') && $request->get('booking_date_to')) {
-            $from = $request->get('booking_date_from');
-            $to = $request->get('booking_date_to');
-            $datatable->whereBetween('shipments.created_at', [$from, $to]);
-        }
+       
         if ($status = $request->get('search_status')) {
             $datatable->where('shipments.shipper_status_id', '=', $status);
         }
@@ -10781,6 +10766,12 @@ class AdminReportsController extends Controller
 
         $data = AgentDay::leftjoin('admins as agent', 'agent.id', 'agent_days.agent_id')
             ->select(['agent.id as agent_id', 'agent.name as agent_name', 'agent_days.date as date', 'agent_days.id as day_id', 'agent_days.auto_close as auto_close', 'agent_days.status as status']);
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $data->whereBetween('agent_days.date', [$from, $to]);
+        }
 
         $datatables = Datatables::of($data)
             ->addColumn('assigned_calls_excel', function ($calls) {

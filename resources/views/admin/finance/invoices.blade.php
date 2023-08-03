@@ -48,14 +48,6 @@
 								</button>
 							</div>
 						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
@@ -96,14 +88,6 @@
 								</button>
 							</div>
 						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn_generation"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
@@ -405,7 +389,7 @@
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
 						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format:'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -420,8 +404,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -437,8 +420,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -453,8 +435,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -756,7 +737,6 @@
 							processing: data_table_loader
 						},
 						serverSide: true,
-						{{--ajax: '{{ route('admin.finance.invoices.list') }}',--}}
 						ajax:{
 							url: '{{ route('admin.finance.invoices.list') }}',
 							data: function (d) {

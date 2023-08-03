@@ -13,12 +13,12 @@
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_pn_no" id="search_pn_no" placeholder="Search Pickup Note Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -27,7 +27,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -36,7 +36,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_city" id="search_city" class="form-control select2">
                                 @foreach($cities as $city)
@@ -45,7 +45,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_completed_by" id="search_completed_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -54,7 +54,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -63,40 +63,40 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3 ">
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                            <span class="la la-calendar-o"></span>
+                        </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                        </div>
+                    </div>
+                    <div class="col-3 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                        <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                            <span class="la la-calendar-o"></span>
+                        </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                        </div>
+
+                    </div>
+                    <div class="col-3">
                         <div class="form-group input-group">
                                 <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
                                 </div>
-                            <input type="text" name="completed_date" class="form-control bg-primary border-primary white rounded-right" id="completed_date" placeholder="Completion Date" title="Completion Date" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="completed_date" class="form-control bg-primary border-primary white rounded-right" id="completed_date" placeholder="Completion Date" title="Completion Date"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                         </div>
                     </div>
-                        <div class="col-4 ">
-
-                            <div class="form-group input-group ml-1">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-
-                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
-                            </div>
-                        </div>
-                        <div class="col-4 ">
-                            <div class="form-group input-group ml-1">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-
-                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
-                            </div>
-
-                        </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
