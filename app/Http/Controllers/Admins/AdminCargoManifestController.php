@@ -1727,28 +1727,30 @@ class AdminCargoManifestController extends Controller
                     } else if ($bag->status_id == 5) {
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
-                            ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
                             $shipment_table = Shipment::find($shipment->shipment_id);
-                            $shipment_table->shipper_status_id = 49;
-                            $shipment_table->consignee_status_id = 49;
-                            $shipment_table->update();
+                            if(in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11])){
+                                ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
+                                $shipment_table->shipper_status_id = 49;
+                                $shipment_table->consignee_status_id = 49;
+                                $shipment_table->update();
 
-                            MisroutedHistory::create([
-                                'shipment_id' => $shipment_table->id,
-                                'old_consignee_city_id' => Auth::user()->default_hub_id,
-                                'old_consignee_name' => $shipment_table->consignee_name,
-                                'old_consignee_address' => $shipment_table->consignee_address,
-                                'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
-                                'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
-                                'old_consignee_email' => $shipment_table->consignee_email,
-                                'new_consignee_city_id' => $shipment_table->consignee_city_id,
-                                'new_consignee_name' => $shipment_table->consignee_name,
-                                'new_consignee_address' => $shipment_table->consignee_address,
-                                'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
-                                'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
-                                'new_consignee_email' => $shipment_table->consignee_email,
-                                'admin_id' => Auth::id()
-                            ]);
+                                MisroutedHistory::create([
+                                    'shipment_id' => $shipment_table->id,
+                                    'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                    'old_consignee_name' => $shipment_table->consignee_name,
+                                    'old_consignee_address' => $shipment_table->consignee_address,
+                                    'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                    'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                    'old_consignee_email' => $shipment_table->consignee_email,
+                                    'new_consignee_city_id' => $shipment_table->consignee_city_id,
+                                    'new_consignee_name' => $shipment_table->consignee_name,
+                                    'new_consignee_address' => $shipment_table->consignee_address,
+                                    'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                    'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                    'new_consignee_email' => $shipment_table->consignee_email,
+                                    'admin_id' => Auth::id()
+                                ]);
+                            }
                         }
                     }
 
