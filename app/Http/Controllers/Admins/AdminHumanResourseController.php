@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\ShiftType;
 use Auth;
 use Carbon\Carbon;
 use App\Http\Models\City;
@@ -3115,7 +3116,9 @@ class AdminHumanResourseController extends Controller
     public function employee_shift_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 433);
-        return view('admin.human_resource.employee_shift');
+
+        $shifts = ShiftType::all();
+        return view('admin.human_resource.employee_shift')->with(['shifts'=>$shifts]);
     }
 
     public function employee_shift_list(Request $request)
@@ -3125,6 +3128,7 @@ class AdminHumanResourseController extends Controller
         }
 
         $shifts = EmployeeShift::all();
+    
         return Datatables::of($shifts)
             ->editColumn('status', function ($data) {
                 if ($data->status == 0) {
@@ -3133,6 +3137,7 @@ class AdminHumanResourseController extends Controller
                     return 'Active';
                 }
             })
+    
             ->editColumn('start_time_formatted', function ($data) {
                 return Carbon::parse($data->start_time)->format("g:i A");
             })
@@ -3189,6 +3194,7 @@ class AdminHumanResourseController extends Controller
         $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
         $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
         $shift->extension_minutes = $request->extension_minutes;
+        $shift->shift_type_id = $request->shift_select;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Added Successfully!');
     }
@@ -3200,6 +3206,7 @@ class AdminHumanResourseController extends Controller
         $shift->start_time = Carbon::parse($request->start_time)->format("H:i:s");
         $shift->end_time = Carbon::parse($request->end_time)->format("H:i:s");
         $shift->extension_minutes = $request->extension_minutes;
+        $shift->shift_type_id = $request->shift_select;
         $shift->save();
         return redirect()->back()->with('success', 'Shift Updated Successfully!');
     }
