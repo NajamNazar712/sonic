@@ -83,7 +83,7 @@
                             </div>
                             <input type="text" name="arrival_date_from"
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="arrival_date_from" placeholder="Arrival Date (From)">
+                                   id="arrival_date_from" placeholder="Arrival Date (From)" title="Arrival Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -95,32 +95,7 @@
                             </div>
                             <input type="text" name="arrival_date_to"
                                    class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="arrival_date_to" placeholder="Arrival Date Date (To)">
-                        </div>
-                    </div>
-
-                    <div class="col-4">
-                        <div class="form-group input-group ">
-                            <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                            </div>
-                            <input type="text" name="booking_date_from"
-                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="booking_date_from" placeholder="Booking Date (From)">
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-group input-group">
-                            <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
-                            </div>
-                            <input type="text" name="booking_date_to"
-                                   class="form-control pickadate bg-primary border-primary white rounded-right"
-                                   id="booking_date_to" placeholder="Booking Date Date (To)">
+                                   id="arrival_date_to" placeholder="Arrival Date Date (To)" title="Arrival Date Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                    
@@ -302,42 +277,6 @@
                 }
             });
 
-
-            var booking_date_from = $('#booking_date_from').pickadate({
-                firstDay: 1,
-                clear: 'Clear',
-                max: from_max,
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#booking_date_from_root').css('top','40px');
-                },
-                onSet: function(context) {
-                    var old_date_formatted = $('input[name="booking_date_from_formatted"]').val();
-                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
-                }
-            });
-            var booking_date_to = $('#booking_date_to').pickadate({
-                firstDay: 1,
-                clear: 'Clear',
-                max: to_max,
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#booking_date_to_root').css('top', '40px');
-                },
-                onSet: function(context) {
-                    var current_date_formatted = $('input[name="booking_date_to_formatted"]').val();
-                    from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
-                }
-            });
-
            
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
@@ -426,6 +365,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -440,8 +380,6 @@
                         d.search_shipping_mode = $('#search_shippimg_modes').val();
                         d.arrival_date_to = $('input[name="arrival_date_to_formatted"]').val();
                         d.arrival_date_from = $('input[name="arrival_date_from_formatted"]').val();
-                        d.booking_date_to = $('input[name="booking_date_to_formatted"]').val();
-                        d.booking_date_from = $('input[name="booking_date_from_formatted"]').val();
                         d.search_status = $('#search_status').val();
                         d.search_zone = $('#search_zone').val();
                         
@@ -449,7 +387,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[7, 'desc']],
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},

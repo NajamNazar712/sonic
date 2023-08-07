@@ -319,6 +319,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('delivered_shipments', 'Shippers\ShipperFinanceController@payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Shippers\ShipperFinanceController@payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('fintech_shipments', 'Shippers\ShipperFinanceController@payments_fintech_shipments')->name('fintech_shipments');
             Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
 
@@ -686,6 +687,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('shipment_print_status', 'Admins\OrderManagementController@shipment_print_status')->name('shipment_print_status');
         Route::post('telenor_shipments_arrival', 'Admins\OrderManagementController@telenor_shipments_arrival')->name('telenor_shipments_arrival');
         Route::post('foodpanda_shipments_arrival', 'Admins\OrderManagementController@foodpanda_shipments_arrival')->name('foodpanda_shipments_arrival');
+        Route::post('shipment_cancel', 'Admins\OrderManagementController@shipment_cancel')->name('shipment_cancel');
+        Route::post('shipment_cancel_reason', 'Admins\OrderManagementController@shipment_cancel_reason')->name('shipment_cancel_reason');
 
         Route::prefix('self_collection')->name('self_collection.')->group(function () {
             Route::get('', 'Admins\OrderManagementController@self_collection_index')->name('index');
@@ -1476,6 +1479,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('index', 'Admins\LostShipmentsController@lost_add_index')->name('index');
                 Route::post('shipment/info', 'Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
                 Route::post('shipment/store', 'Admins\LostShipmentsController@add_lost_shipments')->name('shipments.store');
+                Route::post('bulk/lost/shipments', 'Admins\LostShipmentsController@bulk_lost_shipments')->name('bulk.lost');
             });
         });
         //Lost Module End
@@ -2077,6 +2081,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
+            Route::post('enable_disable', 'Admins\UserManagementController@role_status')->name('enable_disable');
 
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
@@ -3718,6 +3723,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
         });
+        Route::prefix('background_image')->name('background_image.')->group(function () {
+            // Route::view('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::get('', 'Admins\GlobalSettingsController@background_image_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
+        });
 
     });
 
@@ -4190,6 +4200,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::post('activate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_activate')->name('activate');
                 Route::post('deactivate', 'Admins\AdminHumanResourseController@employee_directory_make_staff_deactivate')->name('deactivate');
                 Route::post('convert-to-staff', 'Admins\AdminHumanResourseController@convert_intern_to_staff')->name('convert');
+                Route::post('convert-to-contractual', 'Admins\AdminHumanResourseController@convert_staff_to_contractual')->name('convert_contractual');
             });
             Route::prefix('rider')->name('rider.')->group(function () {
                 Route::post('incentive', 'Admins\AdminHumanResourseController@employee_directory_make_rider_incentive')->name('incentive');
