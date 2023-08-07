@@ -28,6 +28,8 @@ use App\Http\Models\Admin\NpsSurvey;
 use App\Http\Models\NpsShipperRatting;
 use App\Http\Models\NpsShipperSkipSurvey;
 use App\Http\Models\Sister_account\Substitute_user\SubstituteUserMergeSisterAccountMapping;
+use App\Http\Models\Admin\BackgroundImage;
+
 
 class LoginController extends Controller
 {
@@ -63,7 +65,20 @@ class LoginController extends Controller
 
     public function showLoginForm()
     {
-        return view('client.auth.login');
+        $background_image = BackgroundImage::first();
+        if($background_image != null)
+        {
+            $background_image['path'] = 'storage/'.$background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        }
+        else
+        {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+
+        }
+
+        return view('client.auth.login')->with(['background_image' => $background_image]);
     }
 
     protected function attemptLogin(Request $request)

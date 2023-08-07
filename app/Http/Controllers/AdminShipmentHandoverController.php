@@ -645,7 +645,7 @@ class AdminShipmentHandoverController extends Controller
         }
         $responsibles_list = HandoverResponsibilities::leftjoin('cities as c','c.id','=','handover_responsibilities.hub_id')
         ->join('admins as a', 'a.id', '=', 'handover_responsibilities.created_by')
-        ->leftjoin('city_areas as ca', 'ca.id', '=', 'a.area_id')
+        ->leftjoin('city_areas as ca', 'ca.id', '=', 'handover_responsibilities.city_area_id')
         ->leftjoin('admins as u', 'u.id', '=', 'handover_responsibilities.updated_by')
         ->select('ca.name as area','handover_responsibilities.id as responsible_id','handover_responsibilities.name as name','c.name as hub','c.id as hub_id','a.name as created','u.name as updated','handover_responsibilities.status as status');
 
