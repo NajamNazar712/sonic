@@ -328,7 +328,7 @@
 					{data: 'official_phone_number', name: 'admins.official_phone_number', class: 'align-middle official_phone_number'},
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
-					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
+					{data: 'designation', name: 'ed.name', class: 'align-middle designation'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
 					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
 					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
