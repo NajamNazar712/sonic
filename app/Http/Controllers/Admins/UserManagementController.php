@@ -81,8 +81,9 @@ class UserManagementController extends Controller
       ActivityTrailController::createActivityTrailLog(Auth::id(),358);
       $hubs=City::select('id','name')->where('hub',1)->get();
       $roles = AdminRole::with('department')->get();
+      $employee_designations = EmployeeDesignation::get();
       $blood_group = EmployeeBloodGroup::select('id','name')->get();
-      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles, 'blood_groups' => $blood_group]);
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles, 'blood_groups' => $blood_group, 'employee_designations' => $employee_designations]);
     }
 
     public function user_list(Request $request) {
