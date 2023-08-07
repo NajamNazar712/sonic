@@ -12,7 +12,7 @@
 
 
 
-    <input type="hidden" class="datepicker">
+    {{-- <input type="hidden" class="datepicker"> --}}
     <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
         aria-hidden="true">
 
