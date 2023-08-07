@@ -15,117 +15,127 @@
                 <div id="search_form" class="">
                     <div class="row row mb-2 justify-content-center">
 
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $hub)
-                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_rider" id="search_rider" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="rider_cnic" id="rider_cnic" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->cnic}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="courier_id" id="courier_id" class="form-control select2">
-                                @foreach($couriers as $courier)
-                                    <option value="{{$courier->id}}">{{$courier->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_updated_by" id="search_updated_by" class="form-control select2">
-                                @foreach($admins as $admin)
-                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                @foreach($shipping_modes as $shipping_mode)
-                                    <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
-                                @foreach($admins as $admin)
-                                    <option value="{{$admin->id}}">{{$admin->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-4">
-
-                        <div class="form-group input-group ml">
-                            <div class="input-group-prepend">
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_hub" id="search_hub" class="form-control select2">
+                                    @foreach($hubs as $hub)
+                                        <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_rider" id="search_rider" class="form-control select2">
+                                    @foreach($riders as $rider)
+                                        <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}} - {{$rider->hub_name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="rider_cnic" id="rider_cnic" class="form-control select2">
+                                    @foreach($riders as $rider)
+                                        <option value="{{$rider->id}}">{{$rider->cnic}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="courier_id" id="courier_id" class="form-control select2">
+                                    @foreach($couriers as $courier)
+                                        <option value="{{$courier->id}}">{{$courier->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_updated_by" id="search_updated_by" class="form-control select2">
+                                    @foreach($admins as $admin)
+                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                    @foreach($shipping_modes as $shipping_mode)
+                                        <option value="{{$shipping_mode->id}}">{{$shipping_mode->mode}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <fieldset class="form-group">
+                                <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
+                                    @foreach($admins as $admin)
+                                        <option value="{{$admin->id}}">{{$admin->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                             </span>
+                                </div>
+                                <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" title="Submission Date">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                              </div>
+                        </div>
+                        <div class="col-3">
+
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Assigned Date (From)" title="Assigned Date (From)">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                            </div>
+                        </div>
+                        <div class="col-3 ">
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Assigned Date (To)" title="Assigned Date (To)">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Assigned Date (From)">
                         </div>
-                    </div>
-                    <div class="col-4 ">
-                        <div class="form-group input-group ml">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
+                        <div class="col-3">
+
+                            <div class="form-group input-group ml">
+                                <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                </div>
+
+                                <input type="text" name="update_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_from" placeholder="Update Date (From)" title="Update Date (From)">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                             </div>
-
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Assigned Date (To)">
                         </div>
 
-                    </div>
-                    <div class="col-4">
-
-                        <div class="form-group input-group ml">
-                            <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                            </div>
-
-                            <input type="text" name="update_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_from" placeholder="Update Date (From)">
-                        </div>
-                    </div>
-
-                        <div class="col-4">
+                        <div class="col-3">
                             <div class="form-group input-group ml">
                                 <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -133,20 +143,11 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="update_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_to" placeholder="Update Date (To)">
-                            </div>
+                                <input type="text" name="update_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="update_date_to" placeholder="Update Date (To)" title="Update Date (To)">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                              </div>
 
                         </div>
-                        <div class="col-4">
-                            <div class="form-group input-group">
-                                <div class="input-group-prepend">
-                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                            </span>
-                                </div>
-                                <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
-                            </div>
-                        </div>
+                        
                         <div class="col-2">
                             <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                         </div>
@@ -501,6 +502,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

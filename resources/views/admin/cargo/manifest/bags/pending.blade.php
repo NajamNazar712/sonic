@@ -16,26 +16,62 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+                            <div class="row mb-2 justify-content-center">
+                                <div class="col-12 ">
+                                    <form id="shipment_type_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col">
+                                            <div class="form-group mr-1">
+                                                <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
+                                                    @foreach($shipping_mode as $mode)
+                                                        <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group">
+                                                <select name="shipment_type" class="select2" id="shipment_type">
+                                                    <option value="" selected="selected"></option>
+                                                    <option value="0">All</option>
+                                                    <option value="1">Normal</option>
+                                                    <option value="2">Return</option>
+                                                </select>
+                                            </div>
+                                        </div>
 
-                            <form id="shipment_type_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                                        <div class="col">
+                                            <div class="form-group input-group ">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_from"
+                                                    class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                    id="search_date_from" placeholder="Arrival From Date" title="Arrival From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                            </div>
+                                        </div>
+                                        <div class="col">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
+                                                </div>
+                                                <input type="text" name="search_date_to"
+                                                    class="form-control pickadate bg-primary border-primary white rounded-right"
+                                                    id="search_date_to" placeholder="Arrival To Date" title="Arrival To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                            </div>
+                                        </div>
 
-                                <div class="form-group mr-1">
-                                    <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
-                                        @foreach($shipping_mode as $mode)
-                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                                        @endforeach
-                                    </select>
+                                        <div class="col">
+                                            <div class="form-group ml-1">
+                                                <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                                            </div>
+                                        </div>
+                                    </form>
                                 </div>
-
-                                <div class="form-group">
-                                    <select name="shipment_type" class="select2" id="shipment_type">
-                                        <option value="" selected="selected"></option>
-                                        <option value="0">All</option>
-                                        <option value="1">Normal</option>
-                                        <option value="2">Return</option>
-                                    </select>
-                                </div>
-                            </form>
+                            </div>
 
                             <div class="col justify-content-end mb-3">
                                 <div class="card-header">
@@ -81,15 +117,48 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            var search_date_to = $('#shipment_type_search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#shipment_type_search_form #search_date_from').pickadate('picker').set('max', $('#shipment_type_search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#shipment_type_search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#shipment_type_search_form #search_date_to').pickadate('picker').set('min', $('#shipment_type_search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -164,6 +233,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -174,6 +244,8 @@
                         d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
                         d.search_shipping_mode = $('#shipment_type_search_form #search_shipping_mode').val();
                         d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'id',
@@ -303,24 +375,25 @@
             });
 
             $('#shipment_type_search_form #shipment_type').select2({
-                width: '150px',
+                width: '100%',
                 placeholder: 'Shipment Type',
                 allowClear:true
-            }).bind('change', function() {
-                table.draw();
             });
+
             $('#shipment_type_search_form #search_shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                width: '150px',
+                width: '100%',
                 placeholder: 'Shipping Mode',
                 allowClear:true
-            }).bind('change', function() {
-                table.draw();
             });
 
             $('#star_shippers_filter').on('click',function () {
                 $('#star_shippers_filter').val(1);
                 table.draw(true);
                 $('#star_shippers_filter').val(0);
+            });
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
             });
 
         });

@@ -975,6 +975,9 @@ class Permission
             'settings.project_arrival_shippers.index' => 828,
             'settings.project_arrival_shippers.store' => 828,
 
+            'settings.background_image.index' => 891,
+            'settings.background_image.store' => 891,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
@@ -1380,6 +1383,9 @@ class Permission
  			'management.shipment_received.index' => 878,
             'return.shipper_return_receiving.history.index' => 885,
             'reports.overland.index' => 886,
+
+            'reports.operations_performance.index' => 892,
+            'reports.operations_performance.export_to_excel' => 892,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

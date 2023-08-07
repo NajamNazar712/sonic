@@ -24,6 +24,8 @@ use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\AgentReturnConfirmation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Models\Admin\BackgroundImage;
+
 
 class AdminLoginController extends Controller
 {
@@ -45,7 +47,20 @@ class AdminLoginController extends Controller
         } else {
             $settings = $settings->first();
         }
-        return view('admin.login')->with(['setting' => $settings]);
+        $background_image = BackgroundImage::first();
+        if($background_image != null)
+        {
+            $background_image['path'] = 'storage/'.$background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        }
+        else
+        {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+
+        }
+        
+        return view('admin.login')->with(['setting' => $settings,'background_image' => $background_image]);
     }
     public function login(Request $request)
     {

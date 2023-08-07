@@ -39,9 +39,12 @@
                 </ul>
                 <div class="tab-content px-1 pt-1">
                     <div role="tabpanel" class="tab-pane active" id="profile" aria-labelledby="profile-tab" aria-expanded="true">
-                        <form id="profile-form" class="form form-horizontal" method="post" action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate">
+                        <form id="profile-form" class="form form-horizontal" method="post"
+                              action="{{route('admin.human_resource.employee_directory.profile.update',$employee->id)}}" novalidate="novalidate"
+                            >
                             @csrf
                             <input type="hidden" name="intended_url" value="{{ $intended_url }}">
+                            <input type="hidden" name="designation_on_off" id="designation_on_off">
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-body">
@@ -453,11 +456,15 @@
                                         <button id="cancel-button-profile"  type="button" class="btn btn-warning mr-1">
                                             Cancel
                                         </button>
-                                        <button type="submit" class="btn btn-primary">
+                                        <button class="btn btn-primary" id="profile-form_update">
                                             Update
+                                        </button>
+                                        <button type="submit" class="btn btn-primary d-none" id="update-form-finallay">
+                                            Update Form
                                         </button>
                                     </div>
                                 </div>
+
                             </div>
                         </form>
                     </div>
@@ -2127,6 +2134,42 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="submit_profile_modal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="submit_profile_modal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Profile Details</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-12 align-self-center mt-3">
+                            <h3 class="text-center">Update Designation !</h3>
+                        </div>
+                        <div class="col-12 align-self-center text-center">
+                            <label for="admin_discount_type" class="mr-2">No</label>
+                            <input type="checkbox" id="admin_discount_type" name="admin_discount_type" class="switchery" data-size="sm" data-switchery="true">
+                            <label for="admin_discount_type" class="ml-2">Yes</label>
+                            <input id="admin_discount_type1" value="0" name="admin_discount_type1" hidden>
+                        </div>
+                        <div class="col-12 align-self-center mt-5">
+                            <h3 class="text-center">Are you sure to update the profile!</h3>
+                        </div>
+                        <div class="col-12 d-flex justify-content-center">
+                            <div class="form-group">
+{{--                                <button type="submit" class="btn btn-primary mr-2" id="submit_profile_no">No</button>--}}
+                                <button type="submit" class="btn btn-primary" id="submit_profile_yes">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -2166,6 +2209,37 @@
         today.setHours(0,0,0,0);
         $(document).ready(function() {
             // $('#peye').on('mousedown',function(){$('#bolt_pin').attr('type','text')}).on('mouseup',function(){$('#bolt_pin').attr('type','password')});
+
+            var toggleValue = false;
+            $('#admin_discount_type').change( function () {
+                toggleValue = !toggleValue;
+                if(toggleValue)
+                {
+                    $('#admin_discount_type1').val("1");
+                    $('#designation_on_off').val(toggleValue);
+                    console.log('clicked',toggleValue);;
+                }
+                else
+                {
+                    $('#admin_discount_type1').val("0");
+                    $('#designation_on_off').val(toggleValue);
+                    console.log('clicked',toggleValue);
+                }
+            });
+
+            $("#profile-form_update").click(function (event) {
+                $("#submit_profile_modal").modal('show');
+                event.preventDefault();
+                $('#designation_on_off').val(toggleValue);
+            });
+
+            $("#submit_profile_yes").click(function () {
+                $('#update-form-finallay').click();
+            });
+
+            $("#submit_profile_no").click(function() {
+                $("#submit_profile_modal").modal('hide');
+            });
 
             $('#profile-form #emergency_contact, #profile-form #personal_number , #profile-form #official_number , #references-form #references_phone').inputmask({
                 'mask': '9999-9999999',

@@ -1271,7 +1271,7 @@
                 </ul>
             </li>
 
-            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886],session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64,65,66,67,68,69,70,71,72,73,74,75,113,138,148,153,156,169,170,172,176,200,210,258,259,263,264,275,300,301,319,327,328,337,356,401,437,444,472,476,493,502,524,532,555,613,614,624,642,647,653,679,673,676,688,705,717,780,784,786,793,794,823,824,839,886,892],session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title"><i
                                 class="la la-file-text-o"></i>Reports</span></a>
                     <ul class="menu-content">
@@ -1655,6 +1655,9 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(886, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.overland.index') }}">Overland Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(892, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.operations_performance.index') }}">Operations Performance Report</a></li>
                         @endif
                     </ul>
                 </li>
@@ -2313,7 +2316,10 @@
                                             <li><a class="menu-item"
                                                     href="{{ route('admin.settings.ticker.index') }}">Ticker</a></li>
                                         @endif
-
+                                        @if (session('role_id') == 1 || in_array(891, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.background_image.index') }}">Background Image</a></li>
+                                        @endif
 
                                         @if (session('role_id') == 1 || in_array(466, session('permissions')))
                                             <li><a class="menu-item"

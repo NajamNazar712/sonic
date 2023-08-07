@@ -26,7 +26,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Select From Date">
+                                                       id="search_date_from" placeholder="Select From Date" title="Select From Date" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
                                         <div class="col-3 mt-1">
@@ -38,7 +38,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_to"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_to" placeholder="Select To Date">
+                                                       id="search_date_to" placeholder="Select To Date" title="Select To Date" data-value="{{ Carbon\Carbon::today() }}">
                                             </div>
                                         </div>
                                         <div class="col-3 mt-1">
@@ -1571,6 +1571,7 @@
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -2751,6 +2752,128 @@
 
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.staff.convert') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+            
+            $('body').on('click', '.convert_contractual_to_staff', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Contractual Agent An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Contractual Agent To Staff!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+            
+            $('body').on('click', '.convert_staff_to_contractual', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Staff An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Staff To Contractual!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert_contractual') !!}',
                             method: 'POST',
                             data: {
                                 'employee_id': id,

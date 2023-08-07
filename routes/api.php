@@ -95,6 +95,8 @@ Route::name('api.')->group(function () {
 
         Route::post('payments', 'APIController@payments')->name('payments');
 
+        Route::get('ideas_payments', 'APIController@ideas_payments')->name('ideas_payments');
+
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
@@ -188,6 +190,7 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
                 Route::post('pickup_in_route', 'Rider\RiderAPIController@pickup_in_route')->name('pickup_in_route');
+                Route::post('scan_rider_picked_shipment', 'Rider\RiderAPIController@scan_rider_picked_shipment')->name('scan_rider_picked_shipment');
             });
 
             //Obsoleted

@@ -53,7 +53,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)">
+                                <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" title="Search Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                             </div>
 
 
@@ -64,7 +64,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" disabled>
+                                <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" title="Search Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                             </div>
 
 
@@ -347,6 +347,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
