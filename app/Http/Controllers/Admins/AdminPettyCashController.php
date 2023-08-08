@@ -2459,7 +2459,7 @@ class AdminPettyCashController extends Controller
         $head = PettyCashAccountHead::where('status', 1)->select('id', 'name')->get();
         $zones = Zone::where('business_category_id', 1)->select('id', 'name')->where('status', 1)->get();
         $employees = Admin::where('trax_id', '!=', null)->where('status', 1)->select(['id', 'trax_id'])->get();
-        $operation_managers = Admin::where('role_id', 10)->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
+        $operation_managers = Admin::whereIn('role_id', [10,105,122])->where('status', 1)->select(['id', 'trax_id', 'name'])->get();
         $exclude_sdns = PettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
         $exclude_advance_sdns = AdvancePettyCashStatement::where('sdn_id','>',0)->distinct()->pluck('sdn_id')->toArray();
         $exclude_sdns = array_merge($exclude_advance_sdns,$exclude_sdns);
