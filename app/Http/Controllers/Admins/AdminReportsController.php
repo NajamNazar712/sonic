@@ -7181,7 +7181,10 @@ class AdminReportsController extends Controller
             ->join('cities AS dc', 's.consignee_city_id', '=', 'dc.id')
             ->leftjoin('adjustment_types as at', 'at.id', '=', 'adjustment_logs.adjustment_type_id')
             ->leftjoin('admins as a', 'a.id', '=', 'adjustment_logs.admin_id')
-            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name', 'dps.done_payment_id as done_payment_id', 'oc.name as origin', 'dc.name as destination')
+            ->select('adjustment_logs.id as adjustment_id', 'adjustment_logs.adjustment_amount as adjustment_amount', 
+            'adjustment_logs.remarks as remarks', 's.tracking_number as tracking_number', 'at.name as adjustment_type', 
+            'adjustment_logs.created_at as created_at', 'a.name as created_by', 'u.name as shipper_name', 
+            'dps.done_payment_id as done_payment_id', 'oc.name as origin', 'dc.name as destination', 'u.id as shipper_id', 'oc.id as origin_id', 'dc.id as destination_id')
             ->whereIn('adjustment_logs.type', [1, 2]);
         $datatable = Datatables::of($adjustments)
             ->addColumn('adjustment_id_padded', function ($adjustment) {
