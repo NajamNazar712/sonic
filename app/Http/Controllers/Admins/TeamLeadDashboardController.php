@@ -188,7 +188,7 @@ class TeamLeadDashboardController extends Controller
     // Heading: N/A
     // Sidebar: N/A
     // URL: team_lead/list
-    // Description: this method is used for Listing Employees.
+    // Description: this method is used for viewing agents of team lead
     public function team_lead_list(Request $request)
     {
         if ($request->get('excel') && $request->get('excel') == true) {
@@ -196,7 +196,7 @@ class TeamLeadDashboardController extends Controller
         }
 
         $empid = Admin::find(Auth::id())->employee_id;
-        // DB::enableQueryLog();
+        
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -216,12 +216,6 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
             ->distinct('staff.CNIC');
-            // ->get();
-            // $query = DB::getQueryLog();
-            // dd($query);
-        
-
-        // dd($employees->get());
 
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
