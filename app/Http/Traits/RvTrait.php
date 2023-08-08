@@ -1481,60 +1481,7 @@ trait RvTrait
                 }
             }
         }
-        return $shipment;
-        // return true;
+        // return $shipment;
+        return true;
     }
-
-
-
-
-
-
-
-    //     public function update_rv_assigned_shipment_status($rv_assigned_shipment, $status, $column_name){
-
-    //     //Assuring if agent is updating the status update rows in rcp_assigned_agent
-    //     $rv_assigned_shipment = $rv_assigned_shipment ->latest()->first();
-    //     if($rv_assigned_shipment->admin_id == Auth::id()){
-
-    //         $rv_assigned_shipment->shipment_status = $status;
-    //         $rv_assigned_shipment->admin_id = Auth::id();
-    //         $rv_assigned_shipment->save();
-
-
-    //         //updating return row of agent 
-    //         $rcp_assigned_agent = RcpAssignedAgent::where('id',$rv_assigned_shipment->rcp_assigned_agent_id)->first();
-    //         $rcp_assigned_agent->increment($column_name);
-    //         $rcp_assigned_agent->decrement('pending_shipments');
-    //         $rcp_assigned_agent->increment('actual_productivity');
-    //         $rcp_assigned_agent->admin_id = Auth::id();
-    //         $rcp_assigned_agent->save();
-
-    //         //creating log 
-    //         $this->makeRvShipmentAssignAgentDetails($rv_assigned_shipment, $request);
-    //         }
-
-    //     //If admin is updating the status update rcp_assigned_shipment & log
-    //         else{
-    //         $rv_assigned_shipment = $rv_assigned_shipment ->latest()->first();
-    //         $rv_assigned_shipment->shipment_status = $status;
-    //         $rv_assigned_shipment->admin_id = Auth::id();
-    //         $rv_assigned_shipment->save();
-
-    //         //updating already_updated & pending of agent if shipment is updated by admin 
-    //         $rcp_assigned_agent = RcpAssignedAgent::where('id',$rv_assigned_shipment->rcp_assigned_agent_id)->first();
-    //         $rcp_assigned_agent->increment('already_updated');
-    //         $rcp_assigned_agent->decrement('pending_shipments');
-    //         $rcp_assigned_agent->save();
-
-
-    //         $return_assign_log = new RcpAssignedShipmentLog();
-    //         $return_assign_log->rcp_assigned_shipment_id = $rv_assigned_shipment->id;
-    //         $return_assign_log->shipment_id = $rv_assigned_shipment->shipment_id;
-    //         $return_assign_log->status = $status;
-    //         $return_assign_log->admin_id = Auth::id();
-    //         $return_assign_log->save();
-    //         }
-    // }
-
 }

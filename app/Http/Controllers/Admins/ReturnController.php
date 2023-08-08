@@ -185,20 +185,26 @@ class ReturnController extends Controller
             //             DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.shipment_id = shipments.id and return_assigned_shipments.status = 1)'));
             // })
 
-            ->leftjoin('rcp_assigned_shipments as new_ras', function ($join) {
+            // ->leftjoin('rcp_assigned_shipments as new_ras', function ($join) {
+            //     $join->on('new_ras.shipment_id', '=', 'shipments.id')
+            //         ->where('new_ras.id','=',
+            //             DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
+            //             and rcp_assigned_shipments.assigned_status = 1 and rcp_assigned_shipments.shipment_status = 0)'))
+                        
+            //             ->where('new_ras.user_id','=',null)
+            //             ->where('new_ras.shipment_status','!=',3);
+            // })
+
+            ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
                     ->where('new_ras.id','=',
-                        // DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        // and rcp_assigned_shipments.assigned_status = 1)'))
-                        DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-                        and rcp_assigned_shipments.assigned_status = 1 and rcp_assigned_shipments.shipment_status = 0)'))
+                        DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+                        and rv_shipment_assign_agents.rv_state_id = 1)'));
                         
-                        ->where('new_ras.user_id','=',null)
-                        ->where('new_ras.shipment_status','!=',3);
             })
-            ->leftjoin('rcp_assigned_agents as raa', 'raa.id', '=', 'new_ras.rcp_assigned_agent_id')
-            ->leftjoin('admins as asad', 'asad.id', '=', 'new_ras.admin_id')
-            ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.assigned_by')
+            
+            ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
+            ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
             ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
 
             // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
@@ -225,13 +231,14 @@ class ReturnController extends Controller
              'shipments_journey.remarks as shipper_remarks',
              'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
              'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
-             'dc.id as consignee_city_id','shipments.shipping_mode_id', 'asad.name as assigned_agent', 
+             'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
              'new_ras.created_at as assigned_at',
              'asadby.name as assigned_by','consolidations.consolidation_id',
-             'raa.admin_id as assigned_agent_id',
+             'assigned_agent.id as assigned_agent_id',
              'tat_options.value as tat_value',
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name','rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
+             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
+             'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
 
             ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
             ->groupBy('shipments.id');
@@ -770,18 +777,7 @@ class ReturnController extends Controller
 
     public function return_reattempt_status(Request $request)
     { //update to status 20 for confirm and 13 for re-attempt
-        // dd($request->all());
-        // array:4 [
-        //     "shipment_ids" => array:2 [
-        //       0 => "1725769"
-        //       1 => "1725771"
-        //     ]
-        //     "_token" => "cR2uKpUvmOo4bEMxhnlRG0vg58jvwQUgKdLdpblO"
-        //     "action" => "reattempt"
-        //     "remark" => array:2 [
-        //       1725769 => null
-        //       1725771 => null
-        //     ]
+
         $shipment_ids = $request->shipment_ids;
 
         if ($request->action == 'reattempt') {
