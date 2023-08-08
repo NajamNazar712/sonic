@@ -8739,7 +8739,7 @@ class GlobalSettingsController extends Controller
 
     public function rider_assigned_hub_index(Request $request)
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
+        //ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
 
         $admin_id = auth()->id();
         $admin_hubs = session('hubs');
@@ -8758,7 +8758,6 @@ class GlobalSettingsController extends Controller
 
     public function rider_assigned_hub_list()
     {
-
         $reasons = RiderAssignedHubForDeliveryNote::join('riders as r','r.id','rider_assigned_hub_for_delivery_notes.rider_id')
         ->select('rider_assigned_hub_for_delivery_notes.id as id','r.id as rider_id', 'r.name as name');
 
@@ -8783,8 +8782,6 @@ class GlobalSettingsController extends Controller
 
     public function rider_assigned_hub_add(Request $request)
     {
-        // TODO: Implement method.
-        //        dd(1,$request->all());
         $rider_id = $request->select_rider_id;
         $rider_hubs = $request->hubs;
 
@@ -8804,7 +8801,6 @@ class GlobalSettingsController extends Controller
 
     public function rider_assigned_hub_edit(Request $request)
     {
-        // TODO: Implement method.
         $rider_info = array();
         $id = $request->id;
         $rider = RiderAssignedHubForDeliveryNote::find($id);

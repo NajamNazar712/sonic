@@ -978,6 +978,8 @@ class Permission
             'settings.background_image.index' => 891,
             'settings.background_image.store' => 891,
 
+            'settings.rider_assigned_hub.index' => 893,
+
 
             'dashboard.userwise' => 333,
             'dashboard.overall' => 334,
