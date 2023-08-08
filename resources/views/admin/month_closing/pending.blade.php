@@ -68,6 +68,7 @@
                         <th class="border-primary border-darken-1">Consignee Address</th>
                         <th class="border-primary border-darken-1">Comments</th>
                         <th class="border-primary border-darken-1">Closing Status</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Actions</th>
                     </tr>
                     </thead>
@@ -169,39 +170,6 @@
              </div>
          </div>
      </div>
-    {{--<div class="modal fade" id="edit_responsible_modal" role="dialog" aria-labelledby="edit_responsible_modal_title" aria-hidden="true">
-         <div class="modal-dialog modal-lg" role="document">
-             <div class="modal-content">
-                 <div class="modal-header">
-                     <h4 class="modal-title" id="edit_responsible_modal_title">Edit Responsible(s)</h4>
-
-                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                         <span aria-hidden="true">×</span>
-                     </button>
-                 </div>
-                 <div class="modal-body text-center">
-                     <form id="edit_responsible_form" class="form-horizontal mb-1 justify-content-center" method="post" action="{{ route('admin.month_closing.pending.assign_update') }}" novalidate="novalidate">
-                        @csrf
-                         <input type="hidden" name="shipment_id" id="edit_responsible_person_shipment_id">
-
-                         <div id="edit_deduct_individual_div">
-
-                         </div>
-
-                         <div class="form-group">
-                             <textarea name="remarks" class="form-control remarks" placeholder="Remarks" data-rule-required="true" data-msg-required="Remarks required"></textarea>
-
-                         </div>
-                         <div class="form-group ml-1">
-                             <button type="submit" name="save" class="btn btn-primary save" value="save">Save</button>
-                         </div>
-                     </form>
-
-                 </div>
-
-             </div>
-         </div>
-     </div>--}}
 
 @endsection
 
@@ -380,6 +348,7 @@
                             head.push('Consignee Address');
                             head.push('Comments');
                             head.push('Closing Status');
+                            head.push('Arrival Date');
 
 
                             $.each(result.data, function(index, values) {
@@ -402,6 +371,7 @@
                                 row.push(values.consignee_address);
                                 row.push(values.remarks);
                                 row.push(values.closing_status);
+                                row.push(values.arrival_Date);
 
 
                                 body.push(row);
@@ -632,6 +602,7 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'remarks', name: 'mc.remarks', class: 'align-middle remarks'},
                     {data: 'closing_status', name: 'mcs.name', class: 'align-middle closing_status'},
+                    {data: 'arrival_date', name: 'sj.created_at', class: 'align-middle arrival_date'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -650,9 +621,6 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    // var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    // var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
-                    // var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -660,22 +628,6 @@
                         if ( $(header).is('.select') || $(header).is('.serial_number') ||  $(header).is('.action') ) {
                             $(td).appendTo($(search));
                         }
-                        // else if($(header).is('.status')){
-                        //     $(drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }else if($(header).is('.mode')){
-                        //     $(mode_drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }else if($(header).is('.service_type')){
-                        //     $(service_drop_select).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -687,31 +639,6 @@
                         }
                     });
 
-
-                    // $("#status_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data,
-                    //       placeholder: "Select Status",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
-                    //
-                    //
-                    //   $("#mode_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data1,
-                    //       placeholder: "Select Mode",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
-                    //
-                    //   $("#service_select").prepend('<option value="" selected></option>').select2({
-                    //       data:data2,
-                    //       placeholder: "Select Service",
-                    //       width:'100%',
-                    //       containerCssClass: 'select-xs',
-                    //       dropdownCssClass: 'form-control-sm p-0'
-                    //   });
                     this.api().table().columns.adjust();
                 }
             });
@@ -765,7 +692,6 @@
                 }
             });
 
-            // var deduct_amount_switch = document.querySelector('.switchery.deduct_switch');
             $('#deduct_switch').on('change',function(){
                 deduct_amount_switch_change = document.querySelector('#deduct_switch');
                 user_switch = document.querySelector('#user_switch');
@@ -844,19 +770,6 @@
                         $('#add_responsible_modal').modal('show');
                         $('#responsible_person_shipment_ids').val(shipment_id);
                     }
-                    /*else if($(this).hasClass('edit_responsible')){
-                        $.ajax({
-                            url: '{!! route('admin.month_closing.pending.assign_details') !!}',
-                            method: 'POST',
-                            data: {
-                                'shipment_id': shipment_id,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        })
-                        .done(function(data) {
-                            console.log(data)
-                        });
-                    }*/
                 }
             });
 
