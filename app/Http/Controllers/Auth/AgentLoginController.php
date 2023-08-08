@@ -105,7 +105,7 @@ class AgentLoginController extends Controller
                                 $errors = [$this->username() => trans('auth.failed')];
                                 return redirect()->back()->withErrors($errors);
                             } else {
-                                $errors = 'You are not allowed in this Time Slot';
+                                $errors = 'Login Not Permitted During This Time Slot';
                                 return redirect()->back()->withErrors($errors);
                             }
                         } else {

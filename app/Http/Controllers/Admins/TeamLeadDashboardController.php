@@ -195,6 +195,7 @@ class TeamLeadDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
 
+        DB::enableQueryLog();
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -213,30 +214,10 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.line_manager_id', Auth::id())
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
-            ->groupBy('staff.CNIC');
+            ->distinct('staff.CNIC');
         
 
         // dd($employees->get());
-
-        $environment = config('app.env');
-
-        if ($environment == 'staging') {
-            $employees = $employees->orderBy('employees.updated_at', 'desc');
-        }
-
-        if (session('role_id') != 1) {
-            $employees = $employees->whereIn('cities.hub_id', session('hubs'));
-        }
-
-        if ($line_manager = $request->get('search_line_manager')) {
-            $employees = $employees->where('employees.line_manager_id', $line_manager);
-        }
-
-        if ($filter_line_manager = $request->get('filter_line_manager')) {
-            if ($filter_line_manager == 1) {
-                $employees = $employees->where('employees.is_line_manager', 1);
-            }
-        }
 
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
@@ -384,16 +365,6 @@ class TeamLeadDashboardController extends Controller
                 }
             });
 
-        if ($request->get('search_date_from')) {
-            if ($request->get('search_date_to')) {
-                $from = $request->get('search_date_from') . ' 00:00:00';
-                $to = $request->get('search_date_to') . ' 23:59:59';
-                $datatable->whereBetween('employees.created_at', [$from, $to]);
-            } else {
-                $from = $request->get('search_date_from');
-                $datatable->whereDate('employees.created_at', $from);
-            }
-        }
         return $datatable->make(true);
     }
 
