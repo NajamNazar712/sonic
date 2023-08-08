@@ -214,10 +214,12 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.line_manager_id', Auth::id())
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
-            ->distinct('staff.CNIC');
+            ->distinct('staff.CNIC')->get();
+            $query = DB::getQueryLog();
+            dd($query);
         
 
-        dd($employees->get());
+        // dd($employees->get());
 
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
