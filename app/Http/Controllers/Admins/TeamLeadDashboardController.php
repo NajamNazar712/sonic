@@ -195,8 +195,8 @@ class TeamLeadDashboardController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 117);
         }
 
-        $empid = Admin::where('id',Auth::id())->employee_id;
-        DB::enableQueryLog();
+        $empid = Admin::find(Auth::id())->employee_id;
+        // DB::enableQueryLog();
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -215,9 +215,10 @@ class TeamLeadDashboardController extends Controller
             ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
-            ->distinct('staff.CNIC')->get();
-            $query = DB::getQueryLog();
-            dd($query);
+            ->distinct('staff.CNIC');
+            // ->get();
+            // $query = DB::getQueryLog();
+            // dd($query);
         
 
         // dd($employees->get());
