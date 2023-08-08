@@ -168,7 +168,7 @@
 
                     dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     buttons:[{
-                        className: 'btn btn-primary mb-1',
+                        className: 'btn btn-primary',
                         text: '<i class="la la-plus"></i> Add Rider',
                         action:function (e) {
                             $('#add_rider_hub_modal').modal('show');
