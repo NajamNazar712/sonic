@@ -961,7 +961,7 @@ class Permission
             'settings.consignee_sms_expire.index' => 683,
 			'settings.sales.user_restriction.index' => 681,
 
-            'settings.return_shipments_address.index' => 689,
+            'settings.return_shFipments_address.index' => 689,
 
             'settings.return_reason_mandatory.index' => 684,
             'settings.return_reason_mandatory.list' => 684,

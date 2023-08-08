@@ -10326,16 +10326,24 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 218) {
+                    $employee = $reference_1_id;
                     $role = $reference_2_id;
-                    $admin = Admin::find($reference_1_id);
-                    if ($admin && $role) {
-                        if (strpos($body, '[admin]') !== FALSE) {
-                            $body = str_replace('[admin]', $admin->name, $body);
+                    if ($employee && $role) {
+                        if (strpos($body, '[employee_name]') !== FALSE) {
+                            $body = str_replace('[employee_name]', $employee->name, $body);
                         }
-                        if (strpos($body, '[role]') !== FALSE) {
-                            $body = str_replace('[role]', $role, $body);
+                        if (strpos($body, '[employee_type]') !== FALSE) {
+                            $body = str_replace('[employee_type]', $employee->employee_type->name, $body);
                         }
-                        $to = ['anas.anwer@trax.pk', 'danish.zahid@trax.pk', 'umair.badar@trax.pk'];
+
+                        if (strpos($body, '[updated_by]') !== FALSE) {
+                            $body = str_replace('[updated_by]', Auth::user()->name, $body);
+                        }
+
+                        if (strpos($body, '[depatment]') !== FALSE) {
+                            $body = str_replace('[depatment]', $employee->department->name, $body);
+                        }
+                        $to = $role;
                         self::email($subject, $body, $to);
                     }
                 }
@@ -10395,7 +10403,7 @@ class NotificationsController extends Controller
 
                                 $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . (isset($rv_shipment->rv_sub_status->name) ? $rv_shipment->rv_sub_status->name : '---') . '</td>';
                             } else {
-                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . 'NO Reason' . '</td>';
+                                $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . '-----' . '</td>';
 
                             }
                             $html .= '</tr>';

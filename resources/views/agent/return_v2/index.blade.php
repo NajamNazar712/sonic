@@ -108,7 +108,7 @@
                                         </div>
                                     </div>
 
-                                    <input type="hidden" id="trax_id" value="{{ $user->trax_id }}">
+                                    <input type="hidden" id="phone_number" value="{{ $user->phone_number }}">
                                     <div class="row justify-content-between">
                                         <div class="col-2">
                                             <h6 class="mt-2">Agent Employee ID</h6>
@@ -1206,9 +1206,9 @@
                     var fake_status = $('#fake_status_id').val();
                     var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
-                    var trax_id = $('#trax_id').val();
+                    var phone_number = $('#phone_number').val();
 
-                    console.log(trax_id)
+                    console.log(phone_number)
 
                     $.ajax({
                             url: '{!! route('agent.dashboard.submit_ticket') !!}',
@@ -1231,7 +1231,7 @@
                                 'intercept_type':intercept_type,
                                 'consignee_email':consignee_email,
                                 'amount':amount,
-                                'trax_id':trax_id
+                                'phone_number':phone_number
 
                             }
 

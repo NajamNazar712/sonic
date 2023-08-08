@@ -57,10 +57,11 @@ class AgentLoginController extends Controller
 
         $admin = Admin::where('phone_number', $request->phone_number)->first();
         if ($admin) {
-            $employee = Employee::where('trax_id', $admin->trax_id)
+            $employee = Employee::where('phone_number', $admin->phone_number)
                 ->where('staff_category_id', 3)
                 ->where('status_id', '!=', 2)
                 ->first();
+
 
             if ($employee) {
                 $today = Carbon::today();

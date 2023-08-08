@@ -12,7 +12,7 @@
 
 
 
-    <input type="hidden" class="datepicker">
+    {{-- <input type="hidden" class="datepicker"> --}}
     <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
         aria-hidden="true">
 
@@ -83,7 +83,7 @@
                 <th class="border-primary border-darken-1">Replacement Name</th>
                 <th class="border-primary border-darken-1">Request/Document Status</th> --}}
                 <th class="border-primary border-darken-1">Employee Status</th>
-                <th class="border-primary border-darken-1">Requested At</th>
+                {{-- <th class="border-primary border-darken-1">Requested At</th> --}}
                 {{-- <th class="border-primary border-darken-1">Joining Date</th> --}}
                 <th class="border-primary border-darken-1">Last Working Date</th>
                 {{-- <th class="border-primary border-darken-1">Remarks</th> --}}
@@ -582,7 +582,7 @@
                             // head.push('Repalcement Name');
                             // head.push('Request/Document Status');
                             head.push('Employee Status');
-                            head.push('Requested At');
+                            // head.push('Requested At');
                             // head.push('Joining Date');
                             head.push('Last Working Date');
                             // head.push('Remarks');
@@ -611,7 +611,7 @@
                                 // row.push(values.r_name);
                                 // row.push(values.request_status);
                                 row.push(values.status);
-                                row.push(values.requested_at);
+                                // row.push(values.requested_at);
                                 // row.push(values.joining_date);
                                 row.push(values.last_working_date);
                                 // row.push(values.remarks);
@@ -982,11 +982,11 @@
                         name: 'es.id',
                         class: 'align-middle status'
                     },
-                    {
-                        data: 'requested_at',
-                        name: 'employees.created_at',
-                        class: 'align-middle requested_at'
-                    },
+                    // {
+                    //     data: 'requested_at',
+                    //     name: 'employees.created_at',
+                    //     class: 'align-middle requested_at'
+                    // },
                     // {
                     //     data: 'joining_date',
                     //     name: 'employees.joining_date',
