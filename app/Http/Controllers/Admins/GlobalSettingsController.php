@@ -8802,9 +8802,30 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function rider_assigned_hub_edit(Request $request, $value)
+    public function rider_assigned_hub_edit(Request $request)
     {
         // TODO: Implement method.
-        dd(1);
+        $rider_info = array();
+        $id = $request->id;
+        $rider = RiderAssignedHubForDeliveryNote::find($id);
+        //$rider_name = Rider::find($rider->rider_id);
+
+        $rider_info['id'] = $rider->id;
+        $hub_ids = explode(',',$rider->hubs);
+
+        $hub_name = City::whereIn('id',$hub_ids)->select('name','id')->get();
+
+        $rider_info['hubs'] = $hub_name->toArray();
+        return response(['status' => 0,'data'=>$rider_info]);
+    }
+
+    public function rider_assigned_hub_edit_submit(Request $request)
+    {
+        $id = $request->edit_id;
+        $hubs = implode(',',$request->edit_hubs);
+
+        $existing_rider = RiderAssignedHubForDeliveryNote::where('id',$id)->update(['hubs' => $hubs]);
+
+        return redirect()->back()->with('success', 'Settings Updated!');
     }
 }
