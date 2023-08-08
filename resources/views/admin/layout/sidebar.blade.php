@@ -608,7 +608,7 @@
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(44, session('permissions')))
                                         <li><a class="menu-item"
-                                                href="{{ route('admin.return.index') }}">Confirmation Pending</a>
+                                                href="{{ route('admin.return.index') }}">Shipment - Reason Validation Required</a>
                                         </li>
                                     @endif
 

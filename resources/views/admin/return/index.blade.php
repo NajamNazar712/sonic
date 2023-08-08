@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
-@section('title', 'Return Confirmation Pending Shipments')
+@section('title', 'Shipment - Reason Validation Required')
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmation Pending Shipments
+        Shipment - Reason Validation Required
     </h1>
 
 
