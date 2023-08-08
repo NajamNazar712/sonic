@@ -21,18 +21,6 @@ class RetailLoginController extends Controller
 }
 
     public function showLoginForm(){
-        // $background_image = BackgroundImage::first();
-        // if($background_image != null)
-        // {
-        //     $background_image['path'] = 'storage/'.$background_image->picture_path;
-        //     $background_image['version'] = $background_image->version;
-        // }
-        // else
-        // {
-        //     $background_image['path'] = "/img/promo-background-11-07-2023.png";
-        //     $background_image['version'] = "2.6";
-
-        // }
         $background_image = BackgroundImage::where('background_image_screen_id', 3)->latest()->first();
         if ($background_image) {
             $background_image['path'] = 'storage/' . $background_image->picture_path;
