@@ -217,7 +217,7 @@ class TeamLeadDashboardController extends Controller
             ->distinct('staff.CNIC');
         
 
-        // dd($employees->get());
+        dd($employees->get());
 
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
