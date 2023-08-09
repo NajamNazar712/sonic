@@ -26,7 +26,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Select From Date" title="Select From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                                       id="search_date_from" placeholder="Select From Date" title="Select From Date" data-value="{{ Carbon\Carbon::today()->subDays(30) }}">
                                             </div>
                                         </div>
                                         <div class="col-3 mt-1">
@@ -1571,7 +1571,7 @@
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
-                deferLoading: 0,
+                // deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
