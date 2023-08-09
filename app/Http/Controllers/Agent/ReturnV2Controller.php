@@ -129,9 +129,7 @@ class ReturnV2Controller extends Controller
                         $shipment = [];
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
-
                         if ($shipment) {
-
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
@@ -210,6 +208,10 @@ class ReturnV2Controller extends Controller
                             }
                         }
 
+                        else{
+                            //No Shipment Found in Assigned Hub
+                            return response()->json(['status' => 5]);
+                        }
 
                     } else {
                         Auth::logout();

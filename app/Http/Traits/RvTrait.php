@@ -1381,7 +1381,6 @@ trait RvTrait
             $shipments = [];
             
             if (!empty($included_shippers)) {
-
                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
                     // ->where('id',1724981)
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
@@ -1417,7 +1416,6 @@ trait RvTrait
                     }
 
                     // Shipment is found and already in working state or return is completed, will not assigned to agent
-
                     $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->first();
                     if ($find_shipment_assigned_agent) {
                         return false;
@@ -1439,7 +1437,8 @@ trait RvTrait
                     return true;
                 }
                 // this check will work if agent gets the ticket 
-                else{
+                else
+                {
                     foreach ($shipments as $key => $shipment) {
                         # code...
                         // if agent shipment is open - assigned to any user who comes first
@@ -1480,7 +1479,12 @@ trait RvTrait
                     }
                 }
             }
+            else {
+                //No Shipment Found in Assigned Hub
+                return false;
+            }
         }
+
         return $shipment;
     }
 }

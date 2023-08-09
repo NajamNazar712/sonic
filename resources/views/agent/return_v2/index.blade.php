@@ -961,9 +961,19 @@
                                 window.location.href = "{{ route('agent.login') }}";
                             } else if (data.status == 4) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            } else if (data.status == 2) {
+                            } 
+                            else if (data.status == 2) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Assigned!";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            }
+
+                            else if (data.status == 5) {
+                                $('#get_ticket_button').prop('disabled', false);
+                                var error = "No Shipment Found in Assigned Hub";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
