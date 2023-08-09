@@ -1481,7 +1481,6 @@ trait RvTrait
                 }
             }
         }
-        // return $shipment;
-        return true;
+        return $shipment;
     }
 }
