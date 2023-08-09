@@ -99,7 +99,7 @@
                                     </div>
                                     <div class="col-6">
                                             <div class="content-body chat-application">
-                                                <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
+                                                <section class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
                                                     <div class="chats">
                                                         @if(!empty($comments))
                                                             @php
@@ -186,7 +186,7 @@
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control width-400 height-75" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control width-600 height-200" placeholder="Type your message"></textarea>
                                                         </fieldset>
 
                                                         <div class="display-inline-block col">
@@ -316,6 +316,17 @@
             filter: grayscale(0);
             font-size: 4rem;
         }
+        
+
+        
+        .chat-application .chat-app-form {
+            position: relative;
+    padding: 20px 10px;
+    background-color: #edeef0;
+    overflow: hidden;
+    height: 280px;
+        }
+
     </style>
 @endsection
 
