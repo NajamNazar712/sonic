@@ -231,7 +231,7 @@
                                 row.push(values.consignee_address);
                                 row.push(values.remarks);
                                 row.push(values.closing_status);
-                                row.push(values.arrival_Date);
+                                row.push(values.arrival_date);
 
 
                                 body.push(row);
