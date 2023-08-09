@@ -963,7 +963,7 @@
                                 window.location.href = "{{ route('agent.login') }}";
                             } else if (data.status == 2) {
                                 $('#get_ticket_button').prop('disabled', false);
-                                var error = "No Shipment Assigned";
+                                var error = "No Shipment Assigned!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
