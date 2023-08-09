@@ -563,6 +563,8 @@ class AdminCRMController extends Controller
     }
 
     public function request_details(Request $request,$id){
+
+    
         $crm_request = CrmRequest::find($id);
         if($crm_request){
             $shipment_status = null;

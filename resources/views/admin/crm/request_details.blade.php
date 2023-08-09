@@ -342,7 +342,7 @@
                                     <div class="col-7">
                                         <div class="content-body chat-application">
                                             <section
-                                                    class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">
+                                                    class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible">
                                                 <div class="chats">
                                                     @if(!empty($comments))
 
@@ -447,7 +447,7 @@
                                             </section>
 
                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
-                                                <section class="chat-app-form">
+                                                <section class="chat-app-form pb-0">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
                                                                 class="form-group position-relative has-icon-left col-9 m-0">
@@ -554,7 +554,7 @@
                                                         </div>
                                                 </div>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
-                                                <section class="chat-app-form">
+                                                <section class="chat-app-form pb-0">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
                                                                 class="form-group position-relative has-icon-left col-9 m-0">
@@ -1368,6 +1368,14 @@
             background-color: #1e9ff2;
         }
 
+        .chat-application .chat-app-form {
+            position: relative;
+    padding: 20px 10px;
+    background-color: #edeef0;
+    overflow: hidden;
+    height: 280px;
+        }
+
         .chat-application .chats .chat-left .chat-content:before {
             border-right-color: #1e9ff2;
         }
@@ -1926,6 +1934,8 @@
             $('.chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
+
+                console.log(comment)
                 $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch = parseInt($(this).attr('to'));
