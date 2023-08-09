@@ -6728,10 +6728,14 @@ class AdminReportsController extends Controller
                 return $responsible_hub;
             })
             ->editColumn('last_status_date', function($request){
-                if($request->last_status_date == NULL){
+
+                $shipment = Shipment::where('tracking_number', $request->tracking_number)->first();
+                $last_shipment = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+
+                if(!isset($last_shipment)){
                     return '---';
                 }else{
-                    return Carbon::parse($request->last_status_date);
+                    return Carbon::parse($last_shipment->created_at);
                 }
             })
             ->addColumn('responsible_zone', function ($requests) {
