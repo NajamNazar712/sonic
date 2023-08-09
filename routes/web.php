@@ -2032,14 +2032,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
 
-   
-
     Route::prefix('cx_quick_tracking')->name('cx_quick_tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@cx_quick_tracking_index')->name('cx_index');
         Route::get('list', 'Admins\AdminTrackingController@cx_quick_tracking_list')->name('cx_list');
         Route::post('update', 'Admins\AdminTrackingController@cx_quick_tracking_update_consignee_info_and_special_instructions')->name('update');
     });
 
+
+    Route::prefix('crm_permission')->name('crm_permission.')->group(function () {
+        Route::get('roles/permissions', 'Admins\UserManagementController@crm_role_permission_index')->name('index');
+        Route::get('roles/add', 'Admins\UserManagementController@role_add_index')->name('add');
+        Route::post('list', 'Admins\UserManagementController@crm_role_permission_list')->name('list');
+        Route::get('bulk_add/{id}', 'Admins\UserManagementController@crm_update_index')->name('bulk_add');
+        Route::post('bulk_add', 'Admins\UserManagementController@role_crm_bulk_add_store')->name('bulk_add.store');
+        Route::get('bulk_remove/{id}', 'Admins\UserManagementController@delete_crm_update_index')->name('bulk_remove');
+        Route::get('bulk_remove', 'Admins\UserManagementController@delete_bulk_remove_store')->name('bulk_remove.remove');
+
+    });
     Route::prefix('user_management')->name('user_management.')->group(function () {
         Route::prefix('users')->name('users.')->group(function () {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
