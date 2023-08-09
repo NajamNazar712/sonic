@@ -147,6 +147,10 @@
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
                         <th class="border-primary border-darken-1">Difference Amount</th>
+                        <th class="border-primary border-darken-1">HBL Amount</th>
+                        <th class="border-primary border-darken-1">1Link Amount</th>
+                        <th class="border-primary border-darken-1">Trax Pay Amount</th>
+                        <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -1107,6 +1111,30 @@
                         searchable: false
                     },
                     {
+                        data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },{
+                        data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },{
+                        data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },{
+                        data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },{
                         data: 'difference_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
