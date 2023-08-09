@@ -519,28 +519,18 @@
                             head = [];
                             head.push('S.No');
                             head.push('Employee ID');
-                            // head.push('Employee Old Trax ID');
                             head.push('Employee Name');
                             head.push('Hub');
                             head.push('City');
                             head.push('CNIC');
                             head.push('Phone No.');
-                            // head.push('Official Email');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
                             head.push('Designation');
                             head.push('Department Name');
                             head.push('Line Manager');
-                            // head.push('IBAN No.');
-                            // head.push('Zone Name');
-                            // head.push('Repalcement Tax ID');
-                            // head.push('Repalcement Name');
-                            // head.push('Request/Document Status');
                             head.push('Employee Status');
-                            // head.push('Requested At');
-                            // head.push('Joining Date');
                             head.push('Last Working Date');
-                            // head.push('Remarks');
                             head.push('Confirmation Status');
                             head.push('Available');
 
@@ -548,28 +538,18 @@
                                 row = [];
                                 row.push(index + 1);
                                 row.push(values.trax_id);
-                                // row.push(values.old_trax_id);
                                 row.push(values.employee_name);
                                 row.push(values.employee_hub);
                                 row.push(values.city);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
-                                // row.push(values.official_email);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
                                 row.push(values.employee_designation);
                                 row.push(values.department_name);
                                 row.push(values.line_manager);
-                                // row.push(values.iban);
-                                // row.push(values.zone_name);
-                                // row.push(values.r_trax_id);
-                                // row.push(values.r_name);
-                                // row.push(values.request_status);
                                 row.push(values.status);
-                                // row.push(values.requested_at);
-                                // row.push(values.joining_date);
                                 row.push(values.last_working_date);
-                                // row.push(values.remarks);
                                 row.push(values.confirmation_status);
                                 row.push(values.attendance_date);
 
@@ -1250,12 +1230,10 @@
             });
 
             $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign_hub', function() {
-                // var employee_id = parseInt($(this).parents('tr').attr('id'));
                 
                 var employeeId = $(this).attr('data-id');
                 var cities = $(this).attr('data-city');
                 
-                console.log(cities);
                 $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
                     employeeId + '">');
 
@@ -1275,7 +1253,8 @@
                     $('#search_origin').trigger('change');
 
 
-                } else if (rv_city == null) {
+                } 
+                else if (rv_city == null) {
                     $("#search_origin option").prop("selected", false).trigger("change");
 
                 }
@@ -1303,16 +1282,10 @@
                     });
                 }
 
-                // var hub_id = $(this).attr('data-hub_id');
-                // $('#AssignHubModal #search_origin').val(hub_id).trigger('change');
-
-
                 var id = $(this).data('target-id');
                 $('#AssignHubModal .employee_type').val(1);
                 $('#AssignHubModal .employee_id').val(id);
                 $('#AssignHubModal').modal('show');
-
-                
             });
 
 
