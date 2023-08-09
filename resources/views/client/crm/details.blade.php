@@ -186,7 +186,7 @@
                                                                 <i class="la la-chevron-right"></i>
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control width-600 height-200" placeholder="Type your message"></textarea>
+                                                            <textarea id="chat_input" class="form-control width-600 height-200 summernote" placeholder="Type your message"></textarea>
                                                         </fieldset>
 
                                                         <div class="display-inline-block col">
@@ -261,6 +261,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/summernote/summernote.css')}}">
+
     <style>
         .chat-application .chat-app-window {
             padding: 20px 10px;
@@ -338,9 +340,20 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/summernote/summernote.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('.summernote').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                ],
+
+            });
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
             });
@@ -350,7 +363,7 @@
             $('#chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br>');
-                $('#chat_input').val('');
+                $('.summernote').summernote('reset'); 
                 var request_id = '{{$crm_details->id}}';
                 if(comment == ''){
                     flag = false;
@@ -373,6 +386,9 @@
                             // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             var user = '{{session('user_type')}}';
                             var shipper = 'You';
+                            $('#chat_input').val();
+
+                            console.log(1)
                             if(user == 1){
                                 if($('div.chat:last-child').hasClass('shipper')) {
                                     var html = '<div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';

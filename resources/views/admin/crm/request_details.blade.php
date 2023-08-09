@@ -459,7 +459,7 @@
 
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
+                                                            <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -565,7 +565,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200 summernote" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -1028,7 +1028,7 @@
                                     <div class="row justify-content-center">
                                         <div class="col-8">
                                             <fieldset class="form-group">
-                                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
+                                                <textarea class="form-control summernote"  name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
                                             </fieldset>
                                         </div>
                                     </div>
@@ -1304,7 +1304,7 @@
                                     {{-- <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control"> --}}
                                 </div>
                                 <div class="col-12 text-left">
-                                    <textarea name="special_approve_reject_reason" id="special_approve_reject_reason" cols="92" rows="5"> {{!empty($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
+                                    <textarea name="special_approve_reject_reason" class="summernote" id="special_approve_reject_reason" cols="92" rows="5"> {{!empty($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
                                 </div>
                             </div>
                             <div class="row justify-content-center mt-2 ml-2">
@@ -1330,6 +1330,9 @@
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/summernote/summernote.css')}}">
+
+
     <style>
         .half-margin {
             margin: 8px 0 0 0 !important;
@@ -1458,6 +1461,8 @@
             filter: grayscale(0);
             font-size: 4rem;
         }
+
+      
     </style>
 @endsection
 
@@ -1471,8 +1476,22 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/summernote/summernote.js')}}" type="text/javascript"></script>
+
+    
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('.summernote').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['fontsize', ['fontsize']],
+                    ['color', ['color']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                ],
+
+            });
+
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -2015,6 +2034,7 @@
 
                             $('#last_comment_id').val(data.last_comment_id);
                             last_comment_edit(last_comment, comment);
+                            $('.summernote').summernote('reset'); 
 
                             updateScroll();
                         }
