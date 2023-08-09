@@ -64,29 +64,18 @@
     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
         <thead>
             <tr class="bg-primary white">
-                {{--                                    <th class="border-primary border-darken-1"></th> --}}
                 <th class="border-primary border-darken-1">S No.</th>
                 <th class="border-primary border-darken-1">Employee ID</th>
-                {{-- <th class="border-primary border-darken-1">Old Employee ID</th> --}}
                 <th class="border-primary border-darken-1">Employee Name</th>
-
                 <th class="border-primary border-darken-1">Hub</th>
                 <th class="border-primary border-darken-1">City</th>
                 <th class="border-primary border-darken-1">CNIC</th>
                 <th class="border-primary border-darken-1">Phone Number</th>
-                {{-- <th class="border-primary border-darken-1">Official Email</th> --}}
                 <th class="border-primary border-darken-1">Employee Type</th>
                 <th class="border-primary border-darken-1">Designation</th>
                 <th class="border-primary border-darken-1">Department</th>
-                {{-- <th class="border-primary border-darken-1">Zone</th> --}}
-                {{-- <th class="border-primary border-darken-1">Replacement Trax ID</th>
-                <th class="border-primary border-darken-1">Replacement Name</th>
-                <th class="border-primary border-darken-1">Request/Document Status</th> --}}
                 <th class="border-primary border-darken-1">Employee Status</th>
-                {{-- <th class="border-primary border-darken-1">Requested At</th> --}}
-                {{-- <th class="border-primary border-darken-1">Joining Date</th> --}}
                 <th class="border-primary border-darken-1">Last Working Date</th>
-                {{-- <th class="border-primary border-darken-1">Remarks</th> --}}
                 <th class="border-primary border-darken-1">Confirmation Status</th>
                 <th class="border-primary border-darken-1">Available</th>
                 <th class="border-primary border-darken-1"></th>
@@ -459,40 +448,6 @@
                     });
             });
 
-
-
-
-
-            $('body').on('click', '.assign_hub', function() {
-
-
-                var employeeId = $(this).attr('data-id');
-                var cities = $(this).attr('data-city');
-                console.log(cities);
-                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
-                    employeeId + '">');
-
-                var selectedCities = cities.toString().split(',');
-
-                if (rv_city != null) {
-                    $('#search_origin option').each(function() {
-                        var optionValue = $(this).val();
-
-                        if (selectedCities.includes(optionValue)) {
-                            $(this).prop('selected', true);
-                        } else {
-                            $(this).prop('selected', false);
-                        }
-                    });
-
-                    $('#search_origin').trigger('change');
-
-
-                } else if (rv_city == null) {
-                    $("#search_origin option").prop("selected", false).trigger("change");
-
-                }
-            });
 
             var area = '';
             var territory = '';
@@ -885,141 +840,25 @@
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
+                    { orderable: false,searchable: false,name: 'serial_number',class: 'align-middle serial_number',targets: 0,
                         render: function(data, type, row) {
                             return '';
                         }
                     },
-                    {
-                        data: 'trax_id',
-                        name: 'employees.trax_id',
-                        class: 'align-middle trax_id'
-                    },
-                    // {
-                    //     data: 'old_trax_id',
-                    //     name: 'employees.old_trax_id',
-                    //     class: 'align-middle old_trax_id'
-                    // },
-
-
-                    {
-                        data: 'employee_name',
-                        name: 'employees.name',
-                        class: 'align-middle employee_name'
-                    },
-
-                    {
-                        data: 'employee_hub',
-                        name: 'employee_hub',
-                        class: 'align-middle employee_hub',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'city',
-                        name: 'cities.name',
-                        class: 'align-middle city'
-                    },
-                    {
-                        data: 'cnic',
-                        name: 'employees.cnic',
-                        class: 'align-middle cnic'
-                    },
-                    {
-                        data: 'phone_number',
-                        name: 'employees.phone_number',
-                        class: 'align-middle phone_number'
-                    },
-                    // {
-                    //     data: 'official_email',
-                    //     name: 'employees.official_email',
-                    //     class: 'align-middle official_email'
-                    // },
-                    {
-                        data: 'employee_type',
-                        name: 'et.name',
-                        class: 'align-middle employee_type'
-                    },
-
-                    {
-                        data: 'employee_designation',
-                        name: 'ed.name',
-                        class: 'align-middle employee_designation'
-                    },
-                    {
-                        data: 'department_name',
-                        name: 'ads.name',
-                        class: 'align-middle department_name'
-                    },
-
-                    // {
-                    //     data: 'zone_name',
-                    //     name: 'ez.id',
-                    //     class: 'align-middle zone_name'
-                    // },
-                    // {
-                    //     data: 'r_trax_id',
-                    //     name: 'r_emp.trax_id',
-                    //     class: 'align-middle r_trax_id'
-                    // },
-                    // {
-                    //     data: 'r_name',
-                    //     name: 'r_emp.name',
-                    //     class: 'align-middle r_name'
-                    // },
-                    // {
-                    //     data: 'request_status',
-                    //     name: 'ers.name',
-                    //     class: 'align-middle request_status'
-                    // },
-                    {
-                        data: 'status',
-                        name: 'es.id',
-                        class: 'align-middle status'
-                    },
-                    // {
-                    //     data: 'requested_at',
-                    //     name: 'employees.created_at',
-                    //     class: 'align-middle requested_at'
-                    // },
-                    // {
-                    //     data: 'joining_date',
-                    //     name: 'employees.joining_date',
-                    //     class: 'align-middle joining_date'
-                    // },
-                    {
-                        data: 'last_working_date',
-                        name: 'employees.last_working_date',
-                        class: 'align-middle last_working_date'
-                    },
-                    // {
-                    //     data: 'remarks',
-                    //     name: 'employees.remarks',
-                    //     class: 'align-middle remarks'
-                    // },
-                    {
-                        data: 'confirmation_status',
-                        name: 'employees.confirmation_status',
-                        class: 'align-middle confirmation_status'
-                    },
-
-                    {
-                        data: 'attendance_date',
-                        name: 'ea.attendance_date',
-                        class: 'align-middle confirmation_status'
-                    },
-                    {
-                        data: 'action',
-                        name: 'action',
-                        class: 'align-middle text-center action',
-                        orderable: false,
-                        searchable: false
-                    }
+                    { data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
+                    { data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name' },
+                    { data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
+                    { data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    { data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
+                    { data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
+                    { data: 'employee_type', name: 'et.name', class: 'align-middle employee_type' },
+                    { data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation' },
+                    { data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
+                    { data: 'status', name: 'es.id', class: 'align-middle status'},
+                    { data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
+                    { data: 'confirmation_status', name: 'employees.confirmation_status', class: 'align-middle confirmation_status'},
+                    { data: 'attendance_date', name: 'ea.attendance_date', class: 'align-middle confirmation_status'},
+                    { data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false }
                 ],
                 rowCallback: function(row, data, index) {
                     // $('td:eq(0)', row).addClass('select-checkbox');
@@ -1040,8 +879,6 @@
                     var employee_type =
                         '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
                         '</select>';
-                    // var department_type = '<select name="department_type_search" id="department_type_search" class="select2 form-control">' +
-                    //     '</select>';
                     var employee_status =
                         '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
@@ -1084,13 +921,6 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
                         }
-                        // else if($(header).is('.department_name'))
-                        // {
-                        //     $(department_type).appendTo($(search))
-                        //         .on( 'change', function () {
-                        //             column.search($(this).val(), false, false, true).draw();
-                        //         } ).wrap(td);
-                        // }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -1417,9 +1247,72 @@
                             });
                     }
                 });
-                // var id = $(this).data('target-id');
-                // $('#employee_id').val(id);
-                // $('#approveRiderModal').modal('show');
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign_hub', function() {
+                // var employee_id = parseInt($(this).parents('tr').attr('id'));
+                
+                var employeeId = $(this).attr('data-id');
+                var cities = $(this).attr('data-city');
+                
+                console.log(cities);
+                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
+                    employeeId + '">');
+
+                var selectedCities = cities.toString().split(',');
+
+                if (rv_city != null) {
+                    $('#search_origin option').each(function() {
+                        var optionValue = $(this).val();
+
+                        if (selectedCities.includes(optionValue)) {
+                            $(this).prop('selected', true);
+                        } else {
+                            $(this).prop('selected', false);
+                        }
+                    });
+
+                    $('#search_origin').trigger('change');
+
+
+                } else if (rv_city == null) {
+                    $("#search_origin option").prop("selected", false).trigger("change");
+
+                }
+
+                if(employeeId){
+                    $.ajax({
+                        url: '{!! route('admin.settings.rider_assigned_hub.edit') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'employeeId': employeeId,
+                        }
+                    }).done(function(data){
+                        if (data.status === 0) {
+                            var row_id= data.data.id;
+                            var ids= [];
+                            var i=0;
+                            $.each(data.data.hubs, function(index, value) {
+                                ids[i] = value.id;
+                                i++;
+                            });
+
+                            $('#AssignHubModal #search_origin').val(ids).trigger('change');
+                        }
+                    });
+                }
+
+                // var hub_id = $(this).attr('data-hub_id');
+                // $('#AssignHubModal #search_origin').val(hub_id).trigger('change');
+
+
+                var id = $(this).data('target-id');
+                $('#AssignHubModal .employee_type').val(1);
+                $('#AssignHubModal .employee_id').val(id);
+                $('#AssignHubModal').modal('show');
+
+                
             });
 
 
@@ -1545,16 +1438,6 @@
                 $('#select_message_error').text('');
 
             });
-
-
-
-            $('body').on('click', '.assign_hub', function(e) {
-                var id = $(this).data('target-id');
-                $('#AssignHubModal .employee_type').val(1);
-                $('#AssignHubModal .employee_id').val(id);
-                $('#AssignHubModal').modal('show');
-            });
-
 
             $('#search_filter_btn').on('click', function() {
                 table.draw(true);
