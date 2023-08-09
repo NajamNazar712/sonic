@@ -8752,7 +8752,7 @@ class GlobalSettingsController extends Controller
             ->select('id','name')
             ->get();
 
-        $hubs = City::whereIn('id',$admin_hubs)->select('id','name')->get();
+        $hubs = City::whereIn('id',$admin_hubs)->where('hub',1)->select('id','name')->get();
         return view('admin.settings.last_mile.rider_assigned_hub')->with(['riders' => $riders, 'hubs' => $hubs]);
     }
 

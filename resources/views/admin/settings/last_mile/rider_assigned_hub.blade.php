@@ -274,7 +274,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update hub(s).',
+                        text: 'Select Yes to add hub(s).',
                         icon: 'warning',
                         buttons: {
                             cancel: {
