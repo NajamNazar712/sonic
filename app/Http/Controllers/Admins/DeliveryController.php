@@ -5851,7 +5851,7 @@ class DeliveryController extends Controller
                 }
 
             })
-            ->addColumn('1link_amount',function ($sdn){
+            ->addColumn('one_link_amount',function ($sdn){
                 $id = $sdn->sdn;
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$id)->select('delivery_note_id');
 
@@ -5900,7 +5900,60 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('cash_amount',function ($sdn){
-                return '-';
+                $id = $sdn->sdn;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$id)->select('delivery_note_id');
+
+                if ($delivery_note->exists())
+                {
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
+
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id',$delivery_note_id);
+                    if ($one_link_amount->exists())
+                    {
+                        $a = $one_link_amount->sum('transactions_amount');
+                    }
+                    else
+                    {
+                        $a = 0;
+                    }
+
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id',$delivery_note_id)->select('transactions_amount');
+                    if ($hbl_amount->exists())
+                    {
+                        $hbl_amount = $hbl_amount->first();
+                        $b = $hbl_amount->transactions_amount;
+                    }
+                    else
+                    {
+                        $b = 0;
+                    }
+
+                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id',$delivery_note_id);
+                    if ($trax_pay_amount->exists())
+                    {
+                        $c = $trax_pay_amount->sum('fintech_amount');
+                    }
+                    else
+                    {
+                        $c = 0;
+                    }
+
+                    $sum = $a + $b + $c;
+
+                    if ($sum > 0)
+                    {
+                        return $total = $sum - $sdn->sdn_amount;
+                    }
+                    else
+                    {
+                        return '-';
+                    }
+                }
+                else
+                {
+                    return '-';
+                }
             });
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {
