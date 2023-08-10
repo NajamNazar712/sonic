@@ -522,7 +522,7 @@
                                                     <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
                                                 </div>
                                                 <div class="col-3">
-                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
+                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Attachment Upload</button>
                                                 </div>
                                                 <div class="row">
                                                 @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)
@@ -1175,7 +1175,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">CRM Image Upload</h4>
+                    <h4 class="modal-title white">CRM Image Upload <strong>(Max 5 File(s) Are Allowed)</strong></h4>
 
                 </div>
                 <div class="modal-body  text-center">
@@ -2613,8 +2613,15 @@
                             var image_html = '';
                             $.each(data.images, function (index, image) {
                                 index++;
+
+                            const url = image['image'];
+                            const substringsToCheck = ["jpg", "png", "jpeg"];
+
+                            if (substringsToCheck.some(substr => url.includes(substr))) {
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                               
+                            } else {
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">Download</span></a>';
+                            }
                                 image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
                             });
                             $('#crm_image_view_table tbody').append(image_html);
@@ -2651,7 +2658,7 @@
                 if (typeof tr_id !== typeof undefined && tr_id !== false) {
                     var new_img_rows = $('#image_upload_table tbody tr').length;
                     new_img_rows = images_count + new_img_rows;
-                    if(new_img_rows >= 2){
+                    if(new_img_rows >= 5){
                         $('#image_upload_table .img_add_btn').attr('disabled', true);
                         return false;
                     }
@@ -2659,7 +2666,7 @@
 
                 rows_count++;
 
-                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension=".*" data-msg-extension="Only files with valid extensions are allowed" data-rule-maxsize="7168KB" data-msg-maxsize="File size must not exceed 7 MB (7168 Kbytes)" data-rule-required="true" data-msg-required="File is required">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -2678,7 +2685,7 @@
                     className: 'btn btn-primary img_add_btn',
                     text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
-                        if(images_count < 2){
+                        if(images_count < 5){
                             add_row();
                         }
                     }
@@ -2696,6 +2703,8 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
+
+
                 },
                 initComplete: function() {
 
@@ -2709,7 +2718,7 @@
                 if(row_id){
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes if you want to delete this image!',
+                        text: 'Select Yes if you want to delete this Attachment!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -2753,6 +2762,7 @@
             });
 
             $('body').on('click', 'a.remove_row',function () {
+                
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, selected_rows);
 
@@ -2776,7 +2786,7 @@
                     $('#selected_ids').val(selected_rows);
                     swal({
                         title: 'Please Wait!',
-                        text: 'Image is being uploaded!',
+                        text: 'Attachments is being uploaded!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

@@ -5766,14 +5766,13 @@ TRAX-Customer Experience';
         $crm_request = CrmRequest::find($crm_request_id);
         if($crm_request){
             $crm_request_images = $crm_request->images->count();
-            if($crm_request_images == 2){
+            if($crm_request_images == 5){
                 return redirect()->back()->with('error', 'Two images are already uploaded!');
             }
 
             foreach ($image_ids as $id){
                     $file_name = 'crm_image_'.$id;
                     $image = $request->file($file_name);
-
                     $extension = $image->getClientOriginalExtension();
                     $random = rand(1000, 100000);
                     $now = Carbon::now();
