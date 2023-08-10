@@ -5777,12 +5777,12 @@ TRAX-Customer Experience';
                     $random = rand(1000, 100000);
                     $now = Carbon::now();
                     $time = $now->year . '_' . $now->month;
-                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/crm_request_images'), $generated_image_name);
+                    $generated_file_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/crm_request_images'), $generated_file_name);
                     $crm_image = new CrmRequestImage();
                     $crm_image->crm_request_id = $crm_request_id;
                     $crm_image->added_by = Auth::id();
-                    $crm_image->image = $generated_image_name;
+                    $crm_image->image = $generated_file_name;
                     $crm_image->save();
             }
 
