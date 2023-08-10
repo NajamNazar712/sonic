@@ -5824,6 +5824,83 @@ class DeliveryController extends Controller
                 } else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('hbl_amount',function ($sdn){
+                $id = $sdn->sdn;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$id)->select('delivery_note_id');
+
+                if ($delivery_note->exists())
+                {
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
+
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id',$delivery_note_id)->select('transactions_amount');
+                    if ($hbl_amount->exists())
+                    {
+                        $hbl_amount = $hbl_amount->first();
+                        return $hbl_amount->transactions_amount;
+                    }
+                    else
+                    {
+                        return '-';
+                    }
+                }
+                else
+                {
+                    return '-';
+                }
+
+            })
+            ->addColumn('1link_amount',function ($sdn){
+                $id = $sdn->sdn;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$id)->select('delivery_note_id');
+
+                if ($delivery_note->exists())
+                {
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
+
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id',$delivery_note_id);
+                    if ($one_link_amount->exists())
+                    {
+                        return $one_link_amount->sum('transactions_amount');
+                    }
+                    else
+                    {
+                        return '-';
+                    }
+                }
+                else
+                {
+                    return '-';
+                }
+            })
+            ->addColumn('trax_pay_amount',function ($sdn){
+                $id = $sdn->sdn;
+                $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$id)->select('delivery_note_id');
+
+                if ($delivery_note->exists())
+                {
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
+
+                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id',$delivery_note_id);
+                    if ($trax_pay_amount->exists())
+                    {
+                        return $trax_pay_amount->sum('fintech_amount');
+                    }
+                    else
+                    {
+                        return '-';
+                    }
+                }
+                else
+                {
+                    return '-';
+                }
+            })
+            ->addColumn('cash_amount',function ($sdn){
+                return '-';
             });
         // ->filterColumn('zone', function ($query, $keyword) {
         //     if ($keyword == 0) {

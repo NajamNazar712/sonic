@@ -1116,26 +1116,30 @@
                         class: 'align-middle difference_amount',
                         orderable: false,
                         searchable: false
-                    },{
-                        data: 'difference_amount',
+                    },
+                    {
+                        data: 'hbl_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
                         searchable: false
-                    },{
-                        data: 'difference_amount',
+                    },
+                    {
+                        data: '1link_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
                         searchable: false
-                    },{
-                        data: 'difference_amount',
+                    },
+                    {
+                        data: 'trax_pay_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
                         searchable: false
-                    },{
-                        data: 'difference_amount',
+                    },
+                    {
+                        data: 'cash_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,
