@@ -319,6 +319,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('delivered_shipments', 'Shippers\ShipperFinanceController@payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Shippers\ShipperFinanceController@payments_returned_shipments')->name('returned_shipments');
             Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('fintech_shipments', 'Shippers\ShipperFinanceController@payments_fintech_shipments')->name('fintech_shipments');
             Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
             Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
 
@@ -2080,6 +2081,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('roles')->name('roles.')->group(function () {
             Route::get('', 'Admins\UserManagementController@role_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
+            Route::post('enable_disable', 'Admins\UserManagementController@role_status')->name('enable_disable');
 
             Route::prefix('add')->name('add.')->group(function () {
                 Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
@@ -2893,6 +2895,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('overland')->name('overland.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
+        });
+
+        Route::prefix('operations_performance')->name('operations_performance.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@operations_performance_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
     });
 
@@ -3715,6 +3722,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('airway_bill_address_visibility')->name('airway_bill_address_visibility.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_store')->name('store');
+        });
+        Route::prefix('background_image')->name('background_image.')->group(function () {
+            // Route::view('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
+            Route::get('', 'Admins\GlobalSettingsController@background_image_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
         });
 
     });

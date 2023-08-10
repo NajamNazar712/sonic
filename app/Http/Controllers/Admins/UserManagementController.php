@@ -274,10 +274,10 @@ class UserManagementController extends Controller
 
     public function user_add_index() {
         if (!in_array(session('role_id'), [1, 58])) {
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('is_active',1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->get();
         }
         $hubs = City::where('hub', 1)->get();
         $shifts = EmployeeShift::where('status', 1)->get();
@@ -412,10 +412,10 @@ class UserManagementController extends Controller
 
     public function user_update_index($id) {
         if (!in_array(session('role_id'), [1, 58])) {
-            $roles = AdminRole::with('department')->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->where('id', '!=', 1)->where('department_id', session('department_id'))->get();
         }
         else{
-            $roles = AdminRole::with('department')->get();
+            $roles = AdminRole::with('department')->where('is_active',1)->get();
         }
         $hubs = City::where('hub', 1)->get();
         $user = Admin::find($id);
@@ -490,7 +490,7 @@ class UserManagementController extends Controller
                 ActivityTrailController::createActivityTrailLog(Auth::id(),232,1);
             }
             $super_admins = [3, 5, 7, 665];
-            $hr_roles = AdminRole::where('department_id', 10)->pluck('id')->toArray();
+            $hr_roles = AdminRole::where('department_id', 10)->where('is_active',1)->pluck('id')->toArray();
             if(in_array(Auth::id(), $super_admins) && in_array($request->input('role_id'), $hr_roles)){
                 $admin->role_id = $request->input('role_id');
                 $admin->designation_id = $request->input('designation_id');
@@ -575,16 +575,34 @@ class UserManagementController extends Controller
     public function role_list(Request $request) {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
         ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-        ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
+        ->select('admin_roles.id', 'admin_roles.name', 'admin_roles.is_active', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by');
 
         $datatables = Datatables::of($roles)
+        ->addColumn('is_active', function($role) {
+            if($role->is_active == 1)
+            {
+                return 'Enabled';
+            }
+            else{
+                return 'Disabled';
+            }
+        })
         ->addColumn('action', function($role) {
             if (session('role_id') == 1 || in_array(87, session('permissions'))) {
+                if($role->is_active == 1)
+                {
+                    $enable_disable = '<button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                }
+                else{
+                    $enable_disable = '<button type="button" class="dropdown-item enable_disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                }
+                
                 return '<div class="btn-group">
                           <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                           <div class="dropdown-menu dropdown-menu-sm">
                             <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
                             <button type="button" class="dropdown-item duplicate"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-copy"></i></div><div class="col-9 offset-1">Duplicate</div></button>
+                            '.$enable_disable.'
                           </div>
                         </div>
                 ';
@@ -595,6 +613,35 @@ class UserManagementController extends Controller
         });
 
         return $datatables->make(true);
+    }
+
+    public function role_status(Request $request) {
+        $admin_role = AdminRole::find($request->id);
+
+        if ($admin_role) {
+
+            if( $admin_role->is_active == 1)
+            {
+                $admin_role->is_active = 0;
+                $admin_role->save();
+            }
+            else{
+                $admin_role->is_active = 1;
+                $admin_role->save();
+            }
+            
+
+
+            if ($request->is_active) {
+                return ['status' => 0, 'success' => 'Role has been enabled'];
+            }
+            else {
+                return ['status' => 0, 'success' => 'Role has been disabled'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Role with given ID is present'];
+        }
     }
 
     public function role_add_index() {

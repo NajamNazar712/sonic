@@ -25,7 +25,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" data-value="">
+                            <input type="text" name="search_date_from" class="form-control bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Search Date (From)" title="Search Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -35,7 +35,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" data-value="">
+                            <input type="text" name="search_date_to" class="form-control bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Search Date (To)" title="Search Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
 
@@ -227,6 +227,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

@@ -418,6 +418,17 @@ class AdminCargoManifestController extends Controller
             $shipments = $shipments->where('shipments.shipment_type', 2);
         }
 
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $shipments->whereDate('shipments_journey.created_at', $from);
+            }
+        }
+
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {

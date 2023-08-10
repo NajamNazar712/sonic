@@ -10327,6 +10327,73 @@ class NotificationsController extends Controller
                     }       
                 }
 
+                else if ($id == 218) {
+
+                    $subject = $notification->subject;
+                    $body = $notification->body;
+
+                    $email_to = $reference_1_id['email_to'];
+
+                    $shipper = $reference_1_id['shipper_name']; 
+                    $tagged_by = $reference_1_id['admin_name']; 
+
+                    $new_poc_person = $reference_1_id['new_poc_person'];
+                    $new_kam_person = $reference_1_id['new_kam_person'];
+                    $new_ref_person = $reference_1_id['new_ref_person'];
+
+
+                    $old_poc_person = $reference_1_id['old_poc_person'];
+                    $old_kam_person = $reference_1_id['old_kam_person'];
+                    $old_ref_person = $reference_1_id['old_ref_person'];
+                    $old_person_date = $reference_1_id['old_person_date'];
+                    $old_person_email = $reference_1_id['old_person_email'];
+
+                     
+                    
+                    
+
+                    $html = '<table style="width:100%;">';
+                    $html .= '<thead><tr>
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Shipper Name</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Tagged By</th>
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Person(s)</th> 
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Old Person(s) Date</th> 
+                        <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">New Person(s)</th>';
+                    $html .= '</tr></thead><tbody>';
+
+                    $to = array();
+                    $cc = array('Waqas@trax.pk', 'shahrukh.raheem@trax.pk', 'khan.usama@trax.pk');
+
+                    $old_person_header = '<tr> <th> POC </th> <th> KAM </th> <th> REF </th> </tr>';
+                    
+                    $html .= '<tr>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
+
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $old_poc_person . '</td> <td>' . $old_kam_person . '</td> <td>' . $old_ref_person . '</td> </tr> </table> </td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $old_person_date . '</td>';
+                    
+                    
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $new_poc_person . '</td> <td>' . $new_kam_person . '</td> <td>' . $new_ref_person . '</td> </tr> </table> </td>';
+                    $html .= '</tr>';
+
+                    $to = $email_to;
+                    
+
+                    if (!empty($old_person_email)) {
+                        $cc = array_merge($cc,$old_person_email);
+                    }
+                    
+                    $html .= '</tbody></table>';
+
+                    if (strpos($body, '[preview]') !== FALSE) {
+                        $body = str_replace('[preview]', $html, $body);
+                    }
+                    
+                    // dd($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $cc);    
+                 }
+
             }
         }
     }
