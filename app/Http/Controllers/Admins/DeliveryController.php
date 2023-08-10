@@ -9795,7 +9795,10 @@ class DeliveryController extends Controller
     public function shipment_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 650);
-        $delivery_note_id = 1282681;
+
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
+        $delivery_note_id = $delivery_note->id;
 
         // $delivery_notes_id = DB::table('delivery_notes')
         // // ->whereDate('id', '>',$delivery_note_id) //open for production
@@ -9818,7 +9821,10 @@ class DeliveryController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 651);
         }
 
-        $delivery_note_id = 1282681;
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
+        $delivery_note_id = $delivery_note->id;
+
         $shipments = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
             ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('shipments as sh', 'sh.id', '=', 'dns.shipment_id')
@@ -9850,7 +9856,11 @@ class DeliveryController extends Controller
     public function delivery_notes_list(Request $request)
     {
         $rider_id = $request->rider_id;
-        $delivery_note_id = 1282681;
+
+        $three_months_from_today = Carbon::today()->subDays(90)->startOfDay()->toDateTimeString();
+        $delivery_note = DeliveryNote::where('created_at', '>=', $three_months_from_today)->first();
+        $delivery_note_id = $delivery_note->id;
+
         if($rider_id){
             $receive_notes_id = DB::table('delivery_notes')
             ->leftjoin('riders', 'riders.id', 'delivery_notes.rider_id' )
