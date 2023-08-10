@@ -5386,7 +5386,7 @@ class AdminReportsController extends Controller
             })
             ->addColumn('fintech_revenue', function ($shipment) {
                 $fintech_revenue = '-';
-                if($shipment->fintech_charges != null){
+                if($shipment->fintech_amount != null){
                     $trax_pay_transaction = TraxPayTransaction::where('shipment_id', $shipment->shipment_id);
                     if($trax_pay_transaction->exists()){
                         $trax_pay_transaction= $trax_pay_transaction->first();
