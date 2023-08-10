@@ -85,8 +85,8 @@
 
                 checkbox.iCheck({
                     checkboxClass: 'icheckbox_line pt-1 pb-1',
-                    checkedClass: 'checked bg-success',
-                    uncheckedClass: 'bg-danger',
+                    checkedClass: 'checked bg-danger',
+                    uncheckedClass: 'bg-success',
                     insert: '<div class="icheck_line-icon"></div>' + text
                 });
             });
