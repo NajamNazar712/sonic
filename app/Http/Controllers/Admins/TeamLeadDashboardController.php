@@ -52,11 +52,12 @@ class TeamLeadDashboardController extends Controller
             ->where('hub', '1')
             ->select('id', 'name')
             ->get();
+            
 
-        $sortedHubs = $hubs->sortBy(function ($hub) {
-            $agentAssignHub = $hub->agentAssignHub->first();
-            return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
-        });
+        // $sortedHubs = $hubs->sortBy(function ($hub) {
+        //     $agentAssignHub = $hub->agentAssignHub->first();
+        //     return $agentAssignHub ? $agentAssignHub->priority : PHP_INT_MAX;
+        // });
 
         $employee_additional_days = EmployeeAdditionalDay::get();
 
@@ -71,7 +72,7 @@ class TeamLeadDashboardController extends Controller
             })
             ->get();
 
-        return view('admin.leads.team_lead')->with(['hubs' => $sortedHubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
+        return view('admin.leads.team_lead')->with(['hubs' => $hubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
 
     public function shipment_assign_index()
@@ -209,13 +210,18 @@ class TeamLeadDashboardController extends Controller
                 $join->on('ea.employee_id', '=', 'employees.id')
                     ->where('ea.id', '=', \Illuminate\Support\Facades\DB::raw('(select max(id) from employee_attendances where employee_attendances.employee_id = employees.id)'));
             })
+            ->leftJoin('rv_agent_assign_hubs as rvab', function ($join) {
+                $join->on('rvab.agent_id', '=', 'staff.id')
+                    ->groupBy('rvab.city_id')
+                    ->havingRaw('COUNT(DISTINCT rvab.agent_id) > 1');
+            })
           
-            ->select(['ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status','ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id','employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
+            ->select(['rvab.city_id as rv_city_id','ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status','ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id','employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
             ->where('et.id', 1)
-            ->distinct('staff.CNIC');
+            ->groupBy('staff.CNIC');
 
         if ($request->get('number_of_available_agents_input') == '2') {
             $employees = $employees->where('attendance_date', Carbon::now()->format('Y-m-d'))->get();
@@ -336,11 +342,16 @@ class TeamLeadDashboardController extends Controller
 
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $result->rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
+
+                                $rv_city = RvAgentAssignHub::where('agent_id', $result->staff_id)->orderBy('priority','ASC')->get();
+                                $rv_city = $rv_city->pluck('city_id')->toArray();
+
+                                $rv_city = implode(',', $rv_city);
+                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
-                                $dropdown .= '<button type="button" class="dropdown-item x" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
                             }
                         }
 
@@ -373,19 +384,26 @@ class TeamLeadDashboardController extends Controller
     // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
+        $sorted_hubs  = explode(',',$request->unsorted_hubs);
+       
         try {
             $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id);
             if ($rvAgentAssignHub) {
                 $rvAgentAssignHub->delete();
             }
 
-            foreach ($request->assign_hubs as $key => $value) {
-                $priority = $key + 1;
-                RvAgentAssignHub::create([
-                    'agent_id' => $request->employee_id,
-                    'city_id' => $value,
-                    'priority' => $priority,
-                ]);
+            foreach ($sorted_hubs as $key => $value) {
+                if($value == null){
+                    break;
+                }else{
+
+                    $priority = $key + 1;
+                    RvAgentAssignHub::create([
+                        'agent_id' => $request->employee_id,
+                        'city_id' => $value,
+                        'priority' => $priority,
+                    ]);
+                }
             }
 
             return redirect()->route('admin.team_lead.index')->with('success', 'Assigned SuccessFully');
@@ -496,31 +514,6 @@ class TeamLeadDashboardController extends Controller
                 $return_assign_log->status = 0;
                 $return_assign_log->assigned_by = Auth::id();
                 $return_assign_log->save();
-
-                // // set record in login/logout table
-                // $check_agent_return_confirmation = AgentReturnConfirmation::where('admin_id',$request->admin_id)->where('current_date',Carbon::now()->format("Y-m-d"));
-
-                // if(!$check_agent_return_confirmation->exists()){
-
-
-                //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                //      ->where('admin_roles.department_id',3)->where('a.id',$request->admin_id)->where('a.status',1);
-
-                //      if($agent_role->exists()){
-                //          $agent_return_confirmation = new AgentReturnConfirmation;
-                //          $agent_return_confirmation->admin_id = $request->admin_id;
-                //          $agent_return_confirmation->return_assigned_shipment_id = $assign_shipments->id;
-                //          $agent_return_confirmation->current_date = Carbon::now()->format("Y-m-d");
-                //          $agent_return_confirmation->save();
-                //      }
-                //  }
-                //  else{
-                //     $check_agent_return_confirmation = $check_agent_return_confirmation->get()->first();
-                //     $check_agent_return_confirmation->return_assigned_shipment_id = $assign_shipments->id;
-                //     $check_agent_return_confirmation->save();
-                //  }
-                // // set record in login/logout table end
-
             }
             return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
         } else {
@@ -668,66 +661,7 @@ class TeamLeadDashboardController extends Controller
                     $agent_id = trim($row['agent_id']); //22
 
                     $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
-                    // $check_already_assigned = ReturnAssignedShipments::where('shipment_id', $id_shipment->id)->where('status', 1)->first();
-                    // if ($check_already_assigned) {
-                    //     $check_already_assigned->status = 0;
-                    //     $check_already_assigned->save();
-                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                    //     $return_assign_log->return_assign_shipment_id = $check_already_assigned->id;
-                    //     $return_assign_log->status = 4;
-                    //     $return_assign_log->assigned_by = Auth::id();
-                    //     $return_assign_log->save();
-                    // }
-                    // $assign_shipments = new ReturnAssignedShipments();
-                    // $assign_shipments->admin_id = $agent_id;
-                    // $assign_shipments->shipment_id =  $id_shipment->id;
-                    // $assign_shipments->status = !empty($agent_id) ? 1 : 0;
-                    // $assign_shipments->assigned_by = Auth::id();
-                    // $assign_shipments->save();
-
-                    // $return_assign_log = new ReturnAssignedShipmentLogs();
-                    // $return_assign_log->return_assign_shipment_id = $assign_shipments->id;
-                    // $return_assign_log->status = !empty($agent_id) ? 0 : 4;
-                    // $return_assign_log->assigned_by = Auth::id();
-                    // $return_assign_log->save();
-
-
-                    //if agent is !empty
-
-                    // if(!empty($agent_id)){
-                    //     $check_agent_return_confrimation = AgentReturnConfirmation::where('admin_id',$agent_id)->whereDate('current_date',Carbon::now()->format("Y-m-d"));
-
-                    //     if(!$check_agent_return_confrimation->exists()){
-                    //         $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                    //             ->where('admin_roles.department_id',3)->where('a.id',$agent_id)->where('a.status',1);
-
-                    //         if($agent_role->exists()){
-                    //             $agent_return_confrimation = new AgentReturnConfirmation;
-                    //             $agent_return_confrimation->admin_id = $agent_id;
-                    //             $agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                    //             $agent_return_confrimation->current_date = Carbon::now()->format("Y-m-d");
-                    //             $agent_return_confrimation->save();
-                    //         }
-                    //     }
-                    //     else{
-                    //         $check_agent_return_confrimation = $check_agent_return_confrimation->get()->first();
-                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                    //         $check_agent_return_confrimation->save();
-                    //     }
-
-                    // }else {
-                    //     //if agent data is empty
-                    //     $check_agent_return_confrimation = AgentReturnConfirmation::
-                    //             where('return_assigned_shipment_id', $assign_shipments->id)
-                    //                 ->orderby('current_date','desc')->first();
-                    //     if(!empty($check_agent_return_confrimation)) {
-                    //         $check_agent_return_confrimation->return_assigned_shipment_id = $assign_shipments->id;
-                    //         $check_agent_return_confrimation->save();
-                    //     }
-
-                    // }
-                    //set record in login/logut table end
-
+                    
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {

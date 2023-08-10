@@ -99,6 +99,7 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
+                            <input type="hidden" class="unsorted_hubs" name="unsorted_hubs">
                             <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple
                                 style="width: 100%;">
                                 @foreach ($hubs as $hub)
@@ -324,7 +325,7 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-        
+
             $('body').on('click', '.delete-icon', function() {
                 var Ids = [];
                 var delId = $(this).data('del-id');
@@ -346,7 +347,6 @@
                         var object = data
                             .object; // Assuming 'data.object' contains the array or object you want to get the length of
 
-                        console.log(object);
 
                         // Get the length of the 'object'
                         var objectLength = 0;
@@ -401,7 +401,6 @@
             $('#datatable tbody').on('click', 'tr', function() {
                 var rowData = table.row(this).data();
                 rv_city = rowData['rv_city'];
-                console.log(rowData);
             });
 
 
@@ -444,7 +443,7 @@
                     .fail(function(xhr, status, error) {
                         // Handle the error response from the server
                         alert('Error: ' + error);
-                        console.log(xhr.responseText); // You can inspect the error response here
+                        // console.log(xhr.responseText); // You can inspect the error response here
                     });
             });
 
@@ -820,25 +819,90 @@
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    { orderable: false,searchable: false,name: 'serial_number',class: 'align-middle serial_number',targets: 0,
+                    {
+                        orderable: false,
+                        searchable: false,
+                        name: 'serial_number',
+                        class: 'align-middle serial_number',
+                        targets: 0,
                         render: function(data, type, row) {
                             return '';
                         }
                     },
-                    { data: 'trax_id', name: 'employees.trax_id', class: 'align-middle trax_id'},
-                    { data: 'employee_name', name: 'employees.name', class: 'align-middle employee_name' },
-                    { data: 'employee_hub', name: 'employee_hub', class: 'align-middle employee_hub', orderable: false, searchable: false},
-                    { data: 'city', name: 'cities.name', class: 'align-middle city'},
-                    { data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
-                    { data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
-                    { data: 'employee_type', name: 'et.name', class: 'align-middle employee_type' },
-                    { data: 'employee_designation', name: 'ed.name', class: 'align-middle employee_designation' },
-                    { data: 'department_name', name: 'ads.name', class: 'align-middle department_name'},
-                    { data: 'status', name: 'es.id', class: 'align-middle status'},
-                    { data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
-                    { data: 'confirmation_status', name: 'employees.confirmation_status', class: 'align-middle confirmation_status'},
-                    { data: 'attendance_date', name: 'ea.attendance_date', class: 'align-middle confirmation_status'},
-                    { data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false }
+                    {
+                        data: 'trax_id',
+                        name: 'employees.trax_id',
+                        class: 'align-middle trax_id'
+                    },
+                    {
+                        data: 'employee_name',
+                        name: 'employees.name',
+                        class: 'align-middle employee_name'
+                    },
+                    {
+                        data: 'employee_hub',
+                        name: 'employee_hub',
+                        class: 'align-middle employee_hub',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'city',
+                        name: 'cities.name',
+                        class: 'align-middle city'
+                    },
+                    {
+                        data: 'cnic',
+                        name: 'employees.cnic',
+                        class: 'align-middle cnic'
+                    },
+                    {
+                        data: 'phone_number',
+                        name: 'employees.phone_number',
+                        class: 'align-middle phone_number'
+                    },
+                    {
+                        data: 'employee_type',
+                        name: 'et.name',
+                        class: 'align-middle employee_type'
+                    },
+                    {
+                        data: 'employee_designation',
+                        name: 'ed.name',
+                        class: 'align-middle employee_designation'
+                    },
+                    {
+                        data: 'department_name',
+                        name: 'ads.name',
+                        class: 'align-middle department_name'
+                    },
+                    {
+                        data: 'status',
+                        name: 'es.id',
+                        class: 'align-middle status'
+                    },
+                    {
+                        data: 'last_working_date',
+                        name: 'employees.last_working_date',
+                        class: 'align-middle last_working_date'
+                    },
+                    {
+                        data: 'confirmation_status',
+                        name: 'employees.confirmation_status',
+                        class: 'align-middle confirmation_status'
+                    },
+                    {
+                        data: 'attendance_date',
+                        name: 'ea.attendance_date',
+                        class: 'align-middle confirmation_status'
+                    },
+                    {
+                        data: 'action',
+                        name: 'action',
+                        class: 'align-middle text-center action',
+                        orderable: false,
+                        searchable: false
+                    }
                 ],
                 rowCallback: function(row, data, index) {
                     // $('td:eq(0)', row).addClass('select-checkbox');
@@ -900,8 +964,7 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        }
-                        else {
+                        } else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -1229,192 +1292,115 @@
                 });
             });
 
-            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.assign_hub', function() {
-                
+            var SelectedCities = [];
+            $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
                 var employeeId = $(this).attr('data-id');
                 var cities = $(this).attr('data-city');
-                
                 $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
                     employeeId + '">');
-
-                var selectedCities = cities.toString().split(',');
-
-                if (rv_city != null) {
+                selectedCities = cities.toString().split(',');
+                if (cities != null) {
                     $('#search_origin option').each(function() {
                         var optionValue = $(this).val();
-
                         if (selectedCities.includes(optionValue)) {
                             $(this).prop('selected', true);
                         } else {
                             $(this).prop('selected', false);
                         }
                     });
-
                     $('#search_origin').trigger('change');
-
-
-                } 
-                else if (rv_city == null) {
+                    $('#AssignHubModal').modal('show');
+                } else if (rv_city == null) {
                     $("#search_origin option").prop("selected", false).trigger("change");
-
-                }
-
-                if(employeeId){
-                    $.ajax({
-                        url: '{!! route('admin.settings.rider_assigned_hub.edit') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'employeeId': employeeId,
-                        }
-                    }).done(function(data){
-                        if (data.status === 0) {
-                            var row_id= data.data.id;
-                            var ids= [];
-                            var i=0;
-                            $.each(data.data.hubs, function(index, value) {
-                                ids[i] = value.id;
-                                i++;
-                            });
-
-                            $('#AssignHubModal #search_origin').val(ids).trigger('change');
-                        }
-                    });
-                }
-
-                var id = $(this).data('target-id');
-                $('#AssignHubModal .employee_type').val(1);
-                $('#AssignHubModal .employee_id').val(id);
-                $('#AssignHubModal').modal('show');
-            });
-
-
-
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-
-                var index = $.inArray(id, selected_rows);
-
-                if (index === -1) {
-                    selected_rows.push(id);
-                } else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button('.bulk_approve').enable();
-                    table.button('.bulk_reject').enable();
-                } else {
-                    table.button('.bulk_approve').disable();
-                    table.button('.bulk_reject').disable();
+                    $('#AssignHubModal').modal('show');
                 }
             });
-            $('body').on('click', '.approve', function(e) {
-                var id = $(this).data('target-id');
-                swal({
-                    title: 'Are You Sure?',
-                    text: 'Select Yes Approve Employee!',
-                    icon: 'warning',
-                    buttons: {
-                        cancel: {
-                            text: 'No',
-                            value: null,
-                            visible: true,
-                            closeModal: true,
-                        },
-                        confirm: {
-                            text: 'Yes',
-                            value: true,
-                            visible: true,
-                            closeModal: true
-                        }
-                    },
-                    closeOnClickOutside: false,
-                    closeOnEsc: false,
-                    dangerMode: true
-                }).then(function(confirm) {
-                    if (confirm) {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Employee is being Approved',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
 
-                        $.ajax({
-                                url: '{!! route('admin.human_resource.employee_directory.required_info') !!}',
-                                method: 'POST',
-                                data: {
-                                    'employee_id': id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            })
-                            .done(function(data) {
-                                if (data.status == 2) {
-                                    if (!data.joining_date) {
-                                        $('#approveStaffForm #joining_date_group').removeClass(
-                                            'd-none');
-                                    } else {
-                                        $('#approveStaffForm #joining_date_group').addClass(
-                                            'd-none');
-                                    }
+        var $select2 = $('#search_origin').select2({
+            templateSelection: template,
+            width: '100%'
+        });
 
-                                    if (!data.employee_nature) {
-                                        $('#approveStaffForm #employee_nature_list_group')
-                                            .removeClass('d-none');
-                                    } else {
-                                        $('#approveStaffForm #employee_nature_list_group')
-                                            .addClass('d-none');
-                                    }
+        // Initialize with default values
+        var defaultValues = {!! $hubs->pluck('id') !!};
+        $select2.val(defaultValues).trigger('change');
 
-                                    if (!data.sub_department) {
-                                        $('#approveStaffForm #sub_department_group')
-                                            .removeClass('d-none');
-                                    } else {
-                                        $('#approveStaffForm #sub_department_group').addClass(
-                                            'd-none');
-                                    }
+        // Cache order of initial values
+        var preservedOrder = defaultValues.slice();
 
-                                    $('#approveStaffForm #employee_id').val(data.employee_id);
+        $select2.on('select2:select select2:unselect', selectionHandler);
 
-                                    $('#employeeRequiredInfoModal').modal('show');
-                                } else if (data.status == 3) {
-                                    $('#approveRiderForm #employee_id').val(data.employee_id);
-                                    $('#RiderRequiredInfoModal').modal('show');
-                                } else if (data.status == 1) {
-                                    toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                } else if (data.status == 0) {
-                                    toastr.success(data.success, 'Success!', {
-                                        positionClass: 'toast-top-center',
-                                        containerId: 'toast-top-center'
-                                    });
-                                }
-                                swal.close();
-                                table.draw('false');
-                            });
+        function selectionHandler(e) {
+            var val = e.params.data.id;
+
+            switch (e.type) {
+                case 'select2:select':
+                    preservedOrder.push(val);
+                    break;
+                case 'select2:unselect':
+                    var foundIndex = preservedOrder.indexOf(val);
+                    if (foundIndex >= 0) {
+                        preservedOrder.splice(foundIndex, 1);
                     }
-                });
+                    break;
+            }
+
+            // Store the updated order
+            $select2.data('preserved-order', preservedOrder);
+
+            // Render selections in the preserved order
+            select2_renderSelections($select2);
+        }
+
+        function select2_renderSelections($select2) {
+            var order = $select2.data('preserved-order') || [];
+            var $container = $select2.next('.select2-container');
+            var $tags = $container.find('li.select2-selection__choice');
+            var $input = $tags.last().next();
+
+
+            var stringList = order.filter(function(item) {
+            return typeof item === 'string';
+        });
+
+
+        // Apply tag order
+        order.forEach(function(val) {
+            var $el = $tags.filter(function(i, tag) {
+                return $(tag).data('data').id === val;
             });
+            $input.before($el);
+        });
 
-            $('#search_origin').select2({
-                placeholder: 'Search Hub (*)',
-                width: '100%',
-                allowClear: false,
-                dropdownParent: $('#AssignHubModal'),
-            }).on('change', function() {
+        $('.unsorted_hubs').val(stringList);
 
-                $('#select_message_error').text('');
+            var selectedIds = $('#search_origin').find('option:selected').map(function() {
+                return $(this).val();
+            }).get();
 
-            });
+            var idArray = $('.unsorted_hubs').val().split(',');
 
-            $('#search_filter_btn').on('click', function() {
-                table.draw(true);
-            });
+            selectedIds = selectedIds.filter(function(item) {
+            return idArray.indexOf(item) === -1;
+        });
+
+        // Append values from array 2 to the end of array 1
+        selectedIds = selectedIds.concat(idArray);
+
+        $('.unsorted_hubs').val(selectedIds)
+
+    }
+
+
+
+/**
+ * Customize the display of each option in the dropdown.
+ * @param data
+ * @param container
+ */
+function template(data, container) {
+    return data.text;
+}
 
 
         });

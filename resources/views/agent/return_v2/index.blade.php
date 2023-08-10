@@ -128,16 +128,6 @@
                                                 <div class="row d-flex justify-content-center">
                                                     <div class="col-2 p-0">
                                                         <div class="p-0">
-                                                            {{-- <h6 class="text-center mt-2">Agent</h6>
-                                            <div class="border table-responsive gray">
-                                              <table class="table table-sm table-borderless mb-0">
-                                                <tbody>
-                                                  <tr>
-                                                    <td class="text-center agent"><strong>harry</strong></td>
-                                                  </tr>
-                                                </tbody>
-                                              </table>
-                                            </div> --}}
                                                         </div>
                                                     </div>
                                                     <div class="col-5 p-0">
@@ -158,39 +148,15 @@
                                                     </div>
                                                     <div class="col-3 p-0">
                                                         <div class="p-0">
-                                                            {{-- <h6 class="text-center mt-2">Agent</h6>
-                                              <div class="border table-responsive gray">
-                                                <table class="table table-sm table-borderless mb-0">
-                                                  <tbody>
-                                                    <tr>
-                                                      <td class="text-center agent"><strong>harry</strong></td>
-                                                    </tr>
-                                                  </tbody>
-                                                </table>
-                                              </div> --}}
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-
-
                                     </div>
-
-
-
-
                                 </div>
-
-
                                 <div class="tracking" id="tracking">
-
-
-
                                 </div>
-
-
-
                             </div>
                         </div>
                     </div>
