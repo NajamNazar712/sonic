@@ -2872,7 +2872,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@hbl_konnect_list')->name('list');
         });
 
-        Route::prefix('pay_fast_report')->name('pay_fast_report.')->group(function () {
+        Route::prefix('pay_fast')->name('pay_fast_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@pay_fast_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pay_fast_report_list')->name('list');
         });
