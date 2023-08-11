@@ -25,21 +25,24 @@
                                 </button>
                             </div>
                             <div class="modal-body text-center">
-								<button id="selectAllBtn" class="btn btn-primary">Select All</button>
-								<button id="deSelectAllBtn" class="btn btn-primary">De Select All</button>
+                                <button id="selectAllBtn" class="btn btn-primary">Select All</button>
+                                <button id="deSelectAllBtn" class="btn btn-primary">Un Select All</button>
                                 <form id="assign_hub_form" action="{{ route('admin.user_management.users.assign_hubs') }}"
                                     method="post">
                                     @method('POST')
                                     @csrf
                                     <div class="container">
-										<input type="hidden" name="id" />
+                                        <input type="hidden" name="id" />
                                         <div class="col-12 form-group">
                                             <select name="hubs[]" id="hub_select" class="form-control select2"
                                                 multiple="multiple">
                                                 @foreach ($hubs as $hub)
                                                     <option value="{{ $hub->id }}">{{ $hub->name }}</option>
                                                 @endforeach
+
                                             </select>
+                                            <div class="d-none text-danger" id="assign_hubs_msg_error">Please Select Hub(s)</div>
+
                                         </div>
 
                                         <div class="row justify-content-center">
@@ -51,7 +54,7 @@
                                     </div>
                                 </form>
 
-                            
+
                             </div>
                         </div>
                     </div>
@@ -153,19 +156,15 @@
 
 
     <style>
-         #selectAllBtn {
+        #selectAllBtn {
 
-			margin-bottom: 10px
-
+            margin-bottom: 10px
         }
 
         #deSelectAllBtn {
 
-			margin-bottom: 10px
-
+            margin-bottom: 10px
         }
-
-     
     </style>
 
 @endsection
@@ -182,7 +181,13 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $('#hub_select').select2();
+            var selectedValue = [];
+
+            $('#hub_select').select2().on('change', function() {
+                selectedValue = $('#hub_select').val();
+                $('#assign_hubs_msg_error').addClass('d-none')
+
+            });
 
             $('#selectAllBtn').on('click', function() {
                 $('#hub_select').val($('#hub_select option').map(function() {
@@ -733,24 +738,33 @@
                 }
             });
 
+
+
             $("#assign_hub_form").validate({
+
                 errorClass: "danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    if (selectedValue.length > 0) {
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Multiple Hub has been assigned!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    form.submit();
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Multiple Hub has been assigned!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+
+                    } else {
+                        $('#assign_hubs_msg_error').removeClass('d-none');
+                    }
                 }
             });
 
