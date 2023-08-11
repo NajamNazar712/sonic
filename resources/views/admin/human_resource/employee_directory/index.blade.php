@@ -377,7 +377,7 @@
                                 </div>
                             </div>
                         </div>
-                        {{-- <div id="rejoin_rider_div" class="d-none">
+                        <div id="rejoin_rider_div" class="d-none">
                             <div class="col-md-12">
                                 <label>Old Trax Id</label>
                                 <input type="text" name="old_trax_id" data-rule-required="true"
@@ -393,7 +393,7 @@
                                                 data-msg-required="This field is required"></textarea>
                                 </fieldset>
                             </div>
-                        </div> --}}
+                        </div>
                     </div>
                     <div class="modal-footer">
                         <button type="submit" class="btn btn-warning btn-min-width mr-1 mb-1" id="confirmAction">Update
@@ -1027,18 +1027,18 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                max: today,
+                // max: today,
             });
 
-            $('#editRiderForm #joining_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                selectYears: 100,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-                max: today,
-            });
+            // $('#editRiderForm #joining_date').pickadate({
+            //     firstDay: 1,
+            //     clear: '',
+            //     selectYears: 100,
+            //     selectMonths: true,
+            //     formatSubmit: 'yyyy-mm-dd',
+            //     hiddenSuffix: '_formatted',
+            //     max: today,
+            // });
 
             $('#rejoinStaffForm #joining_date').pickadate({
                 firstDay: 1,
@@ -2147,8 +2147,8 @@
                     $('#editRiderModal .modal-footer #confirmAction').text("Rejoin Rider");
                     $('#editRiderModal #joining_date_group').removeClass("d-none");
                     $("#editRiderForm #rejoin_div_html").html("<input type='hidden' name='rejoin_rider_bit' value='1'>");
-                    // $("#editRiderForm #rejoin_rider_div").removeClass("d-none");
-                    // $('#editRiderModal #old_trax_id').val(trax_id);
+                    $("#editRiderForm #rejoin_rider_div").removeClass("d-none");
+                    $('#editRiderModal #old_trax_id').val(trax_id);
                 }
                 else{
                     $('#editRiderModal .modal-title').text("Update Rider");
