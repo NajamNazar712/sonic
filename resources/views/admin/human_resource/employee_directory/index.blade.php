@@ -1047,7 +1047,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                max: today,
+                // max: today,
             });
 
             var search_date_to = $('#search_form #search_date_to').pickadate({
