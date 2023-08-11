@@ -2865,6 +2865,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@one_link_charges_summary_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@one_link_charges_summary_list')->name('list');
         });
+
+
+        Route::prefix('hbl_konnect')->name('hbl_konnect.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@hbl_konnect_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@hbl_konnect_list')->name('list');
+        });
+
+        Route::prefix('pay_fast_report')->name('pay_fast_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@pay_fast_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@pay_fast_report_list')->name('list');
+        });
         Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');

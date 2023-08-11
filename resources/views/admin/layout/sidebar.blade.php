@@ -1659,6 +1659,13 @@
                         @if (session('role_id') == 1 || in_array(892, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.operations_performance.index') }}">Operations Performance Report</a></li>
                         @endif
+                        @if (session('role_id') == 1 || in_array(894, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.hbl_konnect.index') }}">Hbl Konnect Report</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(895, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.pay_fast_report.index') }}">Pay Fast Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
