@@ -1007,7 +1007,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                max: today,
+                // max: today,
             });
 
             $('#approveRiderForm #joining_date').pickadate({
@@ -1017,7 +1017,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
-                max: today,
+                // max: today,
             });
 
             $('#editRiderForm #joining_date').pickadate({
