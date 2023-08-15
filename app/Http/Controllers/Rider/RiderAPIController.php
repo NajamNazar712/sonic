@@ -14280,4 +14280,10 @@ RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!', 'delivery_note_id' => $request->delivery_note_id]);
         }
     }
+
+    static public function rider_wise_delivery_note($shipment_id,$delivery_note_id,$rider_id,$shipper_status_id)
+    {
+        $time = Carbon::now();
+        dd(1);
+    }
 }
