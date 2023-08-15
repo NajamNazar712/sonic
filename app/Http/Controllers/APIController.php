@@ -7760,10 +7760,10 @@ class APIController extends Controller
 
             if ($employee->exists()) {
 
-                $employee = $employee->whereIn('request_status_id', [1, 2]);
-                return response()->json(['status' => 1, 'message' => $employee->first()]);
+                /*$employee = $employee->whereIn($employee->request_status_id, [1, 2]);
+                return response()->json(['status' => 1, 'message' => $employee->first()]);*/
 
-                if ($employee->exists()) {
+                if ($employee->whereIn('request_status_id', [1, 2])->exists()) {
                     $employee = $employee->first();
                     return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
                 } else {
