@@ -326,7 +326,7 @@
     padding: 20px 10px;
     background-color: #edeef0;
     overflow: hidden;
-    height: 280px;
+    /* height: 280px; */
         }
 
     </style>
