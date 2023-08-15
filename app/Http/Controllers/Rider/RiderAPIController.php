@@ -9147,6 +9147,25 @@ RiderAPIController extends Controller
                 }
             }
         }
+        $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
+        if(count($delivered_shipment_ids) > 0){
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = count($delivered_shipment_ids);
+            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->save();
+        }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
