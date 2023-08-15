@@ -356,8 +356,8 @@
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'destination_zone', name: 'z.name ', class: 'align-middle destination_zone', orderable: false, searchable: false},
                 {data: 'destination_arrival', name: 'sjd.created_at ', class: 'align-middle destination_arrival', orderable: false, searchable: false},
-                {data: 'last_rider', name: 'r.name ', class: 'align-middle last_rider', orderable: false, searchable: false},
-                {data: 'rider_trax_id', name: 'r.trax_id ', class: 'align-middle rider_trax_id', orderable: false, searchable: false},
+                {data: 'last_rider', name: 'r.name', class: 'align-middle last_rider', orderable: false},
+                {data: 'rider_trax_id', name: 'r.trax_id ', class: 'align-middle rider_trax_id', orderable: false},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
