@@ -188,6 +188,10 @@ class DeliveryController extends Controller
                         DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)')
                     );
             })
+            
+
+
+
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftjoin('intercept_re_book_request_histories as irrh', 'irrh.shipment_id', '=', 'shipments.id')
             ->leftjoin('crm_requests as crm', function ($join) {
@@ -206,7 +210,9 @@ class DeliveryController extends Controller
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
 
-            ->leftjoin('riders as r','r.id','=','shipments_journey.rider_id')
+            ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'shipments.id')
+            ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
+            ->leftjoin('riders as r','r.id','=','dn.rider_id')
             ->leftjoin('zones as z','z.id','=','oc.zone_id')
 
             ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 
