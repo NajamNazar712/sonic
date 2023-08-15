@@ -3729,6 +3729,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
         });
 
+        Route::prefix('rider_assigned_hub')->name('rider_assigned_hub.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_assigned_hub_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@rider_assigned_hub_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@rider_assigned_hub_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit')->name('edit');
+            Route::post('submit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit_submit')->name('edit.submit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@rider_assigned_hub_enable_disable')->name('enable_disable');
+        });
+
     });
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
