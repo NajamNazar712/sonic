@@ -637,14 +637,14 @@ class UserManagementController extends Controller
 
     public function crm_role_permission_index()
     {
-        $modules = ModulePermission::whereIn('id', [179, 180, 181, 182, 233, 234, 235, 236, 310, 352, 353, 363, 374, 538])->get();
+        $modules = ModulePermission::whereIn('id', [179, 184, 185, 186, 213,233, 234, 235, 236,310, 352, 353, 363,869,795,543,523,787,201,202,309])->get();
         return view('admin.user_management.role.permissions.crm_index')->with(['modules' => $modules]);
     }
 
     public function crm_update_index($ids)
     {
 
-        $modules = ModulePermission::whereIn('id', [179, 180, 181, 182, 233, 234, 235, 236, 310, 352, 353, 363, 374, 538])->get();
+        $modules = ModulePermission::whereIn('id', [179, 184, 185, 186, 213,233, 234, 235, 236,310, 352, 353, 363,869,795,543,523,787,201,202,309])->get();
         return view('admin.user_management.role.add.crm_bulk_index')->with(['modules' => $modules, 'ids' => $ids]);
 
     }
@@ -652,7 +652,7 @@ class UserManagementController extends Controller
     public function delete_crm_update_index($ids)
     {
 
-        $modules = ModulePermission::whereIn('id', [179, 180, 181, 182, 233, 234, 235, 236, 310, 352, 353, 363, 374, 538])->get();
+        $modules = ModulePermission::whereIn('id', [179, 184, 185, 186, 213,233, 234, 235, 236,310, 352, 353, 363,869,795,543,523,787,201,202,309])->get();
         return view('admin.user_management.role.remove.crm_bulk_index')->with(['modules' => $modules, 'ids' => $ids]);
 
     }
