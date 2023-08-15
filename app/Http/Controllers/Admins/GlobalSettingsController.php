@@ -5887,12 +5887,13 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_tagging_submit(Request $request)
     {
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
+        
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('admin_id', $request->admin_id)->where('status', 1);
         if (!$crm_agent->exists()) {
             CrmAutoTagUser::create($request->all());
             return redirect()->back()->with('success', 'Agent Added!');
         } else {
-            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
+            return redirect()->back()->with('error', 'Selected User on this Location already exist, Please edit the Tagged user');
         }
     }
 
