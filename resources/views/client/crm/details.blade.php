@@ -99,7 +99,7 @@
                                     </div>
                                     <div class="col-6">
                                             <div class="content-body chat-application">
-                                                <section class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
+                                                <section class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible">
                                                     <div class="chats">
                                                         @if(!empty($comments))
                                                             @php
@@ -267,6 +267,8 @@
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
+
+        
         .badge.badge-admin{
             background-color: #edeef0;
             color:#000;
@@ -320,7 +322,10 @@
         }
         
 
-        
+        textarea#chat_input {
+    text-transform: capitalize !important
+}
+
         .chat-application .chat-app-form {
             position: relative;
     padding: 20px 10px;
@@ -345,13 +350,15 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-            $('.summernote').summernote({
+                  $('.summernote').summernote({
                 toolbar: [
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['para', ['ul', 'ol', 'paragraph']],
                 ],
-
+                
+        
             });
+        
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
             });

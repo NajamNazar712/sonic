@@ -1185,7 +1185,7 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Date Added</th>
-                            <th class="border-primary border-darken-1">Image</th>
+                            <th class="border-primary border-darken-1">Attachments</th>
                         </tr>
                         </thead>
                         <tbody></tbody>
@@ -2620,14 +2620,14 @@
                             if (substringsToCheck.some(substr => url.includes(substr))) {
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
                             } else {
-                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">Download</span></a>';
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><span class="align-middle">Download</span></a>';
                             }
                                 image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
                             });
                             $('#crm_image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
                         }else if(data.status == 2){
-                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
+                            var image_html = '<tr><td colspan="4">No Attachments found!</td></tr>';
 
                             $('#crm_image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
@@ -2666,7 +2666,7 @@
 
                 rows_count++;
 
-                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension=".*" data-msg-extension="Only files with valid extensions are allowed" data-rule-maxsize="7168KB" data-msg-maxsize="File size must not exceed 7 MB (7168 Kbytes)" data-rule-required="true" data-msg-required="File is required">';
+                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_' + rows_count + '" data-rule-extension=".*" data-msg-extension="Only files with valid extensions are allowed" data-rule-maxsize="7168000" data-msg-maxsize="File size must not exceed 7 MB (7168 Kbytes)" data-rule-required="true" data-msg-required="File is required">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{

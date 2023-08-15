@@ -5761,13 +5761,13 @@ TRAX-Customer Experience';
         $crm_request_id = $request->image_crm_request_id;
         $image_ids = explode(',', $request->selected_ids);
         if(count($image_ids) == 0){
-            return redirect()->back()->with('error', 'No images selected!');
+            return redirect()->back()->with('error', 'No Attachments selected!');
         }
         $crm_request = CrmRequest::find($crm_request_id);
         if($crm_request){
             $crm_request_images = $crm_request->images->count();
             if($crm_request_images == 5){
-                return redirect()->back()->with('error', 'Two images are already uploaded!');
+                return redirect()->back()->with('error', 'Five Attachments are already uploaded!');
             }
 
             foreach ($image_ids as $id){
@@ -5786,7 +5786,7 @@ TRAX-Customer Experience';
                     $crm_image->save();
             }
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Images updated successfully']);
+            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Attachments updated successfully']);
 
         }
         return redirect()->back()->with(['status' => 0, 'error' => 'CRM Request Not found!']);
