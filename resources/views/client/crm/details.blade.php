@@ -361,7 +361,8 @@
             $('#chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br>');
-                $('.summernote').summernote('reset'); 
+                $(".summernote").summernote("code", "");
+
                 var request_id = '{{$crm_details->id}}';
                 if(comment == ''){
                     flag = false;

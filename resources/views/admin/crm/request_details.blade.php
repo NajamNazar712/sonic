@@ -2032,7 +2032,7 @@
 
                             $('#last_comment_id').val(data.last_comment_id);
                             last_comment_edit(last_comment, comment);
-                            $('.summernote').summernote('reset'); 
+                            $(".summernote").summernote("code", "");
 
                             updateScroll();
                         }
