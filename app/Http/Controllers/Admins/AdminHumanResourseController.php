@@ -898,7 +898,7 @@ class AdminHumanResourseController extends Controller
 
     public function employee_directory_make_rider_deactivate(Request $request)
     {
-
+        
         $employee_id = $request->employee_id;
         if (!$employee_id) {
             return response()->json(['status' => 1, 'error' => 'Rider not found!']);
@@ -1084,6 +1084,8 @@ class AdminHumanResourseController extends Controller
             $employee->rider_sub_category = $request->rider_category;
             $employee->rider_main_category = $request->rider_main_category;
             $employee->rider_type_id = $request->rider_type;
+            $employee->remarks = $request->remarks;
+            $employee->old_trax_id = $request->old_trax_id;
             $employee->save();
 
             if ($request->has('rejoin_rider_bit')) {
@@ -1136,7 +1138,6 @@ class AdminHumanResourseController extends Controller
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
-                dd($employee);
                 if (in_array($employee->request_status_id, [1, 2])) {
                     if ($employee->trax_id == null) {
                         if ($employee->employee_type_id == 1) {
