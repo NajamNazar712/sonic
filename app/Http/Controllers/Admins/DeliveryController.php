@@ -210,9 +210,16 @@ class DeliveryController extends Controller
             ->leftjoin('products as prod', 'prod.id', '=', 'si.product_type_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
 
-            ->leftJoin('delivery_note_shipments as dns', 'dns.shipment_id', '=', 'shipments.id')
+            ->leftjoin('delivery_note_shipments as dns', function ($join) {
+                $join->on('dns.shipment_id', '=', 'shipments.id')
+                    ->where(
+                        'dns.delivery_note_id',
+                        '=',
+                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments WHERE shipment_id = shipments.id)')
+                    );
+            })
             ->leftJoin('delivery_notes as dn', 'dn.id', '=', 'dns.delivery_note_id')
-            ->leftjoin('riders as r','r.id','=','dn.rider_id')
+            ->leftjoin('riders as r', 'r.id', '=', 'dn.rider_id')
             ->leftjoin('zones as z','z.id','=','oc.zone_id')
 
             ->select('agent.name as agent', 'shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 
@@ -227,7 +234,7 @@ class DeliveryController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status)
-            ->groupBy('shipments.id');
+            ->groupBy('r.id');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
