@@ -7952,5 +7952,149 @@ class APIController extends Controller
             }
         }
     }
+
+    public function forget_pin(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                $employee_type_id = $employee->employee_type_id;
+
+                if ($employee_type_id == 1) {
+                    //Staff...
+                    $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($admins->exists()) {
+                        $admins = $admins->first();
+                        if ($admins->status == 1) {
+                            $pin = rand(100000, 999999);
+                            $admins->reset_pin_otp = $pin;
+                            $admins->save();
+                            NotificationsController::send(162, $admins->id, $request->phone_number);
+                            return response()->json(['status' => 0, 'message' => 'Otp has been sent to your phone number', 'otp' => $pin]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+
+                } elseif ($employee_type_id == 2) {
+                    //Rider...
+                    $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->status) {
+                            $pin = rand(100000, 999999);
+                            $rider->reset_pin_otp = $pin;
+                            $rider->save();
+                            NotificationsController::send(158, $rider->id);
+                            return response()->json(['status' => 0, 'message' => 'Otp has been sent to your registered number', 'otp' => $pin]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'Employee Not Found'];
+            }
+        }
+    }
+
+    public function reset_pin(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:6'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                $employee_type_id = $employee->employee_type_id;
+
+                if ($employee_type_id == 1) {
+                    //Staff...
+                    $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($admin->exists()) {
+                        $admin = $admin->first();
+                        if ($request->input('otp') == $admin->reset_pin_otp) {
+                            $admin->password = bcrypt($request->pin);
+                            $admin->dummy_pin = $request->pin;
+                            $admin->reset_pin_otp = NULL;
+                            $admin->save();
+
+                            $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $employee->pin = $request->pin;
+                                $employee->update();
+                            }
+                            $admin->reset_pin_status = 1;
+                            $admin->save();
+                            return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+
+                } elseif ($employee_type_id == 2) {
+                    //Rider...
+                    $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($request->input('otp') == $rider->reset_pin_otp) {
+                            $rider->pin = bcrypt($request->pin);
+                            $rider->dummy_pin = $request->pin;
+                            $rider->reset_pin_otp = NULL;
+                            $rider->save();
+
+                            $employee = Employee::where('trax_id', $rider->trax_id)->where('trax_id', '!=', null);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $employee->pin = $request->pin;
+                                $employee->update();
+                            }
+                            return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'Employee Not Found'];
+            }
+        }
+    }
 }
 
