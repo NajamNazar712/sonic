@@ -7740,5 +7740,31 @@ class APIController extends Controller
             }
         }
     }
+
+    public function app_login(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                return ['status' => 0, 'message' => 'Employee Found', 'data' => $employee];
+            } else {
+                return ['status' => 0, 'message' => 'Employee Not Found'];
+            }
+        }
+    }
 }
 

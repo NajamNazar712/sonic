@@ -681,4 +681,8 @@ Route::name('api.')->group(function () {
     });
     //Hbl Konnect
 
+    Route::prefix('employee')->name('employee.')->group(function () {
+        Route::post('app_login', 'APIController@app_login')->name('app_login');
+    });
+
 });
