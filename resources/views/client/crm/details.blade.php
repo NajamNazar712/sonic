@@ -356,23 +356,25 @@
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['para', ['ul', 'ol', 'paragraph']],
                 ],
-               
-            });
-            
-            $('.summernote').on('summernote.keyup', function(e) {
-                var code = e.keyCode || e.which;
-                if (code === 32 || code === 13) {
-                    alert()  // Space or Enter key
-                    var content = $('.summernote').summernote('code');
-                    var words = content.split(' ');
-                    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-                    var capitalizedContent = words.join(' ');
 
-                    if (capitalizedContent !== content) {
-                        $('.summernote').summernote('code', capitalizedContent);
+                callbacks: {
+                    onChange: function (contents) {
+                        var $editor = $('.summernote').siblings('.note-editor');
+                        var $editable = $editor.find('.note-editable');
+                        var text = $editable.text().trim();
+                        if (text) {
+                            var firstWord = text.split(' ')[0];
+                            var capitalizedFirstWord = firstWord.charAt(0).toUpperCase() + firstWord.slice(1);
+                            var newText = text.replace(firstWord, capitalizedFirstWord);
+                            $editable.text(newText);
+                        }
                     }
                 }
+            
+
             });
+            
+        
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
             });
