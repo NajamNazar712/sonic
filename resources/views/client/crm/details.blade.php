@@ -350,15 +350,29 @@
     <script type="text/javascript">
         $(document).ready(function() {
 
-                  $('.summernote').summernote({
+            
+            $('.summernote').summernote({
                 toolbar: [
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['para', ['ul', 'ol', 'paragraph']],
                 ],
-                
-        
+               
             });
-        
+            
+            $('.summernote').on('summernote.keyup', function(e) {
+                var code = e.keyCode || e.which;
+                if (code === 32 || code === 13) {
+                    alert()  // Space or Enter key
+                    var content = $('.summernote').summernote('code');
+                    var words = content.split(' ');
+                    words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+                    var capitalizedContent = words.join(' ');
+
+                    if (capitalizedContent !== content) {
+                        $('.summernote').summernote('code', capitalizedContent);
+                    }
+                }
+            });
             $('#chat_form').on('submit',function (e) {
                 e.preventDefault();
             });

@@ -2615,7 +2615,7 @@
                                 index++;
 
                             const url = image['image'];
-                            const substringsToCheck = ["jpg", "png", "jpeg"];
+                            const substringsToCheck = ["jpg", "png", "jpeg","jfif", "JPEG","GIF", "TIFF", "PSD","PSD","EPS","RAW"];
 
                             if (substringsToCheck.some(substr => url.includes(substr))) {
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
