@@ -535,7 +535,13 @@ class DeliveryController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
                     $shipment_status_id = $shipment->shipper_status_id ?? NULL;
-                    $operation_rider_id = Rider::where('id', $request->rider_id)->first()->operation_rider_id;
+                    $rider = Rider::where('id', $request->rider_id);
+                    if($rider->exists()){
+                        $operation_rider_id = $rider->first()->operation_rider_id;
+                    }
+                    else{
+                        return ['status' => 1, 'error' => 'Rider not found!'];
+                    }
                     if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
                         return ['status' => 1, 'error' => 'Shipment cannot be added because it is on Re-Attempt Status'];
                     } else {
