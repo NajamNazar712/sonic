@@ -172,6 +172,8 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Sub Segment</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">First Attempt Date</th>
+                        <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -363,7 +365,7 @@
 
             var booking_from_date = $('#from_date1').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -378,7 +380,7 @@
             });
             var booking_to_date = $('#to_date1').pickadate({
                 firstDay: 1,
-                clear: '',
+                clear: 'Clear',
                 max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
@@ -460,6 +462,8 @@
                             head.push('Shipper');
                             head.push('Sub Segment');
                             head.push('Consignee Name');
+                            head.push('First Attempt Date');
+                            head.push('Rider Picked Status Date');
                             head.push('Status');
                             head.push('Reason');
                             head.push('Remarks');
@@ -500,6 +504,8 @@
                                 row.push(values.sub_segment);
                                 row.push(values.account_no);
                                 row.push(values.name);
+                                row.push(values.first_attempt_date);
+                                row.push(values.rider_picked_status_date);
                                 row.push(values.status);
                                 row.push(values.reason);
                                 row.push(values.remarks);
@@ -590,7 +596,7 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[17, 'desc']],
+                order: [[19, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -599,6 +605,8 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'sub_segment', name: 'scs.name', class: 'align-middle sub_segment'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
+                    {data: 'first_attempt_date', name: 'first_attempt_date', class: 'align-middle first_attempt_date'},
+                    {data: 'rider_picked_status_date', name: 'rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'sjr.remarks', class: 'align-middle remarks'},

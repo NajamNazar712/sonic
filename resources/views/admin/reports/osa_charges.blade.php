@@ -21,7 +21,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                     </div>
-                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date is required">
+                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)" data-rule-required="true" data-msg-required="Date is required" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-4">
@@ -31,7 +31,7 @@
                                         <span class="la la-calendar-o"></span>
                                     </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date is required">
+                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)" data-rule-required="true" data-msg-required="Date is required" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-2">
@@ -172,6 +172,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

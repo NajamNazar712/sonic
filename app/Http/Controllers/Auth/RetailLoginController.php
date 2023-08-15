@@ -10,6 +10,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\MessageBag;
+use App\Http\Models\Admin\BackgroundImage;
+
 
 class RetailLoginController extends Controller
 {
@@ -19,7 +21,16 @@ class RetailLoginController extends Controller
 }
 
     public function showLoginForm(){
-        return view('retail.login');
+        $background_image = BackgroundImage::where('background_image_screen_id', 3)->latest()->first();
+        if ($background_image) {
+            $background_image['path'] = 'storage/' . $background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        } else {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+
+        }
+        return view('retail.login')->with(['background_image' => $background_image]);
     }
     public function login(Request $request){
         //validate the form

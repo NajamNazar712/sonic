@@ -4965,6 +4965,7 @@ class AdminFinanceController extends Controller
 
     public function make_payments_shipment_list(Request $request)
     {
+        // dd($request->all());
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
             ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -5065,6 +5066,10 @@ class AdminFinanceController extends Controller
                 $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
             })
             ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
+
+            if (($from = $request->get('requested_from_date')) && ($to = $request->get('requested_to_date'))) {
+                $datatables->whereBetween('pending_payment_shipments.created_at', [$from, $to]);
+            }
 
         return $datatables->make(true);
     }

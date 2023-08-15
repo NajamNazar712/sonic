@@ -27,6 +27,7 @@
 										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
+										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -221,7 +222,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.roles.list') }}',
 				rowId: 'id',
-				order: [[4, 'desc']],
+				order: [[5, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'id', name: 'admin_roles.id', class: 'align-middle id'},
@@ -230,6 +231,7 @@
 					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admin_roles.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
+					{data: 'is_active', name: 'admin_roles.is_active', class: 'align-middle is_active'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -247,6 +249,7 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var departments_select = '<select name="departments_select" id="departments_select" class="select2 form-control"></select>';
+                    var status = '<select name="status" id="status" class="select2 form-control"> <option value="1">Enabled</option> <option value="0">Disabled</option></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -254,8 +257,15 @@
 
 						if ($(header).is('.serial_number') || $(header).is('.action') ||  $(header).is('.select')) {
 							$(td).appendTo($(search));
-						}else if($(header).is('.department')){
+						}
+						else if($(header).is('.department')){
                             $(departments_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+						else if($(header).is('.status')){
+                            $(status).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -288,6 +298,14 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+
+                    $("#status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
 					this.api().table().columns.adjust();
 				}
 			});
@@ -340,6 +358,31 @@
                     table.button('.bulk_add').disable();
                     table.button('.remove').disable();
                 }
+				
+            });
+
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .enable_disable', function() {
+
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+				$.ajax({
+					url: '{!! route('admin.user_management.roles.enable_disable') !!}',
+					method: 'POST',
+					data: {
+						'id': id,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						table.draw(false);
+
+						toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+					else {
+						toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+					}
+				});
 				
             });
 		});

@@ -157,6 +157,8 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\BackgroundImage;
+
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -8690,5 +8692,47 @@ class GlobalSettingsController extends Controller
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
+    }
+
+    public function background_image_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 683);
+        $background_image = BackgroundImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.background_image')->with(['id' => 1, 'background_image' => $background_image]);
+    }
+    public function background_image_store(Request $request)
+    {
+        
+        $request->validate([
+            'upload_image' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+        ],[
+            'upload_image.max' => 'The image must be less than 2 Megabytes.',
+            'upload_image.mimes' => 'The upload image must be a file of type jpeg, png, jpg.',
+        ]);
+
+        if (!$request->hasFile('upload_image')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image')) {
+            if ($request->has('background_image_id_1')) {
+                $image_id = $request->get('background_image_id_1');
+                $background_image = BackgroundImage::find($image_id);
+                Storage::disk('public')->delete($background_image->picture_path);
+            } else {
+
+                $background_image = new BackgroundImage();
+                $background_image->save();
+            }
+
+            $picture_path = 'background_image/' . $background_image->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image));
+            $background_image->picture_path = $picture_path;
+            $background_image->version = carbon::now();
+            $background_image->background_image_screen_id = 1;
+            
+            $background_image->save();
+        }
+        return redirect()->back()->with(['success' => 'Image Uploaded!']);
     }
 }

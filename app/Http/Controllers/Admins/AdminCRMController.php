@@ -2780,6 +2780,7 @@ class AdminCRMController extends Controller
 			->leftjoin('star_shippers as sts','sts.user_id','=','user.id')
 			->select('crm_requests.id as id', 's.tracking_number as tracking_number', 'crcn.name as case_nature', 'crcnt.type as case_nature_type', 'crc.channel as channel', 'ad.name as agent', 'a.name as name', 'u.name as shipper', 'su.name as sub_shipper', 'ru.name as retail_user', 'cu.name as consignee_user', 'crm_requests.launched_by as launched_added_by', 'crm_requests.created_at as created_at', 'crm_requests.description as description','inp.created_at as inprocess','res.created_at as closed_date', 'ss.name as status', 'user.name as shipper_name', 'oc.name as origin','och.name as origin_hub','ocz.name as origin_zone', 'dc.name as destination', 'crm_requests.launched_by_id','crm_requests.address as address', 'crm_requests.address_latitude as address_latitude','crm_requests.address_longitude as address_longitude','crsh.created_at as reopen_date','crm_requests.shipment_id', 'dh.name as hub', 'z.name as zone','ss.id as shipment_status_id','sts.status as star_status')
             ->where('crm_requests.status_id', 4);
+            
 
         if (!in_array(session('role_id'), [1, 6]) && !in_array(179, session('permissions')) && !in_array(201, session('permissions'))) {
             $closed_request = $closed_request->where(function ($sub_query) {
@@ -2807,6 +2808,18 @@ class AdminCRMController extends Controller
         else if (session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
                 $closed_request = $closed_request->where('spt.admin_id', Auth::id());
+            }
+        }
+
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                
+                $closed_request->whereBetween('res.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $closed_request->whereDate('res.created_at', $from);
             }
         }
 
@@ -3794,8 +3807,8 @@ TRAX-Customer Experience';
             return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
         }
     }
-
     public function crm_index(){
+
         $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
         return view('admin.crm.index')->with(['departments' => $departments]);
     }
