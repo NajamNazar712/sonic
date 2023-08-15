@@ -683,6 +683,8 @@ Route::name('api.')->group(function () {
 
     Route::prefix('employee')->name('employee.')->group(function () {
         Route::post('app_login', 'APIController@app_login')->name('app_login');
+        Route::post('forget_pin', 'APIController@forget_pin')->name('forget_pin');
+        Route::post('reset_pin', 'APIController@reset_pin')->name('reset_pin');
     });
 
 });
