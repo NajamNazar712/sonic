@@ -328,7 +328,7 @@
 					{data: 'official_phone_number', name: 'admins.official_phone_number', class: 'align-middle official_phone_number'},
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
-					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
+					{data: 'designation', name: 'ed.id', class: 'align-middle designation'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
 					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
 					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
@@ -359,6 +359,8 @@
                         '<option value="0">Disable</option>' +
                         '<option value="1">Enable</option>' +
                         '</select>';
+					var employee_designation_select = '<select name="employee_designation_select" id="employee_designation_select" class="select2 form-control"></select>';
+
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -371,6 +373,12 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
+						else if ($(header).is('.designation')) {
+							$(employee_designation_select).appendTo($(search))
+									.on('change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -380,6 +388,21 @@
 								current.val(column.search());
 							}
 						}
+					});
+
+					var data = $.map({!! $employee_designations !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+
+						return obj;
+					});
+
+					$('#employee_designation_select').prepend('<option value="" selected></option>').select2({
+						data:data,
+						placeholder: "Select Designation",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
 					});
 					
                     $("#status_select").prepend('<option value="" selected></option>').select2({
