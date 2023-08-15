@@ -8735,4 +8735,47 @@ class GlobalSettingsController extends Controller
         }
         return redirect()->back()->with(['success' => 'Image Uploaded!']);
     }
+
+    public function last_mile_app_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 639);
+        $auto_verification = false;
+        $excluded_hubs = array();
+
+        $auto_verification_time = '01:00';
+        $hubs = City::select('id', 'name')->where('status', 1)->where('hub', 1)->get();
+        $zone = Zone::select('id', 'name')->where('status', 1)->get();
+        $rider = Rider::select('id', 'name')->where('status', 1)->get();
+        $rider_category = RiderCategory::select('id', 'name')->get();
+
+        $auto_verification_setting = GlobalSettings::where('type', 'delivery_note_auto_verification');
+
+        if ($auto_verification_setting->exists()) {
+            $auto_verification_setting = $auto_verification_setting->first();
+            $auto_verification = $auto_verification_setting->setting_value;
+        }
+
+        $excluded_hubs_setting = GlobalSettings::where('type', 'delivery_note_auto_verification_exclude_hubs');
+
+        if ($excluded_hubs_setting->exists()) {
+            $excluded_hubs_setting = $excluded_hubs_setting->first();
+            $excluded_hubs = array_map('intval', explode(',', $excluded_hubs_setting->text));
+        }
+
+        $auto_verification_setting_time = GlobalSettings::where('type', 'delivery_note_auto_verification_time');
+
+        if($auto_verification_setting_time->exists()){
+            $auto_verification_setting_time  = $auto_verification_setting_time->first();
+            $auto_verification_time = $auto_verification_setting_time->text;
+        }
+
+        $today = Carbon::now()->endOfDay();
+
+        return view('admin.settings.last_mile.last_mile_app_report')->with(['hubs' => $hubs, 'zone' => $zone, 'rider' => $rider, 'rider_category' => $rider_category, 'auto_verification_time' => $auto_verification_time, 'today' => $today]);
+    }
+
+    public function last_mile_app_report_list()
+    {
+
+    }
 }

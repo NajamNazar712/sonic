@@ -3712,6 +3712,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_delivery_note_verification_index')->name('index');
             Route::post('store', 'Admins\GlobalSettingsController@auto_delivery_note_verification_store')->name('store');
         });
+
+		Route::prefix('last_mile_app_report')->name('last_mile_app_report.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@last_mile_app_report_index')->name('index');
+            Route::post('list', 'Admins\GlobalSettingsController@last_mile_app_report_list')->name('list');
+        });
+
 		Route::prefix('star_shippers')->name('star_shippers.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@star_shippers_index')->name('index');
             Route::get('list', 'Admins\GlobalSettingsController@star_shippers_list')->name('list');
