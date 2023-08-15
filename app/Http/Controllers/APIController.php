@@ -7759,15 +7759,11 @@ class APIController extends Controller
             $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($employee->exists()) {
+                $employee = $employee->first();
 
-                /*$employee = $employee->whereIn($employee->request_status_id, [1, 2]);
-                return response()->json(['status' => 1, 'message' => $employee->first()]);*/
-
-                if ($employee->whereIn('request_status_id', [1, 2])->exists()) {
-                    $employee = $employee->first();
+                if ($employee->request_status_id == 1 || $employee->request_status_id == 2) {
                     return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
                 } else {
-                    $employee = $employee->first();
                     $employee_type_id = $employee->employee_type_id;
 
                     if ($employee_type_id == 1) {
