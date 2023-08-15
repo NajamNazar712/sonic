@@ -7756,173 +7756,96 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
 
             if ($employee->exists()) {
-                $employee = $employee->first();
-                $employee_type_id = $employee->employee_type_id;
 
-                if ($employee_type_id == 1) {
-                    //Staff...
+                $employee = $employee->whereIn('request_status_id', [1, 2]);
 
-                    $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
-                    if ($user->exists()) {
-                        $user = $user->first();
-                        if ($user->status == 0) {
+                if ($employee->exists()) {
+                    $employee = $employee->first();
+                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
+                } else {
+                    $employee = $employee->first();
+                    $employee_type_id = $employee->employee_type_id;
 
-                            if ($user->first_login == 0) {
-                                return response()->json(['status' => 1, 'message' => "Dear " . $user->name . "- Your request is in process and is pending for approval from HR."]);
-                            } else {
-                                return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
-                            }
-                        }
-                        if (Hash::check($request->input('pin'), $user->password)) {
-                            $generate_otp = false;
-                            $environment = config('app.env');
-                            $settings = GlobalSettings::where('type', 'admin_otp');
-                            if ($settings->exists()) {
-                                $settings = $settings->first();
-                                if ($settings->setting_value) {
-                                    if ($environment == 'production' || $environment == 'staging') {
-                                        $otp = mt_rand(100000, 999999);
-                                        $user->otp = $otp;
-                                        $user->last_login_attempt = Carbon::now();
-                                        $user->save();
-                                        $data = array("otp" => $otp, "phone_number" => $request->phone_number);
-                                        NotificationsController::send(138, $user, $data);
-                                        $generate_otp = true;
-                                    }
-                                }
-                            }
+                    if ($employee_type_id == 1) {
+                        //Staff...
 
-                            if (!$user->api_token) {
-                                $api_token = uniqid(base64_encode(str_random(60)));
-                                $user->api_token = $api_token;
-                                $user->save();
-                            }
-                            $api_token = $user->api_token;
-                            if ($generate_otp) {
-                                return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
-                            } else {
-                                $employee = Employee::where('trax_id', $user->trax_id);
-                                $information = array();
-                                $information['id'] = $user->id;
-                                $information['name'] = $user->name;
-                                $information['phone'] = $user->phone_number;
-                                $information['cnic'] = $user->cnic;
-                                $information['api_token'] = $api_token;
-                                $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
-                                if ($user->designation_id) {
-                                    $user_department = $user->Edesignation->department_id;
+                        $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                        if ($user->exists()) {
+                            $user = $user->first();
+                            if ($user->status == 0) {
+
+                                if ($user->first_login == 0) {
+                                    return response()->json(['status' => 1, 'message' => "Dear " . $user->name . "- Your request is in process and is pending for approval from HR."]);
                                 } else {
-                                    $user_department = $user->role->department_id;
+                                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
                                 }
-                                $information['sales_person'] = ($user_department == 7) ? 1 : 0;
-                                if ($employee->exists()) {
-                                    $employee = $employee->first();
-                                    $information['address'] = ($employee->address) ? $employee->address : "";
-                                } else {
-                                    $information['address'] = '';
-                                }
-                                $information['role'] = 'staff';
-                                if ($request->has('device_token')) {
-                                    EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
-                                    EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
-                                    $employee_device_token = new EmployeeDeviceToken();
-                                    $employee_device_token->employee_id = $user->id;
-                                    $employee_device_token->employee_type_id = 1;
-                                    $employee_device_token->device_token = $request->get('device_token');
-                                    $employee_device_token->save();
-                                }
-
-                                $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                                    ->join('admins as a', 'e.id', 'a.employee_id')
-                                    ->where('a.id', $user->id);
-
-                                if ($reporting_location->exists()) {
-                                    $reporting_location = $reporting_location->first();
-                                    $information['distance'] = $reporting_location->radius;
-                                    $information['lat'] = $reporting_location->lat;
-                                    $information['long'] = $reporting_location->long;
-                                } else {
-                                    $information['distance'] = 0;
-                                    $information['lat'] = 0;
-                                    $information['long'] = 0;
-                                }
-                                $information['welcome_bit'] = 0;
-                                if (!$user->first_login) {
-                                    $information['welcome_bit'] = 1;
-                                    $information['welcome_message'] = "Welcome to TRAX " . $user->name;
-                                }
-                                $user->first_login = 1;
-                                $user->save();
-                                return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                             }
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
-                        }
-                    } else {
-                        $employee = Employee::whereIn('request_status_id', [1, 2])->where('employee_type_id', 1)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
-                        if ($employee->exists()) {
-                            $employee = $employee->first();
-                            return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
-                        }
-                    }
-
-                } elseif ($employee_type_id == 2) {
-                    //Rider...
-
-                    $generate_otp = false;
-                    $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
-                    if ($rider->exists()) {
-                        $rider = $rider->first();
-                        if ($rider->status) {
-                            if (Hash::check($request->input('pin'), $rider->pin)) {
+                            if (Hash::check($request->input('pin'), $user->password)) {
+                                $generate_otp = false;
                                 $environment = config('app.env');
-                                $settings = GlobalSettings::where('type', 'rider_otp');
+                                $settings = GlobalSettings::where('type', 'admin_otp');
                                 if ($settings->exists()) {
                                     $settings = $settings->first();
                                     if ($settings->setting_value) {
                                         if ($environment == 'production' || $environment == 'staging') {
                                             $otp = mt_rand(100000, 999999);
-                                            $rider->otp = $otp;
-                                            $rider->last_login_attempt = Carbon::now();
-                                            $rider->save();
+                                            $user->otp = $otp;
+                                            $user->last_login_attempt = Carbon::now();
+                                            $user->save();
                                             $data = array("otp" => $otp, "phone_number" => $request->phone_number);
-                                            NotificationsController::send(138, $rider, $data);
+                                            NotificationsController::send(138, $user, $data);
                                             $generate_otp = true;
                                         }
                                     }
                                 }
 
-                                if ($rider->api_token) {
-                                    $api_token = $rider->api_token;
-                                } else {
+                                if (!$user->api_token) {
                                     $api_token = uniqid(base64_encode(str_random(60)));
-                                    $rider->api_token = $api_token;
+                                    $user->api_token = $api_token;
+                                    $user->save();
                                 }
-                                $rider->save();
+                                $api_token = $user->api_token;
                                 if ($generate_otp) {
                                     return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
                                 } else {
+                                    $employee = Employee::where('trax_id', $user->trax_id);
                                     $information = array();
-                                    $information['name'] = $rider->name;
-                                    $information['phone'] = $rider->phone;
-                                    $information['cnic'] = $rider->cnic;
-                                    $information['address'] = $rider->address;
-                                    $information['role'] = 'rider';
-                                    $information['api_token'] = $rider->api_token;
-                                    $information['cargo_user'] = 0;
-                                    $information['welcome_bit'] = 0;
-                                    if (!$rider->first_login) {
-                                        $information['welcome_bit'] = 1;
-                                        $information['welcome_message'] = "Welcome to TRAX " . $rider->name;
+                                    $information['id'] = $user->id;
+                                    $information['name'] = $user->name;
+                                    $information['phone'] = $user->phone_number;
+                                    $information['cnic'] = $user->cnic;
+                                    $information['api_token'] = $api_token;
+                                    $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                                    if ($user->designation_id) {
+                                        $user_department = $user->Edesignation->department_id;
+                                    } else {
+                                        $user_department = $user->role->department_id;
                                     }
+                                    $information['sales_person'] = ($user_department == 7) ? 1 : 0;
+                                    if ($employee->exists()) {
+                                        $employee = $employee->first();
+                                        $information['address'] = ($employee->address) ? $employee->address : "";
+                                    } else {
+                                        $information['address'] = '';
+                                    }
+                                    $information['role'] = 'staff';
+                                    if ($request->has('device_token')) {
+                                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
+                                        $employee_device_token = new EmployeeDeviceToken();
+                                        $employee_device_token->employee_id = $user->id;
+                                        $employee_device_token->employee_type_id = 1;
+                                        $employee_device_token->device_token = $request->get('device_token');
+                                        $employee_device_token->save();
+                                    }
+
                                     $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
-                                        ->join('riders as r', 'e.id', 'r.employee_id')
-                                        ->where('r.id', $rider->id);
+                                        ->join('admins as a', 'e.id', 'a.employee_id')
+                                        ->where('a.id', $user->id);
+
                                     if ($reporting_location->exists()) {
                                         $reporting_location = $reporting_location->first();
                                         $information['distance'] = $reporting_location->radius;
@@ -7933,27 +7856,96 @@ class APIController extends Controller
                                         $information['lat'] = 0;
                                         $information['long'] = 0;
                                     }
-                                    $rider->first_login = 1;
-                                    $rider->save();
-                                    return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
+                                    $information['welcome_bit'] = 0;
+                                    if (!$user->first_login) {
+                                        $information['welcome_bit'] = 1;
+                                        $information['welcome_message'] = "Welcome to TRAX " . $user->name;
+                                    }
+                                    $user->first_login = 1;
+                                    $user->save();
+                                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
                                 }
                             } else {
-                                return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
-                            }
-                        } else {
-                            if ($rider->first_login == 0) {
-                                return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for approval from HR."]);
-                            } else {
-                                return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                                return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
                             }
                         }
-                    } else {
-                        $employee = Employee::whereIn('request_status_id', [1, 2])->where('employee_type_id', 2)->where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
-                        if ($employee->exists()) {
-                            $employee = $employee->first();
-                            return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
-                        } else {
-                            return response()->json(['status' => 1, 'message' => 'Invalid Credentials']);
+
+                    } elseif ($employee_type_id == 2) {
+                        //Rider...
+
+                        $generate_otp = false;
+                        $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                        if ($rider->exists()) {
+                            $rider = $rider->first();
+                            if ($rider->status) {
+                                if (Hash::check($request->input('pin'), $rider->pin)) {
+                                    $environment = config('app.env');
+                                    $settings = GlobalSettings::where('type', 'rider_otp');
+                                    if ($settings->exists()) {
+                                        $settings = $settings->first();
+                                        if ($settings->setting_value) {
+                                            if ($environment == 'production' || $environment == 'staging') {
+                                                $otp = mt_rand(100000, 999999);
+                                                $rider->otp = $otp;
+                                                $rider->last_login_attempt = Carbon::now();
+                                                $rider->save();
+                                                $data = array("otp" => $otp, "phone_number" => $request->phone_number);
+                                                NotificationsController::send(138, $rider, $data);
+                                                $generate_otp = true;
+                                            }
+                                        }
+                                    }
+
+                                    if ($rider->api_token) {
+                                        $api_token = $rider->api_token;
+                                    } else {
+                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $rider->api_token = $api_token;
+                                    }
+                                    $rider->save();
+                                    if ($generate_otp) {
+                                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                                    } else {
+                                        $information = array();
+                                        $information['name'] = $rider->name;
+                                        $information['phone'] = $rider->phone;
+                                        $information['cnic'] = $rider->cnic;
+                                        $information['address'] = $rider->address;
+                                        $information['role'] = 'rider';
+                                        $information['api_token'] = $rider->api_token;
+                                        $information['cargo_user'] = 0;
+                                        $information['welcome_bit'] = 0;
+                                        if (!$rider->first_login) {
+                                            $information['welcome_bit'] = 1;
+                                            $information['welcome_message'] = "Welcome to TRAX " . $rider->name;
+                                        }
+                                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                            ->join('riders as r', 'e.id', 'r.employee_id')
+                                            ->where('r.id', $rider->id);
+                                        if ($reporting_location->exists()) {
+                                            $reporting_location = $reporting_location->first();
+                                            $information['distance'] = $reporting_location->radius;
+                                            $information['lat'] = $reporting_location->lat;
+                                            $information['long'] = $reporting_location->long;
+                                        } else {
+                                            $information['distance'] = 0;
+                                            $information['lat'] = 0;
+                                            $information['long'] = 0;
+                                        }
+                                        $rider->first_login = 1;
+                                        $rider->save();
+                                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
+                                }
+                            } else {
+                                if ($rider->first_login == 0) {
+                                    return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for approval from HR."]);
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                                }
+                            }
                         }
                     }
                 }
