@@ -16,7 +16,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
-{{--                        <th class="border-primary border-darken-1">Hub(s)</th>--}}
+                        <th class="border-primary border-darken-1">Hub(s)</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
@@ -94,6 +94,25 @@
                         <button type="submit" class="btn btn-info">Update</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="bookings_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -189,7 +208,7 @@
                     columns: [
                         {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                         {data: 'name', name: 'r.name', class: 'align-middle name'},
-                        // {data: 'hubs', name: 'hubs', class: 'align-middle name'},
+                        {data: 'hubs', name: 'hubs', class: 'align-middle name hub_count'},
                         {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                     ],
@@ -341,57 +360,30 @@
                 }
             });
 
-            {{--$('body').on('click','#edit_hub_submit', function () {--}}
-            {{--    var reason = $('#edit_reason').val();--}}
-            {{--    var reason_id = parseInt($('#edit_reason_id').val());--}}
+            $('body').on('click', '#datatable tbody tr td.hub_count button', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
 
-            {{--    if(reason != '' && reason_id != ''){--}}
-            {{--        swal({--}}
-            {{--            title: 'Are You Sure?',--}}
-            {{--            text: 'Select Yes to update the reason!',--}}
-            {{--            icon: 'warning',--}}
-            {{--            buttons: {--}}
-            {{--                cancel: {--}}
-            {{--                    text: 'No',--}}
-            {{--                    value: null,--}}
-            {{--                    visible: true,--}}
-            {{--                    closeModal: true,--}}
-            {{--                },--}}
-            {{--                confirm: {--}}
-            {{--                    text: 'Yes',--}}
-            {{--                    value: true,--}}
-            {{--                    visible: true,--}}
-            {{--                    closeModal: true--}}
-            {{--                }--}}
-            {{--            },--}}
-            {{--            closeOnClickOutside: false,--}}
-            {{--            closeOnEsc: false,--}}
-            {{--            dangerMode: true--}}
-            {{--        }).then(function (confirm) {--}}
-            {{--            if (confirm) {--}}
-            {{--                $.ajax({--}}
-            {{--                    url: '{!! route('admin.settings.rider_assigned_hub.edit.submit') !!}',--}}
-            {{--                    method: 'POST',--}}
-            {{--                    data: {--}}
-            {{--                        '_token': '{{ csrf_token() }}',--}}
-            {{--                        'reason_id': reason_id,--}}
-            {{--                        'reason':reason--}}
-            {{--                    }--}}
-            {{--                }).done(function(data){--}}
-            {{--                    if(data.status == 0){--}}
-            {{--                        table.draw(true);--}}
-            {{--                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-            {{--                        $('#edit_rider_hub_modal').modal('hide');--}}
-            {{--                    }--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--        });--}}
-            {{--    }else{--}}
-            {{--        var error = 'Reason required!';--}}
-            {{--        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-            {{--    }--}}
-            {{--});--}}
+                $.ajax({
+                    url: '{!! route('admin.settings.rider_assigned_hub.hub_count') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function (data) {
+                        console.log(data);
+                        var hubs = '';
+                        if (data) {
+                            $.each(data.hubs, function (index, value) {
+                                hubs += '<u><button class="btn btn-primary mr-1">' + value + '</button></u>';
+                            });
+                        }
+                        $('#bookings_modal .modal-body').html(hubs);
+                    });
+            });
 
         });
     </script>

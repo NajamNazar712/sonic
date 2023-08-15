@@ -14,6 +14,7 @@ class RiderAssignedHubForDeliveryNotePermissionSeeder extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('module_permissions')->insert(array(
             array('id' => 893, 'name' => 'Rider Assigned Hub - View', 'module_id' => 14),
+            array('id' => 896, 'name' => 'Rider Assigned Hub (Edit)- button', 'module_id' => 14),
         ));
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 686, 'screen_name' => 'Rider Assigned Hub', 'action'=> 'View'),

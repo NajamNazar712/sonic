@@ -3736,6 +3736,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('edit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit')->name('edit');
             Route::post('submit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit_submit')->name('edit.submit');
             Route::post('enable_disable', 'Admins\GlobalSettingsController@rider_assigned_hub_enable_disable')->name('enable_disable');
+            Route::post('hub_count', 'Admins\GlobalSettingsController@rider_assigned_hub_count')->name('hub_count');
         });
 
     });
