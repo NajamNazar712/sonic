@@ -1287,6 +1287,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 //show shipemtns with fintech charges
                 Route::get('show', 'Admins\DeliveryController@pending_cash_collection_showshipment')->name('showshipment');
                 //end 
+
+                Route::get('fintech_shipment', 'Admins\DeliveryController@pending_cash_collection_fintech_shipment')->name('fintechshipment');
+
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all', 'Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments', 'Admins\DeliveryController@cash_collection_shipments')->name('shipments');
