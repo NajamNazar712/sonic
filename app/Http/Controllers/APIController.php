@@ -7761,7 +7761,7 @@ class APIController extends Controller
             if ($employee->exists()) {
 
                 $employee = $employee->whereIn('request_status_id', [1, 2]);
-                dd($employee->first());
+                return response()->json(['status' => 1, 'message' => $employee->first()]);
 
                 if ($employee->exists()) {
                     $employee = $employee->first();
