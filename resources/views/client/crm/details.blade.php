@@ -323,7 +323,7 @@
         
 
         textarea#chat_input {
-    text-transform: capitalize !important
+    text-transform: capitalize;
 }
 
         .chat-application .chat-app-form {

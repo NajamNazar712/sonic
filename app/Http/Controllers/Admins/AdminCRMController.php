@@ -5786,7 +5786,7 @@ TRAX-Customer Experience';
                     $crm_image->save();
             }
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Attachments updated successfully']);
+            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Attachments Upload successfully']);
 
         }
         return redirect()->back()->with(['status' => 0, 'error' => 'CRM Request Not found!']);
