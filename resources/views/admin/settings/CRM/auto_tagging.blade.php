@@ -350,6 +350,7 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
+                            $('#city_area_id').prepend('<option selected></option>');
                             $('#city_area_id').append(newOption).trigger('change');
                         });
                     }
@@ -375,6 +376,7 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
+                            $('#crm_case_nature_type_id').prepend('<option selected></option>');
                             $('#crm_case_nature_type_id').append(newOption).trigger('change');
                         });
                     }
@@ -400,6 +402,7 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
+                            $('#edit_city_area_id').prepend('<option selected></option>');
                             $('#edit_city_area_id').append(newOption).trigger('change');
                         });
                     }
@@ -425,6 +428,7 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
+                            $('#edit_crm_case_nature_type_id').prepend('<option selected></option>');
                             $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
                         });
                     }
