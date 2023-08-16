@@ -1659,6 +1659,10 @@
                         @if (session('role_id') == 1 || in_array(892, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.operations_performance.index') }}">Operations Performance Report</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(896, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.fintech_report.index') }}">Fintech Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif

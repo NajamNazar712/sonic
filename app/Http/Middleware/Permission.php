@@ -635,6 +635,9 @@ class Permission
             'reports.quick_scanned_report.index' => 877,
             'reports.quick_scanned_report.list' => 877,
 
+            'reports.fintech_report.index' => 896,
+            'reports.fintech_report.list' => 896,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,

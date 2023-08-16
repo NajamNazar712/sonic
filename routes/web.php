@@ -2903,7 +2903,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
 
         
-        Route::prefix('fintech_report')->name('fintech_report.')->group(function () {
+        Route::prefix('fintech')->name('fintech_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fintech_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
         });

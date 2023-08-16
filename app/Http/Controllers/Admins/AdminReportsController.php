@@ -50,6 +50,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\MonthClosingResponsible;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
@@ -12356,5 +12357,155 @@ class AdminReportsController extends Controller
                 return ['status' => 0, 'message' => 'No Record Found!'];
             }
             
+    }
+
+    public function fintech_report_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 691);
+
+        $riders = Rider::select('id', 'name')->get();
+        $shippers = User::get();
+        $fintech_companies = FintechCompany::get();
+        $hubs = DB::table('cities')->where('hub', 1)->select('id', 'name')->get();
+        $fintech_transactions = FintechPaymentDetails::get();
+
+        $delivery_notes = DeliveryNoteShipment::groupBy('delivery_note_id')->get();
+        return view('admin.reports.fintech_report')->with(['riders'=>$riders,'shippers'=>$shippers,'fintech_companies'=>$fintech_companies,'hubs'=>$hubs,'fintech_transactions'=>$fintech_transactions,'delivery_notes'=>$delivery_notes]);
+    }
+    
+    public function fintech_report_list(Request $request)
+    {
+        if($request->get('excel') && $request->get('excel') == true)
+        {
+            ActivityTrailController::createActivityTrailLog(Auth::id(),692);
+        }
+        
+        $fintech = DB::connection('reports')->table('shipments')->join('trax_pay_transactions','trax_pay_transactions.shipment_id','shipments.id')
+        ->leftjoin('fintech_payment_details as fpd', 'fpd.trax_pay_id','trax_pay_transactions.id')
+        ->leftjoin('users', 'users.id','shipments.user_id')
+        ->leftjoin('riders', 'riders.id','fpd.rider_id')
+        ->leftjoin('shipment_fintech_charges as sfc', 'sfc.shipment_id','trax_pay_transactions.shipment_id')
+        ->leftjoin('fintech_companies as fc', 'fc.id','fpd.fintech_company_id')
+        ->leftjoin('fintech_company_charges as fcc', 'fc.id','fcc.company_Id')
+        ->leftjoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'trax_pay_transactions.shipment_id')
+                ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = trax_pay_transactions.shipment_id)'));
+        })
+        ->leftJoin('shipments_journey as sjd', function ($join) {
+            $join->on('sjd.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sjd.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 14)')
+                );
+        })->select('tracking_number','sj.shipper_status_id as shipper_status','sjd.created_at as delivered_date', 'trax_pay_transactions.delivery_note_id as delivery_note_id','fpd.transaction_id as transaction_id','fpd.trax_pay_id as trax_pay_id','shipments.amount as cod_amount','shipments.fintech_charges as fintech_charges','fpd.created_at as transaction_date','fpd.revenue as gross_revenue','shipments.consignee_city_id as city','users.name as name','riders.name as rider_name','riders.trax_id as rider_trax_id','sfc.applied_to as applied_to','fc.company_name as fc_name','fcc.charges as fintech_company_charges','fcc.fed_tax as fintech_company_fed_tax');
+
+        $datatables = Datatables::of($fintech)
+        ->addColumn('fed_tax', function ($result) {
+            $standard_fintech_charges = DB::table('standard_fintech_charges')->first();
+            $shipment = Shipment::where('tracking_number', $result->tracking_number)->first();
+            $fintech_charges = DB::table('shipment_fintech_charges')->where('shipment_id', $shipment->id)->first();
+            if ($fintech_charges) {
+                $fintech_charges = intval($fintech_charges->fintech_charges);
+                $calculation = $result->cod_amount * ($standard_fintech_charges->standard_fintech_charges / 100) - $fintech_charges;
+                $result->fed_tax_calculation = $calculation;
+                return $calculation;
+            } else {
+                return '---';
+            }
+        })
+        ->editColumn('tracking_number', function ($result) {
+            $route = route('admin.tracking.index');
+            $trackingLink = "$route?tracking_number=$result->tracking_number";
+            return [
+                'tracking_number' => $result->tracking_number,
+                'tracking_link' => $trackingLink,
+            ];
+        })
+        
+        ->editColumn('applied_to', function($result){
+            return $result->applied_to === 1 ? 'shipper' : ($result->applied_to === 2 ? 'consignee' : '----');
+        })
+        ->editColumn('delivered_date', function ($result) {
+            return ($result->shipper_status == 14) ? Carbon::parse($result->delivered_date) : '----';
+        })
+        ->editColumn('shipper_status', function ($result) {
+            return $result->shipper_status ? ShipmentStatus::where('id', $result->shipper_status)->value('name') : '-----';
+        })
+
+        ->editColumn('city', function ($result) {
+            return $result->city ? City::where('id', $result->city)->value('name') : '-----';
+        })
+        ->editColumn('transaction_id', function ($result) {
+            return $result->transaction_id ?? '-----';
+        })
+        ->editColumn('trax_pay_id', function ($result) {
+            return $result->trax_pay_id ?? '-----';
+        })
+        ->editColumn('rider_name', function ($result) {
+            return $result->rider_name ?? '-----';
+        })        
+        ->editColumn('rider_trax_id', function ($result) {
+            return $result->rider_trax_id ?? '-----';
+        })
+        ->editColumn('fintech_company_charges', function ($result) {
+            return $result->fintech_company_charges ?? '-----';
+        })
+        ->editColumn('fc_name', function ($result) {
+            return $result->fc_name ?? '-----';
+        })
+        ->editColumn('fintech_company_fed_tax', function ($result) {
+            return $result->fintech_company_fed_tax ?? '-----';
+        })
+        ->editColumn('transaction_date', function ($result) {
+            return isset($result->transaction_date) ? Carbon::parse($result->transaction_date) : '-----';
+        })
+        ->editColumn('gross_revenue', function ($result) {
+            return $result->gross_revenue ?? '-----';
+        })
+        
+        ->addColumn('net_revenue', function ($result) {
+            if (isset($result->fed_tax_calculation) && isset($result->gross_revenue)) {              
+                $net_revenue = $result->gross_revenue - $result->fed_tax_calculation;
+                return $net_revenue;
+            } else {
+                return '---';
+            }
+        });
+
+        if ($search_riders = $request->get('search_riders')) {
+          
+            $datatables->where('riders.id', $search_riders);
+        }    
+        if ($search_shippers = $request->get('search_shippers')) {
+            $datatables->where('users.id', $search_shippers);
+        } 
+        
+        if ($search_fintech_companies = $request->get('search_fintech_companies')) {
+            $datatables->where('fc.id', $search_fintech_companies);
+        } 
+        if ($search_hub = $request->get('search_hubs')) {
+            $datatables->where('shipments.consignee_city_id', $search_hub);
+        } 
+
+        if ($search_fintech_transactions = $request->get('search_fintech_transactions')) {
+            $datatables->where('fpd.id', $search_fintech_transactions);
+        } 
+
+        if ($search_tracking_no = $request->get('search_tracking_no')) {
+            $datatables->where('shipments.tracking_number', $search_tracking_no);
+        } 
+
+        if ($delivery_notes = $request->get('search_delivery_notes')) {
+            $datatables->where('trax_pay_transactions.delivery_note_id', $delivery_notes);
+        } 
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('sjd.created_at', [$from, $to]);
+
+        } 
+
+        return $datatables->make(true);
     }
 }
