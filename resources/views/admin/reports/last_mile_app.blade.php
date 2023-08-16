@@ -157,25 +157,40 @@
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">S.No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note#</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Delivery Note Date</th>
-                        <th class="border-primary border-darken-1">Trax IDs</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Rider Category</th>
-                        <th class="border-primary border-darken-1">Total Shipment</th>
-                        <th class="border-primary border-darken-1">Update Via App</th>
-                        <th class="border-primary border-darken-1">Update Via DBF</th>
-
-
-                    </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">S.No.</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Delivery Note#</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Zone</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Delivery Note Date</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Trax IDs</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Name</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Category</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Total Shipment</th>
+                            <th class="border-primary border-darken-1 align-middle" colspan="16">
+                                <div class="text-center">Update Via App</div>
+                            </th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via DBF</th>
+                        </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">Before 11 AM</th>
+                            <th class="border-primary border-darken-1">11:00</th>
+                            <th class="border-primary border-darken-1">12:00</th>
+                            <th class="border-primary border-darken-1">13:00</th>
+                            <th class="border-primary border-darken-1">14:00</th>
+                            <th class="border-primary border-darken-1">15:00</th>
+                            <th class="border-primary border-darken-1">16:00</th>
+                            <th class="border-primary border-darken-1">17:00</th>
+                            <th class="border-primary border-darken-1">18:00</th>
+                            <th class="border-primary border-darken-1">19:00</th>
+                            <th class="border-primary border-darken-1">20:00</th>
+                            <th class="border-primary border-darken-1">21:00</th>
+                            <th class="border-primary border-darken-1">22:00</th>
+                            <th class="border-primary border-darken-1">23:00</th>
+                            <th class="border-primary border-darken-1">After 23:00</th>
+                            <th class="border-primary border-darken-1">Total</th>
+                        </tr>
                     </thead>
-
-                   
-
                 </table>
             </div>
         </div>
@@ -510,6 +525,7 @@
 
             $('#datatable').append("<tfoot><tr><th colspan='7'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
@@ -559,8 +575,21 @@
                     {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
                     {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
                     {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
-
-
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -592,27 +621,21 @@
                     var update_via_dbf_count = 0;
                     var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        // console.table(this.data());
-                        // console.log('updated_via_App ',this.data().update_via_app);
-                        // console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
-                        // console.log('total_shipments ',this.data().total_shipments);
                         update_via_app_count+=this.data().shipments_rider_updated;
                         update_via_dbf_count+=this.data().shipments_dbf_updated;
-                    total_shipment_count+=this.data().total_shipments;
+                        total_shipment_count+=this.data().total_shipments;
     
-                } );    
-                // console.log(total_delivered_count);
-                // console.log(total_shipment_count);
+                    } );
 
-                setTimeout(function(){
-                    document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
-                    document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
-                    document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
-                }, 1000);
+                    setTimeout(function(){
+                        document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
+                        document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
+                        document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
+                    }, 1000);
                     
-    },
+                },
                 stateLoaded: function (settings, data) {
-  },
+                },
           initComplete: function() {
                     this.api().table().columns.adjust();
                 }
