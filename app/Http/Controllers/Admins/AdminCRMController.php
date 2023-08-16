@@ -3973,91 +3973,91 @@ TRAX-Customer Experience';
                     {
                     if ($crm_request->status_id == 1 || $crm_request->status_id == 5) {
                         if($request->valid == 1){
-                            // CrmRequest::where('id', $crm_request->id)->update([
-                            //     'status_id' => 2,
-                            // ]);
-                            // CrmRequestStatusHistory::create([
-                            //     'crm_request_id' => $crm_request->id,
-                            //     'status_id' => 6,
-                            //     'agent_id' => Auth::id()
-                            // ]);
-                            // NotificationsController::send(41, $crm_request->id);
-                            // CrmRequestStatusHistory::create([
-                            //     'crm_request_id' => $crm_request->id,
-                            //     'status_id' => 2,
-                            //     'agent_id' => Auth::id()
-                            // ]);
-                            // if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
-                            //     self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
-                            // }
-                            // if($crm_request->status_id == 1){
-                            //     if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
-                            //         self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
-                            //     }
-                            // }
+                            CrmRequest::where('id', $crm_request->id)->update([
+                                'status_id' => 2,
+                            ]);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 6,
+                                'agent_id' => Auth::id()
+                            ]);
+                            NotificationsController::send(41, $crm_request->id);
+                            CrmRequestStatusHistory::create([
+                                'crm_request_id' => $crm_request->id,
+                                'status_id' => 2,
+                                'agent_id' => Auth::id()
+                            ]);
+                            if($crm_request->case_nature_type_id == 2 && $crm_request->shipment_id != null){
+                                self::delay_in_delivery_shipment_add($crm_request->id, $crm_request->shipment_id);
+                            }
+                            if($crm_request->status_id == 1){
+                                if($crm_request->case_nature_type_id == 1 && $crm_request->shipment_id != null){
+                                    self::automation_payment_add($crm_request->id, $crm_request->shipment_id);
+                                }
+                            }
 
-                            // if($crm_request->case_nature_id == 4){
-                            //     NotificationsController::send(117, $crm_request->id, 6);
-                            // }
+                            if($crm_request->case_nature_id == 4){
+                                NotificationsController::send(117, $crm_request->id, 6);
+                            }
 
-                            // if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
-                            //     $crm_city_id = $crm_request->shipment->pickup_address->city->id;
-                            //     $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
+                            if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
+                                $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                                $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
     
-                            // }else{
+                            }else{
                                 $crm_city_id = $crm_request->shipment->consignee_city_id;
                                 $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
-                            // }
-                            // if($crm_request->shipper_id){
-                            //     $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
-                            //     if($sales_tier_tag->exists()){
-                            //         $sales_tier_tag = $sales_tier_tag->first();
-                            //         $tagged_id = $sales_tier_tag->kam;
-                            //         $kam_admin = Admin::find($tagged_id);
-                            //         if($kam_admin){
-                            //             if($kam_admin->status){
-                            //                 if($tagged_id){
-                            //                     $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->first();
-                            //                     if(!empty($tagged_crm_request)){
-                            //                         if($tagged_crm_request['tagged_id'] != $tagged_id) {
-                            //                             CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->update([
-                            //                                 'crm_request_tagging_type_id' => 4,
-                            //                                 'tagged_id' => $tagged_id
-                            //                             ]);
+                            }
+                            if($crm_request->shipper_id){
+                                $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
+                                if($sales_tier_tag->exists()){
+                                    $sales_tier_tag = $sales_tier_tag->first();
+                                    $tagged_id = $sales_tier_tag->kam;
+                                    $kam_admin = Admin::find($tagged_id);
+                                    if($kam_admin){
+                                        if($kam_admin->status){
+                                            if($tagged_id){
+                                                $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->first();
+                                                if(!empty($tagged_crm_request)){
+                                                    if($tagged_crm_request['tagged_id'] != $tagged_id) {
+                                                        CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',4)->update([
+                                                            'crm_request_tagging_type_id' => 4,
+                                                            'tagged_id' => $tagged_id
+                                                        ]);
         
-                            //                             CrmRequestTaggingHistory::create([
-                            //                                 'crm_request_id' => $crm_request->id,
-                            //                                 'crm_request_tagging_type_id' => 4,
-                            //                                 'tagged_id' => $tagged_id,
-                            //                                 'agent_id' => 306,
-                            //                                 'hub_id' => NULL
-                            //                             ]);
-                            //                             NotificationsController::send(31,$crm_request->id);
-                            //                         }
-                            //                     }
-                            //                     else{
-                            //                         CrmRequestTagging::create([
-                            //                             'crm_request_id' => $crm_request->id,
-                            //                             'crm_request_tagging_type_id' => 4,
-                            //                             'tagged_id' => $tagged_id,
-                            //                             'hub_id' => NULL
-                            //                         ]);
+                                                        CrmRequestTaggingHistory::create([
+                                                            'crm_request_id' => $crm_request->id,
+                                                            'crm_request_tagging_type_id' => 4,
+                                                            'tagged_id' => $tagged_id,
+                                                            'agent_id' => 306,
+                                                            'hub_id' => NULL
+                                                        ]);
+                                                        NotificationsController::send(31,$crm_request->id);
+                                                    }
+                                                }
+                                                else{
+                                                    CrmRequestTagging::create([
+                                                        'crm_request_id' => $crm_request->id,
+                                                        'crm_request_tagging_type_id' => 4,
+                                                        'tagged_id' => $tagged_id,
+                                                        'hub_id' => NULL
+                                                    ]);
         
-                            //                         CrmRequestTaggingHistory::create([
-                            //                             'crm_request_id' => $crm_request->id,
-                            //                             'crm_request_tagging_type_id' => 4,
-                            //                             'tagged_id' => $tagged_id,
-                            //                             'agent_id' => 306,
-                            //                             'hub_id' => NULL
-                            //                         ]);
-                            //                         NotificationsController::send(31,$crm_request->id);
-                            //                     }
-                            //                 }
-                            //             }
-                            //         }
+                                                    CrmRequestTaggingHistory::create([
+                                                        'crm_request_id' => $crm_request->id,
+                                                        'crm_request_tagging_type_id' => 4,
+                                                        'tagged_id' => $tagged_id,
+                                                        'agent_id' => 306,
+                                                        'hub_id' => NULL
+                                                    ]);
+                                                    NotificationsController::send(31,$crm_request->id);
+                                                }
+                                            }
+                                        }
+                                    }
         
-                            //     }
-                            // }
+                                }
+                            }
 
                             if($crm_request->case_nature_type_id != 1){
                             
