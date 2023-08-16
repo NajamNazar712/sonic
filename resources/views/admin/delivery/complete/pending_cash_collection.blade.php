@@ -658,12 +658,13 @@
                     fintech_sum = fintech_sum[0].innerText
                     fintech_sum = parseFloat(fintech_sum)
 
-                    if(data.transactions_amount_link == '-'){
-                        data.transactions_amount_link = 0
+                    if(data.transactions_amount == null){
+                        
+                        data.transactions_amount = 0
                     }
-                    
-                    value = dccn_amount - fintech_sum - data.transactions_amount_link;
+                    value = dccn_amount - fintech_sum - data.transactions_amount;
 
+                    console.log(data.transactions_amount)
                     $('td:eq(18)', row).html(value);
 
                 },
