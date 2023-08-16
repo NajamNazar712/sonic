@@ -12086,7 +12086,7 @@ class AdminReportsController extends Controller
                             $admin = Admin::find($first_status_journey->admin_id);
                             if($admin)
                             {
-                                $data[$key]['first_status_hub'] = City::find($admin->city->hub_id)->name ;
+                                $data[$key]['first_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
                             $data[$key]['first_admin_name'] = $admin->name;
@@ -12098,7 +12098,7 @@ class AdminReportsController extends Controller
                             $rider = Rider::find($first_status_journey->rider_id);
                             if($rider)
                             {
-                                $data[$key]['first_status_hub'] = City::find($rider->city->hub_id)->name;
+                                $data[$key]['first_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
                             $data[$key]['first_rider_name'] = $rider->name;
@@ -12124,11 +12124,11 @@ class AdminReportsController extends Controller
                             $admin = Admin::find($current_status_journey->admin_id);
                             if($admin)
                             {
-                                $data[$key]['current_status_hub'] = City::find($admin->city->hub_id)->name ;
+                                $data[$key]['current_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
                             $data[$key]['current_admin_name'] = $admin->name;
-                            $data[$key]['current_admin_trax_id'] = $admin->rider_trax_id;
+                            $data[$key]['current_admin_trax_id'] = $admin->trax_id;
     
                         }
                         else if($current_status_journey->rider_id != null){
@@ -12136,11 +12136,11 @@ class AdminReportsController extends Controller
                             $rider = Rider::find($current_status_journey->rider_id);
                             if($rider)
                             {
-                                $data[$key]['current_status_hub'] = City::find($rider->city->hub_id)->name;
+                                $data[$key]['current_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
                             $data[$key]['current_rider_name'] = $rider->name;
-                            $data[$key]['current_rider_trax_id'] = $rider->rider_trax_id;
+                            $data[$key]['current_rider_trax_id'] = $rider->trax_id;
                         }
     
                         $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id];

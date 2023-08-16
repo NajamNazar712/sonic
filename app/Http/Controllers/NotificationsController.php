@@ -4519,7 +4519,7 @@ class NotificationsController extends Controller
                     $admins = Admin::leftjoin('admin_hubs as ah', 'ah.admin_id', '=', 'admins.id')->leftjoin('cities as c', 'c.id', '=', 'ah.hub_id')->whereIn('role_id', [2, 3, 4, 31])->where('admins.status', 1);
 
 
-                    $cc_admins = Admin::whereIn('id', [8, 3])->where('status', 1);
+                    $cc_admins = Admin::whereIn('id', [8])->where('status', 1);
                     if ($admins->exists()) {
                         $to = array_merge($to, $admins->distinct('id')->pluck('email')->toArray());
                     }
@@ -9785,7 +9785,7 @@ class NotificationsController extends Controller
                     $name = '';
                     $rider = Rider::find($rider_id);
                     $shipment = Shipment::find($shipment_id);
-                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->first();
+                    $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today())->first();
 
                     if (strpos($body, '[consignee_name]') !== FALSE) {
                         $body = str_replace('[consignee_name]', $shipment->consignee_name, $body);
