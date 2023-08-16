@@ -230,6 +230,7 @@ Route::name('api.')->group(function () {
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
+                Route::post('pending_for_verification', 'Rider\RiderAPIController@pending_for_verification')->name('pending_for_verification');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
@@ -530,6 +531,7 @@ Route::name('api.')->group(function () {
                 Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
                 Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
+                Route::post('note_requests_v2', 'AdminAPIController@delivery_note_requests_v2')->name('note_requests');
                 Route::post('reject', 'AdminAPIController@delivery_note_requests_reject')->name('reject');
                 Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
