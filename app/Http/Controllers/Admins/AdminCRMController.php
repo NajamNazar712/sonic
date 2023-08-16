@@ -4062,7 +4062,7 @@ TRAX-Customer Experience';
                             if($crm_request->case_nature_type_id != 1){
                             
                                 $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
-                                
+
                                 if($crm_auto_tag_user->exists()){
 
                                     $scenario1 = CrmAutoTagUser::where('city_id',$crm_city_id)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id)->where('status',1);
@@ -4103,16 +4103,18 @@ TRAX-Customer Experience';
                                     {
                                         if($crm_auto_tag_user_count > 1)
                                         {
-                                            $crm_auto_tag_ids = $crm_auto_tag_user->pluck('id')->toArray();
-                                            $min_tagged_user = CrmRequestTagging::select("tagged_id",DB::raw("count('tagged_id') as tagged_count"))->whereIn('tagged_id', $crm_auto_tag_ids)->groupBy('tagged_id')->min('tagged_count');
-    
+                                            $crm_auto_tag_ids = $crm_auto_tag_user->pluck('admin_id')->toArray();
+                                            $min_tagged_user = CrmRequestTagging::select("tagged_id",DB::raw("count('tagged_id') as tagged_count"))->whereIn('tagged_id', $crm_auto_tag_ids)->groupBy('tagged_id')->orderBy('tagged_count','asc');
+                                            
                                             if($min_tagged_user->exists())
-                                            {
+                                            {   
+                                                $min_tagged_user = $min_tagged_user->first();
                                                 $admin_id = $min_tagged_user->tagged_id;
                                             }
                                             else{
                                                 $admin_id = $crm_auto_tag_ids[0];
                                             }
+
                                         }
                                         else{
                                             $crm_auto_tag_user = $crm_auto_tag_user->first();
