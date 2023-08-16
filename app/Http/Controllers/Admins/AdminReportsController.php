@@ -12086,7 +12086,7 @@ class AdminReportsController extends Controller
                             $admin = Admin::find($first_status_journey->admin_id);
                             if($admin)
                             {
-                                $data[$key]['first_status_hub'] = City::find($admin->city->hub_id)->name ;
+                                $data[$key]['first_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
                             $data[$key]['first_admin_name'] = $admin->name;
@@ -12098,7 +12098,7 @@ class AdminReportsController extends Controller
                             $rider = Rider::find($first_status_journey->rider_id);
                             if($rider)
                             {
-                                $data[$key]['first_status_hub'] = City::find($rider->city->hub_id)->name;
+                                $data[$key]['first_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
                             $data[$key]['first_rider_name'] = $rider->name;
@@ -12124,7 +12124,7 @@ class AdminReportsController extends Controller
                             $admin = Admin::find($current_status_journey->admin_id);
                             if($admin)
                             {
-                                $data[$key]['current_status_hub'] = City::find($admin->city->hub_id)->name ;
+                                $data[$key]['current_status_hub'] = $admin->city->hub_city->name ?? '-' ;
                             }
     
                             $data[$key]['current_admin_name'] = $admin->name;
@@ -12136,7 +12136,7 @@ class AdminReportsController extends Controller
                             $rider = Rider::find($current_status_journey->rider_id);
                             if($rider)
                             {
-                                $data[$key]['current_status_hub'] = City::find($rider->city->hub_id)->name;
+                                $data[$key]['current_status_hub'] = $rider->city->hub_city->name ?? '-';
                             }
     
                             $data[$key]['current_rider_name'] = $rider->name;
