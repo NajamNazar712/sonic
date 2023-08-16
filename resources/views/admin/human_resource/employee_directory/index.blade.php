@@ -159,6 +159,7 @@
         </div>
     </section>
 
+    {{-- Same Modal is Used for Edit And Rejoin Rider --}}
     <div class="modal fade text-left" id="editRiderModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="editRiderModal" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -183,7 +184,7 @@
                                 </div>
                             </div>
                         <div class="row">
-                                <div class="col-4" id="joining_date_group">
+                                <div class="col-5" id="joining_date_group">
                                     <label>Joining Date<span class="text-danger">*</span></label>
                                     <fieldset class="form-group input-group">
                                         <div class="input-group-prepend">
@@ -199,7 +200,7 @@
                                 </div>
 
                                 
-                                <div class="col-2">
+                                <div class="col-3">
                                     <label>Old Trax Id</label>
                                     <div id="unEditableFields">
                                         <fieldset class="form-group">
