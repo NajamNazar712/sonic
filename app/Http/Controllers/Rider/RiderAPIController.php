@@ -152,6 +152,8 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 use App\Http\Models\Admin\TraxPayTransaction;
 use App\ReturnDeliveredToShipperSms;
+use App\RiderWiseDeliveryNote;
+use App\RiderWiseDeliveryNoteShipment;
 
 class
 RiderAPIController extends Controller
@@ -8929,10 +8931,11 @@ RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-
+//            dd($request->all());
             $rider_id = $request->rider_id;
 
-            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+//            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+                $added_at = $request->added_at;
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                 if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
@@ -9046,8 +9049,7 @@ RiderAPIController extends Controller
                         }
 
                         if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
-
-
+                            
                             if ($request->distribution == 1) {
                                 if ($request->has('distribution_items_list')) {
                                     $distribution_items = json_decode($request->distribution_items_list, true);
@@ -9066,7 +9068,8 @@ RiderAPIController extends Controller
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                     ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
                                 }
-                            } elseif ($shipment->booking_type_id == 2) {
+                            }
+                            elseif ($shipment->booking_type_id == 2) {
                                 $shipment->shipper_status_id = 30;
                                 $shipment->consignee_status_id = 30;
                                 $shipment->received_amount = $shipment->amount;
@@ -9076,7 +9079,8 @@ RiderAPIController extends Controller
                                 NotificationsController::send(183, $details);
                                 NotificationsController::send(184, $details);
                                 $rider_delivery->rider_status_id = 30;
-                            } else if ($shipment->booking_type_id == 3) {
+                            }
+                            else if ($shipment->booking_type_id == 3) {
                                 $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
                                 $item_ids = explode(',', $res);
                                 $total_cod = 0;
@@ -9100,7 +9104,8 @@ RiderAPIController extends Controller
                                     $rider_delivery->rider_status_id = 37;
                                 }
                                 DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
-                            } else if ($shipment->booking_type_id == 4) {
+                            }
+                            else if ($shipment->booking_type_id == 4) {
                                 ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
 
                                 if ($shipment->charges_mode_id == 1) {
@@ -9114,7 +9119,8 @@ RiderAPIController extends Controller
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
                                 }
-                            } else {
+                            }
+                            else {
                                 $shipment->shipper_status_id = 14;
                                 $shipment->consignee_status_id = 14;
                                 $shipment->received_amount = $shipment->amount;
@@ -9124,6 +9130,8 @@ RiderAPIController extends Controller
                                 /*if($shipment->packaging_material_request == 1){
                                     self::delivery_packaging_material_update($shipment->tracking_number);
                                 }*/
+
+                                $this::rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
                             }
                             $shipment->delivery_in_route = 0;
                             $shipment->save();
@@ -14281,9 +14289,184 @@ RiderAPIController extends Controller
         }
     }
 
-    static public function rider_wise_delivery_note($shipment_id,$delivery_note_id,$rider_id,$shipper_status_id)
+    static public function rider_wise_delivery_note($shipment_id,$delivery_note_id,$rider_id,$shipper_status_id,
+    $added_at,$rider_delivery,$via)
     {
-        $time = Carbon::now();
-        dd(1);
+        //via : 1=admin, 2=rider
+        $datetime = Carbon::parse($rider_delivery->added_at);
+        $time = $datetime->format('H:i:s');
+
+        $delivery_note_data = DeliveryNote::join('cities as c','c.id','delivery_notes.hub_id')
+            ->join('zones as z','c.zone_id','z.id')
+            ->where('delivery_notes.id',$delivery_note_id)
+            ->select('delivery_notes.created_at as created_at',
+            'delivery_notes.hub_id as hub_id','delivery_notes.shipments_count as total_shipments',
+            'c.name as hub_name','z.id as zone_id','z.name as zone_name')
+            ->first();
+
+        $rider = Rider::join('employees as e','e.id','riders.employee_id')
+            ->select('riders.name as rider_name','e.trax_id as trax_id')
+            ->where('riders.id',$rider_id)
+            ->first();
+
+            // dd($delivery_note_data,$rider);
+
+        $existing_delivery_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
+        if($existing_delivery_note->exists())
+        {
+            $existing_delivery_note = $existing_delivery_note->first();
+            $existing_delivery_note->count = $existing_delivery_note->count + 1;
+            $existing_delivery_note->save();
+
+            $new_shipment = new RiderWiseDeliveryNoteShipment();
+            $new_shipment->rwdn_id = $existing_delivery_note->id;
+            $new_shipment->shipment_id = $shipment_id;
+            $new_shipment->shipper_status_id = $shipper_status_id;
+            $new_shipment->delivery_note_date = $delivery_note_data->created_at;
+            $new_shipment->updated_date = $rider_delivery->added_at;
+            $new_shipment->updated_via = $via;
+
+            if($time < '10:59:59')
+            {
+                $new_shipment->before_11_count = 1;
+            }
+            elseif($time > '10:59:59' && $time < '11:59:59')
+            {
+                $new_shipment->at_11_count = 1;
+            }
+            elseif($time > '11:59:59' && $time < '12:59:59')
+            {
+                $new_shipment->at_12_count = 1;
+            }
+            elseif($time > '12:59:59' && $time < '13:59:59')
+            {           
+                 $new_shipment->at_13_count = 1;
+            }
+            elseif($time > '13:59:59' && $time < '14:59:59')
+            {           
+                 $new_shipment->at_14_count = 1;
+            }
+            elseif($time > '14:59:59' && $time < '15:59:59')
+            {           
+                 $new_shipment->at_15_count = 1;
+            }
+            elseif($time > '15:59:59' && $time < '16:59:59')
+            {           
+                 $new_shipment->at_16_count = 1;
+            }
+            elseif($time > '16:59:59' && $time < '17:59:59')
+            {           
+                 $new_shipment->at_17_count = 1;
+            }
+            elseif($time > '17:59:59' && $time < '18:59:59')
+            {           
+                 $new_shipment->at_18_count = 1;
+            }
+            elseif($time > '18:59:59' && $time < '19:59:59')
+            {           
+                 $new_shipment->at_19_count = 1;
+            }
+            elseif($time > '19:59:59' && $time < '20:59:59')
+            {           
+                 $new_shipment->at_20_count = 1;
+            }
+            elseif($time > '20:59:59' && $time < '21:59:59')
+            {           
+                 $new_shipment->at_21_count = 1;
+            }
+            elseif($time > '21:59:59' && $time < '22:59:59')
+            {           
+                 $new_shipment->at_22_count = 1;
+            }
+            elseif($time > '22:59:59' && $time < '23:59:59')
+            {           
+                 $new_shipment->after_23_count = 1;
+            }
+
+            $new_shipment->save();
+        }
+        else
+        {
+            $new_delivery = new RiderWiseDeliveryNote();
+            $new_delivery->delivery_note_id = $delivery_note_id;
+            $new_delivery->delivery_note_created_at = $delivery_note_data->created_at;
+            $new_delivery->rider_id = $rider_id;
+            $new_delivery->trax_id = $rider->trax_id;
+            $new_delivery->rider_name = $rider->rider_name;
+            $new_delivery->hub_id = $delivery_note_data->hub_id;
+            $new_delivery->hub_name = $delivery_note_data->hub_name;
+            $new_delivery->zone_id = $delivery_note_data->zone_id;
+            $new_delivery->zone_name = $delivery_note_data->zone_name;
+            $new_delivery->count = 1;
+            $new_delivery->total_shipments = $delivery_note_data->total_shipments;
+            $new_delivery->save();
+        
+            $new_shipment = new RiderWiseDeliveryNoteShipment();
+            $new_shipment->rwdn_id = $new_delivery->id;
+            $new_shipment->shipment_id = $shipment_id;
+            $new_shipment->shipper_status_id = $shipper_status_id;
+            $new_shipment->delivery_note_date = $delivery_note_data->created_at;
+            $new_shipment->updated_date = $rider_delivery->added_at;
+            $new_shipment->updated_via = $via;
+
+            if($time < '10:59:59')
+            {
+                $new_shipment->before_11_count = 1;
+            }
+            elseif($time > '10:59:59' && $time < '11:59:59')
+            {
+                $new_shipment->at_11_count = 1;
+            }
+            elseif($time > '11:59:59' && $time < '12:59:59')
+            {
+                $new_shipment->at_12_count = 1;
+            }
+            elseif($time > '12:59:59' && $time < '13:59:59')
+            {           
+                 $new_shipment->at_13_count = 1;
+            }
+            elseif($time > '13:59:59' && $time < '14:59:59')
+            {           
+                 $new_shipment->at_14_count = 1;
+            }
+            elseif($time > '14:59:59' && $time < '15:59:59')
+            {           
+                 $new_shipment->at_15_count = 1;
+            }
+            elseif($time > '15:59:59' && $time < '16:59:59')
+            {           
+                 $new_shipment->at_16_count = 1;
+            }
+            elseif($time > '16:59:59' && $time < '17:59:59')
+            {           
+                 $new_shipment->at_17_count = 1;
+            }
+            elseif($time > '17:59:59' && $time < '18:59:59')
+            {           
+                 $new_shipment->at_18_count = 1;
+            }
+            elseif($time > '18:59:59' && $time < '19:59:59')
+            {           
+                 $new_shipment->at_19_count = 1;
+            }
+            elseif($time > '19:59:59' && $time < '20:59:59')
+            {           
+                 $new_shipment->at_20_count = 1;
+            }
+            elseif($time > '20:59:59' && $time < '21:59:59')
+            {           
+                 $new_shipment->at_21_count = 1;
+            }
+            elseif($time > '21:59:59' && $time < '22:59:59')
+            {           
+                 $new_shipment->at_22_count = 1;
+            }
+            elseif($time > '22:59:59' && $time < '23:59:59')
+            {           
+                 $new_shipment->after_23_count = 1;
+            }
+
+            $new_shipment->save();
+        }
     }
 }
