@@ -5111,13 +5111,16 @@ class DeliveryController extends Controller
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
             ->editColumn('fintech_charges', function ($deliveries) {
-                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)
-                ->pluck('shipment_id')->toArray(); 
-                $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
-                ->where('fintech_charges','!=','')->count('id');
-                if($count_fintech_shapment > 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,' . $deliveries->delivery_note . ')" >' . $count_fintech_shapment . '</button>';
-                }
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
+                $amount = Shipment::whereIn('id', $delivery_note_shipment)
+                ->pluck('fintech_charges')->toArray();
+    
+                $sum = collect($amount)->sum(function ($amount) {
+                    return floatval($amount);
+                }); 
+              
+                    return '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>';
+                
             })
 
             ->editColumn('amount', function ($shipment) {
@@ -7014,11 +7017,16 @@ class DeliveryController extends Controller
 
         ->editColumn('fintech_shipments_charges', function ($deliveries) {
             $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
-            $count_fintech_shapment = Shipment::whereIn('id', $delivery_note_shipment)
-            ->where('fintech_charges','!=','')->count('id');
-            if($count_fintech_shapment > 0){
-                return '<button class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshow(event,'.$deliveries->delivery_note.')" >' . $count_fintech_shapment . '</button>';
-            }
+            $amount = Shipment::whereIn('id', $delivery_note_shipment)
+            ->pluck('fintech_charges')->toArray();
+
+            $sum = collect($amount)->sum(function ($amount) {
+                return floatval($amount);
+            });
+
+     
+             return '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,'.$deliveries->delivery_note.')" >' . $sum . '</button>';
+            
         })
 
 
