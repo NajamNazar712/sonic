@@ -14238,7 +14238,14 @@ RiderAPIController extends Controller
             $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
 
             if ($updated_shipments_count == 0) {
-                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+                $delivery_note = DeliveryNote::where('id', $request->delivery_note_id);
+                if($delivery_note->exists()){
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note->pending_status = 1;
+                    $delivery_note->pending_for_verification_at = Carbon::now();
+                    $delivery_note->save();
+                }
+//                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
                 dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
