@@ -385,8 +385,10 @@
                 ajax: {
                     url: '{{ route('admin.cargo_manifest.history.list') }}',
                     data: function (d) {
-                        d.transit_from_date = $('#transit_from_date').val();
-                        d.transit_to_date = $('#transit_to_date').val();
+                        // d.transit_from_date = $('#transit_from_date').val();
+                        // d.transit_to_date = $('#transit_to_date').val();
+                        d.transit_from_date = $('input[name="transit_from_date_formatted"]').val();
+                        d.transit_to_date = $('input[name="transit_to_date_formatted"]').val();
                         d.search_filter_origin = $('#search_filter_origin').val();
                         d.search_filter_destination = $('#search_filter_destination').val();
                         d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
