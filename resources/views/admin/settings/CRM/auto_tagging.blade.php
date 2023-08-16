@@ -61,11 +61,11 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="city_area_id" id="city_area_id" class="form-control select2">
+                        <select name="city_area_id" id="city_area_id" class="form-control select2" >
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2">
+                        <select name="crm_case_nature_id" id="crm_case_nature_id" class="form-control select2" data-rule-required="true" data-msg-required="Case Nature is required">
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
@@ -121,7 +121,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2">
+                        <select name="crm_case_nature_id" id="edit_crm_case_nature_id" class="form-control select2"  data-rule-required="true" data-msg-required="Case Nature is required">
                             @foreach($case_natures as $case_nature)
                                 <option value="{{ $case_nature->id }}" > {{ $case_nature->name }} </option>
                             @endforeach
@@ -186,7 +186,6 @@
             $('#city_area_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Hub Area",
-                allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
             $('#crm_case_nature_id').prepend('<option selected></option>').select2({
@@ -198,7 +197,6 @@
             $('#crm_case_nature_type_id').prepend('<option selected></option>').select2({
                 width:'100%',
                 placeholder:"Select Case Nature Type",
-                allowClear:true,
                 dropdownParent:$('#crm_agent_assign')
             });
 
@@ -217,7 +215,6 @@
             $('#edit_city_area_id').select2({
                 width:'100%',
                 placeholder:"Select Hub Area",
-                allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             $('#edit_crm_case_nature_id').select2({
@@ -229,7 +226,6 @@
             $('#edit_crm_case_nature_type_id').select2({
                 width:'100%',
                 placeholder:"Select Case Nature Type",
-                allowClear:true,
                 dropdownParent:$('#crm_agent_edit')
             });
             
@@ -350,7 +346,6 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            $('#city_area_id').prepend('<option selected></option>');
                             $('#city_area_id').append(newOption).trigger('change');
                         });
                     }
@@ -376,7 +371,6 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            $('#crm_case_nature_type_id').prepend('<option selected></option>');
                             $('#crm_case_nature_type_id').append(newOption).trigger('change');
                         });
                     }
@@ -402,7 +396,6 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            $('#edit_city_area_id').prepend('<option selected></option>');
                             $('#edit_city_area_id').append(newOption).trigger('change');
                         });
                     }
@@ -428,7 +421,6 @@
                     {
                         $.each(result, function(index, option) {
                             var newOption = new Option(option.name, option.id); 
-                            $('#edit_crm_case_nature_type_id').prepend('<option selected></option>');
                             $('#edit_crm_case_nature_type_id').append(newOption).trigger('change');
                         });
                     }
