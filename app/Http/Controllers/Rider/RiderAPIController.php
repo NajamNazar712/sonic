@@ -9128,6 +9128,7 @@ RiderAPIController extends Controller
                             $shipment->delivery_in_route = 0;
                             $shipment->save();
                         }
+                        $rider_delivery->save();
 
                         if ($request->has('dbf_otp_entered')) {
                             $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
@@ -12296,9 +12297,9 @@ RiderAPIController extends Controller
 
             foreach ($delivery_notes as $delivery_note) {
 
-                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
-                    continue;
-                }
+//                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
+//                    continue;
+//                }
                 $information = array();
 
                 $information['delivery_note_id'] = $delivery_note->id;
