@@ -11346,7 +11346,8 @@ RiderAPIController extends Controller
             $rc_flag = false;
             $rider_id = $request->rider_id;
 
-            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+//            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+            $added_at = $request->added_at;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
             if ($shipment_journey->exists()) {
                 $shipment_journey = $shipment_journey->first();
@@ -11479,6 +11480,9 @@ RiderAPIController extends Controller
                                         }
 
                                         ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
+
+                                        $this::rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,$request->shipper_status_id,$added_at,$rider_delivery,2);
+
                                         if ($request->shipper_status_id != 7) {
                                             NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
                                         }
