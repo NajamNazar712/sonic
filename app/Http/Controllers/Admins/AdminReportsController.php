@@ -12128,7 +12128,7 @@ class AdminReportsController extends Controller
                             }
     
                             $data[$key]['current_admin_name'] = $admin->name;
-                            $data[$key]['current_admin_trax_id'] = $admin->rider_trax_id;
+                            $data[$key]['current_admin_trax_id'] = $admin->trax_id;
     
                         }
                         else if($current_status_journey->rider_id != null){
@@ -12140,7 +12140,7 @@ class AdminReportsController extends Controller
                             }
     
                             $data[$key]['current_rider_name'] = $rider->name;
-                            $data[$key]['current_rider_trax_id'] = $rider->rider_trax_id;
+                            $data[$key]['current_rider_trax_id'] = $rider->trax_id;
                         }
     
                         $data[$key]['current_status'] =  $shipment_statuses[$current_status_journey->shipper_status_id];
