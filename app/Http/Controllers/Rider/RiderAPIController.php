@@ -14322,6 +14322,13 @@ RiderAPIController extends Controller
             $existing_delivery_note->count = $existing_delivery_note->count + 1;
             $existing_delivery_note->save();
 
+            $id = $existing_delivery_note->id;
+            $existing_shipment = RiderWiseDeliveryNoteShipment::where('rwdn_id',$id)->select('shipment_id');
+            if($existing_shipment->exists())
+            {
+                $existing_shipment = $existing_shipment->first();
+            }
+
             $new_shipment = new RiderWiseDeliveryNoteShipment();
             $new_shipment->rwdn_id = $existing_delivery_note->id;
             $new_shipment->shipment_id = $shipment_id;
