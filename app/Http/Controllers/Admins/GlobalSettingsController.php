@@ -8746,13 +8746,15 @@ class GlobalSettingsController extends Controller
 
         $existing_riders = RiderAssignedHubForDeliveryNote::all()->pluck('rider_id');
 
-        $riders = Rider::whereIn('city_id',$admin_hubs)
-            ->where('blacklist', 0)
-            ->whereNotIn('id',$existing_riders)
-            ->select('id','name')
+        $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')
+            ->leftjoin('cities as c','c.id','riders.city_id')
+            ->whereIn('riders.city_id',$admin_hubs)
+            ->where('riders.blacklist', 0)
+            ->whereNotIn('riders.id',$existing_riders)
+            ->select('riders.id as id','riders.name as name','e.trax_id as trax_id','c.name as city_name')
             ->get();
 
-
+//        dd($riders);
 
         $hubs = City::whereIn('id',$admin_hubs)->where('hub',1)->select('id','name')->get();
         return view('admin.settings.last_mile.rider_assigned_hub')->with(['riders' => $riders, 'hubs' => $hubs]);

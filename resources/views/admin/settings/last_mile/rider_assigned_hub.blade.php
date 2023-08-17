@@ -41,9 +41,10 @@
                     <div class="modal-body">
                         <div class="row justify-content-center">
                             <div class="col-10 form-group">
+{{--                                {{$riders}}--}}
                                 <select class="form-control select2" name="select_rider_id" id="select_rider_id" data-rule-required="true" data-msg-required="Rider is required">
                                     @foreach($riders as $select_rider)
-                                        <option value="{{$select_rider->id}}">{{$select_rider->name}}</option>
+                                        <option value="{{$select_rider->id}}">{{$select_rider->name.' '.$select_rider->trax_id.' ('.$select_rider->city_name.')'}}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -123,7 +124,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style>
-
+        .custom_btn
+        {
+            padding: 5px;
+        }
     </style>
 
 @endsection
@@ -378,7 +382,7 @@
                         var hubs = '';
                         if (data) {
                             $.each(data.hubs, function (index, value) {
-                                hubs += '<u><button class="btn btn-primary mr-1">' + value + '</button></u>';
+                                hubs += '<button class="btn btn-primary mr-1 custom_btn" style="cursor: not-allowed">' + value + '</button>';
                             });
                         }
                         $('#bookings_modal .modal-body').html(hubs);
