@@ -3807,8 +3807,8 @@ TRAX-Customer Experience';
             return ['status' => 0, 'success' => 'Request(s) successfully un tagged'];
         }
     }
-
     public function crm_index(){
+
         $departments = AdminDepartment::where('id', '!=', 1)->get(['id', 'name']);
         return view('admin.crm.index')->with(['departments' => $departments]);
     }
