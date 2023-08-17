@@ -47,8 +47,8 @@ class AdminLoginController extends Controller
         } else {
             $settings = $settings->first();
         }
-        $background_image = BackgroundImage::first();
-        if($background_image != null)
+        $background_image = BackgroundImage::where('background_image_screen_id',1)->latest()->first();
+        if($background_image)
         {
             $background_image['path'] = 'storage/'.$background_image->picture_path;
             $background_image['version'] = $background_image->version;
