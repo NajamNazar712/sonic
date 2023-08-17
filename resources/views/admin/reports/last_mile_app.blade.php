@@ -172,7 +172,8 @@
                             <th class="border-primary border-darken-1 align-middle" colspan="16">
                                 <div class="text-center">Update Via App</div>
                             </th>
-                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via DBF</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Rider</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Admin</th>
                         </tr>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">Before 11 AM</th>
@@ -587,7 +588,8 @@
                     {data: 'at_23_count',  class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'total_updated_shipments', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'update_via', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'updated_via_rider', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'updated_via_admin', class: 'align-middle text-center', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

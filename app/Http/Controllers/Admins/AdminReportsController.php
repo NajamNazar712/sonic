@@ -9374,7 +9374,9 @@ class AdminReportsController extends Controller
             'rider_wise_delivery_note_summaries.at_17_count','rider_wise_delivery_note_summaries.at_18_count','rider_wise_delivery_note_summaries.at_19_count',
             'rider_wise_delivery_note_summaries.at_20_count','rider_wise_delivery_note_summaries.at_21_count','rider_wise_delivery_note_summaries.at_22_count',
             'rider_wise_delivery_note_summaries.at_23_count','rider_wise_delivery_note_summaries.after_23_count',
-            'z.name as zone','h.name as hub','r.name as rider_name');
+            'z.name as zone','h.name as hub','r.name as rider_name',
+            DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
+            DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin'));
 // dd($new_deliveries->get());
         $datatable = Datatables::of($new_deliveries)
             ->addColumn('delivery_note', function ($new_deliveries) {
@@ -9386,6 +9388,20 @@ class AdminReportsController extends Controller
             ->editColumn('total_shipments_link', function ($new_deliveries) {
                 if ($new_deliveries->total_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->total_shipments . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('updated_via_rider', function ($new_deliveries) {
+                if ($new_deliveries->updated_via_rider != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_rider . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('updated_via_admin', function ($new_deliveries) {
+                if ($new_deliveries->updated_via_admin != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_admin . '</button>';
                 } else {
                     return 0;
                 }
