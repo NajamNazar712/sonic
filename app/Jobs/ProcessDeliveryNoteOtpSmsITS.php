@@ -47,7 +47,7 @@ class ProcessDeliveryNoteOtpSmsITS implements ShouldQueue
             }
         }
         catch(Exception $exception) {
-            $to = ['muhammad.yousuf@trax.pk'];
+            $to = ['asad.ahsan@trax.pk'];
             $subject = '[Error] SMS API';
             $body = 'Error Exception.<br/>' . json_encode($exception->getMessage());
 
@@ -85,7 +85,7 @@ class ProcessDeliveryNoteOtpSmsITS implements ShouldQueue
 
                 $this->sms->save();
 
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] SMS API - ITS';
                 $body = 'Unrecognized Error in SMS API.<br/>SMS ID: ' . $sms->id . '<br/>Response Received: ' . json_encode($response);
 
