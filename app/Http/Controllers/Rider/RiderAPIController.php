@@ -14293,111 +14293,132 @@ RiderAPIController extends Controller
         }
     }
 
-    static public function rider_wise_delivery_note($shipment_id,$delivery_note_id,$rider_id,$shipper_status_id,
-    $added_at,$rider_delivery,$via)
+    static public function rider_wise_delivery_note($shipment_id, $delivery_note_id, $rider_id, $shipper_status_id,
+                                                    $added_at, $rider_delivery, $via)
     {
         //via : 1=admin, 2=rider
         $datetime = Carbon::parse($rider_delivery->added_at);
         $time = $datetime->format('H:i:s');
 
-        $delivery_note_data = DeliveryNote::join('cities as c','c.id','delivery_notes.hub_id')
-            ->join('zones as z','c.zone_id','z.id')
-            ->where('delivery_notes.id',$delivery_note_id)
+        $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
+            ->join('zones as z', 'c.zone_id', 'z.id')
+            ->where('delivery_notes.id', $delivery_note_id)
             ->select('delivery_notes.created_at as created_at',
-            'delivery_notes.hub_id as hub_id','delivery_notes.shipments_count as total_shipments',
-            'c.name as hub_name','z.id as zone_id','z.name as zone_name')
+                'delivery_notes.hub_id as hub_id', 'delivery_notes.shipments_count as total_shipments',
+                'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name')
             ->first();
 
-        $rider = Rider::join('employees as e','e.id','riders.employee_id')
-            ->select('riders.name as rider_name','e.trax_id as trax_id')
-            ->where('riders.id',$rider_id)
+        $rider = Rider::join('employees as e', 'e.id', 'riders.employee_id')
+            ->select('riders.name as rider_name', 'e.trax_id as trax_id')
+            ->where('riders.id', $rider_id)
             ->first();
 
-            // dd($delivery_note_data,$rider);
-
-        $existing_delivery_note = RiderWiseDeliveryNote::where('delivery_note_id',$delivery_note_id);
-        if($existing_delivery_note->exists())
-        {
+        $existing_delivery_note = RiderWiseDeliveryNote::where('delivery_note_id', $delivery_note_id);
+        if ($existing_delivery_note->exists()) {
             $existing_delivery_note = $existing_delivery_note->first();
             $existing_delivery_note->count = $existing_delivery_note->count + 1;
             $existing_delivery_note->save();
 
             $id = $existing_delivery_note->id;
-            $existing_shipment = RiderWiseDeliveryNoteShipment::where('rwdn_id',$id)->select('shipment_id');
-            if($existing_shipment->exists())
+            $existing_shipment = RiderWiseDeliveryNoteShipment::where('rwdn_id', $id)
+                ->where('shipment_id', $shipment_id);
+            if ($existing_shipment->exists())
             {
+                $temp = 1;
                 $existing_shipment = $existing_shipment->first();
-            }
+                $existing_shipment = $existing_shipment->update(
+                    ['shipper_status_id' => $shipper_status_id
+                    ,'before_11_count'=>0
+                    ,'at_11_count'=>0
+                    ,'at_12_count'=>0
+                    ,'at_13_count'=>0
+                    ,'at_14_count'=>0
+                    ,'at_15_count'=>0
+                    ,'at_16_count'=>0
+                    ,'at_17_count'=>0
+                    ,'at_18_count'=>0
+                    ,'at_19_count'=>0
+                    ,'at_20_count'=>0
+                    ,'at_21_count'=>0
+                    ,'at_22_count'=>0
+                    ,'at_23_count'=>0
+                    ,'after_23_count'=>0]);
 
-            $new_shipment = new RiderWiseDeliveryNoteShipment();
-            $new_shipment->rwdn_id = $existing_delivery_note->id;
-            $new_shipment->shipment_id = $shipment_id;
-            $new_shipment->shipper_status_id = $shipper_status_id;
-            $new_shipment->delivery_note_date = $delivery_note_data->created_at;
-            $new_shipment->updated_date = $rider_delivery->added_at;
-            $new_shipment->updated_via = $via;
+                if ($time < '10:59:59') {
+                    $existing_shipment->before_11_count = 1;
+                } elseif ($time > '10:59:59' && $time < '11:59:59') {
+                    $existing_shipment->at_11_count = 1;
+                } elseif ($time > '11:59:59' && $time < '12:59:59') {
+                    $existing_shipment->at_12_count = 1;
+                } elseif ($time > '12:59:59' && $time < '13:59:59') {
+                    $existing_shipment->at_13_count = 1;
+                } elseif ($time > '13:59:59' && $time < '14:59:59') {
+                    $existing_shipment->at_14_count = 1;
+                } elseif ($time > '14:59:59' && $time < '15:59:59') {
+                    $existing_shipment->at_15_count = 1;
+                } elseif ($time > '15:59:59' && $time < '16:59:59') {
+                    $existing_shipment->at_16_count = 1;
+                } elseif ($time > '16:59:59' && $time < '17:59:59') {
+                    $existing_shipment->at_17_count = 1;
+                } elseif ($time > '17:59:59' && $time < '18:59:59') {
+                    $existing_shipment->at_18_count = 1;
+                } elseif ($time > '18:59:59' && $time < '19:59:59') {
+                    $existing_shipment->at_19_count = 1;
+                } elseif ($time > '19:59:59' && $time < '20:59:59') {
+                    $existing_shipment->at_20_count = 1;
+                } elseif ($time > '20:59:59' && $time < '21:59:59') {
+                    $existing_shipment->at_21_count = 1;
+                } elseif ($time > '21:59:59' && $time < '22:59:59') {
+                    $existing_shipment->at_22_count = 1;
+                } elseif ($time > '22:59:59' && $time < '23:59:59') {
+                    $existing_shipment->after_23_count = 1;
+                }
+                $existing_shipment->save();
+            }
+            else
+                {
 
-            if($time < '10:59:59')
-            {
-                $new_shipment->before_11_count = 1;
-            }
-            elseif($time > '10:59:59' && $time < '11:59:59')
-            {
-                $new_shipment->at_11_count = 1;
-            }
-            elseif($time > '11:59:59' && $time < '12:59:59')
-            {
-                $new_shipment->at_12_count = 1;
-            }
-            elseif($time > '12:59:59' && $time < '13:59:59')
-            {           
-                 $new_shipment->at_13_count = 1;
-            }
-            elseif($time > '13:59:59' && $time < '14:59:59')
-            {           
-                 $new_shipment->at_14_count = 1;
-            }
-            elseif($time > '14:59:59' && $time < '15:59:59')
-            {           
-                 $new_shipment->at_15_count = 1;
-            }
-            elseif($time > '15:59:59' && $time < '16:59:59')
-            {           
-                 $new_shipment->at_16_count = 1;
-            }
-            elseif($time > '16:59:59' && $time < '17:59:59')
-            {           
-                 $new_shipment->at_17_count = 1;
-            }
-            elseif($time > '17:59:59' && $time < '18:59:59')
-            {           
-                 $new_shipment->at_18_count = 1;
-            }
-            elseif($time > '18:59:59' && $time < '19:59:59')
-            {           
-                 $new_shipment->at_19_count = 1;
-            }
-            elseif($time > '19:59:59' && $time < '20:59:59')
-            {           
-                 $new_shipment->at_20_count = 1;
-            }
-            elseif($time > '20:59:59' && $time < '21:59:59')
-            {           
-                 $new_shipment->at_21_count = 1;
-            }
-            elseif($time > '21:59:59' && $time < '22:59:59')
-            {           
-                 $new_shipment->at_22_count = 1;
-            }
-            elseif($time > '22:59:59' && $time < '23:59:59')
-            {           
-                 $new_shipment->after_23_count = 1;
-            }
+                $new_shipment = new RiderWiseDeliveryNoteShipment();
+                $new_shipment->rwdn_id = $existing_delivery_note->id;
+                $new_shipment->shipment_id = $shipment_id;
+                $new_shipment->shipper_status_id = $shipper_status_id;
+                $new_shipment->delivery_note_date = $delivery_note_data->created_at;
+                $new_shipment->updated_date = $rider_delivery->added_at;
+                $new_shipment->updated_via = $via;
 
-            $new_shipment->save();
+                if ($time < '10:59:59') {
+                    $new_shipment->before_11_count = 1;
+                } elseif ($time > '10:59:59' && $time < '11:59:59') {
+                    $new_shipment->at_11_count = 1;
+                } elseif ($time > '11:59:59' && $time < '12:59:59') {
+                    $new_shipment->at_12_count = 1;
+                } elseif ($time > '12:59:59' && $time < '13:59:59') {
+                    $new_shipment->at_13_count = 1;
+                } elseif ($time > '13:59:59' && $time < '14:59:59') {
+                    $new_shipment->at_14_count = 1;
+                } elseif ($time > '14:59:59' && $time < '15:59:59') {
+                    $new_shipment->at_15_count = 1;
+                } elseif ($time > '15:59:59' && $time < '16:59:59') {
+                    $new_shipment->at_16_count = 1;
+                } elseif ($time > '16:59:59' && $time < '17:59:59') {
+                    $new_shipment->at_17_count = 1;
+                } elseif ($time > '17:59:59' && $time < '18:59:59') {
+                    $new_shipment->at_18_count = 1;
+                } elseif ($time > '18:59:59' && $time < '19:59:59') {
+                    $new_shipment->at_19_count = 1;
+                } elseif ($time > '19:59:59' && $time < '20:59:59') {
+                    $new_shipment->at_20_count = 1;
+                } elseif ($time > '20:59:59' && $time < '21:59:59') {
+                    $new_shipment->at_21_count = 1;
+                } elseif ($time > '21:59:59' && $time < '22:59:59') {
+                    $new_shipment->at_22_count = 1;
+                } elseif ($time > '22:59:59' && $time < '23:59:59') {
+                    $new_shipment->after_23_count = 1;
+                }
+                $new_shipment->save();
+            }
         }
-        else
-        {
+        else {
             $new_delivery = new RiderWiseDeliveryNote();
             $new_delivery->delivery_note_id = $delivery_note_id;
             $new_delivery->delivery_note_created_at = $delivery_note_data->created_at;
@@ -14411,7 +14432,7 @@ RiderAPIController extends Controller
             $new_delivery->count = 1;
             $new_delivery->total_shipments = $delivery_note_data->total_shipments;
             $new_delivery->save();
-        
+
             $new_shipment = new RiderWiseDeliveryNoteShipment();
             $new_shipment->rwdn_id = $new_delivery->id;
             $new_shipment->shipment_id = $shipment_id;
@@ -14420,63 +14441,35 @@ RiderAPIController extends Controller
             $new_shipment->updated_date = $rider_delivery->added_at;
             $new_shipment->updated_via = $via;
 
-            if($time < '10:59:59')
-            {
+            if ($time < '10:59:59') {
                 $new_shipment->before_11_count = 1;
-            }
-            elseif($time > '10:59:59' && $time < '11:59:59')
-            {
+            } elseif ($time > '10:59:59' && $time < '11:59:59') {
                 $new_shipment->at_11_count = 1;
-            }
-            elseif($time > '11:59:59' && $time < '12:59:59')
-            {
+            } elseif ($time > '11:59:59' && $time < '12:59:59') {
                 $new_shipment->at_12_count = 1;
+            } elseif ($time > '12:59:59' && $time < '13:59:59') {
+                $new_shipment->at_13_count = 1;
+            } elseif ($time > '13:59:59' && $time < '14:59:59') {
+                $new_shipment->at_14_count = 1;
+            } elseif ($time > '14:59:59' && $time < '15:59:59') {
+                $new_shipment->at_15_count = 1;
+            } elseif ($time > '15:59:59' && $time < '16:59:59') {
+                $new_shipment->at_16_count = 1;
+            } elseif ($time > '16:59:59' && $time < '17:59:59') {
+                $new_shipment->at_17_count = 1;
+            } elseif ($time > '17:59:59' && $time < '18:59:59') {
+                $new_shipment->at_18_count = 1;
+            } elseif ($time > '18:59:59' && $time < '19:59:59') {
+                $new_shipment->at_19_count = 1;
+            } elseif ($time > '19:59:59' && $time < '20:59:59') {
+                $new_shipment->at_20_count = 1;
+            } elseif ($time > '20:59:59' && $time < '21:59:59') {
+                $new_shipment->at_21_count = 1;
+            } elseif ($time > '21:59:59' && $time < '22:59:59') {
+                $new_shipment->at_22_count = 1;
+            } elseif ($time > '22:59:59' && $time < '23:59:59') {
+                $new_shipment->after_23_count = 1;
             }
-            elseif($time > '12:59:59' && $time < '13:59:59')
-            {           
-                 $new_shipment->at_13_count = 1;
-            }
-            elseif($time > '13:59:59' && $time < '14:59:59')
-            {           
-                 $new_shipment->at_14_count = 1;
-            }
-            elseif($time > '14:59:59' && $time < '15:59:59')
-            {           
-                 $new_shipment->at_15_count = 1;
-            }
-            elseif($time > '15:59:59' && $time < '16:59:59')
-            {           
-                 $new_shipment->at_16_count = 1;
-            }
-            elseif($time > '16:59:59' && $time < '17:59:59')
-            {           
-                 $new_shipment->at_17_count = 1;
-            }
-            elseif($time > '17:59:59' && $time < '18:59:59')
-            {           
-                 $new_shipment->at_18_count = 1;
-            }
-            elseif($time > '18:59:59' && $time < '19:59:59')
-            {           
-                 $new_shipment->at_19_count = 1;
-            }
-            elseif($time > '19:59:59' && $time < '20:59:59')
-            {           
-                 $new_shipment->at_20_count = 1;
-            }
-            elseif($time > '20:59:59' && $time < '21:59:59')
-            {           
-                 $new_shipment->at_21_count = 1;
-            }
-            elseif($time > '21:59:59' && $time < '22:59:59')
-            {           
-                 $new_shipment->at_22_count = 1;
-            }
-            elseif($time > '22:59:59' && $time < '23:59:59')
-            {           
-                 $new_shipment->after_23_count = 1;
-            }
-
             $new_shipment->save();
         }
     }
