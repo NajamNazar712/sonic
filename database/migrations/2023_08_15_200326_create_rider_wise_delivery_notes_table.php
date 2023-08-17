@@ -15,17 +15,14 @@ class CreateRiderWiseDeliveryNotesTable extends Migration
     {
         Schema::create('rider_wise_delivery_notes', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('rwdnsum_id')->index();
             $table->integer('delivery_note_id')->index();
+            $table->integer('shipment_update_count')->nullable();
             $table->dateTime('delivery_note_created_at')->index();
-            $table->integer('rider_id')->index();
-            $table->string('trax_id')->index();
-            $table->string('rider_name');
             $table->integer('hub_id')->index();
             $table->string('hub_name');
             $table->integer('zone_id')->index();
             $table->string('zone_name');
-            $table->integer('count');
-            $table->integer('total_shipments');
             $table->timestamps();
         });
     }

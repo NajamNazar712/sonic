@@ -46,6 +46,9 @@ use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Zone;
+use App\RiderWiseDeliveryNote;
+use App\RiderWiseDeliveryNoteShipment;
+use App\RiderWiseDeliveryNoteSummary;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -75,6 +78,7 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\SpecialApprovalRequestAdmin;
+use function GuzzleHttp\Promise\all;
 
 class AdminReportsController extends Controller
 {
@@ -9355,77 +9359,65 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 228);
         }
-        $date = Carbon::createFromDate('2021', '02', '19')->toDateString();
-        $deliveries = DB::connection('reports')->table('delivery_notes')
-            ->join('cities as c', 'delivery_notes.hub_id', '=', 'c.id')
-            ->join('zones as z', 'z.id', '=', 'c.zone_id')
-            ->join('riders as r', 'delivery_notes.rider_id', '=', 'r.id')
-            ->join('operation_riders_categories as rd', 'r.operation_rider_id', '=', 'rd.id')
-            ->select('r.trax_id as trax_id','delivery_notes.id as delivery_note_id', 'z.name as zone', 'delivery_notes.created_at as created_at', 'rd.name as rider_cat', 'r.name as rider', 'delivery_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `adns` where `adns`.`delivery_note_id` = `delivery_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `delivery_note_shipments` AS `dns` where `dns`.`delivery_note_id` = `delivery_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'))
-            ->whereDate('delivery_notes.created_at', '>', $date);
 
-
-        $datatable = Datatables::of($deliveries)
-            ->addColumn('delivery_note', function ($deliveries) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+        $new_deliveries = RiderWiseDeliveryNoteSummary::join('riders as r','r.id','rider_wise_delivery_note_summaries.rider_id')
+        ->join('cities as c','c.id','r.city_id')
+        ->join('cities as h','h.id','c.hub_id')
+        ->join('zones as z','z.id','c.zone_id')
+        ->select('rider_wise_delivery_note_summaries.id as id','rider_wise_delivery_note_summaries.rider_id',
+        'rider_wise_delivery_note_summaries.trax_id',
+            'rider_wise_delivery_note_summaries.rider_name',
+            'rider_wise_delivery_note_summaries.delivery_note_shipments_count as total_shipments',
+            'rider_wise_delivery_note_summaries.delivery_date','rider_wise_delivery_note_summaries.shipment_update_count as total_updated_shipments',
+            'rider_wise_delivery_note_summaries.before_11_count','rider_wise_delivery_note_summaries.at_11_count','rider_wise_delivery_note_summaries.at_12_count','rider_wise_delivery_note_summaries.at_13_count',
+            'rider_wise_delivery_note_summaries.at_14_count','rider_wise_delivery_note_summaries.at_15_count','rider_wise_delivery_note_summaries.at_16_count',
+            'rider_wise_delivery_note_summaries.at_17_count','rider_wise_delivery_note_summaries.at_18_count','rider_wise_delivery_note_summaries.at_19_count',
+            'rider_wise_delivery_note_summaries.at_20_count','rider_wise_delivery_note_summaries.at_21_count','rider_wise_delivery_note_summaries.at_22_count',
+            'rider_wise_delivery_note_summaries.at_23_count','rider_wise_delivery_note_summaries.after_23_count',
+            'z.name as zone','h.name as hub','r.name as rider_name');
+// dd($new_deliveries->get());
+        $datatable = Datatables::of($new_deliveries)
+            ->addColumn('delivery_note', function ($new_deliveries) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($new_deliveries->dn_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
-            ->addColumn('delivery_note_id_padded', function ($deliveries) {
-                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            ->addColumn('delivery_note_id_padded', function ($new_deliveries) {
+                return str_pad($new_deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('total_shipments_link', function ($deliveries) {
-                if ($deliveries->total_shipments != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->total_shipments . '</button>';
+            ->editColumn('total_shipments_link', function ($new_deliveries) {
+                if ($new_deliveries->total_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->total_shipments . '</button>';
                 } else {
                     return 0;
                 }
             })
-            ->editColumn('shipments_rider_updated', function ($deliveries) {
-                if ($deliveries->shipments_rider_updated != null) {
-                    return $deliveries->shipments_rider_updated;
-                } else {
-                    return 0;
-                }
+            ->addColumn('update_via', function ($new_deliveries) {
+                return '-';
             })
-            ->addColumn('update_via_app', function ($deliveries) {
-                if ($deliveries->shipments_rider_updated != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_rider_updated . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('update_via_dbf', function ($deliveries) {
-                $count = $deliveries->shipments_dbf_updated;
-                if ($count != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $count . '</button>';
-                } else {
-                    return 0;
-                }
+        ->addColumn('update_via_dbf', function ($new_deliveries) {
+                return '-';
             });
 
-        if ($search_rider = $request->get('search_rider')) {
-            $datatable->where('r.id', $search_rider);
-        }
-        if ($search_rider_cat = $request->get('search_rider_cat')) {
-            $datatable->where('r.operation_rider_id', $search_rider_cat);
-        }
-        if ($search_zone = $request->get('search_zone')) {
-            $datatable->where('c.zone_id', $search_zone);
-        }
-        if ($search_hub = $request->get('search_hub')) {
-            $datatable->where('c.id', $search_hub);
-        }
-        if ($dn_no = $request->get('search_dn_no')) {
-            $datatable->where('delivery_notes.id', '=', $dn_no);
-        }
-        if ($tracking = $request->get('search_tracking')) {
-            $datatable->join('delivery_note_shipments as rns', 'rns.delivery_note_id', '=', 'delivery_notes.id')
-                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking);
-        }
+       if ($search_rider = $request->get('search_rider')) {
+           $datatable->where('r.id', $search_rider);
+       }
+       if ($search_zone = $request->get('search_zone')) {
+           $datatable->where('z.id', $search_zone);
+       }
+       if ($search_hub = $request->get('search_hub')) {
+           $datatable->where('h.id', $search_hub);
+       }
+//        if ($dn_no = $request->get('search_dn_no')) {
+//            $datatable->where('delivery_notes.id', '=', $dn_no);
+//        }
+//        if ($tracking = $request->get('search_tracking')) {
+//            $datatable->join('delivery_note_shipments as rns', 'rns.delivery_note_id', '=', 'delivery_notes.id')
+//                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+//                ->where('s.tracking_number', '=', $tracking);
+//        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatable->whereBetween('delivery_notes.created_at', [$from, $to]);
+            $datatable->whereBetween('rider_wise_delivery_note_summaries.created_at', [$from, $to]);
         }
        
         return $datatable->make(true);
@@ -9623,6 +9615,17 @@ class AdminReportsController extends Controller
                 }
             });
         return $datatables->make(true);
+    }
+
+    public function shipment_list(Request $request)
+    {
+        $id = $request->id;
+        $shipments = RiderWiseDeliveryNoteShipment::join('shipments as s','s.id','rider_wise_delivery_note_shipments.shipment_id')
+            ->select('s.tracking_number as tracking_number')
+            ->where('rider_wise_delivery_note_shipments.rwdnsum_id',$id)
+            ->get();
+
+        return response()->json(['status' => 0, 'success' => 'Delivery Note Shipments','shipments'=>$shipments->pluck('tracking_number')]);
     }
 
     public function weight_qc_index()
