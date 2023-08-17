@@ -482,7 +482,7 @@ class ShipperFinanceController extends Controller
         $total_charges = 0;
         $total_adjustments = 0;
         $total_payable = 0;
-        $total_fintech_charges = [];
+        $total_fintech_charges = 0;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;

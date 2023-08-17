@@ -51,7 +51,7 @@ class TelenorCallApiController extends Controller
             }
 
             if ($error) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] CALL API';
                 $body = 'Error in Generate Session ID CALL API.<br/>Response Received: ' . json_encode($xml);
 
@@ -84,7 +84,7 @@ class TelenorCallApiController extends Controller
             }
         }
         catch (RequestException $e) {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] CALL API';
             $body = 'Error in Generate Session ID CALL API.<br/>No Response';
 
@@ -125,7 +125,7 @@ class TelenorCallApiController extends Controller
                 }
 
                 if ($error) {
-                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] CALL API';
                     $body = 'Error in Ping CALL API.<br/>Response Received: ' . json_encode($xml);
 
@@ -133,7 +133,7 @@ class TelenorCallApiController extends Controller
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] CALL API';
                 $body = 'Error in Ping CALL API.<br/>No Response';
 
@@ -141,7 +141,7 @@ class TelenorCallApiController extends Controller
             }
         }
         else {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] CALL API';
             $body = 'Error in Ping CALL API.<br/>No Entry';
 
@@ -309,7 +309,7 @@ class TelenorCallApiController extends Controller
                 }
 
                 if ($error) {
-                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] CALL API';
                     foreach ($calls as $call) {
                         $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>Response Received: ' . json_encode($xml);
@@ -328,7 +328,7 @@ class TelenorCallApiController extends Controller
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] CALL API';
                 foreach ($calls as $call) {
                     $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Response';
@@ -344,7 +344,7 @@ class TelenorCallApiController extends Controller
             }
         }
         else {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] CALL API';
             foreach ($calls as $call) {
                 $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Entry';
@@ -437,7 +437,7 @@ class TelenorCallApiController extends Controller
                 }
 
                 if ($error) {
-                    $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                    $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                     $subject = '[Error] CALL API';
                     $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>Response Received: ' . json_encode($xml);
 
@@ -456,7 +456,7 @@ class TelenorCallApiController extends Controller
                 }
             }
             catch (RequestException $e) {
-                $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+                $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
                 $subject = '[Error] CALL API';
                 $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Response';
 
@@ -471,7 +471,7 @@ class TelenorCallApiController extends Controller
             }
         }
         else {
-            $to = ['muhammad.yousuf@trax.pk', 'noman.aziz@trax.pk'];
+            $to = ['asad.ahsan@trax.pk', 'noman.aziz@trax.pk'];
             $subject = '[Error] CALL API';
             $body = 'Error in CALL API.<br/>CALL ID: ' . $call->id . '<br/>No Entry';
 

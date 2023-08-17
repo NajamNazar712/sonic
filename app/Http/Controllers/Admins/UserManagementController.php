@@ -76,13 +76,13 @@ class UserManagementController extends Controller
         return response()->json(['status' => 0, 'success' => 'Admin Rejoined Successfully!']);
     }
 
-    public function user_index()
-    {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 358);
-        $hubs = City::select('id', 'name')->where('hub', 1)->get();
-        $roles = AdminRole::with('department')->get();
-        $blood_group = EmployeeBloodGroup::select('id', 'name')->get();
-        return view('admin.user_management.user.index')->with(['hubs' => $hubs, 'roles' => $roles, 'blood_groups' => $blood_group]);
+    public function user_index() {
+      ActivityTrailController::createActivityTrailLog(Auth::id(),358);
+      $hubs=City::select('id','name')->where('hub',1)->get();
+      $roles = AdminRole::with('department')->get();
+      $employee_designations = EmployeeDesignation::get();
+      $blood_group = EmployeeBloodGroup::select('id','name')->get();
+      return view('admin.user_management.user.index')->with(['hubs'=>$hubs,'roles'=>$roles, 'blood_groups' => $blood_group, 'employee_designations' => $employee_designations]);
     }
 
     public function user_list(Request $request)
@@ -97,7 +97,7 @@ class UserManagementController extends Controller
             ->leftjoin('employees as emp', 'emp.trax_id', '=', 'admins.trax_id')
             ->leftjoin('employee_blood_groups as bg', 'bg.id', '=', 'emp.blood_group')
             ->leftjoin('cities as h', 'h.id', '=', 'admins.default_hub_id')
-            ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub', 'admins.trax_id as trax_id', 'admins.designation as designation', 'admins.official_phone_number', 'emp.first_inactive', 'ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person');
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status', 'h.name as default_hub','admins.trax_id as trax_id','ed.name as designation','admins.official_phone_number','emp.first_inactive','ed.name as designation_name', 'bg.name as blood_group', 'emp.emergency_contact as emergency_contact_no', 'emp.emergency_contact_person as emergency_contact_person');
 
         if (!in_array(session('role_id'), [1, 58, 70, 63])) {
             $users = $users

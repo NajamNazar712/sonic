@@ -26,7 +26,7 @@
 
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2" multiple="multiple">
                                 @foreach($shippers as $shipper)
                                     <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                 @endforeach
@@ -165,11 +165,12 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
-
+                        
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Request No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipment Status</th>
+                        <th class="border-primary border-darken-1">Last Status Date</th>
                         <th class="border-primary border-darken-1">Case Nature</th>
                         <th class="border-primary border-darken-1">Case Nature Type</th>
                         <th class="border-primary border-darken-1">Description</th>
@@ -394,7 +395,7 @@
                 allowClear:true
             });
             
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            $('#search_shipper').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
                 allowClear:true
@@ -458,6 +459,7 @@
                             head.push('Request No.');
                             head.push('Tracking No.');
                             head.push('Shipment Status');
+                            head.push('Last Status Date');
                             head.push('Case Nature');
                             head.push('Case Nature Type');
                             head.push('Description');
@@ -510,6 +512,7 @@
                                 row.push(values.request_number);
                                 row.push(values.tracking_number);
                                 row.push(values.status);
+                                row.push(values.last_status_date);
                                 row.push(values.case_nature);
                                 row.push(values.case_nature_type);
                                 row.push(values.description);
@@ -618,6 +621,7 @@
                     {data: 'id_padded_link', name: 'crm_requests.id', class: 'align-middle request_number'},
                     {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'last_status_date', name: 'ss.created_at', class: 'align-middle last_status_date'},
                     {data: 'case_nature', name: 'crcn.name', class: 'align-middle case_nature'},
                     {data: 'case_nature_type', name: 'crcnt.type', class: 'align-middle case_nature_type'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
@@ -662,7 +666,7 @@
                     {data: 'responsibe_person_name', name: 'responsibe_person_name', class: 'align-middle responsibe_person_name'},
                     {data: 'responsibe_person_hub', name: 'responsibe_person_hub', class: 'align-middle responsibe_person_hub'},
                     {data: 'claim_adjustment_status', name: 'claim_adjustment_status', class: 'align-middle claim_adjustment_status'},
-                    
+
                     
                 ],
                 rowCallback: function(row, data, index) {

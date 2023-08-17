@@ -1464,25 +1464,25 @@ class AdminHumanResourseController extends Controller
             if ($admin->exists()) {
                 $admin = $admin->first();
 
-                if ($admin->designation_id != $employee->designation_id) {
-                    if ($designation_toggle_val == true) {
-                        AdminHub::where('admin_id', $admin->id)->delete();
+//                if ($admin->designation_id != $employee->designation_id) {
+//                    AdminHub::where('admin_id', $admin->id)->delete();
+//
+//                    $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
+//                    if (count($hubs) == 0) {
+//                        $admin_hub = new AdminHub();
+//                        $admin_hub->admin_id = $admin->id;
+//                        $admin_hub->hub_id = $employee->city->hub_city->id;
+//                        $admin_hub->save();
+//                    } else {
+//                        foreach ($hubs as $hub) {
+//                            $admin_hub = new AdminHub();
+//                            $admin_hub->admin_id = $admin->id;
+//                            $admin_hub->hub_id = $hub->hub_id;
+//                            $admin_hub->save();
+//                        }
+//                    }
+//                }
 
-                        $hubs = EmployeeDesignationHub::where('designation_id', $employee->designation_id)->get(['hub_id']);
-                        if (count($hubs) == 0) {
-                            $admin_hub = new AdminHub();
-                            $admin_hub->admin_id = $admin->id;
-                            $admin_hub->hub_id = $employee->city->hub_city->id;
-                            $admin_hub->save();
-                        } else {
-                            foreach ($hubs as $hub) {
-                                $admin_hub = new AdminHub();
-                                $admin_hub->admin_id = $admin->id;
-                                $admin_hub->hub_id = $hub->hub_id;
-                                $admin_hub->save();
-                            }
-                        }
-                    }
                 }
                 if ($role_flag == true) {
                     if ($designation_toggle_val == true) {
@@ -1503,8 +1503,7 @@ class AdminHumanResourseController extends Controller
                 $admin->area_id = $employee->area_id;
                 $admin->update();
 
-            }
-        } else {
+            } else {
             
             $rider = Rider::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
             if ($rider->exists()) {
