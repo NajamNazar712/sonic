@@ -37,7 +37,7 @@
     <style>
         body.bg-full-screen-image
         {
-            background: url('{{ asset("$background_image->path") }}?v=$background_image->version') no-repeat center center fixed;
+            background: url('{{ asset($background_image['path']) }}?v={{ $background_image['version'] }}') no-repeat center center fixed; 
 	        background-size: cover;
         }
         .hide{
