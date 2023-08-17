@@ -14,14 +14,14 @@ class RemoveDeliveryNoteCash extends Seeder
      */
     public function run()
     {
-        $delivery_note_ids = array(1119712, 1209741, 1205532, 1156405, 1209850, 1206399, 1202444, 1129121, 1210959, 1212116, 1204811, 1191492, 1207301, 1192829, 1217214, 1222880, 1221016, 1226118, 1224827, 1221032, 1222169, 1224952, 1213761, 1214701, 1225021, 1222670, 1219718);
+        $delivery_note_ids = array(1595358, 1595205, 1594718, 1595236, 1595132, 1594447, 1594657, 1595061, 1593075, 1595073, 1594739, 1594064, 1595134, 1594887, 1594450, 1594660, 1593636, 1595098, 1594803, 1594150, 1595017, 1594451, 1594661, 1593637, 1595104, 1594806, 1594305, 1594468, 1593867, 1595123, 1594446, 1594810, 1594625, 1593876, 1512941, 1513345, 1513706);
 
         foreach ($delivery_note_ids as $note_id) {
             $note_details = DeliveryNote::where('id', $note_id)->where('cash_collection_status', 1)->first();
             if ($note_details) {
                 $note_details->cash_collection_status = 0;
-                $note_details->cash_collected_by = Null;
-                $note_details->cash_collected_at = Null;
+                $note_details->cash_collected_by = NULL;
+                $note_details->cash_collected_at = NULL;
                 $note_details->save();
             }
         }
