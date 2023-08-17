@@ -190,7 +190,7 @@
                                             </section>
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
-                                                    <fieldset class="form-group position-relative col-10 has-icon-left">
+                                                    <fieldset class="form-group position-relative col-10 has-icon-left text-capitalize">
                                                         <input type="hidden" id="last_comment_id"
                                                             value="{{ $last_comment_id }}">
                                                         <div class="form-control-position">
@@ -385,24 +385,12 @@
                 toolbar: [
                     ['style', ['bold', 'italic', 'underline', 'clear']],
                     ['para', ['ul', 'ol', 'paragraph']],
-                ],
-
-                callbacks: {
-                    onChange: function(contents) {
-                        var $editor = $('.summernote').siblings('.note-editor');
-                        var $editable = $editor.find('.note-editable');
-                        var text = $editable.text().trim();
-                        if (text) {
-                            var words = text.split(' ');
-                            words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-                            var newText = words.join(' ');
-                            $editable.html(newText);
-                        }
-                    }
-                }
-
-
+                ]
             });
+
+
+
+
 
 
             $('#chat_form').on('submit', function(e) {
@@ -443,7 +431,7 @@
                             console.log(1)
                             if (user == 1) {
                                 if ($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content text-left"><p>' + comment +
+                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
@@ -457,14 +445,14 @@
                                 }
                             } else {
                                 if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left"><p>' + comment +
+                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
                                     var html =
                                         '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' +
                                         shipper +
-                                        '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' +
+                                        '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' +
                                         comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
@@ -500,26 +488,26 @@
                         if (data.status) {
                             if (data.comment.comment_by === 0) {
                                 if ($('div.chat:last-child').hasClass('admin')) {
-                                    var html = '<div class="chat-content text-left mr-3"><p>' + data.comment
+                                    var html = '<div class="chat-content text-left mr-3 text-capitalize"><p>' + data.comment
                                         .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
                                     var html =
-                                        '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content text-left"><p>' +
+                                        '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' +
                                         data.comment.comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             } else if (data.comment.comment_by === 2) {
                                 if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left"><p>' + data.comment
+                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + data.comment
                                         .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
                                     var html =
                                         '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' +
                                         data.name +
-                                        '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' +
+                                        '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' +
                                         data.comment.comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
