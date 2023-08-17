@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Rider Assigned Hub
+        Rider Assigned Hub(s)
     </h1>
 
     <div class="card">
