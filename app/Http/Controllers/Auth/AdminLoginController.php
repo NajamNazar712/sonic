@@ -24,6 +24,8 @@ use App\Http\Models\Admin\AdminRoleModulePermission;
 use App\Http\Models\AgentReturnConfirmation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Models\Admin\BackgroundImage;
+
 
 class AdminLoginController extends Controller
 {
@@ -45,7 +47,20 @@ class AdminLoginController extends Controller
         } else {
             $settings = $settings->first();
         }
-        return view('admin.login')->with(['setting' => $settings]);
+        $background_image = BackgroundImage::where('background_image_screen_id',1)->latest()->first();
+        if($background_image)
+        {
+            $background_image['path'] = 'storage/'.$background_image->picture_path;
+            $background_image['version'] = $background_image->version;
+        }
+        else
+        {
+            $background_image['path'] = "/img/promo-background-11-07-2023.png";
+            $background_image['version'] = "2.6";
+
+        }
+        
+        return view('admin.login')->with(['setting' => $settings,'background_image' => $background_image]);
     }
     public function login(Request $request)
     {
@@ -102,24 +117,24 @@ class AdminLoginController extends Controller
                 }
             }
             //mark login start
-            $check_login = AgentReturnConfirmation::where('admin_id', $id)->where('current_date', Carbon::now()->format("Y-m-d"));
-            if (!$check_login->exists()) {
-                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                    ->where('admin_roles.department_id', 3)->where('a.id', $id);
-                if ($agent_role->exists()) {
-                    $agent_login = new AgentReturnConfirmation;
-                    $agent_login->login_time = Carbon::now();
-                    $agent_login->admin_id = $id;
-                    $agent_login->current_date = Carbon::now()->format("Y-m-d");
-                    $agent_login->save();
-                }
-            } else {
-                $check_login = $check_login->get()->first();
-                if ($check_login->login_time == NULL) {
-                    $check_login->login_time = Carbon::now();
-                    $check_login->save();
-                }
-            }
+            // $check_login = AgentReturnConfirmation::where('admin_id', $id)->where('current_date', Carbon::now()->format("Y-m-d"));
+            // if (!$check_login->exists()) {
+            //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            //         ->where('admin_roles.department_id', 3)->where('a.id', $id);
+            //     if ($agent_role->exists()) {
+            //         $agent_login = new AgentReturnConfirmation;
+            //         $agent_login->login_time = Carbon::now();
+            //         $agent_login->admin_id = $id;
+            //         $agent_login->current_date = Carbon::now()->format("Y-m-d");
+            //         $agent_login->save();
+            //     }
+            // } else {
+            //     $check_login = $check_login->get()->first();
+            //     if ($check_login->login_time == NULL) {
+            //         $check_login->login_time = Carbon::now();
+            //         $check_login->save();
+            //     }
+            // }
 
             //mark login in new return_shipments_assigned_agents
             $check_login = RcpAssignedAgent::where('admin_id', $id)->whereDate('created_at', date('Y-m-d'));
@@ -186,17 +201,17 @@ class AdminLoginController extends Controller
         if (Auth::guard('admin')) {
             //mark logout start
             $admin = Auth::guard('admin');
-            $check_logout = AgentReturnConfirmation::where('admin_id', $admin->id())->where('current_date', Carbon::now()->format("Y-m-d"));
             $check_logout_new_rcp_agents = RcpAssignedAgent::where('admin_id', $admin->id())->whereDate('created_at',date('Y-m-d'));
-            if ($check_logout->exists()) {
-                $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-                ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
-                if ($agent_role->exists()) {
-                    $agent_logout = $check_logout->first();
-                    $agent_logout->logout_time = Carbon::now();
-                    $agent_logout->save();
-                }
-            }
+            // $check_logout = AgentReturnConfirmation::where('admin_id', $admin->id())->where('current_date', Carbon::now()->format("Y-m-d"));
+            // if ($check_logout->exists()) {
+            //     $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
+            //     ->where('admin_roles.department_id', 3)->where('a.id', $admin->id());
+            //     if ($agent_role->exists()) {
+            //         $agent_logout = $check_logout->first();
+            //         $agent_logout->logout_time = Carbon::now();
+            //         $agent_logout->save();
+            //     }
+            // }
 
             if ($check_logout_new_rcp_agents->exists()) {
                 $agent_role = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')

@@ -396,9 +396,17 @@ class DHLInternationalShipmentSyncController extends Controller
                     $pickup_note_request->status = 1;
                     $pickup_note_request->save();
                     $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
+                    $v2_pickup_note = V2PickupNote::where('id', $pickup_note_id)->first();
                     if($pickup_note_requests_count == 0){
-                        V2PickupNote::where('id', $pickup_note_id)->update(['status' => 1]);
+                        $v2_pickup_note->status = 1;
                     }
+
+                    $pickup_note_pickup_request_ids = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->pluck('pickup_request_id')->toArray();
+                    if(count($pickup_note_pickup_request_ids) > 0){
+                        $arrived_shipments = V2PickupRequest::whereIn('id', $pickup_note_pickup_request_ids)->sum('received');
+                        $v2_pickup_note->arrived_shipments = $arrived_shipments;
+                    }
+                    $v2_pickup_note->save();
                 }
 
                 ShipmentsPickupJourneyController::add($shipment_id, 2, 184, $pickup_request->id);
@@ -756,6 +764,7 @@ class DHLInternationalShipmentSyncController extends Controller
             $pickup_note = $pickup_note->first();
 
             $pickup_note->pickups += 1;
+            $pickup_note->shipments += $pickup_request->booked;
 
             $pickup_note->save();
 
@@ -787,6 +796,7 @@ class DHLInternationalShipmentSyncController extends Controller
 
             $pickup_note->rider_id = $rider_id;
             $pickup_note->pickups = 1;
+            $pickup_note->shipments = $pickup_request->booked;
             $pickup_note->save();
 
             $pickup_note_id = $pickup_note->id;

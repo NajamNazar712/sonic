@@ -206,6 +206,7 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Contact Person</th>
                         <th class="border-primary border-darken-1">Phone No.</th>
+                        <th class="border-primary border-darken-1">Rider Picked Status Date</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Return Reason</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
@@ -468,6 +469,7 @@
                             head.push('Shipper');
                             head.push('Contact Person');
                             head.push('Phone No.');
+                            head.push('Rider Picked Status Date');
                             head.push('Status');
                             head.push('Return Reason');
                             head.push('Payment Status');
@@ -492,6 +494,7 @@
                                 row.push(values.user_name);
                                 row.push(values.consignee_name);
                                 row.push(values.consignee_phone);
+                                row.push(values.rider_picked_status_date);
                                 row.push(values.current_status);
                                 row.push(values.return_reason);
                                 row.push(values.payment_status);
@@ -546,7 +549,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[12, 'desc']],
+                order: [[13, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -554,6 +557,7 @@
                     { data:'user_name' ,name: 'u.name', class: 'align-middle user_name'},
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
+                    { data:'rider_picked_status_date' ,name: 'sjrp.created_at', class: 'align-middle rider_picked_status_date'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'return_reason' ,name: 'ssr.name', class: 'align-middle return_reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},

@@ -1,7 +1,7 @@
 @extends('admin.layout.master')
 
 @section('title', 'Employee Directory')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1>Employee Directory</h1>
 
@@ -26,7 +26,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_from"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_from" placeholder="Select From Date">
+                                                       id="search_date_from" placeholder="Select From Date" title="Select From Date" data-value="">
                                             </div>
                                         </div>
                                         <div class="col-3 mt-1">
@@ -38,7 +38,7 @@
                                                 </div>
                                                 <input type="text" name="search_date_to"
                                                        class="form-control pickadate bg-primary border-primary white rounded-right"
-                                                       id="search_date_to" placeholder="Select To Date">
+                                                       id="search_date_to" placeholder="Select To Date" title="Select To Date" data-value="">
                                             </div>
                                         </div>
                                         <div class="col-3 mt-1">
@@ -137,6 +137,13 @@
                                     <th class="border-primary border-darken-1">Request/Document Status</th>
                                     <th class="border-primary border-darken-1">Employee Status</th>
                                     <th class="border-primary border-darken-1">Requested At</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Date of Birth</th>
+                                    <th class="border-primary border-darken-1">Emergency Contact Person</th>
+                                    <th class="border-primary border-darken-1">Emergency Contact Number</th>
+                                    <th class="border-primary border-darken-1">Religion</th>
+                                    <th class="border-primary border-darken-1">Marital Status</th>
+                                    <th class="border-primary border-darken-1">Shift Timing</th>
                                     <th class="border-primary border-darken-1">Joining Date</th>
                                     <th class="border-primary border-darken-1">Last Working Date</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
@@ -482,6 +489,7 @@
                         <div class="row mb-2">
                             {{csrf_field()}}
                             <input type="hidden" name="employee_id" id="employee_id" value="">
+                            <input type="hidden" id="selected_employee_id" value="">
                                 <div class="col"  id="employee_nature_list_group">
                                 <div class="form-group">
                                     <label>Employee Nature<span class="text-danger">*</span></label>
@@ -955,6 +963,32 @@
                 width:'100%',
                 dropdownParent: $('#employeeRequiredInfoModal')
             });
+            
+            $('#employee_nature_list').on('change',function () {
+                var replacementlist = $('#replacement_employee_list');
+                var employee_nature_list = $('#employee_nature_list').val();
+                var employee_id = $('#selected_employee_id').val();
+                if(employee_nature_list == 2){
+
+                    $.ajax({
+                        url:'{!! route('admin.management.rider.replacement.ajax') !!}',
+                        type:'GET',
+                        dataType:'json',
+                        data: {
+                            'employee_id':employee_id,
+                        },
+                        success:function (data) {
+                            console.log(data);
+                            replacementlist.empty();
+                            $.each(data.replacement_employees, function (key, value) {
+                                var newOption = "<option value="+ value.id +">" + value.trax_id + ' | '  + value.name +"</option>";
+                                replacementlist.append(newOption);
+                            });
+                            // replacementlist.val(route_id).trigger('change');
+                        }
+                    });
+                }
+            });
 
             var replacement_last_working_day = $('#replacement_last_working_day').pickadate({
                 firstDay: 1,
@@ -1220,6 +1254,10 @@
                     params.excel = true;
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.human_resource.employee_directory.list') }}',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: params,
                         success: function (result) {
                             head = [];
@@ -1248,6 +1286,13 @@
                             head.push('Request/Document Status');
                             head.push('Employee Status');
                             head.push('Requested At');
+                            head.push('Address');
+                            head.push('Date of Birth');
+                            head.push('Emergency Contact Person');
+                            head.push('Emergency Contact Number');
+                            head.push('Religion');
+                            head.push('Marital Status');
+                            head.push('Shift Timing');
                             head.push('Joining Date');
                             head.push('Last Working Date');
                             head.push('Remarks');
@@ -1280,6 +1325,13 @@
                                 row.push(values.request_status);
                                 row.push(values.status);
                                 row.push(values.requested_at);
+                                row.push(values.address);
+                                row.push(values.date_of_birth);
+                                row.push(values.emergency_contact_person);
+                                row.push(values.emergency_contact);
+                                row.push(values.religion);
+                                row.push(values.martial_status);
+                                row.push(values.shift);
                                 row.push(values.joining_date);
                                 row.push(values.last_working_date);
                                 row.push(values.remarks);
@@ -1519,12 +1571,17 @@
                 autoWidth: false,
                 pagingType: 'full_numbers',
                 processing: true,
+                // deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.human_resource.employee_directory.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
@@ -1533,7 +1590,7 @@
                         d.area = $('#select_area').val();
                     }
                 },
-                order: [[22, 'desc']],
+                order: [[24, 'desc']],
                 rowId: 'employee_id',
                 columns: [
                     // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
@@ -1563,6 +1620,13 @@
                     {data: 'request_status', name: 'ers.name', class: 'align-middle request_status'},
                     {data: 'status', name: 'es.id', class: 'align-middle status'},
                     {data: 'requested_at', name: 'employees.created_at', class: 'align-middle requested_at'},
+                    {data: 'address', name: 'employees.address', class: 'align-middle address'},
+                    {data: 'date_of_birth', name: 'employees.date_of_birth', class: 'align-middle date_of_birth'},
+                    {data: 'emergency_contact_person', name: 'employees.emergency_contact_person', class: 'align-middle emergency_contact_person'},
+                    {data: 'emergency_contact', name: 'employees.emergency_contact', class: 'align-middle emergency_contact'},
+                    {data: 'religion', name: 'er.name', class: 'align-middle religion'},
+                    {data: 'martial_status', name: 'ems.name', class: 'align-middle martial_status'},
+                    {data: 'shift', name: 'shift', class: 'align-middle shift', orderable: false, searchable: false},
                     {data: 'joining_date', name: 'employees.joining_date', class: 'align-middle joining_date'},
                     {data: 'last_working_date', name: 'employees.last_working_date', class: 'align-middle last_working_date'},
                     {data: 'remarks', name: 'employees.remarks', class: 'align-middle remarks'},
@@ -1660,7 +1724,7 @@
                         }
                     });
 
-                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'}];
+                    data = [{'id':1,'text':'Staff'},{'id':2,'text':'Rider - Permanent'},{'id':3,'text':'Rider - Incentive'},{'id':4,'text':'Intern'},{'id':5,'text':'Contractual'}];
 
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
@@ -1823,6 +1887,7 @@
                                     }
 
                                     $('#approveStaffForm #employee_id').val(data.employee_id);
+                                    $('#approveStaffForm #selected_employee_id').val(data.employee_id);
 
                                     $('#employeeRequiredInfoModal').modal('show');
                                 }
@@ -2687,6 +2752,128 @@
 
                         $.ajax({
                             url: '{!! route('admin.human_resource.employee_directory.staff.convert') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+            
+            $('body').on('click', '.convert_contractual_to_staff', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Contractual Agent An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Contractual Agent To Staff!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert') !!}',
+                            method: 'POST',
+                            data: {
+                                'employee_id': id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        })
+                            .done(function (data) {
+                                if (data.status == 0) {
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                }
+                                swal.close();
+                                table.draw('false');
+                            });
+                    }
+                });
+            });
+            
+            $('body').on('click', '.convert_staff_to_contractual', function (e) {
+                var id = $(this).data('target-id');
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes To Make Staff An Employee!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Converting Staff To Contractual!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        $.ajax({
+                            url: '{!! route('admin.human_resource.employee_directory.staff.convert_contractual') !!}',
                             method: 'POST',
                             data: {
                                 'employee_id': id,

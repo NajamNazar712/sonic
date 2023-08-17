@@ -26,7 +26,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(30)}}">
+                                        <input type="text" name="search_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_from" placeholder="Date (From)" title="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
                                 </div>
 
@@ -38,7 +38,7 @@
 			                                </span>
                                         </div>
 
-                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                                        <input type="text" name="search_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_to" placeholder="Date (To)" title="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                     </div>
                                 </div>
 
@@ -179,7 +179,7 @@
 
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                order: [[ 4, "desc" ]],
+                order: [[6, "desc" ]],
                 scrollX: false, scrollY: '500px',
                 buttons: [
                     {
@@ -195,6 +195,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 serverSide: true,
                 language: {
                     processing: data_table_loader

@@ -95,7 +95,7 @@ class ProcessGulAhmedShipmentConfirmation implements ShouldQueue
     }
 
     private function error($subject, $body) {
-        $to = 'muhammad.yousuf@trax.pk';
+        $to = 'asad.ahsan@trax.pk';
         $body .= 'Shipment Tracking Number(s): ' . json_encode($this->confirmation_shipments);
 
         $mail = Mail::to($to)->send(new Notifications($subject, $body));

@@ -25,7 +25,7 @@
 								</div>
 								<input type="text" name="invoice_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_from" placeholder="Invoicing Date From">
+									   id="invoice_from" placeholder="Invoicing Date From" title="Invoicing Date From" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -37,7 +37,7 @@
 								</div>
 								<input type="text" name="invoice_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_to" placeholder="Invoicing Date To">
+									   id="invoice_to" placeholder="Invoicing Date To" title="Invoicing Date To" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-2">
@@ -48,14 +48,6 @@
 								</button>
 							</div>
 						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
@@ -73,7 +65,7 @@
 								</div>
 								<input type="text" name="generation_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_from" placeholder="Generation Date From">
+									   id="generation_from" placeholder="Generation Date From" title="Generation Date From" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-4">
@@ -85,7 +77,7 @@
 								</div>
 								<input type="text" name="generation_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_to" placeholder="Generation Date To">
+									   id="generation_to" placeholder="Generation Date To" title="Generation Date To" data-value="{{ Carbon\Carbon::today() }}">
 							</div>
 						</div>
 						<div class="col-md-2">
@@ -96,14 +88,6 @@
 								</button>
 							</div>
 						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn_generation"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
@@ -149,7 +133,10 @@
 						<th class="border-primary border-darken-1">Deposit Slip</th>
 						<th class="border-primary border-darken-1">Adjustments</th>
 						<th class="border-primary border-darken-1">Received Amount</th>
-						<th class="border-primary border-darken-1">Tax Amount</th>
+						{{-- <th class="border-primary border-darken-1">Tax Amount</th> --}}
+						<th class="border-primary border-darken-1">Income Tax Withhold</th>
+						<th class="border-primary border-darken-1">Sales Tax Withheld</th>
+						<th class="border-primary border-darken-1">Other Deductions</th>
 						<th class="border-primary border-darken-1">Payment Type</th>
 						<th class="border-primary border-darken-1"></th>
 						{{--<th class="border-primary border-darken-1">Payment Type</th>--}}
@@ -402,7 +389,7 @@
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
 						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format:'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -417,8 +404,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -434,8 +420,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -450,8 +435,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -554,7 +538,10 @@
 									head.push('Status');
 									head.push('Deposit Date');
 									head.push('Received Amount');
-									head.push('Tax Amount');
+									// head.push('Tax Amount');
+									head.push('Income Tax Withhold');
+									head.push('Sales Tax Withheld');
+									head.push('Other Deductions');
 									head.push('Payment Type');
 
 
@@ -584,7 +571,10 @@
 										row.push(values.status);
 										row.push(values.deposit_date);
 										row.push(values.received_amount);
-										row.push(values.tax_amount);
+										// row.push(values.tax_amount);
+										row.push(values.income_tax_withhold);
+										row.push(values.sales_tax_withheld);
+										row.push(values.other_deductions);
 										row.push(values.payment_type);
 
 										body.push(row);
@@ -742,11 +732,11 @@
 						pageLength: 50,
 						pagingType: 'full_numbers',
 						processing: true,
+						deferLoading: 0,
 						language: {
 							processing: data_table_loader
 						},
 						serverSide: true,
-						{{--ajax: '{{ route('admin.finance.invoices.list') }}',--}}
 						ajax:{
 							url: '{{ route('admin.finance.invoices.list') }}',
 							data: function (d) {
@@ -786,7 +776,10 @@
 							{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle text-center deposit_slip', orderable: false, searchable: false},
 							{data:'invoice_adjustment', name: 'invoice_adjustment', class: 'align-middle text-center invoice_adjustment', orderable: false, searchable: false},
 							{data:'received_amount', name: 'received_amount', class: 'align-middle text-center received_amount'},
-							{data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+							// {data:'tax_amount', name: 'tax_amount', class: 'align-middle text-center tax_amount'},
+							{data:'income_tax_withhold', name: 'income_tax_withhold', class: 'align-middle text-center income_tax_withhold'},
+							{data:'sales_tax_withheld', name: 'sales_tax_withheld', class: 'align-middle text-center sales_tax_withheld'},
+							{data:'other_deductions', name: 'other_deductions', searchable: false, class: 'align-middle text-center other_deductions'},
 							{data:'payment_type', name: 'payment_type', class: 'align-middle text-center payment_type'},
 							{data:'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false},
 						],
@@ -832,7 +825,7 @@
 								var column = this;
 								var header = column.header();
 
-								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip') || $(header).is('.balance_amount')) {
+								if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.other_deductions')|| $(header).is('.aging') || $(header).is('.overdue_by') || $(header).is('.action') || $(header).is('.upload_slip') || $(header).is('.deposit_slip') || $(header).is('.balance_amount')) {
 									$(td).appendTo($(search));
 								}
 								else if($(header).is('.account'))

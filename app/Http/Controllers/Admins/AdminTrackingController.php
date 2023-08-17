@@ -11,6 +11,7 @@ use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\CargoManifest\ManifestBag;
 use App\Http\Models\Admin\CargoManifest\V2Junctions;
 use App\Http\Models\Admin\DeliveryShipmentsReceivedOperation;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\HighAlertShipper;
 use App\Http\Models\Admin\KeyAccountDailyShipment;
 use App\Http\Models\Admin\KeyAccountDailySummary;
@@ -189,13 +190,23 @@ class AdminTrackingController extends Controller
                     $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                     $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
+                    $fintech_paid = '';
+
+                    $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                        ->where('trax_pay_transactions.shipment_id',$shipment->id)
+                        ->orderBy('fintech_payment_details.id', 'desc');
+
+                    if($fintech_payment->exists()){
+                        $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                    }
+
                     if ($shipment->booking_type_id != 4) {
-                        $details['order_information']['amount'] = number_format($shipment->amount);
+                        $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                     } else {
                         if ($shipment->charges_mode_id == 1) {
                             $details['order_information']['amount'] = 0;
                         } else {
-                            $details['order_information']['amount'] = number_format($shipment->amount);
+                            $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                         }
                     }
 
@@ -691,7 +702,7 @@ class AdminTrackingController extends Controller
                         $details['complaint'] = $crm->id;
                     }
 
-                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null);
+                    ShipmentScanningJourneyController::add($shipment->id, 8, 1, Auth::id(), null, null, null, 1);
                     return response()->json(['status' => 1, 'details' => $details]);
                 } else {
                     return response()->json(['status' => 0, 'error' => 'You are not allowed for given Tracking Number!']);
@@ -1112,13 +1123,23 @@ class AdminTrackingController extends Controller
                         $details['order_information']['booking_type'] = $shipment->booking_type->booking_type;
                         $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
 
+                        $fintech_paid = '';
+
+                        $fintech_payment  = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
+                            ->where('trax_pay_transactions.shipment_id',$shipment->id)
+                            ->orderBy('fintech_payment_details.id', 'desc');
+
+                        if($fintech_payment->exists()){
+                            $fintech_paid = '<button class="btn btn-sm btn-success align-middle"> Paid <i class="la la-lg la-credit-card"></i></button>';
+                        }
+
                         if ($shipment->booking_type_id != 4) {
-                            $details['order_information']['amount'] = number_format($shipment->amount);
+                            $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                         } else {
                             if ($shipment->charges_mode_id == 1) {
                                 $details['order_information']['amount'] = 0;
                             } else {
-                                $details['order_information']['amount'] = number_format($shipment->amount);
+                                $details['order_information']['amount'] = number_format($shipment->amount). ' ' . $fintech_paid;
                             }
                         }
 
@@ -2229,13 +2250,71 @@ class AdminTrackingController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),616);
         }
 
-        $shipment_positions = ShipmentPosition::select(['tracking_number', 'origin', 'destination', 'status', 'status_at', 'status_by', 'screen_location', 'city', 'scanned_by', 'scanned_at', 'handover_note', 'handover_created_by', 'handover_created_at', 'handover_from', 'handover_to', 'handover_received_by', 'handover_received_at', 'last_action'])
-            ->where('tracked_by', Auth::id());
+        $shipment_positions = ShipmentPosition::join('shipments as s','s.id','=','shipment_positions.shipment_id')->join('users as u','u.id','=','s.user_id')
+        ->join('shipments_journey as sj','sj.shipment_id','=','shipment_positions.shipment_id')
+        ->join('admins as a','a.id','=','sj.admin_id')
+        ->select(['shipment_positions.tracking_number', 'shipment_positions.origin', 'shipment_positions.destination', 'shipment_positions.status', 'shipment_positions.status_at', 'shipment_positions.status_by', 'shipment_positions.screen_location', 'shipment_positions.city', 'shipment_positions.scanned_by', 'shipment_positions.scanned_at', 'shipment_positions.handover_note', 'shipment_positions.handover_created_by', 'shipment_positions.handover_created_at', 'shipment_positions.handover_from', 'shipment_positions.handover_to', 'shipment_positions.handover_received_by', 'shipment_positions.handover_received_at', 'shipment_positions.last_action','u.name as shipper_name','s.amount as cod_value','a.trax_id' ,'sj.admin_id as admin_id','s.id as shipment_id'])
+        ->where('tracked_by', Auth::id())->groupBy('shipment_positions.shipment_id');
 
         $datatables = Datatables::of($shipment_positions)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('trax_id', function ($shipments) {
+                $last_scanned_location = ShipmentScanningJourney::where('shipment_id', $shipments->shipment_id)->whereNotIn('screen_location_id', [9, 18])->orderBy('id', 'desc');
+                if($last_scanned_location->exists()){
+                    $last_scanned_location_flag = true;
+                    $last_scanned_location = $last_scanned_location->first();
+                    if($last_scanned_location->admin_id == null && $last_scanned_location->user_id == null){
+                        $last_scanned_location_flag = false;
+                        $trax_id = '-';
+                    }
+                    else {
+                        $screen_location = $last_scanned_location->screen_location->name;
+                        if ($last_scanned_location->user_type == 1) {
+                            $account_type = 'Admin';
+                            $admin = Admin::find($last_scanned_location->admin_id);
+                            if($admin->trax_id){
+                               $trax_id = $admin->trax_id;
+                            }
+                            else {
+                                $trax_id = '-';
+                            }
+                        } else if ($last_scanned_location->user_type == 2) {
+                            $account_type = 'Shipper';
+                            $trax_id = '-';
+                        } else if ($last_scanned_location->user_type == 3) {
+                            $account_type = 'Substitute Shipper';
+                            $trax_id = '-';
+                        } else if ($last_scanned_location->user_type == 4) {
+                            $account_type = 'Retail User';
+                            $retail_admin = RetailUser::find($last_scanned_location->admin_id);
+                            if($retail_admin->trax_id){
+                                $trax_id = $retail_admin->trax_id;
+                            }
+                            else {
+                                $trax_id = '-';
+                            }
+                        } else if ($last_scanned_location->user_type == 5) {
+                            $account_type = 'Rider';
+                            $rider = Rider::find($last_scanned_location->admin_id);
+                            if($rider->trax_id){
+                                $trax_id = $rider->trax_id;
+                            }
+                            else {
+                                $trax_id = '-';
+                            }
+                        } else {
+                            $trax_id = '-';
+                        }
+                    }
+                }
+                else {
+                    $last_scanned_location_flag = false;
+                    $trax_id = '-';
+                }
+                return $trax_id;
             });
         return $datatables->make(true);
     }

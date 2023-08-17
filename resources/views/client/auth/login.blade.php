@@ -33,8 +33,21 @@
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
 
-    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.5
-">
+    {{-- <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}?v=2.6"> --}}
+    <style>
+        body.bg-full-screen-image
+        {
+            background: url('{{ asset($background_image['path']) }}?v={{ $background_image['version'] }}') no-repeat center center fixed; 
+	        background-size: cover;
+        }
+        .hide{
+            display: none;
+        }
+
+        .ps-theme-dark > .ps-scrollbar-y-rail {
+            opacity: 0.9 !important;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded blank-page blank-page"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
