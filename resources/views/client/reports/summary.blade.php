@@ -557,7 +557,7 @@
                     { data:'user_name' ,name: 'u.name', class: 'align-middle user_name'},
                     { data:'consignee_name' ,name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     { data:'consignee_phone' ,name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
-                    { data:'rider_picked_status_date' ,name: 'shipments.rider_picked_status_date', class: 'align-middle rider_picked_status_date'},
+                    { data:'rider_picked_status_date' ,name: 'sjrp.created_at', class: 'align-middle rider_picked_status_date'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data: 'return_reason' ,name: 'ssr.name', class: 'align-middle return_reason'},
                     { data:'payment_status' ,name: 'sps.name', class: 'align-middle payment_status'},

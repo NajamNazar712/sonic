@@ -633,40 +633,43 @@ class AdminRevenueReportsController extends Controller
 
         $datatable = Datatables::of($invoice)
             ->editColumn('weight_charges', function ($invoice) {
-                return number_format($invoice->weight_charges);
+                return number_format($invoice->weight_charges,2);
             })
             ->editColumn('cash_handling_charges', function ($invoice) {
-                return number_format($invoice->cash_handling_charges);
+                return number_format($invoice->cash_handling_charges,2);
             })
             ->editColumn('insurance_charges', function ($invoice) {
-                return number_format($invoice->insurance_charges);
+                return number_format($invoice->insurance_charges,2);
             })
             ->editColumn('return_charges', function ($invoice) {
-                return number_format($invoice->return_charges);
+                return number_format($invoice->return_charges,2);
             })
             ->editColumn('replacement_charges', function ($invoice) {
-                return number_format($invoice->replacement_charges);
+                return number_format($invoice->replacement_charges,2);
             })
             ->editColumn('fuel_surcharge', function ($invoice) {
-                return number_format($invoice->fuel_surcharge);
+                return number_format($invoice->fuel_surcharge,2);
             })
             ->editColumn('packaging_charges', function ($invoice) {
-                return number_format($invoice->packaging_charges);
+                return number_format($invoice->packaging_charges,2);
             })
             ->editColumn('try_buy_charges', function ($invoice) {
-                return number_format($invoice->try_buy_charges);
+                return number_format($invoice->try_buy_charges,2);
             })
             ->editColumn('packing_charges', function ($invoice) {
-                return number_format($invoice->packing_charges);
+                return number_format($invoice->packing_charges,2);
             })
             ->editColumn('total_charges', function ($invoice) {
-                return number_format($invoice->total_charges);
+                return number_format($invoice->total_charges,2);
             })
             ->editColumn('nsa_osa_charges', function ($invoice) {
-                return number_format($invoice->nsa_osa_charges);
+                return number_format($invoice->nsa_osa_charges,2);
             })
             ->editColumn('gst', function ($invoice) {
-                return number_format($invoice->gst);
+                return number_format($invoice->gst,2);
+            })
+            ->editColumn('intercept_charges', function ($invoice) {
+                return number_format($invoice->intercept_charges,2);
             })
             ->editColumn('payment_type', function ($invoice) {
                 if (!is_null($invoice->payment_type)) {
@@ -678,7 +681,11 @@ class AdminRevenueReportsController extends Controller
                 } else {
                     return '';
                 }
+            })
+            ->addColumn('total_invoice_amount', function ($invoice) {
+                return number_format(($invoice->total_charges + $invoice->gst),2);
             });
+
             if($search_invoice_number = $request->get('search_invoice_number')){
                 $datatable->where('rbi.invoice_number','=', $search_invoice_number);
             }
