@@ -9441,8 +9441,11 @@ class AdminReportsController extends Controller
 
     public function last_mile_app_shipments_list(Request $request)
     {
-
-        $delivery_note_id = $request->delivery_note_id;
+        //$delivery_note_id = $request->delivery_note_id;
+        $id = $request->id;
+        $delivery_note_id = RiderWiseDeliveryNote::where('rwdnsum_id',$id)->select('delivery_note_id')->get();
+        $delivery_note_id = $delivery_note_id->pluck('delivery_note_id')->toArray();
+//        dd($delivery_note_id);
 
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->join('rider_deliveries', function ($join) {
@@ -9465,7 +9468,8 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'rider_deliveries.picture_path', 'rider_deliveries.cnic_image as cnic_image', 'rider_deliveries.ccd_image as ccd_image', 'rider_deliveries.house_image as house_image', 'rider_deliveries.delivered_status', 'rider_deliveries.audio_path', 'rider_deliveries.cnic as cnic', 'rider_deliveries.relation as relation')
             ->where('delivery_note_shipments.update_type', 1)
-            ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
+            ->whereIn('delivery_note_shipments.delivery_note_id',[$delivery_note_id]);
+            //->where('delivery_note_shipments.delivery_note_id',757);
 
 
         $datatables = Datatables::of($shipments)
@@ -9587,8 +9591,10 @@ class AdminReportsController extends Controller
 
     public function last_mile_dbf_shipments_list(Request $request)
     {
-        $delivery_note_id = $request->delivery_note_id;
-
+        //$delivery_note_id = $request->delivery_note_id;
+        $id = $request->id;
+        $delivery_note_id = RiderWiseDeliveryNote::where('rwdnsum_id',$id)->select('delivery_note_id')->get();
+        $delivery_note_id = $delivery_note_id->pluck('delivery_note_id')->toArray();
         $shipments = DeliveryNoteShipment::join('shipments as s', 's.id', '=', 'delivery_note_shipments.shipment_id')
             ->leftjoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'delivery_note_shipments.shipment_id')
@@ -9603,7 +9609,8 @@ class AdminReportsController extends Controller
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'shipments_journey.cnic as cnic', 'shipments_journey.relation as relation')
             ->where('delivery_note_shipments.update_type', 0)
             ->where('delivery_note_shipments.status', '>', 0)
-            ->where('delivery_note_shipments.delivery_note_id', $delivery_note_id);
+            ->whereIn('delivery_note_shipments.delivery_note_id', [$delivery_note_id]);
+            //->where('delivery_note_shipments.delivery_note_id', 756);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');

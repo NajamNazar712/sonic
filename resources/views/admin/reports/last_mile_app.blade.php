@@ -588,8 +588,8 @@
                     {data: 'at_23_count',  class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'total_updated_shipments', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'updated_via_rider', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'updated_via_admin', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'updated_via_rider', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
+                    {data: 'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -675,7 +675,6 @@
                             $('#shipments_modal .modal-body').html(html);
                         }
                     });
-
             });
 
             var app_table;
@@ -708,7 +707,7 @@
                         ajax: {
                             url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
                             data: function (d) {
-                                d.delivery_note_id = $('#app_delivery_note_id').val();
+                                d.id = $('#app_delivery_note_id').val();
                             }
                         },
                         rowId: 'shipment_id',
@@ -771,7 +770,7 @@
                         ajax: {
                             url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
                             data: function (d) {
-                                d.delivery_note_id = $('#dbf_delivery_note_id').val();
+                                d.id = $('#dbf_delivery_note_id').val();
                             }
                         },
                         rowId: 'shipment_id',
