@@ -630,7 +630,7 @@ class DeliveryController extends Controller
                         if (!$dispute_check) {
                             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                         }
-
+                    }
                     if ($shipment->shipment_detail()->exists()) {
                         if ($shipment->shipment_detail->is_open == 1) {
                             $is_open_box = 1;
