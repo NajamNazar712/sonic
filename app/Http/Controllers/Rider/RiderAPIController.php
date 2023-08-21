@@ -8687,6 +8687,7 @@ RiderAPIController extends Controller
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
+
                 $information['summary'] = array();
                 $total_shipments = $delivery_note->shipments_count;
                 $information['summary']['deliveries'] = $total_shipments;
@@ -9127,55 +9128,6 @@ RiderAPIController extends Controller
                             $shipment->delivery_in_route = 0;
                             $shipment->save();
                         }
-                        $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
-                        if (!$rider_delivery_note_status->exists()) {
-                            $new_status = new RiderDeliveryNoteStatus();
-                            $new_status->delivery_note_id = $request->delivery_note_id;
-                            $new_status->status = 1;
-                            $new_status->save();
-                        }
-                        $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-
-                        if ($updated_shipments_count == 0) {
-                            DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
-
-                            dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
-
-                            //fintech
-
-                            $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
-                            if(count($unique_codes) > 0){
-                                dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
-                            }
-
-                            $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
-                            if ($rider_delivery_note_status->exists()) {
-                                $rider_delivery_note_status = $rider_delivery_note_status->first();
-                                $rider_delivery_note_status->status = 2;
-                                $rider_delivery_note_status->save();
-                            }
-                        }
-
-
-                        $delivered_status = array(14, 30, 36, 37);
-                        $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-                        $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
-                            $query->where(function ($sub_query) {
-                                $sub_query->where('booking_type_id', '!=', 4);
-                            })
-                                ->orWhere(function ($sub_query) {
-                                    $sub_query->where('booking_type_id', '=', 4)
-                                        ->where('charges_mode_id', '=', 2);
-                                });
-                        })->sum('received_amount');
-                        $count = count($delivered_shipment_ids);
-                        $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
-                        $delivery_note_data->delivered_shipments = $count;
-                        $delivery_note_data->received_cod_amount = $dncc_amount;
-                        $delivery_note_data->last_updated_at = Carbon::now();
-                        $delivery_note_data->status_updated_at = Carbon::now();
-                        $delivery_note_data->save();
-                        $rider_delivery->save();
 
                         if ($request->has('dbf_otp_entered')) {
                             $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
@@ -9194,6 +9146,25 @@ RiderAPIController extends Controller
                     $message = 'Shipment is marked as delivered already';
                 }
             }
+        }
+        $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
+        if(count($delivered_shipment_ids) > 0){
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = count($delivered_shipment_ids);
+            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->save();
         }
         return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
     }
@@ -11517,21 +11488,6 @@ RiderAPIController extends Controller
                                         }
                                     }
 
-
-                                    $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
-                                    if ($updated_shipments_count == 0) {
-                                        DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
-
-                                        dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
-
-                                        $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
-                                        if(count($unique_codes) > 0){
-                                            dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
-                                        }
-                                    }
-
-
-
                                     if ($rc_flag == true) {
                                         $otp_bypass = $this->otp_bypass($shipment->user_id);
                                         if ($otp_bypass) {
@@ -11548,8 +11504,6 @@ RiderAPIController extends Controller
                                         $arr['delivery_note_id'] = $request->delivery_note_id;
                                         dispatch(new ProcessAgentCallMonitoring($arr));
                                     }
-
-
 
                                     $message = 'Shipment is marked as Undelivered Successfully';
                                 } else {
@@ -12351,6 +12305,13 @@ RiderAPIController extends Controller
                 $information['assigned_date'] = $delivery_note->created_at->toDateTimeString();
                 $information['no_of_parcels'] = $delivery_note->shipments_count;
                 $information['delivery_note_otp'] = $delivery_note->otp;
+
+                $information['pending_shipment_count'] = 0;
+                $pending_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note->id)->where('status', 0)->count();
+                if($pending_shipments_count == 0){
+                    $information['pending_shipment_count'] = 1;
+                }
+
                 $information['summary'] = array();
                 $total_shipments = $delivery_note->shipments_count;
                 $information['summary']['deliveries'] = $total_shipments;
@@ -13166,26 +13127,21 @@ RiderAPIController extends Controller
         } else {
             $rider_id = $request->rider_id;
             $shipment_id = $request->shipment_id;
+            $otp = mt_rand(100000, 999999);
             $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id)->where('rider_id', $rider_id)->whereDate('updated_at', Carbon::today());
-            if (!$shipment_otp->exists()) {
-                $shipment_otp = ShipmentOtp::where('shipment_id', $shipment_id);
-                $otp = mt_rand(100000, 999999);
-                if ($shipment_otp->exists()) {
-                    $shipment_otp = $shipment_otp->first();
-                } else {
-                    $shipment_otp = new ShipmentOtp();
-                    $shipment_otp->shipment_id = $shipment_id;
-                }
-                $shipment_otp->otp = $otp;
-                $shipment_otp->rider_id = $rider_id;
-                $shipment_otp->latitude = $request->latitude;
-                $shipment_otp->longitude = $request->longitude;
-                $shipment_otp->save();
-                NotificationsController::send(192, $rider_id, $shipment_id);
-                return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully through call!', 'otp' => $otp]);
+            if ($shipment_otp->exists()) {
+                $shipment_otp = $shipment_otp->first();
             } else {
-                return response()->json(['status' => 1, 'message' => 'OTP against this shipment is already generated from your side']);
+                $shipment_otp = new ShipmentOtp();
+                $shipment_otp->shipment_id = $shipment_id;
             }
+            $shipment_otp->otp = $otp;
+            $shipment_otp->rider_id = $rider_id;
+            $shipment_otp->latitude = $request->latitude;
+            $shipment_otp->longitude = $request->longitude;
+            $shipment_otp->save();
+            NotificationsController::send(192, $rider_id, $shipment_id);
+            return response()->json(['status' => 0, 'message' => 'OTP sent to consignee successfully!', 'otp' => $otp]);
         }
     }
 
@@ -14252,6 +14208,76 @@ RiderAPIController extends Controller
                         break;
                 }
             }
+        }
+    }
+
+    public function pending_for_verification(Request $request){
+
+        $message = '';
+        $rules = [
+            'delivery_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:delivery_notes,id'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $rider_id = $request->rider_id;
+
+            $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+            if (!$rider_delivery_note_status->exists()) {
+                $new_status = new RiderDeliveryNoteStatus();
+                $new_status->delivery_note_id = $request->delivery_note_id;
+                $new_status->status = 1;
+                $new_status->save();
+            }
+            $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+
+            if ($updated_shipments_count == 0) {
+                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+
+                dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
+
+                //fintech
+
+                $unique_codes = TraxPayTransaction::where('delivery_note_id')->pluck('unique_code')->toArray();
+                if(count($unique_codes) > 0){
+                    dispatch(new ProcessTraxPayExpireDeliveryNote($unique_codes));
+                }
+
+                $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+                if ($rider_delivery_note_status->exists()) {
+                    $rider_delivery_note_status = $rider_delivery_note_status->first();
+                    $rider_delivery_note_status->status = 2;
+                    $rider_delivery_note_status->save();
+                }
+            }
+
+
+            $delivered_status = array(14, 30, 36, 37);
+            $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                            ->where('charges_mode_id', '=', 2);
+                    });
+            })->sum('received_amount');
+            $count = count($delivered_shipment_ids);
+            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+            $delivery_note_data->delivered_shipments = $count;
+            $delivery_note_data->received_cod_amount = $dncc_amount;
+            $delivery_note_data->last_updated_at = Carbon::now();
+            $delivery_note_data->status_updated_at = Carbon::now();
+            $delivery_note_data->save();
+
+            return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!', 'delivery_note_id' => $request->delivery_note_id]);
         }
     }
 }
