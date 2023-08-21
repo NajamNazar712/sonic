@@ -10439,52 +10439,15 @@ class AdminAPIController extends Controller
             $shipment = Shipment::where('tracking_number', $request->tracking);
             $operation_rider_id = Rider::where('id', $request->rider_id)->first()->operation_rider_id;
             if ($shipment->exists()) {
-                $shipment_status_id = $shipment->first()->shipper_status_id ?? NULL;
-                if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
-                    return response()->json(['status' => 1, 'message' => 'Shipment cannot be added because it is on Re-Attempt Status']);
-                } else {
+                /******** COMMENT FOR PRODUCTION AS PER REVERT TICKET(6263)-  CAN BE REOPEN AGAIN  ********/
+                // $shipment_status_id = $shipment->first()->shipper_status_id ?? NULL;
+                // if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
+                //     return response()->json(['status' => 1, 'message' => 'Shipment cannot be added because it is on Re-Attempt Status']);
+                // } else {
                     $role_id = $request->admin_role_id;
                     $admin_hubs = $request->admin_hubs;
                     $rider_id = $request->rider_id;
-                    /*if ($request->tracking != '' && $request->rider_id != '') {
-                        $tracking_number = $request->tracking;
-
-
-                        $rider_default_type = Rider::where('id', $rider_id)->select('rider_category_id')->first();
-
-                        $shipment = Shipment::where('tracking_number', $tracking_number)->select('actual_weight', 'consignee_city_id')->first();
-
-
-                        $weight = GlobalSettings::where('type', 'light_heavy_weight_for_shipment')->select('text')->first();
-
-                        if ($shipment->actual_weight > $weight->text) {
-                            $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 2)->select('rider_category_id', 'id')->latest()->first();
-
-                            if ($rider_bypass_type) {
-                                $rider_bypass_id = $rider_bypass_type->id;
-                                if ($rider_bypass_type->rider_category_id != 2) {
-                                    if ($rider_default_type->rider_category_id == 1) {
-                                        return response()->json(['status' => 1, 'message' => 'Shipment is heavy weighted and the selected rider type is light weighted !']);
-                                    }
-                                }
-                            } elseif ($rider_default_type->rider_category_id == 1) {
-                                return response()->json(['status' => 1, 'message' => 'Shipment is heavy weighted and the selected rider type is light weighted !']);
-                            }
-                        } elseif ($shipment->actual_weight <= $weight->text) {
-                            $rider_bypass_type = RiderCategoryByPass::where('rider_id', $rider_id)->where('status', 1)->where('rider_category_id', 1)->select('rider_category_id', 'id')->latest()->first();
-
-                            if ($rider_bypass_type) {
-                                $rider_bypass_id = $rider_bypass_type->id;
-                                if ($rider_bypass_type->rider_category_id != 1) {
-                                    if ($rider_default_type->rider_category_id == 2) {
-                                        return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
-                                    }
-                                }
-                            } elseif ($rider_default_type->rider_category_id == 2) {
-                                return response()->json(['status' => 1, 'message' => 'Shipment is light weighted and the selected rider type is heavy weighted !']);
-                            }
-                        }
-                    }*/
+                    
                     $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                     if ($request->tracking != '') {
                         $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -10751,7 +10714,7 @@ class AdminAPIController extends Controller
                             return response()->json(['status' => 1, 'message' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!']);
                         }
                     }
-                }
+                // } //Commented else
             } else {
                 return response()->json(['status' => 1, 'message' => 'Invalid Tracking Number']);
             }
