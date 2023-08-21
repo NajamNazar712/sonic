@@ -21,20 +21,23 @@ trait LastMileAppReportTrait
             $rider_id1 = $rider->rider_id;
 
             $added_at1 = Carbon::now();
+             $rider_delivery_date = $added_at1->toDateTimeString();
+         }
+         else
+         {
+             $rider_delivery_date = $rider_delivery->added_at;
          }
 
-        $added_at_from = Carbon::parse($rider_delivery->added_at);
+        $added_at_from = Carbon::parse($rider_delivery_date);
         $added_at_from = $added_at_from->startOfDay();
-        $added_at_to = Carbon::parse($rider_delivery->added_at);
+        $added_at_to = Carbon::parse($rider_delivery_date);
         $added_at_to = $added_at_to->endOfDay();
         $added_at_from = $added_at_from->toDateTimeString();
         $added_at_to = $added_at_to->toDateTimeString();
 
-        $datetime = Carbon::parse($rider_delivery->added_at);
+        $datetime = Carbon::parse($rider_delivery_date);
         $time = $datetime->format('H:i:s');
-
-        dd($rider_id1,$added_at1,$rider_delivery->added_at);
-
+        
         $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
             ->join('zones as z', 'c.zone_id', 'z.id')
             ->where('delivery_notes.id', $delivery_note_id)
@@ -135,7 +138,7 @@ trait LastMileAppReportTrait
         else
         {
             $new_summary = new RiderWiseDeliveryNoteSummary();
-            $new_summary->delivery_date = $rider_delivery->added_at;
+            $new_summary->delivery_date = $rider_delivery_date;
             $new_summary->rider_id = $rider_id;
             $new_summary->trax_id = $rider->trax_id;
             $new_summary->rider_name = $rider->rider_name;
