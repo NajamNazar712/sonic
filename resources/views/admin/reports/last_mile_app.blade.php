@@ -52,7 +52,7 @@
                                 </fieldset>
                             </div>
 
-                            {{-- <div class="col-4 mt-1">
+                             <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                                 </fieldset>
@@ -61,7 +61,7 @@
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                                 </fieldset>
-                            </div> --}}
+                            </div>
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
@@ -187,7 +187,7 @@
                             <th class="border-primary border-darken-1">22:00</th>
                             <th class="border-primary border-darken-1">23:00</th>
                             <th class="border-primary border-darken-1">After 23:00</th>
-                            <th class="border-primary border-darken-1">Total</th>
+                            <th class="border-primary border-darken-1">Total Updated Shipments</th>
                         </tr>
                     </thead>
                 </table>
@@ -460,7 +460,6 @@
                         data: params,
                         success: function (result) {
                             head = [];
-                            footer = [];
 
                             head.push('S. No');
                             head.push('Trax IDs');
@@ -468,52 +467,60 @@
                             head.push('Hub');
                             head.push('Zone');
                             head.push('Delivery Date');
-                            head.push('Total Shipment');
+                            head.push('Total Shipments');
+                            head.push('Before 11');
+                            head.push('At 11');
+                            head.push('At 12');
+                            head.push('At 13');
+                            head.push('At 14');
+                            head.push('At 15');
+                            head.push('At 16');
+                            head.push('At 17');
+                            head.push('At 18');
+                            head.push('At 19');
+                            head.push('At 20');
+                            head.push('At 21');
+                            head.push('At 22');
+                            head.push('At 23');
+                            head.push('After 23');
+                            head.push('Total Updated Shipments');
                             head.push('Update Via App');
-                            head.push('Update Via Rider');
                             head.push('Update Via Admin');
-                            var total_shipments_count = 0;
-                            var update_via_app_count = 0;
-                            var update_via_dbf_count = 0;
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id_padded);
-                                row.push(values.city);
-                                row.push(values.zone);
-                                row.push(values.created_at);
                                 row.push(values.trax_id);
-                                row.push(values.rider);
-                                row.push(values.rider_cat);
-                                row.push(values.total_shipments);
-                                row.push(values.shipments_rider_updated);
-                                row.push(values.shipments_dbf_updated);
+                                row.push(values.rider_name);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.delivery_date);
+                                row.push(values.total_shipments_excel);
+                                row.push(values.before_11_count);
+                                row.push(values.at_11_count);
+                                row.push(values.at_12_count);
+                                row.push(values.at_13_count);
+                                row.push(values.at_14_count);
+                                row.push(values.at_15_count);
+                                row.push(values.at_16_count);
+                                row.push(values.at_17_count);
+                                row.push(values.at_18_count);
+                                row.push(values.at_19_count);
+                                row.push(values.at_20_count);
+                                row.push(values.at_21_count);
+                                row.push(values.at_22_count);
+                                row.push(values.at_23_count);
+                                row.push(values.after_23_count);
+                                row.push(values.total_updated_shipments);
+                                row.push(values.updated_via_rider1);
+                                row.push(values.updated_via_admin1);
 
                                 body.push(row);
-                                total_shipments_count+=values.total_shipments
-                                update_via_app_count+=values.shipments_rider_updated
-                                update_via_dbf_count+=values.shipments_dbf_updated
                             });
-                            
-
-                            footer.push('');
-                            footer.push('Total');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push(total_shipments_count);
-                            footer.push(update_via_app_count);
-                            footer.push(update_via_dbf_count);
                         },
                         async: false
                     });
-                    UnblockPagePermanently();
-
-                    return {body: body, header: head, footer: footer};
+                    return {body: body, header: head,};
                 }
             });
             var total_shipments = 0;
@@ -529,8 +536,6 @@
                         className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -592,13 +597,13 @@
                     if(index == 0){
 
                         total_shipments = data.total_shipments;
-                        app_shipments = data.shipments_rider_updated;
-                        dbf_shipments = data.shipments_dbf_updated;
+                        app_shipments = data.updated_via_rider1;
+                        dbf_shipments = data.updated_via_admin1;
                     }
                     else{
                         total_shipments += data.total_shipments;
-                        app_shipments += data.shipments_rider_updated;
-                        dbf_shipments += data.shipments_dbf_updated;
+                        app_shipments += data.updated_via_rider1;
+                        dbf_shipments += data.updated_via_admin1;
 
                     }
                     if(index == (info.end - 1)){
@@ -606,8 +611,6 @@
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
                     }
-
-
                 },
                 drawCallback: function () {
                     var api = this.api();
@@ -616,17 +619,16 @@
                     var update_via_dbf_count = 0;
                     var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        update_via_app_count+=this.data().shipments_rider_updated;
-                        update_via_dbf_count+=this.data().shipments_dbf_updated;
+                        update_via_app_count+=this.data().updated_via_rider1;
+                        update_via_dbf_count+=this.data().updated_via_admin1;
                         total_shipment_count+=this.data().total_shipments;
-
                     } );
 
-                    setTimeout(function(){
-                        document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
-                        document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
-                        document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
-                    }, 1000);
+                    // setTimeout(function(){
+                    //     document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
+                    //     document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
+                    //     document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
+                    // }, 1000);
 
                 },
                 stateLoaded: function (settings, data) {

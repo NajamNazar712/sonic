@@ -9393,6 +9393,13 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
+            ->editColumn('total_shipments_excel', function ($new_deliveries) {
+                if ($new_deliveries->total_shipments != 0) {
+                    return  $new_deliveries->total_shipments ;
+                } else {
+                    return 0;
+                }
+            })
             ->editColumn('updated_via_rider', function ($new_deliveries) {
                 if ($new_deliveries->updated_via_rider != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_rider . '</button>';
@@ -9400,9 +9407,23 @@ class AdminReportsController extends Controller
                     return 0;
                 }
             })
+            ->editColumn('updated_via_rider1', function ($new_deliveries) {
+                if ($new_deliveries->updated_via_rider != 0) {
+                    return  $new_deliveries->updated_via_rider;
+                } else {
+                    return 0;
+                }
+            })
             ->editColumn('updated_via_admin', function ($new_deliveries) {
                 if ($new_deliveries->updated_via_admin != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_admin . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->editColumn('updated_via_admin1', function ($new_deliveries) {
+                if ($new_deliveries->updated_via_admin != 0) {
+                    return $new_deliveries->updated_via_admin ;
                 } else {
                     return 0;
                 }
@@ -9423,10 +9444,12 @@ class AdminReportsController extends Controller
 
         if (isset($request->search_tracking) && !empty($request->search_tracking))
         {
-            $new_deliveries->whereHas('delivery_notes.delivery_note_shipments', function($q) use ($request) {
-                $q->where('shipment_id', $request->search_tracking);
+            $new_deliveries->whereHas('delivery_note_shipments.shipment', function($q) use ($request) {
+                $q->where('tracking_number', $request->search_tracking);
             });
         }
+
+//        dd($new_deliveries->toSql());
 
        if ($search_rider = $request->get('search_rider')) {
            $datatable->where('r.id', $search_rider);
