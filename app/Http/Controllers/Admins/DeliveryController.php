@@ -229,7 +229,7 @@ class DeliveryController extends Controller
             'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 
             'shipments_journey.created_at as current_status_date', 'sjd.created_at as destination_arrival', 'sj.created_at as arrival', 'shipments.booking_type_id', 'usi.poc', 
             'crm.id as complaint','shipments.actual_weight as weight','si.description as shipment_description','prod.product_name as product_type','sts.status as star_status',
-            'ca.name as area', 'r.name as last_rider', 'r.trax_id as rider_trax_id','z.name as destination_zone')
+            'ca.name as area', 'r.name as last_rider', 'r.trax_id as rider_trax_id', 'z.name as destination_zone')
             
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
@@ -305,21 +305,29 @@ class DeliveryController extends Controller
                         return $shipments->status_date;
                     }
                 } else {
-                    return " - ";
+                    return '-';
                 }
             })
             ->editColumn('arrival', function ($shipments) {
                 if ($shipments->arrival) {
                     return $shipments->arrival;
                 } else {
-                    return " - ";
+                    return '-';
                 }
             })
             ->editColumn('destination_arrival', function ($shipments) {
                 if ($shipments->destination_arrival) {
                     return $shipments->destination_arrival;
                 } else {
-                    return " - ";
+                    return '-';
+                }
+            })
+        
+            ->editColumn('destination_zone', function ($shipments) {
+                if ($shipments->destination_zone) {
+                    return $shipments->destination_zone;
+                } else {
+                    return '-';
                 }
             })
             ->filterColumn('status', function ($query, $keyword) {
