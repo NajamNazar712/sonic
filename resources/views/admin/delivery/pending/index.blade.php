@@ -2,7 +2,6 @@
 @extends('admin.layout.master')
 @section('title','Pending Deliveries')
 
-<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1 class="mb-1">
         Pending Deliveries
@@ -229,10 +228,6 @@
                 params.excel = true;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.pending.list') }}',
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
                     data: params,
                     success: function (result) {
                         head = [];
@@ -327,10 +322,6 @@
             serverSide: true,
             ajax:{
                 url: '{{ route('admin.delivery.pending.list') }}',
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                },
                 data: function (d) {
                     d.search_shipping_mode = $('#search_shipping_mode').val();
                     d.search_hub = $('#search_hub').val();
@@ -363,10 +354,10 @@
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                {data: 'destination_zone', name: 'z.name', class: 'align-middle destination_zone', orderable: false, searchable: false},
-                {data: 'destination_arrival', name: 'sjd.created_at ', class: 'align-middle destination_arrival', orderable: false, searchable: false},
+                {data: 'destination_zone', name: 'z.name', class: 'align-middle destination_zone'},
+                {data: 'destination_arrival', name: 'sjd.created_at', class: 'align-middle destination_arrival', orderable: false, searchable: false},
                 {data: 'last_rider', name: 'r.name', class: 'align-middle last_rider', orderable: false},
-                {data: 'rider_trax_id', name: 'r.trax_id ', class: 'align-middle rider_trax_id', orderable: false},
+                {data: 'rider_trax_id', name: 'r.trax_id', class: 'align-middle rider_trax_id', orderable: false},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
