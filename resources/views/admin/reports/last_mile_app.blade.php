@@ -24,7 +24,7 @@
                                 </fieldset>
                             </div>
 
-                            <div class="col-4 mt-1">
+                            {{-- <div class="col-4 mt-1">
                                 <fieldset class="form-group">
                                     <select name="search_rider_cat" id="search_rider_cat" class="form-control select2">
                                         @foreach($riders_cat as $rider_cat)
@@ -32,7 +32,7 @@
                                         @endforeach
                                     </select>
                                 </fieldset>
-                            </div>
+                            </div> --}}
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
                                     <select name="search_hub" id="search_hub" class="form-control select2">
@@ -52,7 +52,7 @@
                                 </fieldset>
                             </div>
 
-                            <div class="col-4 mt-1">
+                            {{-- <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                                 </fieldset>
@@ -61,7 +61,7 @@
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                                 </fieldset>
-                            </div>
+                            </div> --}}
                             <div class="col-4 mt-1">
                                 <div class="form-group input-group ">
                                     <div class="input-group-prepend">
@@ -159,10 +159,6 @@
                     <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">S.No.</th>
-{{--                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Delivery Note#</th>--}}
-{{--                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>--}}
-{{--                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Zone</th>--}}
-{{--                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Delivery Note Date</th>--}}
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Trax IDs</th>
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Name</th>
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>
@@ -414,16 +410,16 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider Category',
-                width:'100%',
-                allowClear:true
-            })
-            $('#search_dn_no,#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+            // $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Search Rider Category',
+            //     width:'100%',
+            //     allowClear:true
+            // })
+            // $('#search_dn_no,#search_tracking_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -467,16 +463,15 @@
                             footer = [];
 
                             head.push('S. No');
-                            head.push('Delivery Note#');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Delivery Note Data');
                             head.push('Trax IDs');
                             head.push('Rider Name');
-                            head.push('Rider Category');
+                            head.push('Hub');
+                            head.push('Zone');
+                            head.push('Delivery Date');
                             head.push('Total Shipment');
                             head.push('Update Via App');
-                            head.push('Update Via DBF');
+                            head.push('Update Via Rider');
+                            head.push('Update Via Admin');
                             var total_shipments_count = 0;
                             var update_via_app_count = 0;
                             var update_via_dbf_count = 0;
@@ -573,23 +568,23 @@
                     {data: 'delivery_date', name: 'rider_wise_delivery_note_summaries.delivery_date', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
                     {data: 'total_shipments_link', class: 'align-middle text-center total_shipments_link', orderable: false, searchable: false},
                     {data: 'before_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_11_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_12_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_13_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_14_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_15_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_16_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_17_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_18_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_19_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_20_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_21_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_22_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'at_23_count',  class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'total_updated_shipments', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'updated_via_rider', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
+                    {data: 'at_11_count',  name:'rider_wise_delivery_note_summaries.at_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_12_count',  name:'rider_wise_delivery_note_summaries.at_12_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_13_count',  name:'rider_wise_delivery_note_summaries.at_13_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_14_count',  name:'rider_wise_delivery_note_summaries.at_14_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_15_count',  name:'rider_wise_delivery_note_summaries.at_15_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_16_count',  name:'rider_wise_delivery_note_summaries.at_16_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_17_count',  name:'rider_wise_delivery_note_summaries.at_17_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_18_count',  name:'rider_wise_delivery_note_summaries.at_18_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_19_count',  name:'rider_wise_delivery_note_summaries.at_19_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_20_count',  name:'rider_wise_delivery_note_summaries.at_20_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_21_count',  name:'rider_wise_delivery_note_summaries.at_21_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_22_count',  name:'rider_wise_delivery_note_summaries.at_22_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_23_count',  name:'rider_wise_delivery_note_summaries.at_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'after_23_count', name:'rider_wise_delivery_note_summaries.after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'total_updated_shipments', name:'rider_wise_delivery_note_summaries.shipment_update_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'updated_via_rider', name:'updated_via_rider', class: 'align-middle text-center updated_via_rider', orderable: false, searchable: false},
+                    {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center updated_via_admin', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -641,6 +636,7 @@
                 }
             });
 
+
             $('#search_filter_btn').on('click',function () {
                 $('#total_shipments').text(0);
                 $('#app_shipments').text(0);
@@ -688,7 +684,6 @@
 
                     app_table = $('#app_shipments_datatable').DataTable({
                         dom: 't',
-                        // scrollX: true,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -697,9 +692,7 @@
                             },
                         ],
                         "autoWidth": true,
-                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                         pageLength: -1,
-                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -760,9 +753,7 @@
                             },
                         ],
                         "autoWidth": true,
-                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                         pageLength: -1,
-                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
