@@ -23,6 +23,8 @@
 								</button>
 							</div>
 							<div class="modal-body text-center">
+                                <button id="selectAllBtn" class="btn btn-primary">Select All</button>
+                                <button id="deSelectAllBtn" class="btn btn-primary">Un Select All</button>
 								<form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
 									@method('POST')
 									@csrf
@@ -34,6 +36,8 @@
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
                                             </select>
+                                            <div class="d-none text-danger" id="assign_hubs_msg_error">Please Select Hub(s)</div>
+
                                         </div>
 										<div class="row justify-content-center">
 											<div class="col-6">
@@ -134,6 +138,18 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
+    <style>
+        #selectAllBtn {
+
+            margin-bottom: 10px
+        }
+
+        #deSelectAllBtn {
+
+            margin-bottom: 10px
+        }
+    </style>
+
 @endsection
 
 @section('js')
@@ -145,6 +161,29 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
+
+            var selectedValue = [];
+
+$('#hub_select').select2().on('change', function() {
+    selectedValue = $('#hub_select').val();
+    $('#assign_hubs_msg_error').addClass('d-none')
+
+});
+
+$('#selectAllBtn').on('click', function() {
+    $('#hub_select').val($('#hub_select option').map(function() {
+        return $(this).val();
+    })).trigger('change');
+
+});
+
+$('#deSelectAllBtn').on('click', function() {
+                $('#hub_select').val([]).trigger('change');
+            });
+
+            $('#selectAllBtn').click(function() {
+                $('#hub_select option').prop('selected', true);
+            });
 			$('#hub_select').select2({
                 placeholder:'Select Hub',
                 width:'100%',
@@ -600,26 +639,34 @@
                 }
 			});
 			
-			$( "#assign_hub_form" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+            $("#assign_hub_form").validate({
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Multiple Hub has been assigned!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-						});
-						
-                        form.submit();
-                }
-			});
+errorClass: "danger",
+errorPlacement: function(error, element) {
+    error.addClass('w-100').appendTo(element.parent('.form-group'));
+},
+submitHandler: function(form) {
+    if (selectedValue.length > 0) {
+
+        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+        swal({
+            title: 'Please Wait!',
+            text: 'Multiple Hub has been assigned!',
+            icon: 'info',
+            buttons: false,
+            closeOnClickOutside: false,
+            closeOnEsc: false
+        });
+
+        form.submit();
+
+    } else {
+        $('#assign_hubs_msg_error').removeClass('d-none');
+    }
+}
+});
+
 			
 
 		});
