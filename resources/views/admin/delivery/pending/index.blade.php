@@ -327,6 +327,10 @@
             serverSide: true,
             ajax:{
                 url: '{{ route('admin.delivery.pending.list') }}',
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
                 data: function (d) {
                     d.search_shipping_mode = $('#search_shipping_mode').val();
                     d.search_hub = $('#search_hub').val();
