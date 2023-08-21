@@ -2,6 +2,7 @@
 @extends('admin.layout.master')
 @section('title','Pending Deliveries')
 
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1 class="mb-1">
         Pending Deliveries
@@ -228,6 +229,10 @@
                 params.excel = true;
                 var jsonResult = $.ajax({
                     url: '{{ route('admin.delivery.pending.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: params,
                     success: function (result) {
                         head = [];

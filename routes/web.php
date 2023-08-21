@@ -1252,7 +1252,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('delivery')->name('delivery.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\DeliveryController@pending_delivery_index')->name('index');
-            Route::get('list', 'Admins\DeliveryController@pending_list')->name('list');
+            Route::post('list', 'Admins\DeliveryController@pending_list')->name('list');
         });
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('', 'Admins\DeliveryController@delivery_note_index')->name('index');
