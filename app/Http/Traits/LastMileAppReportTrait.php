@@ -37,7 +37,7 @@ trait LastMileAppReportTrait
 
         $datetime = Carbon::parse($rider_delivery_date);
         $time = $datetime->format('H:i:s');
-        
+
         $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
             ->join('zones as z', 'c.zone_id', 'z.id')
             ->where('delivery_notes.id', $delivery_note_id)

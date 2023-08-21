@@ -9361,6 +9361,7 @@ class AdminReportsController extends Controller
         }
 
         $new_deliveries = RiderWiseDeliveryNoteSummary::join('riders as r','r.id','rider_wise_delivery_note_summaries.rider_id')
+//            ->leftjoin('rider_wise_delivery_notes as rwdn','rwdn.rwdnsum_id','rider_wise_delivery_note_summaries.id')
         ->join('cities as c','c.id','r.city_id')
         ->join('cities as h','h.id','c.hub_id')
         ->join('zones as z','z.id','c.zone_id')
@@ -9377,7 +9378,7 @@ class AdminReportsController extends Controller
             'z.name as zone','h.name as hub','r.name as rider_name',
             DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
             DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin'));
-// dd($new_deliveries->get());
+
         $datatable = Datatables::of($new_deliveries)
             ->addColumn('delivery_note', function ($new_deliveries) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($new_deliveries->dn_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
@@ -9413,6 +9414,20 @@ class AdminReportsController extends Controller
                 return '-';
             });
 
+        if (isset($request->search_dn_no) && !empty($request->search_dn_no))
+        {
+            $new_deliveries->whereHas('delivery_notes', function($q) use ($request) {
+                $q->where('delivery_note_id', $request->search_dn_no);
+            });
+        }
+
+        if (isset($request->search_tracking) && !empty($request->search_tracking))
+        {
+            $new_deliveries->whereHas('delivery_notes.delivery_note_shipments', function($q) use ($request) {
+                $q->where('shipment_id', $request->search_tracking);
+            });
+        }
+
        if ($search_rider = $request->get('search_rider')) {
            $datatable->where('r.id', $search_rider);
        }
@@ -9422,9 +9437,7 @@ class AdminReportsController extends Controller
        if ($search_hub = $request->get('search_hub')) {
            $datatable->where('h.id', $search_hub);
        }
-//        if ($dn_no = $request->get('search_dn_no')) {
-//            $datatable->where('delivery_notes.id', '=', $dn_no);
-//        }
+
 //        if ($tracking = $request->get('search_tracking')) {
 //            $datatable->join('delivery_note_shipments as rns', 'rns.delivery_note_id', '=', 'delivery_notes.id')
 //                ->join('shipments as s', 'rns.shipment_id', '=', 's.id')

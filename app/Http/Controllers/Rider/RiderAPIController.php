@@ -9148,7 +9148,6 @@ RiderAPIController extends Controller
                                 }*/
 
                                 $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
-                                dd(11);
 
                             }
                             $shipment->delivery_in_route = 0;
