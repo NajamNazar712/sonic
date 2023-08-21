@@ -78,10 +78,13 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Adjustment ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Shipper ID</th>
                         <th class="border-primary border-darken-1">Shipper Name</th>
                         <th class="border-primary border-darken-1">Adjustment Type</th>
                         <th class="border-primary border-darken-1">Adjusted Amount</th>
+                        <th class="border-primary border-darken-1">Origin ID</th>
                         <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination ID</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Payment ID</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -235,10 +238,13 @@
                             head.push('S. No.');
                             head.push('Adjustment ID');
                             head.push('Tracking No.');
+                            head.push('Shipper ID');
                             head.push('Shipper Name');
                             head.push('Adjustment Type');
                             head.push('Adjusted Amount');
+                            head.push('Origin ID');
                             head.push('Origin');
+                            head.push('Destination ID');
                             head.push('Destination');
                             head.push('Payment ID');
                             head.push('Remarks');
@@ -249,10 +255,13 @@
                                 row.push(index + 1);
                                 row.push(values.adjustment_id_padded);
                                 row.push(values.tracking_number);
+                                row.push(values.shipper_id);
                                 row.push(values.shipper_name);
                                 row.push(values.adjustment_type);
                                 row.push(values.adjustment_amount);
+                                row.push(values.origin_id);
                                 row.push(values.origin);
+                                row.push(values.destination_id);
                                 row.push(values.destination);
                                 row.push(values.done_payment_id);
                                 row.push(values.remarks);
@@ -305,10 +314,13 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'adjustment_id_padded' ,name: 'adjustment_logs.id', class: 'align-middle text-center adjustment_id'},
                     { data:'tracking_number_link' ,name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'shipper_id' ,name: 'u.id', class: 'align-middle shipper_id'},
                     { data:'shipper_name' ,name: 'u.name', class: 'align-middle shipper_name'},
                     { data:'adjustment_type' ,name: 'at.name', class: 'align-middle adjustment_type'},
                     { data:'adjustment_amount' ,name: 'adjustment_logs.adjustment_amount', class: 'align-middle adjustment_amount'},
+                    { data:'origin_id' ,name: 'oc.id', class: 'align-middle origin_id'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'destination_id' ,name: 'dc.id', class: 'align-middle destination_id'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'done_payment_link' ,name: 'dps.done_payment_id', class: 'align-middle done_payment_id'},
                     { data:'remarks' ,name: 'adjustment_logs.remarks', class: 'align-middle remarks'},

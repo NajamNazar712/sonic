@@ -127,8 +127,9 @@
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
                         <th class="border-primary border-darken-1">NSA/OSA Charges</th>
                         <th class="border-primary border-darken-1">Intercept Charges</th>
-                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
+                        <th class="border-primary border-darken-1">GST</th>
+                        <th class="border-primary border-darken-1">Total Invoice Amount</th>
                     </tr>
                     </thead>
                 </table>
@@ -340,8 +341,9 @@
                             head.push('Try & Buy Charges');
                             head.push('NSA/OSA Charges');
                             head.push('Intercept Charges');
-                            head.push('GST');
                             head.push('Total Charges');
+                            head.push('GST');
+                            head.push('Total Invoice Amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -359,15 +361,17 @@
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
-                                row.push(values.packaging_material_charges);
+                                row.push(values.packaging_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
-                                row.push(values.try_and_buy_charges);
+                                // row.push(values.try_and_buy_charges);
+                                row.push(values.try_buy_charges);
                                 row.push(values.nsa_osa_charges);
                                 row.push(values.intercept_charges);
-                                row.push(values.gst);
                                 row.push(values.total_charges);
+                                row.push(values.gst);
+                                row.push(values.total_invoice_amount);
 
                                 body.push(row);
                             });
@@ -440,8 +444,9 @@
                     { data:'try_buy_charges' ,name: 'rbi.try_buy_charges', class: 'align-middle try_buy_charges'},
                     { data:'nsa_osa_charges' ,name: 'rbi.nsa_osa_charges', class: 'align-middle nsa_osa_charges'},
                     { data:'intercept_charges' ,name: 'rbi.intercept_charges', class: 'align-middle intercept_charges'},
+                    { data:'total_charges' ,name: 'rbi.total_charges', class: 'align-middle total_charges'},
                     { data:'gst' ,name: 'rbi.gst', class: 'align-middle gst'},
-                    { data:'total_charges' ,name: 'rbi.total_charges', class: 'align-middle total_charges'}
+                    { data:'total_invoice_amount' ,name: 'rbi.total_charges', class: 'align-middle total_invoice_amount',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

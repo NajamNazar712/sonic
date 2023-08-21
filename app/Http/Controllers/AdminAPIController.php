@@ -148,6 +148,7 @@ use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
+use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -10479,6 +10480,7 @@ class AdminAPIController extends Controller
                         }
                     }
                 }*/
+                $flag = true;
                 $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                 if ($request->tracking != '') {
                     $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -10572,7 +10574,35 @@ class AdminAPIController extends Controller
 
                                 if ($request->has('hub_id')) {
                                     $hub_id = $shipment->consignee_city->hub_id;
-                                    if ($request->hub_id == $hub_id) {
+
+                                    // rider assigned hub setting
+                                    $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                                    if ($rider_assigned_hub->exists())
+                                    {
+                                        $rider_assigned_hub = $rider_assigned_hub->first();
+                                        $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                                        $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                                        if (in_array($hub_id,$rider_assigned_hubs))
+                                        {
+                                            $flag = true;
+                                        }
+                                        elseif ($request->hub_id == $hub_id)
+                                        {
+                                            $flag = true;
+                                        }
+                                        else
+                                        {
+                                            $flag = false;
+                                        }
+                                    }
+                                    elseif ($request->hub_id == $hub_id)
+                                    {
+                                        $flag = true;
+                                    }
+                                    // rider assigned hub setting end
+
+                                    if ($flag) {
                                         if (!$request->has('pieces_confirm')) {
                                             if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                                 $details = array();
@@ -11071,6 +11101,44 @@ class AdminAPIController extends Controller
     }
 
     public function delivery_note_requests(Request $request){
+
+        $role_id = $request->admin_role_id;
+        $admin_hubs = $request->admin_hubs;
+
+        $delivery_note_requests = RiderDeliveryNoteRequest::join('riders as r', 'r.id', '=', 'rider_delivery_note_requests.rider_id')
+            ->join('cities as c', 'c.id', '=', 'rider_delivery_note_requests.hub_id')
+            ->join('routes as ro', 'ro.id', '=', 'rider_delivery_note_requests.route_id')
+            ->whereDate('rider_delivery_note_requests.created_at', Carbon::today())
+            ->where('rider_delivery_note_requests.status', 0)
+            ->select('rider_delivery_note_requests.id as id', 'rider_delivery_note_requests.created_at as date', 'r.name as rider_name', 'c.name as city_name', 'ro.junction as junction', 'ro.start as start', 'ro.end as end')->orderBy('rider_delivery_note_requests.id', 'DESC');
+
+        if($role_id != 1){
+            $delivery_note_requests = $delivery_note_requests->whereIn('rider_delivery_note_requests.hub_id', $admin_hubs);
+        }
+
+        if($delivery_note_requests->exists()){
+
+            $delivery_note_requests = $delivery_note_requests->get();
+            $data = array();
+            
+            foreach ($delivery_note_requests as $delivery_note_request){
+                $datum = array();
+                $shipments = RiderDeliveryNoteRequestShipment::join('shipments as s', 's.id', '=', 'rider_delivery_note_request_shipments.shipment_id')
+                    ->where('request_note_id', $delivery_note_request->id)->pluck('s.tracking_number')->toArray();
+                $datum['date'] = Carbon::parse($delivery_note_request->date)->format("Y-m-d");
+                $datum['request_id'] = $delivery_note_request->id;
+                $datum['rider_name'] = $delivery_note_request->rider_name;
+                $datum['city_name'] = $delivery_note_request->city_name;
+                $datum['route'] = $delivery_note_request->junction. ' ('.$delivery_note_request->start. ' to '.$delivery_note_request->end.')';
+                $datum['tracking_no'] = implode(',',$shipments);
+                $data[] = $datum;
+            }
+            return response()->json(['status' => 0, 'data' => $data]);
+        }
+        return response()->json(['status' => 1, 'message' => 'No Request Found!']);
+    }
+
+    public function delivery_note_requests_v2(Request $request){
 
         $rules = [
             'admin_role_id' => ['nullable'],

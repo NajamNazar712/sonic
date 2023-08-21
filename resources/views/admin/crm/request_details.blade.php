@@ -342,7 +342,7 @@
                                     <div class="col-7">
                                         <div class="content-body chat-application">
                                             <section
-                                                    class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible">
+                                                    class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible">
                                                 <div class="chats">
                                                     @if(!empty($comments))
 
@@ -447,10 +447,10 @@
                                             </section>
 
                                             @if(session('role_id') == 1 || session('role_id') == 6 || ($crm_details->status_id == 1 &&  $crm_details->agent_id == Auth::id()) || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || in_array(201, session('permissions')) || ($sale_person && $sale_person->admin_id == Auth::id()) || (in_array(session('role_id'), [8, 9 ,10]) && (in_array($crm_details->shipment->pickup_address->city->hub_id, session('hubs')) || in_array($crm_details->shipment->consignee_city->hub_id, session('hubs')))))
-                                                <section class="chat-app-form">
+                                                <section class="chat-app-form pb-0">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-9 m-0">
+                                                                class="form-group position-relative has-icon-left col-9 m-0 text-capitalize">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
                                                             <div class="form-control-position">
@@ -459,7 +459,7 @@
 
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
+                                                            <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -522,7 +522,7 @@
                                                     <button class="btn btn-primary ml-1"><a class="white" href="{{route('admin.crm.claim.invoice_image', ['id' => $crm_details->id])}}" target="_blank">View Invoice</a></button>
                                                 </div>
                                                 <div class="col-3">
-                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Image Upload</button>
+                                                    <button class="btn btn-social btn-primary mb-1 ml-1" type="button" id="image_upload_btn"><span class="la la-picture-o"></span>Attachment Upload</button>
                                                 </div>
                                                 <div class="row">
                                                 @if ($crm_details->damage_product_picture != null && $crm_details->product_packaging_picture != null && $crm_details->actual_product_picture != null)
@@ -554,7 +554,7 @@
                                                         </div>
                                                 </div>
                                             @elseif(session('role_id') == 1 || session('role_id') == 6 || (($crm_details->status_id == 2 || $crm_details->status_id == 3) &&  ($crm_details->agent_id == Auth::id() || ($crm_details->launched_by == 0 && $crm_details->launched_by_id == Auth::id()) || (!empty($crm_tagging) ? ($crm_tagging->crm_request_tagging_type_id == 1)? $crm_tagging->tagged_id == session('department_id'): $crm_tagging->tagged_id == Auth::id() : false ) || $escalation_tagged_check == true)) || ($sale_person && $sale_person->admin_id == Auth::id()))
-                                                <section class="chat-app-form">
+                                                <section class="chat-app-form pb-0">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
                                                                 class="form-group position-relative has-icon-left col-9 m-0">
@@ -565,7 +565,7 @@
                                                             </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control height-200" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
+                                                            <textarea id="chat_input" class="form-control height-200 summernote" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
                                                         </fieldset>
                                                         <div class="display-inline-block col-3">
                                                             <fieldset
@@ -1028,7 +1028,7 @@
                                     <div class="row justify-content-center">
                                         <div class="col-8">
                                             <fieldset class="form-group">
-                                                <textarea class="form-control" name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
+                                                <textarea class="form-control summernote"  name="description" id="description" rows="5" placeholder="Enter Description Here...">{{$crm_details->description}}</textarea>
                                             </fieldset>
                                         </div>
                                     </div>
@@ -1175,7 +1175,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">CRM Image Upload</h4>
+                    <h4 class="modal-title white">CRM Image Upload <strong>(Max 5 File(s) Are Allowed)</strong></h4>
 
                 </div>
                 <div class="modal-body  text-center">
@@ -1185,7 +1185,7 @@
 
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Date Added</th>
-                            <th class="border-primary border-darken-1">Image</th>
+                            <th class="border-primary border-darken-1">Attachments</th>
                         </tr>
                         </thead>
                         <tbody></tbody>
@@ -1304,7 +1304,7 @@
                                     {{-- <input type="text" id="adjusted_persentage" name="adjusted_persentage" class="form-control"> --}}
                                 </div>
                                 <div class="col-12 text-left">
-                                    <textarea name="special_approve_reject_reason" id="special_approve_reject_reason" cols="92" rows="5"> {{!empty($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
+                                    <textarea name="special_approve_reject_reason" class="summernote" id="special_approve_reject_reason" cols="92" rows="5"> {{!empty($special_request_agent_data) ? $special_request_agent_data->reason : '' }}</textarea>
                                 </div>
                             </div>
                             <div class="row justify-content-center mt-2 ml-2">
@@ -1330,6 +1330,9 @@
     <link rel="stylesheet" type="text/css"
           href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/summernote/summernote.css')}}">
+
+
     <style>
         .half-margin {
             margin: 8px 0 0 0 !important;
@@ -1366,6 +1369,14 @@
             margin: 0 0 10px 20px;
             color: #ffffff;
             background-color: #1e9ff2;
+        }
+
+        .chat-application .chat-app-form {
+            position: relative;
+    padding: 20px 10px;
+    background-color: #edeef0;
+    overflow: hidden;
+    /* height: 280px; */
         }
 
         .chat-application .chats .chat-left .chat-content:before {
@@ -1450,6 +1461,8 @@
             filter: grayscale(0);
             font-size: 4rem;
         }
+
+      
     </style>
 @endsection
 
@@ -1463,8 +1476,20 @@
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/summernote/summernote.js')}}" type="text/javascript"></script>
+
+    
     <script type="text/javascript">
         $(document).ready(function () {
+
+            $('.summernote').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                ],
+
+            });
+
             $('#claim_product_cost').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -1926,6 +1951,8 @@
             $('.chat_send').on('click', function () {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br/>');
+
+                console.log(comment)
                 $('#chat_input').val('');
                 var request_id = '{{$crm_details->id}}';
                 var internal_switch = parseInt($(this).attr('to'));
@@ -1985,15 +2012,15 @@
                             //     $('div.chat:last-child').find('.chat-body').append(html);
                             // }else{
                             if (internal_switch == 1) {
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }else if(internal_switch == 2){
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }else if(internal_switch == 3){
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
                                 var last_comment = data.last_comment_id;
 
-                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left">';
+                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize">';
                                 @if(session('role_id') == 1 || in_array(310, session('permissions')))
                                     html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
                                 @endif
@@ -2005,6 +2032,7 @@
 
                             $('#last_comment_id').val(data.last_comment_id);
                             last_comment_edit(last_comment, comment);
+                            $(".summernote").summernote("code", "");
 
                             updateScroll();
                         }
@@ -2035,13 +2063,13 @@
                             var name = data.name;
                             if (user == 0) {
                                 if (data.comment.comment_type == 0) {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 1) {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 3) {
-                                    var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);
 
@@ -2050,20 +2078,20 @@
                                     var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now  ({{Carbon\Carbon::now()}})</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
-                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             } else {
                                 if(data.comment.comment_type == 0){
                                     if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                        var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
+                                        var html = '<div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
                                         $('div.chat:last-child').find('.chat-body').append(html);
                                     } else {
-                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                         $('section.chat-app-window .chats').append(html);
                                     }
                                 }else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
 
                                     $('section.chat-app-window .chats').append(html);
                                 }
@@ -2585,14 +2613,21 @@
                             var image_html = '';
                             $.each(data.images, function (index, image) {
                                 index++;
+
+                            const url = image['image'];
+                            const substringsToCheck = ["jpg", "png", "jpeg","jfif", "JPEG","GIF", "TIFF", "PSD","PSD","EPS","RAW"];
+
+                            if (substringsToCheck.some(substr => url.includes(substr))) {
                                 var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
-                               
+                            } else {
+                                var img = '<a class="btn btn-sm btn-outline-info align-middle" href="' + image.image + '" target="_blank"><span class="align-middle">Download</span></a>';
+                            }
                                 image_html += '<tr id="' + image.id + '"><td>' + index + '</td><td>' + image.date + '</td><td>' + img + '</td></tr>';
                             });
                             $('#crm_image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
                         }else if(data.status == 2){
-                            var image_html = '<tr><td colspan="4">No Images found!</td></tr>';
+                            var image_html = '<tr><td colspan="4">No Attachments found!</td></tr>';
 
                             $('#crm_image_view_table tbody').append(image_html);
                             $('#image_upload_modal').modal('show');
@@ -2623,7 +2658,7 @@
                 if (typeof tr_id !== typeof undefined && tr_id !== false) {
                     var new_img_rows = $('#image_upload_table tbody tr').length;
                     new_img_rows = images_count + new_img_rows;
-                    if(new_img_rows >= 2){
+                    if(new_img_rows >= 5){
                         $('#image_upload_table .img_add_btn').attr('disabled', true);
                         return false;
                     }
@@ -2631,7 +2666,7 @@
 
                 rows_count++;
 
-                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_'+rows_count+'" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required">';
+                var crm_image = '<input class="form-control form-control-sm" type="file" name="crm_image_' + rows_count + '" data-rule-extension=".*" data-msg-extension="Only files with valid extensions are allowed" data-rule-maxsize="7168000" data-msg-maxsize="File size must not exceed 7 MB (7168 Kbytes)" data-rule-required="true" data-msg-required="File is required">';
                 if(rows_count == 1){
                     var remove = '';
                 }else{
@@ -2650,7 +2685,7 @@
                     className: 'btn btn-primary img_add_btn',
                     text: '<i class="la la-plus"></i> Add Row',
                     action:function (e) {
-                        if(images_count < 2){
+                        if(images_count < 5){
                             add_row();
                         }
                     }
@@ -2668,6 +2703,8 @@
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
+
+
                 },
                 initComplete: function() {
 
@@ -2681,7 +2718,7 @@
                 if(row_id){
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes if you want to delete this image!',
+                        text: 'Select Yes if you want to delete this Attachment!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -2725,6 +2762,7 @@
             });
 
             $('body').on('click', 'a.remove_row',function () {
+                
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, selected_rows);
 
@@ -2748,7 +2786,7 @@
                     $('#selected_ids').val(selected_rows);
                     swal({
                         title: 'Please Wait!',
-                        text: 'Image is being uploaded!',
+                        text: 'Attachments is being uploaded!',
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

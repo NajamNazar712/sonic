@@ -2205,6 +2205,15 @@ class V2AdminPickupsController extends Controller
             }
         }
 
+        foreach ($pickup_request_ids as $pickup_request_id) {
+        $pickup_request = V2PickupRequest::find($pickup_request_id);
+        if ($pickup_request->received >= 1) {
+            if ($pickup_rider_id && !in_array($pickup_request_id, $unassigned_pickup_requests)) {
+                    $this->retail_pickup_arrival($pickup_request_id);
+                }
+            } 
+        }
+
         if (!empty($pickup_note_ids)) {
             foreach ($pickup_note_ids as $pickup_note_id) {
                 $pickup_note_requests_count = V2PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('status', 0)->count();
