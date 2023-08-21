@@ -534,17 +534,18 @@ class DeliveryController extends Controller
                 $rider_name = '';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
-                    $shipment_status_id = $shipment->shipper_status_id ?? NULL;
-                    $rider = Rider::where('id', $request->rider_id);
-                    if($rider->exists()){
-                        $operation_rider_id = $rider->first()->operation_rider_id;
-                    }
-                    else{
-                        return ['status' => 1, 'error' => 'Rider not found!'];
-                    }
-                    if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
-                        return ['status' => 1, 'error' => 'Shipment cannot be added because it is on Re-Attempt Status'];
-                    } else {
+                    /******** COMMENT FOR PRODUCTION AS PER REVERT TICKET(6263)-  CAN BE REOPEN AGAIN (FROM ZOHAIB TARIQ) ********/
+                    // $shipment_status_id = $shipment->shipper_status_id ?? NULL;
+                    // $rider = Rider::where('id', $request->rider_id);
+                    // if($rider->exists()){
+                    //     $operation_rider_id = $rider->first()->operation_rider_id;
+                    // }
+                    // else{
+                    //     return ['status' => 1, 'error' => 'Rider not found!'];
+                    // }
+                    // if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
+                    //     return ['status' => 1, 'error' => 'Shipment cannot be added because it is on Re-Attempt Status'];
+                    // } else {
                         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                         if (!$dispute_check) {
                             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -791,7 +792,7 @@ class DeliveryController extends Controller
                         } else {
                             return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
                         }
-                    }
+                    // }//Commented else
                 } else {
                     return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
                 }
