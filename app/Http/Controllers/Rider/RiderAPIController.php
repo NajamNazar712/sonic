@@ -8936,11 +8936,10 @@ RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-//            dd($request->all());
             $rider_id = $request->rider_id;
 
-//            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-                $added_at = $request->added_at;
+            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+//                $added_at = $request->added_at;
             if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
                 if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
@@ -11363,8 +11362,8 @@ RiderAPIController extends Controller
             $rc_flag = false;
             $rider_id = $request->rider_id;
 
-//            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-            $added_at = $request->added_at;
+            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+//            $added_at = $request->added_at;
             $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
             if ($shipment_journey->exists()) {
                 $shipment_journey = $shipment_journey->first();
