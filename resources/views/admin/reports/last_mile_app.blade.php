@@ -163,7 +163,7 @@
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Name</th>
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Zone</th>
-                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Delivery Date</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Updated Delivery Date</th>
                             <th class="border-primary border-darken-1 align-middle" rowspan="2">Total Shipments</th>
                             <th class="border-primary border-darken-1 align-middle" colspan="16">
                                 <div class="text-center">Update Via App</div>
@@ -588,8 +588,8 @@
                     {data: 'at_23_count',  name:'rider_wise_delivery_note_summaries.at_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'after_23_count', name:'rider_wise_delivery_note_summaries.after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
                     {data: 'total_updated_shipments', name:'rider_wise_delivery_note_summaries.shipment_update_count', class: 'align-middle text-center', orderable: false, searchable: false},
-                    {data: 'updated_via_rider', name:'updated_via_rider', class: 'align-middle text-center updated_via_rider', orderable: false, searchable: false},
-                    {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center updated_via_admin', orderable: false, searchable: false},
+                    {data: 'updated_via_rider', name:'updated_via_rider', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
+                    {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
