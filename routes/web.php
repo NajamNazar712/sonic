@@ -2888,7 +2888,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@pay_fast_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pay_fast_report_list')->name('list');
         });
-        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
+
+        Route::prefix('csat')->name('csat_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@csat_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@csat_report_list')->name('list');
+        });
+        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');
             Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
@@ -2925,7 +2930,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
 
-        
+
         Route::prefix('fintech')->name('fintech_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fintech_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
