@@ -12564,44 +12564,44 @@ class AdminReportsController extends Controller
         })
         
         ->editColumn('applied_to', function($result){
-            return $result->applied_to === 1 ? 'shipper' : ($result->applied_to === 2 ? 'consignee' : '----');
+            return $result->applied_to === 1 ? 'shipper' : ($result->applied_to === 2 ? 'consignee' : '-');
         })
         ->editColumn('delivered_date', function ($result) {
-            return ($result->shipper_status == 14) ? Carbon::parse($result->delivered_date) : '----';
+            return ($result->shipper_status == 14) ? Carbon::parse($result->delivered_date) : '-';
         })
         ->editColumn('shipper_status', function ($result) {
-            return $result->shipper_status ? ShipmentStatus::where('id', $result->shipper_status)->value('name') : '-----';
+            return $result->shipper_status ? ShipmentStatus::where('id', $result->shipper_status)->value('name') : '-';
         })
 
         ->editColumn('city', function ($result) {
-            return $result->city ? City::where('id', $result->city)->value('name') : '-----';
+            return $result->city ? City::where('id', $result->city)->value('name') : '-';
         })
         ->editColumn('transaction_id', function ($result) {
-            return $result->transaction_id ?? '-----';
+            return $result->transaction_id ?? '-';
         })
         ->editColumn('trax_pay_id', function ($result) {
-            return $result->trax_pay_id ?? '-----';
+            return $result->trax_pay_id ?? '-';
         })
         ->editColumn('rider_name', function ($result) {
-            return $result->rider_name ?? '-----';
+            return $result->rider_name ?? '-';
         })        
         ->editColumn('rider_trax_id', function ($result) {
-            return $result->rider_trax_id ?? '-----';
+            return $result->rider_trax_id ?? '-';
         })
         ->editColumn('fintech_company_charges', function ($result) {
-            return $result->fintech_company_charges ?? '-----';
+            return $result->fintech_company_charges ?? '-';
         })
         ->editColumn('fc_name', function ($result) {
-            return $result->fc_name ?? '-----';
+            return $result->fc_name ?? '-';
         })
         ->editColumn('fintech_company_fed_tax', function ($result) {
-            return $result->fintech_company_fed_tax ?? '-----';
+            return $result->fintech_company_fed_tax ?? '-';
         })
         ->editColumn('transaction_date', function ($result) {
-            return isset($result->transaction_date) ? Carbon::parse($result->transaction_date) : '-----';
+            return isset($result->transaction_date) ? Carbon::parse($result->transaction_date) : '-';
         })
         ->editColumn('gross_revenue', function ($result) {
-            return $result->gross_revenue ?? '-----';
+            return $result->gross_revenue ?? '-';
         })
         
         ->editColumn('net_revenue', function ($result) {
@@ -12609,7 +12609,7 @@ class AdminReportsController extends Controller
                 $net_revenue = $result->gross_revenue - $result->fed_tax_calculation;
                 return $net_revenue;
             } else {
-                return '---';
+                return '-';
             }
         });
 
