@@ -1221,6 +1221,8 @@ class DeliveryController extends Controller
             'riders.rider_type_id', 'rider_types.name as rt', 'delivery_notes.created_via_app as created_via', 'riders.trax_id as rider_trax_id','cas.name as city_area_name'])
             ->where('delivery_notes.status', 0);
 
+            dd($deliveries->get()); 
+
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
