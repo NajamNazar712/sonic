@@ -1200,7 +1200,7 @@ class DeliveryController extends Controller
         }
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as cas', 'cas.id', '=', 'riders.area_id')
             ->join('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
@@ -1215,8 +1215,7 @@ class DeliveryController extends Controller
             'delivery_notes.created_at', 'delivery_notes.last_updated_at', 'ad.name as updated_by', 
             'delivery_notes.special_rider', 'delivery_notes.special_rider_name', 'delivery_notes.special_rider_phone', 
             'delivery_notes.delivered_shipments as delivered_shipments', 
-            DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id 
-            WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'), 
+            DB::raw('(SELECT COUNT(d.id) FROM delivery_notes AS d INNER JOIN delivery_note_shipments AS dns ON d.id = dns.delivery_note_id WHERE dns.delivery_note_id = delivery_notes.id AND dns.status = 0) AS shipments_unverified_count'), 
             'oc.business_category_id as business_category', 'z.name as zone_name', 'riders.operation_rider_id', 
             'riders.rider_type_id', 'rider_types.name as rt', 'delivery_notes.created_via_app as created_via', 'riders.trax_id as rider_trax_id','cas.name as city_area_name')
             ->where('delivery_notes.status', 0);
