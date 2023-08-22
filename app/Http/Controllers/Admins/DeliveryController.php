@@ -1200,10 +1200,10 @@ class DeliveryController extends Controller
         }
 
         $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
-            ->leftjoin('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->leftjoin('city_areas as cas', 'cas.id', '=', 'riders.area_id')
             ->join('rider_types', 'rider_types.id', '=', 'riders.rider_type_id')
-            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->leftjoin('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->join('zones as z', 'oc.zone_id', '=', 'z.id')
             ->leftjoin('admins as ad', 'ad.id', '=', 'delivery_notes.updated_by')
