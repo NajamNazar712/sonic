@@ -12538,7 +12538,7 @@ class AdminReportsController extends Controller
                     '=',
                     DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 14)')
                 );
-        })->select('tracking_number','sj.shipper_status_id as shipper_status','sjd.created_at as delivered_date', 'trax_pay_transactions.delivery_note_id as delivery_note_id','fpd.transaction_id as transaction_id','fpd.trax_pay_id as trax_pay_id','shipments.amount as cod_amount','shipments.fintech_charges as fintech_charges','fpd.created_at as transaction_date','fpd.revenue as gross_revenue','shipments.consignee_city_id as city','users.name as name','riders.name as rider_name','riders.trax_id as rider_trax_id','sfc.applied_to as applied_to','fc.company_name as fc_name','fcc.charges as fintech_company_charges','fcc.fed_tax as fintech_company_fed_tax');
+        })->select('tracking_number','sj.shipper_status_id as shipper_status','sjd.created_at as delivered_date', 'trax_pay_transactions.delivery_note_id as delivery_note_id','fpd.transaction_id as transaction_id','fpd.trax_pay_id as trax_pay_id','shipments.amount as cod_amount','shipments.fintech_charges as fintech_charges','fpd.created_at as transaction_date','fpd.revenue as gross_revenue','shipments.consignee_city_id as city','users.name as name','riders.name as rider_name','riders.trax_id as rider_trax_id','sfc.applied_to as applied_to','fc.company_name as fc_name','fcc.charges as fintech_company_charges','fcc.fed_tax as fintech_company_fed_tax','sj.created_at as net_revenue')->where('shipments.fintech_charges','!=','');
 
         $datatables = Datatables::of($fintech)
         ->addColumn('fed_tax', function ($result) {
@@ -12604,7 +12604,7 @@ class AdminReportsController extends Controller
             return $result->gross_revenue ?? '-----';
         })
         
-        ->addColumn('net_revenue', function ($result) {
+        ->editColumn('net_revenue', function ($result) {
             if (isset($result->fed_tax_calculation) && isset($result->gross_revenue)) {              
                 $net_revenue = $result->gross_revenue - $result->fed_tax_calculation;
                 return $net_revenue;
