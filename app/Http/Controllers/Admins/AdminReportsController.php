@@ -12665,12 +12665,22 @@ public function csat_report_list(Request $request)
     if ($request->get('excel') && $request->get('excel') == true) {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
     }
+
+    $csat_types = GlobalSettings::where('type', 'csat_type')->first();
+    $case_types = explode(',', $csat_types->text ?? '');
+
+    if(isset($case_types)){
+        $case_types;
+    }else{
+        $case_types = [];
+    }
+
     $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
         $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
             ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));
     })->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
     ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
-    ->where('crm_requests.status_id', 4);
+    ->where('crm_requests.status_id', 4)->whereIn('crm_requests.case_nature_type_id', $case_types);
 
 
     $datatable = Datatables::of($csat_report)->editColumn('agent_id', function($result){

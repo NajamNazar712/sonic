@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'FOC Account')
+@section('title', 'CSAT Case Nature Types')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    FOC Account
+                    CSAT Case Nature Types
                 </h1>
 
                 <div class="card">
@@ -20,13 +20,13 @@
                             <div class="row justify-content-center">
                                 <div class="col-6">
 
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.foc_account.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.csat_cases_setting.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
-                                                    @foreach($shippers as $shipper)
-                                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                <select name="case_types[]" id="case_types_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one Case Type is required" data-rule-required="true" required="required">
+                                                    @foreach($case_nature_types as $case_nature_type)
+                                                        <option value="{{$case_nature_type->id}}" {{ in_array($case_nature_type->id, $csat_types) ? 'selected' : '' }}>{{$case_nature_type->type}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -56,8 +56,8 @@
     <script>
         $(document).ready(function() {
 
-            $('#shippers_select').select2({
-                placeholder:'Shippers',
+            $('#case_types_select').select2({
+                placeholder:'Case Nature Types',
                 width:'100%',
                 allowClear:true
             }).bind('select2:select', function () {
@@ -67,16 +67,12 @@
                 }
             });
 
-            $('#shippers_select').on('select2:unselect', function () {
+            $('#case_types_select').on('select2:unselect', function () {
                if($(this).val().length == 0){
                    $('#settings_form').find('button[type=submit]').prop('disabled', true);
                }
             });
 
-            @if(count($foc_account_tags) > 0)
-                var ids = @json($foc_account_tags);
-                $('#shippers_select').val(ids).trigger('change');
-            @endif
 
             $('#settings_form').validate({
                 // ignore: ":not(:visible),:disabled",
@@ -88,7 +84,7 @@
                 submitHandler: function (form) {
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to update FOC Accounts!',
+                        text: 'Select Yes to update CSAT Case Types!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
