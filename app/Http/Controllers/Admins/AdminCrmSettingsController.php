@@ -859,4 +859,9 @@ class AdminCrmSettingsController extends Controller
         }
         return response()->json(['status' => 1, 'selected_levels' => $selected_levels]);
     }
+
+    public function csat_cases_setting_index()
+    {
+        dd(1);
+    }
 }
