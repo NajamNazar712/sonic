@@ -3153,6 +3153,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         Route::prefix('csat_cases_setting')->name('csat_cases_setting.')->group(function () {
             Route::get('', 'Admins\AdminCrmSettingsController@csat_cases_setting_index')->name('index');
+            Route::get('formula', 'Admins\AdminCrmSettingsController@csat_score_formula_index')->name('formula.index');
+
             Route::post('/submit', 'Admins\AdminCrmSettingsController@csat_cases_setting_store')->name('store');
 
         });

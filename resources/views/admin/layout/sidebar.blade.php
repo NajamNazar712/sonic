@@ -2296,6 +2296,12 @@
                                             Cases Setting</a></li>
                                     @endif
 
+                                    @if (session('role_id') == 1 || in_array(900, session('permissions')))
+                                    <li><a class="menu-item"
+                                            href="{{ route('admin.settings.csat_cases_setting.formula.index') }}">Csat 
+                                            Score Formula</a></li>
+                                    @endif
+
 
                                     @if (session('role_id') == 1 ||
                                             session('role_id') == 6 ||

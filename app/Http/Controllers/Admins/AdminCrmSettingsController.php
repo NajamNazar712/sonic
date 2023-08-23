@@ -897,4 +897,16 @@ class AdminCrmSettingsController extends Controller
         }
     }
 
+
+    public function csat_score_formula_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 698);   
+
+        $formulas = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $formulas = explode(',', $formulas->text ?? '');
+
+        return view('admin.settings.CRM.csat_formula_setting')->with(['formulas'=>$formulas]);
+
+    }
+
 }
