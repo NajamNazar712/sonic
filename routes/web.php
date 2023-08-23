@@ -1287,6 +1287,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 //show shipemtns with fintech charges
                 Route::get('show', 'Admins\DeliveryController@pending_cash_collection_showshipment')->name('showshipment');
                 //end 
+
+                Route::get('fintech_shipment', 'Admins\DeliveryController@pending_cash_collection_fintech_shipment')->name('fintechshipment');
+
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all', 'Admins\DeliveryController@pending_cash_collect_all')->name('all');
                 Route::post('shipments', 'Admins\DeliveryController@cash_collection_shipments')->name('shipments');
@@ -3755,6 +3758,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             // Route::view('', 'Admins\GlobalSettingsController@airway_bill_address_visibility_index')->name('index');
             Route::get('', 'Admins\GlobalSettingsController@background_image_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@background_image_store')->name('store');
+        });
+
+        Route::prefix('rider_assigned_hub')->name('rider_assigned_hub.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rider_assigned_hub_index')->name('index');
+            Route::get('list', 'Admins\GlobalSettingsController@rider_assigned_hub_list')->name('list');
+            Route::post('add', 'Admins\GlobalSettingsController@rider_assigned_hub_add')->name('add');
+            Route::post('edit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit')->name('edit');
+            Route::post('submit', 'Admins\GlobalSettingsController@rider_assigned_hub_edit_submit')->name('edit.submit');
+            Route::post('enable_disable', 'Admins\GlobalSettingsController@rider_assigned_hub_enable_disable')->name('enable_disable');
+            Route::post('hub_count', 'Admins\GlobalSettingsController@rider_assigned_hub_count')->name('hub_count');
         });
 
     });
