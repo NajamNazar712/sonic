@@ -21,6 +21,7 @@ class OrdinaryDiscrepancyReportSeeder extends Seeder
         DB::table('activity_trail_actions')->insert(array(
             array('id' => 698, 'screen_name' => 'Ordinary Discrepancy Report', 'action' => 'View'),
             array('id' => 699, 'screen_name' => 'Ordinary Discrepancy Report ', 'action' => 'Excel Download'),
+            array('id' => 700, 'screen_name' => 'Ordinary Discrepancy Report ', 'action' => 'Tracking'),
         ));
 
 

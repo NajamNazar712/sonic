@@ -12650,6 +12650,9 @@ class AdminReportsController extends Controller
     }
 
     public function ordinary_discrepancy_report_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 303);
+        $operation_rider_category = OperationRidersCategory::all();
+        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1', 'operation_rider_category' => $operation_rider_category]);
         
     }
     public function ordinary_discrepancy_report_list(Request $request){
