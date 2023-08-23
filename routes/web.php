@@ -2765,10 +2765,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@osa_charges_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@osa_charges_list')->name('list');
         });
-        //        Route::prefix('confirmation_pending_report')->name('confirmation_pending_report.')->group(function (){
-        //            Route::get('', 'Admins\AdminReportsController@confirmation_shipments_index')->name('index');
-        //            Route::get('list', 'Admins\AdminReportsController@confirmation_shipments_list')->name('list');
-        //        });
 
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
@@ -2929,6 +2925,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('fintech')->name('fintech_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fintech_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
+        });
+
+        Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
         });
     });
 

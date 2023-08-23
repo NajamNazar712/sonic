@@ -12649,4 +12649,11 @@ class AdminReportsController extends Controller
         return $datatables->make(true);
     }
 
+    public function ordinary_discrepancy_report_index(){
+        
+    }
+    public function ordinary_discrepancy_report_list(Request $request){
+
+    }
+
 }
