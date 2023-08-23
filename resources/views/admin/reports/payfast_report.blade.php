@@ -62,8 +62,8 @@
                             <tr role="row" class="bg-primary white">
                                 <th class="border-primary border-darken-1">S. No.</th>
                                 <th class="border-primary border-darken-1">Tracking No.</th>
-                                <th class="border-primary border-darken-1">COD Amount</th>
                                 <th class="border-primary border-darken-1">Delivery Note ID</th>
+                                <th class="border-primary border-darken-1">COD Amount</th>
                                 <th class="border-primary border-darken-1">Payment Name</th>
                                 <th class="border-primary border-darken-1">Transaction ID</th>
                                 <th class="border-primary border-darken-1">Created At</th>
@@ -299,7 +299,7 @@
                     }
                 },
                 order: [
-                    [2, 'desc']
+                    [6, 'desc']
                 ],
                 columns: [{
                         orderable: false,
@@ -317,14 +317,14 @@
                         class: 'align-middle text-center tracking_number'
                     },
                     {
-                        data: 'cod_amount',
-                        name: 'cod_amount',
-                        class: 'align-middle text-center transaction_amount'
-                    },
-                    {
                         data: 'delivery_note_id',
                         name: 'delivery_note_id',
                         class: 'align-middle text-center delivery_note_id'
+                    },
+                    {
+                        data: 'cod_amount',
+                        name: 'cod_amount',
+                        class: 'align-middle text-center transaction_amount'
                     },
                     {
                         data: 'payment_name_id',
