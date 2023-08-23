@@ -236,6 +236,8 @@
                             head.push('Payment Name');
                             head.push('COD Amount');
                             head.push('Transaction ID');
+                            head.push('Created at');
+
 
 
 
@@ -248,6 +250,8 @@
                                 row.push(values.payment_name_id);
                                 row.push(values.cod_amount);
                                 row.push(values.trax_pay_id);
+                                row.push(values.created_at);
+
                                 body.push(row);
                             });
                         },
@@ -268,7 +272,7 @@
                 buttons: [{
                     extend: 'excelHtml5',
                     className: 'btn btn-primary',
-                    title: 'PayFast Report Summary',
+                    title: 'PayFast Shipment Wise Summary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }, ],
                 lengthMenu: [
@@ -324,7 +328,7 @@
                     },
                     {
                         data: 'payment_name_id',
-                        name: 'payment_name_id',
+                        name: 'trax_pay_transactions.payment_name_id',
                         class: 'align-middle text-center payment_name_id'
                     },
                     {

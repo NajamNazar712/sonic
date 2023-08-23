@@ -12471,13 +12471,13 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 690);
         }
-        $trax_pay = TraxPayTransaction::join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')->leftjoin('fintech_payment_details as fpd', 'trax_pay_transactions.id', 'fpd.trax_pay_id')->select('trax_pay_transactions.delivery_note_id as delivery_note_id', 'trax_pay_transactions.cod_amount as cod_amount', 'fpd.transaction_id as trax_pay_id', 'trax_pay_transactions.created_at as created_at', 'shipments.tracking_number as tracking_number');
+        $trax_pay = TraxPayTransaction::join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')->leftjoin('fintech_payment_details as fpd', 'trax_pay_transactions.id', 'fpd.trax_pay_id')->select('trax_pay_transactions.delivery_note_id as delivery_note_id','trax_pay_transactions.payment_name_id as payment_name_id','trax_pay_transactions.cod_amount as cod_amount', 'fpd.transaction_id as trax_pay_id', 'trax_pay_transactions.created_at as created_at', 'shipments.tracking_number as tracking_number','trax_pay_transactions.created_at as created_at');
 
         $datatable = Datatables::of($trax_pay)
 
             ->editColumn('payment_name_id', function ($result) {
-                if (isset($result->payment_name)) {
-                    return $result->payment_name->name;
+                if (isset($result->payment_name_id)) {
+                    return ($result->payment_name->name);
                 } else {
                     return '-';
                 }
@@ -12636,7 +12636,7 @@ class AdminReportsController extends Controller
         } 
 
         if ($search_fintech_transactions = $request->get('search_fintech_transactions')) {
-            $datatables->where('fpd.id', $search_fintech_transactions);
+            $datatables->where('trax_pay_transactions.id', $search_fintech_transactions);
         } 
 
         if ($search_tracking_no = $request->get('search_tracking_no')) {

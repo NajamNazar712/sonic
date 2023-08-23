@@ -100,6 +100,21 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+
+            
+            $('#to_date').on('change', function() {
+                $('#to_date-error').hide();
+                $('#to_date').removeClass('danger');
+
+            })
+
+
+            $('#from_date').on('change', function() {
+                $('#from_date-error').hide();
+                $('#from_date').removeClass('danger');
+
+            })
            
 
             var from_date = $('#from_date').pickadate({
