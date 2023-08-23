@@ -145,6 +145,7 @@ use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Admin\UserFintectCharges;
 use App\Jobs\SwichPaymentGatewayApi;
+use App\RiderAssignedHubForDeliveryNote;
 use Session;
 //End
 use Carbon\Carbon;
@@ -8816,5 +8817,110 @@ class GlobalSettingsController extends Controller
             $background_image->save();
         }
         return redirect()->back()->with(['success' => 'Image Uploaded!']);
+    }
+
+    public function rider_assigned_hub_index(Request $request)
+    {
+        //ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
+
+        $admin_id = auth()->id();
+        $admin_hubs = session('hubs');
+
+        $existing_riders = RiderAssignedHubForDeliveryNote::all()->pluck('rider_id');
+
+        $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')
+            ->leftjoin('cities as c','c.id','riders.city_id')
+            ->whereIn('riders.city_id',$admin_hubs)
+            ->where('riders.blacklist', 0)
+            ->whereNotIn('riders.id',$existing_riders)
+            ->select('riders.id as id','riders.name as name','e.trax_id as trax_id','c.name as city_name')
+            ->get();
+
+//        dd($riders);
+
+        $hubs = City::whereIn('id',$admin_hubs)->where('hub',1)->select('id','name')->get();
+        return view('admin.settings.last_mile.rider_assigned_hub')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
+
+    public function rider_assigned_hub_list()
+    {
+        $reasons = RiderAssignedHubForDeliveryNote::join('riders as r','r.id','rider_assigned_hub_for_delivery_notes.rider_id')
+        ->select('rider_assigned_hub_for_delivery_notes.id as id','r.id as rider_id', 'r.name as name','rider_assigned_hub_for_delivery_notes.hubs as hubs');
+
+        $datatable = Datatables::of($reasons)
+            ->addColumn('hubs', function ($data) {
+                $rider_id = $data->rider_id;
+                $hubs = $data->hubs;
+                $count = count( explode(',',$hubs));
+                return '<button ref="'.$rider_id.'" class="btn btn-sm btn-outline-info align-middle hubs_count">'.$count.'</button>';
+            })->addColumn('action', function ($data) {
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                if (session('role_id') == 1 || in_array(896, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
+                return $dropdown;
+            });
+
+        return $datatable->make(true);
+    }
+
+    public function rider_assigned_hub_add(Request $request)
+    {
+        $rider_id = $request->select_rider_id;
+        $rider_hubs = $request->hubs;
+
+        $rider_selected_hubs = implode(',',$rider_hubs);
+
+        $check_setting = RiderAssignedHubForDeliveryNote::where('rider_id',$rider_id);
+        if (!$check_setting->exists())
+        {
+            $new_setting = new RiderAssignedHubForDeliveryNote();
+            $new_setting->rider_id = $rider_id;
+            $new_setting->hubs = $rider_selected_hubs;
+            $new_setting->save();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function rider_assigned_hub_edit(Request $request)
+    {
+        $rider_info = array();
+        $id = $request->id;
+        $rider = RiderAssignedHubForDeliveryNote::find($id);
+
+        $rider_info['id'] = $rider->id;
+        $hub_ids = explode(',',$rider->hubs);
+
+        $hub_name = City::whereIn('id',$hub_ids)->select('name','id')->get();
+
+        $rider_info['hubs'] = $hub_name->toArray();
+        return response(['status' => 0,'data'=>$rider_info]);
+    }
+
+    public function rider_assigned_hub_edit_submit(Request $request)
+    {
+        $id = $request->edit_id;
+        $hubs = implode(',',$request->edit_hubs);
+
+        $existing_rider = RiderAssignedHubForDeliveryNote::where('id',$id)->update(['hubs' => $hubs]);
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function rider_assigned_hub_count(Request $request)
+    {
+        $id = $request->id;
+        $hub_id = RiderAssignedHubForDeliveryNote::find($id);
+        $hub_id = explode(',',$hub_id->hubs);
+
+        $hubs = City::whereIn('id',$hub_id)->select('name')->get()->pluck('name');
+
+        return response(['hubs'=>$hubs]);
     }
 }

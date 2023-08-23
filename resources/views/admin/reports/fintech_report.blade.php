@@ -405,7 +405,7 @@
                 },
                 rowId: 'tracking_number',
                 order: [
-                    [2, 'desc']
+                    [11, 'desc']
                 ],
                 columns: [{
                         orderable: false,
@@ -442,7 +442,7 @@
                     },
                     {
                         data: 'cod_amount',
-                        name: 'shipments.cod_amount',
+                        name: 'cod_amount',
                         class: 'align-middle text-center cod_amount'
                     },
                     {
@@ -452,12 +452,12 @@
                     },
                     {
                         data: 'rider_name',
-                        name: 'riders.rider_name',
+                        name: 'rider_name',
                         class: 'align-middle rider_name text-center'
                     },
                     {
                         data: 'rider_trax_id',
-                        name: 'riders.rider_trax_id',
+                        name: 'rider_trax_id',
                         class: 'align-middle rider_name text-center'
                     },
                     {
@@ -477,7 +477,7 @@
                     },
                     {
                         data: 'fintech_charges',
-                        name: 'shipments.fintech_charges',
+                        name: 'fintech_charges',
                         class: 'align-middle fintech_charges'
                     },
                     {
@@ -497,12 +497,12 @@
                     },
                     {
                         data: 'fintech_company_charges',
-                        name: 'fcc.fintech_company_charges',
+                        name: 'fintech_company_charges',
                         class: 'align-middle fintech_company_charges'
                     },
                     {
                         data: 'fintech_company_fed_tax',
-                        name: 'fcc.fintech_company_fed_tax',
+                        name: 'fintech_company_fed_tax',
                         class: 'align-middle fintech_company_fed_tax'
                     },
                     {
@@ -518,7 +518,7 @@
                     },
                     {
                         data: 'net_revenue',
-                        name: 'net_revenue',
+                        name: 'sj.created_at',
                         class: 'align-middle net_revenue'
                     },
 

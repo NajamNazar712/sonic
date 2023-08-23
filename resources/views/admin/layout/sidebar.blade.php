@@ -2145,6 +2145,9 @@
                                     @if (session('role_id') == 1 || in_array(836, session('permissions')))
                                         <li><a class="menu-item" href="{{route('admin.settings.auto_delivery_note_verification.index')}}">Auto Delivery Note Verification</a></li>
                                     @endif
+                                        @if (session('role_id') == 1 || in_array(836, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.settings.rider_assigned_hub.index')}}">Rider Assigned Hub</a></li>
+                                        @endif
 
                                 </ul>
                             </li>
