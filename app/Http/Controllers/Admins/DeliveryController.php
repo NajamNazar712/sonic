@@ -4809,8 +4809,7 @@ class DeliveryController extends Controller
 
         ->editColumn('count_fintech_shipments', function ($deliveries) {
             $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
-            $amount = Shipment::whereIn('id', $delivery_note_shipment)
-            ->pluck('fintech_charges')->toArray();
+            $amount = Shipment::whereIn('id', $delivery_note_shipment)->pluck('amount')->toArray();
 
             $sum = collect($amount)->sum(function ($amount) {
                 return floatval($amount);
@@ -4975,7 +4974,7 @@ class DeliveryController extends Controller
             'shipments.amount as COD_amount',
             'shipments.fintech_charges as fintech_charges',
             'shipments.received_amount as received_amount',
-            'trax_pay_transactions.created_at as Date',
+            'fintech_payment_details.created_at as Date',
             'fintech_payment_details.transaction_id'
         )
         ->distinct()
@@ -5096,7 +5095,7 @@ class DeliveryController extends Controller
             ->editColumn('fintech_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
                 $amount = Shipment::whereIn('id', $delivery_note_shipment)
-                ->pluck('fintech_charges')->toArray();
+                ->pluck('amount')->toArray();
     
                 $sum = collect($amount)->sum(function ($amount) {
                     return floatval($amount);
@@ -7001,7 +7000,7 @@ class DeliveryController extends Controller
         ->editColumn('fintech_shipments_charges', function ($deliveries) {
             $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
             $amount = Shipment::whereIn('id', $delivery_note_shipment)
-            ->pluck('fintech_charges')->toArray();
+            ->pluck('amount')->toArray();
 
             $sum = collect($amount)->sum(function ($amount) {
                 return floatval($amount);
