@@ -4896,8 +4896,7 @@ class DeliveryController extends Controller
                 return floatval($amount);
             });   
             
-            return '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,'.$deliveries->delivery_note.')" >' . $sum . '</button>';
-        })
+            return (['link' =>'<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>','sum'=>$sum]);        })
         
         ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
@@ -5182,7 +5181,7 @@ class DeliveryController extends Controller
                     return floatval($amount);
                 }); 
               
-                    return '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>';
+                    return (['link' =>'<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>','sum'=>$sum]);
                 
             })
 
@@ -7218,8 +7217,7 @@ class DeliveryController extends Controller
             });
 
      
-             return '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,'.$deliveries->delivery_note.')" >' . $sum . '</button>';
-            
+            return (['link' =>'<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>','sum'=>$sum]);            
         })
 
 

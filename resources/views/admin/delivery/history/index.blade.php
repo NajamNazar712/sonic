@@ -366,6 +366,7 @@
                             head.push('Cash Collected By');
                             head.push('Cash Collection Date');
                             head.push('DNCC Amount');
+                            head.push('Fintech Amount');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
@@ -397,6 +398,7 @@
                                 row.push(values.cash_collected);
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
+                                row.push(values.fintech_shipments_charges.sum);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
@@ -462,7 +464,7 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges', orderable: false, searchable: false},
+                    { data:'fintech_shipments_charges.link' ,name: 'fintech_shipments_charges.link', class: 'align-middle fintech_shipments_charges.link', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
