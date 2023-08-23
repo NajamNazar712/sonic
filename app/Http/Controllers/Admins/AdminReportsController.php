@@ -12666,7 +12666,7 @@ public function csat_report_list(Request $request)
         ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
     }
 
-    $csat_types = GlobalSettings::where('type', 'csat_type')->first();
+    $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
     $case_types = explode(',', $csat_types->text ?? '');
 
     if(isset($case_types)){

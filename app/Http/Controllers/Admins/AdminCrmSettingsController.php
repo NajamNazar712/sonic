@@ -865,7 +865,7 @@ class AdminCrmSettingsController extends Controller
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 698);
 
-        $csat_types = GlobalSettings::where('type', 'csat_type')->first();
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_nature_types = CrmRequestCaseNatureType::all();
 
         if(isset($csat_types)){
@@ -880,7 +880,7 @@ class AdminCrmSettingsController extends Controller
 
     public function csat_cases_setting_store(Request $request)
     {
-        $csat_types = GlobalSettings::where('type', 'csat_type')->first();
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_types = $request->get('case_types');
         $case_types = implode(',', $case_types);
 
