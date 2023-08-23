@@ -235,7 +235,7 @@
                             head.push('Delivery Note ID');
                             head.push('Payment Name');
                             head.push('COD Amount');
-                            head.push('Fintech Charges');
+                            head.push('Transaction ID');
 
 
 
