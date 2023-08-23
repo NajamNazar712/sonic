@@ -1670,6 +1670,10 @@
                         @if (session('role_id') == 1 || in_array(896, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.fintech_report.index') }}">Fintech Report</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(896, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.ordinary_discrepancy_report.index') }}">Ordinary Discrepancy Report</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
