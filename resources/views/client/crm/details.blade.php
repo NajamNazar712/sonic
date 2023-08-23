@@ -190,7 +190,8 @@
                                             </section>
                                             <section class="chat-app-form">
                                                 <form class="chat-app-input d-flex" id="chat_form">
-                                                    <fieldset class="form-group position-relative col-10 has-icon-left text-capitalize">
+                                                    <fieldset
+                                                        class="form-group position-relative col-10 has-icon-left text-capitalize">
                                                         <input type="hidden" id="last_comment_id"
                                                             value="{{ $last_comment_id }}">
                                                         <div class="form-control-position">
@@ -340,10 +341,10 @@
             transition: 0.3s;
         }
 
-        .feedback .radio:checked~span {
+        /* .feedback .radio:checked~span {
             filter: grayscale(0);
             font-size: 4rem;
-        }
+        } */
 
         .feedback .radio:hover~span {
             filter: grayscale(0);
@@ -388,11 +389,22 @@
                 ]
             });
 
+            var selectedValue = parseInt($('input[type="radio"]:checked').val());
 
+            $('input[type="radio"]').each(function() {
+                var radioValue = parseInt($(this).val());
 
-
-
-
+                if (radioValue <= selectedValue) {
+                    $(this).prop('disabled', true);
+                        $(this).next('span').css({
+                            filter: 'grayscale(0)',
+                            fontSize: '4rem'
+                        });
+                    
+                } else {
+                    $(this).prop('disabled', false);
+                }
+            });
             $('#chat_form').on('submit', function(e) {
                 e.preventDefault();
             });
@@ -431,7 +443,9 @@
                             console.log(1)
                             if (user == 1) {
                                 if ($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + comment +
+                                    var html =
+                                        '<div class="chat-content text-left text-capitalize"><p>' +
+                                        comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
@@ -445,7 +459,9 @@
                                 }
                             } else {
                                 if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + comment +
+                                    var html =
+                                        '<div class="chat-content text-left text-capitalize"><p>' +
+                                        comment +
                                         '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
@@ -488,7 +504,9 @@
                         if (data.status) {
                             if (data.comment.comment_by === 0) {
                                 if ($('div.chat:last-child').hasClass('admin')) {
-                                    var html = '<div class="chat-content text-left mr-3 text-capitalize"><p>' + data.comment
+                                    var html =
+                                        '<div class="chat-content text-left mr-3 text-capitalize"><p>' +
+                                        data.comment
                                         .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
@@ -500,7 +518,8 @@
                                 }
                             } else if (data.comment.comment_by === 2) {
                                 if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left text-capitalize"><p>' + data.comment
+                                    var html = '<div class="chat-content text-left text-capitalize"><p>' +
+                                        data.comment
                                         .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {

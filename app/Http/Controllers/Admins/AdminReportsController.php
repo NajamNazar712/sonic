@@ -12653,7 +12653,6 @@ class AdminReportsController extends Controller
     {
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 694);
-
         $agents = Admin::all();
         $ratings = CrmRequestRating::all();
         return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings]);
