@@ -10415,11 +10415,11 @@ class NotificationsController extends Controller
                                     
                         $html = $htmlHeader;
                         $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                     
                     }
 
