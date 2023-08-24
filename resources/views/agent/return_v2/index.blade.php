@@ -1184,8 +1184,6 @@
                     var shipment_id_val = $("#shipment_id_val").val();
                     var phone_number = $('#phone_number').val();
 
-                    console.log(phone_number)
-
                     $.ajax({
                             url: '{!! route('agent.dashboard.submit_ticket') !!}',
                             method: 'POST',

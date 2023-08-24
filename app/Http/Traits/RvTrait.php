@@ -77,7 +77,6 @@ trait RvTrait
     // Description:
     protected function rv_shipment_assign($data)
     {
-        // try {
         //if the same shipment has been already completed, new row will be created
         $completed_shipments = RvShipmentAssignAgent::where('shipment_id', $data['shipment_id'])->where('rv_state_id', 4)->latest()->first();
         if ($completed_shipments) {
@@ -123,9 +122,6 @@ trait RvTrait
         ]);
 
         return true;
-        // } catch (\Throwable $th) {
-        //     return ['status' => 0, 'error' => $th->getMessage()];
-        // }
     }
 
     // Heading: N/A
@@ -1375,26 +1371,25 @@ trait RvTrait
             $only_shipper = $only_shipper->first();
             $only_shippers = explode(',', $only_shipper['text']);
         }
-
+        
         foreach ($sorted_agents as $key => $agent) {
             // Check if included_shippers exists (1 && 1)
             $shipments = [];
             
             if (!empty($included_shippers)) {
                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    // ->where('id',1724981)
-                    ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                    ->whereIn('user_id', $included_shippers)
-                    ->orderBy('id', 'ASC')
-                    ->get();
+                // ->where('id',1724981)
+                ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
+                ->whereIn('user_id', $included_shippers)
+                ->orderBy('id', 'ASC')
+                ->get();
             }
-
+            
             // Check if only_shippers exists (1 && 0)
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
-
                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                    ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                    ->whereNotIn('user_id', $only_shippers)
+                ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
+                ->whereNotIn('user_id', $only_shippers)
                     ->orderBy('id', 'ASC')
                     ->get();
             }
@@ -1402,23 +1397,24 @@ trait RvTrait
             else if ($all_shipper_exists && !($included_shipper)->exists()) {
                 $shipments = [];
             }
-
+            
             // check if shipments exist
             if (count($shipments)) {
 
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
                     // if agent shipment is assigned - not assigned to same agent only 
-
+                    
                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                     if ($shipment_assigned_assigned_agent->exists()) {
-                       return false;
+                        // return false;
+                        return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                     }
-
+                    
                     // Shipment is found and already in working state or return is completed, will not assigned to agent
-                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->first();
+                    $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->where('rv_state_id', 1)->first();
                     if ($find_shipment_assigned_agent) {
-                        return false;
+                        return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                     }
 
                     $shipments_journey = ShipmentsJourney::where('shipment_id', $agent_shipment_id)->latest()->first();
@@ -1434,13 +1430,14 @@ trait RvTrait
                     // creating a new record
                     $this->rv_shipment_assign($data);
 
-                    return true;
+                    // return true;
+                    return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                 }
                 // this check will work if agent gets the ticket 
                 else
                 {
                     foreach ($shipments as $key => $shipment) {
-                        # code...
+                        
                         // if agent shipment is open - assigned to any user who comes first
                         $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                         if ($shipment_assigned_unassigned_agent->exists()) {
@@ -1449,7 +1446,6 @@ trait RvTrait
                         }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
-                        
                         $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                         if ($shipment_assigned_assigned_agent->exists()) {
                             $shipment_assigned_assigned_agent->first();
@@ -1475,13 +1471,14 @@ trait RvTrait
                         // creating a new record
                         $this->rv_shipment_assign($data);
                         break 2;
-    
                     }
                 }
             }
             else {
                 //No Shipment Found in Assigned Hub
-                return false;
+                // return false;
+                // return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
+                return response()->json(['status' => 1, 'error' => 'Hub not Assigned to this Agent ']);
             }
         }
 

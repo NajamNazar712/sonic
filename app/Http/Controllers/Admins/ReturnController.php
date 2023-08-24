@@ -5015,7 +5015,6 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         $agent_id = $request->admin_id;
-
         // Get all assigned agent to hubs priority wise
         $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
         if($sorted_agents->isNotEmpty())
@@ -5025,11 +5024,12 @@ class ReturnController extends Controller
             {
                 foreach ($shipment_ids as $shipment_id) 
                 {
-                    //this function checks if the shipper is included not and and assign the shipment to agent
+                    //this function checks if the shipper is included and assign the shipment to agent
                     $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
 
-                    if($include_shippers ==true){
-                        return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
+                    if($include_shippers){
+                        return $include_shippers;
+                        // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                     }
                     else{
                         return response()->json(['status' => 1, 'error' => 'Shipper is disabled']);

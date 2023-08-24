@@ -1341,10 +1341,9 @@
                                 head.push('Assigned By');
                                 head.push('Consolidation');
                                 head.push('Consolidation IDs');
-                                $.each(result.data, function(index, values) {
+
+                                    $.each(result.data, function(index, values) {
                                     row = [];
-
-
                                     row.push(index + 1);
                                     row.push(values.tracking);
                                     row.push(values.order_id);
@@ -1382,7 +1381,8 @@
                                     row.push(values.consolidation);
                                     row.push(values.consolidated_id);
                                     body.push(row);
-                                });
+                                    }
+                                );
                             },
                             async: false
                         });
@@ -1444,58 +1444,35 @@
                                                                     }
                                                                 })
                                                                 .done(function(data) {
-                                                                    if (data
-                                                                        .status == 0
-                                                                    ) {
-                                                                        $('#AssignAgentModal')
-                                                                            .modal(
-                                                                                'hide'
-                                                                            );
-                                                                        toastr
-                                                                            .success(
-                                                                                data
-                                                                                .success,
+                                                                    if (data.status == 0) 
+                                                                    {
+                                                                        $('#AssignAgentModal').modal('hide');
+                                                                        toastr.success(data .success,
                                                                                 'Success!', {
                                                                                     positionClass: 'toast-bottom-center',
                                                                                     containerId: 'toast-bottom-center'
                                                                                 });
-                                                                    } else {
-                                                                        toastr
-                                                                            .error(
-                                                                                data
-                                                                                .error,
+                                                                                
+                                                                                // Reload the table after showing the toastr notification
+                                                                               table.draw();
+                                                                            } 
+                                                                            else {
+                                                                                toastr.error(data.error,
                                                                                 'Error!', {
                                                                                     positionClass: 'toast-top-center',
                                                                                     containerId: 'toast-top-center'
                                                                                 });
-                                                                    }
-                                                                    selected_rows
-                                                                        = [];
-                                                                    restricted_rows
-                                                                        = [];
+                                                                            }
+                                                                            
+                                                                    selected_rows  = [];
+                                                                    restricted_rows = [];
 
-                                                                    table.rows()
-                                                                        .deselect();
-
-                                                                    table.draw(
-                                                                        true);
-                                                                    table.button(
-                                                                            '.assign'
-                                                                        )
-                                                                        .disable();
-                                                                    table.button(
-                                                                            '.confirm'
-                                                                        )
-                                                                        .disable();
-                                                                    table.button(
-                                                                            '.re-attempt'
-                                                                        )
-                                                                        .disable();
-                                                                    table.button(
-                                                                            '.un-assign'
-                                                                        )
-                                                                        .disable();
-
+                                                                    table.rows().deselect();
+                                                                    table.draw(true);
+                                                                    table.button('.assign').disable();
+                                                                    table.button('.confirm').disable();
+                                                                    table.button('.re-attempt').disable();
+                                                                    table.button('.un-assign').disable();
                                                                 });
                                                         } else {
                                                             var error =
@@ -2997,53 +2974,6 @@
 
                     $('#send_sms_form #id').val(id);
                     $('#send_sms_modal').modal('show');
-
-                    // if(id){
-
-                    //     swal({
-                    //         title: 'Are You Sure?',
-                    //         text: 'Select Yes to update Estimated Charges!',
-                    //         icon: 'warning',
-                    //         buttons: {
-                    //             cancel: {
-                    //                 text: 'No',
-                    //                 value: null,
-                    //                 visible: true,
-                    //                 closeModal: true,
-                    //             },
-                    //             confirm: {
-                    //                 text: 'Yes',
-                    //                 value: true,
-                    //                 visible: true,
-                    //                 closeModal: true
-                    //             }
-                    //         },
-                    //         closeOnClickOutside: false,
-                    //         closeOnEsc: false,
-                    //         dangerMode: true
-                    //     }).then(function (confirm) {
-                    //         if(confirm){
-                    //             $.ajax({
-                    //                 url: '{!! route('admin.return.rcp_sms') !!}',
-                    //                 method: 'POST',
-                    //                 data: {
-                    //                     '_token': '{{ csrf_token() }}',
-                    //                     'id': id
-                    //                 }
-                    //             })
-                    //                 .done(function(data) {
-                    //                     if (data.status == 0) {
-
-                    //                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                    //                     }
-                    //                     else {
-
-                    //                         toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    //                     }
-                    //                 });
-                    //         }
-                    //     });
-                    // }
                 });
 
                 $('#star_shippers_filter').on('click', function() {
