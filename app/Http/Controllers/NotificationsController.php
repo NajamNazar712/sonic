@@ -10385,13 +10385,19 @@ class NotificationsController extends Controller
                 } else if ($id = 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
-          
 
+                    foreach ($crm_case_closeds as $item) {
+                        $shipperId = $item['shipper_id'];
 
-                    dd($array);
+                        if (!isset($array[$shipperId])) {
+                            $array[$shipperId] = [];
+                        }
 
+                        $array[$shipperId][] = $item;
+                    }
 
-
+                    
+                                    
                 }
 
             }
