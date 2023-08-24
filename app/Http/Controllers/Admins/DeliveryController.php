@@ -4962,7 +4962,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('one_link_payment_count_button', function ($deliveries) {
-=                if ($deliveries->one_link_payment_count != null) {
+                if ($deliveries->one_link_payment_count != null) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 } else {
                     return '-';
