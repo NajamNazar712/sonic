@@ -6077,7 +6077,7 @@ class DeliveryController extends Controller
 
                     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
                     if ($one_link_amount->exists()) {
-                        $a = $one_link_amount->sum('transactions_amount');
+                        $a = $one_link_amount->sum('transaction_amount');
                     } else {
                         $a = 0;
                     }
