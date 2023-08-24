@@ -10420,7 +10420,9 @@ class NotificationsController extends Controller
                             $resolution = ShipmentStatusReason::where('id',$resolution["shipper_status_id"])->latest()->first();
                         
                             $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["id"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">';
+                            $html .= '<a href="'.route('cod.crm.request.details', ['id' => $item['id']]) . '">' . $item["id"] . '</a>';
+                            $html .= '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $type ?? '-' . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $resolution['name'] ?? '-' . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Closed</td>';
