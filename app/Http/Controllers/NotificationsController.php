@@ -31,6 +31,8 @@ use App\Http\Models\CRM\CrmRequestStatus;
 use App\Http\Models\CRM\CrmRequestTagging;
 use App\Http\Models\DailyFakeStatus;
 use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\NotificationSetting;
+use App\Http\Models\NotificationSettingShipper;
 use App\Http\Models\ReturnNoteRequest;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\EmployeeDeviceToken;
@@ -952,7 +954,10 @@ class NotificationsController extends Controller
                         $body = str_replace('[company_name]', $shipper->name, $body);
                     }
 
-                    self::sms($body, $to);
+                    $sms_setting = self::sms_notification_setting(11, $shipper->id);
+                    if($sms_setting){
+                        self::sms($body, $to);
+                    }
                 } 
                 
                 else if ($id == 12) {
@@ -1036,7 +1041,11 @@ class NotificationsController extends Controller
                             $body = str_replace('[refusal_otp]', $shipment_otp->otp, $body);
                         }
                     }
-                    self::sms($body, $to);
+
+                    $sms_setting = self::sms_notification_setting(12, $shipper->id);
+                    if($sms_setting){
+                        self::sms($body, $to);
+                    }
                 } 
                 
                 
@@ -10769,6 +10778,33 @@ class NotificationsController extends Controller
                     }
                 }
             }
+        }
+    }
+
+    static public function sms_notification_setting($id, $shipper_id){
+        $notification_setting = NotificationSetting::where('notification_id', $id);
+        if($notification_setting->exists()){
+            $notification_setting = $notification_setting->first();
+            $notification_setting_shipper = NotificationSettingShipper::where('notification_setting_id', $notification_setting->id)->where('shipper_id', $shipper_id);
+            if($notification_setting->shipper_toggle == 1){
+                if($notification_setting_shipper->exists()){
+                    return false; //All shipper selected but this shipper is excluded
+                }
+                else{
+                    return true; //All shipper selected
+                }
+            }
+            else{
+                if($notification_setting_shipper->exists()){
+                    return true; //All shipper excluded but this shipper is selected
+                }
+                else{
+                    return false; //All shipper excluded
+                }
+            }
+        }
+        else{
+            return true; //Notification not updated yet so by default selected
         }
     }
    
