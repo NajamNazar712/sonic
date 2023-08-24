@@ -63,23 +63,138 @@
     </style>
 @endsection
 
+
+<style>
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+</style>
+
 @section('js')
     <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/datatable_buttons.js') }}" type="text/javascript"></script>
 
     <script>
         $(document).ready(function() {
+            var selected_rows = [];
+
             var table = $('#datatable').DataTable({
                 scrollX: true,
                 scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
+                buttons:[
+                        @if (session('role_id') == 1 || in_array(789, session('permissions')))	
+                        {
+                            text: 'Search Role Permissions',
+                            className: 'btn btn-primary add',
+                            action: function (e, dt, node, config) {
+                                window.location = '{{ route('admin.crm_permission.index') }}';
+                            }
+                        },
+                        @endif
+                    
+                        @if (session('role_id') == 1 || in_array(775, session('permissions')))
+                        {
+                            text: 'Bulk Add',
+                            className: 'btn btn-primary bulk_add',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                var redirect = '{!! route('admin.crm_permission.bulk_add', ':id') !!}';
+                                var url = redirect.replace(':id', selected_rows);
+                                window.location = url;
+                                selected_rows = [];
+                            }
+                        },
+                        @endif
+                        @if (session('role_id') == 1 || in_array(776, session('permissions')))
+                        
+                        {
+                            text: 'Bulk Remove',
+                            className: 'btn btn-primary remove',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                var redirect = '{!! route('admin.crm_permission.bulk_remove', ':id') !!}';
+                                var url = redirect.replace(':id', selected_rows);
+                                window.location = url;
+                                selected_rows = [];
+
+                            }
+                        },
+                        @endif
+                        @if (session('role_id') == 1 || count(array_intersect([775, 776], session('permissions'))) !== 0)
+                        {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.bulk_add').enable();
+                                    table.button('.remove').enable();
+                                    
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.bulk_add').disable();
+                                        table.button('.remove').disable();
+
+                                    }
+                                }
+                            });
+                        }
+                    },
+                    @endif  
                     'reset'
-                ],
-                lengthMenu: [
-                    [50, 100, 500, 1000, -1],
-                    [50, 100, 500, 1000, 'All']
-                ],
+                    ],
+                select: {
+					info: false,
+					style: 'multi',
+					selector: 'td.select-checkbox',
+					className: 'selected bg-primary bg-lighten-5 primary'
+            	},
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
@@ -137,10 +252,13 @@
                     }
                 ],
                 rowCallback: function(row, data, index) {
-                    var info = table.page.info();
-
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
+					var info = table.page.info();
+					$('td:eq(0)', row).addClass('select-checkbox');
+					if ($.inArray(data.id, selected_rows) !== -1) {
+						table.row(row).select();
+					}
+					// $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+				},
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>')
                         .appendTo(this.api().table().header());
@@ -197,6 +315,29 @@
 
                     this.api().table().columns.adjust();
                 }
+            });
+
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+                if (selected_rows.length > 0) {
+                    table.button('.bulk_add').enable();
+                    table.button('.remove').enable();
+                }
+                else {
+                    table.button('.bulk_add').disable();
+                    table.button('.remove').disable();
+                }
+				
             });
 
             @if (session('role_id') == 1 || session('role_id') == 6 || in_array(188, session('permissions')))

@@ -148,6 +148,7 @@ use App\Http\Models\Rider\RiderDeliveryNoteRequestShipment;
 use App\Http\Models\Rider\RiderReturnNoteRequest;
 use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
 use App\Http\Traits\CommonTrait;
+use App\RiderAssignedHubForDeliveryNote;
 use App\RiderMainCategory;
 use Barryvdh\Snappy\Facades\SnappyPdf;
 use Carbon\Carbon;
@@ -10515,7 +10516,8 @@ class AdminAPIController extends Controller
                                 if ($is_updateable == 0) {
                                     if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
                                         return response()->json(['status' => 1, 'message' => 'Cargo not arrived at destination center!']);
-                                    } else if ($shipment->shipper_status_id == 49) {
+                                    }
+                                    else if ($shipment->shipper_status_id == 49) {
                                         $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
                                         if ($misroute_history->exists()) {
                                             $misroute_history = $misroute_history->latest()->first();
@@ -10526,7 +10528,8 @@ class AdminAPIController extends Controller
                                             return response()->json(['status' => 1, 'message' => 'Shipment Not found!']);
                                         }
 
-                                    } else if ($shipment->shipper_status_id == 55) {
+                                    }
+                                    else if ($shipment->shipper_status_id == 55) {
                                         $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
                                         if ($request_history->exists()) {
                                             $request_history = $request_history->first();
@@ -10541,7 +10544,35 @@ class AdminAPIController extends Controller
 
                                     if ($request->has('hub_id')) {
                                         $hub_id = $shipment->consignee_city->hub_id;
-                                        if ($request->hub_id == $hub_id) {
+
+                                        // rider assigned hub setting
+                                        $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                                        if ($rider_assigned_hub->exists())
+                                        {
+                                            $rider_assigned_hub = $rider_assigned_hub->first();
+                                            $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                                            $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                                            if (in_array($hub_id,$rider_assigned_hubs))
+                                            {
+                                                $flag = true;
+                                            }
+                                            elseif ($request->hub_id == $hub_id)
+                                            {
+                                                $flag = true;
+                                            }
+                                            else
+                                            {
+                                                $flag = false;
+                                            }
+                                        }
+                                        elseif ($request->hub_id == $hub_id)
+                                        {
+                                            $flag = true;
+                                        }
+                                        // rider assigned hub setting end
+
+                                        if ($flag) {
                                             if (!$request->has('pieces_confirm')) {
                                                 if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                                     $details = array();
@@ -10623,7 +10654,8 @@ class AdminAPIController extends Controller
                                             return response()->json(['status' => 1, 'message' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id]);
                                         }
 
-                                    } else {
+                                    }
+                                    else {
                                         if (!$request->has('pieces_confirm')) {
                                             if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                                 $details = array();
@@ -10707,7 +10739,8 @@ class AdminAPIController extends Controller
                                     return response()->json(['status' => 1, 'message' => 'This Shipment is already in an unverified delivery note!']);
 
                                 }
-                            } else {
+                            }
+                            else {
                                 return response()->json(['status' => 1, 'message' => 'This Shipment doesn\'t belongs to your assigned hubs!']);
                             }
                         } else {

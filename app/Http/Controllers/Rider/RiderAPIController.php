@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
+use App\RiderAssignedHubForDeliveryNote;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -12690,6 +12691,7 @@ RiderAPIController extends Controller
                         }
                     }
                 }*/
+                $flag = true;
                 $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                 if ($request->tracking != '') {
                     $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -12740,7 +12742,35 @@ RiderAPIController extends Controller
                         }
 
                         $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
-                        if ($admin_hub == $rider_hub) {
+
+                        // rider assigned hub setting
+                        $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                        if ($rider_assigned_hub->exists())
+                        {
+                            $rider_assigned_hub = $rider_assigned_hub->first();
+                            $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                            $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                            if (in_array($admin_hub,$rider_assigned_hubs))
+                            {
+                                $flag = true;
+                            }
+                            elseif ($rider_hub == $admin_hub)
+                            {
+                                $flag = true;
+                            }
+                            else
+                            {
+                                $flag = false;
+                            }
+                        }
+                        elseif ($rider_hub == $admin_hub)
+                        {
+                            $flag = true;
+                        }
+                        // rider assigned hub setting end
+
+                        if ($flag) {
                             $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
                             if ($old_delivery_note_id->exists()) {
                                 $old_delivery_note_id = $old_delivery_note_id->first();
@@ -12779,7 +12809,35 @@ RiderAPIController extends Controller
 
                                 if ($request->has('hub_id')) {
                                     $hub_id = $shipment->consignee_city->hub_id;
-                                    if ($request->hub_id == $hub_id) {
+
+                                    // rider assigned hub setting
+                                    $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                                    if ($rider_assigned_hub->exists())
+                                    {
+                                        $rider_assigned_hub = $rider_assigned_hub->first();
+                                        $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                                        $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                                        if (in_array($hub_id,$rider_assigned_hubs))
+                                        {
+                                            $flag = true;
+                                        }
+                                        elseif ($request->hub_id == $hub_id)
+                                        {
+                                            $flag = true;
+                                        }
+                                        else
+                                        {
+                                            $flag = false;
+                                        }
+                                    }
+                                    elseif ($request->hub_id == $hub_id)
+                                    {
+                                        $flag = true;
+                                    }
+                                    // rider assigned hub setting end
+                                    
+                                    if ($flag) {
                                         if (!$request->has('pieces_confirm')) {
                                             if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                                 $details = array();

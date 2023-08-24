@@ -73,7 +73,10 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Origin Arrival Date</th>
+                        <th class="border-primary border-darken-1">Destination Zone</th>
                         <th class="border-primary border-darken-1">Destination Arrival Date</th>
+                        <th class="border-primary border-darken-1">Last Rider</th>
+                        <th class="border-primary border-darken-1">Last Rider Trax ID</th>
                         <th class="border-primary border-darken-1">Status Date</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -251,7 +254,10 @@
                         head.push('Reason');
                         head.push('Remarks');
                         head.push('Origin Arrival Date');
+                        head.push('Destination Zone');
                         head.push('Destination Arrival Date');
+                        head.push('Last Rider');
+                        head.push('Last Rider Trax ID');
                         head.push('Status Date');
                         $.each(result.data, function(index, values) {
                             row = [];
@@ -278,7 +284,10 @@
                             row.push(values.reason);
                             row.push(values.remarks);
                             row.push(values.arrival);
+                            row.push(values.d_zone);
                             row.push(values.destination_arrival);
+                            row.push(values.last_rider);
+                            row.push(values.rider_trax_id);
                             row.push(values.current_status_date);
 
                             body.push(row);
@@ -345,7 +354,10 @@
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                {data: 'destination_arrival', name: 'sjd.created_at ', class: 'align-middle destination_arrival', orderable: false, searchable: false},
+                {data: 'd_zone', name: 'z.name', class: 'align-middle d_zone'},
+                {data: 'destination_arrival', name: 'sjd.created_at', class: 'align-middle destination_arrival', orderable: false, searchable: false},
+                {data: 'last_rider', name: 'r.name', class: 'align-middle last_rider', orderable: false},
+                {data: 'rider_trax_id', name: 'r.trax_id', class: 'align-middle rider_trax_id', orderable: false},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
