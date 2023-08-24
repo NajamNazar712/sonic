@@ -49,7 +49,8 @@
                                                 <table class="table table-sm table-borderless mb-0">
                                                     <tbody>
                                                         <tr>
-                                                            <td class="text-center"><strong>{{count( $agent_total_tickets) }}</strong></td>
+                                                            <td class="text-center">
+                                                                <strong>{{ count($agent_total_tickets) }}</strong></td>
                                                         </tr>
                                                     </tbody>
                                                 </table>
@@ -66,7 +67,8 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>{{ $reattempt_count }}</strong></td>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $reattempt_count }}</strong></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -81,7 +83,8 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>{{ $refused_on_call }}</strong></td>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $refused_on_call }}</strong></td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -96,7 +99,9 @@
                                                                 <table class="table table-sm table-borderless mb-0">
                                                                     <tbody>
                                                                         <tr>
-                                                                            <td class="text-center"><strong>{{ $unresponsive_count }}</strong></td>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $unresponsive_count }}</strong>
+                                                                            </td>
                                                                         </tr>
                                                                     </tbody>
                                                                 </table>
@@ -273,8 +278,8 @@
 
         <style>
             /*.selectize-control {
-                   width: 300px !important;
-                  }*/
+                       width: 300px !important;
+                      }*/
 
             #horizontal_line {
                 border: none;
@@ -558,7 +563,7 @@
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
-                                shipment += '</tbody>'; 
+                                shipment += '</tbody>';
                                 shipment += '</table>';
                                 shipment += '</div>';
                                 shipment += '</div>';
@@ -571,12 +576,12 @@
                                 shipment += '<tr>';
                                 shipment += '<td style="width: 15%;"><strong>Name</strong></td>';
                                 shipment += '<td style="width: 45%;">' + ((data.shipment.consignee_name != null &&
-                                        data.shipment.consignee_name
-                                         != null) ? data.shipment.consignee_name : '----------------') + '</td>';
+                                    data.shipment.consignee_name !=
+                                    null) ? data.shipment.consignee_name : '----------------') + '</td>';
                                 shipment += '<td><strong>Origin</strong></td>';
-                                shipment += '<td>' +  ((data.consignee_city.name != null &&
-                                        data.consignee_city.name
-                                         != null) ? data.consignee_city.name : '----------------') + '</td>';
+                                shipment += '<td>' + ((data.consignee_city.name != null &&
+                                    data.consignee_city.name !=
+                                    null) ? data.consignee_city.name : '----------------') + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
                                 shipment += '<tr>';
@@ -677,11 +682,13 @@
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
 
-                                shipment += '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
+                                shipment +=
+                                    '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
 
                                 shipment += '<td>' + ((data.rider_details.reason.name != null) ? data
                                     .rider_details.reason.name : '-----------') + '</td>';
-                                shipment += '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
+                                shipment +=
+                                    '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
                                 shipment += '<td>' + ((data.rider_details.attempted_time != null) ? data
                                     .rider_details.attempted_time : '-----------') + '</td>';
                                 shipment += '<th><strong>Remarks: </strong></th>';
@@ -791,14 +798,6 @@
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
-                                // $.each(details.tracking_history, function (index, history) {
-                                //         shipment += '<tr>';
-
-                                //         shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
-                                //         shipment += '<td>' + history.remarks + '</td>';
-
-                                //         shipment += '</tr>';
-                                // });
 
                                 shipment += '</tbody>';
                                 shipment += '</table>';
@@ -927,17 +926,14 @@
                                 window.location.href = "{{ route('agent.login') }}";
                             } else if (data.status == 4) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            } 
-                            else if (data.status == 2) {
+                            } else if (data.status == 2) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Assigned!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
-                            }
-
-                            else if (data.status == 5) {
+                            } else if (data.status == 5) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Found in Assigned Hub";
                                 toastr.error(error, 'Error!', {
@@ -1080,7 +1076,7 @@
                                             $('input[name="consignee_email"]').val(data.shipment
                                                 .consignee_email);
                                             $('input[name="amount"]').val(data.shipment.amount);
-                                           
+
 
                                             var selectOptions = '';
 
@@ -1137,7 +1133,7 @@
                 var intercept_type = null;
                 var consignee_email = null;
                 var amount = null;
-                var imageBase64 = null; 
+                var imageBase64 = null;
 
                 $(document).on('click', '#intercept_update', function(event) {
                     event.preventDefault();
@@ -1150,7 +1146,7 @@
                     intercept_type = $('#intercept_type').val();
                     consignee_email = $('#consignee_email').val();
                     amount = $('#amount').val();
-                    
+
                     // Get the file input element
                     var inputFile = document.getElementById('replacement_parcel_image');
 
@@ -1183,7 +1179,7 @@
                     var call_to_id = $('#call_to_id').val();
                     var shipment_id_val = $("#shipment_id_val").val();
                     var phone_number = $('#phone_number').val();
-
+                    blockPagePermanently();
                     $.ajax({
                             url: '{!! route('agent.dashboard.submit_ticket') !!}',
                             method: 'POST',
@@ -1196,16 +1192,16 @@
                                 'remarks': shipment_remarks,
                                 'is_fake_status': checkbox,
                                 'call_to_id': call_to_id,
-                                'image':imageBase64,
-                                'consignee_city':consignee_city,
-                                'consignee_name':consignee_name,
-                                'consignee_address':consignee_address,
-                                'consignee_phone_number_1':consignee_phone_number_1,
-                                'consignee_phone_number_2':consignee_phone_number_2,
-                                'intercept_type':intercept_type,
-                                'consignee_email':consignee_email,
-                                'amount':amount,
-                                'phone_number':phone_number
+                                'image': imageBase64,
+                                'consignee_city': consignee_city,
+                                'consignee_name': consignee_name,
+                                'consignee_address': consignee_address,
+                                'consignee_phone_number_1': consignee_phone_number_1,
+                                'consignee_phone_number_2': consignee_phone_number_2,
+                                'intercept_type': intercept_type,
+                                'consignee_email': consignee_email,
+                                'amount': amount,
+                                'phone_number': phone_number
 
                             }
 
@@ -1217,15 +1213,12 @@
                                     containerId: 'toast-bottom-center'
                                 });
                                 window.location.reload();
-                            } else if(data.status == 2){
+                            } else if (data.status == 2) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            }
-                          
-                            else {
+                            } else {
                                 var errors = data.errors;
                                 $.each(errors, function(field, messages) {
                                     var errorMessage;
-                                    console.log(field);
                                     if (field === 'rv_assign_agent_status_id' && $(
                                             "#shipment_status").val() === "") {
                                         errorMessage = '* Action is Required';
@@ -1241,7 +1234,7 @@
                                     }
 
                                     if (field === 'rv_fake_status_id' && $("#fake_status_id")
-                                    .val() === "") {
+                                        .val() === "") {
                                         if (checkbox == 1) {
                                             errorMessage = '* Fake Status is Required';
                                             $('#rv_assign_agent_fake_status_id_error').text(
@@ -1263,7 +1256,7 @@
 
                             }
                         })
-
+                        UnblockPagePermanently();
                 });
             });
         </script>

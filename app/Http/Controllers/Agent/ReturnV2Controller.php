@@ -269,71 +269,49 @@ class ReturnV2Controller extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'errors' => $validate->errors()]);
         } 
-        else {
+        else 
+        {
             $current_time = Carbon::now();
             $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->first();
-            $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
-            $admin_agent = Admin::where('id', Auth::id())->first();
-            $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
-            $employee = Employee::where('phone_number', $request->phone_number)->first();
-            $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
-
-            // Check Employee Shift Time
-            if ($current_time->between(Carbon::parse($employee_shift['start_time']), Carbon::parse($employee_shift['end_time']))) {
-                    //if agent already exists on same date update row
-                    if ($assign_agent) {
-
-                        //if shipment already exists update row
-                        if ($shipment_assign_agent) {
-                            $this->update_shipment_status($request); //updating status of shipment
-                            $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
-                            $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-
-                            return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+            if($shipment_assign_agent){
+                $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
+                $admin_agent = Admin::where('id', Auth::id())->first();
+                $shipments_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->latest()->first();
+                $employee = Employee::where('phone_number', $request->phone_number)->first();
+                $employee_shift = EmployeeShift::where('id', $employee->shift_id)->first();
+    
+                // Check Employee Shift Time
+                if ($current_time->between(Carbon::parse($employee_shift['start_time']), Carbon::parse($employee_shift['end_time']))) {
+                        //if agent already exists on same date update row
+                        if ($assign_agent) {
+    
+                            //if shipment already exists update row
+                            if ($shipment_assign_agent) {
+                                $this->update_shipment_status($request); //updating status of shipment
+                                $this->update_shipment_assign_agent($request, $assign_agent, $admin_agent, $shipment_assign_agent);
+                                $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+    
+                                return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
+                            } else {
+                                return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
+                            }
                         } else {
-                            return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
+                            $this->update_shipment_status($request); //updating status of shipment
+                            $this->add_shipment_agent($request, $shipment_assign_agent);
+                            $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
+                            return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                         }
-                    } else {
-                        $this->update_shipment_status($request); //updating status of shipment
-                        $this->add_shipment_agent($request, $shipment_assign_agent);
-                        $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
-                        return response()->json(['status' => 0, 'success' => 'Shipment Status Updated!']);
                     }
+                else 
+                {
+                    Auth::logout();
+                    return response()->json(['status' => 2, 'success' => 'Successfully logout']);
                 }
-            else 
-            {
-                Auth::logout();
-                return response()->json(['status' => 2, 'success' => 'Successfully logout']);
             }
+            else{
+                return response()->json(['status' => 1, 'errors' => 'This shipment is Unassigned to you!']);
             }
+        }
 
     }
 }
-
-
-
-
-
-// $admin = Admin::where('id', $request->auth_id);
-// if ($admin->exists()) {
-//     $admin = $admin->first();
-//     $employee_attendance = EmployeeAttendance::where('employee_id', $admin->employee_id)->where('attendance_date', date('Y-m-d'));
-
-//     if($employee_attendance->exists()){
-//         $employee_attendance->update(['clock_in'=>date('H:i:s')]);
-//     } else {
-
-//         $employee_attendance = new EmployeeAttendance();
-//         $employee_attendance->employee_id = $admin->employee_id;
-//         $employee_attendance->attendance_date = date('Y-m-d');
-//         $employee_attendance->clock_in = date('H:i:s');
-//         $employee_attendance->employee_type = $admin->employee_type ? $admin->employee_type : '1';
-//         // $employee_attendance->clock_out_latitude = session('latitude');
-//         // $employee_attendance->clock_out_longitude = session('longitude');
-//         $employee_attendance->save();
-//     }
-
-
-//     return response()->json(['employee_attendance'=>$employee_attendance]);
-
-// }
