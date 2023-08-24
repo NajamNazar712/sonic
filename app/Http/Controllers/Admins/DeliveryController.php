@@ -6035,9 +6035,22 @@ class DeliveryController extends Controller
                     $delivery_note = $delivery_note->get();
                     $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
-                        return $one_link_amount->sum('transaction_amount');
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            return $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            return '-';
+                        }
                     } else {
                         return '-';
                     }
@@ -6081,10 +6094,24 @@ class DeliveryController extends Controller
                     $delivery_note = $delivery_note->get();
                     $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
-                        $a = $one_link_amount->sum('transaction_amount');
-                    } else {
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            $a = $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            $a = 0;
+                        }
+                    }
+                    else {
                         $a = 0;
                     }
 
