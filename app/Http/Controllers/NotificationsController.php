@@ -10407,18 +10407,20 @@ class NotificationsController extends Controller
                 ';
                     $htmlHeader .= '</tr></thead><tbody>';
 
-                    foreach ($array as $key => $value) {
+                    foreach ($array as $key => $items) {
+                        
+                        foreach($items as $key => $value){
+                        $email = User::where('id', $value['shipper_id'])->pluck('email')->toArray();
+
+                                    
                         $html = $htmlHeader;
                         $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">'$value['']'</td>';
+                    
                     }
 
                      $html .= '</tbody></table>';
@@ -10431,6 +10433,7 @@ class NotificationsController extends Controller
 
 
                 }
+            }
 
             }
         }
