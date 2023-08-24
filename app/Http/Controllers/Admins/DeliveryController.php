@@ -4934,20 +4934,16 @@ class DeliveryController extends Controller
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
 
                 
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->sum('cod_amount');
 
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
                 }            
             })
@@ -5233,23 +5229,18 @@ class DeliveryController extends Controller
             })
             ->editColumn('fintech_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->sum('cod_amount');
 
-
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }
+                }     
 
             })
 
@@ -7268,23 +7259,18 @@ class DeliveryController extends Controller
 
             ->editColumn('fintech_shipments_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->sum('cod_amount');
 
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }            
+                }             
             })
 
 
