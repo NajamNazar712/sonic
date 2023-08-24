@@ -10396,8 +10396,35 @@ class NotificationsController extends Controller
                         $array[$shipperId][] = $item;
                     }
 
-                    
-                                    
+                    $htmlHeader = '<table style="width:100%;">';
+                    $htmlHeader .= '<thead><tr>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
+                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved WithIn</th>
+            
+                ';
+                    $htmlHeader .= '</tr></thead><tbody>';
+
+                    foreach ($array as $key => $value) {
+                        $html = $htmlHeader;
+                        $html .= '<tr>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
+
+                    }
+
+                    $to = $value[]
+                    self::email($subject, $body, $to, $cc);
+
+
                 }
 
             }
