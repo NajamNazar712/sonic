@@ -4932,7 +4932,9 @@ class DeliveryController extends Controller
 
             ->editColumn('count_fintech_shipments', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = Shipment::whereIn('id', $delivery_note_shipment)->pluck('fintech_charges')->toArray();
+
+                
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
 
                 $sum = collect($amount)->sum(function ($amount) {
                     return floatval($amount);
@@ -5231,8 +5233,8 @@ class DeliveryController extends Controller
             })
             ->editColumn('fintech_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = Shipment::whereIn('id', $delivery_note_shipment)
-                    ->pluck('fintech_charges')->toArray();
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+
 
                 $sum = collect($amount)->sum(function ($amount) {
                     return floatval($amount);
@@ -7266,8 +7268,7 @@ class DeliveryController extends Controller
 
             ->editColumn('fintech_shipments_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = Shipment::whereIn('id', $delivery_note_shipment)
-                    ->pluck('fintech_charges')->toArray();
+                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
 
                 $sum = collect($amount)->sum(function ($amount) {
                     return floatval($amount);
