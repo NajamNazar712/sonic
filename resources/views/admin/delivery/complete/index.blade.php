@@ -599,7 +599,7 @@
                         
                         data.transactions_amount = 0
                     }
-                    value = dccn_amount - fintech_sum - data.transactions_amount;
+                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
 
                     $('td:eq(20)', row).html(value);
 
