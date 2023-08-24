@@ -5024,7 +5024,7 @@ class ReturnController extends Controller
             {
                 foreach ($shipment_ids as $shipment_id) 
                 {
-                    //this function checks if the shipper is included and assign the shipment to agent
+                    //this function checks if the shipper is included not and and assign the shipment to agent
                     $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
 
                     if($include_shippers){

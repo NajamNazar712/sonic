@@ -1373,7 +1373,8 @@ trait RvTrait
         }
         
         foreach ($sorted_agents as $key => $agent) {
-            // Check if included_shippers exists (1 && 1)
+
+            
             $shipments = [];
             
             if (!empty($included_shippers)) {
@@ -1383,6 +1384,10 @@ trait RvTrait
                 ->whereIn('user_id', $included_shippers)
                 ->orderBy('id', 'ASC')
                 ->get();
+                
+                if($shipments->isEmpty()){
+                    continue;
+                }
             }
             
             // Check if only_shippers exists (1 && 0)
