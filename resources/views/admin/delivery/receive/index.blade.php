@@ -48,7 +48,7 @@
                         <th class="border-primary border-darken-1">Business Category</th>
                         <th class="border-primary border-darken-1">Rider ID</th>
                         <th class="border-primary border-darken-1">Rider</th>
- <th class="border-primary border-darken-1">Area</th>
+                        <th class="border-primary border-darken-1">Area</th>
                         <th class="border-primary border-darken-1">Rider Type</th>
                         <th class="border-primary border-darken-1">Rider Category</th>
                         <th class="border-primary border-darken-1">Route</th>
@@ -283,7 +283,7 @@
                             head.push('Business Category');
                             head.push('Rider ID');
                             head.push('Rider');
-  head.push('Area');
+                            head.push('Area');
                             head.push('Rider Type');
                             head.push('Rider Category');
                             head.push('Route');
@@ -308,7 +308,7 @@
                                 row.push(values.business_category);
                                 row.push(values.rider_trax_id);
                                 row.push(values.rider);
- row.push(values.city_area_name);
+                                row.push(values.city_area_name);
                                 row.push(values.rt);
                                 row.push(values.operation_rider_id);
                                 row.push(values.route);
@@ -361,59 +361,29 @@
                 rowId: 'delivery_note_id',
                 order: [[1, 'desc']],
                 columns: [
-                    {
-                        orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0,
                         render: function (data, type, row) {
                             return '';
                         }
                     },
                     {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle delivery_note'},
-
                     {data: 'hub', name: 'oc.name', class: 'align-middle hub'},
                     {data: 'zone_name', name: 'z.name', class: 'align-middle zone_name'},
-                    {
-                        data: 'business_category',
-                        name: 'oc.business_category_id',
-                        class: 'align-middle business_category'
-                    },
+                    {data: 'business_category', name: 'oc.business_category_id', class: 'align-middle business_category'},
                     {data: 'rider_trax_id', name: 'riders.trax_id', class: 'align-middle rider_trax_id'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
- {data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
+                    {data: 'city_area_name', name: 'cas.name', class: 'align-middle city_area_name'},
                     {data: 'rt', name: 'rider_types.name', class: 'align-middle rider_types'},
                     {data: 'operation_rider_id', name: 'riders.operation_rider_id', class: 'align-middle operation_rider_id'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
-                    {
-                        data: 'shipments_count_link',
-                        name: 'delivery_notes.shipments_count',
-                        class: 'align-middle shipments_count_link text-center'
-                    },
-                    {
-                        data: 'shipments_unverified_link',
-                        name: 'shipments_unverified_count',
-                        class: 'align-middle shipments_unverified_link text-center',
-                        orderable: false,
-                        searchable: false
-                    },
-                    {
-                        data: 'delivered_shipments',
-                        name: 'delivery_notes.delivered_shipments',
-                        class: 'align-middle delivered_shipments text-center',
-                        orderable: false,
-                        searchable: false
-                    },
+                    {data: 'shipments_count_link', name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    {data: 'shipments_unverified_link', name: 'shipments_unverified_count', class: 'align-middle shipments_unverified_link text-center', orderable: false, searchable: false},
+                    {data: 'delivered_shipments', name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments text-center', orderable: false, searchable: false},
                     {data: 'assignee', name: 'admins.name', class: 'align-middle assignee'},
                     {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     {data: 'amount', name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     {data: 'pending_status', name: 'pending_status', class: 'align-middle pending_status'},
-                    {
-                        data: 'last_updated_at',
-                        name: 'delivery_notes.last_updated_at',
-                        class: 'align-middle last_updated_at'
-                    },
+                    {data: 'last_updated_at', name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                     {data: 'updated_by', name: 'delivery_notes.updated_by', class: 'align-middle updated_by'},
                     {data: 'created_via', name: 'delivery_notes.created_via_app', class: 'align-middle created_via'},
                     {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
