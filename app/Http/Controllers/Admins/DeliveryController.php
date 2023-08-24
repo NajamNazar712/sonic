@@ -6095,7 +6095,16 @@ class DeliveryController extends Controller
 
                     $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
-                        $c = $trax_pay_amount->sum('fintech_amount');
+                        $trax_pay_amount = $trax_pay_amount->get();
+                        $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
+                        $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
+                        if($fintech_payment_detail->exists())
+                        {
+                            $c = $fintech_payment_detail->sum('cod_amount');
+                        }
+                        else {
+                            $c = 0;
+                        }
                     } else {
                         $c = 0;
                     }
