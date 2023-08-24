@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class OneLinkOutForDeliveryShipmentPayment extends Model
 {
-    protected $guarded = [];
+    //
 }
