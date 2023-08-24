@@ -10382,33 +10382,35 @@ class NotificationsController extends Controller
 
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);
-                } else if ($id = 222)if ($id == 222) {
+                } else if ($id = 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
-                
+                    
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-                
+                    
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-                
+                    
                         $array[$shipperId][] = $item;
                     }
-                
-                    $htmlHeader = '<table style="width:100%;">';
-                    $htmlHeader .= '<thead><tr>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
-                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved Within</th>
-                        </tr></thead><tbody>';
-                
-                    foreach ($array as $items) {
+                    
+                    foreach ($array as $shipperId => $items) {
+                        $email = User::where('id', $shipperId)->pluck('email')->toArray();
+                    
+                        $htmlHeader = '<table style="width:100%;">';
+                        $htmlHeader .= '<thead><tr>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
+                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved Within</th>
+                            </tr></thead><tbody>';
+                    
+                        $html = $htmlHeader;
+                        
                         foreach ($items as $item) {
-                            $email = User::where('id', $item['shipper_id'])->pluck('email')->toArray();                
-                            $html = $htmlHeader;
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
@@ -10417,19 +10419,19 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
                             $html .= '</tr>';
                         }
+                    
                         $html .= '</tbody></table>';
-                
+                    
                         $body = str_replace('[preview]', $html, $notification->body);
-                
-                        self::email($subject, $body, $email);
+                    
+                            self::email($subject, $body, $email);
                         
                     }
                 }
             }
-        }
-
-                
-    }
+        }                    
+    }        
+    
     static public function custom($type, $subject, $body, $to)
     {
         if ($type == 1) {
