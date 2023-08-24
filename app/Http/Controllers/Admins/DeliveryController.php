@@ -6014,8 +6014,8 @@ class DeliveryController extends Controller
 
                     $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->first();
-                        return $hbl_amount->transactions_amount;
+                        $hbl_amount = $hbl_amount->get();
+                        return $hbl_amount->sum('transactions_amount');
                     } else {
                         return '-';
                     }
@@ -6087,8 +6087,8 @@ class DeliveryController extends Controller
 
                     $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->first();
-                        $b = $hbl_amount->transactions_amount;
+                        $hbl_amount = $hbl_amount->get();
+                        $b = $hbl_amount->sum('transactions_amount');
                     } else {
                         $b = 0;
                     }
@@ -6112,7 +6112,8 @@ class DeliveryController extends Controller
                     $sum = $a + $b + $c;
 
                     if ($sum > 0) {
-                        return $total = $sum - $sdn->sdn_amount;
+                         $total = $sum - $sdn->sdn_amount;
+                         return abs($total);
                     } else {
                         return '-';
                     }
