@@ -1,0 +1,142 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentsJourney;
+use Carbon\Carbon;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+
+class CrmResponseRate extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'crm:response_rate';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Daily CRM Request Response Email';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        $requests = CrmRequest::join('shipments as ships', 'crm_requests.shipment_id', '=', 'ships.id')
+                                ->join('shipment_status as ss', 'ss.id', '=', 'ships.shipper_status_id')
+                                ->join('user_shipping_infos as usi', 'ships.pickup_address_id', '=', 'usi.id')
+                                ->join('cities as oc', 'oc.id', '=', 'usi.city_id')
+                                ->join('cities as och', 'och.id', '=', 'oc.hub_id')
+                                ->join('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
+                                ->join('cities as dc', 'dc.id', '=', 'ships.consignee_city_id')
+                                ->join('cities as dh', 'dh.id', '=', 'dc.hub_id')
+                                ->leftjoin('crm_comments', 'crm_requests.id', '=','crm_comments.crm_request_id')
+                                ->where('crm_requests.created_at', ">=", Carbon::now()->subHours(24))
+                                ->select('crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
+                                ->get();
+        
+        // if($requests[3]['comm_id']) {
+            dd($requests[4]);
+        // }
+
+        $responses= [];
+
+        foreach($requests as $req) {
+            $responsible_hub = "";
+            $status = $req->ship_status_id;
+            $shipment_id = $req->ship_id;
+            $origin_hub = $req->origin_hub;
+            $destination_hub = $req->hub;
+            $status_destination_array = [4, 12, 20, 24, 11, 8, 14, 30, 7, 13, 52, 5, 15,9];
+            $status_origin_array = [1,2,17,22,27,23,31,29,26,25,60,62,53,47,28];
+            $shipment_journey = ShipmentsJourney::whereIn('shipper_status_id',[11,12,20,21,22])
+                ->where('shipment_id',$shipment_id);
+            if($shipment_journey->exists()){
+                $shipment_journey = $shipment_journey->pluck('shipper_status_id')->toArray();
+                if(in_array(11,$shipment_journey) &&  in_array(12,$shipment_journey) ) {
+                    $temp = $destination_hub;
+                    $destination_hub = $origin_hub;
+                    $origin_hub = $temp;
+                }
+            }
+            if(in_array($status,$status_origin_array)){
+                $responsible_hub = $origin_hub;
+            }
+            elseif($status == 3 || $status == 21){
+                $manifest_bag = CargoManifestBagShipments::
+                leftjoin('cargo_manifest_bags as cmb','cmb.id','=','cargo_manifest_bag_shipments.cargo_manifest_bag_id')
+                    ->leftjoin('cities as c','c.id','=','cmb.origin_hub_id')
+                    ->leftjoin('cities as cd','cd.id','=','cmb.destination_hub_id')
+                    ->leftjoin('cities as chi','chi.id','=','cmb.current_hub_id')
+                    ->where('cargo_manifest_bag_shipments.shipment_id',$shipment_id)
+                    ->select(['cargo_manifest_bag_shipments.id','cmb.status_id','c.name as origin_hub','cd.name as destination_hub','chi.name as curren_hub_origin'])
+                    ->orderby('cargo_manifest_bag_shipments.id','desc');
+                if($manifest_bag->exists()){
+                    $manifest_bag = $manifest_bag->first();
+                    if ($manifest_bag->status_id == 0) {  //bag created
+                        $responsible_hub = $manifest_bag->origin_hub;
+                    }
+                    elseif ($manifest_bag->status_id == 1) {  //bag created
+                        $responsible_hub = $manifest_bag->origin_hub;
+                    }elseif ($manifest_bag->status_id == 3) { // bag Received at junction
+                        $responsible_hub = $manifest_bag->curren_hub_origin;
+                    }
+                    elseif ($manifest_bag->status_id == 2 || $manifest_bag->status_id == 4 || $manifest_bag->status_id == 5 || $manifest_bag->status_id == 7) {
+                        $responsible_hub = $manifest_bag->destination_hub;
+                    } elseif ($manifest_bag->status_id == 9) {
+                        $responsible_hub = $manifest_bag->curren_hub_origin;
+                    }
+                }
+            }
+            elseif(in_array($status, $status_destination_array) && $req->case_nature != 'Service Request'){
+                $responsible_hub = $destination_hub;
+            }
+            else{
+                $responsible_hub = "-";
+            }
+
+            // if($req->comm_id) {
+            //     dd('Comment exists');
+            // } else {
+            //     dd('no comments');
+            // }
+            $hubIndex = array_search($responsible_hub, array_column($responses, 'responsible_hub'));
+            
+            if ($hubIndex !== false) {
+                $responses[$hubIndex]['total_tagged'] += 1;
+
+            } else {
+                    $responses[] = [
+                        'responsible_hub' => $responsible_hub,
+                        'total_tagged' => 1,
+                        'response_rate' => ($req->comm_id) ? 100 : 0
+                    ];
+                }
+        }
+
+        dd($responses);
+
+        NotificationsController::send(221, $responses);
+    }
+}

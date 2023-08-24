@@ -20,6 +20,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         '\App\Console\Commands\ReturnConfirmationPendingEmail',
+        '\App\Console\Commands\CrmResponseRate',
         '\App\Console\Commands\ReturnConfirmEmail',
         '\App\Console\Commands\ShipmentReAttemptEmail',
         '\App\Console\Commands\AutoDisableShipperAccount',
@@ -158,6 +159,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('corporate_reimbursement_setting:update')->monthlyOn(1, '00:15')->runInBackground();
 
         $schedule->command('email:dailyfakestatusreport')->dailyAt('06:00')->runInBackground();
+        $schedule->command('crm:response_rate')->dailyAt('18:00')->runInBackground();
+
         // $schedule->command('email:inactiverideronroutereport')->dailyAt('19:36')->runInBackground();
         $schedule->command('inactive_employee:resign_date')->dailyAt('05:00')->runInBackground();
         $schedule->command('saleperson:numbers')->dailyAt('06:00')->runInBackground();

@@ -118,6 +118,8 @@ use Maatwebsite\Excel\Excel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\ReturnDeliveredToShipperSms;
 use App\Jobs\GenerateDeliveryOTP;
+use Illuminate\Support\Facades\Log;
+
 class NotificationsController extends Controller
 {
     static private function sms($body, $to, $otp = NULL)
@@ -10324,7 +10326,6 @@ class NotificationsController extends Controller
                 }
 
                 else if ($id == 218) {
-
                     $subject = $notification->subject;
                     $body = $notification->body;
 
@@ -10390,7 +10391,21 @@ class NotificationsController extends Controller
                     self::email($subject, $body, $to, $cc);    
                  }
 
-            }
+                else if ($id == 221) {
+                    $responses = $reference_1_id;
+                    $to = 'mohsin.khan@trax.pk';
+                    $cc = 'shahrukh.raheem@trax.pk';
+
+                    $date = Carbon::now()->toFormattedDateString();
+
+                    $table= view('email.crm-response-rate-email-template', ['responses' => $responses])->render();
+
+                    $body=str_replace('[date]', $date, $body);
+                    $body=str_replace('[preview]', $table, $body);
+
+                    self::email($subject, $body, $to, $cc);
+                }
+                }
         }
     }
     static public function custom($type, $subject, $body, $to)
