@@ -12,6 +12,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use App\Http\Controllers\Webhook\FinalChargesWebhookController;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
 use App\Http\Models\Admin\DeliveryRelation;
@@ -6033,7 +6034,7 @@ class DeliveryController extends Controller
 
                     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
                     if ($one_link_amount->exists()) {
-                        return $one_link_amount->sum('transactions_amount');
+                        return $one_link_amount->sum('transaction_amount');
                     } else {
                         return '-';
                     }
@@ -6051,7 +6052,17 @@ class DeliveryController extends Controller
 
                     $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
-                        return $trax_pay_amount->sum('fintech_amount');
+                        $trax_pay_amount = $trax_pay_amount->get();
+                        $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
+                        $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
+                        if($fintech_payment_detail->exists())
+                        {
+                           return $fintech_payment_detail->sum('cod_amount');
+                        }
+                        else
+                        {
+                            return '-';
+                        }
                     } else {
                         return '-';
                     }
