@@ -10382,61 +10382,57 @@ class NotificationsController extends Controller
 
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);
-                } else if ($id = 222) {
+                } else if ($id = 222)if ($id == 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
-
+                
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-
+                
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-
+                
                         $array[$shipperId][] = $item;
                     }
-
+                
                     $htmlHeader = '<table style="width:100%;">';
                     $htmlHeader .= '<thead><tr>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
-                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved WithIn</th>
-            
-                ';
-                    $htmlHeader .= '</tr></thead><tbody>';
-
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
+                            <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved Within</th>
+                        </tr></thead><tbody>';
+                
                     foreach ($array as $key => $items) {
-                        
-                        foreach($items as $key => $value){
-                        $email = User::where('id', $value['shipper_id'])->pluck('email')->toArray();
-
-                                    
-                        $html = $htmlHeader;
-                        $html .= '<tr>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
-                    
-                    }
-
-                     $html .= '</tbody></table>';
-
+                        foreach ($items as $item) {
+                            $email = User::where('id', $item['shipper_id'])->pluck('email')->toArray();
+                
+                            $html = $htmlHeader;
+                            $html .= '<tr>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
+                            $html .= '</tr>';
+                        }
+                        $html .= '</tbody></table>';
+                
                         // Use $html to replace [preview] in the email body
                         $body = str_replace('[preview]', $html, $notification->body);
-
+                
                         // Send the email to the user with all their shipments
-                        self::email($subject, $body, $email);
-
-
+                        foreach ($email as $e) {
+                            self::email($subject, $body, $e);
+                        }
+                    }
                 }
             }
-
-            }
         }
+
+                
     }
     static public function custom($type, $subject, $body, $to)
     {
