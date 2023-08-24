@@ -2,81 +2,82 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\DailyVisit;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AgentCallMonitoring;
-use App\Http\Models\Admin\AgentDay;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AgentDayLog;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\DailyVisitRating;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\OperationRidersCategory;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\BagStatus;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\StationDepositNote;
-use App\Http\Models\Admin\TraxPayTransaction;
-use App\Http\Models\BanksList;
-use App\Http\Models\City;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CRM\CrmRequestAgentHistory;
-use App\Http\Models\CRM\CrmRequestRating;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CrmAgent;
-use App\Http\Models\Excel_reports\Debriefing;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\Rider;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\StationRecoveryReport;
-use App\Http\Models\StationRecoveryReportDeposit;
-use App\Http\Models\Shipment;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\Zone;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\FintechCompany;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
-use App\Http\Models\Admin\MonthClosingResponsible;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Admin\Retail\RetailUser;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use PHPExcel_Cell;
+use App\DailyVisit;
 use PHPExcel_Style_Fill;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use Illuminate\Http\Request;
+use App\Http\Models\CrmAgent;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Http\Models\Admin\Admin;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\CRM\CRMCount;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\InsuranceCharge;
+use App\SpecialApprovalRequestAdmin;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\SalePersonTag;
+use Illuminate\Support\Facades\Response;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CRM\CrmRequestRating;
+use App\Http\Models\ShipmentStatusReason;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\ReturnRevertLog;
-use App\Http\Models\CRM\CRMCount;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\V2Pickup\V2PickupNote;
-use App\SpecialApprovalRequestAdmin;
+use App\Http\Models\Admin\DailyVisitRating;
+use App\Http\Models\CRM\CrmRequestFeedback;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\Excel_reports\Debriefing;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\MasterCargo\BagStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Models\StationRecoveryReportDeposit;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\Admin\MonthClosingResponsible;
+use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 
 class AdminReportsController extends Controller
 {
@@ -12655,7 +12656,12 @@ class AdminReportsController extends Controller
         ActivityTrailController::createActivityTrailLog(Auth::id(), 694);
         $agents = Admin::all();
         $ratings = CrmRequestRating::all();
-        return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings]);
+        $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $formula_value = explode(',', $csat_formula->text ?? '');
+        $csat_score = CrmRequest::leftJoin('crm_request_feedbacks','crm_requests.id','crm_request_feedbacks.crm_request_id')->where('crm_requests.status_id', 4)->whereIn('crm_request_feedbacks.rating_id', $formula_value ?? [])->count();
+        $csat_score = $csat_score / (CrmRequestFeedback::count() ?? 1) * 100; 
+
+        return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings, 'csat_score'=>$csat_score]);
 }
 
 
@@ -12674,6 +12680,7 @@ public function csat_report_list(Request $request)
     }else{
         $case_types = [];
     }
+
 
     $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
         $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')

@@ -11,7 +11,10 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                <div class="text-center p-1 bg-info text-white custom_csat">
+                    <strong>CSAT = {{ number_format($csat_score) }}%</strong>
+                </div>
+                <form id="search_form" class="form-inline mb-1 mt-3 justify-content-center" novalidate="novalidate">
                     <div class="col-2">
                         <div class="col-3 mb-1">
                             <select name="agents" class="select2" id="agents">
@@ -64,8 +67,12 @@
                                 Search</button>
                         </div>
                     </div>
+
+                    
                 </form>
 
+
+               
                 <div id="table">
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
@@ -78,7 +85,7 @@
                                 <th class="border-primary border-darken-1">Status</th>
                                 <th class="border-primary border-darken-1">Resolved WithIn</th>
                                 <th class="border-primary border-darken-1">Rating</th>
-
+                                
                             </tr>
                         </thead>
                     </table>
@@ -111,12 +118,17 @@
 
         #rating option img {
             width: 20px;
-            /* Adjust the width as needed */
             height: 20px;
-            /* Adjust the height as needed */
             vertical-align: middle;
             margin-right: 5px;
         }
+
+        .custom_csat {
+            width: 180px;
+            margin: 0 auto;
+            display: table;
+        }
+        
     </style>
 @endsection
 @section('js')

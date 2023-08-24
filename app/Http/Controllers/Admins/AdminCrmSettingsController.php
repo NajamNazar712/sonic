@@ -909,4 +909,22 @@ class AdminCrmSettingsController extends Controller
 
     }
 
+    public function csat_score_formula_store(Request $request)
+    {
+        $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $values = $request->get('submitted_values');   
+        
+        if(!isset($csat_formula))
+        {
+            GlobalSettings::create(['setting_value'=> 1 , 'type' => 'csat_formula', 'text'=> $values]);
+            return redirect()->route('admin.settings.csat_cases_setting.formula.index')->with('success', 'Updated Successfully');
+        }
+        else
+        {
+            GlobalSettings::where('type','=','csat_formula')->update(['text' => $values]);
+            return redirect()->route('admin.settings.csat_cases_setting.formula.index')->with('success', 'Updated Successfully');
+
+        }
+
+    }
 }
