@@ -10421,8 +10421,13 @@ class NotificationsController extends Controller
 
                     }
 
-                    $to = $value[]
-                    self::email($subject, $body, $to, $cc);
+                     $html .= '</tbody></table>';
+
+                        // Use $html to replace [preview] in the email body
+                        $body = str_replace('[preview]', $html, $notification->body);
+
+                        // Send the email to the user with all their shipments
+                        self::email($subject, $body, $email);
 
 
                 }
