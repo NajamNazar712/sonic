@@ -4890,7 +4890,7 @@ class DeliveryController extends Controller
 
         ->editColumn('count_fintech_shipments', function ($deliveries) {
             $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray(); 
-            $amount = Shipment::whereIn('id', $delivery_note_shipment)->pluck('amount')->toArray();
+            $amount = Shipment::whereIn('id', $delivery_note_shipment)->pluck('fintech_charges')->toArray();
 
             $sum = collect($amount)->sum(function ($amount) {
                 return floatval($amount);
