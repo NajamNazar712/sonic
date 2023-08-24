@@ -10405,10 +10405,9 @@ class NotificationsController extends Controller
                             <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved Within</th>
                         </tr></thead><tbody>';
                 
-                    foreach ($array as $key => $items) {
+                    foreach ($array as $items) {
                         foreach ($items as $item) {
-                            $email = User::where('id', $item['shipper_id'])->pluck('email')->toArray();
-                
+                            $email = User::where('id', $item['shipper_id'])->pluck('email')->toArray();                
                             $html = $htmlHeader;
                             $html .= '<tr>';
                             $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $item["description"] . '</td>';
@@ -10420,13 +10419,10 @@ class NotificationsController extends Controller
                         }
                         $html .= '</tbody></table>';
                 
-                        // Use $html to replace [preview] in the email body
                         $body = str_replace('[preview]', $html, $notification->body);
                 
-                        // Send the email to the user with all their shipments
-                        foreach ($email as $e) {
-                            self::email($subject, $body, $e);
-                        }
+                        self::email($subject, $body, $email);
+                        
                     }
                 }
             }
