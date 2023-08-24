@@ -4962,6 +4962,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn('one_link_payment_count_button', function ($deliveries) {
+                dd($deliveries->one_link_payment_count);
                 if ($deliveries->one_link_payment_count != null) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->one_link_payment_count . '</button>';
                 } else {
@@ -7094,9 +7095,10 @@ class DeliveryController extends Controller
             $payment_transactions = $payment_transactions->get();
             $payment_transaction_data = array();
             foreach ($payment_transactions as $index => $payment_transaction) {
+                $cod_amount = Shipment::where('id',$payment_transaction->shipment_id)->first();
                 $payment_transaction_data[$index]['transaction_authentication_id'] = $payment_transaction->transaction_authentication_id;
                 $payment_transaction_data[$index]['tracking_number'] = $payment_transaction->tracking_number;
-                $payment_transaction_data[$index]['transaction_amount'] = number_format($payment_transaction->transaction_amount);
+                $payment_transaction_data[$index]['transaction_amount'] = number_format($cod_amount->received_amount);
                 $payment_transaction_data[$index]['created_at'] = Carbon::parse($payment_transaction->created_at)->toDateTimeString();
                 $payment_transaction_data[$index]['transaction_date'] = Carbon::parse($payment_transaction->transaction_date)->format('M d, Y');
                 $payment_transaction_data[$index]['transaction_time'] = Carbon::parse($payment_transaction->transaction_time)->format('H:i:s');
