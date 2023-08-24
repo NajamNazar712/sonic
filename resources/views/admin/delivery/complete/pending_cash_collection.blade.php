@@ -664,9 +664,12 @@
                         
                         data.transactions_amount = 0
                     }
-                    value = dccn_amount - fintech_sum - data.transactions_amount;
+                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
 
-                    console.log(data.transactions_amount)
+                    if (value < 0) {
+                        value = 0;
+                    }                    
+                    
                     $('td:eq(18)', row).html(value);
 
                 },
