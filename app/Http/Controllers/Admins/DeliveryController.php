@@ -4934,20 +4934,16 @@ class DeliveryController extends Controller
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
 
                 
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
 
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
                 }            
             })
@@ -5233,23 +5229,18 @@ class DeliveryController extends Controller
             })
             ->editColumn('fintech_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
 
-
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }
+                }     
 
             })
 
@@ -6008,22 +5999,21 @@ class DeliveryController extends Controller
             })
             ->addColumn('hbl_amount', function ($sdn) {
                 $id = $sdn->sdn;
-//                dd($id);
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->get();
-                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->get();
-                        return $hbl_amount->sum('transactions_amount');
+                        $hbl_amount = $hbl_amount->first();
+                        return $hbl_amount->transactions_amount;
                     } else {
-                        return '-1';
+                        return '-';
                     }
                 } else {
-                    return '-2';
+                    return '-';
                 }
 
             })
@@ -6032,8 +6022,8 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->get();
-                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
 
                     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
@@ -6063,10 +6053,10 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->get();
-                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
 
-                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
@@ -6091,8 +6081,8 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->get();
-                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note_id = $delivery_note->delivery_note_id;
 
                     $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
@@ -6115,15 +6105,15 @@ class DeliveryController extends Controller
                         $a = 0;
                     }
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->get();
-                        $b = $hbl_amount->sum('transactions_amount');
+                        $hbl_amount = $hbl_amount->first();
+                        $b = $hbl_amount->transactions_amount;
                     } else {
                         $b = 0;
                     }
 
-                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
@@ -6142,8 +6132,7 @@ class DeliveryController extends Controller
                     $sum = $a + $b + $c;
 
                     if ($sum > 0) {
-                         $total = $sum - $sdn->sdn_amount;
-                         return abs($total);
+                        return $total = $sum - $sdn->sdn_amount;
                     } else {
                         return '-';
                     }
@@ -7297,23 +7286,18 @@ class DeliveryController extends Controller
 
             ->editColumn('fintech_shipments_charges', function ($deliveries) {
                 $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $deliveries->delivery_note)->pluck('shipment_id')->toArray();
-                $amount = TraxPayTransaction::whereIn('shipment_id', $delivery_note_shipment)->pluck('cod_amount')->toArray();
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
 
-                $sum = collect($amount)->sum(function ($amount) {
-                    return floatval($amount);
-                });
-
-
-                if($sum > 0)
+                if($amount > 0)
                 {
-                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $sum . '</button>', 'sum' => $sum]);
+                    return (['link' => '<button id="myButton" class="btn btn-sm btn-outline-info align-middle" onclick="fintechshipmentsshowfintech(event,' . $deliveries->delivery_note . ')" >' . $amount . '</button>', 'sum' => $amount]);
 
                 }
                 else
                 {
-                    return (['link' => '<span id="myButton">' . $sum . '</span>', 'sum' => $sum]);
+                    return (['link' => '<span id="myButton">' . $amount . '</span>', 'sum' => $amount]);
 
-                }            
+                }             
             })
 
 

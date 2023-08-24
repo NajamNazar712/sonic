@@ -487,6 +487,10 @@
                         data.transactions_amount = 0
                     }
                     value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+                    
+                    if (value < 0) {
+                        value = 0;
+                    }  
 
                     console.log(data.transactions_amount)
                     $('td:eq(22)', row).html(value);
