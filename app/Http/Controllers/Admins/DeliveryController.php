@@ -6008,13 +6008,14 @@ class DeliveryController extends Controller
             })
             ->addColumn('hbl_amount', function ($sdn) {
                 $id = $sdn->sdn;
+//                dd($id);
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
                         $hbl_amount = $hbl_amount->get();
                         return $hbl_amount->sum('transactions_amount');
@@ -6031,10 +6032,10 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id);
                     if ($one_link_amount->exists()) {
                         return $one_link_amount->sum('transaction_amount');
                     } else {
@@ -6049,10 +6050,10 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
@@ -6077,17 +6078,17 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id);
                     if ($one_link_amount->exists()) {
                         $a = $one_link_amount->sum('transaction_amount');
                     } else {
                         $a = 0;
                     }
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
                         $hbl_amount = $hbl_amount->get();
                         $b = $hbl_amount->sum('transactions_amount');
@@ -6095,7 +6096,7 @@ class DeliveryController extends Controller
                         $b = 0;
                     }
 
-                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
