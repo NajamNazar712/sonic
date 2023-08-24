@@ -6019,10 +6019,10 @@ class DeliveryController extends Controller
                         $hbl_amount = $hbl_amount->get();
                         return $hbl_amount->sum('transactions_amount');
                     } else {
-                        return '-';
+                        return '-1';
                     }
                 } else {
-                    return '-';
+                    return '-2';
                 }
 
             })
