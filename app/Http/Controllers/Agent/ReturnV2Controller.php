@@ -309,7 +309,7 @@ class ReturnV2Controller extends Controller
                 }
             }
             else{
-                return response()->json(['status' => 1, 'errors' => 'This shipment is Unassigned to you!']);
+                return response()->json(['status' => 1, 'errors' => 'The Shipment is Unassigned']);
             }
         }
 

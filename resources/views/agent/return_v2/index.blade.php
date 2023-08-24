@@ -915,25 +915,30 @@
                                 shipment += '</form>'
                                 $('#tracking').append(shipment);
                                 scan_sound(1);
-                            } else if (data.status == 1) {
+                            } 
+                            else if (data.status == 1) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Assigned";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
-                            } else if (data.status == 3) {
+                            } 
+                            else if (data.status == 3) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            } else if (data.status == 4) {
+                            } 
+                            else if (data.status == 4) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            } else if (data.status == 2) {
+                            } 
+                            else if (data.status == 2) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Assigned!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
-                            } else if (data.status == 5) {
+                            } 
+                            else if (data.status == 5) {
                                 $('#get_ticket_button').prop('disabled', false);
                                 var error = "No Shipment Found in Assigned Hub";
                                 toastr.error(error, 'Error!', {
@@ -1212,29 +1217,43 @@
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
                                 });
-                                window.location.reload();
-                            } else if (data.status == 2) {
+                                setTimeout(function() {
+                                    window.location.reload();
+                                }, 3000); // 3000 milliseconds = 3 seconds
+                            } 
+                            
+                            else if (data.status == 2) {
                                 window.location.href = "{{ route('agent.login') }}";
-                            } else {
+                            } 
+                            
+                            //if shipment is unassigned to the agent
+                            else if (data.status == 1) {
+                                toastr.error(data.errors, 'Error!', {
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
+                                    });
+                                    setTimeout(function() {
+                                        window.location.reload();
+                                    }, 3000); // 3000 milliseconds = 3 seconds
+                            } 
+                            
+                            else {
                                 var errors = data.errors;
+                                console.log(errors);
                                 $.each(errors, function(field, messages) {
                                     var errorMessage;
-                                    if (field === 'rv_assign_agent_status_id' && $(
-                                            "#shipment_status").val() === "") {
+                                    if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
                                         errorMessage = '* Action is Required';
                                         $('#rv_assign_agent_status_error').text(errorMessage);
                                         $('#shipment_remarks').css('margin-bottom', '17px');
                                     }
 
-                                    if (field === 'rv_assign_agent_sub_status_id' && $(
-                                            "#shipment_reason").val() === "" && $(
-                                            "#shipment_status").is(':empty') === false) {
+                                    if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
                                         errorMessage = '* Reason is Required';
                                         $('#rv_assign_agent_sub_status_error').text(errorMessage);
                                     }
 
-                                    if (field === 'rv_fake_status_id' && $("#fake_status_id")
-                                        .val() === "") {
+                                    if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
                                         if (checkbox == 1) {
                                             errorMessage = '* Fake Status is Required';
                                             $('#rv_assign_agent_fake_status_id_error').text(
@@ -1242,18 +1261,12 @@
                                         }
                                     }
 
-                                    if (field === 'remarks' && $("#shipment_remarks").val() ===
-                                        "") {
+                                    if (field === 'remarks' && $("#shipment_remarks").val() === "") {
                                         errorMessage = '* Remarks is Required';
                                         $('#shipment_remarks_error').text(errorMessage);
                                     }
-
-                                    // toastr.error(errorMessage, 'Error!', {
-                                    //     positionClass: 'toast-top-center',
-                                    //     containerId: 'toast-top-center'
-                                    // });
+                
                                 });
-
                             }
                         })
                         UnblockPagePermanently();

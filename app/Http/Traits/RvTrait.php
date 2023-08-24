@@ -1439,7 +1439,7 @@ trait RvTrait
                     return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
                 }
                 // this check will work if agent gets the ticket 
-                else
+                else if ($shipments)
                 {
                     foreach ($shipments as $key => $shipment) {
                         
@@ -1486,7 +1486,6 @@ trait RvTrait
                 return response()->json(['status' => 1, 'error' => 'Hub not Assigned to this Agent ']);
             }
         }
-
         return $shipment;
     }
 }
