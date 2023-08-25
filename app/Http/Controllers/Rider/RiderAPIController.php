@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
+use App\RiderAssignedHubForDeliveryNote;
 use DB;
 use phpDocumentor\Reflection\Types\This;
 use Validator;
@@ -9152,6 +9153,7 @@ RiderAPIController extends Controller
                             $shipment->delivery_in_route = 0;
                             $shipment->save();
                         }
+                        $rider_delivery->save();
 
                         if ($request->has('dbf_otp_entered')) {
                             $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
@@ -12324,9 +12326,9 @@ RiderAPIController extends Controller
 
             foreach ($delivery_notes as $delivery_note) {
 
-                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
-                    continue;
-                }
+//                if ($delivery_note->shipments_count == $delivery_note->delivered_shipments) {
+//                    continue;
+//                }
                 $information = array();
 
                 $information['delivery_note_id'] = $delivery_note->id;
@@ -12717,6 +12719,7 @@ RiderAPIController extends Controller
                         }
                     }
                 }*/
+                $flag = true;
                 $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                 if ($request->tracking != '') {
                     $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
@@ -12767,7 +12770,35 @@ RiderAPIController extends Controller
                         }
 
                         $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
-                        if ($admin_hub == $rider_hub) {
+
+                        // rider assigned hub setting
+                        $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                        if ($rider_assigned_hub->exists())
+                        {
+                            $rider_assigned_hub = $rider_assigned_hub->first();
+                            $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                            $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                            if (in_array($admin_hub,$rider_assigned_hubs))
+                            {
+                                $flag = true;
+                            }
+                            elseif ($rider_hub == $admin_hub)
+                            {
+                                $flag = true;
+                            }
+                            else
+                            {
+                                $flag = false;
+                            }
+                        }
+                        elseif ($rider_hub == $admin_hub)
+                        {
+                            $flag = true;
+                        }
+                        // rider assigned hub setting end
+
+                        if ($flag) {
                             $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
                             if ($old_delivery_note_id->exists()) {
                                 $old_delivery_note_id = $old_delivery_note_id->first();
@@ -12806,7 +12837,35 @@ RiderAPIController extends Controller
 
                                 if ($request->has('hub_id')) {
                                     $hub_id = $shipment->consignee_city->hub_id;
-                                    if ($request->hub_id == $hub_id) {
+
+                                    // rider assigned hub setting
+                                    $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id',$request->rider_id);
+                                    if ($rider_assigned_hub->exists())
+                                    {
+                                        $rider_assigned_hub = $rider_assigned_hub->first();
+                                        $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                                        $rider_assigned_hubs = explode(',',$rider_assigned_hubs);
+
+                                        if (in_array($hub_id,$rider_assigned_hubs))
+                                        {
+                                            $flag = true;
+                                        }
+                                        elseif ($request->hub_id == $hub_id)
+                                        {
+                                            $flag = true;
+                                        }
+                                        else
+                                        {
+                                            $flag = false;
+                                        }
+                                    }
+                                    elseif ($request->hub_id == $hub_id)
+                                    {
+                                        $flag = true;
+                                    }
+                                    // rider assigned hub setting end
+                                    
+                                    if ($flag) {
                                         if (!$request->has('pieces_confirm')) {
                                             if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                                 $details = array();
@@ -14266,7 +14325,14 @@ RiderAPIController extends Controller
             $updated_shipments_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
 
             if ($updated_shipments_count == 0) {
-                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
+                $delivery_note = DeliveryNote::where('id', $request->delivery_note_id);
+                if($delivery_note->exists()){
+                    $delivery_note = $delivery_note->first();
+                    $delivery_note->pending_status = 1;
+                    $delivery_note->pending_for_verification_at = Carbon::now();
+                    $delivery_note->save();
+                }
+//                DeliveryNote::where('id', $request->delivery_note_id)->update(['pending_status' => 1, 'pending_for_verification_at' => Carbon::now()]);
 
                 dispatch(new ProcessOneLinkExpireDeliveryNote($request->delivery_note_id));
 
