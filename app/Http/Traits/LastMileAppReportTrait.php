@@ -15,17 +15,25 @@ trait LastMileAppReportTrait
      {
          //via : 1=admin, 2=rider
 
-         if ($via == 1)
-         {
-            $rider = DeliveryNote::where('id',$delivery_note_id)->select('rider_id')->first();
-            $rider_id1 = $rider->rider_id;
+         if ($via == 1) {
+             $rider = DeliveryNote::where('id', $delivery_note_id)->select('rider_id')->first();
+             $rider_id = $rider->rider_id;
+             $rider = Rider::join('employees as e', 'e.id', 'riders.employee_id')
+                 ->select('riders.name as rider_name', 'e.trax_id as trax_id')
+                 ->where('riders.id', $rider_id)
+                 ->first();
 
-            $added_at1 = Carbon::now();
+             $added_at1 = Carbon::now();
              $rider_delivery_date = $added_at1->toDateTimeString();
          }
          else
          {
              $rider_delivery_date = $rider_delivery->added_at;
+
+             $rider = Rider::join('employees as e', 'e.id', 'riders.employee_id')
+                 ->select('riders.name as rider_name', 'e.trax_id as trax_id')
+                 ->where('riders.id', $rider_id)
+                 ->first();
          }
 
         $added_at_from = Carbon::parse($rider_delivery_date);
@@ -46,10 +54,7 @@ trait LastMileAppReportTrait
                 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name')
             ->first();
 
-        $rider = Rider::join('employees as e', 'e.id', 'riders.employee_id')
-            ->select('riders.name as rider_name', 'e.trax_id as trax_id')
-            ->where('riders.id', $rider_id)
-            ->first();
+
 
         $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)
             ->whereBetween('delivery_date',[$added_at_from,$added_at_to]);
