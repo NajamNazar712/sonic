@@ -9645,7 +9645,7 @@ class AdminReportsController extends Controller
             ->select('s.id as shipment_id', 's.tracking_number', 'shipments_journey.shipper_status_id', 'ss.name as shipment_status', 'ssr.name as shipment_reason', 'shipments_journey.created_at as update_date_time', 'shipments_journey.received_or_refused_by', 'shipments_journey.cnic as cnic', 'shipments_journey.relation as relation')
             ->where('delivery_note_shipments.update_type', 0)
             ->where('delivery_note_shipments.status', '>', 0)
-            ->whereIn('delivery_note_shipments.delivery_note_id', [$delivery_note_id]);
+            ->whereIn('delivery_note_shipments.delivery_note_id', $delivery_note_id);
             //->where('delivery_note_shipments.delivery_note_id', 756);
         $datatables = Datatables::of($shipments)
             ->addColumn('tracking_number_link', function ($shipments) {
