@@ -1350,6 +1350,7 @@ trait RvTrait
 
     protected function included_shippers($sorted_agents, $agent_id, $agent_shipment_id = null)
     {
+        $shipment = null;
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
@@ -1483,7 +1484,7 @@ trait RvTrait
                 //No Shipment Found in Assigned Hub
                 // return false;
                 // return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
-                return response()->json(['status' => 1, 'error' => 'Hub not Assigned to this Agent ']);
+                return response()->json(['status' => 1]);
             }
         }
         return $shipment;

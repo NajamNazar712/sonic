@@ -764,14 +764,12 @@
                                 shipment += '<option value="">Select Action (*)</option>';
 
                                 @foreach ($shipment_statuses as $status)
-                                    shipment +=
+                                shipment +=
                                         '<option value="{{ $status->id }}" id="status_value">{{ $status->name }}</option>';
                                 @endforeach
-                                shipment +=
-                                    '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
+                                shipment += '</select></strong><div id="rv_assign_agent_status_error" class="error_message_rv_assign_agent_status error_message"></div></th>';
 
-                                shipment +=
-                                    '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
+                                shipment += '<th><strong><select class="form-control d-none" id="call_to_id" name="call_to_id" disabled>';
                                 shipment += '<option value="">Select Call To</option>';
                                 shipment += '<option value="1" selected>Consignee</option>';
                                 shipment += '<option value="2">Shipper</option>';
@@ -1219,7 +1217,7 @@
                                 });
                                 setTimeout(function() {
                                     window.location.reload();
-                                }, 3000); // 3000 milliseconds = 3 seconds
+                                }, 2000); // 2000 milliseconds = 2 seconds
                             } 
                             
                             else if (data.status == 2) {
@@ -1228,18 +1226,20 @@
                             
                             //if shipment is unassigned to the agent
                             else if (data.status == 1) {
-                                toastr.error(data.errors, 'Error!', {
+                                    var error = "The Shipment is Unassigned";
+                                    toastr.error(error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
+
+                                    //Wait 2 seconds and reload the page if shipment is unassigned to the agent 
                                     setTimeout(function() {
-                                        window.location.reload();
-                                    }, 3000); // 3000 milliseconds = 3 seconds
-                            } 
+                                    window.location.reload();
+                                     }, 2000); // 2000 milliseconds = 2 seconds
+                                } 
                             
                             else {
                                 var errors = data.errors;
-                                console.log(errors);
                                 $.each(errors, function(field, messages) {
                                     var errorMessage;
                                     if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {

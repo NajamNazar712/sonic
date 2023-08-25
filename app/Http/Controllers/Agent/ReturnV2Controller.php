@@ -130,7 +130,7 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
                         if ($shipment) {
-                            try {
+                            // try {
                                 $shipper_city = $shipment->pickup_address->city;
                                 $shipper_info = $shipment->user;
                                 $service_type = $shipment->booking_type;
@@ -203,9 +203,9 @@ class ReturnV2Controller extends Controller
                                 } else {
                                     return response()->json(['status' => 0, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                                 }
-                            } catch (Exception $ex) {
-                                return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
-                            }
+                            // } catch (Exception $ex) {
+                            //     return response()->json(['status' => 2, 'error' => $ex->getMessage()]);
+                            // }
                         }
 
                         else{
