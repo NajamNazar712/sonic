@@ -936,10 +936,11 @@
                                     containerId: 'toast-top-center'
                                 });
                             } 
+
+                            //No Shipment Found in Assigned Hub
                             else if (data.status == 5) {
                                 $('#get_ticket_button').prop('disabled', false);
-                                var error = "No Shipment Found in Assigned Hub";
-                                toastr.error(error, 'Error!', {
+                                toastr.error(data.errors, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
                                 });
@@ -1225,17 +1226,17 @@
                             } 
                             
                             //if shipment is unassigned to the agent
-                            else if (data.status == 1) {
-                                    var error = "The Shipment is Unassigned";
+                            else if (data.status == 3) {
+                                    var error = "This Shipment has been Unassigned!";
                                     toastr.error(error, 'Error!', {
                                         positionClass: 'toast-top-center',
                                         containerId: 'toast-top-center'
                                     });
 
-                                    //Wait 2 seconds and reload the page if shipment is unassigned to the agent 
+                                    //Wait 3 seconds and reload the page if shipment is unassigned to the agent 
                                     setTimeout(function() {
                                     window.location.reload();
-                                     }, 2000); // 2000 milliseconds = 2 seconds
+                                     }, 3000); // 3000 milliseconds = 3 seconds
                                 } 
                             
                             else {

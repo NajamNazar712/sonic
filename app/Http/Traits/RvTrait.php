@@ -1483,8 +1483,9 @@ trait RvTrait
             else {
                 //No Shipment Found in Assigned Hub
                 // return false;
-                // return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
-                return response()->json(['status' => 1]);
+                return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
+                // return response()->json(['status' => 3, 'error' => 'This Shipment is Unassigned']);
+                // return response()->json(['status' => 1, 'error' => 'Hub not Assigned to this Agent ']);
             }
         }
         return $shipment;
