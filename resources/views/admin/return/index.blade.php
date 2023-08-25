@@ -1462,6 +1462,8 @@
                                                                                     positionClass: 'toast-top-center',
                                                                                     containerId: 'toast-top-center'
                                                                                 });
+                                                                                // Reload the table after showing the toastr notification
+                                                                               table.draw();
                                                                             }
                                                                             
                                                                     selected_rows  = [];

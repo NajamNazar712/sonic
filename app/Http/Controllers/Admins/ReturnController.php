@@ -179,21 +179,6 @@ class ReturnController extends Controller
                     ->where('crm.id','=',
                         DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
-            // ->leftjoin('return_assigned_shipments as ras', function ($join) {
-            //     $join->on('ras.shipment_id', '=', 'shipments.id')
-            //         ->where('ras.id','=',
-            //             DB::raw('(select max(id) from return_assigned_shipments where return_assigned_shipments.shipment_id = shipments.id and return_assigned_shipments.status = 1)'));
-            // })
-
-            // ->leftjoin('rcp_assigned_shipments as new_ras', function ($join) {
-            //     $join->on('new_ras.shipment_id', '=', 'shipments.id')
-            //         ->where('new_ras.id','=',
-            //             DB::raw('(select max(id) from rcp_assigned_shipments where rcp_assigned_shipments.shipment_id = shipments.id 
-            //             and rcp_assigned_shipments.assigned_status = 1 and rcp_assigned_shipments.shipment_status = 0)'))
-                        
-            //             ->where('new_ras.user_id','=',null)
-            //             ->where('new_ras.shipment_status','!=',3);
-            // })
 
             ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
                 $join->on('new_ras.shipment_id', '=', 'shipments.id')
@@ -5026,7 +5011,7 @@ class ReturnController extends Controller
                 {
                     //this function checks if the shipper is included not and and assign the shipment to agent
                     $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
-
+                    
                     if($include_shippers){
                         return $include_shippers;
                         // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);

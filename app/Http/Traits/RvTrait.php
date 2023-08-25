@@ -1363,7 +1363,7 @@ trait RvTrait
                 $included_shippers = explode(',', $included_shipper['text']);
             }
         }
-
+        
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
         // If only_shippers setting is not found, initialize as an empty array
         $only_shippers = [];
@@ -1406,7 +1406,7 @@ trait RvTrait
             
             // check if shipments exist
             if (count($shipments)) {
-
+                
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
                     // if agent shipment is assigned - not assigned to same agent only 
@@ -1484,8 +1484,6 @@ trait RvTrait
                 //No Shipment Found in Assigned Hub
                 // return false;
                 return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
-                // return response()->json(['status' => 3, 'error' => 'This Shipment is Unassigned']);
-                // return response()->json(['status' => 1, 'error' => 'Hub not Assigned to this Agent ']);
             }
         }
         return $shipment;
