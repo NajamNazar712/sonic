@@ -449,7 +449,7 @@
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
-                    blockPagePermanently();
+                    // blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
