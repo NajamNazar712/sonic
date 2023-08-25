@@ -9488,18 +9488,20 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('updated_via_admin', function ($new_deliveries) {
-                if ($new_deliveries->updated_via_admin != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_admin . '</button>';
-                } else {
-                    return 0;
-                }
+//                if ($new_deliveries->updated_via_admin != 0) {
+//                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_admin . '</button>';
+//                } else {
+//                    return 0;
+//                }
+                return '-';
             })
             ->editColumn('updated_via_admin1', function ($new_deliveries) {
-                if ($new_deliveries->updated_via_admin != 0) {
-                    return $new_deliveries->updated_via_admin ;
-                } else {
-                    return 0;
-                }
+//                if ($new_deliveries->updated_via_admin != 0) {
+//                    return $new_deliveries->updated_via_admin ;
+//                } else {
+//                    return 0;
+//                }
+                return '-';
             })
             ->addColumn('update_via', function ($new_deliveries) {
                 return '-';
@@ -9521,8 +9523,6 @@ class AdminReportsController extends Controller
                 $q->where('tracking_number', $request->search_tracking);
             });
         }
-
-//        dd($new_deliveries->toSql());
 
        if ($search_rider = $request->get('search_rider')) {
            $datatable->where('r.id', $search_rider);
