@@ -530,7 +530,7 @@ class NotificationsController extends Controller
                         } else {
                             $to = $shipper->email;
                         }
-                        $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+                        $shipment_details = '<table style=\"padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
 
                         $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
 
@@ -10403,7 +10403,38 @@ class NotificationsController extends Controller
                         'date' => $date
                         ])->render();
 
-                    // $body=str_replace('[date]', $date, $body);
+                //     $html = "<div>
+                //     <span style=\"margin-bottom: 10px;\">Dated: $date</span>
+                //     <table style=\"border-collapse: collapse; width: 100%; border: 1px solid #ddd; margin-top: 0;\">
+                //         <thead>
+                //             <tr>
+                //                 <th style=\"border: 1px solid #ddd; text-align: center; padding: 8px; background-color: #f2f2f2;\">Sno</th>
+                //                 <th style=\"border: 1px solid #ddd; text-align: center; padding: 8px; background-color: #f2f2f2;\">Responsible Hub</th>
+                //                 <th style=\"border: 1px solid #ddd; text-align: center; padding: 8px; background-color: #f2f2f2;\">Total Tagged</th>
+                //                 <th style=\"border: 1px solid #ddd; text-align: center; padding: 8px; background-color: #f2f2f2;\">Response Rate (%)</th>
+                //             </tr>
+                //         </thead>
+                //         <tbody>";
+                //     $sno = 1;
+                //     foreach ($responses as $resp) {
+                //         $html.="<tr>
+                //             <td style=\"border: 1px solid #ddd; text-align: center; padding: 8px;\">$sno</td>
+                //             <td style=\"border: 1px solid #ddd; text-align: center; padding: 8px;\">";
+                //         $html.=$resp['responsible_hub'];
+                //         $html.="</td>
+                //             <td style=\"border: 1px solid #ddd; text-align: center; padding: 8px;\">";
+                //         $html.=$resp['total_tagged'];
+                //         $html.="</td>
+                //             <td style=\"border: 1px solid #ddd; text-align: center; padding: 8px;\">";
+                //         $html.=$resp['response_rate'];
+                //         $html.="</td>
+                //         </tr>";
+                //         $sno++;
+                //     }
+                //         $html.="</tbody>
+                //     </table>
+                // </div>";
+
                     $body=str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
