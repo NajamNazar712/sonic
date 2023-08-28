@@ -10398,10 +10398,13 @@ class NotificationsController extends Controller
 
                     $date = Carbon::now()->toFormattedDateString();
 
-                    $table= view('email.crm-response-rate-email-template', ['responses' => $responses])->render();
+                    $preview = view('email.crm-response-rate-email-template', [
+                        'responses' => $responses,
+                        'date' => $date
+                        ])->render();
 
-                    $body=str_replace('[date]', $date, $body);
-                    $body=str_replace('[preview]', $table, $body);
+                    // $body=str_replace('[date]', $date, $body);
+                    $body=str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
                 }

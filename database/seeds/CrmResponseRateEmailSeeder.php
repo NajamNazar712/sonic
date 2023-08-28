@@ -23,7 +23,7 @@ class CrmResponseRateEmailSeeder extends Seeder
                 'name' => 'CRM Response Rate Email',
                 'type_id' => 1,
                 'subject' => 'CRM Response Rate',
-                'body' => 'Dated: [date]' . PHP_EOL . PHP_EOL . '[preview]',
+                'body' => '[preview]',
                 'updated_by' => 615,
                 'status' => 1,
             )
