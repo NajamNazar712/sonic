@@ -7,6 +7,7 @@ use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\RiderWiseDeliveryNoteSummary;
 use Carbon\Carbon;
+use phpDocumentor\Reflection\Types\Null_;
 
 trait LastMileAppReportTrait
 {
@@ -45,6 +46,7 @@ trait LastMileAppReportTrait
 
         $datetime = Carbon::parse($rider_delivery_date);
         $time = $datetime->format('H:i:s');
+        $flag = false;
 
         $delivery_note_data = DeliveryNote::join('cities as c', 'c.id', 'delivery_notes.hub_id')
             ->join('zones as z', 'c.zone_id', 'z.id')
@@ -54,8 +56,6 @@ trait LastMileAppReportTrait
                 'c.name as hub_name', 'z.id as zone_id', 'z.name as zone_name')
             ->first();
 
-
-
         $check_summary = RiderWiseDeliveryNoteSummary::where('rider_id',$rider_id)
             ->whereBetween('delivery_date',[$added_at_from,$added_at_to]);
 
@@ -63,7 +63,51 @@ trait LastMileAppReportTrait
         {
             $check_summary = $check_summary->first();
             $rwdnsum_id = $check_summary->id;
-            $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
+
+            $existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
+            if($existing_shipment->exists())
+            {
+                $existing_shipment = $existing_shipment->latest();
+                $existing_time = $existing_shipment->updated_time;
+
+                if ($existing_time < '10:59:59') {
+                    $check_summary->before_11_count = $check_summary->before_11_count + 1;
+                } elseif ($existing_time > '10:59:59' && $existing_time < '11:59:59') {
+                    $check_summary->at_11_count = $check_summary->at_11_count - 1;
+                } elseif ($existing_time > '11:59:59' && $existing_time < '12:59:59') {
+                    $check_summary->at_12_count = $check_summary->at_12_count - 1;
+                } elseif ($existing_time > '12:59:59' && $existing_time < '13:59:59') {
+                    $check_summary->at_13_count = $check_summary->at_13_count - 1;
+                } elseif ($existing_time > '13:59:59' && $existing_time < '14:59:59') {
+                    $check_summary->at_14_count = $check_summary->at_14_count - 1;
+                } elseif ($existing_time > '14:59:59' && $existing_time < '15:59:59') {
+                    $check_summary->at_15_count = $check_summary->at_15_count - 1;
+                } elseif ($existing_time > '15:59:59' && $existing_time < '16:59:59') {
+                    $check_summary->at_16_count = $check_summary->at_16_count - 1;
+                } elseif ($existing_time > '16:59:59' && $existing_time < '17:59:59') {
+                    $check_summary->at_17_count = $check_summary->at_17_count - 1;
+                } elseif ($existing_time > '17:59:59' && $existing_time < '18:59:59') {
+                    $check_summary->at_18_count = $check_summary->at_18_count - 1;
+                } elseif ($existing_time > '18:59:59' && $existing_time < '19:59:59') {
+                    $check_summary->at_19_count = $check_summary->at_19_count - 1;
+                } elseif ($existing_time > '19:59:59' && $existing_time < '20:59:59') {
+                    $check_summary->at_20_count = $check_summary->at_20_count - 1;
+                } elseif ($existing_time > '20:59:59' && $existing_time < '21:59:59') {
+                    $check_summary->at_21_count = $check_summary->at_21_count - 1;
+                } elseif ($existing_time > '21:59:59' && $time < '22:59:59') {
+                    $check_summary->at_22_count = $check_summary->at_22_count - 1;
+                } elseif ($existing_time > '22:59:59' && $existing_time < '23:59:59') {
+                    $check_summary->after_23_count = $check_summary->after_23_count - 1;
+                }
+
+                $flag = true;
+            }
+
+            if (!$flag)
+            {
+                $check_summary->shipment_update_count = $check_summary->shipment_update_count + 1;
+                $check_summary->via_rider_count = $check_summary->via_rider_count + 1;
+            }
 
             if ($time < '10:59:59') {
                 $check_summary->before_11_count = $check_summary->before_11_count + 1;
@@ -125,8 +169,12 @@ trait LastMileAppReportTrait
             else
             {
                 $check_existing_note = $check_existing_note->first();
-                $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
-                $check_existing_note->save();
+
+                if (!$flag)
+                {
+                    $check_existing_note->shipment_update_count = $check_existing_note->shipment_update_count + 1;
+                    $check_existing_note->save();
+                }
 
                 $new_delivery_note_shipment = new RiderWiseDeliveryNoteShipment();
                 $new_delivery_note_shipment->rwdnsum_id = $rwdnsum_id;
@@ -150,6 +198,7 @@ trait LastMileAppReportTrait
             $new_summary->shipment_update_count = 1;
             $new_summary->delivery_note_count = 1;
             $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments;
+            $new_summary->via_rider_count = 1;
 
             if ($time < '10:59:59') {
                 $new_summary->before_11_count = 1;

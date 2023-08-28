@@ -867,7 +867,7 @@ class LastMileDebriefingController extends Controller
                                 if ($shipment_details->shipper_status_id != $shipper_status_id) {
                                     if ($shipper_status_id == 7 || $shipper_status_id == 18) {
                                         ShipmentsJourneyController::add($shipment, $shipper_status_id, NULL, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                     }
@@ -877,7 +877,7 @@ class LastMileDebriefingController extends Controller
                                             ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 56, 'consignee_status_id' => 56]);
                                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                         }
 
                                     }
@@ -886,18 +886,18 @@ class LastMileDebriefingController extends Controller
                                             ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                         } else if ($shipment_details->packaging_material_charges != '' && $shipment_details->packaging_material_request == 1) {
                                             ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                             Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                             DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                            $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                         } else if ($shipment_details->packaging_material_charges == null && $shipment_details->packaging_material_request == 1) {
                                             if ($shipper_status_id != 12) {
                                                 ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
                                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $shipper_status_id, 'consignee_status_id' => $shipper_status_id]);
                                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                                                $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                                $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                             }
 
                                         }
@@ -907,20 +907,20 @@ class LastMileDebriefingController extends Controller
                                 else if (($shipment_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id != $status_reason_id)) {
 
                                         ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
 
                                 }
                                 else if (($shipment_details->shipper_status_id == $shipper_status_id) && ($journey->status_reason_id == $status_reason_id) && ($shipment_journey_remarks != $journey->remarks)) {
 
                                         ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
 
                                 }
                                 else {
                                     if ($verification == 1) {
 
                                         ShipmentsJourneyController::add($shipment, $shipper_status_id, $shipper_status_id, $status_reason_id, $shipment_journey_remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
-                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
+//                                        $this->rider_wise_delivery_note($shipment,$delivery_note_id,null,$shipper_status_id,null,null,1);
                                     }
                                 }
                             }//main if condition

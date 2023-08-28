@@ -9442,6 +9442,7 @@ class AdminReportsController extends Controller
         'rider_wise_delivery_note_summaries.trax_id',
             'rider_wise_delivery_note_summaries.rider_name',
             'rider_wise_delivery_note_summaries.delivery_note_shipments_count as total_shipments',
+            'rider_wise_delivery_note_summaries.via_rider_count as via_rider_count',
             'rider_wise_delivery_note_summaries.delivery_date','rider_wise_delivery_note_summaries.shipment_update_count as total_updated_shipments',
             'rider_wise_delivery_note_summaries.before_11_count','rider_wise_delivery_note_summaries.at_11_count','rider_wise_delivery_note_summaries.at_12_count','rider_wise_delivery_note_summaries.at_13_count',
             'rider_wise_delivery_note_summaries.at_14_count','rider_wise_delivery_note_summaries.at_15_count','rider_wise_delivery_note_summaries.at_16_count',
@@ -9451,7 +9452,7 @@ class AdminReportsController extends Controller
             'z.name as zone','h.name as hub','r.name as rider_name',
             DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 2 ) as updated_via_rider'),
             DB::raw('(select count(updated_via) from rider_wise_delivery_note_shipments where rider_wise_delivery_note_summaries.id = rider_wise_delivery_note_shipments.rwdnsum_id AND rider_wise_delivery_note_shipments.updated_via = 1 ) as updated_via_admin'));
-// dd($new_deliveries->get());
+
         $datatable = Datatables::of($new_deliveries)
             ->addColumn('delivery_note', function ($new_deliveries) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($new_deliveries->dn_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
@@ -9474,15 +9475,15 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('updated_via_rider', function ($new_deliveries) {
-                if ($new_deliveries->updated_via_rider != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->updated_via_rider . '</button>';
+                if ($new_deliveries->via_rider_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $new_deliveries->via_rider_count . '</button>';
                 } else {
                     return 0;
                 }
             })
             ->editColumn('updated_via_rider1', function ($new_deliveries) {
-                if ($new_deliveries->updated_via_rider != 0) {
-                    return  $new_deliveries->updated_via_rider;
+                if ($new_deliveries->via_rider_count != 0) {
+                    return  $new_deliveries->via_rider_count;
                 } else {
                     return 0;
                 }
@@ -9752,9 +9753,11 @@ class AdminReportsController extends Controller
     public function shipment_list(Request $request)
     {
         $id = $request->id;
-        $shipments = RiderWiseDeliveryNoteShipment::join('shipments as s','s.id','rider_wise_delivery_note_shipments.shipment_id')
+        $shipments = RiderWiseDeliveryNote::join('delivery_notes as dn','dn.id','rider_wise_delivery_notes.delivery_note_id')
+            ->join('delivery_note_shipments as dns','dns.delivery_note_id','dn.id')
+            ->join('shipments as s','s.id','dns.shipment_id')
             ->select('s.tracking_number as tracking_number')
-            ->where('rider_wise_delivery_note_shipments.rwdnsum_id',$id)
+            ->where('rider_wise_delivery_notes.rwdnsum_id',$id)
             ->get();
 
         return response()->json(['status' => 0, 'success' => 'Delivery Note Shipments','shipments'=>$shipments->pluck('tracking_number')]);
