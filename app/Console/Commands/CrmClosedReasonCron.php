@@ -22,7 +22,7 @@ class CrmClosedReasonCron extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'This CRON Will Send Email To Those Shipper Whose Status Are Marked As Closed And Shipper Mark Rating As Per Their User Experience.';
 
     /**
      * Create a new command instance.
@@ -47,7 +47,7 @@ class CrmClosedReasonCron extends Command
         ->whereDate('crm_requests.updated_at', now()->format('Y-m-d'))
         ->select('crm_requests.*')
         ->get();
-    
+        
         NotificationsController::send(222, $closed_reason);
     }
 }

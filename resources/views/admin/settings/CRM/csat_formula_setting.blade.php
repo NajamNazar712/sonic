@@ -47,7 +47,7 @@
                                     </div>
 
 
-                                    <textarea rows="4" cols="50" id="value">
+                                    <textarea rows="2" cols="50" id="value" readonly>
                                 </textarea>
 
                                 <input type="hidden" name="submitted_values" id="submitted_values" value="">

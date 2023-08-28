@@ -15,6 +15,8 @@ class CrmClosedCaseEmailSeeder extends Seeder
     {
         $timestamp = Carbon::now()->format('Y-m-d H:i:s');
 
+        DB::table('notifications')->where('name', 'CRM Closed Case Email')->delete();
+
         DB::table('notifications')->insert(array(
             array(
                 'id' => 222,
@@ -23,7 +25,7 @@ class CrmClosedCaseEmailSeeder extends Seeder
                 'name' => 'CRM Closed Case Email',
                 'type_id' => 1,
                 'subject' => 'CRM Closed Case',
-                'body' => '[preview]',
+                'body' => 'Dear [shipper], These tickets have been closed with resolution. Please rate us about your experience with resolution by clicking below link On Request Number.'.PHP_EOL.'[preview]',
                 'updated_by' => 615,
                 'status' => 1,
             )
