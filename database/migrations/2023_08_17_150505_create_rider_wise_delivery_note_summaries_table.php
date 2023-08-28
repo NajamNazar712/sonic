@@ -39,6 +39,7 @@ class CreateRiderWiseDeliveryNoteSummariesTable extends Migration
             $table->integer('at_23_count')->default(0);
             $table->integer('after_23_count')->default(0);
             $table->integer('total_count')->default(0);
+            $table->integer('via_rider_count')->default(0);
 
             $table->timestamps();
         });
