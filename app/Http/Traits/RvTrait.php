@@ -130,7 +130,6 @@ trait RvTrait
     // Description: Unassigning shipment from agent 
     protected function rv_unassign_agents($request, $shipment_id)
     {
-
         //if admin is un assigning shipment from un assign button 
         if (isset($request) && $request->action == 'un-assign') {
             $shipment_ids = $request->shipment_ids;
@@ -138,14 +137,16 @@ trait RvTrait
                 foreach ($shipment_ids as $shipment) {
                     $rv_unassign_agent = RvShipmentAssignAgent::where('shipment_id', $shipment)->where('rv_assign_agent_status_id', null)->where('rv_state_id', 1);
                     if ($rv_unassign_agent->exists()) {
+                        
                         $rv_unassign_agent = $rv_unassign_agent->latest()->first();
                         $rv_unassign_agent->rv_state_id = 2;
                         $rv_unassign_agent->updated_by_id = Auth::id();
                         $rv_unassign_agent->save();
 
                         //new row in RvShipmentAssignAgentDetails table
-                        $rv_unassign_agent = RvShipmentAssignAgent::max('id');
+                        $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
+                        $request = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                         $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
                     }
                 }
@@ -164,10 +165,11 @@ trait RvTrait
                 $rv_unassign_agent->rv_state_id = 2;
                 $rv_unassign_agent->updated_by_id = Auth::id();
                 $rv_unassign_agent->save();
-
+                
                 //new row in RvShipmentAssignAgentDetails table
-                $rv_unassign_agent = RvShipmentAssignAgent::max('id');
+                $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
+                $request = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                 $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
 
                 return true;
