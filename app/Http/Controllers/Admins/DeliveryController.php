@@ -6137,8 +6137,8 @@ class DeliveryController extends Controller
                     $sum = $a + $b + $c;
 
                     if ($sum > 0) {
-                        $total = $sum - $sdn->sdn_amount;
-                        return abs($total);
+                        $total = $sdn->sdn_amount - $sum;
+                        return $total;
                     } else {
                         return '-';
                     }
