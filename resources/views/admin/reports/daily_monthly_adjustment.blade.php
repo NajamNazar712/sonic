@@ -20,7 +20,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
                     <div class="col-3 ">
@@ -31,7 +31,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
 
                     </div>
@@ -265,6 +265,7 @@
 
                 autoWidth: false,
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
@@ -325,6 +326,7 @@
                 paging: false,
                 autoWidth: false,
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },

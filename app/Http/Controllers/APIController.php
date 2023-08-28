@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetail;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransactionRetailNote;
@@ -11,6 +12,7 @@ use App\Http\Models\Admin\RcpAssignedAgent;
 use App\Http\Models\Admin\RcpAssignedShipment;
 use App\Http\Models\Admin\RcpAssignedShipmentLog;
 use App\Http\Models\Admin\Retail\RetailCashDeposit;
+use App\Http\Models\DonePaymentShipment;
 use App\Http\Models\ReceivingSheetPrintStatus;
 use App\GuestApiToken;
 use App\Http\Controllers\Admins\AdminFinanceController;
@@ -20,7 +22,6 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\V2Pickup\V2AdminPickupsController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\CRM\CRMController;
-use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Shippers\ShipperReceivingSheetController;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
@@ -90,6 +91,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use phpDocumentor\Reflection\DocBlock\Tags\Uses;
 use phpDocumentor\Reflection\PseudoTypes\False_;
 use phpDocumentor\Reflection\Types\Null_;
 use SnappyImage;
@@ -4429,22 +4431,9 @@ class APIController extends Controller
                         //                            //                NotificationsController::send(15, 0, $request->shipment_id);
                         //                            //                NotificationsController::send(16, 0, $request->shipment_id);
                         //                        }
-                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
-                        // if ($return_assign_shipment->exists()) {
-                        //     $return_assign_shipment = $return_assign_shipment->latest()->first();
-                        //     $return_assign_shipment->status = 0;
-                        //     $return_assign_shipment->save();
-
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 2; //Return Confirm
-                        //     $return_assign_log->assigned_by = $user_id;
-                        //     $return_assign_log->save();
-                        // }
-                            
                         
                         //Rcp Request Create
-                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
+                        $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                         if ($rcp_assigned_shipment->exists()) {
                             $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                             $rcp_assigned_shipment->shipment_status = 4; //return confirm status
@@ -4491,19 +4480,10 @@ class APIController extends Controller
                             }
                             ShipmentsJourneyController::add($shipment->id, 52, 52, $last_reason_id, $remark, $user_id, null, null);
 
-                            //Reateempt Request
+                            //Reattempt Request
                             // $rcp_assigned_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
-                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->latest()->first();
+                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0)->latest()->first();
                             if ($rcp_assigned_shipment) {
-                                // $return_assign_shipment->status = 0;
-                                // $return_assign_shipment->save();
-
-                                // $return_assign_log = new ReturnAssignedShipmentLogs();
-                                // $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                // $return_assign_log->status = 5; //reattempt request
-                                // $return_assign_log->assigned_by = $user_id;
-                                // $return_assign_log->save();
-                                
                                 $rcp_assigned_shipment->shipment_status = 10; //reattempt request 
                                 $rcp_assigned_shipment->assigned_status = 2; //unassign agent 
                                 $rcp_assigned_shipment->user_id = $user_id;
@@ -4592,7 +4572,7 @@ class APIController extends Controller
 
 
                                             //Updating New RcpAssigned Tables for Same Consignee Intercept
-                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                                             if ($rcp_assigned_shipment->exists()) {
                                                 
                                                 $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
@@ -4697,7 +4677,7 @@ class APIController extends Controller
                                             ShipmentsJourneyController::add($shipment->id, 54, 54, null, null, $user_id, NULL);
 
                                             //Updating New RcpAssigned Tables for different Consignee Intercept
-                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
+                                            $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                                             if ($rcp_assigned_shipment->exists()) {
                                                     $rcp_assigned_shipment = $rcp_assigned_shipment ->latest()->first();
                                                     $rcp_assigned_shipment->shipment_status = 7; //intercept request
@@ -4987,32 +4967,13 @@ class APIController extends Controller
                                     $shipment->save();
 
                                     ShipmentsJourneyController::add($shipment->id, 13, 13, NULL, NULL, NULL, 1728);
-                                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id)->latest()->first();
 
-                                    // if ($return_assign_shipment) {
-                                    //     $return_assign_shipment->status = 0;
-                                    //     $return_assign_shipment->save();
-
-                                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                    //     $return_assign_log->status = 1; //reattempt status
-                                    //     $return_assign_log->assigned_by = 1728;
-                                    //     $return_assign_log->save();
-                                    // }
-
-                                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
+                                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id)->where('assigned_status', 1)->where('shipment_status', 0);
                                     if ($rcp_assigned_shipment->exists()) {
                                         $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
                                         $rcp_assigned_shipment->shipment_status = 3; //reattempt status
                                         $rcp_assigned_shipment->admin_id = 1728;
                                         $rcp_assigned_shipment->save();
-            
-                                        //updating already_updated & pending of agent if shipment is updated by shipper 
-                                        // $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                                        // $already_updated = $rcp_assigned_agent->increment('already_updated');
-                                        // $rcp_assigned_agent->decrement('pending_shipments');
-                                        // $rcp_assigned_agent->save();
-            
             
                                         $return_assign_log = new RcpAssignedShipmentLog ();
                                         $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
@@ -5060,40 +5021,28 @@ class APIController extends Controller
                                         }
                                     }
                                     ShipmentsJourneyController::add($shipment->id, 20, 20, 38, NULL, NULL, 1728);
-                                    // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment->id);
-                                    // if ($return_assign_shipment->exists()) {
-                                    //     $return_assign_shipment = $return_assign_shipment->latest()->first();
-                                    //     $return_assign_shipment->status = 0;
-                                    //     $return_assign_shipment->save();
 
-                                    //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                                    //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                                    //     $return_assign_log->status = 2; //return confirm status
-                                    //     $return_assign_log->assigned_by = 1728;
+                                    // $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
+                                    // if ($rcp_assigned_shipment->exists()) {
+                                    //     $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
+                                    //     $rcp_assigned_shipment->shipment_status = 4; //return confirm status
+                                    //     $rcp_assigned_shipment->admin_id = 1728;
+                                    //     $rcp_assigned_shipment->save();
+            
+                                    //     //updating already_updated & pending of agent if shipment is updated by shipper 
+                                    //     $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
+                                    //     $already_updated = $rcp_assigned_agent->increment('already_updated');
+                                    //     $rcp_assigned_agent->decrement('pending_shipments');
+                                    //     $rcp_assigned_agent->save();
+            
+            
+                                    //     $return_assign_log = new RcpAssignedShipmentLog ();
+                                    //     $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
+                                    //     $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
+                                    //     $return_assign_log->status = 4; //return confirm status
+                                    //     $return_assign_log->admin_id = 1728;
                                     //     $return_assign_log->save();
                                     // }
-
-                                    $rcp_assigned_shipment = RcpAssignedShipment::where('shipment_id', $shipment->id);
-                                    if ($rcp_assigned_shipment->exists()) {
-                                        $rcp_assigned_shipment = $rcp_assigned_shipment->latest()->first();
-                                        $rcp_assigned_shipment->shipment_status = 4; //return confirm status
-                                        $rcp_assigned_shipment->admin_id = 1728;
-                                        $rcp_assigned_shipment->save();
-            
-                                        //updating already_updated & pending of agent if shipment is updated by shipper 
-                                        $rcp_assigned_agent = RcpAssignedAgent::where('id',$rcp_assigned_shipment->rcp_assigned_agent_id)->first();
-                                        $already_updated = $rcp_assigned_agent->increment('already_updated');
-                                        $rcp_assigned_agent->decrement('pending_shipments');
-                                        $rcp_assigned_agent->save();
-            
-            
-                                        $return_assign_log = new RcpAssignedShipmentLog ();
-                                        $return_assign_log->rcp_assigned_shipment_id = $rcp_assigned_shipment->id;
-                                        $return_assign_log->shipment_id = $rcp_assigned_shipment->shipment_id;
-                                        $return_assign_log->status = 4; //return confirm status
-                                        $return_assign_log->admin_id = 1728;
-                                        $return_assign_log->save();
-                                    }
                                 }
 
                                 $res_from_consignee = $data[0] . " " . $res;
@@ -7176,7 +7125,7 @@ class APIController extends Controller
                 'delivery_notes.id as delivery_note_id','shipments.id as shipment_id','trax_pay_transactions.id as trax_transaction_id')->first();
         // parameters
         $user_id          = $shipments->shipper_id;
-        $cod_Amount       = $shipments->cod_amount;
+        $cod_amount       = $shipments->cod_amount;
         $fintechCharges   = $shipments->fintech_amount;
         $delivery_note_id = $shipments->delivery_note_id;
         $shipment_id      = $shipments->shipment_id;
@@ -7209,14 +7158,14 @@ class APIController extends Controller
                 $type = 3;
             }
         // select range of fintech company according to cod amount
-        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_Amount)
-        ->where('range_up', '<=', $cod_Amount)->where('company_Id',$req->fintech_company)
+        $select_range = FintechCompanyCharges::where('range_down', '>=', $cod_amount)
+        ->where('range_up', '<=', $cod_amount)->where('company_Id',$req->fintech_company)
         ->where('payment_type_id',$type)->first(); 
         
         //Calculate Fintech Charges
         if($select_range->charges_is_percentage == 1){
             $company_chages        = ($select_range->charges) / 100; // company charges
-            $total_company_charges = number_format($company_chages * $cod_Amount,2);
+            $total_company_charges = number_format($company_chages * $cod_amount,2);
         }
         else{
             $total_company_charges = $select_range->charges; // company charges
@@ -7253,12 +7202,12 @@ class APIController extends Controller
             return [$total,$tax];
         }
         //user or Stadard fintech Charges
-        $total_fintech_calculated = calculatepercentage($cod_Amount,$fintect_charges_percentage,$fed_percentage);
+        $total_fintech_calculated = calculatepercentage($cod_amount,$fintect_charges_percentage,$fed_percentage);
 
         //Total revenue
         $revenue = $total_fintech_calculated[0] - $total_company_fintech_charges;
         // return response()->json([
-                // 'cod'             => $cod_Amount, 
+                // 'cod'             => $cod_amount,
                 // 'conpany charges' => $total_company_charges, 
                 // 'company fed'     => $total_company_fed,        
                 // 'company addi'    => $additional_charges,
@@ -7269,10 +7218,11 @@ class APIController extends Controller
                 // 'revenue'         => $revenue   
         //  ]);
         //total amount received   
-        $total_amount_received = $cod_Amount + $total_fintech_calculated[0];
+        $total_amount_received = $cod_amount + $total_fintech_calculated[0];
         $fintech_details = new FintechPaymentDetails();
         $fintech_details->trax_pay_id            = $trax_pay_id;
         $fintech_details->transaction_id         = $req->transaction_id;
+        $fintech_details->cod_amount              = $cod_amount;
         $fintech_details->rider_tip              = $req->tip;
         $fintech_details->rider_id               = $shipments->rider;
         $fintech_details->fintech_company_id     = $req->fintech_company;
@@ -7594,6 +7544,556 @@ class APIController extends Controller
                 return response()->json(['status' => 1, 'message' => 'Date range should not exceed 90 days']);
             }
 
+        }
+    }
+
+    public function ideas_payments(Request $request)
+    {
+        $user_id = $request->user_id;
+
+        $rules = [
+            'tracking_number' => ['required', 'array', 'min:1'],
+            'tracking_number.*' => ['required', 'integer', 'distinct', 'digits_between:10,20', Rule::exists('shipments', 'tracking_number')->where(function ($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })],
+        ];
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        }
+        else {
+            $tracking_number = $request->tracking_number;
+
+            $shipments = Shipment::whereIn('tracking_number', $tracking_number)->get();
+
+            $detail = array();
+
+            foreach ($shipments as $shipment) {
+
+                $tracking_no = $shipment->tracking_number;
+
+                $estimated = null;
+                $estimated = (($shipment->weight_charges != null) ? $shipment->weight_charges : 0) + (($shipment->cash_handling_charges != null) ? $shipment->cash_handling_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->insurance_charges != null) ? $shipment->insurance_charges : 0) + (($shipment->return_charges != null) ? $shipment->return_charges : 0) + (($shipment->replacement_charges != null) ? $shipment->replacement_charges : 0) + (($shipment->fuel_surcharge != null) ? $shipment->fuel_surcharge : 0) + (($shipment->try_and_buy_charges != null) ? $shipment->try_and_buy_charges : 0) + (($shipment->packaging_material_charges != null) ? $shipment->packaging_material_charges : 0) + (($shipment->intercept_charges != null) ? $shipment->intercept_charges : 0);
+
+                $pickup_address = Shipment::where('tracking_number',$tracking_no)->select('pickup_address_id');
+                $pickup_address = $pickup_address->first();
+                $city = UserShippingInfo::where('id',$pickup_address->pickup_address_id)->select('city_id')->first();
+                $origin_city = City::find($city->city_id);
+
+                $gst = $origin_city->zone->gst;
+
+                $gst = ROUND(($gst * $estimated), 2, PHP_ROUND_HALF_DOWN);
+
+                $result = Shipment::join('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payment_shipments as dps', 'dps.shipment_id', '=', 'shipments.id')
+                    ->leftjoin('done_payments as d', 'd.id', '=', 'dps.done_payment_id')
+                    ->join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
+                    ->select('shipments.id as shipment_id','dps.updated_at as paid_at',
+                        'dps.payable as amount_paid', 'c.name as city_name',
+                        'sj.created_at as delivered_date', 'd.status as payment_status')
+                    ->where('shipments.id', $shipment->id)
+                    ->where('sj.shipper_status_id', 14);
+
+                if ($result->exists()) {
+                    $result = $result->first();
+
+                    $check_payment = DonePaymentShipment::where('shipment_id',$result->shipment_id);
+                    if ($check_payment->exists())
+                    {
+                        $detail[$tracking_no]['payment_status'] = ($result->payment_status == 1) ? "Paid" : "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] = ($result->payment_status == 1) ? $result->amount_paid : 0;
+                        $detail[$tracking_no]['payment_date'] = ($result->payment_status == 1) ? $result->paid_at : '-';
+                    }
+                    else
+                    {
+                        $detail[$tracking_no]['payment_status'] =  "Unpaid";
+                        $detail[$tracking_no]['amount_paid'] =  0;
+                        $detail[$tracking_no]['payment_date'] = '-';
+                    }
+
+                    $detail[$tracking_no]['parcel_weight'] = $shipment->actual_weight;
+                    $detail[$tracking_no]['city'] = $result->city_name;
+                    $detail[$tracking_no]['gst'] = ($gst) ? $gst : 0;
+                    $detail[$tracking_no]['delivery_charges'] = $estimated;
+                    $detail[$tracking_no]['delivery_date'] = $result->delivered_date;
+
+                    $detail[$tracking_no]['courier_name'] = 'Trax';
+
+                }
+            }
+
+            return response()->json(['status' => 0, 'payments' => $detail]);
+        }
+    }
+
+    public function shipment_track_consignee_public(Request $request)
+    {
+        $rules = [
+            'tracking_number' => ['required'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $tracking_numbers = explode(',', $request->tracking_number);
+
+            $tracking = array();
+            $invalid_tracking = array();
+            $error_exist = 0;
+            $invalid_length = 0;
+
+            foreach ($tracking_numbers as $tracking_number) {
+                
+                $tracking_length = strlen($tracking_number);
+
+                if ($tracking_length >=10 && $tracking_length <=20) {
+ 
+                    $shipment = Shipment::where('tracking_number', $tracking_number);
+                    
+                    if ($shipment->exists()) {
+
+                        $shipment = $shipment->first();
+                    
+                        if ($shipment->user->blacklist == 0) {
+                            $details = array();
+                            
+                            $details['tracking_number'] = $tracking_number;
+                            
+                            $shipper = $shipment->user;
+                            $details['shipper']['name'] = $shipper->name;
+
+                            $pickup = $shipment->pickup_address;
+
+                            $details['pickup']['origin'] = $pickup->city->name;
+
+                            $details['consignee']['name'] = $shipment->consignee_name;
+                            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                            $details['consignee']['destination'] = $shipment->consignee_city->name;
+                            $details['consignee']['address'] = $shipment->consignee_address;
+
+                            foreach ($shipment->items as $item) {
+                                $item_details = array();
+
+                                $item_details['order_id'] = $shipment->order_id;
+                                $item_details['product_type'] = $item->product->product_name;
+                                $item_details['description'] = $item->description;
+                                $item_details['quantity'] = $item->quantity;
+
+                                $details['order_information']['items'][] = $item_details;
+                            }
+
+                            $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                            $details['order_information']['amount'] = $shipment->amount;
+
+                            foreach ($shipment->shipment_journey as $journey) {
+                                if ($journey->consignee_status_id != null) {
+                                    if ($journey->verification) {
+                                        $journey_details = array();
+
+                                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+                                        $journey_details['timestamp'] = Carbon::parse($journey->created_at)->timestamp;
+                                        $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+                                        $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : null;
+
+                                        $details['tracking_history'][] = $journey_details;
+                                    }
+                                }
+                            }
+
+                            $tracking[$shipment->id] = $details;
+                        
+                        } else {
+                            $error_exist = 1;
+                            $invalid_tracking[] = $tracking_number;
+                        }
+                    }
+                    else{
+                        $error_exist = 1;
+                        $invalid_tracking[] = $tracking_number;
+                    }
+                }
+                else{
+                    $invalid_length = 1;
+                    $invalid_tracking[] = $tracking_number;
+                }
+            }
+            
+            if(($error_exist == 1 || $invalid_length == 1) &&  count($tracking) > 0)
+            {
+                return response()->json(['status' => 2, 'message' => 'Error(s) in Input or Tracking Number must be between 10 and 20 Digits.', 'errors' => ['invalid_tracking_numbers' => $invalid_tracking], 'details' => $tracking]);
+            }
+            else if($error_exist == 0 && $invalid_length == 0 &&  count($tracking) > 0){
+                return response()->json(['status' => 1, 'message' => 'Tracking of Shipment(s) # ' . $request->tracking_number, 'details' => $tracking]);
+            }
+            else{
+                return response()->json(['status' => 0, 'message' => 'Error(s) in Input', 'errors' => ['tracking_number' => $invalid_tracking]]);
+            }
+        }
+    }
+
+    public function app_login(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'pin' => ['required', 'integer', 'digits:4'],
+            'device_token' => ['nullable']
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+
+                if ($employee->request_status_id == 1 || $employee->request_status_id == 2) {
+                    return response()->json(['status' => 1, 'message' => "Dear " . $employee->name . "- Your request is in process and is pending for approval from HR."]);
+                } else {
+                    $employee_type_id = $employee->employee_type_id;
+
+                    if ($employee_type_id == 1) {
+                        //Staff...
+
+                        $user = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                        if ($user->exists()) {
+                            $user = $user->first();
+                            if ($user->status == 0) {
+
+                                if ($user->first_login == 0) {
+                                    return response()->json(['status' => 1, 'message' => "Dear " . $user->name . "- Your request is in process and is pending for approval from HR."]);
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Account disabled, Please contact admin!']);
+                                }
+                            }
+                            if (Hash::check($request->input('pin'), $user->password)) {
+                                $generate_otp = false;
+                                $environment = config('app.env');
+                                $settings = GlobalSettings::where('type', 'admin_otp');
+                                if ($settings->exists()) {
+                                    $settings = $settings->first();
+                                    if ($settings->setting_value) {
+                                        if ($environment == 'production' || $environment == 'staging') {
+                                            $otp = mt_rand(100000, 999999);
+                                            $user->otp = $otp;
+                                            $user->last_login_attempt = Carbon::now();
+                                            $user->save();
+                                            $data = array("otp" => $otp, "phone_number" => $request->phone_number);
+                                            NotificationsController::send(138, $user, $data);
+                                            $generate_otp = true;
+                                        }
+                                    }
+                                }
+
+                                if (!$user->api_token) {
+                                    $api_token = uniqid(base64_encode(str_random(60)));
+                                    $user->api_token = $api_token;
+                                    $user->save();
+                                }
+                                $api_token = $user->api_token;
+                                if ($generate_otp) {
+                                    return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                                } else {
+                                    $employee = Employee::where('trax_id', $user->trax_id);
+                                    $information = array();
+                                    $information['id'] = $user->id;
+                                    $information['name'] = $user->name;
+                                    $information['phone'] = $user->phone_number;
+                                    $information['cnic'] = $user->cnic;
+                                    $information['api_token'] = $api_token;
+                                    $information['cargo_user'] = (in_array($user->role_id, [11, 10, 15, 55, 23, 33, 46])) ? 1 : 0;
+                                    if ($user->designation_id) {
+                                        $user_department = $user->Edesignation->department_id;
+                                    } else {
+                                        $user_department = $user->role->department_id;
+                                    }
+                                    $information['sales_person'] = ($user_department == 7) ? 1 : 0;
+                                    if ($employee->exists()) {
+                                        $employee = $employee->first();
+                                        $information['address'] = ($employee->address) ? $employee->address : "";
+                                    } else {
+                                        $information['address'] = '';
+                                    }
+                                    $information['role'] = 'staff';
+                                    if ($request->has('device_token')) {
+                                        EmployeeDeviceToken::where('device_token', $request->get('device_token'))->delete();
+                                        EmployeeDeviceToken::where('employee_type_id', 1)->where('employee_id', $user->id)->delete();
+                                        $employee_device_token = new EmployeeDeviceToken();
+                                        $employee_device_token->employee_id = $user->id;
+                                        $employee_device_token->employee_type_id = 1;
+                                        $employee_device_token->device_token = $request->get('device_token');
+                                        $employee_device_token->save();
+                                    }
+
+                                    $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                        ->join('admins as a', 'e.id', 'a.employee_id')
+                                        ->where('a.id', $user->id);
+
+                                    if ($reporting_location->exists()) {
+                                        $reporting_location = $reporting_location->first();
+                                        $information['distance'] = $reporting_location->radius;
+                                        $information['lat'] = $reporting_location->lat;
+                                        $information['long'] = $reporting_location->long;
+                                    } else {
+                                        $information['distance'] = 0;
+                                        $information['lat'] = 0;
+                                        $information['long'] = 0;
+                                    }
+                                    $information['welcome_bit'] = 0;
+                                    if (!$user->first_login) {
+                                        $information['welcome_bit'] = 1;
+                                        $information['welcome_message'] = "Welcome to TRAX " . $user->name;
+                                    }
+                                    $user->first_login = 1;
+                                    $user->save();
+                                    return response()->json(['status' => 0, 'message' => 'Logged In Successfully', 'information' => $information]);
+                                }
+                            } else {
+                                return response()->json(['status' => 1, 'message' => 'Invalid PIN!']);
+                            }
+                        }
+
+                    } elseif ($employee_type_id == 2) {
+                        //Rider...
+
+                        $generate_otp = false;
+                        $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                        if ($rider->exists()) {
+                            $rider = $rider->first();
+                            if ($rider->status) {
+                                if (Hash::check($request->input('pin'), $rider->pin)) {
+                                    $environment = config('app.env');
+                                    $settings = GlobalSettings::where('type', 'rider_otp');
+                                    if ($settings->exists()) {
+                                        $settings = $settings->first();
+                                        if ($settings->setting_value) {
+                                            if ($environment == 'production' || $environment == 'staging') {
+                                                $otp = mt_rand(100000, 999999);
+                                                $rider->otp = $otp;
+                                                $rider->last_login_attempt = Carbon::now();
+                                                $rider->save();
+                                                $data = array("otp" => $otp, "phone_number" => $request->phone_number);
+                                                NotificationsController::send(138, $rider, $data);
+                                                $generate_otp = true;
+                                            }
+                                        }
+                                    }
+
+                                    if ($rider->api_token) {
+                                        $api_token = $rider->api_token;
+                                    } else {
+                                        $api_token = uniqid(base64_encode(str_random(60)));
+                                        $rider->api_token = $api_token;
+                                    }
+                                    $rider->save();
+                                    if ($generate_otp) {
+                                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'otp_generated' => 1]);
+                                    } else {
+                                        $information = array();
+                                        $information['name'] = $rider->name;
+                                        $information['phone'] = $rider->phone;
+                                        $information['cnic'] = $rider->cnic;
+                                        $information['address'] = $rider->address;
+                                        $information['role'] = 'rider';
+                                        $information['api_token'] = $rider->api_token;
+                                        $information['cargo_user'] = 0;
+                                        $information['welcome_bit'] = 0;
+                                        if (!$rider->first_login) {
+                                            $information['welcome_bit'] = 1;
+                                            $information['welcome_message'] = "Welcome to TRAX " . $rider->name;
+                                        }
+                                        $reporting_location = ReportingLocation::join('employees as e', 'reporting_locations.id', 'e.reporting_location_id')
+                                            ->join('riders as r', 'e.id', 'r.employee_id')
+                                            ->where('r.id', $rider->id);
+                                        if ($reporting_location->exists()) {
+                                            $reporting_location = $reporting_location->first();
+                                            $information['distance'] = $reporting_location->radius;
+                                            $information['lat'] = $reporting_location->lat;
+                                            $information['long'] = $reporting_location->long;
+                                        } else {
+                                            $information['distance'] = 0;
+                                            $information['lat'] = 0;
+                                            $information['long'] = 0;
+                                        }
+                                        $rider->first_login = 1;
+                                        $rider->save();
+                                        return response()->json(['status' => 0, 'message' => 'Otp Generated', 'api_token' => $api_token, 'information' => $information]);
+                                    }
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Invalid PIN']);
+                                }
+                            } else {
+                                if ($rider->first_login == 0) {
+                                    return response()->json(['status' => 1, 'message' => "Dear " . $rider->name . "- Your request is in process and is pending for approval from HR."]);
+                                } else {
+                                    return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                                }
+                            }
+                        }
+                    }
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'Employee Not Found'];
+            }
+        }
+    }
+
+    public function forget_pin(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                $employee_type_id = $employee->employee_type_id;
+
+                if ($employee_type_id == 1) {
+                    //Staff...
+                    $admins = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($admins->exists()) {
+                        $admins = $admins->first();
+                        if ($admins->status == 1) {
+                            $pin = rand(100000, 999999);
+                            $admins->reset_pin_otp = $pin;
+                            $admins->save();
+                            NotificationsController::send(162, $admins->id, $request->phone_number);
+                            return response()->json(['status' => 0, 'message' => 'Otp has been sent to your phone number', 'otp' => $pin]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+
+                } elseif ($employee_type_id == 2) {
+                    //Rider...
+                    $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($rider->status) {
+                            $pin = rand(100000, 999999);
+                            $rider->reset_pin_otp = $pin;
+                            $rider->save();
+                            NotificationsController::send(158, $rider->id);
+                            return response()->json(['status' => 0, 'message' => 'Otp has been sent to your registered number', 'otp' => $pin]);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Your Account is Disabled']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'Employee Not Found'];
+            }
+        }
+    }
+
+    public function reset_pin(Request $request) {
+
+        $rules = [
+            'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
+            'otp' => ['required', 'integer', 'digits:6'],
+            'pin' => ['required', 'integer', 'digits:4'],
+        ];
+
+        $validate = Validator::make($request->all(), $rules, $this->messages);
+
+        $validate->setAttributeNames($this->names);
+
+        if ($validate->fails()) {
+            return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+        } else {
+
+            $employee = Employee::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+
+            if ($employee->exists()) {
+                $employee = $employee->first();
+                $employee_type_id = $employee->employee_type_id;
+
+                if ($employee_type_id == 1) {
+                    //Staff...
+                    $admin = Admin::where('phone_number', substr_replace($request->input('phone_number'), '-', 4, 0))->orWhere('official_phone_number', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($admin->exists()) {
+                        $admin = $admin->first();
+                        if ($request->input('otp') == $admin->reset_pin_otp) {
+                            $admin->password = bcrypt($request->pin);
+                            $admin->dummy_pin = $request->pin;
+                            $admin->reset_pin_otp = NULL;
+                            $admin->save();
+
+                            $employee = Employee::where('trax_id', $admin->trax_id)->where('trax_id', '!=', null);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $employee->pin = $request->pin;
+                                $employee->update();
+                            }
+                            $admin->reset_pin_status = 1;
+                            $admin->save();
+                            return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+
+                } elseif ($employee_type_id == 2) {
+                    //Rider...
+                    $rider = Rider::where('phone', substr_replace($request->input('phone_number'), '-', 4, 0));
+                    if ($rider->exists()) {
+                        $rider = $rider->first();
+                        if ($request->input('otp') == $rider->reset_pin_otp) {
+                            $rider->pin = bcrypt($request->pin);
+                            $rider->dummy_pin = $request->pin;
+                            $rider->reset_pin_otp = NULL;
+                            $rider->save();
+
+                            $employee = Employee::where('trax_id', $rider->trax_id)->where('trax_id', '!=', null);
+                            if ($employee->exists()) {
+                                $employee = $employee->first();
+                                $employee->pin = $request->pin;
+                                $employee->update();
+                            }
+                            return response()->json(['status' => 0, 'reset_message' => 'Pin has been reset successfully']);
+                        } else {
+                            return response()->json(['status' => 1, 'message' => 'Invalid OTP']);
+                        }
+                    } else {
+                        return response()->json(['status' => 1, 'message' => 'Phone number not registered']);
+                    }
+                }
+
+            } else {
+                return ['status' => 1, 'message' => 'Employee Not Found'];
+            }
         }
     }
 }

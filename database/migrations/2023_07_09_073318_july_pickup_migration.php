@@ -14,9 +14,9 @@ class JulyPickupMigration extends Migration
     public function up()
     {
         Schema::table('v2_pickup_notes', function (Blueprint $table) {
-            $table->integer('shipments')->default(0);
-            $table->integer('arrived_shipments')->default(0);
-            $table->integer('shipments_scanned_by_rider')->default(0);
+            // $table->integer('shipments')->default(0);
+            // $table->integer('arrived_shipments')->default(0);
+            // $table->integer('shipments_scanned_by_rider')->default(0);
         });
     }
 
@@ -28,9 +28,9 @@ class JulyPickupMigration extends Migration
     public function down()
     {
         Schema::table('v2_pickup_notes', function (Blueprint $table) {
-            $table->dropColumn('shipments');
-            $table->dropColumn('arrived_shipments');
-            $table->dropColumn('shipments_scanned_by_rider');
+            // $table->dropColumn('shipments');
+            // $table->dropColumn('arrived_shipments');
+            // $table->dropColumn('shipments_scanned_by_rider');
         });
     }
 }

@@ -95,6 +95,8 @@ Route::name('api.')->group(function () {
 
         Route::post('payments', 'APIController@payments')->name('payments');
 
+        Route::get('ideas_payments', 'APIController@ideas_payments')->name('ideas_payments');
+
         Route::post('invoice', 'APIController@invoice')->name('invoice');
 
 
@@ -114,6 +116,7 @@ Route::name('api.')->group(function () {
 
     Route::middleware('APIThrottle:500,0.5')->prefix('shipment')->name('shipment.')->group(function () {
         Route::get('track/public', 'APIController@shipment_track_public')->name('track.public');
+        Route::get('track/consignee/public', 'APIController@shipment_track_consignee_public')->name('track.consignee.public');
     });
 
 
@@ -187,6 +190,7 @@ Route::name('api.')->group(function () {
                 Route::post('scan_shipment_assign', 'Rider\RiderAPIController@scan_shipment_assign')->name('scan_shipment_assign');
                 Route::post('scan_shipment_detail', 'Rider\RiderAPIController@scan_shipment_detail')->name('scan_shipment_detail');
                 Route::post('pickup_in_route', 'Rider\RiderAPIController@pickup_in_route')->name('pickup_in_route');
+                Route::post('scan_rider_picked_shipment', 'Rider\RiderAPIController@scan_rider_picked_shipment')->name('scan_rider_picked_shipment');
             });
 
             //Obsoleted
@@ -226,14 +230,11 @@ Route::name('api.')->group(function () {
                 Route::post('delivery_in_route', 'Rider\RiderAPIController@delivery_in_route')->name('delivery_in_route');
                 Route::post('action_log', 'Rider\RiderAPIController@delivery_action_log')->name('delivery_action_log');
                 Route::post('otp_generate', 'Rider\RiderAPIController@generate_otp_for_consignee')->name('otp_generate');
+                Route::post('pending_for_verification', 'Rider\RiderAPIController@pending_for_verification')->name('pending_for_verification');
             });
             Route::prefix('comments')->name('comments.')->group(function () {
                 Route::post('add', 'Rider\RiderAPIController@crm_comment_add')->name('add');
             });
-
-           
-
-
 
             Route::prefix('history')->name('history.')->group(function () {
                 //Obsoleted
@@ -347,6 +348,10 @@ Route::name('api.')->group(function () {
                 Route::post('generate_otp', 'Rider\RiderAPIController@delivery_note_otp_generation')->name('generate_otp');
                 Route::post('verify_otp', 'Rider\RiderAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'Rider\RiderAPIController@create_delivery_note')->name('create');
+            });
+
+            Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
+                Route::post('scan_shipment', 'Rider\RiderAPIController@scan_shipment')->name('index');
             });
         });
 
@@ -526,6 +531,7 @@ Route::name('api.')->group(function () {
                 Route::post('verify_otp', 'AdminAPIController@delivery_note_otp_verification')->name('verify_otp');
                 Route::post('create', 'AdminAPIController@create_delivery_note')->name('create');
                 Route::get('note_requests', 'AdminAPIController@delivery_note_requests')->name('note_requests');
+                Route::post('note_requests_v2', 'AdminAPIController@delivery_note_requests_v2')->name('note_requests');
                 Route::post('reject', 'AdminAPIController@delivery_note_requests_reject')->name('reject');
                 Route::post('approve', 'AdminAPIController@delivery_note_requests_approve')->name('approve');
             });
@@ -534,6 +540,10 @@ Route::name('api.')->group(function () {
                 Route::get('index', 'AdminAPIController@crm_request_index')->name('index');
                 Route::get('list', 'AdminAPIController@crm_request_list')->name('list');
                 Route::post('submit', 'AdminAPIController@crm_request_submit')->name('submit');
+            });
+
+            Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
+                Route::post('scan_shipment', 'AdminAPIController@scan_shipment')->name('index');
             });
         });
 
@@ -670,5 +680,11 @@ Route::name('api.')->group(function () {
         Route::post('out_for_delivery_shipment_payment', 'APIController@out_for_delivery_shipment_payment')->name('out_for_delivery_shipment_payment');
     });
     //Hbl Konnect
+
+    Route::prefix('employee')->name('employee.')->group(function () {
+        Route::post('app_login', 'APIController@app_login')->name('app_login');
+        Route::post('forget_pin', 'APIController@forget_pin')->name('forget_pin');
+        Route::post('reset_pin', 'APIController@reset_pin')->name('reset_pin');
+    });
 
 });

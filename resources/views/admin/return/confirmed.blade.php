@@ -288,6 +288,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '500px',
                 buttons: [
+                    @if ( session('role_id') == 1 || in_array(109, session('permissions')) )
                     {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
@@ -323,7 +324,7 @@
 
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks textarea').val();
+                                                var remark = $(row.node()).find('td.remarks input').val();
                                                 shipment_remarks[id] = remark;
                                             }
                                         });
@@ -365,6 +366,7 @@
                             }
                         }
                     },
+                    @endif
                     {
                         extend: 'excel',
                         title: 'Return Confirmed',

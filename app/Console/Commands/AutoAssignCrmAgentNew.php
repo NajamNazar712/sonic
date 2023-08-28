@@ -55,6 +55,7 @@ class AutoAssignCrmAgentNew extends Command
                 $crm_requests = CrmRequest::leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
                     ->leftjoin('users as shipper', 'shipper.id', '=', 's.user_id')
                     ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                    ->leftjoin('cities as h', 'h.id', '=', 'dc.hub_id')
                     ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')
                     ->leftjoin('sale_tier_tags as shipper_key', function ($join) {
                         $join->on('shipper_key.user_id', '=', 's.user_id')
@@ -69,7 +70,8 @@ class AutoAssignCrmAgentNew extends Command
                         'crm_requests.case_nature_type_id',
                         'crm_requests.agent_id',
                         'z.id as zone_id',
-                        'dc.id as hub_id',
+                        'dc.id as city_id',
+                        'h.id as hub_id',
                         's.shipper_status_id as shipment_status_id',
                         'shipper.segment_id as business_segment_id',
                         'shipper.sub_segment_id as sub_segment_id',

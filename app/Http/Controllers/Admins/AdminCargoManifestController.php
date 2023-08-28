@@ -418,6 +418,17 @@ class AdminCargoManifestController extends Controller
             $shipments = $shipments->where('shipments.shipment_type', 2);
         }
 
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $shipments->whereDate('shipments_journey.created_at', $from);
+            }
+        }
+
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -1716,28 +1727,30 @@ class AdminCargoManifestController extends Controller
                     } else if ($bag->status_id == 5) {
                         $bag->status_id = 6;
                         foreach ($bag->shipment as $shipment) {
-                            ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
                             $shipment_table = Shipment::find($shipment->shipment_id);
-                            $shipment_table->shipper_status_id = 49;
-                            $shipment_table->consignee_status_id = 49;
-                            $shipment_table->update();
+                            if(in_array($shipment_table->shipper_status_id, [3, 21, 26, 32, 11])){
+                                ShipmentsJourneyController::add($shipment->shipment_id, 49, 49, null, null, null, Auth::id(), $bag->seal_number);
+                                $shipment_table->shipper_status_id = 49;
+                                $shipment_table->consignee_status_id = 49;
+                                $shipment_table->update();
 
-                            MisroutedHistory::create([
-                                'shipment_id' => $shipment_table->id,
-                                'old_consignee_city_id' => Auth::user()->default_hub_id,
-                                'old_consignee_name' => $shipment_table->consignee_name,
-                                'old_consignee_address' => $shipment_table->consignee_address,
-                                'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
-                                'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
-                                'old_consignee_email' => $shipment_table->consignee_email,
-                                'new_consignee_city_id' => $shipment_table->consignee_city_id,
-                                'new_consignee_name' => $shipment_table->consignee_name,
-                                'new_consignee_address' => $shipment_table->consignee_address,
-                                'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
-                                'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
-                                'new_consignee_email' => $shipment_table->consignee_email,
-                                'admin_id' => Auth::id()
-                            ]);
+                                MisroutedHistory::create([
+                                    'shipment_id' => $shipment_table->id,
+                                    'old_consignee_city_id' => Auth::user()->default_hub_id,
+                                    'old_consignee_name' => $shipment_table->consignee_name,
+                                    'old_consignee_address' => $shipment_table->consignee_address,
+                                    'old_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                    'old_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                    'old_consignee_email' => $shipment_table->consignee_email,
+                                    'new_consignee_city_id' => $shipment_table->consignee_city_id,
+                                    'new_consignee_name' => $shipment_table->consignee_name,
+                                    'new_consignee_address' => $shipment_table->consignee_address,
+                                    'new_consignee_phone_number_1' => $shipment_table->consignee_phone_number_1,
+                                    'new_consignee_phone_number_2' => $shipment_table->consignee_phone_number_2,
+                                    'new_consignee_email' => $shipment_table->consignee_email,
+                                    'admin_id' => Auth::id()
+                                ]);
+                            }
                         }
                     }
 
@@ -2862,8 +2875,8 @@ class AdminCargoManifestController extends Controller
             $from = $request->get('transit_from_date');
             $to = $request->get('transit_to_date');
 
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('cargo_manifests.created_at', [$from, $stop_date]);
+            // $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $datatables->whereBetween('cargo_manifests.created_at', [$from, $to]);
         }
         if (($request->search_filter_origin != null) && ($request->search_filter_destination != null)) {
             $origin = $request->get('search_filter_origin');

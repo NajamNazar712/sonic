@@ -147,6 +147,10 @@
                         <th class="border-primary border-darken-1">Adjustment Amount</th>
                         <th class="border-primary border-darken-1">Adjustment Reference</th>
                         <th class="border-primary border-darken-1">Difference Amount</th>
+                        <th class="border-primary border-darken-1">HBL Amount</th>
+                        <th class="border-primary border-darken-1">1Link Amount</th>
+                        <th class="border-primary border-darken-1">Trax Pay Amount</th>
+                        <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">Deposit Slip</th>
                         <th class="border-primary border-darken-1">Aging</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -796,6 +800,10 @@
                             head.push('Adjustment Amount');
                             head.push('Adjustment Reference');
                             head.push('Difference Amount');
+                            head.push('HBL Amount');
+                            head.push('1Link Amount');
+                            head.push('Trax Pay Amount');
+                            head.push('Cash Amount');
                             head.push('Aging');
 
                             $.each(result.data, function (index, values) {
@@ -820,6 +828,10 @@
                                 row.push(values.adjusted_reference_count);
                                 row.push(values.adjustment_ref);
                                 row.push(values.difference_amount);
+                                row.push(values.hbl_amount);
+                                row.push(values.one_link_amount);
+                                row.push(values.Trax_pay_amount);
+                                row.push(values.cash_amount);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -1108,6 +1120,34 @@
                     },
                     {
                         data: 'difference_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'hbl_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'one_link_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'trax_pay_amount',
+                        name: 'difference_amount',
+                        class: 'align-middle difference_amount',
+                        orderable: false,
+                        searchable: false
+                    },
+                    {
+                        data: 'cash_amount',
                         name: 'difference_amount',
                         class: 'align-middle difference_amount',
                         orderable: false,

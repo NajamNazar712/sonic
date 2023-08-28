@@ -13,17 +13,17 @@
                 @include('admin.inc.messages')
                 <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_rn_no" id="search_rn_no" placeholder="Search Return Note Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -32,7 +32,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -41,7 +41,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_created_by" id="search_created_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -50,7 +50,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_submitted_by" id="search_submitted_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -59,7 +59,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_shipping_mode" id="search_shipping_mode" class="form-control select2">
                                 @foreach($shipping_modes as $shipping_mode)
@@ -68,7 +68,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-4">
+                    <div class="col-3">
                         <div class="form-group input-group ">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -76,7 +76,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
+                            <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" title="Submission Date">  <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                         </div>
                     </div>
                     <div class="col-4">
@@ -88,10 +88,11 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" title="Date (From)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
+                            
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-3 ">
                         <div class="form-group input-group">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -99,11 +100,11 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" title="Date (To)"> <!-- data-value="{{ Carbon\Carbon::today() }}" -->
                         </div>
 
                     </div>
-                    <div class="col-2">
+                    <div class="col-3">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
@@ -384,6 +385,7 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
