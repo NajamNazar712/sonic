@@ -290,7 +290,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="segments">Segments:
+                                                        <label for="segments">Products:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
@@ -305,7 +305,7 @@
                                                
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="sub_segments">Sub Segments:
+                                                        <label for="sub_segments">Sub Product:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
