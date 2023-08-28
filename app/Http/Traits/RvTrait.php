@@ -146,8 +146,7 @@ trait RvTrait
                         //new row in RvShipmentAssignAgentDetails table
                         $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
-                        $request = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
-                        $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
+                        $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
                     }
                 }
                 return true;
@@ -169,8 +168,7 @@ trait RvTrait
                 //new row in RvShipmentAssignAgentDetails table
                 $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                $request = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
-                $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
+                $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
 
                 return true;
             } 
@@ -1485,7 +1483,7 @@ trait RvTrait
             else {
                 //No Shipment Found in Assigned Hub
                 // return false;
-                return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
+                return response()->json(['status' => 1, 'error' => '1 No Shipment Found in Assigned Hub']);
             }
         }
         return $shipment;
