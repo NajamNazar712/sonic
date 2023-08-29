@@ -14,6 +14,9 @@ class AddIndexToSubSegmentIdInUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
+            $table->dropIndex(['sub_segment_id']);
+        });
+        Schema::table('users', function (Blueprint $table) {
             $table->index('sub_segment_id');
         });
     }
