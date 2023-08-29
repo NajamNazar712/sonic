@@ -139,7 +139,7 @@ trait RvTrait
                     if ($rv_unassign_agent->exists()) {
                         
                         $rv_unassign_agent = $rv_unassign_agent->latest()->first();
-                        $rv_unassign_agent->rv_state_id = 2;
+                        $rv_unassign_agent->rv_state_id = 3; // we are setting status to open because in future any agent can get the shipment automatically from Virtual RCP Agent Screen
                         $rv_unassign_agent->updated_by_id = Auth::id();
                         $rv_unassign_agent->save();
 
@@ -1404,7 +1404,6 @@ trait RvTrait
                 $shipments = [];
             }
 
-            dd(count($shipments) , $shipments);
             
             // check if shipments exist
             if (count($shipments)) {
@@ -1453,6 +1452,13 @@ trait RvTrait
                             $shipment_assigned_unassigned_agent->first();
                             break 2;
                         }
+
+                        // get the shipments which admin has unassigned from agent P.S. Admin can only unassign shipments from agent on which agent hasn't updated any status
+                        $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('rv_state_id', 3)->whereNull('rv_assign_agent_status_id')->whereNull('rv_state_id');
+                        if ($shipment_assigned_unassigned_agent->exists()) {
+                            $shipment_assigned_unassigned_agent->first();
+                            break 2;
+                        }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
@@ -1461,17 +1467,10 @@ trait RvTrait
                             break 2;
                         }
                         
-                       
-                        // $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
-                        // if ($find_shipment_assigned_agent) {
-                        //     dd(3);
-                        //     break 2;
-                        // }
 
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                         if ($find_shipment_assigned_agent) {
-                            $shipment = null;
                             continue;
                         }
 
