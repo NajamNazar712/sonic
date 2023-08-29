@@ -273,7 +273,7 @@ class ReturnV2Controller extends Controller
         else 
         {
             $current_time = Carbon::now();
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->first();
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->orWhere('rv_state_id', 3)->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
                 $admin_agent = Admin::where('id', Auth::id())->first();

@@ -1411,10 +1411,8 @@ trait RvTrait
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
                     // if agent shipment is assigned - not assigned to same agent only 
-                    
                     $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $agent_shipment_id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                     if ($shipment_assigned_assigned_agent->exists()) {
-                        // return false;
                         return response()->json(['status' => 1, 'error' => 'Shipment is already assigned']);
                     }
                     
