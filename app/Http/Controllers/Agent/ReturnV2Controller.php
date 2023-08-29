@@ -153,7 +153,7 @@ class ReturnV2Controller extends Controller
                                     $detail_product_infos[] = $detail_product;
                                 }
 
-                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->first();
+                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
 
                                 if (isset($rider_info)) {
                                     $rider_info = $rider_info->first();
