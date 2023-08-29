@@ -685,8 +685,8 @@
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
 
-                                shipment += '<td>' + ((data.rider_details.reason.name != null) ? data
-                                    .rider_details.reason.name : '-----------') + '</td>';
+                                shipment += '<td>' + ((data.rider_details.reason != null) ? data
+                                    .rider_details.reason : '-----------') + '</td>';
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
                                 shipment += '<td>' + ((data.rider_details.attempted_time != null) ? data
