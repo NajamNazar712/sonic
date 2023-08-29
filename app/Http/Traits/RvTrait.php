@@ -1443,12 +1443,12 @@ trait RvTrait
                 // this check will work if agent gets the ticket from Virtual RCP Agent Screen
                 else if ($shipments)
                 {
+                    dd($shipments);
                     foreach ($shipments as $key => $shipment) {
                         
                         // if agent shipment is open - assigned to any user who comes first
                         $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('rv_state_id', 3);
                         if ($shipment_assigned_unassigned_agent->exists()) {
-                            dd(1);
                             $shipment_assigned_unassigned_agent->first();
                             break 2;
                         }
@@ -1456,17 +1456,24 @@ trait RvTrait
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
                         if ($shipment_assigned_assigned_agent->exists()) {
-                            dd(2);
                             $shipment_assigned_assigned_agent->first();
                             break 2;
                         }
                         
+                       
+                        // $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
+                        // if ($find_shipment_assigned_agent) {
+                        //     dd(3);
+                        //     break 2;
+                        // }
+
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                         if ($find_shipment_assigned_agent) {
-                            dd(3);
+                            // dd(3);
                             continue;
                         }
+
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                         
                         $data = [
