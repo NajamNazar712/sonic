@@ -96,13 +96,13 @@ class RegisterController extends Controller
         $average_shipment_durations = AverageShipmentCycle::all();
 //        $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('admins.status', 1)->where('ar.department_id', 7);
         $segments = Segment::all();
-        $sub_segments = SubCategorySegment::all();
+//        $sub_segments = SubCategorySegment::all();
         
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         $invoicing_cycle = InvoicingCycle::all();
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments,'sub_segments' => $sub_segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'references' => $references, 'average_shipment_durations' => $average_shipment_durations, 'segments' => $segments, 'lead' => $lead,'invoicing_cycle' => $invoicing_cycle]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -147,7 +147,7 @@ class RegisterController extends Controller
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
-                'sub_segments' => 'required',
+//                'sub_segments' => 'required',
                 'referral' => ''
                 
             ]);
@@ -191,7 +191,7 @@ class RegisterController extends Controller
                 'blank_cheque_image' => 'mimes:png,jpeg,jpg',
                 'g-recaptcha-response' => 'required|captcha',
                 'segments' => 'required',
-                'sub_segments' => 'required',
+//                'sub_segments' => 'required',
                 'cycle_of_invoicing' => 'required',
                 'referral' => ''
 
@@ -388,7 +388,7 @@ class RegisterController extends Controller
             'email_verified' => 0,
             'brand_name' => $data['brand_name'],
             'segment_id' => $data['segments'],
-            'sub_segment_id' => $data['sub_segments'],
+//            'sub_segment_id' => $data['sub_segments'],
             'referral_id' => $referral_id,
             'lead_id' => $lead_id,
             'api_token' => uniqid(base64_encode(str_random(60))),
