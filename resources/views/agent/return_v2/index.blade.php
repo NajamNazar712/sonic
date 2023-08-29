@@ -606,7 +606,7 @@
 
 
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4><u>Order Information</u></h4>';
+                                shipment += '<h4 class="text-center"><u>Order Information</u></h4>';
                                 shipment += '<div class="border table-responsive black">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
 
@@ -761,7 +761,7 @@
 
                                 shipment +=
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
-                                shipment += '<option disabled selected hidden>Select Action (*)</option>';
+                                shipment += '<option hidden value="">Select Action (*)</option>';
 
                                 @foreach ($shipment_statuses as $status)
                                 shipment +=
@@ -821,7 +821,7 @@
 
                                 shipment +=
                                     '<td class="col-5"><strong><select class="form-control" id="fake_status_id" name="fake_status_id" disabled>';
-                                shipment += '<option disabled selected hidden>Select Fake Status</option>';
+                                shipment += '<option hidden value="">Select Fake Status</option>';
 
                                 @foreach ($fake_status_remarks as $fsk)
                                     shipment +=
@@ -1019,7 +1019,7 @@
                         .done(function(data) {
                             if (data.status == 1 && (id == 1 || id == 5)) {
                                 var options = '';
-                                options += '<option disabled selected hidden>Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason (*)</option>';
 
                                 $.each(data.reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1040,7 +1040,7 @@
 
                             } else if (data.status == 1 && (id == 6)) { //unresponsive
                                 var options = '';
-                                options += '<option disabled selected hidden>Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason (*)</option>';
 
                                 $.each(data.unresponsive_reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
