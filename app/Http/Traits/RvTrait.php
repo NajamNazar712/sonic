@@ -1403,6 +1403,8 @@ trait RvTrait
             else if ($all_shipper_exists && !($included_shipper)->exists()) {
                 $shipments = [];
             }
+
+            dd(count($shipments) , $shipments);
             
             // check if shipments exist
             if (count($shipments)) {
@@ -1493,7 +1495,7 @@ trait RvTrait
             else {
                 //No Shipment Found in Assigned Hub
                 // return false;
-                return response()->json(['status' => 1, 'error' => 'No Shipment Found in Assigned Hub']);
+                return response()->json(['status' => 1, 'error' => '1 No Shipment Found in Assigned Hub']);
             }
         }
         return $shipment;
