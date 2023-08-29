@@ -1319,7 +1319,6 @@
                                 head.push('Address');
                                 head.push('Sub Station');
                                 head.push('Collection Amount');
-                                /* head.push('RCP SMS Count');*/
                                 head.push('Shipping Mode');
                                 head.push('Service Type');
                                 head.push('Status');
@@ -1354,12 +1353,10 @@
                                     row.push(values.destination);
                                     row.push(values.hub);
                                     row.push(values.consignee_name);
-                                    row.push(values.consignee_phone_number_1 + '|' + values
-                                        .consignee_phone_number_2);
+                                    row.push(values.consignee_phone_number_1 + '|' + values.consignee_phone_number_2);
                                     row.push(values.consignee_address);
                                     row.push(values.sub_station);
                                     row.push(values.amount);
-                                    /*    row.push(values.message_count);*/
                                     row.push(values.mode);
                                     row.push(values.service_type);
                                     row.push(values.status);

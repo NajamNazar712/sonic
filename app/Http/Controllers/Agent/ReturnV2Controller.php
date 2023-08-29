@@ -200,7 +200,8 @@ class ReturnV2Controller extends Controller
 
                                 if (isset($shipment_assigned_agents)) {
                                     return response()->json(['status' => 1, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Assign Successfully']);
-                                } else {
+                                } 
+                                else {
                                     return response()->json(['status' => 0, 'rider_details' => $rider_details, 'image_location' => $image_location, 'business_category' => $business_category, 'service_type' => $service_type, 'detail_product_infos' => $detail_product_infos, 'shipping_mode' => $shipping_mode, 'shipment' => $shipment, 'shipper_info' => $shipper_info, 'shipper_city' => $shipper_city, 'consignee_city' => $consignee_city, 'message' => 'Already Assigned']);
                                 }
                             } catch (Exception $ex) {
@@ -210,7 +211,7 @@ class ReturnV2Controller extends Controller
 
                         else{
                             //No Shipment Found in Assigned Hub
-                            return response()->json(['status' => 5, 'errors' => ' 2 No Shipment Found in Assigned Hub']);
+                            return response()->json(['status' => 5, 'errors' => 'No Shipment Found in Assigned Hub']);
                         }
 
                     } else {
@@ -241,13 +242,13 @@ class ReturnV2Controller extends Controller
     // Sidebar: N/A
     // URL: 
     // Description: this function is used in agent dashboard for submitting the ticket
+    //2  reattempt, 3 intercept, 5 on hold
     public function submit_ticket(Request $request)
     {
 
         $validations = [
             'rv_assign_agent_status_id' => 'required',
             'rv_assign_agent_sub_status_id' => 'required_unless:rv_assign_agent_status_id, 2, 3, 5',
-            //2  reattempt, 3 intercept, 5 on hold
             'is_fake_status' => 'required',
             'rv_fake_status_id' => 'required_if:is_fake_status, 1',
             'remarks' => Rule::requiredIf(function () use ($request) {
