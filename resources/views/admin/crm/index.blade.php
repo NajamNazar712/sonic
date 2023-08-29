@@ -17,20 +17,20 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
-                            <div id="search_form" class="row p-1 mb-2">
+{{--                            <div id="search_form" class="row p-1 mb-2">--}}
 
-                                <div class="col-4">
-                                    <fieldset class="form-group">
-                                        <input type="text" name="search_Permission" id="search_Permission"
-                                            class="form-control cnic" placeholder="Permission">
-                                    </fieldset>
-                                </div>
-                                <div class="col-2">
-                                    <button type="button" id="search_filter_btn"
-                                        class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>
-                                        Search</button>
-                                </div>
-                            </div>
+{{--                                <div class="col-4">--}}
+{{--                                    <fieldset class="form-group">--}}
+{{--                                        <input type="text" name="search_Permission" id="search_Permission"--}}
+{{--                                            class="form-control cnic" placeholder="Permission">--}}
+{{--                                    </fieldset>--}}
+{{--                                </div>--}}
+{{--                                <div class="col-2">--}}
+{{--                                    <button type="button" id="search_filter_btn"--}}
+{{--                                        class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i>--}}
+{{--                                        Search</button>--}}
+{{--                                </div>--}}
+{{--                            </div>--}}
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>

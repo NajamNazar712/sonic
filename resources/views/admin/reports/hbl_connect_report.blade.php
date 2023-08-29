@@ -49,8 +49,8 @@
                         <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Delivery Note ID</th>
+                            <th class="border-primary border-darken-1">COD Amount</th>
                             <th class="border-primary border-darken-1">Transaction ID</th>
                             <th class="border-primary border-darken-1">Created at</th>
                         </tr>
@@ -100,6 +100,21 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+
+            
+            $('#to_date').on('change', function() {
+                $('#to_date-error').hide();
+                $('#to_date').removeClass('danger');
+
+            })
+
+
+            $('#from_date').on('change', function() {
+                $('#from_date-error').hide();
+                $('#from_date').removeClass('danger');
+
+            })
            
 
             var from_date = $('#from_date').pickadate({
@@ -169,8 +184,8 @@
                          
 
                             head.push('S. No.');
-                            head.push('COD Amount');
                             head.push('Delivery Note ID');
+                            head.push('COD Amount');
                             head.push('Transaction ID');
                             head.push('Created at');
                             
@@ -180,8 +195,8 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.amount);
                                 row.push(values.delivery_note_id);
+                                row.push(values.amount);
                                 row.push(values.transaction_id);
                                 row.push(values.created_at);
                                 body.push(row);
@@ -224,11 +239,11 @@
                         d.search_date_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
-                order: [[2, 'desc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'amount' ,name: 'amount', class: 'align-middle text-center transaction_authentication_id'},
                     { data:'delivery_note_id' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note_id'},
+                    { data:'amount' ,name: 'amount', class: 'align-middle text-center transaction_authentication_id'},
                     { data:'transaction_id' ,name: 'transaction_id', class: 'align-middle text-center transaction_amount'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle text-center created_at'},
                 ],
