@@ -1581,6 +1581,14 @@ class AdminCRMController extends Controller
                         $sub_query->whereIn('oc.hub_id', session('hubs'))
                             ->orWhereIn('dc.hub_id', session('hubs'));
                     }
+                })
+                ->filterColumn('z.id',function ($query,$keyword){
+                    if ($keyword != '') {
+                        $query->where('z.id',$keyword);
+                    }
+                    else {
+                        $query->whereRaw('false');
+                    }
                 });
             });
         }
