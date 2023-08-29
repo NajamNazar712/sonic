@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Survey;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\CRM\CrmRequestFeedback;
 use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
 use App\Http\Models\Survey\DisableAccountIntimationQuestion;
@@ -79,9 +80,15 @@ class DisabledAccountIntimationSurveyController extends Controller
         return view('survey')->with(['result' => $result , 'alert' => $alert]);
     }
 
-    function feedback_index(Request $request)
+    public function feedback_index(Request $request)
     {
-        dd($request->all(),'hello');    
+        foreach($request->all() as $key => $value)
+        {
+            CrmRequestFeedback::insert([
+                'crm_request_id'=> $key,
+                'rating_id' => $value
+            ]);
+        }
     }
     
 }

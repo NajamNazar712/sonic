@@ -213,7 +213,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
+    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL, $head = NULL)
     {
         if ($to) {
 
@@ -252,7 +252,7 @@ class NotificationsController extends Controller
                 $mail->bcc($bcc);
             }
 
-            $mail->send(new Notifications($subject, $body, $from));
+            $mail->send(new Notifications($subject, $body, $from, $head));
         }
     }
 
@@ -269,6 +269,7 @@ class NotificationsController extends Controller
                 }
 
                 $body = $notification->body;
+                $head = $notification->head;
 
 
                 if ($id == 1) {
@@ -10385,37 +10386,178 @@ class NotificationsController extends Controller
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);
                 } else if ($id = 222) {
-                  $array = array();
+                    $array = array();
                     $crm_case_closeds = $reference_1_id;
-
+                    
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-
+                    
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-
+                    
                         $array[$shipperId][] = $item;
                     }
 
+                    
                     foreach ($array as $shipperId => $items) {
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
+                        
+                        $htmlHeader = '<form action="https://sonic.test/survey_form/submit/email" method="post">';
+                        $htmlHeader .= '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
+                        $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
+                                            <th style="padding:10px; border: 1px solid black;">Request #</th>
+                                            <th style="padding:10px; border: 1px solid black;">Type</th>
+                                            <th style="padding:10px; border: 1px solid black;">Resolution</th>
+                                            <th style="padding:10px; border: 1px solid black;">Status</th>
+                                            <th style="padding:10px; border: 1px solid black;">Resolved Within</th>
+                                            <th style="padding:10px; border: 1px solid black;">Rate</th>
+                                        </tr></thead><tbody>';
+                        
+                        $html = $htmlHeader;
+                        
+                        foreach ($items as $item) {
+                            $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
+                            $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
+                        
+                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
+                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
 
-                        // Render the HTML table using the view and data
-                        $preview = view('admin.email.crm_closed', ['items' => $items])->render();
+                            $html .= '<tr>';
 
-                        // Replace placeholders in the email body
-                        $body = str_replace('[preview]', $preview, $notification->body);
+                            $html .= '<td style="padding:5px; border: 1px solid black;">';
+                            $html .= '<a href="' . route('cod.crm.request.details', ['id' => $item['id']]) . '">' . $item["id"] . ' (Click Here To Rate)' . '</a>';
+                            $html .= '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
+                        
+                            // Add star rating system here
+                            $html .= '<td style="padding:5px; border: 1px solid black;">';
+
+                            // Add star rating system here
+                            $html .= '<div class="stars">';
+                            for ($i = 1; $i <= 5; $i++) {
+                                $inputName = $item['id'];
+                                $inputId = 'star_a'.$item['id'].'-'.$i;
+                                $html .= '<input type="radio" class="star-'.$i.'" id="'.$inputId.'" name="' . $inputName . '" value="' . $i . '"/>';
+                                $html .= '<label class="star-'.$i.'" for="'.$inputId.'" title="' . $i . ' star"></label>';
+                            }
+                            $html .= '<span></span></div>';
+
+                            $html .= '</td>';
+                            
+                            $html .= '</tr>';
+                        }
+                        
+                        $html .= '</tbody>';
+                        $html .= '</form>
+                        </table>
+                        <button type="submit" class="button">Submit</button>
+                       ';
+                        
+                   $head = '
+                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+                        <style>
+
+                        .button{
+                            padding: 10px 15px;
+                            margin-left: 400px;
+                            background-color: #3545da;
+                            color: wheat;
+                        }
+                        .stars {
+                            background: gray;
+                            width: 150px;
+                            margin: 0 auto;
+                        }
+                        .stars input[type="radio"] {
+                            position: absolute;
+                            opacity: 0;
+                            filter: alpha(opacity=0);
+                        }
+                        .stars input[type="radio"].star-5:checked+label ~ span {
+                            width: 100%;
+                        }
+                        .stars input[type="radio"].star-4:checked+label ~ span {
+                            width: 80%;
+                        }
+                        .stars input[type="radio"].star-3:checked+label ~ span {
+                            width: 60%;
+                        }
+                        .stars input[type="radio"].star-2:checked+label ~ span {
+                            width: 40%;
+                        }
+                        .stars input[type="radio"].star-1:checked+label ~ span {
+                            width: 20%;
+                        }
+
+                        
+                        .stars label {
+                            display: block;
+                            width: 28px;
+                            height: 28px;
+                            border: 1px solid black;
+                            margin: 0!important;
+                            padding: 0!important;
+                            text-indent: -999em;
+                            float: left;
+                            position: relative;
+                            z-index: 10;
+                            background: transparent!important;
+                            cursor: pointer;
+                        }
+                        .stars label:hover ~ span {
+                            background-position: 0 -30px;
+                        }
+                        .stars label.star-5:hover ~ span {
+                            width: 100% !important;
+                        }
+                        .stars label.star-4:hover ~ span {
+                            width: 80% !important;
+                        }
+                        .stars label.star-3:hover ~ span {
+                            width: 60% !important;
+                        }
+                        .stars label.star-2:hover ~ span {
+                            width: 40% !important;
+                        }
+                        .stars label.star-1:hover ~ span {
+                            width: 20% !important;
+                        }
+                        
+                        .stars span {
+                            display: block;
+                            width: 0;
+                            position: relative;
+                            top: 0;
+                            left: 0;
+                            height: 30px;
+                            background: red;
+                            filter: alpha(opacity=0);
+                            -webkit-transition: -webkit-width 0.5s;
+                            -moz-transition: -moz-width 0.5s;
+                            -ms-transition: -ms-width 0.5s;
+                            -o-transition: -o-width 0.5s;
+                            transition: width 0.5s;
+                        }
+                        </style>';
+
+
+
+                        $cc = NULL;
+                        $bcc = NULL;
+                        $from = NULL;
+
+                        
+                        $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
-
-                        // Send email for each shipper
-                        self::email($subject, $body, $email);
-                    }
-
+                        self::email($subject, $body, $email, $cc, $bcc, $from ,$head);
                     }
                 }
-            
+            }
         }                    
     }        
     

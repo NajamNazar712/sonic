@@ -59,7 +59,7 @@
 
 <body>
     
-    <form action="https://sonic.test/survey_form/email" method="POST">
+    <form action="https://sonic.test/survey_form/submit/email" method="POST">
     <table style="width:100%;">
         <thead>
             <tr>
@@ -83,6 +83,8 @@
                         ->latest()
                         ->first();
                 @endphp
+
+                <input type="text" name="ids" value="{{ $item['id'] }}">
                 <tr>
                     <td style="padding:5px; border: 1px solid black; border-collapse: collapse;">
                         <a href="{{ route('cod.crm.request.details', ['id' => $item['id']]) }}">
