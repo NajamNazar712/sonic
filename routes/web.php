@@ -25,6 +25,7 @@ Route::get('payfast-payment-details', 'Admins\AdminDashboardController@payfast_p
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
+    Route::post('submit/email', 'Survey\DisabledAccountIntimationSurveyController@feedback_index')->name('feedback.submit');
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
 

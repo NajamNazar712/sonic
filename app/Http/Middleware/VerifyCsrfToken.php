@@ -22,6 +22,7 @@ class VerifyCsrfToken extends Middleware
         'admin/finance/make_payments/returned_shipments',
         'admin/finance/make_payments/adjusted_shipments',
         'admin/finance/make_payments/shipment_details',
-        'admin/finance/make_payments/verify'
+        'admin/finance/make_payments/verify',
+        'survey_form/submit/email'
     ];
 }

@@ -101,10 +101,18 @@
     <script>
         $(document).ready(function() {
 
-            const greenBoxValues = [];
+            var greenBoxValues = [];
 
             $('.formula-value').each(function() {
                 greenBoxValues.push(parseInt($(this).text()));
+
+                if(isNaN(greenBoxValues))
+                {
+                    greenBoxValues = [];
+                }
+                else{
+                    greenBoxValues;
+                }
             });
 
             $('.red-box').each(function() {

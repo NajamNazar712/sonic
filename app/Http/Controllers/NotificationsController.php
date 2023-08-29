@@ -10385,61 +10385,37 @@ class NotificationsController extends Controller
                     // dd($subject, $body, $to, $cc);
                     self::email($subject, $body, $to, $cc);
                 } else if ($id = 222) {
-                    $array = array();
+                  $array = array();
                     $crm_case_closeds = $reference_1_id;
-                    
+
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-                    
+
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-                    
+
                         $array[$shipperId][] = $item;
                     }
 
-                    
                     foreach ($array as $shipperId => $items) {
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
-                    
-                        $htmlHeader = '<table style="width:100%;">';
-                        $htmlHeader .= '<thead><tr>
-                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Request #</th>
-                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Type</th>
-                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolution</th> 
-                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Status</th> 
-                                <th style="padding:5px; border: 1px solid black; border-collapse: collapse;">Resolved Within</th>
-                                </tr></thead><tbody>';
-                                
-                                $html = $htmlHeader;
-                        
-                        foreach ($items as $item) {
-                            $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
-                            $type = CrmRequestCaseNatureType::where('id',$item["case_nature_type_id"])->value('type');
 
-                            $resolution = ShipmentsJourney::where('shipment_id',$item['shipment_id'])->latest()->first();
-                            $resolution = ShipmentStatusReason::where('id',$resolution["shipper_status_id"])->latest()->first();
-                        
-                            $html .= '<tr>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">';
-                            $html .= '<a href="'.route('cod.crm.request.details', ['id' => $item['id']]) . '">' . $item["id"] .' (Click Here To Rate)'. '</a>';
-                            $html .= '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $type ?? '-' . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $resolution['name'] ?? '-' . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">Closed</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within. ' Days') .  '</td>';
-                            $html .= '</tr>';
-                        }
-                    
-                        $html .= '</tbody></table>';
-                        $body = str_replace('[preview]', $html, $notification->body);
-                        $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);  
+                        // Render the HTML table using the view and data
+                        $preview = view('admin.email.crm_closed', ['items' => $items])->render();
+
+                        // Replace placeholders in the email body
+                        $body = str_replace('[preview]', $preview, $notification->body);
+                        $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
+
+                        // Send email for each shipper
                         self::email($subject, $body, $email);
-                        
+                    }
+
                     }
                 }
-            }
+            
         }                    
     }        
     

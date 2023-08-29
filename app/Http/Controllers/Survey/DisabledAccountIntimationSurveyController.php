@@ -78,5 +78,10 @@ class DisabledAccountIntimationSurveyController extends Controller
 
         return view('survey')->with(['result' => $result , 'alert' => $alert]);
     }
+
+    function feedback_index(Request $request)
+    {
+        dd($request->all(),'hello');    
+    }
     
 }
