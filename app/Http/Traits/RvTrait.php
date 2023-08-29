@@ -1452,13 +1452,6 @@ trait RvTrait
                             $shipment_assigned_unassigned_agent->first();
                             break 2;
                         }
-
-                        // get the shipments which admin has unassigned from agent P.S. Admin can only unassign shipments from agent on which agent hasn't updated any status
-                        $shipment_assigned_unassigned_agent = RvShipmentAssignAgent::where('rv_state_id', 3)->whereNull('rv_assign_agent_status_id')->whereNull('rv_state_id');
-                        if ($shipment_assigned_unassigned_agent->exists()) {
-                            $shipment_assigned_unassigned_agent->first();
-                            break 2;
-                        }
                         
                         // if agent shipment is assigned - assigned to same agent only - if close mistakenly or in case of lost page
                         $shipment_assigned_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->where('agent_id', Auth::id())->where('rv_state_id', 1);
