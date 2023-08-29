@@ -1080,6 +1080,14 @@ class AdminCRMController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
                 if($requests->launched_added_by == 0){
