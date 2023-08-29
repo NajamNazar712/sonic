@@ -67,7 +67,7 @@ trait LastMileAppReportTrait
             $existing_shipment = RiderWiseDeliveryNoteShipment::where('shipment_id',$shipment_id);
             if($existing_shipment->exists())
             {
-                $existing_shipment = $existing_shipment->latest();
+                $existing_shipment = $existing_shipment->latest()->first();
                 $existing_time = $existing_shipment->updated_time;
 
                 if ($existing_time < '10:59:59') {
