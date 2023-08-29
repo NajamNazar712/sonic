@@ -84,6 +84,8 @@ class DisabledAccountIntimationSurveyController extends Controller
     {
         foreach($request->all() as $key => $value)
         {
+            CrmRequestFeedback::where('crm_request_id', $key)->delete();
+
             CrmRequestFeedback::insert([
                 'crm_request_id'=> $key,
                 'rating_id' => $value

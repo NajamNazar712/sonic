@@ -10426,9 +10426,7 @@ class NotificationsController extends Controller
 
                             $html .= '<tr>';
 
-                            $html .= '<td style="padding:5px; border: 1px solid black;">';
-                            $html .= '<a href="' . route('cod.crm.request.details', ['id' => $item['id']]) . '">' . $item["id"] . ' (Click Here To Rate)' . '</a>';
-                            $html .= '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">'. $item["id"]. '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
