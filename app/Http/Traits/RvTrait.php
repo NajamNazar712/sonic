@@ -1443,7 +1443,6 @@ trait RvTrait
                 // this check will work if agent gets the ticket from Virtual RCP Agent Screen
                 else if ($shipments)
                 {
-                    dd($shipments);
                     foreach ($shipments as $key => $shipment) {
                         
                         // if agent shipment is open - assigned to any user who comes first
@@ -1470,7 +1469,7 @@ trait RvTrait
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                         if ($find_shipment_assigned_agent) {
-                            // dd(3);
+                            $shipment = null;
                             continue;
                         }
 
