@@ -1582,7 +1582,7 @@ class AdminCRMController extends Controller
                             ->orWhereIn('dc.hub_id', session('hubs'));
                     }
                 })
-                ->filterColumn('z.id',function ($query,$keyword){
+                ->filterColumn('zones',function ($query,$keyword){
                     if ($keyword != '') {
                         $query->where('z.id',$keyword);
                     }
