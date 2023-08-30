@@ -67,9 +67,10 @@ class TeamLeadDashboardController extends Controller
             ->whereIn('id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
-                    ->groupBy('employee_id');
+                    ->groupBy('employee_attendances.employee_id');
             })
             ->get();
+
 
         return view('admin.leads.team_lead')->with(['hubs' => $hubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
