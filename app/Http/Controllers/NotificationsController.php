@@ -10404,7 +10404,7 @@ class NotificationsController extends Controller
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
                         
-                        $htmlHeader = '<form action="https://sonic.test/survey_form/submit/email" method="post">';
+                        $htmlHeader = '<form action="'.route('survey.feedback.submit').'" method="post">';
                         $htmlHeader .= '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
                         $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
                                             <th style="padding:10px; border: 1px solid black;">Request #</th>
