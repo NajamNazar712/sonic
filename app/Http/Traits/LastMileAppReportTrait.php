@@ -189,13 +189,13 @@ trait LastMileAppReportTrait
              else
              {
                  $new_summary = new RiderWiseDeliveryNoteSummary();
-                 $new_summary->delivery_date = $rider_delivery_date ?? null;
-                 $new_summary->rider_id = $rider_id ?? null;
-                 $new_summary->trax_id = $rider->trax_id ?? null;
-                 $new_summary->rider_name = $rider->rider_name ?? null;
+                 $new_summary->delivery_date = $rider_delivery_date ?? '00:00:00 00:00:00';
+                 $new_summary->rider_id = $rider_id;
+                 $new_summary->trax_id = $rider->trax_id ?? '';
+                 $new_summary->rider_name = $rider->rider_name ?? '';
                  $new_summary->shipment_update_count = 1;
                  $new_summary->delivery_note_count = 1;
-                 $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments ?? null;
+                 $new_summary->delivery_note_shipments_count = $delivery_note_data->total_shipments ?? 0;
                  $new_summary->via_rider_count = 1;
 
                  if ($time < '10:59:59') {
