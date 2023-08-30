@@ -10436,7 +10436,7 @@ class NotificationsController extends Controller
                             $html .= '<td style="padding:5px; border: 1px solid black;">';
 
                             // Add star rating system here
-                            $html .= '<div class="stars">';
+                            $html .= '<div class="rate">';
                             for ($i = 1; $i <= 5; $i++) {
                                 $inputName = $item['id'];
                                 $inputId = 'star_a'.$item['id'].'-'.$i;
@@ -10460,87 +10460,53 @@ class NotificationsController extends Controller
                         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
                         <style>
 
-                        .button{
+                        .button {
                             padding: 10px 15px;
                             margin-left: 400px;
                             background-color: #3545da;
                             color: wheat;
                         }
-                        .stars {
-                            background: gray;
-                            width: 150px;
-                            margin: 0 auto;
+                        *{
+                            margin: 0;
+                            padding: 0;
                         }
-                        .stars input[type="radio"] {
-                            position: absolute;
-                            opacity: 0;
-                            filter: alpha(opacity=0);
-                        }
-                        .stars input[type="radio"].star-5:checked+label ~ span {
-                            width: 100%;
-                        }
-                        .stars input[type="radio"].star-4:checked+label ~ span {
-                            width: 80%;
-                        }
-                        .stars input[type="radio"].star-3:checked+label ~ span {
-                            width: 60%;
-                        }
-                        .stars input[type="radio"].star-2:checked+label ~ span {
-                            width: 40%;
-                        }
-                        .stars input[type="radio"].star-1:checked+label ~ span {
-                            width: 20%;
-                        }
-
-                        
-                        .stars label {
-                            display: block;
-                            width: 28px;
-                            height: 28px;
-                            border: 1px solid black;
-                            margin: 0!important;
-                            padding: 0!important;
-                            text-indent: -999em;
+                        .rate {
                             float: left;
-                            position: relative;
-                            z-index: 10;
-                            background: transparent!important;
-                            cursor: pointer;
+                            height: 46px;
+                            padding: 0 10px;
                         }
-                        .stars label:hover ~ span {
-                            background-position: 0 -30px;
+                        .rate:not(:checked) > input {
+                            position:absolute;
+                            top:-9999px;
                         }
-                        .stars label.star-5:hover ~ span {
-                            width: 100% !important;
+                        .rate:not(:checked) > label {
+                            float:right;
+                            width:1em;
+                            overflow:hidden;
+                            white-space:nowrap;
+                            cursor:pointer;
+                            font-size:30px;
+                            color:#ccc;
                         }
-                        .stars label.star-4:hover ~ span {
-                            width: 80% !important;
+                        .rate:not(:checked) > label:before {
+                            content: "★";
                         }
-                        .stars label.star-3:hover ~ span {
-                            width: 60% !important;
+                        .rate > input:checked ~ label {
+                            color: #ffc700;    
                         }
-                        .stars label.star-2:hover ~ span {
-                            width: 40% !important;
+                        .rate:not(:checked) > label:hover,
+                        .rate:not(:checked) > label:hover ~ label {
+                            color: #deb217;  
                         }
-                        .stars label.star-1:hover ~ span {
-                            width: 20% !important;
+                        .rate > input:checked + label:hover,
+                        .rate > input:checked + label:hover ~ label,
+                        .rate > input:checked ~ label:hover,
+                        .rate > input:checked ~ label:hover ~ label,
+                        .rate > label:hover ~ input:checked ~ label {
+                            color: #c59b08;
                         }
                         
-                        .stars span {
-                            display: block;
-                            width: 0;
-                            position: relative;
-                            top: 0;
-                            left: 0;
-                            height: 30px;
-                            background: red;
-                            filter: alpha(opacity=0);
-                            -webkit-transition: -webkit-width 0.5s;
-                            -moz-transition: -moz-width 0.5s;
-                            -ms-transition: -ms-width 0.5s;
-                            -o-transition: -o-width 0.5s;
-                            transition: width 0.5s;
-                        }
+                        /* Modified from: https://github.com/mukulkant/Star-rating-using-pure-css */
                         </style>';
 
 

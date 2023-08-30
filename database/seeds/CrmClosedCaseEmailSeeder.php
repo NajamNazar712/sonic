@@ -25,7 +25,7 @@ class CrmClosedCaseEmailSeeder extends Seeder
                 'name' => 'CRM Closed Case Email',
                 'type_id' => 1,
                 'subject' => 'CRM Closed Case',
-                'body' => 'Dear [shipper], These tickets have been closed with resolution. Please rate us about your experience with resolution by clicking below link On Request Number.'.PHP_EOL.'[preview]',
+                'body' => PHP_EOL.'**Dear [shipper]**,'.PHP_EOL.'These tickets have been closed with resolution. Please rate us about your experience with resolution by rate On Request Number.'.PHP_EOL.'[preview]',
                 'updated_by' => 615,
                 'status' => 1,
             )

@@ -87,6 +87,10 @@
         .color{
             color: white;
         }
+
+        #value{
+            color: gray
+        }
     </style>
 
 @endsection
@@ -106,13 +110,18 @@
             $('.formula-value').each(function() {
                 greenBoxValues.push(parseInt($(this).text()));
 
-                if(isNaN(greenBoxValues))
+                if((greenBoxValues.lenght === 0))
                 {
                     greenBoxValues = [];
                 }
                 else{
                     greenBoxValues;
                 }
+
+            });
+
+            var greenBoxValues = $.grep(greenBoxValues, function(value) {
+                return !isNaN(value);
             });
 
             $('.red-box').each(function() {
@@ -145,7 +154,7 @@
                 greenBoxValues.sort(function(a, b) {
                     return a - b;
                 });
-                console.log(typeof greenBoxValues);
+
                 newValue = 'Total ' + greenBoxValues + ' Star Rating Cases / Total Rated Cases * 100 ';
                 $('#value').text(newValue);
 
