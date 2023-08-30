@@ -24,7 +24,7 @@
                                 </fieldset>
                             </div>
 
-                            <div class="col-4 mt-1">
+                            {{-- <div class="col-4 mt-1">
                                 <fieldset class="form-group">
                                     <select name="search_rider_cat" id="search_rider_cat" class="form-control select2">
                                         @foreach($riders_cat as $rider_cat)
@@ -32,7 +32,7 @@
                                         @endforeach
                                     </select>
                                 </fieldset>
-                            </div>
+                            </div> --}}
                             <div class="col-4 mt-1">
                                 <fieldset class="form-group">
                                     <select name="search_hub" id="search_hub" class="form-control select2">
@@ -52,7 +52,7 @@
                                 </fieldset>
                             </div>
 
-                            <div class="col-4 mt-1">
+                             <div class="col-4 mt-1">
                                 <fieldset class="form-group input-group">
                                     <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search Delivery Note Number">
                                 </fieldset>
@@ -157,25 +157,39 @@
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1">S.No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note#</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Zone</th>
-                        <th class="border-primary border-darken-1">Delivery Note Date</th>
-                        <th class="border-primary border-darken-1">Trax IDs</th>
-                        <th class="border-primary border-darken-1">Rider Name</th>
-                        <th class="border-primary border-darken-1">Rider Category</th>
-                        <th class="border-primary border-darken-1">Total Shipment</th>
-                        <th class="border-primary border-darken-1">Update Via App</th>
-                        <th class="border-primary border-darken-1">Update Via DBF</th>
-
-
-                    </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">S.No.</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Trax IDs</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Rider Name</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Hub</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Zone</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Updated Delivery Date</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Total Shipments</th>
+                            <th class="border-primary border-darken-1 align-middle" colspan="16">
+                                <div class="text-center">Update Via App</div>
+                            </th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Rider</th>
+                            <th class="border-primary border-darken-1 align-middle" rowspan="2">Update Via Admin</th>
+                        </tr>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1">Before 11 AM</th>
+                            <th class="border-primary border-darken-1">11:00</th>
+                            <th class="border-primary border-darken-1">12:00</th>
+                            <th class="border-primary border-darken-1">13:00</th>
+                            <th class="border-primary border-darken-1">14:00</th>
+                            <th class="border-primary border-darken-1">15:00</th>
+                            <th class="border-primary border-darken-1">16:00</th>
+                            <th class="border-primary border-darken-1">17:00</th>
+                            <th class="border-primary border-darken-1">18:00</th>
+                            <th class="border-primary border-darken-1">19:00</th>
+                            <th class="border-primary border-darken-1">20:00</th>
+                            <th class="border-primary border-darken-1">21:00</th>
+                            <th class="border-primary border-darken-1">22:00</th>
+                            <th class="border-primary border-darken-1">23:00</th>
+                            <th class="border-primary border-darken-1">After 23:00</th>
+                            <th class="border-primary border-darken-1">Total Updated Shipments</th>
+                        </tr>
                     </thead>
-
-                   
-
                 </table>
             </div>
         </div>
@@ -396,16 +410,16 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider Category',
-                width:'100%',
-                allowClear:true
-            })
-            $('#search_dn_no,#search_tracking_no').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
+            // $('#search_rider_cat').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Search Rider Category',
+            //     width:'100%',
+            //     allowClear:true
+            // })
+            // $('#search_dn_no,#search_tracking_no').inputmask({
+            //     'alias': 'integer',
+            //     'allowMinus': false,
+            //     'allowPlus': false
+            // });
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -435,7 +449,7 @@
 
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
-                    blockPagePermanently();
+                    // blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -446,70 +460,75 @@
                         data: params,
                         success: function (result) {
                             head = [];
-                            footer = [];
 
                             head.push('S. No');
-                            head.push('Delivery Note#');
-                            head.push('Hub');
-                            head.push('Zone');
-                            head.push('Delivery Note Data');
                             head.push('Trax IDs');
                             head.push('Rider Name');
-                            head.push('Rider Category');
-                            head.push('Total Shipment');
+                            head.push('Hub');
+                            head.push('Zone');
+                            head.push('Delivery Date');
+                            head.push('Total Shipments');
+                            head.push('Before 11');
+                            head.push('At 11');
+                            head.push('At 12');
+                            head.push('At 13');
+                            head.push('At 14');
+                            head.push('At 15');
+                            head.push('At 16');
+                            head.push('At 17');
+                            head.push('At 18');
+                            head.push('At 19');
+                            head.push('At 20');
+                            head.push('At 21');
+                            head.push('At 22');
+                            head.push('At 23');
+                            head.push('After 23');
+                            head.push('Total Updated Shipments');
                             head.push('Update Via App');
-                            head.push('Update Via DBF');
-                            var total_shipments_count = 0;
-                            var update_via_app_count = 0;
-                            var update_via_dbf_count = 0;
+                            head.push('Update Via Admin');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id_padded);
-                                row.push(values.city);
-                                row.push(values.zone);
-                                row.push(values.created_at);
                                 row.push(values.trax_id);
-                                row.push(values.rider);
-                                row.push(values.rider_cat);
-                                row.push(values.total_shipments);
-                                row.push(values.shipments_rider_updated);
-                                row.push(values.shipments_dbf_updated);
+                                row.push(values.rider_name);
+                                row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.delivery_date);
+                                row.push(values.total_shipments_excel);
+                                row.push(values.before_11_count);
+                                row.push(values.at_11_count);
+                                row.push(values.at_12_count);
+                                row.push(values.at_13_count);
+                                row.push(values.at_14_count);
+                                row.push(values.at_15_count);
+                                row.push(values.at_16_count);
+                                row.push(values.at_17_count);
+                                row.push(values.at_18_count);
+                                row.push(values.at_19_count);
+                                row.push(values.at_20_count);
+                                row.push(values.at_21_count);
+                                row.push(values.at_22_count);
+                                row.push(values.at_23_count);
+                                row.push(values.after_23_count);
+                                row.push(values.total_updated_shipments);
+                                row.push(values.updated_via_rider1);
+                                row.push(values.updated_via_admin1);
 
                                 body.push(row);
-                                total_shipments_count+=values.total_shipments
-                                update_via_app_count+=values.shipments_rider_updated
-                                update_via_dbf_count+=values.shipments_dbf_updated
                             });
-                            
-
-                            footer.push('');
-                            footer.push('Total');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push('-');
-                            footer.push(total_shipments_count);
-                            footer.push(update_via_app_count);
-                            footer.push(update_via_dbf_count);
                         },
                         async: false
                     });
-                    UnblockPagePermanently();
-
-                    return {body: body, header: head, footer: footer};
+                    return {body: body, header: head,};
                 }
             });
             var total_shipments = 0;
             var app_shipments = 0;
             var dbf_shipments = 0;
 
-
-            $('#datatable').append("<tfoot><tr><th colspan='7'>Total:</th><th class='total_shipment_count'></th><th class='update_via_app_count'></th><th class='update_via_dbf_count'></th></tr></tfoot>");
             var table = $('#datatable').DataTable({
+                scrollX: true, scrollY: '500px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
@@ -517,8 +536,6 @@
                         className: 'btn btn-primary',
                         title: 'Last Mile App Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                        footer: true
-
                     },
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -545,22 +562,34 @@
 
                     }
                 },
-                rowId: 'delivery_note_id',
-                order: [[4, 'desc']],
+                rowId: 'id',
+                order: [[1, 'desc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'delivery_note', name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    {data: 'city', name: 'c.name', class: 'align-middle text-center city'},
-                    {data: 'zone', name: 'z.name', class: 'align-middle text-center zone'},
-                    {data: 'created_at', name: 'delivery_notes.created_at', class: 'align-middle text-center created_at'},
-                    {data: 'trax_id', name: 'r.trax_id', class: 'align-middle text-center trax_id'},
-                    {data: 'rider', name: 'r.name', class: 'align-middle text-center rider'},
-                    {data: 'rider_cat', name: 'rd.name', class: 'align-middle text-center rider_cat'},
-                    {data: 'total_shipments_link', name: 'delivery_notes.shipments_count', class: 'align-middle text-center total_shipments_link'},
-                    {data: 'update_via_app', name: 'shipments_rider_updated', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
-                    {data: 'update_via_dbf', name:'update_via_dbf', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
-
-
+                    {data: 'id',orderable: false, searchable: false, class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'trax_id', name: 'rider_wise_delivery_note_summaries.trax_id', class: 'align-middle text-center trax_id'},
+                    {data: 'rider_name', name: 'r.name', class: 'align-middle text-center rider'},
+                    {data: 'hub',name:'h.name', class: 'align-middle text-center rider_cat'},
+                    {data: 'zone', name:'z.name', class: 'align-middle text-center total_shipments_link'},
+                    {data: 'delivery_date', name: 'rider_wise_delivery_note_summaries.delivery_date', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
+                    {data: 'total_shipments_link', class: 'align-middle text-center total_shipments_link', orderable: false, searchable: false},
+                    {data: 'before_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_11_count',  name:'rider_wise_delivery_note_summaries.at_11_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_12_count',  name:'rider_wise_delivery_note_summaries.at_12_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_13_count',  name:'rider_wise_delivery_note_summaries.at_13_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_14_count',  name:'rider_wise_delivery_note_summaries.at_14_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_15_count',  name:'rider_wise_delivery_note_summaries.at_15_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_16_count',  name:'rider_wise_delivery_note_summaries.at_16_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_17_count',  name:'rider_wise_delivery_note_summaries.at_17_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_18_count',  name:'rider_wise_delivery_note_summaries.at_18_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_19_count',  name:'rider_wise_delivery_note_summaries.at_19_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_20_count',  name:'rider_wise_delivery_note_summaries.at_20_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_21_count',  name:'rider_wise_delivery_note_summaries.at_21_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_22_count',  name:'rider_wise_delivery_note_summaries.at_22_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'at_23_count',  name:'rider_wise_delivery_note_summaries.at_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'after_23_count', name:'rider_wise_delivery_note_summaries.after_23_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'total_updated_shipments', name:'rider_wise_delivery_note_summaries.shipment_update_count', class: 'align-middle text-center', orderable: false, searchable: false},
+                    {data: 'updated_via_rider', name:'updated_via_rider', class: 'align-middle text-center update_via_app', orderable: false, searchable: false},
+                    {data: 'updated_via_admin', name:'updated_via_admin', class: 'align-middle text-center update_via_dbf', orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -568,13 +597,13 @@
                     if(index == 0){
 
                         total_shipments = data.total_shipments;
-                        app_shipments = data.shipments_rider_updated;
-                        dbf_shipments = data.shipments_dbf_updated;
+                        app_shipments = data.updated_via_rider1;
+                        dbf_shipments = data.updated_via_admin1;
                     }
                     else{
                         total_shipments += data.total_shipments;
-                        app_shipments += data.shipments_rider_updated;
-                        dbf_shipments += data.shipments_dbf_updated;
+                        app_shipments += data.updated_via_rider1;
+                        dbf_shipments += data.updated_via_admin1;
 
                     }
                     if(index == (info.end - 1)){
@@ -582,41 +611,33 @@
                         $('#app_shipments').text(app_shipments);
                         $('#dbf_shipments').text(dbf_shipments);
                     }
-                   
-             
                 },
                 drawCallback: function () {
                     var api = this.api();
-                    
+
                     var update_via_app_count = 0;
                     var update_via_dbf_count = 0;
                     var total_shipment_count = 0;
                     api.rows( {page:'current'} ).every( function () {
-                        // console.table(this.data());
-                        // console.log('updated_via_App ',this.data().update_via_app);
-                        // console.log('shipments_dbf_updated ',this.data().shipments_dbf_updated);
-                        // console.log('total_shipments ',this.data().total_shipments);
-                        update_via_app_count+=this.data().shipments_rider_updated;
-                        update_via_dbf_count+=this.data().shipments_dbf_updated;
-                    total_shipment_count+=this.data().total_shipments;
-    
-                } );    
-                // console.log(total_delivered_count);
-                // console.log(total_shipment_count);
+                        update_via_app_count+=this.data().updated_via_rider1;
+                        update_via_dbf_count+=this.data().updated_via_admin1;
+                        total_shipment_count+=this.data().total_shipments;
+                    } );
 
-                setTimeout(function(){
-                    document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
-                    document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
-                    document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
-                }, 1000);
-                    
-    },
+                    // setTimeout(function(){
+                    //     document.getElementsByClassName('total_shipment_count')[0].innerHTML=total_shipment_count;
+                    //     document.getElementsByClassName('update_via_app_count')[0].innerHTML=update_via_app_count;
+                    //     document.getElementsByClassName('update_via_dbf_count')[0].innerHTML=update_via_dbf_count;
+                    // }, 1000);
+
+                },
                 stateLoaded: function (settings, data) {
-  },
+                },
           initComplete: function() {
                     this.api().table().columns.adjust();
                 }
             });
+
 
             $('#search_filter_btn').on('click',function () {
                 $('#total_shipments').text(0);
@@ -633,11 +654,11 @@
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.reports.completed_delivery_notes.shipments') !!}',
+                    url: '{!! route('admin.reports.last_mile_app.shipment_list') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'id': id
                     }
                 })
                     .done(function(data) {
@@ -652,7 +673,6 @@
                             $('#shipments_modal .modal-body').html(html);
                         }
                     });
-
             });
 
             var app_table;
@@ -666,7 +686,6 @@
 
                     app_table = $('#app_shipments_datatable').DataTable({
                         dom: 't',
-                        // scrollX: true,
                         buttons: [
                             {
                                 extend: 'excelHtml5',
@@ -675,9 +694,7 @@
                             },
                         ],
                         "autoWidth": true,
-                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                         pageLength: -1,
-                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -685,7 +702,7 @@
                         ajax: {
                             url: '{{ route('admin.reports.last_mile_app.app_shipments_list') }}',
                             data: function (d) {
-                                d.delivery_note_id = $('#app_delivery_note_id').val();
+                                d.id = $('#app_delivery_note_id').val();
                             }
                         },
                         rowId: 'shipment_id',
@@ -738,9 +755,7 @@
                             },
                         ],
                         "autoWidth": true,
-                        // lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                         pageLength: -1,
-                        // pagingType: 'full_numbers',
                         processing: true,
                         language: {
                             processing: data_table_loader
@@ -748,7 +763,7 @@
                         ajax: {
                             url: '{{ route('admin.reports.last_mile_app.dbf_shipments_list') }}',
                             data: function (d) {
-                                d.delivery_note_id = $('#dbf_delivery_note_id').val();
+                                d.id = $('#dbf_delivery_note_id').val();
                             }
                         },
                         rowId: 'shipment_id',

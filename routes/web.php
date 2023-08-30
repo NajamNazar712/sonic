@@ -2774,6 +2774,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+            Route::post('shipment_list', 'Admins\AdminReportsController@shipment_list')->name('shipment_list');
             Route::get('app_shipments_list', 'Admins\AdminReportsController@last_mile_app_shipments_list')->name('app_shipments_list');
             Route::get('dbf_shipments_list', 'Admins\AdminReportsController@last_mile_dbf_shipments_list')->name('dbf_shipments_list');
         });

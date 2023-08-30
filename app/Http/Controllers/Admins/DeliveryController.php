@@ -261,8 +261,8 @@ class DeliveryController extends Controller
             ->whereRaw('IF (shipments.shipper_status_id IN (2, 49), (oc.hub_id = dc.hub_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
             ->whereRaw('IF (shipments.shipper_status_id = 55, (irrh.old_consignee_city_id = irrh.new_consignee_city_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id', $status)
-            ->groupBy('r.id');
+            ->whereIn('shipments.shipper_status_id', $status);
+            // ->groupBy('r.id');
 
 
 
@@ -644,119 +644,200 @@ class DeliveryController extends Controller
                 $rider_name = '';
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
-                    $shipment_status_id = $shipment->shipper_status_id ?? NULL;
-                    $rider = Rider::where('id', $request->rider_id);
-                    if ($rider->exists()) {
-                        $operation_rider_id = $rider->first()->operation_rider_id;
-                    } else {
-                        return ['status' => 1, 'error' => 'Rider not found!'];
-                    }
-                    if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
-                        return ['status' => 1, 'error' => 'Shipment cannot be added because it is on Re-Attempt Status'];
-                    } else {
+                    /******** COMMENT FOR PRODUCTION AS PER REVERT TICKET(6263)-  CAN BE REOPEN AGAIN (FROM ZOHAIB TARIQ) ********/
+                    // $shipment_status_id = $shipment->shipper_status_id ?? NULL;
+                    // $rider = Rider::where('id', $request->rider_id);
+                    // if($rider->exists()){
+                    //     $operation_rider_id = $rider->first()->operation_rider_id;
+                    // }
+                    // else{
+                    //     return ['status' => 1, 'error' => 'Rider not found!'];
+                    // }
+                    // if ($operation_rider_id == 2 && ($shipment_status_id == NULL || $shipment_status_id == 13)) {
+                    //     return ['status' => 1, 'error' => 'Shipment cannot be added because it is on Re-Attempt Status'];
+                    // } else {
                         $dispute_check = CheckDisputeShipmentsController::check($shipment->id);
                         if (!$dispute_check) {
                             return ['status' => 1, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
                         }
-                    }
-                    if ($shipment->shipment_detail()->exists()) {
-                        if ($shipment->shipment_detail->is_open == 1) {
-                            $is_open_box = 1;
+                        if ($shipment->shipment_detail()->exists()) {
+                            if ($shipment->shipment_detail->is_open == 1) {
+                                $is_open_box = 1;
+                            } else {
+                                $is_open_box = 0;
+                            }
                         } else {
                             $is_open_box = 0;
                         }
-                    } else {
-                        $is_open_box = 0;
-                    }
-                    $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
-                    if ($on_hold_shipment->exists()) {
-                        if (!in_array(Auth::id(), [10, 288, 423])) {
-                            $on_hold_shipment = $on_hold_shipment->first();
-                            $delivery_date = Carbon::parse($on_hold_shipment->delivery_date);
-                            $today = Carbon::today();
-                            if ($delivery_date > $today) {
-                                $delivery_date = $delivery_date->toFormattedDateString();
-                                return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $delivery_date];
-                            }
-                        }
-                    }
-                    if ($shipment->packaging_material_request == 1) {
-                        $packaging_material_request = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
-                        if ($packaging_material_request != null) {
-                            if ($packaging_material_request->status_id != 3) {
-                                return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
-                            }
-                        }
-                        $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number', $shipment->tracking_number)->first();
-                        if ($packaging_material_request_stock != null) {
-                            if ($packaging_material_request_stock->status_id != 3) {
-                                return ['status' => 1, 'error' => 'Warehouse Stock Request is not dispatched yet!'];
-                            }
-                        }
-                    }
-
-                    $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
-                    if (session('role_id') == 1 || in_array($admin_hub, session('hubs'))) {
-                        $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
-                        if ($old_delivery_note_id->exists()) {
-                            $old_delivery_note_id = $old_delivery_note_id->first();
-                            $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
-                            $rider_name = $delivery_note_rider->rider->name;
-                            $is_updateable = DeliveryNoteShipment::where('delivery_note_id', $old_delivery_note_id->delivery_note_id)->where('status', 0)->count();
-                        } else {
-                            $is_updateable = 0;
-                        }
-
-
-                        if ($is_updateable == 0) {
-                            if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
-                                return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
-                            } else if ($shipment->shipper_status_id == 49) {
-                                $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
-                                if ($misroute_history->exists()) {
-                                    $misroute_history = $misroute_history->latest()->first();
-                                    if ($misroute_history->old_consignee_city->hub_id != $misroute_history->new_consignee_city->hub_id) {
-                                        return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
-                                    }
-                                } else {
-                                    return ['status' => 1, 'error' => 'Shipment Not found!'];
-                                }
-                            } else if ($shipment->shipper_status_id == 55) {
-                                $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
-                                if ($request_history->exists()) {
-                                    $request_history = $request_history->first();
-                                    if ($request_history->old_consignee_city->hub_id != $request_history->new_consignee_city->hub_id) {
-                                        return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
-                                    }
-                                } else {
-                                    return ['status' => 1, 'error' => 'Shipment Not found!'];
+                        $on_hold_shipment = ShipmentOnHold::where('shipment_id', $shipment->id)->where('status', 1);
+                        if ($on_hold_shipment->exists()) {
+                            if (!in_array(Auth::id(), [10, 288, 423])) {
+                                $on_hold_shipment = $on_hold_shipment->first();
+                                $delivery_date = Carbon::parse($on_hold_shipment->delivery_date);
+                                $today = Carbon::today();
+                                if ($delivery_date > $today) {
+                                    $delivery_date = $delivery_date->toFormattedDateString();
+                                    return ['status' => 1, 'error' => 'Shipment is marked as On-Hold until ' . $delivery_date];
                                 }
                             }
+                        }
+                        if ($shipment->packaging_material_request == 1) {
+                            $packaging_material_request = PackagingMaterialRequest::where('tracking_number', $shipment->tracking_number)->first();
+                            if ($packaging_material_request != null) {
+                                if ($packaging_material_request->status_id != 3) {
+                                    return ['status' => 1, 'error' => 'Packaging Material Request is not dispatched yet!'];
+                                }
+                            }
+                            $packaging_material_request_stock = WarehouseStockRequest::where('tracking_number', $shipment->tracking_number)->first();
+                            if ($packaging_material_request_stock != null) {
+                                if ($packaging_material_request_stock->status_id != 3) {
+                                    return ['status' => 1, 'error' => 'Warehouse Stock Request is not dispatched yet!'];
+                                }
+                            }
+                        }
+
+                        $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
+                        if (session('role_id') == 1 || in_array($admin_hub, session('hubs'))) {
+                            $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes', 'delivery_notes.id', '=', 'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
+                            if ($old_delivery_note_id->exists()) {
+                                $old_delivery_note_id = $old_delivery_note_id->first();
+                                $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
+                                $rider_name = $delivery_note_rider->rider->name;
+                                $is_updateable = DeliveryNoteShipment::where('delivery_note_id', $old_delivery_note_id->delivery_note_id)->where('status', 0)->count();
+                            } else {
+                                $is_updateable = 0;
+                            }
 
 
-                            if ($request->has('hub_id')) {
+                            if ($is_updateable == 0) {
+                                if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
+                                    return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
+                                } else if ($shipment->shipper_status_id == 49) {
+                                    $misroute_history = MisroutedHistory::where('shipment_id', $shipment->id);
+                                    if ($misroute_history->exists()) {
+                                        $misroute_history = $misroute_history->latest()->first();
+                                        if ($misroute_history->old_consignee_city->hub_id != $misroute_history->new_consignee_city->hub_id) {
+                                            return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                        }
+                                    } else {
+                                        return ['status' => 1, 'error' => 'Shipment Not found!'];
+                                    }
+                                } else if ($shipment->shipper_status_id == 55) {
+                                    $request_history = InterceptReBookRequestHistory::where('shipment_id', $shipment->id);
+                                    if ($request_history->exists()) {
+                                        $request_history = $request_history->first();
+                                        if ($request_history->old_consignee_city->hub_id != $request_history->new_consignee_city->hub_id) {
+                                            return ['status' => 1, 'error' => 'Shipment needs to be moved through cargo!'];
+                                        }
+                                    } else {
+                                        return ['status' => 1, 'error' => 'Shipment Not found!'];
+                                    }
+                                }
 
-                                $hub_id = $shipment->consignee_city->hub_id;
-                                // rider assigned hub setting
-                                $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id', $request->rider_id);
-                                if ($rider_assigned_hub->exists()) {
-                                    $rider_assigned_hub = $rider_assigned_hub->first();
-                                    $rider_assigned_hubs = $rider_assigned_hub->hubs;
-                                    $rider_assigned_hubs = explode(',', $rider_assigned_hubs);
 
-                                    if (in_array($hub_id, $rider_assigned_hubs)) {
-                                        $flag = true;
+                                if ($request->has('hub_id')) {
+
+                                    $hub_id = $shipment->consignee_city->hub_id;
+                                    // rider assigned hub setting
+                                    $rider_assigned_hub = RiderAssignedHubForDeliveryNote::where('rider_id', $request->rider_id);
+                                    if ($rider_assigned_hub->exists()) {
+                                        $rider_assigned_hub = $rider_assigned_hub->first();
+                                        $rider_assigned_hubs = $rider_assigned_hub->hubs;
+                                        $rider_assigned_hubs = explode(',', $rider_assigned_hubs);
+
+                                        if (in_array($hub_id, $rider_assigned_hubs)) {
+                                            $flag = true;
+                                        } elseif ($request->hub_id == $hub_id) {
+                                            $flag = true;
+                                        } else {
+                                            $flag = false;
+                                        }
                                     } elseif ($request->hub_id == $hub_id) {
                                         $flag = true;
-                                    } else {
-                                        $flag = false;
                                     }
-                                } elseif ($request->hub_id == $hub_id) {
-                                    $flag = true;
-                                }
-                                // rider assigned hub setting end
+                                    // rider assigned hub setting end
 
-                                if ($flag) {
+                                    if ($flag) {
+                                        if (!$request->has('pieces_confirm')) {
+                                            if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
+                                                $details = array();
+                                                $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
+
+                                                $details['id'] = $shipment->id;
+                                                $details['tracking_number'] = $shipment->tracking_number;
+                                                $details['pieces_count'] = $shipment->pieces;
+                                                $details['pieces_tracking_numbers'] = $shipment_pieces;
+                                                return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
+                                            }
+                                        }
+                                        $destination = $shipment->consignee_city->name;
+                                        $hub = City::find($shipment->consignee_city->hub_id)->name;
+                                        $service = $shipment->booking_type->booking_type;
+                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                        if ($shipment_journey->exists()) {
+                                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
+
+                                            $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
+                                            $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                            if ($status_id != '') {
+                                                $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                                $status = $status_name->name;
+                                            } else {
+                                                $status = ' - ';
+                                            }
+                                        }
+                                        $class = null;
+                                        if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
+                                            $class = 'complaint_row';
+                                        }
+                                        ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
+                                        $consolidation_details = self::check_consolidation($shipment->id);
+                                        $consolidation_flag = FALSE;
+
+                                        if ($consolidation_details) {
+                                            $consolidation_flag = TRUE;
+                                        }
+
+                                        $intercept = false;
+                                        if (InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->exists()) {
+                                            $intercept = true;
+                                        }
+                                        $amount_check = false;
+                                        $amount_log = ChangeShipmentAmountLog::where('shipment_id', $shipment->id);
+                                        if ($amount_log->exists()) {
+                                            $amount_log = $amount_log->first();
+                                            $amount_check = true;
+                                        }
+                                        $crm_request = array();
+                                        if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
+                                            if ($amount_check) {
+                                                $crm_request['cod_change'] = $amount_log->new_amount;
+                                            } else {
+                                                $crm_request['cod_change'] = $shipment->intercept_history->new_amount;
+                                            }
+                                        } else {
+                                            $crm_request['cod_change'] = null;
+                                        }
+                                        if (($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))) {
+                                            $crm_request['address_change'] = $shipment->intercept_history->new_consignee_address;
+                                        } else {
+                                            $crm_request['address_change'] = null;
+                                        }
+                                        if (($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))) {
+                                            $crm_request['phone_one_change'] = $shipment->intercept_history->new_consignee_phone_number_1;
+                                        } else {
+                                            $crm_request['phone_one_change'] = null;
+                                        }
+                                        if ($shipment->payment_mode_id == 2) {
+                                            $ccd_shipment = 1;
+                                        } else {
+                                            $ccd_shipment = 0;
+                                        }
+                                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment]);
+                                    } else {
+                                        return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
+                                    }
+                                } else {
                                     if (!$request->has('pieces_confirm')) {
                                         if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
                                             $details = array();
@@ -770,11 +851,11 @@ class DeliveryController extends Controller
                                         }
                                     }
                                     $destination = $shipment->consignee_city->name;
-                                    $hub = City::find($shipment->consignee_city->hub_id)->name;
+                                    $hub = City::find($shipment->consignee_city->hub_id)->id;
                                     $service = $shipment->booking_type->booking_type;
                                     $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                                     if ($shipment_journey->exists()) {
-                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
+                                        $shipment_journey = $shipment_journey->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
 
                                         $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
                                         $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
@@ -791,6 +872,7 @@ class DeliveryController extends Controller
                                     }
                                     ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
                                     $consolidation_details = self::check_consolidation($shipment->id);
+
                                     $consolidation_flag = FALSE;
 
                                     if ($consolidation_details) {
@@ -809,10 +891,10 @@ class DeliveryController extends Controller
                                     }
                                     $crm_request = array();
                                     if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
-                                        if ($amount_check) {
-                                            $crm_request['cod_change'] = $amount_log->new_amount;
-                                        } else {
+                                        if ($intercept == true) {
                                             $crm_request['cod_change'] = $shipment->intercept_history->new_amount;
+                                        } else {
+                                            $crm_request['cod_change'] = $amount_log->new_amount;
                                         }
                                     } else {
                                         $crm_request['cod_change'] = null;
@@ -833,95 +915,17 @@ class DeliveryController extends Controller
                                         $ccd_shipment = 0;
                                     }
                                     return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment]);
-                                } else {
-                                    return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
                                 }
                             } else {
-                                if (!$request->has('pieces_confirm')) {
-                                    if ($shipment->booking_type_id == 1 && $shipment->pieces > 1) {
-                                        $details = array();
-                                        $shipment_pieces = ShipmentPiece::where('shipment_id', $shipment->id)->pluck('tracking_number')->toArray();
-
-                                        $details['id'] = $shipment->id;
-                                        $details['tracking_number'] = $shipment->tracking_number;
-                                        $details['pieces_count'] = $shipment->pieces;
-                                        $details['pieces_tracking_numbers'] = $shipment_pieces;
-                                        return ['status' => 2, 'success' => 'Shipment Piece(s) found!', 'details' => $details];
-                                    }
-                                }
-                                $destination = $shipment->consignee_city->name;
-                                $hub = City::find($shipment->consignee_city->hub_id)->id;
-                                $service = $shipment->booking_type->booking_type;
-                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                                if ($shipment_journey->exists()) {
-                                    $shipment_journey = $shipment_journey->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
-
-                                    $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
-                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                                    if ($status_id != '') {
-                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                        $status = $status_name->name;
-                                    } else {
-                                        $status = ' - ';
-                                    }
-                                }
-                                $class = null;
-                                if (CrmRequest::where('shipment_id', $shipment->id)->where('case_nature_id', 1)->whereIn('status_id', [2, 3, 5])->exists()) {
-                                    $class = 'complaint_row';
-                                }
-                                ShipmentScanningJourneyController::add($shipment->id, 4, 1, Auth::id(), null, null);
-                                $consolidation_details = self::check_consolidation($shipment->id);
-
-                                $consolidation_flag = FALSE;
-
-                                if ($consolidation_details) {
-                                    $consolidation_flag = TRUE;
-                                }
-
-                                $intercept = false;
-                                if (InterceptReBookRequestHistory::where('shipment_id', $shipment->id)->exists()) {
-                                    $intercept = true;
-                                }
-                                $amount_check = false;
-                                $amount_log = ChangeShipmentAmountLog::where('shipment_id', $shipment->id);
-                                if ($amount_log->exists()) {
-                                    $amount_log = $amount_log->first();
-                                    $amount_check = true;
-                                }
-                                $crm_request = array();
-                                if (($intercept == true && ($shipment->intercept_history->old_amount != $shipment->intercept_history->new_amount)) || ($amount_check == true && ($amount_log->old_amount != $amount_log->new_amount))) {
-                                    if ($intercept == true) {
-                                        $crm_request['cod_change'] = $shipment->intercept_history->new_amount;
-                                    } else {
-                                        $crm_request['cod_change'] = $amount_log->new_amount;
-                                    }
-                                } else {
-                                    $crm_request['cod_change'] = null;
-                                }
-                                if (($intercept == true && ($shipment->intercept_history->old_consignee_address != $shipment->intercept_history->new_consignee_address))) {
-                                    $crm_request['address_change'] = $shipment->intercept_history->new_consignee_address;
-                                } else {
-                                    $crm_request['address_change'] = null;
-                                }
-                                if (($intercept == true && ($shipment->intercept_history->old_consignee_phone_number_1 != $shipment->intercept_history->new_consignee_phone_number_1))) {
-                                    $crm_request['phone_one_change'] = $shipment->intercept_history->new_consignee_phone_number_1;
-                                } else {
-                                    $crm_request['phone_one_change'] = null;
-                                }
-                                if ($shipment->payment_mode_id == 2) {
-                                    $ccd_shipment = 1;
-                                } else {
-                                    $ccd_shipment = 0;
-                                }
-                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => number_format($shipment->amount), 'service_type' => $service, 'shipment_status' => $status, 'rider_name' => $rider_name, 'remarks' => $remarks, 'class' => $class, 'consolidation_flag' => $consolidation_flag, 'consolidation_details' => $consolidation_details, 'crm_request' => $crm_request, 'is_open_box' => $is_open_box, 'ccd_shipment' => $ccd_shipment]);
+                                return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
                             }
-                        } else {
-                            return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
                         }
-                    } else {
-                        return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
-                    }
-                } else {
+                        else {
+                            return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
+                        }
+                    // }//Commented else
+                }
+                else {
                     return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
                 }
             }
@@ -5999,16 +6003,17 @@ class DeliveryController extends Controller
             })
             ->addColumn('hbl_amount', function ($sdn) {
                 $id = $sdn->sdn;
+//                dd($id);
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->first();
-                        return $hbl_amount->transactions_amount;
+                        $hbl_amount = $hbl_amount->get();
+                        return $hbl_amount->sum('transactions_amount');
                     } else {
                         return '-';
                     }
@@ -6022,12 +6027,25 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
-                        return $one_link_amount->sum('transaction_amount');
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            return $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            return '-';
+                        }
                     } else {
                         return '-';
                     }
@@ -6040,17 +6058,17 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
                         $fintech_payment_detail = FintechPaymentDetails::whereIn('trax_pay_id',$trax_pay_transection_id);
                         if($fintech_payment_detail->exists())
                         {
-                           return $fintech_payment_detail->sum('cod_amount');
+                            return $fintech_payment_detail->sum('cod_amount');
                         }
                         else
                         {
@@ -6068,25 +6086,39 @@ class DeliveryController extends Controller
                 $delivery_note = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $id)->select('delivery_note_id');
 
                 if ($delivery_note->exists()) {
-                    $delivery_note = $delivery_note->first();
-                    $delivery_note_id = $delivery_note->delivery_note_id;
+                    $delivery_note = $delivery_note->get();
+                    $delivery_note_id = $delivery_note->pluck('delivery_note_id')->toArray();
 
-                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::where('delivery_note_id', $delivery_note_id);
+                    $one_link_amount = OneLinkOutForDeliveryShipmentPayment::whereIn('delivery_note_id', $delivery_note_id)->select('shipment_id');
                     if ($one_link_amount->exists()) {
-                        $a = $one_link_amount->sum('transaction_amount');
-                    } else {
+                        $one_link_amount = $one_link_amount->get();
+                        $one_link_shipments = $one_link_amount->pluck('shipment_id')->toArray();
+
+                        $cod = Shipment::whereIn('id',$one_link_shipments)->select('amount');
+
+                        if($cod->exists())
+                        {
+                            $cod = $cod->get();
+                            $a = $cod = $cod->sum('amount');
+                        }
+                        else
+                        {
+                            $a = 0;
+                        }
+                    }
+                    else {
                         $a = 0;
                     }
 
-                    $hbl_amount = HblKonnectTransactionDeliveryNote::where('delivery_note_id', $delivery_note_id)->select('transactions_amount');
+                    $hbl_amount = HblKonnectTransactionDeliveryNote::whereIn('delivery_note_id', $delivery_note_id)->select('transactions_amount');
                     if ($hbl_amount->exists()) {
-                        $hbl_amount = $hbl_amount->first();
-                        $b = $hbl_amount->transactions_amount;
+                        $hbl_amount = $hbl_amount->get();
+                        $b = $hbl_amount->sum('transactions_amount');
                     } else {
                         $b = 0;
                     }
 
-                    $trax_pay_amount = TraxPayTransaction::where('delivery_note_id', $delivery_note_id);
+                    $trax_pay_amount = TraxPayTransaction::whereIn('delivery_note_id', $delivery_note_id);
                     if ($trax_pay_amount->exists()) {
                         $trax_pay_amount = $trax_pay_amount->get();
                         $trax_pay_transection_id = $trax_pay_amount->pluck('id')->toArray();
@@ -6105,7 +6137,8 @@ class DeliveryController extends Controller
                     $sum = $a + $b + $c;
 
                     if ($sum > 0) {
-                        return $total = $sum - $sdn->sdn_amount;
+                        $total = $sdn->sdn_amount - $sum;
+                        return $total;
                     } else {
                         return '-';
                     }
@@ -7094,9 +7127,10 @@ class DeliveryController extends Controller
             $payment_transactions = $payment_transactions->get();
             $payment_transaction_data = array();
             foreach ($payment_transactions as $index => $payment_transaction) {
+                $cod_amount = Shipment::where('id',$payment_transaction->shipment_id)->first();
                 $payment_transaction_data[$index]['transaction_authentication_id'] = $payment_transaction->transaction_authentication_id;
                 $payment_transaction_data[$index]['tracking_number'] = $payment_transaction->tracking_number;
-                $payment_transaction_data[$index]['transaction_amount'] = number_format($payment_transaction->transaction_amount);
+                $payment_transaction_data[$index]['transaction_amount'] = number_format($cod_amount->received_amount);
                 $payment_transaction_data[$index]['created_at'] = Carbon::parse($payment_transaction->created_at)->toDateTimeString();
                 $payment_transaction_data[$index]['transaction_date'] = Carbon::parse($payment_transaction->transaction_date)->format('M d, Y');
                 $payment_transaction_data[$index]['transaction_time'] = Carbon::parse($payment_transaction->transaction_time)->format('H:i:s');
