@@ -18,12 +18,11 @@ class Notifications extends Mailable implements ShouldQueue
      *
      * @return void
      */
-    public function __construct($subject, $body, $from = NULL, $head = NULL)
+    public function __construct($subject, $body, $from = NULL)
     {
         $this->queue = 'email';
         $this->subject = $subject;
         $this->body = nl2br($body);
-        $this->head = $head;
 
         if ($from) {
             $this->from($from, 'TRAX');
@@ -37,6 +36,6 @@ class Notifications extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject($this->subject)->view('notifications.email')->with([ 'body' => $this->body,'head' => $this->head]);
+        return $this->subject($this->subject)->view('notifications.email')->with([ 'body' => $this->body]);
     }
 }

@@ -213,7 +213,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL, $head = NULL)
+    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
     {
         if ($to) {
 
@@ -252,7 +252,7 @@ class NotificationsController extends Controller
                 $mail->bcc($bcc);
             }
 
-            $mail->send(new Notifications($subject, $body, $from, $head));
+            $mail->send(new Notifications($subject, $body, $from));
         }
     }
 
@@ -10509,16 +10509,10 @@ class NotificationsController extends Controller
                         /* Modified from: https://github.com/mukulkant/Star-rating-using-pure-css */
                         </style>';
 
-
-
-                        $cc = NULL;
-                        $bcc = NULL;
-                        $from = NULL;
-
                         
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
-                        self::email($subject, $body, $email, $cc, $bcc, $from ,$head);
+                        self::email($subject, $body, $email);
                     }
                 }
             }
