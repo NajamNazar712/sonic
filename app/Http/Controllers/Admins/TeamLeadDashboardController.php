@@ -60,7 +60,7 @@ class TeamLeadDashboardController extends Controller
 
         $employee_additional_days = EmployeeAdditionalDay::get();
 
-        $number_of_available_agents = Employee::where('line_manager_id', Auth::id())->where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
