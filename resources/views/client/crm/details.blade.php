@@ -193,9 +193,6 @@
                                                     <fieldset class="form-group position-relative col-10 has-icon-left ">
                                                         <input type="hidden" id="last_comment_id"
                                                             value="{{ $last_comment_id }}">
-                                                        <div class="form-control-position">
-                                                            <i class="la la-chevron-right"></i>
-                                                        </div>
                                                         {{-- <input type="text" class="form-control" id="chat_input" placeholder="Type your message"> --}}
                                                         <textarea id="chat_input" class="form-control width-600 height-200 summernote" placeholder="Type your message"></textarea>
                                                     </fieldset>
@@ -287,7 +284,7 @@
         .note-editable:first-letter {
             text-transform: capitalize;
         }
-        
+
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }

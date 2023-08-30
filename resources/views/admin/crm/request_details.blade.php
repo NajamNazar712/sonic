@@ -453,10 +453,6 @@
                                                                 class="form-group position-relative has-icon-left col-9 m-0 ">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
-
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
@@ -560,9 +556,6 @@
                                                                 class="form-group position-relative has-icon-left col-9 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-200 summernote" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
