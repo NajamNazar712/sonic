@@ -45,7 +45,6 @@ class TeamLeadDashboardController extends Controller
     public function team_lead_index()
     {
 
-        $today = Carbon::today()->toDateString();
 
         $hubs = City::where('status', '1')
             ->where('business_category_id', '1')
@@ -64,7 +63,7 @@ class TeamLeadDashboardController extends Controller
         $number_of_available_agents = Employee::where('line_manager_id', Auth::id())->where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-            ->where('attendance_date', '=', $today)
+            ->whereDate('attendance_date', '=', date('Y-m-d'))
             ->whereIn('id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
