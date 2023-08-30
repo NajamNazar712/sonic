@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Http\Models\CrmAgent;
 use App\Http\Models\Shipment;
 use App\Http\Models\BanksList;
+use App\RiderWiseDeliveryNote;
 use App\Http\Models\Admin\Admin;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\CRM\CRMCount;
@@ -26,11 +27,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
 use App\Http\Models\InsuranceCharge;
 use App\SpecialApprovalRequestAdmin;
+use function GuzzleHttp\Promise\all;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\File;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\MultipleSaleLead;
 use App\Http\Models\ShipmentsJourney;
+use App\RiderWiseDeliveryNoteSummary;
 use App\Http\Models\Admin\AgentDayLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\SubCategorySegment;
@@ -49,6 +52,7 @@ use App\Http\Models\Admin\MasterCargo\Bag;
 use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\StationRecoveryReport;
 use App\Http\Models\V2Pickup\V2PickupNote;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use App\Http\Models\Admin\DailyVisitRating;
 use App\Http\Models\CRM\CrmRequestFeedback;
 use App\Http\Models\Shipper\SubstituteUser;
@@ -61,6 +65,7 @@ use App\Http\Models\Admin\TraxPayTransaction;
 use App\Http\Models\CorporateInsuranceCharge;
 use App\Http\Models\Excel_reports\Debriefing;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use App\Http\Models\Admin\AgentCallMonitoring;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\CRM\CrmRequestAgentHistory;
@@ -78,8 +83,6 @@ use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-
-use function GuzzleHttp\Promise\all;
 
 class AdminReportsController extends Controller
 {
