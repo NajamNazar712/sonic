@@ -451,7 +451,7 @@
             var area = '';
             var territory = '';
 
-            $("#search_origin").prepend('<option value=""></option>').select2({
+            $("#search_origin").select2({
                 placeholder: "Select Hub",
                 width: '100%'
             });
@@ -1303,6 +1303,11 @@
                     $('#search_origin option').each(function() {
                         var optionValue = $(this).val();
                         if (selectedCities.includes(optionValue)) {
+                            var cityIndex = selectedCities.indexOf(optionValue);
+                            if (cityIndex > -1) {
+                                $(this).detach(); 
+                                $('#search_origin').prepend($(this)); 
+                            }
                             $(this).prop('selected', true);
                         } else {
                             $(this).prop('selected', false);
@@ -1315,6 +1320,7 @@
                     $('#AssignHubModal').modal('show');
                 }
             });
+
 
         var $select2 = $('#search_origin').select2({
             templateSelection: template,
