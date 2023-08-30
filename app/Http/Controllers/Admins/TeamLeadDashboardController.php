@@ -63,7 +63,7 @@ class TeamLeadDashboardController extends Controller
         $number_of_available_agents = Employee::where('line_manager_id', Auth::id())->where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
-            ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
+            ->whereDate('employee_attendances.attendance_date', '=', now()->format('Y-m-d'))
             ->whereIn('employee_attendances.id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
