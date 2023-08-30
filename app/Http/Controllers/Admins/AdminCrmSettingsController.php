@@ -863,7 +863,7 @@ class AdminCrmSettingsController extends Controller
 
     public function csat_cases_setting_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 698);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 696);
 
         $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_nature_types = CrmRequestCaseNatureType::all();
@@ -880,6 +880,7 @@ class AdminCrmSettingsController extends Controller
 
     public function csat_cases_setting_store(Request $request)
     {
+        
         $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
         $case_types = $request->get('case_types');
         $case_types = implode(',', $case_types);
@@ -900,7 +901,7 @@ class AdminCrmSettingsController extends Controller
 
     public function csat_score_formula_index()
     {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 698);   
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 701);
 
         $formulas = GlobalSettings::where('type', 'csat_formula')->latest()->first();
         $formulas = explode(',', $formulas->text ?? '');

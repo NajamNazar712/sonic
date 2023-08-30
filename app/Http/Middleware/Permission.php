@@ -851,6 +851,11 @@ class Permission
 
             'settings.return_delivered_to_shipper_email_cut_off_time.index' => 269,
             'settings.return_delivered_to_shipper_email_cut_off_time.store' => 269,
+            'settings.crm_cut_off_time_and_holidays.index' => 237,
+
+            'settings.csat_cases_setting.index' => 900,
+          
+            'settings.csat_cases_setting.formula.index' => 902,
 
             'settings.crm_reopen.index' => 274,
             'settings.crm_reopen.update' => 274,
@@ -1248,6 +1253,7 @@ class Permission
             
             'admin.reports.pay_fast_report.index' => 894,
             'admin.reports.pay_fast_report.list' => 894,
+            'admin.reports.csat_report.index' => 899,
 
 
             'admin.reports.hbl_konnect.index' => 895,
