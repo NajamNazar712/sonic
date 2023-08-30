@@ -7938,8 +7938,13 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1)')
                     );
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), 
+            DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 
+            'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type',
+            'delivery_notes.id as delivery_note')
             ->groupBy('r.id');
+
+            // dd($route_distribution_summary);
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
@@ -7958,6 +7963,48 @@ class AdminReportsController extends Controller
             ->addColumn('hbl_konnect_amount', function ($entry) {
                 $dn_ids = explode(',', $entry->dn_ids);
                 return DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+            })
+            ->editColumn('hbl_konnect_amount_percent', function ($entry) {
+                $dn_ids = explode(',', $entry->dn_ids);
+                $dncc_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+
+                $hbl_konnect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    return round(($hbl_konnect_amount / $dncc_amount) * 100, 2);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
+            ->editColumn('fintech_shipments_charges', function ($entry) {
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $entry->delivery_note)->pluck('shipment_id')->toArray();
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($amount > 0)
+                {
+                    return $amount;
+                }
+                else
+                {
+                    return '-';
+                }             
+            })
+            ->editColumn('fintech_amount_percent', function ($entry) {
+
+                $dn_ids = explode(',', $entry->dn_ids);
+                $dncc_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $entry->delivery_note)->pluck('shipment_id')->toArray();
+                $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($fintech_amount > 0 && $dncc_amount > 0 )
+                {
+                    return round(( $fintech_amount / $dncc_amount) * 100, 2);
+                }
+                else
+                {
+                    return '-';
+                }     
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
