@@ -64,7 +64,7 @@ class TeamLeadDashboardController extends Controller
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
-            ->whereIn('id', function ($query) {
+            ->whereIn('employee_attendances.id', function ($query) {
                 $query->select(DB::raw('MAX(id)'))
                     ->from('employee_attendances')
                     ->groupBy('employee_attendances.employee_id');
