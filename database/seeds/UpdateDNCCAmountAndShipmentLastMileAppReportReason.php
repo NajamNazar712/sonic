@@ -32,7 +32,7 @@ class UpdateDNCCAmountAndShipmentLastMileAppReportReason extends Seeder
                                 $shipment->shipper_status_id = $max_shipment_journey->shipper_status_id;
                                 $shipment->consignee_status_id = $max_shipment_journey->shipper_status_id;
 
-                                if(in_array([6,7], $delivery_note_shipment->status)){
+                                if(in_array($delivery_note_shipment->status, [6,7])){
                                     $shipment->received_amount = $shipment->amount;
                                     $dncc_amount = $dncc_amount + $shipment->amount;
                                     $delivered_count++;
