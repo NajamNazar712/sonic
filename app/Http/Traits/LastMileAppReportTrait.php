@@ -15,7 +15,7 @@ trait LastMileAppReportTrait
 
     public function createDeliveryNoteErrorLog($delivery_note_id, $shipment_id, $message) {
 
-        $delivery_note_error_log = DeliveryNoteErrorLog::create([
+        DeliveryNoteErrorLog::create([
             'delivery_note_id' => $delivery_note_id,
             'shipment_id' => $shipment_id,
             'message' => $message,
