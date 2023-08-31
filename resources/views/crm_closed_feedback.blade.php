@@ -2,8 +2,12 @@
 <html class="loading" lang="en" data-textdirection="ltr">
 
 <head>
-    @include('client.layout.header')
+    @extends('client.layout.header')
+    @section('title', 'Rating Form')
+
 </head>
+
+
 
 <body class="vertical-layout vertical-overlay-menu 2-columns menu-expanded fixed-navbar" data-open="click"
     data-menu="vertical-overlay-menu" data-col="2-columns">
@@ -49,11 +53,10 @@
         }
 
         .rate {
-    float: left;
-    height: 46px;
-    padding: 0px 0px;
-}
-
+            float: left;
+            height: 46px;
+            padding: 0px 0px;
+        }
         .rate:not(:checked)>input {
             position: absolute;
             top: -9999px;
@@ -94,6 +97,8 @@
     @media only screen and (min-width: 768px) and (max-width: 1400px) {
 	
         .rate {
+            float: left;
+            height: 46px;
             padding: 0px 0px;
         }
 
@@ -138,9 +143,9 @@
                                                             $resolution = App\Http\Models\ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
                                                         @endphp
                                                 <tr>
-                                                    <td style="width: 300px">{{ $crm_closed_case->id ?? '-' }}</td>
+                                                    <td style="width: 200px">{{ $crm_closed_case->id ?? '-' }}</td>
                                                     
-                                                    <td style="width: 300px">
+                                                    <td style="width: 200px">
                                                         {{ $type ?? '-' }}
                                                     </td>
                                                     
@@ -150,7 +155,7 @@
                                                     
                                                     <td style="widxth: 300px">Closed</td>
                                                     
-                                                    <td style="width: 300px">
+                                                    <td style="width: 200px">
                                                         {{ $resolved_within == 0 ? '1 Day' : $resolved_within . ' Days' }}
                                                     </td>
 
