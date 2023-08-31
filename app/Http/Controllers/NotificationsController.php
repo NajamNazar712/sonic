@@ -10391,20 +10391,27 @@ class NotificationsController extends Controller
                     
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-                    
+
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-                    
+
                         $array[$shipperId][] = $item;
                     }
 
-                    
+
                     foreach ($array as $shipperId => $items) {
+                        $ids = array();
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
                         
-                        $htmlHeader .= '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
+                        foreach ($items as $key => $value) {
+                            $ids[] = $value['id'];
+                        }
+
+                        $ids = implode(',', $ids);
+
+                        $htmlHeader = '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
                         $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
                                             <th style="padding:10px; border: 1px solid black;">Request #</th>
                                             <th style="padding:10px; border: 1px solid black;">Type</th>
@@ -10412,40 +10419,45 @@ class NotificationsController extends Controller
                                             <th style="padding:10px; border: 1px solid black;">Status</th>
                                             <th style="padding:10px; border: 1px solid black;">Resolved Within</th>
                                         </tr></thead><tbody>';
-                        
+
+                        $htmlHeader .= '<p style="text-align: center; font-size: 16px;">';
+                        $htmlHeader .= '<a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
+                        $htmlHeader .= '</p>';
                         $html = $htmlHeader;
-                        
+
+
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-                        
+
                             $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
                             $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
 
                             $html .= '<tr>';
 
-                            $html .= '<td style="padding:5px; border: 1px solid black;">'. $item["id"]. '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
-                                                  
+
                             $html .= '</tr>';
                         }
-                        
+
                         $html .= '</tbody>
                         </table>
                        ';
-                        
+
+
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
                         self::email($subject, $body, $email);
                     }
                 }
             }
-        }                    
-    }        
-    
+        }
+    }
+
     static public function custom($type, $subject, $body, $to)
     {
         if ($type == 1) {

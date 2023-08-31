@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers\Survey;
 
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\CRM\CrmRequestFeedback;
-use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\Survey\DisableAccountIntimationQuestion;
 use Exception;
+use Illuminate\Http\Request;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\CRM\CrmRequestFeedback;
+use App\Http\Models\Survey\DisableAccountIntimationQuestion;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Survey\DisableAccountIntimationSubmitSurvey;
 
 class DisabledAccountIntimationSurveyController extends Controller
 {
@@ -80,16 +82,37 @@ class DisabledAccountIntimationSurveyController extends Controller
     public function feedback_store(Request $request)
     {
         try {
-            foreach ($request->all() as $key => $value) {
-                CrmRequestFeedback::where('crm_request_id', $key)->delete();
-                CrmRequestFeedback::insert([
-                    'crm_request_id' => $key,
-                    'rating_id' => $value
-                ]);
+            if (count($request->all()) != 0) {
+                $request = $request->except('_token');
+                foreach ($request as $key => $value) {
+                    CrmRequestFeedback::where('crm_request_id', $key)->delete();
+                    CrmRequestFeedback::insert([
+                        'crm_request_id' => $key,
+                        'rating_id' => $value,
+                    ]);
+                }
+
+                return back()->with('success', 'ThankYou For Giving Us Feedback');
+            } else {
+                return back()->with('error', 'Please Submit Your Feedback');
+
             }
         } catch (Exception $ex) {
-
+            return back()->with('error', $ex->getMessage());
         }
+    }
+
+
+    public function feedback_index($ids)
+    {
+        $ids = explode(',', $ids);
+        $crm_closed_case = CrmRequest::leftjoin('crm_request_feedbacks', 'crm_requests.id', '=', 'crm_request_feedbacks.crm_request_id')
+            ->whereNull('crm_request_feedbacks.crm_request_id')
+            ->whereIn('crm_requests.id', $ids)
+            ->select('crm_requests.*')
+            ->get();
+
+        return view('crm_closed_feedback')->with('crm_closed_cases', $crm_closed_case);
     }
 
 }
