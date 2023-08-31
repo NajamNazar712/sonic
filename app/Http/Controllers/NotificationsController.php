@@ -213,7 +213,7 @@ class NotificationsController extends Controller
         dispatch(new ProcessOTPSMSForBotSMS($sms));
     }
 
-    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL, $head = NULL)
+    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL, $from = NULL)
     {
         if ($to) {
 
@@ -252,7 +252,7 @@ class NotificationsController extends Controller
                 $mail->bcc($bcc);
             }
 
-            $mail->send(new Notifications($subject, $body, $from, $head));
+            $mail->send(new Notifications($subject, $body, $from));
         }
     }
 
@@ -10391,140 +10391,73 @@ class NotificationsController extends Controller
                     
                     foreach ($crm_case_closeds as $item) {
                         $shipperId = $item['shipper_id'];
-                    
+
                         if (!isset($array[$shipperId])) {
                             $array[$shipperId] = [];
                         }
-                    
+
                         $array[$shipperId][] = $item;
                     }
 
-                    
+
                     foreach ($array as $shipperId => $items) {
+                        $ids = array();
                         $email = User::where('id', $shipperId)->pluck('email')->toArray();
                         $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
                         
-                        $htmlHeader = '<form action="'.route('survey.feedback.submit').'" method="post">';
-                        $htmlHeader .= '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
+                        foreach ($items as $key => $value) {
+                            $ids[] = $value['id'];
+                        }
+
+                        $ids = implode(',', $ids);
+
+                        $htmlHeader = '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
                         $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
                                             <th style="padding:10px; border: 1px solid black;">Request #</th>
                                             <th style="padding:10px; border: 1px solid black;">Type</th>
                                             <th style="padding:10px; border: 1px solid black;">Resolution</th>
                                             <th style="padding:10px; border: 1px solid black;">Status</th>
                                             <th style="padding:10px; border: 1px solid black;">Resolved Within</th>
-                                            <th style="padding:10px; border: 1px solid black;">Rate</th>
                                         </tr></thead><tbody>';
-                        
+
+                        $htmlHeader .= '<p style="text-align: center; font-size: 16px;">';
+                        $htmlHeader .= '<a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
+                        $htmlHeader .= '</p>';
                         $html = $htmlHeader;
-                        
+
+
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-                        
+
                             $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
                             $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
 
                             $html .= '<tr>';
 
-                            $html .= '<td style="padding:5px; border: 1px solid black;">'. $item["id"]. '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . $item["id"] . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
                             $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
-                        
-                            // Add star rating system here
-                            $html .= '<td style="padding:5px; border: 1px solid black;">';
 
-                            // Add star rating system here
-                            $html .= '<div class="rate">';
-                            for ($i = 1; $i <= 5; $i++) {
-                                $inputName = $item['id'];
-                                $inputId = 'star_a'.$item['id'].'-'.$i;
-                                $html .= '<input type="radio" class="star-'.$i.'" id="'.$inputId.'" name="' . $inputName . '" value="' . $i . '"/>';
-                                $html .= '<label class="star-'.$i.'" for="'.$inputId.'" title="' . $i . ' star"></label>';
-                            }
-                            $html .= '<span></span></div>';
-
-                            $html .= '</td>';
-                            
                             $html .= '</tr>';
                         }
-                        
-                        $html .= '</tbody>';
-                        $html .= '</form>
+
+                        $html .= '</tbody>
                         </table>
-                        <button type="submit" class="button">Submit</button>
                        ';
-                        
-                   $head = '
-                        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-                        <style>
-
-                        .button {
-                            padding: 10px 15px;
-                            margin-left: 400px;
-                            background-color: #3545da;
-                            color: wheat;
-                        }
-                        *{
-                            margin: 0;
-                            padding: 0;
-                        }
-                        .rate {
-                            float: left;
-                            height: 46px;
-                            padding: 0 10px;
-                        }
-                        .rate:not(:checked) > input {
-                            position:absolute;
-                            top:-9999px;
-                        }
-                        .rate:not(:checked) > label {
-                            float:right;
-                            width:1em;
-                            overflow:hidden;
-                            white-space:nowrap;
-                            cursor:pointer;
-                            font-size:30px;
-                            color:#ccc;
-                        }
-                        .rate:not(:checked) > label:before {
-                            content: "★";
-                        }
-                        .rate > input:checked ~ label {
-                            color: #ffc700;    
-                        }
-                        .rate:not(:checked) > label:hover,
-                        .rate:not(:checked) > label:hover ~ label {
-                            color: #deb217;  
-                        }
-                        .rate > input:checked + label:hover,
-                        .rate > input:checked + label:hover ~ label,
-                        .rate > input:checked ~ label:hover,
-                        .rate > input:checked ~ label:hover ~ label,
-                        .rate > label:hover ~ input:checked ~ label {
-                            color: #c59b08;
-                        }
-                        
-                        /* Modified from: https://github.com/mukulkant/Star-rating-using-pure-css */
-                        </style>';
 
 
-
-                        $cc = NULL;
-                        $bcc = NULL;
-                        $from = NULL;
-
-                        
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
-                        self::email($subject, $body, $email, $cc, $bcc, $from ,$head);
+                        self::email($subject, $body, $email);
                     }
                 }
             }
-        }                    
-    }        
-    
+        }
+    }
+
     static public function custom($type, $subject, $body, $to)
     {
         if ($type == 1) {
