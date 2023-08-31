@@ -15,7 +15,7 @@ class UpdateDNCCAmountAndShipmentLastMileAppReportReason extends Seeder
      */
     public function run()
     {
-        $delivery_note_ids = [1637039, 1634643, 1634642, 1634381];
+        $delivery_note_ids = [1634250, 1634276];
         foreach ($delivery_note_ids as $delivery_note_id){
             $delivery_note = DeliveryNote::find($delivery_note_id);
             if($delivery_note){
