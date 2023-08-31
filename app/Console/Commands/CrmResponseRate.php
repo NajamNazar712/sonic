@@ -140,8 +140,10 @@ class CrmResponseRate extends Command
                 }
         }
         
-        // dd($responses);
-
-        NotificationsController::send(221, array_slice($responses, 0, 3));
+        if(isset($responses)){
+            NotificationsController::send(221, array_slice($responses, 0, 3));
+        }else{
+            return;
+        }
     }
 }
