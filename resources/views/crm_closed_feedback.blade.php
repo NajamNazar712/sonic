@@ -49,10 +49,10 @@
         }
 
         .rate {
-            float: left;
-            height: 46px;
-            padding: 0 10px;
-        }
+    float: left;
+    height: 46px;
+    padding: 0px 0px;
+}
 
         .rate:not(:checked)>input {
             position: absolute;
@@ -90,9 +90,15 @@
             color: #c59b08;
         }
 
-        .color{
-            color: #64a0d2 
+
+    @media only screen and (min-width: 768px) and (max-width: 1400px) {
+	
+        .rate {
+            padding: 0px 0px;
         }
+
+    } 
+
     </style>
 
     <div class="content-body">
@@ -116,12 +122,12 @@
                                     <div class="table-responsive">
                                         <table class="table">
                                             <tr>
-                                                <th>Request Number</th>
+                                                <th>Ticket Number</th>
                                                 <th>Type</th>
                                                 <th>Resolution</th>
                                                 <th>Status</th>
                                                 <th>Resolved WithIn</th>
-                                                <th>Rate</th>
+                                                <th>Rating</th>
 
                                             </tr>
                                             @foreach ($crm_closed_cases as $crm_closed_case)

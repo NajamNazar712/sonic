@@ -82,8 +82,8 @@ class DisabledAccountIntimationSurveyController extends Controller
     public function feedback_store(Request $request)
     {
         try {
-            if (count($request->all()) != 0) {
-                $request = $request->except('_token');
+            $request = $request->except('_token');
+            if (count($request) != 0) {
                 foreach ($request as $key => $value) {
                     CrmRequestFeedback::where('crm_request_id', $key)->delete();
                     CrmRequestFeedback::insert([
@@ -91,7 +91,6 @@ class DisabledAccountIntimationSurveyController extends Controller
                         'rating_id' => $value,
                     ]);
                 }
-
                 return back()->with('success', 'ThankYou For Giving Us Feedback');
             } else {
                 return back()->with('error', 'Please Submit Your Feedback');
@@ -101,6 +100,7 @@ class DisabledAccountIntimationSurveyController extends Controller
             return back()->with('error', $ex->getMessage());
         }
     }
+
 
 
     public function feedback_index($ids)
