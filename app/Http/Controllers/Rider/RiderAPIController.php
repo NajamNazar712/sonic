@@ -9201,7 +9201,7 @@ RiderAPIController extends Controller
                 DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Something Went Wrong!']);
+                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
 
                 //throw $th;
             }
@@ -11579,7 +11579,7 @@ RiderAPIController extends Controller
                 DB::rollback();
 
                 $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
-                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Something Went Wrong!']);
+                return response()->json(['status' => 1,  'message' => 'Something Went Wrong!']);
 
                 //throw $th;
             }
