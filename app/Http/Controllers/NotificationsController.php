@@ -2,122 +2,125 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\AdminReportsController;
-use App\Http\Controllers\Admins\AdminReportsEmailController;
-use App\Http\Models\Admin\ActivityTrailLog;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AdminUserRequest;
-use App\Http\Models\Admin\CompletedAgingReport;
-use App\Http\Models\Admin\CrmSmsLog;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\Lead\Lead;
-use App\Http\Models\Admin\MasterCargo\MasterCargo;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\Admin\PendingCashCollectionAgingReport;
-use App\Http\Models\Admin\Retail\RetailShipperInfo;
-use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\AppNotification;
-use App\Http\Models\Commission\SalesCommission;
-use App\Http\Models\Commission\SalesCommissionUser;
-use App\Http\Models\ConsigneeUser;
-use App\Http\Models\CRFTermsConditions;
-use App\Http\Models\CRM\CrmComments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestStatus;
-use App\Http\Models\CRM\CrmRequestTagging;
-use App\Http\Models\DailyFakeStatus;
-use App\Http\Models\DeliveryNoteOtpSms;
-use App\Http\Models\ReturnNoteRequest;
-use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\EmployeeNotificationHistory;
-use App\Http\Models\EmployeeRequisition;
-use App\Http\Models\Excel_reports\Debriefing;
-use App\Http\Models\Excel_reports\DonePaymentsReport;
-use App\Http\Models\Excel_reports\HubWiseSplit;
-use App\Http\Models\Excel_reports\KaeNumber;
-use App\Http\Models\Excel_reports\MonthAverage;
-use App\Http\Models\Excel_reports\MonthAverageDestination;
-use App\Http\Models\Excel_reports\QaReportPettyCash;
-use App\Http\Models\Excel_reports\SalePersonNumbers;
-use App\Http\Models\FnfSectionEmployee;
-use App\Http\Models\HR\Employee;
-use App\Http\Models\HR\EmployeeAttendanceAdjustment;
-use App\Http\Models\HR\EmployeeLeave;
-use App\Http\Models\HR\LeaveStatus;
-use App\Http\Models\OvernightOverlandReportData;
-use App\Http\Models\PickupRequest;
-use App\Http\Models\RetailDonePayment;
+use Carbon\Carbon;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Client;
+use App\Http\Models\SMS;
+use App\Jobs\ProcessSMS;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderDelivery;
 use App\Http\Models\Runner;
-use App\Http\Models\RunnerDetail;
+use App\Jobs\ProcessOTPSMS;
+use App\Mail\Notifications;
+use App\Http\Models\Dispute;
+use App\Http\Models\Invoice;
+use Illuminate\Http\Request;
+use Maatwebsite\Excel\Excel;
+use App\Http\Models\Shipment;
+use App\Jobs\ProcessOTPSMSITS;
+use App\Http\Models\PickupNote;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\DonePayment;
+use App\Http\Models\HR\Employee;
 use App\Http\Models\SaleTierTag;
-use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentOtp;
-use App\Http\Models\ShipmentPiecesRequest;
-use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Notification;
+use App\Http\Models\RunnerDetail;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\User;
+use App\Jobs\GenerateDeliveryOTP;
+use App\Http\Models\ConsigneeUser;
+use App\Http\Models\PickupRequest;
+use App\Http\Models\RiderDelivery;
+use App\PayFastTransactionDetials;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\HR\LeaveStatus;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CrmSmsLog;
+use App\Http\Models\Admin\Lead\Lead;
+use App\Http\Models\AppNotification;
+use App\Http\Models\CRM\CrmComments;
+use App\Http\Models\DailyFakeStatus;
+use App\Jobs\ProcessOTPSMSForBotSMS;
+use App\ReturnDeliveredToShipperSms;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\HR\EmployeeLeave;
+use App\Http\Models\ShipmentsJourney;
+use App\Jobs\ProcessPushNotification;
+use App\Http\Models\RetailDonePayment;
+use App\Http\Models\ReturnNoteRequest;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\CRFTermsConditions;
+use App\Http\Models\DeliveryNoteOtpSms;
+use App\Http\Models\FnfSectionEmployee;
+use App\Jobs\ProcessDeliveryNoteOtpSms;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\EmployeeRequisition;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CRM\CrmRequestStatus;
+use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\CRM\CrmRequestTagging;
+use App\Http\Models\ShipmentPiecesRequest;
+use App\Http\Models\V2Pickup\V2PickupNote;
+//use App\ReturnDeliveredToShipperSms;
+use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
+use GuzzleHttp\Exception\RequestException;
+use App\Http\Models\Admin\ActivityTrailLog;
+use App\Http\Models\Admin\AdminUserRequest;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Excel_reports\KaeNumber;
+use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Excel_reports\Debriefing;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\ShipperNotificationEmail;
-use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
-use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\Zone;
-use App\Jobs\ProcessDeliveryNoteOtpSms;
-use App\Jobs\ProcessOTPSMS;
-use App\Jobs\ProcessOTPSMSITS;
-use App\Jobs\ProcessDeliveryNoteOtpSmsITS;
-use App\Jobs\ProcessPushNotification;
-//use App\ReturnDeliveredToShipperSms;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Hash;
-use App\Http\Controllers\Controller;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\GlobalSettingsController;
-use App\Http\Models\Notification;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\UserBankInfo;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\PickupNote;
-use App\Http\Models\CargoConsignment;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Dispute;
-use App\Http\Models\DonePayment;
-use App\Http\Models\City;
-use App\Http\Models\Invoice;
-use App\Http\Models\SMS;
-use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\CompletedAgingReport;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Commission\SalesCommission;
+use App\Http\Models\Excel_reports\HubWiseSplit;
+use App\Http\Models\Excel_reports\MonthAverage;
 use App\Http\Models\Admin\FintechPaymentDetails;
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7;
-use GuzzleHttp\Exception\RequestException;
-use App\Http\Models\Admin\AdminHub;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
+use App\Http\Models\EmployeeNotificationHistory;
+use App\Http\Models\OvernightOverlandReportData;
+use App\Http\Models\CRM\CrmRequestCaseNatureType;
+use App\Http\Models\Admin\MasterCargo\MasterCargo;
+use App\Http\Models\Admin\Retail\RetailShipperInfo;
+use App\Http\Models\Commission\SalesCommissionUser;
+use App\Http\Models\Excel_reports\QaReportPettyCash;
+use App\Http\Models\Excel_reports\SalePersonNumbers;
+use App\Http\Models\HR\EmployeeAttendanceAdjustment;
+use App\Http\Models\V2Pickup\V2PickupRequestAttempt;
+use App\Http\Models\Excel_reports\DonePaymentsReport;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\Storage;
-use App\Mail\Notifications;
-use App\Jobs\ProcessOTPSMSForBotSMS;
-use App\PayFastTransactionDetials;
-use App\Jobs\ProcessSMS;
-use Maatwebsite\Excel\Excel;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use App\ReturnDeliveredToShipperSms;
-use App\Jobs\GenerateDeliveryOTP;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Controllers\Admins\GlobalSettingsController;
+use App\Http\Models\Excel_reports\MonthAverageDestination;
+use App\Http\Models\V2Pickup\V2PickupRequestNotPickReason;
+use App\Http\Models\Admin\PendingCashCollectionAgingReport;
+use App\Http\Models\Excel_reports\RetailDonePaymentsReport;
+use App\Http\Controllers\Admins\AdminReportsEmailController;
+use App\Http\Models\Survey\DisableAccountIntimationSendSurvey;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+
 use Illuminate\Support\Facades\Log;
 
 class NotificationsController extends Controller
@@ -145,7 +148,7 @@ class NotificationsController extends Controller
     static private function push_notification($employee_id, $employee_type, $title, $body, $screen = NULL)
     {
         $notification_history = new EmployeeNotificationHistory();
-        
+
         $notification_history->employee_id = $employee_id;
         $notification_history->employee_type_id = $employee_type;
         $notification_history->title = $title;
@@ -176,9 +179,7 @@ class NotificationsController extends Controller
             $sms->save();
 
             dispatch(new ProcessDeliveryNoteOtpSmsITS($sms, $name, $otp));
-        }
-        else if($type == 3)
-        {
+        } else if ($type == 3) {
             $sms = new SMS();
 
             $sms->to = str_replace('-', '', $to);
@@ -270,6 +271,7 @@ class NotificationsController extends Controller
                 }
 
                 $body = $notification->body;
+                $head = $notification->head;
 
 
                 if ($id == 1) {
@@ -955,12 +957,10 @@ class NotificationsController extends Controller
                     }
 
                     self::sms($body, $to);
-                } 
-                
-                else if ($id == 12) {
+                } else if ($id == 12) {
 
                     $payment_link = $reference_3_id;
-                    
+
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
                     $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
                     $delivery_note = DeliveryNote::find($reference_1_id);
@@ -968,8 +968,8 @@ class NotificationsController extends Controller
                     $shipment = Shipment::find($reference_2_id);
 
                     //PayFast Payment Link Send 
-                        // $payfast = new PayFastTransactionDetials();
-                        // $payment_link = $payfast::where('invoice_ref_id',$shipment->tracking_number)->first();  
+                    // $payfast = new PayFastTransactionDetials();
+                    // $payment_link = $payfast::where('invoice_ref_id',$shipment->tracking_number)->first();  
                     //End
 
 
@@ -992,7 +992,7 @@ class NotificationsController extends Controller
                             $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                         }
                     }
-                    
+
                     if ($delivery_note->special_rider) {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
@@ -1004,7 +1004,7 @@ class NotificationsController extends Controller
                     } else {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
-                                $body = str_replace('[rider]',  str_replace('-', '', $delivery_note->rider->phone), $body);
+                                $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
                             } else {
                                 $body = str_replace('[rider]', '', $body);
                             }
@@ -1039,10 +1039,7 @@ class NotificationsController extends Controller
                         }
                     }
                     self::sms($body, $to);
-                } 
-                
-                
-                else if ($id == 13) {
+                } else if ($id == 13) {
                     $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
                     $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
@@ -2594,7 +2591,7 @@ class NotificationsController extends Controller
                     if ($ceo) {
                         $to[] = $ceo->email;
                     }*/
-                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'rahat.ali@trax.pk', 'hassan.arman@trax.pk'];
+                    $to = ['mohsin.ali@trax.pk', 'waqas@trax.pk', 'hassan@trax.pk', 'noman.aziz@trax.pk', 'asad.ahsan@trax.pk', 'fawad.ahmed@trax.pk', 'nadir.qureshi@trax.pk', 'hammad.saleem@trax.pk', 'rahat.ali@trax.pk', 'hassan.arman@trax.pk'];
 
                     $bcc = ['muhammad.waqas@trax.pk', 'danish.zahid@trax.pk'];
                     self::email($subject, $body, $to, $cc, $bcc);
@@ -3223,10 +3220,10 @@ class NotificationsController extends Controller
 
                     $today->hour = $rdts_time;
 
-//                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
+                    //                    $yesterday =  Carbon::now()->startOfDay()->toDateTimeString();
 //                    $today = Carbon::parse($yesterday)->endOfDay()->toDateTimeString();
 
-                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name',''];
+                    $possible_fields = ['tracking_number', 'status_updated_at', 'receiver_name', ''];
 
                     $field_names = ['tracking_number' => 'Tracking Number', 'status_updated_at' => 'Status Updated At', 'receiver_name' => 'Received By', 'returned_at' => 'Returned At'];
 
@@ -3256,8 +3253,8 @@ class NotificationsController extends Controller
 
                     $user_wise_shipments = array();
                     $shipment_details = ShipmentsJourney::join('shipments', 'shipments.id', '=', 'shipments_journey.shipment_id')
-                        ->whereIn('shipments.shipper_status_id', [25,31,38])
-                        ->whereIn('shipments_journey.shipper_status_id', [25,31,38])
+                        ->whereIn('shipments.shipper_status_id', [25, 31, 38])
+                        ->whereIn('shipments_journey.shipper_status_id', [25, 31, 38])
                         ->whereBetween('shipments_journey.created_at', [$yesterday, $today])->select('shipments.user_id', 'shipments.tracking_number', 'shipments_journey.created_at', 'shipments_journey.received_or_refused_by', 'shipments_journey.reference_1_id');
 
                     if ($shipment_details->exists()) {
@@ -3342,21 +3339,21 @@ class NotificationsController extends Controller
                                     }
                                 }
 
-                                $body = str_replace('[' . $first_field . ']', $shipment_details,$body);
+                                $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-                                $data1 = ReturnNote::join('return_note_shipments as rns','rns.return_note_id','=','return_notes.id')
-                                    ->leftjoin('shipments as s','s.id','=','rns.shipment_id')
-                                    ->leftjoin('shipments_journey as sj','sj.shipment_id','=','s.id')
-                                    ->whereIn('sj.shipper_status_id',[25,31,38])
-                                    ->where('s.user_id',$user_id)
-                                    ->whereBetween('sj.created_at',[$yesterday,$today])
-                                    ->whereBetween('return_notes.updated_at',[$yesterday,$today])
-                                    ->select('return_notes.id as return_note_id','sj.shipment_id as shipment_id')
-//                                    ->where('sj.reference_1_id','return_notes.id')
+                                $data1 = ReturnNote::join('return_note_shipments as rns', 'rns.return_note_id', '=', 'return_notes.id')
+                                    ->leftjoin('shipments as s', 's.id', '=', 'rns.shipment_id')
+                                    ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 's.id')
+                                    ->whereIn('sj.shipper_status_id', [25, 31, 38])
+                                    ->where('s.user_id', $user_id)
+                                    ->whereBetween('sj.created_at', [$yesterday, $today])
+                                    ->whereBetween('return_notes.updated_at', [$yesterday, $today])
+                                    ->select('return_notes.id as return_note_id', 'sj.shipment_id as shipment_id')
+                                    //                                    ->where('sj.reference_1_id','return_notes.id')
                                     ->get();
-//                                dd($data1);
+                                //                                dd($data1);
 
-//                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
+                                //                                $data1 = ReturnDeliveredToShipperSms::join('return_notes as rn', 'rn.id', '=', 'return_delivered_to_shipper_sms.return_note_id')
 //                                    ->join('shipments', 'shipments.id', '=', 'return_delivered_to_shipper_sms.shipment_id')
 //                                    ->join('users as u', 'u.id', '=', 'return_delivered_to_shipper_sms.user_id')
 ////                                    ->where('return_delivered_to_shipper_sms.status', 0)
@@ -3371,28 +3368,28 @@ class NotificationsController extends Controller
 //                                    ->groupBy('return_delivered_to_shipper_sms.return_note_id')
 //                                    ->get();
 
-                                    $da = [];
-									$i = 0;
-									foreach($data1 as $key=>$value){
-										
-										$da[$value->return_note_id]['shipment_id'][$i] = isset($da[$value->return_note_id]['shipment_id'][$i]) ? $da[$value->return_note_id]['shipment_id'][$i]  : $value->shipment_id ;
-										$da[$value->return_note_id]['count'] = isset($da[$value->return_note_id]['count']) ? $da[$value->return_note_id]['count']+=1  : 1 ;
-									
-										$i++;
-									}
-									$return_detail = "";
-									foreach($da as $key=>$val){
-									
-										$shipment_ids = implode(',',$val['shipment_id']);
-										$count = $val['count'];
-										$return_detail.= PHP_EOL." Return ID : $key ,".PHP_EOL."Having shipments : $count ".PHP_EOL."---".PHP_EOL;
-										
-									}
+                                $da = [];
+                                $i = 0;
+                                foreach ($data1 as $key => $value) {
+
+                                    $da[$value->return_note_id]['shipment_id'][$i] = isset($da[$value->return_note_id]['shipment_id'][$i]) ? $da[$value->return_note_id]['shipment_id'][$i] : $value->shipment_id;
+                                    $da[$value->return_note_id]['count'] = isset($da[$value->return_note_id]['count']) ? $da[$value->return_note_id]['count'] += 1 : 1;
+
+                                    $i++;
+                                }
+                                $return_detail = "";
+                                foreach ($da as $key => $val) {
+
+                                    $shipment_ids = implode(',', $val['shipment_id']);
+                                    $count = $val['count'];
+                                    $return_detail .= PHP_EOL . " Return ID : $key ," . PHP_EOL . "Having shipments : $count " . PHP_EOL . "---" . PHP_EOL;
+
+                                }
 
                                 if (strpos($body, '[return_detail]') !== FALSE) {
                                     $body = str_replace('[return_detail]', $return_detail, $body);
                                 }
-//                                dd($body);
+                                //                                dd($body);
 
                                 self::email($subject, $body, $to);
 
@@ -4018,8 +4015,8 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->city->name . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($hub_wise_split->shipments) . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $hub_wise_split->ratio . '%</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$hub_wise_split->actual_weight, 2, '.', '') . '</td>';
-                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$hub_wise_split->avg_actual_weight, 2, '.', '') . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $hub_wise_split->actual_weight, 2, '.', '') . '</td>';
+                        $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $hub_wise_split->avg_actual_weight, 2, '.', '') . '</td>';
                         $html .= '</tr>';
                         $shipments_count = $shipments_count + $hub_wise_split->shipments;
                         $ratio_count = $ratio_count + $hub_wise_split->ratio;
@@ -4037,8 +4034,8 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format($shipments_count) . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . ceil($ratio_count) . '%</td>';
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$actual_weight_count, 2, '.', '') . '</td>';
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float)$avg_actual_weight_count, 2, '.', '') . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $actual_weight_count, 2, '.', '') . '</td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . number_format((float) $avg_actual_weight_count, 2, '.', '') . '</td>';
                     $html .= '</tr>';
 
                     $html .= '</tr>';
@@ -6083,7 +6080,8 @@ class NotificationsController extends Controller
 
                     foreach ($shipments as $shipment) {
                         $origin = $shipment->pickup_address;
-                        $destination = $shipment->consignee_city;;
+                        $destination = $shipment->consignee_city;
+                        ;
                         $html .= '<tr>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->tracking_number . '</td>';
                         $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $origin->pickup_address . '</td>';
@@ -6868,7 +6866,7 @@ class NotificationsController extends Controller
                          if ($admins->exists()) {
                              $cc = $admins->pluck('email')->toArray();
                          }*/
-                        self::email($subject, $body, $to/*,$cc*/);
+                        self::email($subject, $body, $to /*,$cc*/);
                     }
                 } else if ($id == 113) {
                     $subject = $notification->subject;
@@ -7683,8 +7681,10 @@ class NotificationsController extends Controller
 
                     $shipment_fields = [
                         'consignee_name' => 'consignee_name',
-                        'consignee_address' => 'consignee_address', 'order_id' => 'order_id',
-                        'amount' => 'amount', 'tracking_number' => 'tracking_number'
+                        'consignee_address' => 'consignee_address',
+                        'order_id' => 'order_id',
+                        'amount' => 'amount',
+                        'tracking_number' => 'tracking_number'
                     ];
 
                     $delivery_note = DeliveryNote::find($reference_1_id);
@@ -7928,7 +7928,7 @@ class NotificationsController extends Controller
                     } else {
                         if (strpos($body, '[rider]') !== FALSE) {
                             if ($delivery_note_shipment->rider_information) {
-                                $body = str_replace('[rider]',  str_replace('-', '', $delivery_note->rider->phone), $body);
+                                $body = str_replace('[rider]', str_replace('-', '', $delivery_note->rider->phone), $body);
                             } else {
                                 $body = str_replace('[rider]', '', $body);
                             }
@@ -9813,7 +9813,7 @@ class NotificationsController extends Controller
                     if ($shipment->consignee_phone_number_2 != NULL) {
                         $to = $shipment->consignee_phone_number_2;
                         // self::sms($body, $to, 1);
-                    self::sms_otp($body, $to, $name, $shipment_otp->otp, 3);
+                        self::sms_otp($body, $to, $name, $shipment_otp->otp, 3);
 
                     }
                 } else if ($id == 205) {
@@ -10126,7 +10126,7 @@ class NotificationsController extends Controller
 
                         $summary = [];
                         foreach ($employees_attendances as $index => $employees_attendance) {
-                            $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date . $employees_attendance->start_time)->addMinutes((int)$employees_attendance->extension_minutes);
+                            $expected_clockin = Carbon::createFromFormat('Y-m-d H:i:s', $employees_attendance->attendance_date . $employees_attendance->start_time)->addMinutes((int) $employees_attendance->extension_minutes);
                             $clock_in = Carbon::parse($employees_attendance->clock_in_datetime);
                             $time_diff = $expected_clockin->diffInMinutes(Carbon::parse($clock_in), false);
                             $html .= '<tr>';
@@ -10263,7 +10263,6 @@ class NotificationsController extends Controller
                         self::email($subject, $body, $temp_email);
                     }
                 } // Today work has been done
-
                 else if ($id == 216) {
 
                     foreach ($reference_1_id as $key => $return_note) {
@@ -10275,7 +10274,7 @@ class NotificationsController extends Controller
                         }
 
                         if (strpos($old_body, '[shipments_count]') !== FALSE) {
-//                            dd($old_body,$return_note->shipment_count);
+                            //                            dd($old_body,$return_note->shipment_count);
                             $old_body = str_replace('[shipments_count]', $return_note->shipment_count, $old_body);
                         }
                         $to = $return_note['phone_number'];
@@ -10296,15 +10295,15 @@ class NotificationsController extends Controller
                     // $user_ids = $reference_1_id->pluck('user_id')->toArray();
                     // ReturnDeliveredToShipperSms::whereIn('user_id',$user_ids)->update(['status'=>0]);
                     // ReturnDeliveredToShipperSms::insert($notify);
-                }
-
-                else if ($id == 217) {
-                   $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions','fintech_payment_details.trax_pay_id','trax_pay_transactions.id')
-                    ->join('shipments','trax_pay_transactions.shipment_id','shipments.id')
-                    ->select('trax_pay_transactions.cod_amount as Amont',
+                } else if ($id == 217) {
+                    $fintech_transaction = FintechPaymentDetails::join('trax_pay_transactions', 'fintech_payment_details.trax_pay_id', 'trax_pay_transactions.id')
+                        ->join('shipments', 'trax_pay_transactions.shipment_id', 'shipments.id')
+                        ->select(
+                            'trax_pay_transactions.cod_amount as Amont',
                             'shipments.tracking_number as tracking_no',
-                            'fintech_payment_details.rider_tip as tip')
-                            ->where('trax_pay_transactions.id',$reference_2_id)->first();
+                            'fintech_payment_details.rider_tip as tip'
+                        )
+                        ->where('trax_pay_transactions.id', $reference_2_id)->first();
                     $rider = Rider::find($reference_1_id);
                     if ($fintech_transaction && $rider) {
                         if (strpos($body, '[amount]') !== FALSE) {
@@ -10321,18 +10320,16 @@ class NotificationsController extends Controller
                         }
                         // $to = $rider->phone;
                         $to = '03110127222';
-                       // self::sms($body, $to);
-                    }       
-                }
-
-                else if ($id == 218) {
+                        // self::sms($body, $to);
+                    }
+                } else if ($id == 218) {
                     $subject = $notification->subject;
                     $body = $notification->body;
 
                     $email_to = $reference_1_id['email_to'];
 
-                    $shipper = $reference_1_id['shipper_name']; 
-                    $tagged_by = $reference_1_id['admin_name']; 
+                    $shipper = $reference_1_id['shipper_name'];
+                    $tagged_by = $reference_1_id['admin_name'];
 
                     $new_poc_person = $reference_1_id['new_poc_person'];
                     $new_kam_person = $reference_1_id['new_kam_person'];
@@ -10345,9 +10342,9 @@ class NotificationsController extends Controller
                     $old_person_date = $reference_1_id['old_person_date'];
                     $old_person_email = $reference_1_id['old_person_email'];
 
-                     
-                    
-                    
+
+
+
 
                     $html = '<table style="width:100%;">';
                     $html .= '<thead><tr>
@@ -10362,36 +10359,34 @@ class NotificationsController extends Controller
                     $cc = array('Waqas@trax.pk', 'shahrukh.raheem@trax.pk', 'khan.usama@trax.pk');
 
                     $old_person_header = '<tr> <th> POC </th> <th> KAM </th> <th> REF </th> </tr>';
-                    
+
                     $html .= '<tr>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipper . '</td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $tagged_by . '</td>';
 
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $old_poc_person . '</td> <td>' . $old_kam_person . '</td> <td>' . $old_ref_person . '</td> </tr> </table> </td>';
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> ' . $old_person_header . ' <tr> <td>' . $old_poc_person . '</td> <td>' . $old_kam_person . '</td> <td>' . $old_ref_person . '</td> </tr> </table> </td>';
                     $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $old_person_date . '</td>';
-                    
-                    
-                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> '.$old_person_header.' <tr> <td>' . $new_poc_person . '</td> <td>' . $new_kam_person . '</td> <td>' . $new_ref_person . '</td> </tr> </table> </td>';
+
+
+                    $html .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"> <table border="1"> ' . $old_person_header . ' <tr> <td>' . $new_poc_person . '</td> <td>' . $new_kam_person . '</td> <td>' . $new_ref_person . '</td> </tr> </table> </td>';
                     $html .= '</tr>';
 
                     $to = $email_to;
-                    
+
 
                     if (!empty($old_person_email)) {
-                        $cc = array_merge($cc,$old_person_email);
+                        $cc = array_merge($cc, $old_person_email);
                     }
-                    
+
                     $html .= '</tbody></table>';
 
                     if (strpos($body, '[preview]') !== FALSE) {
                         $body = str_replace('[preview]', $html, $body);
                     }
-                    
-                    // dd($subject, $body, $to, $cc);
-                    self::email($subject, $body, $to, $cc);    
-                 }
 
-                else if ($id == 221) {
+                    // dd($subject, $body, $to, $cc);
+                    self::email($subject, $body, $to, $cc);
+                } else if ($id == 221) {
                     $responses = $reference_1_id;
                     $to = 'mohsin.khan@trax.pk';
                     $cc = 'shahrukh.raheem@trax.pk';
@@ -10406,8 +10401,77 @@ class NotificationsController extends Controller
                     $body=str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
-                }
-                }
+                } else if ($id = 222) {
+                    $array = array();
+                    $crm_case_closeds = $reference_1_id;
+                    
+                    foreach ($crm_case_closeds as $item) {
+                        $shipperId = $item['shipper_id'];
+
+                        if (!isset($array[$shipperId])) {
+                            $array[$shipperId] = [];
+                        }
+
+                        $array[$shipperId][] = $item;
+                    }
+
+
+                    foreach ($array as $shipperId => $items) {
+                        $ids = array();
+                        $email = User::where('id', $shipperId)->pluck('email')->toArray();
+                        $shipper_name = User::where('id', $items[0]['shipper_id'])->value('name');
+                        
+                        foreach ($items as $key => $value) {
+                            $ids[] = $value['id'];
+                        }
+
+                        $ids = implode(',', $ids);
+
+                        $htmlHeader = '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
+                        $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
+                                            <th style="padding:10px; border: 1px solid black;">Request #</th>
+                                            <th style="padding:10px; border: 1px solid black;">Type</th>
+                                            <th style="padding:10px; border: 1px solid black;">Resolution</th>
+                                            <th style="padding:10px; border: 1px solid black;">Status</th>
+                                            <th style="padding:10px; border: 1px solid black;">Resolved Within</th>
+                                        </tr></thead><tbody>';
+
+                        $htmlHeader .= '<p style="text-align: center; font-size: 16px;">';
+                        $htmlHeader .= '<a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
+                        $htmlHeader .= '</p>';
+                        $html = $htmlHeader;
+
+
+                        foreach ($items as $item) {
+                            $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
+                            $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
+
+                            $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
+                            $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
+
+                            $html .= '<tr>';
+
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . $item["id"] . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
+                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
+
+                            $html .= '</tr>';
+                        }
+
+                        $html .= '</tbody>
+                        </table>
+                       ';
+
+
+                        $body = str_replace('[preview]', $html, $notification->body);
+                        $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
+                        self::email($subject, $body, $email);
+                    }
+
+                } 
+            }
         }
     }
     static public function custom($type, $subject, $body, $to)
@@ -10752,10 +10816,9 @@ class NotificationsController extends Controller
                         if ($admin_id)
                             self::push_notification($admin_id, $employee_type, $title, $body);
                     }
-                } 
-                
-                //For Fintech
+                }
 
+                //For Fintech
                 else if ($id == 21) {
                     $fintech_transaction = FintechPaymentDetails::find($reference2_id);
                     $rider = Rider::find($reference1_id);
@@ -10788,5 +10851,5 @@ class NotificationsController extends Controller
             }
         }
     }
-   
+
 }

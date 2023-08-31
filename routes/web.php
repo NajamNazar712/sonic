@@ -25,6 +25,8 @@ Route::get('payfast-payment-details', 'Admins\AdminDashboardController@payfast_p
 
 Route::prefix('survey_form')->name('survey.')->group(function () {
     Route::get('/{id}', 'Survey\DisabledAccountIntimationSurveyController@survey')->name('index')->where(['id' => '[0-9]+']);
+    Route::post('submit/email', 'Survey\DisabledAccountIntimationSurveyController@feedback_store')->name('feedback.submit');
+    Route::get('submit/email/{ids}', 'Survey\DisabledAccountIntimationSurveyController@feedback_index')->name('feedback.index');
     Route::post('submit', 'Survey\DisabledAccountIntimationSurveyController@submit_survey')->name('submit');
 });
 
@@ -2773,6 +2775,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('last_mile_app')->name('last_mile_app.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@last_mile_app_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@last_mile_app_list')->name('list');
+            Route::post('shipment_list', 'Admins\AdminReportsController@shipment_list')->name('shipment_list');
             Route::get('app_shipments_list', 'Admins\AdminReportsController@last_mile_app_shipments_list')->name('app_shipments_list');
             Route::get('dbf_shipments_list', 'Admins\AdminReportsController@last_mile_dbf_shipments_list')->name('dbf_shipments_list');
         });
@@ -2888,7 +2891,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@pay_fast_report_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@pay_fast_report_list')->name('list');
         });
-        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function (){
+
+        Route::prefix('csat')->name('csat_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@csat_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@csat_report_list')->name('list');
+        });
+        Route::prefix('rider_pickup')->name('rider_pickup.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@rider_pickup_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@rider_pickup_list')->name('list');
             Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
@@ -2925,7 +2933,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@operations_performance_export_to_excel')->name('export_to_excel');
         });
 
-        
+
         Route::prefix('fintech')->name('fintech_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fintech_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
@@ -3144,6 +3152,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_list')->name('list');
             Route::post('add', 'Admins\AdminCrmSettingsController@crm_cut_off_time_and_holidays_add')->name('add');
         });
+
+        
+        Route::prefix('csat_cases_setting')->name('csat_cases_setting.')->group(function () {
+            Route::get('', 'Admins\AdminCrmSettingsController@csat_cases_setting_index')->name('index');
+            Route::get('formula', 'Admins\AdminCrmSettingsController@csat_score_formula_index')->name('formula.index');
+            Route::post('formula', 'Admins\AdminCrmSettingsController@csat_score_formula_store')->name('formula.store');
+
+            Route::post('/submit', 'Admins\AdminCrmSettingsController@csat_cases_setting_store')->name('store');
+
+        });
+
 
         Route::prefix('return_confirmation_pending_shipment_selection_time')->name('return_confirmation_pending_shipment_selection_time.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@return_confirmation_pending_shipment_selection_time_index')->name('index');
