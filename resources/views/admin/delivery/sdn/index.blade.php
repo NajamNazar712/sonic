@@ -825,7 +825,7 @@
                                 row.push(values.status);
                                 // row.push(values.zone);
                                 row.push(values.adjustment_date);
-                                row.push(values.adjusted_reference_count);
+                                row.push(values.adjusted_amount);
                                 row.push(values.adjustment_ref);
                                 row.push(values.difference_amount);
                                 row.push(values.hbl_amount);
