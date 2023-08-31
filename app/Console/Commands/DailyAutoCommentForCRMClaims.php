@@ -20,7 +20,7 @@ class DailyAutoCommentForCRMClaims extends Command
      *
      * @var string
      */
-    protected $description = 'Auto Comment For Claim And Service Request(When Launched)';
+    protected $description = 'Auto Comment For Claim';
 
     /**
      * Create a new command instance.
@@ -41,7 +41,7 @@ class DailyAutoCommentForCRMClaims extends Command
     {
         //Claim
         $crm_requests = CrmRequest::where('status_id', 2)->where('case_nature_id', 4);
-        if($crm_requests->exists()){
+        if ($crm_requests->exists()) {
             $crm_requests = $crm_requests->get();
 
             $comment = 'Dear Customer,
@@ -56,30 +56,12 @@ Regards,
 TRAX-Customer Experience';
             $internal_comment = 'Dear Team,
                                  Please conclude this case on priority.';
-            foreach ($crm_requests as $crm_request){
+            foreach ($crm_requests as $crm_request) {
                 CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
                 CRMCommentController::add($crm_request->id, 306, 0, 1, $internal_comment, 0, 0);
             }
         }
 
-        //Service Request
-        $crm_requests = CrmRequest::where('status_id', 1)->where('case_nature_id', 2);
-        if($crm_requests->exists()){
-            $crm_requests = $crm_requests->get();
 
-            $comment = 'Dear Customer,
-
-            Thank you for reaching out to us!
-            
-            We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
-            
-            UAN # 021-111-11-8729 
-            
-            Email:Info@trax.pk';
-         
-            foreach ($crm_requests as $crm_request){
-                CRMCommentController::add($crm_request->id, 306, 0, 0, $comment, 0, 0);
-            }
-        }
     }
 }
