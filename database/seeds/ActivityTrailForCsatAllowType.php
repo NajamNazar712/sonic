@@ -25,6 +25,9 @@ class ActivityTrailForCsatAllowType extends Seeder
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > CRM > CSAT Cases-Type Setting', 'url'=>'admin.settings.csat_cases_setting.index', 'permission_id' => 900),
+
+        );
+        DB::table('admins_screen_list')->insert(
             array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > CRM > CSAT Formula Setting', 'url'=>'admin.settings.csat_cases_setting.formula.index', 'permission_id' => 902)
 
         );
