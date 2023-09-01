@@ -72,6 +72,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 use App\Http\Models\Admin\OSAChargesLog;
 use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
 use App\Http\Models\CRM\CRMCount;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\ShipmentScanningJourney;
@@ -12651,12 +12652,150 @@ class AdminReportsController extends Controller
 
     public function ordinary_discrepancy_report_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 303);
-        $operation_rider_category = OperationRidersCategory::all();
-        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1', 'operation_rider_category' => $operation_rider_category]);
+        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1']);
         
     }
     public function ordinary_discrepancy_report_list(Request $request){
+        
+        $tracking_data = OrdinaryDiscrepancyReport::join('shipments','shipments.id','ordinary_discrepancy_reports.shipment_id')
+        ->leftjoin('admins', 'admins.id','ordinary_discrepancy_reports.admin_id')
+        ->leftjoin('users', 'users.id','shipments.user_id')
+        ->leftjoin('shipment_status as ss', 'ss.id','shipments.shipper_status_id')
+        ->leftjoin('cities as c', 'c.id','shipments.consignee_city_id')
+        ->leftjoin('user_shipping_infos as usi', 'usi.id','shipments.pickup_address_id')
+        ->leftjoin('cities as citi', 'citi.id','usi.city_id')
+        ->leftjoin('shipment_items as si', 'si.shipment_id','shipments.id')
+        // ->leftjoin('admin_hubs as ah', 'ah.admin_id','ordinary_discrepancy_reports.admin_id')
+        ->leftjoin('cities as ch', 'ch.id','admins.default_hub_id')
+        
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                );
+        })
+        ->select('shipments.tracking_number as tracking_number','sj.created_at as arrival_date','ss.name as shipment_status','users.name as shipper_name', 'citi.name as origin', 'c.name as destination',
+        'shipments.pieces as quantity_by_shipper','shipments.amount as cod_value', 'si.description as shipment_content_by_shipper', 'ordinary_discrepancy_reports.product_content as shipment_content_by_admin',
+        'ordinary_discrepancy_reports.picture_path as images','ordinary_discrepancy_reports.quantity as quantity_by_admin','ordinary_discrepancy_reports.remarks as remarks_by_admin',
+        'ordinary_discrepancy_reports.created_at as created_at','admins.name as updated_by','ch.name as admin_hub');
 
+        $datatables = Datatables::of($tracking_data)
+        ->editcolumn('images', function ($tracking_data) {
+            if ($tracking_data->images != null) {
+                $images = explode('|', $tracking_data->images);
+                $html = "";
+                foreach ($images as $image)
+                {
+                    $exists = Storage::disk('public')->exists($image);
+                    if ($exists) {
+                        $route = Storage::disk('public')->url($image);
+                    }
+                    else{
+                        $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
+                    }
+                    $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                }
+                return $html;
+            }
+            return "-";
+        })
+        ;
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('shipments.created_at', [$from, $to]);
+        } 
+        
+        return $datatables->make(true);
+    }
+
+    public function ordinary_discrepancy_report_tracking_data(Request $request){
+
+        $tracking_number = $request->tracking_number;
+        $shipment_id = substr($tracking_number, 6);
+
+        $tracking_data = Shipment::join('users','users.id','shipments.user_id')
+        ->leftjoin('shipment_status as ss', 'ss.id','shipments.shipper_status_id')
+        ->leftjoin('cities as c', 'c.id','shipments.consignee_city_id')
+        ->leftjoin('user_shipping_infos as usi', 'usi.id','shipments.pickup_address_id')
+        ->leftjoin('cities as citi', 'citi.id','usi.city_id')
+        ->leftjoin('shipment_items as si', 'si.shipment_id','shipments.id')
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                );
+        })
+        ->select('citi.name as origin', 'c.name as destination','ss.name as shipment_status','sj.created_at as arrival_date',
+        'shipments.amount as cod_value','users.name as shipper_name', 'si.description as shipment_content_shipper')
+        ->where('shipments.id',$shipment_id)->first();
+
+        return response()->json(['status' => 1, 'data' => $tracking_data]);
+    }
+
+    // public function upload_attachment(Request $request)
+    // {
+    //     if ($request->hasFile('upload_attachment')) {
+    //         $lead = Lead::find($request->lead_id);
+    //         $filename = 'lead_attachment_' . $lead->id . '.png';
+
+    //         $file = $request->file('upload_attachment');
+
+    //         Storage::disk('public')->putFileAs('leads\attachment', $file, $filename);
+
+    //         $lead->attachment = $filename;
+    //         $lead->save();
+    //         return redirect()->back()->with('success', 'Image Uploaded Successfully');
+    //     } else {
+    //         return redirect()->back()->with('error', 'Incomplete Information!');
+    //     }
+    // }
+
+    public function submit_tracking(Request $request){
+        $date_time = Carbon::now();
+        $date = $date_time->format('Y-m-d');
+        $tracking_number = $request->tracking_number;
+        $shipment_id = substr($tracking_number, 6);
+        $data = Shipment::find($shipment_id);
+
+
+        if ($request->hasFile('picture_attached')) {
+            $file = $request->file('picture_attached');
+            $filename = 'Shipment_Image_' . $date . '.' . $file->extension();
+            $directory = 'ordinary_discrepancy_report\attachment' . $data->id . '';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $image = $directory . '/' . $filename;
+        }
+        else {
+            return redirect()->back()->with('error', 'Incomplete Information!');
+        }
+        
+
+        
+        $get_data = OrdinaryDiscrepancyReport::where('shipment_id',$data->id)->get();
+        if(count($get_data) >= 3){
+            return response()->json(['status' => 0, 'message' => 'Shipment cannot be editied more than 3 times']);
+        }
+        else{
+            $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
+            $ordinary_discrepancy_reports->shipment_id = $data->id;
+            $ordinary_discrepancy_reports->user_id = $data->user_id;
+            $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
+            $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
+            $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
+            $ordinary_discrepancy_reports->picture_path = $image;
+            $ordinary_discrepancy_reports->quantity = $request->quantity;
+            $ordinary_discrepancy_reports->remarks = $request->remarks;
+            $ordinary_discrepancy_reports->admin_id = Auth::id();
+            $ordinary_discrepancy_reports->save();
+
+            return response()->json(['status' => 1, 'message' => 'Shipment Updated Successfully']);
+        }
     }
 
 }

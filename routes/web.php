@@ -2930,6 +2930,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('ordinary_discrepancy_report')->name('ordinary_discrepancy_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@ordinary_discrepancy_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@ordinary_discrepancy_report_list')->name('list');
+            Route::post('tracking_data', 'Admins\AdminReportsController@ordinary_discrepancy_report_tracking_data')->name('tracking_data');
+            Route::post('submit_tracking', 'Admins\AdminReportsController@submit_tracking')->name('submit_tracking');
         });
     });
 
