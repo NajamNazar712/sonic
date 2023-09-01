@@ -10427,42 +10427,41 @@ class NotificationsController extends Controller
 
                         $ids = implode(',', $ids);
 
-                        $htmlHeader = '<table style="width:100%; border-collapse: collapse; border: 1px solid black;">';
-                        $htmlHeader .= '<thead><tr style="background-color: #f2f2f2;">
-                                            <th style="padding:10px; border: 1px solid black;">Request #</th>
-                                            <th style="padding:10px; border: 1px solid black;">Type</th>
-                                            <th style="padding:10px; border: 1px solid black;">Resolution</th>
-                                            <th style="padding:10px; border: 1px solid black;">Status</th>
-                                            <th style="padding:10px; border: 1px solid black;">Resolved Within</th>
-                                        </tr></thead><tbody>';
-
-                        $htmlHeader .= '<p style="text-align: center; font-size: 16px;">';
-                        $htmlHeader .= '<a style="display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
-                        $htmlHeader .= '</p>';
-                        $html = $htmlHeader;
-
+                        $html = '<div style="text-align: center; margin-top: 20px;">';
+                        $html .= '<a style="margin-bottom:10px; display: inline-block; padding: 10px 20px; background-color: #3498db; color: #fff; text-decoration: none; border-radius: 5px; font-weight: bold;" href="' . route('survey.feedback.index', ['ids' => $ids]) . '">Click Here To Rate</a>';
+                        $html .= '</div>';
+               
+                        $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                        $html .= '<thead>';
+                        $html .= '<tr style="background-color: #f2f2f2;">';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Request #</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Type</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolution</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Status</th>';
+                        $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Resolved Within</th>';
+                        $html .= '</tr>';
+                        $html .= '</thead>';
+                        $html .= '<tbody>';
 
                         foreach ($items as $item) {
                             $resolved_within = $item['created_at']->diffInDays($item['updated_at']);
                             $type = CrmRequestCaseNatureType::where('id', $item["case_nature_type_id"])->value('type');
-
+                        
                             $resolution = ShipmentsJourney::where('shipment_id', $item['shipment_id'])->latest()->first();
                             $resolution = ShipmentStatusReason::where('id', $resolution["shipper_status_id"])->latest()->first();
-
+                        
                             $html .= '<tr>';
-
-                            $html .= '<td style="padding:5px; border: 1px solid black;">' . $item["id"] . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($type ?? '-') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolution['name'] ?? '-') . '</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black;">Closed</td>';
-                            $html .= '<td style="padding:5px; border: 1px solid black;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
-
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $item["id"] . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($type ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolution['name'] ?? '-') . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">Closed</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . ($resolved_within == 0 ? '1 Day' : $resolved_within . ' Days') . '</td>';
                             $html .= '</tr>';
                         }
+                        
+                        $html .= '</tbody>';
+                        $html .= '</table>';
 
-                        $html .= '</tbody>
-                        </table>
-                       ';
 
 
                         $body = str_replace('[preview]', $html, $notification->body);

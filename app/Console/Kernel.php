@@ -21,6 +21,7 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         '\App\Console\Commands\ReturnConfirmationPendingEmail',
         '\App\Console\Commands\CrmResponseRate',
+        '\App\Console\Commands\CrmClosedReasonCron',
         '\App\Console\Commands\ReturnConfirmEmail',
         '\App\Console\Commands\ShipmentReAttemptEmail',
         '\App\Console\Commands\AutoDisableShipperAccount',
