@@ -15,13 +15,13 @@ class CreateV3PickupRequestsTable extends Migration
     {
         Schema::create('v3_pickup_requests', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('pickup_type')->default(1)->index();
             $table->integer('shipper_id')->index();
             $table->integer('pickup_address_id')->index();
-            $table->dateTime('pickup_date')->index();
             $table->integer('booked');
             $table->integer('received')->nullable();
-            $table->integer('received_wo_scan')->nullable();
             $table->integer('city_id')->index();
+            $table->dateTime('pickup_date')->index();
             $table->integer('time_range_id')->index();
             $table->integer('pickup_type_id')->index();
             $table->decimal('estimated_weight')->nullable();
