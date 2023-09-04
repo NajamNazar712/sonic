@@ -2,10 +2,10 @@
 
 @section('title', 'Pending Pickups')
 
-@section('content')
+@sec tion('content')
     <div class="app-content content">
         <div class="content-wrapper">
-            <div class="content-header row">
+            <divclass="content-header row">
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
@@ -14,66 +14,85 @@
 
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
-                        <div class="card-body">
+                       <div class="card-body">
                             @include('admin.inc.messages')
 
-                            <div class="container">
+                           <div class="container">
                                 <div class="row justify-content-center">
 
-                                    <div class="col">
+                                    <div class"col">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                   <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                     <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
-                                            </div>
+                                           </div>
                                             <input type="text" name="requested_from_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="requested_from_date" placeholder="Requested Date From">
+                                                  id="requested_from_date" placeholder="Requested Date From">
                                         </div>
                                     </div>
-                                    <div class="col">
+                                    <div class="col>
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
-                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                                     <span class="la la-calendar-o small-calender-icon"></span>
                                                     </span>
-                                            </div>
+                                             </div>
                                             <input type="text" name="requested_to_date"
                                                    class="form-control bg-primary border-primary white rounded-right"
-                                                   id="requested_to_date" placeholder="Requested Date To">
+                                                    id="requested_to_date" placeholder="Requested Date To">
                                         </div>
                                     </div>
-                                    <div class="col">
+                                     <div class="col">
                                         <button type="button" id="search_filter_btn"
                                                 class="float-right mb-1 btn btn-outline-primary btn-min-width"><i
-                                                    class="la la-search" style="margin-right: 10px"></i> Search
+                                                     class="la la-search" style="margin-right: 10px"></i> Search
                                         </button>
                                     </div>
-                                </div>
+                                 </div>
 
 
-                            </div>
+                             </div>
 
                             <div class="container-fluid">
-                                <div class="row justify-content-center">
+                                 <div class="row justify-content-start">
                                     @foreach($pickup_statuses as $status)
                                         <div>
-                                            <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1">{{ $status->name }}</button>
+                                             <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1">{{ $status->name }} (10) </button>
                                         </div>
                                     @endforeach
-                                </div>
+                                 </div>
                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                                <thead>
+                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Pickup Address</th>
+                                     <th class="border-primary border-darken-1">ID</th>
+                                    <!-- <th class="border-primary border-darken-1">S. No.</th> -->
+                                    <th class="border-primary border-darken-1">Date & Time</th>
+                                     <th class="border-primary border-darken-1">Ask Time</th>
+                                    <th class="border-primary border-darken-1">Shipments/Pieces</th>
+                                    <th class="border-primary border-darken-1">Weight (KG)</th>
+                                   <th class="border-primary border-darken-1">Courier Type</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Pickup Time</th>
+                                   <th class="border-primary border-darken-1">Shipments Picked</th>
+                                    <th class="border-primary border-darken-1">Picked Weight (KG)</th>
+                                    <th class="border-primary border-darken-1">Product</th>
+                                    <th clas="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Station</th>
+                                    <th class="border-primary border-darken-1">Route No</th>
+                                    <th clas="border-primary border-darken-1">Courier No</th>
+                                    <th class="border-primary border-darken-1">Assigned Courier</th>
+                                    <th class="border-primary border-darken-1">Communication Mode</th>
+                                   <th class="border-primary border-darken-1">Requested By</th>
+                                    <th class="border-primary border-darken-1">Special Request</th>
+                                    <th class="border-primary border-darken-1">Additional Services</th>
+                                    <th class="borde-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
-                                </thead>
+                               </thead>
                             </table>
                         </div>
                     </div>
@@ -82,61 +101,76 @@
                 <div class="modal fade" id="assign_to_rider" data-backdrop="static" role="dialog" aria-labelledby="assign_to_rider_title" aria-hidden="true">
                     <div class="modal-dialog modal-sm" role="document">
                         <div class="modal-content">
-                            <form class="form-horizontal" action="{{route('admin.v3_pickups.pending.assign')}}" method="post">
+                             <form class="form-horizontal" action="{{route('admin.v3_pickups.pending.assign')}}" method="post">
                                 @csrf
 
-                                <div class="modal-header">
+                               <div class="modal-header">
                                     <h4 class="modal-title" id="assign_to_rider_title">Assign to Rider</h4>
                                 </div>
-                                <input type="hidden" name="pickup_request_ids" id="assign_pickup_request_ids">
+                                 <input type="hidden" name="pickup_request_ids" id="assign_pickup_request_ids">
                                 <div class="modal-body">
                                     <div class="form-group m-0">
-                                        <select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
+                                       <select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
                                             @foreach($riders as $rider)
                                                 @if($rider->trax_id)
-                                                    <option value="{{ $rider->id }}">{{ $rider->name }} - {{ $rider->trax_id }}</option>
+                                                   <option value="{{ $rider->id }}">{{ $rider->name }} - {{ $rider->trax_id }}</option>
                                                 @else
                                                     <option value="{{ $rider->id }}">{{ $rider->name }}</option>
-                                                @endif
+                                               @endif
                                             @endforeach
                                         </select>
-                                    </div>
+
+         </div>
                                 </div>
                                 <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary ml-auto">Assign</button>
                                 </div>
-                            </form>
+
+             </form>
                         </div>
                     </div>
                 </div>
 
+
                 <div class="modal fade" id="update_pickup_modal" data-backdrop="static" role="dialog" aria-labelledby="update_pickup_modal_title" aria-hidden="true">
-                    <div class="modal-dialog modal-sm" role="document">
-                        <div class="modal-content">
-                            <form class="form-horizontal" action="{{ route('admin.v2_pickups.pending.update') }}" method="post">
-                                {{ csrf_field() }}
+                     <div class="moda
+    -
+d                         <div class="modal-content">
+
+
+    {{ csrf_field() }}
                                 @method('put')
                                 <div class="modal-header">
-                                    <h4 class="modal-title" id="update_pickup_modal_title">Update Pickup Request</h4>
+
+
+                <h4 class="modal-title" id="update_pickup_modal_title">Update Pickup Request</h4>
                                 </div>
                                 <input type="hidden" name="pickup_request_ids" id="update_pickup_request_ids">
-                                <div class="modal-body">
-                                    <div class="form-group m-0 mb-1">
-                                        <select name="reason" class="select2 reason" data-rule-required="true" data-msg-required="Reason is required">
-                                            @foreach($not_pick_reasons as $reason)
+
+                                      <div class="form-group m-0 mb-1">
+
+
+     @foreach($not_pick_reasons as $reason)
                                                 <option value="{{ $reason->id }}">{{ $reason->name }}</option>
                                             @endforeach
-                                        </select>
+
+                             </select>
                                     </div>
                                     <div class="form-group m-0">
-                                        <textarea name="trax_remarks" id="trax_remarks" class="form-control" cols="30" rows="3"></textarea>
+
+                              <textarea name="trax_remarks" id="trax_remarks" class="form-control" cols="30" rows="3"></textarea>
                                     </div>
                                 </div>
-                                <div class="modal-footer">
+                                 <div class="modal-footer">
+
+
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                     <button type="submit" class="btn btn-primary ml-auto" id="update_pickup_request_btn_submit">Update</button>
-                                </div>
+                                 </div>
+
+
                             </form>
                         </div>
                     </div>
@@ -296,20 +330,129 @@
 
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add Request</h4>
+                    <h4 class="modal-title white">Add New Pickup</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center">
+                <div class="modal-body">
                     <form id="add_request_form" method="post" enctype="multipart/form-data">
-                        @csrf
+
                         <div class="container">
 
-{{--                            Code here--}}
+                                <div class="d-flex justify-content-start vh-100 pl-1">
+
+                                   <b class="text-dark"> Customer Information </b>
+
+                                </div>
+
+                                <div class="d-flex justify-content-center align-items-center vh-100 mt-md-1">
+                                    <div class="col-6">
+
+                                        <div class="form-group">
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span
+                                                        class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                        <span class="la la-calendar-o"></span>
+                                                    </span>
+                                                </div>
+
+                                                <input type="text" name="pickup_date"
+                                                    class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
+                                                    id="pickup_date" placeholder="Select Pickup Date" data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
+
+                                                    <option value="shipper name"> shipper name </option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <select name="pickup_address_id" id="pickup_address_id" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Area is required">
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <select name="preferred_time_range" id="preferred_time_range" class="form-control select2" data-rule-required="true" data-msg-required="Preferred Time Range is required">
+                                                <option value="">Selected Preferred Time Range</option>
+
+                                                    <option value="time">time</option>
+
+                                           </select>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <select name="pickup_type_id" id="pickup_type_id" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Type is required">
+
+                                                    <option value="pickup name" >pickup name</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-12">
+                                        <div class="form-group input-group">
+
+                                            <div class="input-group-prepend">
+
+                                                <span class="input-group-text text-dark border-primary  rounded-left">
+                                                    <span> Estimated Weight </span>
+                                                </span>
+                                            </div>
+
+                                            <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-center" placeholder="Estimated Weight">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-12">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+
+                                                <span class="input-group-text text-dark border-primary rounded-left">
+                                                    <span> No of Shipments </span>
+                                                </span>
+                                            </div>
+                                            <input type="text" id="shipments_count" name="shipments_count" class="form-control" data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-center align-items-center vh-100">
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <textarea type="text" name="remarks" class="form-control" placeholder="Remarks"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="d-flex justify-content-start align-items-center">
+                                    <div class="col-12">
+                                        <div id="pickup_div" class="form-group text-left p-0 pt-md-0 pb-md-0">
+                                            <label class="d-block"><strong>Regular Pickup</strong></label>
+                                            <input type="checkbox" name="pickup" class="switch hidden" id="pickup">
+                                        </div>
+                                    </div>
+
+                                </div>
 
                             <div class="row justify-content-center">
                                 <div class="col-3">
@@ -353,7 +496,12 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script>
-        var booking_from_date = $('#requested_from_date').pickadate({
+
+
+
+        $(document).ready(function () {
+
+            var booking_from_date = $('#requested_from_date').pickadate({
             firstDay: 1,
             clear: '',
             max: '{{ Carbon\Carbon::now() }}',
@@ -386,11 +534,6 @@
             }
         });
 
-    </script>
-
-
-    <script>
-        $(document).ready(function () {
             $('#search_filter').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search',
                 width:'100%',
@@ -613,8 +756,26 @@
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
+                    {data: 'date', name: 'date', class: 'align-middle date_time'},
+                    {data: 'ask_time', name: 'ask_time', class: 'align-middle ask_time'},
+                    {data: 'shipments', name: 'shipments', class: 'align-middle shipments'},
+                    {data: 'weight', name: 'weight', class: 'align-middle weight'},
+                    {data: 'courier_type', name: 'courier_type', class: 'align-middle courier_type'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'pickup_time', name: 'pickup_time', class: 'align-middle pickup_time'},
+                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                    {data: 'picked_weight', name: 'picked_weight', class: 'align-middle picked_weight'},
+                    {data: 'product', name: 'product', class: 'align-middle product'},
+                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
+                    {data: 'station', name: 'station', class: 'align-middle station'},
+                    {data: 'route_no', name: 'route_no', class: 'align-middle route_no'},
+                    {data: 'courier_no', name: 'courier_no', class: 'align-middle courier_no'},
+                    {data: 'assigned_courier', name: 'assigned_courier', class: 'align-middle assigned_courier'},
+                    {data: 'communication_mode', name: 'communication_mode', class: 'align-middle communication_mode'},
+                    {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
+                    {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
+                    {data: 'additional_services', name: 'additional_services', class: 'align-middle additional_services'},
+                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
                 ],
@@ -807,31 +968,7 @@
                         }
                     });
             });
-            {{--$('#datatable tbody').on('click','tr td.received_link button',function () {--}}
-            {{--    var id = parseInt($(this).parents('tr').attr('id'));--}}
-            {{--    $('#pending_bookings_modal .modal-body').html('');--}}
-            {{--    $('#pending_bookings_modal').modal('show');--}}
 
-            {{--    $.ajax({--}}
-            {{--        url: '{!! route('admin.v2_pickups.pending.bookings.received') !!}',--}}
-            {{--        method: 'POST',--}}
-            {{--        data: {--}}
-            {{--            '_token': '{{ csrf_token() }}',--}}
-            {{--            'pickup_request_id': id--}}
-            {{--        }--}}
-            {{--    })--}}
-            {{--    .done(function(data) {--}}
-            {{--        if (data) {--}}
-            {{--            var shipments = '';--}}
-            {{--            if (data.booked) {--}}
-            {{--                $.each(data.booked, function(index, tracking_numbers) {--}}
-            {{--                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';--}}
-            {{--                });--}}
-            {{--            }--}}
-            {{--            $('#pending_bookings_modal .modal-body').html(shipments);--}}
-            {{--        }--}}
-            {{--    });--}}
-            {{--});--}}
 
             $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
                 var pickup_note_id = parseInt($(this).attr('rel'));
