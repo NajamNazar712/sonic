@@ -282,6 +282,7 @@
                                 $('#picture_attached').val('');
 
                                 $('#shipment_tracking_modal').modal('show');
+                                $('#tracking_number').val('');
                             }
                             else{
                                 swal({
