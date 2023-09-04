@@ -12,7 +12,7 @@
             <li class=" nav-item"><a href="{{ route('admin.dashboard.index') }}"><i class="la la-area-chart"></i><span
                         class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a>
             </li>
-            @if (session('role_id') == 1 || in_array(416, session('permissions')))
+            @if (session('role_id') == 1 || in_array(416, session('permissions')) || in_array(903, session('permissions')))
             <li><a class="menu-item" ><i class="la la-user-plus"></i>Leads</a>
                 <ul> <!-- Nested menu for Team Lead -->
 
