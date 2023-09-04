@@ -155,15 +155,7 @@ class V3AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v3_pickup_request_attempts where v3_pickup_request_attempts.pickup_request_id = v3_pickup_requests.id)')
                     );
             })
-            //End
-            ->leftJoin('v3_pickup_note_requests as vpn', function ($join) {
-                $join->on('vpn.pickup_request_id', '=', 'v3_pickup_requests.id')
-                    ->where(
-                        'vpn.id',
-                        '=',
-                        DB::raw('(select max(id) from v3_pickup_note_requests where v3_pickup_note_requests.pickup_request_id = v3_pickup_requests.id)')
-                    );
-            })
+
             ->leftJoin('v3_rider_pickups as vpr', function ($join) {
                 $join->on('vpr.pickup_request_id', '=', 'v3_pickup_requests.id')
                     ->where(
@@ -173,7 +165,7 @@ class V3AdminPickupsController extends Controller
                     );
             })
             ->leftjoin('star_shippers as ss','ss.user_id','=','u.id')
-            ->select('v3_pickup_requests.id','v3_pickup_requests.reminder_status as reminder', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date as requested_date', 'v3_pickup_requests.created_at as pickup_created_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'usi.vendor as vendor_name', 'prs.name as request_status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.try_and_buy', 'v3_pickup_requests.vendor', 'v3_pickup_requests.status_id', 'v3_pickup_requests.after_cut_off_time', 'vpn.pickup_note_id', 'vpn.pickup_note_id as pickup_note_no', 'v3_pickup_requests.received as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v3_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v3_pickup_requests.remarks', 't.name as territory', 'cas.name as city_area_name', 'ss.status as star_status', 'h.name as hub', 'z.name as zone', 'vpt.name as shipment_type')
+            ->select('v3_pickup_requests.id','v3_pickup_requests.reminder_status as reminder', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date as requested_date', 'v3_pickup_requests.created_at as pickup_created_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'usi.vendor as vendor_name', 'prs.name as request_status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.try_and_buy', 'v3_pickup_requests.vendor', 'v3_pickup_requests.status_id', 'v3_pickup_requests.after_cut_off_time', 'v3_pickup_requests.received as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v3_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v3_pickup_requests.remarks', 't.name as territory', 'cas.name as city_area_name', 'ss.status as star_status', 'h.name as hub', 'z.name as zone', 'vpt.name as shipment_type')
             ->whereNotIn('v3_pickup_requests.status_id', [2, 4]);
 
         if (session('role_id') != 1) {
@@ -266,12 +258,6 @@ class V3AdminPickupsController extends Controller
                     }
                 }
                 return $attempted_date;
-            })
-            ->editColumn('pickup_note_no', function ($pickup_requests) {
-                if ($pickup_requests->pickup_note_id != null) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle print" rel="' . $pickup_requests->pickup_note_id . '"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_requests->pickup_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-                }
-                return '';
             })
             ->addColumn('action', function ($reminder_request) {
                 $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
