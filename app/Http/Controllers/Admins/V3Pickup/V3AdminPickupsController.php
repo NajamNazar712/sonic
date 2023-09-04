@@ -138,11 +138,11 @@ class V3AdminPickupsController extends Controller
         $today = Carbon::now()->startOfDay();
         $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
+            ->leftjoin('route_locations as rl', 'rl.pickup_address_id', '=', 'v3_pickup_requests.pickup_address_id')
+            ->leftjoin('routes as rt', 'rt.id', '=', 'rl.route_id')
             ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
             ->join('cities as h', 'ci.hub_id', '=', 'h.id')
             ->join('v3_pickup_types as vpt', 'vpt.id', '=', 'v3_pickup_requests.pickup_type')
-            ->leftjoin('zones as z', 'z.id', '=', 'h.zone_id')
-            ->leftjoin('city_areas as cas', 'cas.id', '=', 'usi.city_area_id')
             ->join('v3_pickup_request_statuses as prs', 'prs.id', '=', 'v3_pickup_requests.status_id')
             ->leftjoin('riders as cr', 'cr.id', '=', 'v3_pickup_requests.current_rider_id')
             ->leftjoin('riders as lr', 'lr.id', '=', 'v3_pickup_requests.last_rider_id')
@@ -163,8 +163,8 @@ class V3AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                     );
             })
-            ->select('v3_pickup_requests.id','v3_pickup_requests.reminder_status as reminder', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date as requested_date', 'v3_pickup_requests.created_at as pickup_created_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'usi.vendor as vendor_name', 'prs.name as request_status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.try_and_buy', 'v3_pickup_requests.vendor', 'v3_pickup_requests.status_id', 'v3_pickup_requests.after_cut_off_time', 'v3_pickup_requests.received as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v3_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v3_pickup_requests.remarks', 't.name as territory', 'cas.name as city_area_name', 'ss.status as star_status', 'h.name as hub', 'z.name as zone', 'vpt.name as shipment_type')
-            ->whereNotIn('v3_pickup_requests.status_id', [2, 4]);
+            ->select('v3_pickup_requests.id', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date as requested_date', 'v3_pickup_requests.created_at as pickup_created_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'prs.name as request_status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.try_and_buy', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_rider_picked', 'vpa.created_at as assigned_date', 'v3_pickup_requests.reverse_pickup', 'vpr.rider_remarks as rider_remarks','usi.pickup_brand_name as brand_name', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type')
+            ->whereDate('v3_pickup_requests.pickup_date', Carbon::today());
 
         if (session('role_id') != 1) {
             $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
@@ -184,7 +184,7 @@ class V3AdminPickupsController extends Controller
         }
 
         $datatables = Datatables::of($pickup_requests)
-            ->setRowAttr([
+            /*->setRowAttr([
                 'class' => function ($pickup_request) use ($today) {
                     if ($pickup_request->star_status == 1)
                     {
@@ -209,7 +209,7 @@ class V3AdminPickupsController extends Controller
                         return 'new_pickup';
                     }
                 }
-            ])
+            ])*/
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                 if ($pickup_requests->reminder == 1) {
                     if ($pickup_requests->star_status == 1)

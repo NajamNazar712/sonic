@@ -18,7 +18,7 @@
                             @include('admin.inc.messages')
 
                             <div class="container">
-                                <div class="row">
+                                <div class="row justify-content-center">
 
                                     <div class="col">
                                         <div class="form-group input-group">
@@ -46,7 +46,7 @@
                                     </div>
                                     <div class="col">
                                         <button type="button" id="search_filter_btn"
-                                                class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+                                                class="float-right mb-1 btn btn-outline-primary btn-min-width"><i
                                                     class="la la-search" style="margin-right: 10px"></i> Search
                                         </button>
                                     </div>
