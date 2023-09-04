@@ -1080,6 +1080,14 @@ class AdminCRMController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('launched_by_name', function ($requests){
                 $name = '';
                 if($requests->launched_added_by == 0){
@@ -1775,6 +1783,14 @@ class AdminCRMController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -2527,7 +2543,11 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
-                    return $admin->name;
+                    if($admin){
+                        return $admin->name;
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }
