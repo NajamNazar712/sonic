@@ -211,31 +211,7 @@ class V3AdminPickupsController extends Controller
                 }
             ])*/
             ->editColumn('pickup_request_id', function ($pickup_requests) {
-                if ($pickup_requests->reminder == 1) {
-                    if ($pickup_requests->star_status == 1)
-                    {
-                        $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                        $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;"><i class="star_shippers_icon"></i>'.$test.'</b></td>';
-                        return $test1;
-                    }
-                    else
-                    {
-                        $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                        $test1 ='<td class="align-middle pickup_request_id sorting_1" ><b style="background-color: 	#00FF00; font-size: 17px;">'.$test.'</b></td>';
-                        return $test1;
-                    }
-                }
-                if ($pickup_requests->star_status == 1)
-                {
-                    $test = str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                    $test1 ='<td class="align-middle" ><i class="star_shippers_icon"></i>'.$test.'</b></td>';
-                    return $test1;
-                }
-                else
-                {
                     return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
-                }
-
             })
             ->addColumn('shipments_rider_picked', function ($pickup_request) {
                 if ($pickup_request->received > 0) {
