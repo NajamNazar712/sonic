@@ -78,6 +78,7 @@ use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\SpecialApprovalRequestAdmin;
+use Illuminate\Support\Facades\Validator;
 
 class AdminReportsController extends Controller
 {
@@ -12651,12 +12652,14 @@ class AdminReportsController extends Controller
     }
 
     public function ordinary_discrepancy_report_index(){
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 303);
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 698);
         return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1']);
         
     }
     public function ordinary_discrepancy_report_list(Request $request){
-        
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 699);
+        }
         $tracking_data = OrdinaryDiscrepancyReport::join('shipments','shipments.id','ordinary_discrepancy_reports.shipment_id')
         ->leftjoin('admins', 'admins.id','ordinary_discrepancy_reports.admin_id')
         ->leftjoin('users', 'users.id','shipments.user_id')
@@ -12706,7 +12709,7 @@ class AdminReportsController extends Controller
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
-            $datatables->whereBetween('shipments.created_at', [$from, $to]);
+            $datatables->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
         } 
         
         return $datatables->make(true);
@@ -12738,25 +12741,23 @@ class AdminReportsController extends Controller
         return response()->json(['status' => 1, 'data' => $tracking_data]);
     }
 
-    // public function upload_attachment(Request $request)
-    // {
-    //     if ($request->hasFile('upload_attachment')) {
-    //         $lead = Lead::find($request->lead_id);
-    //         $filename = 'lead_attachment_' . $lead->id . '.png';
-
-    //         $file = $request->file('upload_attachment');
-
-    //         Storage::disk('public')->putFileAs('leads\attachment', $file, $filename);
-
-    //         $lead->attachment = $filename;
-    //         $lead->save();
-    //         return redirect()->back()->with('success', 'Image Uploaded Successfully');
-    //     } else {
-    //         return redirect()->back()->with('error', 'Incomplete Information!');
-    //     }
-    // }
-
     public function submit_tracking(Request $request){
+        // dd($request->all());
+        if ($request->hasFile('picture_attached')) {
+            // $mime = $request->file('picture_attached')->getMimeType();
+            // dd($mime); image/jpeg
+            $validations = [
+                'picture_attached' => ['required', 'mimes:png,jpeg,jpg']
+                // 'picture_attached' => 'required|mimes:image/jpeg,jpg,png',
+            ];
+
+            $validate = Validator::make($request->all(), $validations);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 0, 'message' => $validate->errors()->first()]);
+            }
+        }
+
         $date_time = Carbon::now();
         $date = $date_time->format('Y-m-d');
         $tracking_number = $request->tracking_number;
@@ -12779,7 +12780,7 @@ class AdminReportsController extends Controller
         
         $get_data = OrdinaryDiscrepancyReport::where('shipment_id',$data->id)->get();
         if(count($get_data) >= 3){
-            return response()->json(['status' => 0, 'message' => 'Shipment cannot be editied more than 3 times']);
+            return response()->json(['status' => 0, 'message' => 'Same Shipment cannot add more than 3 times']);
         }
         else{
             $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
@@ -12796,6 +12797,7 @@ class AdminReportsController extends Controller
 
             return response()->json(['status' => 1, 'message' => 'Shipment Updated Successfully']);
         }
+    
     }
 
 }

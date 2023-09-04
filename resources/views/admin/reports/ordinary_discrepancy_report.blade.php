@@ -84,7 +84,7 @@
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
                 </div>
                 
-                            <form id="update_shipment_tracking_form" method="post" accept-charset="utf-8" novalidate="novalidate">
+                            <form id="update_shipment_tracking_form" method="post" enctype="multipart/form-data">
                                 @csrf
                                 <input type="hidden" id="tracking_number">
                                 <div class="modal-body" style="padding: 5px;">
@@ -118,7 +118,7 @@
                                         </div>
                                         <div class="row p-1">
                                             <div class="col">
-                                                <label>Shipment Content By Shipper</label>
+                                                <label>Product Content By Shipper</label>
                                                 <input class="form-control" id="shipment_content_shipper" name="shipment_content_shipper" type="text" value="shipment_content_shipper" readonly/>
                                             </div>
                                             <div class="col">
@@ -136,8 +136,12 @@
                                                 <input type="text" name="shipment_content_admin" id="shipment_content_admin" class="form-control shipment_content_admin" placeholder="Product Content" data-rule-required="true" data-msg-required="Product Content is required">
                                             </div>
                                             <div class="col">
-                                                <label>Picture<span class="text-danger">*</span></label>
-                                                <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-maxsize="5242880" data-rule-required="true" data-msg-required="Picture is required">
+                                                <label>Image<span class="text-danger">*</span></label>
+                                               
+                                                    {{-- <input class="form-control form-control-sm" type="file" name="picture_attached" id="picture_attached" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"> --}}
+                                                {{-- <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" data-rule-extension="jpeg|jpg|png" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"> --}}
+                                                <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" accept="image/*" data-rule-required="true" data-msg-required="Image is required">
+
                                             </div>
                                         </div>
                                         <div class="form-group ml-1 ">
@@ -146,8 +150,6 @@
                                         </div>
                                     </div>
                                 </form>
-                            
-
                 </div>
             </div>
         </div>
@@ -273,11 +275,17 @@
                                 $('#cod_value').val(response.data.cod_value);
                                 $('#shipper_name').val(response.data.shipper_name);
                                 $('#shipment_content_shipper').val(response.data.shipment_content_shipper);
+
+                                $('#quantity').val('');
+                                $('#remarks').val('');
+                                $('#shipment_content_admin').val('');
+                                $('#picture_attached').val('');
+
                                 $('#shipment_tracking_modal').modal('show');
                             }
                             else{
                                 swal({
-                                    title: 'Something Went Wrong!',
+                                    title: 'Error!',
                                     text: 'No Tracking Number Found',
                                     icon: 'error',
                                     closeOnClickOutside: false,
@@ -301,6 +309,7 @@
                     error.appendTo(element.parent());
                 },
                 submitHandler: function(form) {
+
                     
                     var formData = new FormData();
                     formData.append('tracking_number', $('#tracking_number').val());
@@ -315,7 +324,6 @@
                     formData.append('remarks', $('#remarks').val());
                     formData.append('shipment_content_admin', $('#shipment_content_admin').val());
                     formData.append('picture_attached', $('#picture_attached')[0].files[0]);
-
                     formData.append('_token', '{{ csrf_token() }}');
                     // AJAX request
                     $.ajax({
@@ -328,15 +336,18 @@
                             if (response.status == 1) 
                             {
                                 swal({
+                                    title: 'Success',
                                     text: response.message,
                                     icon: 'success',
                                     closeOnClickOutside: false,
                                     closeOnEsc: false
                                 });
-                            $('#shipment_tracking_modal').modal('hide');
+                                $('#shipment_tracking_modal').modal('hide');
+                                $('#tracking_number').val('');
                             }
                             else{
                                 swal({
+                                    title: 'Error!',
                                     text: response.message,
                                     icon: 'error',
                                     closeOnClickOutside: false,
@@ -346,7 +357,6 @@
                             table.draw();
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
-                        console.error('Form submission failed:', textStatus, errorThrown);
                         }
                     });
                 }
@@ -377,7 +387,7 @@
             //Excel
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
-                    blockPagePermanently();
+                    // blockPagePermanently();
                     body = [];
                     var params = table.ajax.params();
                     params.start = 0;
@@ -386,6 +396,10 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.ordinary_discrepancy_report.list') }}',
                         data: params,
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         success: function (result) {
                             head = [];
 
@@ -430,9 +444,9 @@
                         },
                         async: false
                     });
-                    UnblockPagePermanently();
+                    // UnblockPagePermanently();
 
-                    return {body: body, header: head};
+                    return { body: body,  header: head };
                 }
             } );
             var selected_rows = [];
@@ -464,17 +478,14 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                rowId: 'tracking_number',
-                order: [[2, 'desc']],
+                rowId: 'shId',
+                order: [[14, 'desc']], //by defualt sort by created_at
                 columns: [
-                    {orderable: false,
-                        searchable: false,
-                        name: 'serial_number',
-                        class: 'align-middle serial_number',
-                        targets: 0,
+                    { data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0,
                         render: function(data, type, row) {
                             return '';
-                        }},
+                        }
+                    },
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date', orderable:false},
                     { data:'shipment_status' ,name: 'ss.name', class: 'align-middle shipment_status'},
@@ -493,6 +504,18 @@
                     { data:'admin_hub' ,name: 'ch.name', class: 'align-middle admin_hub'},
                     
                 ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+
+                    if (data.OsaStatus == 0) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+
+                        if ($.inArray(data.shId, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
+                    }
+                },
             });
 
             $('#search_filter_btn').on('click',function () {
