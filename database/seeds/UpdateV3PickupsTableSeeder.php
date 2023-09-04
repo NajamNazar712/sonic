@@ -11,6 +11,19 @@ class UpdateV3PickupsTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('v3_pickup_types')->truncate();
+        DB::table('v3_pickup_types')->insert(array(
+            array('id' => 1, 'name' => 'Regular'),
+            array('id' => 2, 'name' => 'WalkIn'),
+        ));
+
+        DB::table('v3_pickup_shipment_types')->truncate();
+        DB::table('v3_pickup_shipment_types')->insert(array(
+            array('id' => 1, 'name' => 'Flyers'),
+            array('id' => 2, 'name' => 'Box'),
+            array('id' => 3, 'name' => 'Both'),
+        ));
+
         DB::table('v3_pickup_time_ranges')->truncate();
         DB::table('v3_pickup_time_ranges')->insert(array(
             array('id' => 1, 'name' => '9 - 10 AM'),
@@ -30,12 +43,7 @@ class UpdateV3PickupsTableSeeder extends Seeder
             array('id' => 15, 'name' => '11 - 12 PM'),
         ));
 
-        DB::table('v3_pickup_types')->truncate();
-        DB::table('v3_pickup_types')->insert(array(
-            array('id' => 1, 'name' => 'Flyer'),
-            array('id' => 2, 'name' => 'Box'),
-            array('id' => 3, 'name' => 'Mixed'),
-        ));
+
 
         DB::table('v3_pickup_request_statuses')->truncate();
 

@@ -71,25 +71,6 @@
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Pickup Address</th>
-                                    <th class="border-primary border-darken-1">Territory</th>
-                                    <th class="border-primary border-darken-1">City</th>
-                                    <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Zone</th>
-                                    <th class="border-primary border-darken-1">Pickup Request ID</th>
-                                    <th class="border-primary border-darken-1">Requested Date</th>
-                                    <th class="border-primary border-darken-1">Current Rider</th>
-                                    <th class="border-primary border-darken-1">Current Rider Contact</th>
-                                    <th class="border-primary border-darken-1">Last Rider</th>
-                                    <th class="border-primary border-darken-1">Pickup Note ID</th>
-                                    <th class="border-primary border-darken-1">Shipment Type</th>
-                                    <th class="border-primary border-darken-1">Shipment(s) Booked</th>
-                                    <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
-                                    <th class="border-primary border-darken-1">Request Status</th>
-                                    <th class="border-primary border-darken-1">Pickup Remarks</th>
-                                    <th class="border-primary border-darken-1">Assigned Date</th>
-                                    <th class="border-primary border-darken-1">Attempt Date/Time</th>
-                                    <th class="border-primary border-darken-1">Attempts</th>
-                                    <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -598,26 +579,6 @@
                     {data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-                    {data: 'territory', name: 't.name', class: 'align-middle territory'},
-                    {data: 'city', name: 'ci.name', class: 'align-middle city'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
-                    {data: 'pickup_request_id', name: 'v3_pickup_requests.id', class: 'align-middle pickup_request_id'},
-
-                    {data: 'requested_date', name: 'v3_pickup_requests.pickup_date', class: 'align-middle requested_date'},
-                    {data: 'current_rider', name: 'cr.name', class: 'align-middle current_rider'},
-                    {data: 'current_rider_contact', name: 'cr.phone', class: 'align-middle current_rider_contact'},
-                    {data: 'last_rider', name: 'lr.name', class: 'align-middle last_rider'},
-                    {data: 'pickup_note_no', name: 'vpn.pickup_note_id', class: 'align-middle pickup_note_no'},
-                    {data: 'shipment_type', name: 'vpt.name', class: 'align-middle shipment_type'},
-                    {data: 'booked', name: 'v3_pickup_requests.booked', class: 'align-middle text-center booked'},
-                    {data: 'shipments_rider_picked', name: 'v3_pickup_requests.received', class: 'align-middle shipments_rider_picked'},
-                    {data: 'request_status', name: 'prs.id', class: 'align-middle request_status'},
-                    {data: 'remarks', name: 'v3_pickup_requests.remarks', class: 'align-middle remarks'},
-                    {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
-                    {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
-                    {data: 'attempts', name: 'v3_pickup_requests.attempts', class: 'align-middle attempts'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
 
                 ],
