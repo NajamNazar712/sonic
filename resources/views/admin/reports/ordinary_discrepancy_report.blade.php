@@ -86,7 +86,7 @@
                 
                             <form id="update_shipment_tracking_form" method="post" enctype="multipart/form-data">
                                 @csrf
-                                <input type="hidden" id="tracking_number">
+                                <input type="hidden" id="tracking_numbers">
                                 <div class="modal-body" style="padding: 5px;">
                                         <div class="row p-1">
                                             <div class="col">
@@ -137,11 +137,7 @@
                                             </div>
                                             <div class="col">
                                                 <label>Image<span class="text-danger">*</span></label>
-                                               
-                                                    {{-- <input class="form-control form-control-sm" type="file" name="picture_attached" id="picture_attached" data-rule-extension="jpeg|jpg|png" data-msg-extension="Only file with extension jpeg, jpg or png allowed" data-rule-accept="image/*" data-msg-accept="Only Image file allowed" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"> --}}
-                                                {{-- <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" data-rule-extension="jpeg|jpg|png" data-rule-maxsize="2097152" data-msg-maxsize="File Size must not exceed 2 MB (2048 KB)." data-rule-required="true" data-msg-required="Image is required"> --}}
                                                 <input type="file" name="picture_attached" id="picture_attached" class="form-control picture_attached" title="Select File" accept="image/*" data-rule-required="true" data-msg-required="Image is required">
-
                                             </div>
                                         </div>
                                         <div class="form-group ml-1 ">
@@ -247,7 +243,7 @@
                 'allowPlus': false
             });
 
-            // fetching data of from shipment tracking number and display values in modal
+            // Opening modal and fetching data from shipment tracking number and display values in modal
             $('#add_shipment_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -275,6 +271,7 @@
                                 $('#cod_value').val(response.data.cod_value);
                                 $('#shipper_name').val(response.data.shipper_name);
                                 $('#shipment_content_shipper').val(response.data.shipment_content_shipper);
+                                $('#tracking_numbers').val(response.tracking);
 
                                 $('#quantity').val('');
                                 $('#remarks').val('');
@@ -287,7 +284,7 @@
                             else{
                                 swal({
                                     title: 'Error!',
-                                    text: response.message,
+                                    text: 'No Tracking Number Found',
                                     icon: 'error',
                                     closeOnClickOutside: false,
                                     closeOnEsc: false
@@ -313,7 +310,7 @@
 
                     
                     var formData = new FormData();
-                    formData.append('tracking_number', $('#tracking_number').val());
+                    formData.append('tracking_numbers', $('#tracking_numbers').val());
                     formData.append('origin', $('#origin').val());
                     formData.append('destination', $('#destination').val());
                     formData.append('shipment_status', $('#shipment_status').val());

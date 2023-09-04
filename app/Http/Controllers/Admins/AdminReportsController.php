@@ -12716,7 +12716,6 @@ class AdminReportsController extends Controller
     }
 
     public function ordinary_discrepancy_report_tracking_data(Request $request){
-
         $tracking_number = $request->tracking_number;
         $shipment_id = substr($tracking_number, 6);
 
@@ -12741,7 +12740,7 @@ class AdminReportsController extends Controller
             return response()->json(['status' => 0, 'message' => 'Shipment on booked status cannot be track']);
         }
         else{
-            return response()->json(['status' => 1, 'data' => $tracking_data]);
+            return response()->json(['status' => 1, 'data' => $tracking_data, 'tracking' => $tracking_number]);
         }
 
     }
@@ -12761,7 +12760,7 @@ class AdminReportsController extends Controller
 
         $date_time = Carbon::now();
         $date = $date_time->format('Y-m-d');
-        $tracking_number = $request->tracking_number;
+        $tracking_number = $request->tracking_numbers;
         $shipment_id = substr($tracking_number, 6);
         $data = Shipment::find($shipment_id);
 
