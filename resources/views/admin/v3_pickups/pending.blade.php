@@ -2,10 +2,10 @@
 
 @section('title', 'Pending Pickups')
 
-@sec tion('content')
+@section('content')
     <div class="app-content content">
         <div class="content-wrapper">
-            <divclass="content-header row">
+            <div class="content-header row">
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
@@ -20,7 +20,7 @@
                            <div class="container">
                                 <div class="row justify-content-center">
 
-                                    <div class"col">
+                                    <div class="col">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -32,7 +32,7 @@
                                                   id="requested_from_date" placeholder="Requested Date From">
                                         </div>
                                     </div>
-                                    <div class="col>
+                                    <div class="col">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
                                                      <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
