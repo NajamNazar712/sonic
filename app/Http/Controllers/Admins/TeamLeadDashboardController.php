@@ -349,7 +349,7 @@ class TeamLeadDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || in_array(652, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(903, session('permissions'))) {
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -359,7 +359,7 @@ class TeamLeadDashboardController extends Controller
 
 
                         if ($result->status_id == 1 || $result->status_id == 3) {
-                            if (session('role_id') == 1 || in_array(session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(903, session('permissions'))) {
 
                                 $rv_city = RvAgentAssignHub::where('agent_id', $result->staff_id)->orderBy('priority', 'ASC')->get();
                                 $rv_city = $rv_city->pluck('city_id')->toArray();
@@ -368,14 +368,14 @@ class TeamLeadDashboardController extends Controller
                                 $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
-                            if (session('role_id') == 1 || in_array(session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(903, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item add_additional_days" data-ename=' . $result->employee_name . ' data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Additional Days</div></button>';
                             }
                         }
 
 
                         if ($result->status_id == 2) {
-                            if (session('role_id') == 1 || in_array(session('permissions'))) {
+                            if (session('role_id') == 1 || in_array(903, session('permissions'))) {
                                 $dropdown .= '<button type="button" class="dropdown-item activate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Staff</div></button>';
                             }
                         }
