@@ -293,6 +293,35 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Request</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="add_request_form" method="post" enctype="multipart/form-data">
+                        @csrf
+                        <div class="container">
+
+{{--                            Code here--}}
+
+                            <div class="row justify-content-center">
+                                <div class="col-3">
+                                    <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -458,6 +487,13 @@
                 @if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
 
                 buttons: [
+                    {
+                        text: '<i class="la la-plus"></i> Add New',
+                        className: 'btn btn-primary request_add',
+                        action: function (e, dt, node, config) {
+                            $('#AddRequestModal').modal('show');
+                        }
+                    },
                         @if (session('role_id') == 1 || in_array(19, session('permissions')))
 
                     {
@@ -597,19 +633,13 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.aging') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.pickup_status')){
-                            $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -621,19 +651,7 @@
                             }
                         }
                     });
-                    var data = $.map({!! $pickup_statuses !!}, function (obj) {
-                        obj.id = obj.id; // replace pk with your identifier
-                        obj.text = obj.name;
-                        return obj;
-                    });
 
-                    $("#status_select").prepend('<option value="" selected></option>').select2({
-                        data:data,
-                        placeholder: "Select Pickup Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
                     this.api().table().columns.adjust();
                 }
 
