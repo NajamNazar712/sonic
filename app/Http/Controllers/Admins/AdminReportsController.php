@@ -12814,7 +12814,7 @@ public function csat_report_list(Request $request)
     })->editColumn('shipment_status', function($result){
         if(isset($result->shipment_status))
         {
-            return $result->shipment->status_shipper->name;
+            return $result->shipment->status_shipper->name ?? '-';
         }else{
             return '-';
         }
