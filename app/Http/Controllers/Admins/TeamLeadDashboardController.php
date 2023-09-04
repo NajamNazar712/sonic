@@ -47,6 +47,7 @@ class TeamLeadDashboardController extends Controller
     public function team_lead_index()
     {
 
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 703);
 
         $hubs = City::where('status', '1')
             ->where('business_category_id', '1')
