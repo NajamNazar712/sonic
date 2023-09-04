@@ -86,7 +86,6 @@
                                     <th class="border-primary border-darken-1">Shipment(s) Rider Picked</th>
                                     <th class="border-primary border-darken-1">Request Status</th>
                                     <th class="border-primary border-darken-1">Pickup Remarks</th>
-                                    <th class="border-primary border-darken-1">Rider Status</th>
                                     <th class="border-primary border-darken-1">Assigned Date</th>
                                     <th class="border-primary border-darken-1">Attempt Date/Time</th>
                                     <th class="border-primary border-darken-1">Attempts</th>
@@ -423,7 +422,6 @@
                             head.push('Trax Remark(s)');
                             head.push('Shipper Remark(s)');
                             head.push('Rider Remark(s)');
-                            head.push('Rider Status');
                             head.push('Assigned Date');
                             head.push('Attempt Date');
                             head.push('Aging');
@@ -455,7 +453,6 @@
                                 row.push(values.trax_remarks);
                                 row.push(values.shipper_remarks);
                                 row.push(values.rider_remarks);
-                                row.push(values.rider_status);
                                 row.push(values.assigned_date);
                                 row.push(values.attempted_date);
                                 row.push(values.aging);
@@ -616,7 +613,6 @@
                     {data: 'booked', name: 'v3_pickup_requests.booked', class: 'align-middle text-center booked'},
                     {data: 'shipments_rider_picked', name: 'v3_pickup_requests.received', class: 'align-middle shipments_rider_picked'},
                     {data: 'request_status', name: 'prs.id', class: 'align-middle request_status'},
-                    {data: 'rider_status', name: 'rs.id', class: 'align-middle rider_status'},
                     {data: 'remarks', name: 'v3_pickup_requests.remarks', class: 'align-middle remarks'},
                     {data: 'assigned_date', name: 'vpa.created_at', class: 'align-middle attempted_date', orderable: false, searchable: false},
                     {data: 'attempted_date', name: 'attempted_date', class: 'align-middle attempted_date', orderable: false, searchable: false},
