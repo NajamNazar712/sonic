@@ -288,8 +288,8 @@
                                     icon: 'error',
                                     closeOnClickOutside: false,
                                     closeOnEsc: false
-                                    $('#tracking_number').val('');
                                 });
+                                $('#tracking_number').val('');
                             }
                             table.draw();
                         },
@@ -351,8 +351,8 @@
                                     icon: 'error',
                                     closeOnClickOutside: false,
                                     closeOnEsc: false
-                                    $('#tracking_number').val('');
                                 });
+                                $('#tracking_number').val('');
                             }
                             table.draw();
                         },
