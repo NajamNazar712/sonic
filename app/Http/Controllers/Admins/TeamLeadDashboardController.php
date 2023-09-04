@@ -2,30 +2,32 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\EmployeeAdditionalDay;
 use DB;
 use Exception;
 use Carbon\Carbon;
 use App\Http\Models\City;
+use App\Http\Models\RvState;
 use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\EmployeeAdditionalDay;
+use App\RvAssignAgentSubStatus;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\HR\Employee;
 use Yajra\Datatables\Datatables;
 use App\Http\Controllers\Controller;
-use App\Http\Models\RvAgentAssignHub;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\RvAssignAgentStatus;
-use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\RvShipmentAssignAgentDetails;
-use App\Http\Models\RvState;
-use App\Http\Models\Shipment;
-use App\RvAssignAgentSubStatus;
-use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Models\RvAgentAssignHub;
+use App\Http\Models\HR\EmployeeStatus;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\RvAssignAgentStatus;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\RvShipmentAssignAgentDetails;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\HR\EmployeeType;
 
 class TeamLeadDashboardController extends Controller
 {
@@ -51,7 +53,7 @@ class TeamLeadDashboardController extends Controller
             ->where('hub', '1')
             ->select('id', 'name')
             ->get();
-            
+
 
         // $sortedHubs = $hubs->sortBy(function ($hub) {
         //     $agentAssignHub = $hub->agentAssignHub->first();
@@ -59,6 +61,8 @@ class TeamLeadDashboardController extends Controller
         // });
 
         $employee_additional_days = EmployeeAdditionalDay::get();
+
+        $employee_statuses = EmployeeStatus::all();
 
         $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
@@ -72,7 +76,11 @@ class TeamLeadDashboardController extends Controller
             ->get();
 
 
-        return view('admin.leads.team_lead')->with(['hubs' => $hubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
+            $employee_types = EmployeeType::all();
+
+
+
+        return view('admin.leads.team_lead')->with(['employee_types' => $employee_types,'employee_statuses' => $employee_statuses, 'hubs' => $hubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
 
     public function shipment_assign_index()
@@ -82,19 +90,19 @@ class TeamLeadDashboardController extends Controller
         $number_of_pending_tickets = RvShipmentAssignAgent::where('rv_state_id', 3)->get();
         $number_of_pending_ticket_percentage = (count($number_of_pending_tickets) / ($number_of_rv_ticket) * 100);
         $number_of_closed_tickets = RvShipmentAssignAgent::where('rv_state_id', 4)->get();
-        $number_of_closed_ticket_percentage =(count($number_of_closed_tickets) / ($number_of_rv_ticket) * 100);
+        $number_of_closed_ticket_percentage = (count($number_of_closed_tickets) / ($number_of_rv_ticket) * 100);
         $number_of_connected_calls = RvShipmentAssignAgent::whereIn('rv_assign_agent_status_id', [1, 2, 3, 5])->get();
-        $number_of_connected_calls_percentage =(count($number_of_connected_calls) / ($number_of_rv_ticket) * 100);
+        $number_of_connected_calls_percentage = (count($number_of_connected_calls) / ($number_of_rv_ticket) * 100);
         $number_of_unresponsive_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 6)->get();
-        $number_of_unresponsive_percentage =(count($number_of_unresponsive_call) / ($number_of_rv_ticket) * 100);
+        $number_of_unresponsive_percentage = (count($number_of_unresponsive_call) / ($number_of_rv_ticket) * 100);
         $number_of_reattempt_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 2)->get();
-        $number_of_reattempt_percentage =(count($number_of_reattempt_call) / ($number_of_rv_ticket) * 100);
+        $number_of_reattempt_percentage = (count($number_of_reattempt_call) / ($number_of_rv_ticket) * 100);
         $number_of_return_confirm_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 1)->get();
-        $number_of_return_confirm_percentage =(count($number_of_return_confirm_call) / ($number_of_rv_ticket) * 100);
+        $number_of_return_confirm_percentage = (count($number_of_return_confirm_call) / ($number_of_rv_ticket) * 100);
         $number_of_intercept_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 3)->get();
-        $number_of_intercept_percentage =(count($number_of_intercept_call) / ($number_of_rv_ticket) * 100);
+        $number_of_intercept_percentage = (count($number_of_intercept_call) / ($number_of_rv_ticket) * 100);
         $number_of_self_collection_call = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 5)->get();
-        $number_of_self_collection_percentage =(count($number_of_self_collection_call) / ($number_of_rv_ticket) * 100);
+        $number_of_self_collection_percentage = (count($number_of_self_collection_call) / ($number_of_rv_ticket) * 100);
 
         return view('admin.rv_assign_shipments.index')->with(['number_of_rv_tickets' => $number_of_rv_tickets, 'number_of_closed_tickets' => $number_of_closed_tickets, 'number_of_closed_ticket_percentage' => $number_of_closed_ticket_percentage, 'number_of_pending_tickets' => $number_of_pending_tickets, 'number_of_pending_ticket_percentage' => $number_of_pending_ticket_percentage, 'number_of_connected_calls' => $number_of_connected_calls, 'number_of_connected_calls_percentage' => $number_of_connected_calls_percentage, 'number_of_unresponsive_call' => $number_of_unresponsive_call, 'number_of_unresponsive_percentage' => $number_of_unresponsive_percentage, 'number_of_reattempt_call' => $number_of_reattempt_call, 'number_of_reattempt_percentage' => $number_of_reattempt_percentage, 'number_of_return_confirm_call' => $number_of_return_confirm_call, 'number_of_return_confirm_percentage' => $number_of_return_confirm_percentage, 'number_of_intercept_call' => $number_of_intercept_call, 'number_of_intercept_percentage' => $number_of_intercept_percentage, 'number_of_self_collection_call' => $number_of_self_collection_call, 'number_of_self_collection_percentage' => $number_of_self_collection_percentage]);
     }
@@ -197,14 +205,19 @@ class TeamLeadDashboardController extends Controller
         }
 
         $empid = Admin::find(Auth::id())->employee_id;
-        
+
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
             ->leftjoin('admins as staff', 'staff.CNIC', '=', 'employees.CNIC')
             ->leftjoin('staff_categories as est', 'est.id', '=', 'employees.staff_category_id')
-            ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
+            ->leftjoin('riders as r', 'r.trax_id', '=', 'employees.trax_id')
+            ->leftjoin('rider_requests as rr', 'rr.id', '=', 'employees.rider_request_id')
+            ->leftjoin('rider_types as rr_rt', 'rr_rt.id', '=', 'rr.rider_type_id')
+            ->leftjoin('rider_types as r_rt', 'r_rt.id', '=', 'r.rider_type_id')
+            ->leftjoin('rider_types as er_rt', 'er_rt.id', '=', 'employees.rider_type_id')
             ->leftjoin('employee_designations as ed', 'ed.id', '=', 'employees.designation_id')
+            ->join('employee_types as et', 'et.id', '=', 'employees.employee_type_id')
             ->join('employee_statuses as es', 'es.id', '=', 'employees.status_id')
             ->leftjoin('employee_attendances as ea', function ($join) {
                 $join->on('ea.employee_id', '=', 'employees.id')
@@ -215,8 +228,8 @@ class TeamLeadDashboardController extends Controller
                     ->groupBy('rvab.city_id')
                     ->havingRaw('COUNT(DISTINCT rvab.agent_id) > 1');
             })
-          
-            ->select(['rvab.city_id as rv_city_id','ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status','ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id','employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
+
+            ->select(['employees.rider_type_id as rider_type_id','rvab.city_id as rv_city_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
@@ -250,6 +263,7 @@ class TeamLeadDashboardController extends Controller
                             $q->where('employees.rider_type_id', 1)
                                 ->orwhere('r_rt.id', 1);
                         });
+
                 } elseif ($keyword == 3) {
                     return $query->where('et.name', '=', 'Rider')
                         ->where(function ($q) {
@@ -259,6 +273,9 @@ class TeamLeadDashboardController extends Controller
                 }
                 if ($keyword == 4) {
                     return $query->where('employees.staff_category_id', '=', 2);
+                }
+                if ($keyword == 5) {
+                    return $query->where('employees.staff_category_id', '=', 3);
                 }
 
                 return null;
@@ -338,12 +355,12 @@ class TeamLeadDashboardController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
                     if ($result->staff_category_id == 3) {
-            
+
 
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(session('permissions'))) {
 
-                                $rv_city = RvAgentAssignHub::where('agent_id', $result->staff_id)->orderBy('priority','ASC')->get();
+                                $rv_city = RvAgentAssignHub::where('agent_id', $result->staff_id)->orderBy('priority', 'ASC')->get();
                                 $rv_city = $rv_city->pluck('city_id')->toArray();
 
                                 $rv_city = implode(',', $rv_city);
@@ -384,8 +401,8 @@ class TeamLeadDashboardController extends Controller
     // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
-        $sorted_hubs  = explode(',',$request->unsorted_hubs);
-       
+        $sorted_hubs = explode(',', $request->unsorted_hubs);
+
         try {
             $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id);
             if ($rvAgentAssignHub) {
@@ -393,9 +410,9 @@ class TeamLeadDashboardController extends Controller
             }
 
             foreach ($sorted_hubs as $key => $value) {
-                if($value == null){
+                if ($value == null) {
                     break;
-                }else{
+                } else {
 
                     $priority = $key + 1;
                     RvAgentAssignHub::create([
@@ -424,7 +441,7 @@ class TeamLeadDashboardController extends Controller
             ]);
         }
 
-        $role = Admin::whereIn('role_id', [6,63,70])->pluck('email')->toArray();
+        $role = Admin::whereIn('role_id', [6, 63, 70])->pluck('email')->toArray();
         $employee = Employee::where('id', $request->employee_id)->first();
         NotificationsController::send(218, $employee, $role);
     }
@@ -446,7 +463,7 @@ class TeamLeadDashboardController extends Controller
 
         try {
             $validations = [
-                'employee_id' => 'required', 
+                'employee_id' => 'required',
                 'add_additional_days' => 'required',
             ];
 
@@ -661,7 +678,7 @@ class TeamLeadDashboardController extends Controller
                     $agent_id = trim($row['agent_id']); //22
 
                     $id_shipment = Shipment::where('tracking_number', $shipment_id)->first();
-                    
+
                     $tracking_numbers['Row #' . $row_id] = $shipment_id;
                 }
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {

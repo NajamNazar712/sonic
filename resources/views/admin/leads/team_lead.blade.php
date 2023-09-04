@@ -344,11 +344,7 @@
                     })
                     .done(function(data) {
 
-                        var object = data
-                            .object; // Assuming 'data.object' contains the array or object you want to get the length of
-
-
-                        // Get the length of the 'object'
+                        var object = data.object;
                         var objectLength = 0;
                         if (Array.isArray(object)) {
                             objectLength = object.length; // If 'object' is an array
@@ -471,6 +467,7 @@
                 width: '100%'
             });
 
+
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -568,160 +565,7 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    @if (session('role_id') == 1 || in_array(712, session('permissions')))
-                        {
-                            text: '<i class="la la-refresh"></i> Update Line Manager',
-                            className: 'btn btn-primary',
-                            action: function(e, dt, node, config) {
-                                $("#updateLineManagerForm #line_manager_id").val('').trigger(
-                                    'change');
-                                $("#updateLineManagerModal").modal('show');
-                            }
-                        },
-                    @endif {
-                        extend: 'excel',
-                        title: 'Employee Directory',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
-                    @if (session('role_id') == 1 || session('role_id') == 6 || in_array(652, session('permissions')))
-                        {
-                            text: 'Approve',
-                            className: 'btn btn-primary bulk_approve d-none',
-                            enabled: false,
-                            action: function(e, dt, node, config) {
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes Approve Employee!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        swal({
-                                            title: 'Please Wait!',
-                                            text: 'Employee is being Approved',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-
-                                        $.ajax({
-                                                url: '{!! route('admin.human_resource.employee_directory.approve') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'employee_ids[]': selected_rows,
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                            .done(function(data) {
-                                                if (data.status == 0) {
-                                                    toastr.success(data.success,
-                                                        'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                swal.close();
-                                                selected_rows = [];
-
-                                                table.rows().deselect();
-                                                table.draw('false');
-                                            });
-                                    }
-                                });
-                            }
-                        }, {
-                            text: 'Reject',
-                            className: 'btn btn-danger bulk_reject d-none',
-                            enabled: false,
-                            action: function(e, dt, node, config) {
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes Reject Employee!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function(confirm) {
-                                    if (confirm) {
-                                        swal({
-                                            title: 'Please Wait!',
-                                            text: 'Employee is being Rejected',
-                                            icon: 'info',
-                                            buttons: false,
-                                            closeOnClickOutside: false,
-                                            closeOnEsc: false
-                                        });
-
-                                        $.ajax({
-                                                url: '{!! route('admin.human_resource.employee_directory.reject') !!}',
-                                                method: 'POST',
-                                                data: {
-                                                    'employee_ids[]': selected_rows,
-                                                    '_token': '{{ csrf_token() }}'
-                                                }
-                                            })
-                                            .done(function(data) {
-                                                if (data.status == 0) {
-                                                    toastr.success(data.success,
-                                                        'Success!', {
-                                                            positionClass: 'toast-bottom-center',
-                                                            containerId: 'toast-bottom-center'
-                                                        });
-                                                } else {
-                                                    toastr.error(data.error, 'Error!', {
-                                                        positionClass: 'toast-top-center',
-                                                        containerId: 'toast-top-center'
-                                                    });
-                                                }
-                                                swal.close();
-                                                selected_rows = [];
-
-                                                table.rows().deselect();
-                                                table.draw('false');
-                                            });
-                                    }
-                                });
-                            }
-                        },
-                    @endif {
+                buttons: [{
                         extend: 'selectAll',
                         text: 'Select All',
                         className: 'select_all d-none',
@@ -863,7 +707,7 @@
                     },
                     {
                         data: 'employee_type',
-                        name: 'et.name',
+                        name: 'et.id',
                         class: 'align-middle employee_type'
                     },
                     {
@@ -894,7 +738,7 @@
                     {
                         data: 'attendance_date',
                         name: 'ea.attendance_date',
-                        class: 'align-middle confirmation_status'
+                        class: 'align-middle attendance_date'
                     },
                     {
                         data: 'action',
@@ -920,14 +764,12 @@
                         '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon =
                         '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var employee_type =
-                        '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">' +
-                        '</select>';
+                        var employee_type = '<select name="employee_type_search" id="employee_type_search" class="select2 form-control">'+
+                            '</select>';
+
                     var employee_status =
                         '<select name="employee_status_search" id="employee_status_search" class="select2 form-control">' +
                         '</select>';
-
-
 
                     var rider_main_categories =
                         '<select name="rider_main_categories_search" id="rider_main_categories_search" class="select2 form-control">' +
@@ -936,6 +778,16 @@
                     var employee_zone =
                         '<select name="employee_zone_search" id="employee_zone_search" class="select2 form-control">' +
                         '</select>';
+
+                        var employee_confirmation_status = '<select name="employee_confirmation_status" id="employee_confirmation_status" class="select2 form-control">' +
+                        '<option value="2">Probation</option>'+
+                        '<option value="1">Permanent</option>'+
+                    '</select>';
+
+                    var employee_attendance = '<select name="employee_attendance" id="employee_attendance" class="select2 form-control">' +
+                        '<option value="1">Offline</option>'+
+                        '<option value="2">Online</option>'+
+                    '</select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -959,12 +811,20 @@
                                 .on('change', function() {
                                     column.search($(this).val(), false, false, true).draw();
                                 }).wrap(td);
-                        } else if ($(header).is('.rider_main_category')) {
-                            $(rider_main_categories).appendTo($(search))
-                                .on('change', function() {
+                        }  else if($(header).is('.confirmation_status'))
+                        {
+                            $(employee_confirmation_status).appendTo($(search))
+                                .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
-                                }).wrap(td);
-                        } else {
+                                } ).wrap(td);
+                        }else if($(header).is('.attendance_date'))
+                        {
+                            $(employee_attendance).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
@@ -989,6 +849,21 @@
                         'text': 'Intern'
                     }];
 
+                    $("#employee_confirmation_status").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
+                    $("#employee_attendance").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Available Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     $("#employee_type_search").prepend('<option value="" selected></option>').select2({
                         data: data,
                         placeholder: "Select Employee Type",
@@ -997,11 +872,23 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
+                    var status_data = $.map({!! $employee_statuses !!}, function(obj) {
+                        obj.text = obj.name;
+                        return obj;
+                    });
+
+                    $("#employee_status_search").prepend('<option value="" selected></option>')
+                .select2({
+                        data: status_data,
+                        placeholder: "Select Status",
+                        width: '100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
                     this.api().table().columns.adjust();
                 }
             });
-
-
 
             $("#filter_line_manager_btn").on('click', function() {
                 $("#filter_line_manager").val(1);
@@ -1305,8 +1192,8 @@
                         if (selectedCities.includes(optionValue)) {
                             var cityIndex = selectedCities.indexOf(optionValue);
                             if (cityIndex > -1) {
-                                $(this).detach(); 
-                                $('#search_origin').prepend($(this)); 
+                                $(this).detach();
+                                $('#search_origin').prepend($(this));
                             }
                             $(this).prop('selected', true);
                         } else {
@@ -1322,91 +1209,91 @@
             });
 
 
-        var $select2 = $('#search_origin').select2({
-            templateSelection: template,
-            width: '100%'
-        });
+            var $select2 = $('#search_origin').select2({
+                templateSelection: template,
+                width: '100%'
+            });
 
-        // Initialize with default values
-        var defaultValues = {!! $hubs->pluck('id') !!};
-        $select2.val(defaultValues).trigger('change');
+            // Initialize with default values
+            var defaultValues = {!! $hubs->pluck('id') !!};
+            $select2.val(defaultValues).trigger('change');
 
-        // Cache order of initial values
-        var preservedOrder = defaultValues.slice();
+            // Cache order of initial values
+            var preservedOrder = defaultValues.slice();
 
-        $select2.on('select2:select select2:unselect', selectionHandler);
+            $select2.on('select2:select select2:unselect', selectionHandler);
 
-        function selectionHandler(e) {
-            var val = e.params.data.id;
+            function selectionHandler(e) {
+                var val = e.params.data.id;
 
-            switch (e.type) {
-                case 'select2:select':
-                    preservedOrder.push(val);
-                    break;
-                case 'select2:unselect':
-                    var foundIndex = preservedOrder.indexOf(val);
-                    if (foundIndex >= 0) {
-                        preservedOrder.splice(foundIndex, 1);
-                    }
-                    break;
+                switch (e.type) {
+                    case 'select2:select':
+                        preservedOrder.push(val);
+                        break;
+                    case 'select2:unselect':
+                        var foundIndex = preservedOrder.indexOf(val);
+                        if (foundIndex >= 0) {
+                            preservedOrder.splice(foundIndex, 1);
+                        }
+                        break;
+                }
+
+                // Store the updated order
+                $select2.data('preserved-order', preservedOrder);
+
+                // Render selections in the preserved order
+                select2_renderSelections($select2);
             }
 
-            // Store the updated order
-            $select2.data('preserved-order', preservedOrder);
-
-            // Render selections in the preserved order
-            select2_renderSelections($select2);
-        }
-
-        function select2_renderSelections($select2) {
-            var order = $select2.data('preserved-order') || [];
-            var $container = $select2.next('.select2-container');
-            var $tags = $container.find('li.select2-selection__choice');
-            var $input = $tags.last().next();
+            function select2_renderSelections($select2) {
+                var order = $select2.data('preserved-order') || [];
+                var $container = $select2.next('.select2-container');
+                var $tags = $container.find('li.select2-selection__choice');
+                var $input = $tags.last().next();
 
 
-            var stringList = order.filter(function(item) {
-            return typeof item === 'string';
-        });
+                var stringList = order.filter(function(item) {
+                    return typeof item === 'string';
+                });
 
 
-        // Apply tag order
-        order.forEach(function(val) {
-            var $el = $tags.filter(function(i, tag) {
-                return $(tag).data('data').id === val;
-            });
-            $input.before($el);
-        });
+                // Apply tag order
+                order.forEach(function(val) {
+                    var $el = $tags.filter(function(i, tag) {
+                        return $(tag).data('data').id === val;
+                    });
+                    $input.before($el);
+                });
 
-        $('.unsorted_hubs').val(stringList);
+                $('.unsorted_hubs').val(stringList);
 
-            var selectedIds = $('#search_origin').find('option:selected').map(function() {
-                return $(this).val();
-            }).get();
+                var selectedIds = $('#search_origin').find('option:selected').map(function() {
+                    return $(this).val();
+                }).get();
 
-            var idArray = $('.unsorted_hubs').val().split(',');
+                var idArray = $('.unsorted_hubs').val().split(',');
 
-            selectedIds = selectedIds.filter(function(item) {
-            return idArray.indexOf(item) === -1;
-        });
+                selectedIds = selectedIds.filter(function(item) {
+                    return idArray.indexOf(item) === -1;
+                });
 
-        // Append values from array 2 to the end of array 1
-        selectedIds = selectedIds.concat(idArray);
+                // Append values from array 2 to the end of array 1
+                selectedIds = selectedIds.concat(idArray);
 
-        $('.unsorted_hubs').val(selectedIds)
+                $('.unsorted_hubs').val(selectedIds)
 
-    }
+            }
 
 
 
-/**
- * Customize the display of each option in the dropdown.
- * @param data
- * @param container
- */
-function template(data, container) {
-    return data.text;
-}
+            /**
+             * Customize the display of each option in the dropdown.
+             * @param data
+             * @param container
+             */
+            function template(data, container) {
+                return data.text;
+            }
 
 
         });
