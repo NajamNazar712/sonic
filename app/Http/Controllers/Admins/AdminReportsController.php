@@ -12747,13 +12747,9 @@ class AdminReportsController extends Controller
     }
 
     public function submit_tracking(Request $request){
-        // dd($request->all());
         if ($request->hasFile('picture_attached')) {
-            // $mime = $request->file('picture_attached')->getMimeType();
-            // dd($mime); image/jpeg
             $validations = [
                 'picture_attached' => ['required', 'mimes:png,jpeg,jpg']
-                // 'picture_attached' => 'required|mimes:image/jpeg,jpg,png',
             ];
 
             $validate = Validator::make($request->all(), $validations);
