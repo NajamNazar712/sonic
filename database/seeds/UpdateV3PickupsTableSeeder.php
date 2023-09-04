@@ -40,17 +40,14 @@ class UpdateV3PickupsTableSeeder extends Seeder
         DB::table('v3_pickup_request_statuses')->truncate();
 
         DB::table('v3_pickup_request_statuses')->insert(array(
-            array('id' => 1, 'name' => 'Requested'),
-            array('id' => 2, 'name' => 'Picked'),
-            array('id' => 3, 'name' => 'Not Picked'),
-            array('id' => 4, 'name' => 'Cancelled')
-        ));
-
-        DB::table('v3_pickup_request_rider_statuses')->truncate();
-
-        DB::table('v3_pickup_request_rider_statuses')->insert(array(
             array('id' => 1, 'name' => 'Pending'),
-            array('id' => 2, 'name' => 'Assigned')
+            array('id' => 2, 'name' => 'Confirmed'),
+            array('id' => 3, 'name' => 'Communicated'),
+            array('id' => 4, 'name' => 'Accepted'),
+            array('id' => 5, 'name' => 'Reached'),
+            array('id' => 6, 'name' => 'Picked'),
+            array('id' => 7, 'name' => 'Rescheduled'),
+            array('id' => 8, 'name' => 'Delayed'),
         ));
 
         DB::table('v3_pickup_request_not_pick_reasons')->truncate();
@@ -67,13 +64,13 @@ class UpdateV3PickupsTableSeeder extends Seeder
             array('id' => 10, 'name' => 'Refused on Call')
         ));
 
-        DB::table('v3_pickup_request_legends')->truncate();
-        DB::table('v3_pickup_request_legends')->insert(array(
-            array('id' => 1, 'name' => 'New Pickup', 'color' => '#00FFFF'),
-            array('id' => 2, 'name' => 'Vendor Pickup', 'color' => '#FFFF00'),
-            array('id' => 3, 'name' => 'Pickup Request Having Try & Buy Shipment', 'color' => '#FFA500'),
-            array('id' => 4, 'name' => 'Reverse Pickup', 'color' => '#BFEFE2'),
 
+        DB::table('v3_pickup_services')->truncate();
+
+        DB::table('v3_pickup_services')->insert(array(
+            array('id' => 1, 'name' => 'Labour'),
+            array('id' => 2, 'name' => 'Lifter'),
+            array('id' => 3, 'name' => 'Packaging'),
         ));
     }
 }

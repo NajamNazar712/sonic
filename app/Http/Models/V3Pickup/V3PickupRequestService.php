@@ -4,7 +4,7 @@ namespace App\Http\Models\V3Pickup;
 
 use Illuminate\Database\Eloquent\Model;
 
-class V3PickupRequestLegend extends Model
+class V3PickupRequestService extends Model
 {
     //
 }

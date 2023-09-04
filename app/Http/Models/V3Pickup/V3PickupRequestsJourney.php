@@ -4,7 +4,7 @@ namespace App\Http\Models\V3Pickup;
 
 use Illuminate\Database\Eloquent\Model;
 
-class V3PickupNote extends Model
+class V3PickupRequestsJourney extends Model
 {
     //
 }

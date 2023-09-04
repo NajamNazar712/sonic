@@ -105,7 +105,7 @@ class V3AdminPickupsController extends Controller
 
         $riders = Rider::where('status', 1)->select(['id', 'name', 'trax_id']);
         $pickup_statuses = V3PickupRequestStatus::all();
-        $rider_statuses = V3PickupRequestRiderStatus::all();
+//        $rider_statuses = V3PickupRequestRiderStatus::all();
         if (session('role_id') != 1) {
             $riders = $riders->whereHas('city', function ($query) {
                 $query->whereIn('hub_id', session('hubs'));
@@ -114,7 +114,7 @@ class V3AdminPickupsController extends Controller
         $not_pick_reasons = V3PickupRequestNotPickReason::all();
         $riders = $riders->get();
 
-        $legends = V3PickupRequestLegend::all();
+//        $legends = V3PickupRequestLegend::all();
         $cut_off_time = '17:30:00';
         $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
         if ($setting->exists()) {
@@ -128,7 +128,7 @@ class V3AdminPickupsController extends Controller
             $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
         }
 
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'legends' => $legends, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'rider_statuses' => $rider_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
     }
 
     public function pending_requests_list(Request $request){
@@ -394,8 +394,6 @@ class V3AdminPickupsController extends Controller
         return $datatables->make(true);
 
     }
-
-
 
     public function history_pickup_requests(Request $request)
     {

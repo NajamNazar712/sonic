@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateV3PickupNoteRequestsTable extends Migration
+class CreateV3PickupRequestServicesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,12 @@ class CreateV3PickupNoteRequestsTable extends Migration
      */
     public function up()
     {
-        Schema::create('v3_pickup_note_requests', function (Blueprint $table) {
+        Schema::create('v3_pickup_request_services', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('pickup_note_id');
-            $table->integer('pickup_request_id');
+            $table->integer('pickup_request_id')->index();
+            $table->integer('pickup_request_service_id')->index();
+            $table->integer('count');
             $table->timestamps();
-            $table->index(['created_at', 'updated_at']);
         });
     }
 
@@ -29,6 +29,6 @@ class CreateV3PickupNoteRequestsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('v3_pickup_note_requests');
+        Schema::dropIfExists('v3_pickup_request_services');
     }
 }

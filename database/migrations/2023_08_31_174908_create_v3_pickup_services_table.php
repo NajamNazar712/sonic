@@ -15,6 +15,7 @@ class CreateV3PickupServicesTable extends Migration
     {
         Schema::create('v3_pickup_services', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('name');
             $table->timestamps();
         });
     }

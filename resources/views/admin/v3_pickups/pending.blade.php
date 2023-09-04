@@ -19,17 +19,7 @@
 
                             <div class="container">
                                 <div class="row">
-                                    <div class="col">
-                                        <input type="text" name="cut_off_time" class="form-control cut_off_time"
-                                               value="{{$cut_off_time}}:00" disabled>
-                                    </div>
-                                    <div class="col">
-                                        <select name="search_filter" id="search_filter" class="form-control select2">
 
-                                            <option value="10">Pickup Request Before Cut Off Time</option>
-                                            <option value="0">All</option>
-                                        </select>
-                                    </div>
                                     <div class="col">
                                         <div class="form-group input-group">
                                             <div class="input-group-prepend">
@@ -54,80 +44,26 @@
                                                    id="requested_to_date" placeholder="Requested Date To">
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col">
                                         <button type="button" id="search_filter_btn"
                                                 class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
                                                     class="la la-search" style="margin-right: 10px"></i> Search
                                         </button>
                                     </div>
-                                    <div class="col-md-6">
-                                        <div class="card-header">
-                                            <div class="heading-elements">
-                                                <ul class="list-inline" style="margin-top: -10px">
-                                                    <li class="primary border-primary round" value="0" id="star_shippers_filter"><a>
-                                                            Star Shippers</a>
-                                                    </li>
-                                                </ul>
-                                            </div>
-                                        </div>
-                                        <div class="card">
-                                            <div class="card-header">
-                                                <div class="heading-elements">
-                                                    <ul class="list-inline mb-0">
-                                                        <li class="primary border-primary round"><a
-                                                                    data-action="collapse">Legend
-                                                                <i class="ft-minus"></i></a></li>
-                                                    </ul>
-                                                </div>
-                                            </div>
-                                            <div class="card-content collapse">
-                                                <div class="card-body p-1">
-                                                    <h4 class=" info">Legend</h4>
-                                                    <input type="hidden" id="legend_filter">
-
-                                                    <table class="table mb-0" id="legends_table">
-                                                        <tbody>
-                                                        @foreach($legends as $legend)
-                                                            @if($legend->id == 7)
-                                                                <tr style="background-color: {{$legend->color}}; color:#010a10;"
-                                                                    id="{{$legend->id}}" class="legends">
-                                                                    <td>
-                                                                        <button type="button"
-                                                                                class="btn btn-sm round btn-min-width text-white"
-                                                                                style="background-color: {{$legend->color}}"
-                                                                                disabled>{{$cut_off_time}}:00
-                                                                        </button>
-                                                                    </td>
-                                                                    <td class="align-middle">{{ $legend->name }}
-                                                                        <b>({{$cut_off_time}}:00)</b></td>
-                                                                </tr>
-                                                            @else
-                                                                <tr style="background-color: {{$legend->color}}; color:#010a10;"
-                                                                    id="{{$legend->id}}" class="legends">
-                                                                    <td>
-                                                                        <button type="button"
-                                                                                class="btn btn-sm round btn-min-width p-1"
-                                                                                style="background-color: {{$legend->color}}"
-                                                                                disabled></button>
-                                                                    </td>
-                                                                    <td class="align-middle">{{ $legend->name }}</td>
-                                                                </tr>
-                                                            @endif
-
-                                                        @endforeach
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                    </div>
                                 </div>
+
+
                             </div>
 
-
+                            <div class="container-fluid">
+                                <div class="row justify-content-center">
+                                    @foreach($pickup_statuses as $status)
+                                        <div class="col-1">
+                                            <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1">{{ $status->name }}</button>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -393,50 +329,6 @@
         .legends{
             cursor:pointer;
         }
-
-        @foreach($legends as $legend)
-    @if($legend->id == 1)
-        .new_pickup{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 2)
-        .vendor_row{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 3)
-        .try_and_buy{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 4)
-        .first_attempt{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 5)
-        .second_attempt{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 6)
-        .multiple_attempt{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 7)
-        .after_cut_off_time{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 8)
-        .reverse_pickup_row{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 8)
-        .reverse_pickup_row{
-            background-color: {{$legend->color}};
-        }
-        @elseif($legend->id == 9)
-        .reminder_pending_row{
-            background-color: {{$legend->color}};
-        }
-        @endif
-        @endforeach
     </style>
 @endsection
 
@@ -749,7 +641,7 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var rider_status_select = '<select name="rider_status_select" id="rider_status_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -758,12 +650,6 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.pickup_status')){
                             $(drop_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
-                        }
-                        else if($(header).is('.rider_status')){
-                            $(rider_status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -787,18 +673,6 @@
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         data:data,
                         placeholder: "Select Pickup Status",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var rider_data = $.map({!! $rider_statuses !!}, function (obj) {
-                        obj.id = obj.id; // replace pk with your identifier
-                        obj.text = obj.name;
-                        return obj;
-                    });
-                    $("#rider_status_select").prepend('<option value="" selected></option>').select2({
-                        data:rider_data,
-                        placeholder: "Select Rider Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
@@ -1022,13 +896,13 @@
             }
 
 
-            $('table#legends_table').on('click', 'tr', function(){
+            /*$('table#legends_table').on('click', 'tr', function(){
                 var id = parseInt($(this).attr('id'));
                 if(id){
                     $('#legend_filter').val(id);
                     table.draw()
                 }
-            })
+            })*/
             $('body').on('click','.reminderMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
