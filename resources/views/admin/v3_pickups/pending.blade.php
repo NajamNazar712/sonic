@@ -58,7 +58,7 @@
                             <div class="container-fluid">
                                 <div class="row justify-content-center">
                                     @foreach($pickup_statuses as $status)
-                                        <div class="col-1">
+                                        <div>
                                             <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1">{{ $status->name }}</button>
                                         </div>
                                     @endforeach
