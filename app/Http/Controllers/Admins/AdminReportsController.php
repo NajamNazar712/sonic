@@ -12737,11 +12737,17 @@ class AdminReportsController extends Controller
         'shipments.amount as cod_value','users.name as shipper_name', 'si.description as shipment_content_shipper','ss.id as shipment_status_id')
         ->where('shipments.id',$shipment_id)->first();
         
-        if($tracking_data->shipment_status_id == 1){
+
+        if($tracking_data && $tracking_data->shipment_status_id == 1){
             return response()->json(['status' => 0, 'message' => 'Shipment on booked status cannot be track']);
         }
-        else{
+        else if($tracking_data){
+           
             return response()->json(['status' => 1, 'data' => $tracking_data, 'tracking' => $tracking_number]);
+        }
+        else{
+            
+            return response()->json(['status' => 0, 'message' => 'Invalid Tracking Number']);
         }
 
     }
