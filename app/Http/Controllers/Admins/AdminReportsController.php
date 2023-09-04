@@ -12735,10 +12735,15 @@ class AdminReportsController extends Controller
                 );
         })
         ->select('citi.name as origin', 'c.name as destination','ss.name as shipment_status','sj.created_at as arrival_date',
-        'shipments.amount as cod_value','users.name as shipper_name', 'si.description as shipment_content_shipper')
+        'shipments.amount as cod_value','users.name as shipper_name', 'si.description as shipment_content_shipper','ss.id as shipment_status_id')
         ->where('shipments.id',$shipment_id)->first();
+        if($tracking_data->shipment_status_id == 1){
+            return response()->json(['status' => 0, 'message' => 'Shipment on booked status cannot be track']);
+        }
+        else{
+            return response()->json(['status' => 1, 'data' => $tracking_data]);
+        }
 
-        return response()->json(['status' => 1, 'data' => $tracking_data]);
     }
 
     public function submit_tracking(Request $request){
