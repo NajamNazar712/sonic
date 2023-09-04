@@ -15,6 +15,10 @@ class CreateV3PickupRequestsJourneysTable extends Migration
     {
         Schema::create('v3_pickup_requests_journeys', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('pickup_request_id')->index();
+            $table->integer('status')->index();
+            $table->tinyInteger('type')->index(); // 1 - Admin, 2 - Rider, 0 -> shipper
+            $table->integer('status_by')->index();
             $table->timestamps();
         });
     }
