@@ -56,7 +56,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Fintech Charge</th>
+                        <th class="border-primary border-darken-1">Fintech Amount</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">CCD Receipts</th>
@@ -397,6 +397,7 @@
                             head.push('Updated By');
                             head.push('Updated Date');
                             head.push('DNCC Amount');
+                            head.push('Fintech Amount');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
@@ -420,6 +421,7 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.amount);
+                                row.push(values.count_fintech_shipments.sum);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
@@ -638,7 +640,7 @@
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'count_fintech_shipments' ,name: 'count_fintech_shipments', class: 'align-middle count_fintech_shipments',orderable: false, searchable: false},
+                    { data:'count_fintech_shipments.link' ,name: 'count_fintech_shipments.link', class: 'align-middle count_fintech_shipments.link',orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount',orderable: false, searchable: false},
                     { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
@@ -662,9 +664,12 @@
                         
                         data.transactions_amount = 0
                     }
-                    value = dccn_amount - fintech_sum - data.transactions_amount;
+                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
 
-                    console.log(data.transactions_amount)
+                    if (value < 0) {
+                        value = 0;
+                    }                    
+                    
                     $('td:eq(18)', row).html(value);
 
                 },

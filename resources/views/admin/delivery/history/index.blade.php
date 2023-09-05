@@ -68,7 +68,8 @@
                         <th class="border-primary border-darken-1">Cash Collected By</th>
                         <th class="border-primary border-darken-1">Cash Collection Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Fintech Charges</th>
+                        <th class="border-primary border-darken-1">Fintech Amount</th>
+                        <th class="border-primary border-darken-1">Fintech Amount %</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
                         <th class="border-primary border-darken-1">One Link Payment Count</th>
@@ -366,6 +367,8 @@
                             head.push('Cash Collected By');
                             head.push('Cash Collection Date');
                             head.push('DNCC Amount');
+                            head.push('Fintech Amount');
+                            head.push('Fintech Amount %');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
@@ -397,6 +400,8 @@
                                 row.push(values.cash_collected);
                                 row.push(values.cash_collected_at);
                                 row.push(values.amount);
+                                row.push(values.fintech_shipments_charges.sum);
+                                row.push(values.fintech_amount_percent);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
@@ -462,7 +467,8 @@
                     { data:'cash_collected' ,name: 'ccb.name', class: 'align-middle cash_collected'},
                     { data:'cash_collected_at' ,name: 'delivery_notes.cash_collected_at', class: 'align-middle cash_collected_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'fintech_shipments_charges' ,name: 'fintech_shipments_charges', class: 'align-middle fintech_shipments_charges', orderable: false, searchable: false},
+                    { data:'fintech_shipments_charges.link' ,name: 'fintech_shipments_charges.link', class: 'align-middle fintech_shipments_charges.link', orderable: false, searchable: false},
+                    { data:'fintech_amount_percent' ,name: 'fintech_amount_percent', class: 'align-middle fintech_amount_percent', orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount', orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
@@ -484,7 +490,11 @@
                         
                         data.transactions_amount = 0
                     }
-                    value = dccn_amount - fintech_sum - data.transactions_amount;
+                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+                    
+                    if (value < 0) {
+                        value = 0;
+                    }  
 
                     console.log(data.transactions_amount)
                     $('td:eq(22)', row).html(value);

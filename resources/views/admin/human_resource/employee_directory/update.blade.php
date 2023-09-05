@@ -2304,7 +2304,7 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                max: today,
+                // max: today,
             });
 
             var date_of_birth = $('#profile-form #date_of_birth').pickadate({
