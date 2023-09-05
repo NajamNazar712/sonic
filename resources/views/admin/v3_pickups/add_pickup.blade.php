@@ -28,9 +28,7 @@
                                                     </span>
                                                 </div>
 
-                                                <input type="text" name="pickup_date"
-                                                    class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
-                                                    id="pickup_date" placeholder="Select Pickup Date" data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                                <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date" id="pickup_date" placeholder="Select Pickup Date" data-rule-required="true" data-msg-required="Pickup Date is Required">
                                             </div>
                                         </div>
                                     </div>

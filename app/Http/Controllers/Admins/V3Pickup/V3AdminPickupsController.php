@@ -10,8 +10,10 @@ use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\RetailPickupNote;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
+use App\Http\Models\Segment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\SubCategorySegment;
 use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Http\Models\V3Pickup\V3PickupNoteRequest;
 use App\Http\Models\V3Pickup\V3PickupRequest;
@@ -20,6 +22,7 @@ use App\Http\Models\V3Pickup\V3PickupRequestLegend;
 use App\Http\Models\V3Pickup\V3PickupRequestNotPickReason;
 use App\Http\Models\V3Pickup\V3PickupRequestRiderStatus;
 use App\Http\Models\V3Pickup\V3PickupRequestStatus;
+use App\Http\Models\V3Pickup\V3PickupShipmentType;
 use App\Http\Models\V3Pickup\V3PickupTimeRange;
 use App\Http\Models\V3Pickup\V3PickupType;
 use Carbon\Carbon;
@@ -103,9 +106,23 @@ class V3AdminPickupsController extends Controller
     public function pending_requests_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
 
+        if(session('department_id') == 7){
+
+            if (in_array(session('id'), session('sale_users_bypass'))) {
+                $shippers = User::where('status',3)->get();
+            }
+            else{
+                $shippers = User::where('status',3)->whereIn('id',session('tagged_shippers'));
+            }
+
+        }
+        else{
+            $shippers = User::where('status',3)->get();
+        }
+
         $riders = Rider::where('status', 1)->select(['id', 'name', 'trax_id']);
         $pickup_statuses = V3PickupRequestStatus::all();
-//        $rider_statuses = V3PickupRequestRiderStatus::all();
+
         if (session('role_id') != 1) {
             $riders = $riders->whereHas('city', function ($query) {
                 $query->whereIn('hub_id', session('hubs'));
@@ -114,21 +131,13 @@ class V3AdminPickupsController extends Controller
         $not_pick_reasons = V3PickupRequestNotPickReason::all();
         $riders = $riders->get();
 
-//        $legends = V3PickupRequestLegend::all();
-        $cut_off_time = '17:30:00';
-        $setting = GlobalSettings::where('type', 'pickup_request_cut_off_time');
-        if ($setting->exists()) {
-            $setting = $setting->first();
-            $cut_off_time = $setting->setting_value;
-        }
+        $pickup_shipment_types = V3PickupShipmentType::all();
+        $time_ranges = V3PickupTimeRange::all();
 
-        $rider_settings = GlobalSettings::where('type', 'rider_assignment_cut_off_time');
-        if ($rider_settings->exists()) {
-            $rider_settings = $rider_settings->first();
-            $rider_cut_off_time = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
-        }
+        $products = Segment::all();
+        $services = SubCategorySegment::all();
 
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'cut_off_time' => $cut_off_time, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'rider_cut_off_time' => $rider_cut_off_time]);
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services]);
     }
 
     public function pending_requests_list(Request $request){
@@ -870,5 +879,13 @@ class V3AdminPickupsController extends Controller
             $retail_pickup_note->status = 2;
             $retail_pickup_note->save();
         }
+    }
+
+    public function get_shipper_info(Request $request){
+        $shipper_id = $request->shipper_id;
+        $pickup_addresses = UserShippingInfo::with('city')->where('user_id', $shipper_id)->where('status', 1)->where('hidden', 0)->get();
+
+        return response()->json(['status' => 0, 'pickup_addresses' => $pickup_addresses]);
+
     }
 }
