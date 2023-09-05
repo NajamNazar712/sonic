@@ -12921,99 +12921,99 @@ class AdminReportsController extends Controller
         $csat_score = $csat_score / ((CrmRequestFeedback::count() != 0 ? CrmRequestFeedback::count() : 1)) * 100; 
 
         return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings, 'csat_score'=>$csat_score]);
-}
-
-
-public function csat_report_list(Request $request)
-{
-
-    if ($request->get('excel') && $request->get('excel') == true) {
-        ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
-    }
-
-    $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
-    $case_types = explode(',', $csat_types->text ?? '');
-
-    if(isset($case_types)){
-        $case_types;
-    }else{
-        $case_types = [];
     }
 
 
-    $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
-        $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
-            ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));
-    })->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
-    ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
-    ->where('crm_requests.status_id', 4)->whereIn('crm_requests.case_nature_type_id', $case_types);
+    public function csat_report_list(Request $request)
+    {
 
-    $datatable = Datatables::of($csat_report)->editColumn('agent_id', function($result){
-        if(isset($result->agent_id))
-        {
-            return $result->agent->name;
-        }else{
-            return '-';
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
         }
-    })->editColumn('case_nature_type_id', function($result){
-        if(isset($result->case_nature_type_id))
-        {
-            return $result->nature_type->type;
-        }else{
-            return '-';
-        }
-    })->editColumn('status_id', function($result){
-        if(isset($result->status_id))
-        {
-            return $result->request_status->name;
-        }else{
-            return '-';
-        }
-    })->editColumn('shipment_status', function($result){
-        if(isset($result->shipment_status))
-        {
-            return $result->shipment->status_shipper->name ?? '-';
-        }else{
-            return '-';
-        }
-    })->editColumn('created_at', function($result){
-        $createdDate = Carbon::parse($result->created_at);
-        $updatedDate = Carbon::parse($result->updated_at);
-        $daysDifference = $createdDate->diffInDays($updatedDate);
 
-        if($daysDifference == 0){
-            return "1 Day";
-        }else{
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
+        $case_types = explode(',', $csat_types->text ?? '');
 
-            return $daysDifference." Days";
-        }
-    })->editColumn('rating_id', function($result){
-        if(isset($result->rating))
-        {
-            $ratingValue = $result->rating->id;
-            $stars = str_repeat('⭐', $ratingValue); 
-            return $stars;
+        if(isset($case_types)){
+            $case_types;
         }else{
-            return '-';
+            $case_types = [];
         }
-    });
 
-    if ($agent_id = $request->get('agents')) {
-        $datatable->where('crm_requests.agent_id', $agent_id);
+
+        $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
+                ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));
+        })->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
+        ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
+        ->where('crm_requests.status_id', 4)->whereIn('crm_requests.case_nature_type_id', $case_types);
+
+        $datatable = Datatables::of($csat_report)->editColumn('agent_id', function($result){
+            if(isset($result->agent_id))
+            {
+                return $result->agent->name;
+            }else{
+                return '-';
+            }
+        })->editColumn('case_nature_type_id', function($result){
+            if(isset($result->case_nature_type_id))
+            {
+                return $result->nature_type->type;
+            }else{
+                return '-';
+            }
+        })->editColumn('status_id', function($result){
+            if(isset($result->status_id))
+            {
+                return $result->request_status->name;
+            }else{
+                return '-';
+            }
+        })->editColumn('shipment_status', function($result){
+            if(isset($result->shipment_status))
+            {
+                return $result->shipment->status_shipper->name ?? '-';
+            }else{
+                return '-';
+            }
+        })->editColumn('created_at', function($result){
+            $createdDate = Carbon::parse($result->created_at);
+            $updatedDate = Carbon::parse($result->updated_at);
+            $daysDifference = $createdDate->diffInDays($updatedDate);
+
+            if($daysDifference == 0){
+                return "1 Day";
+            }else{
+
+                return $daysDifference." Days";
+            }
+        })->editColumn('rating_id', function($result){
+            if(isset($result->rating))
+            {
+                $ratingValue = $result->rating->id;
+                $stars = str_repeat('⭐', $ratingValue); 
+                return $stars;
+            }else{
+                return '-';
+            }
+        });
+
+        if ($agent_id = $request->get('agents')) {
+            $datatable->where('crm_requests.agent_id', $agent_id);
+        }
+
+        if ($rating_id = $request->get('ratings')) {
+            $datatable->where('crmf.rating_id', $rating_id);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('crm_requests.created_at', [$from, $to]);
+        }
+
+        return $datatable->make(true);
     }
-
-    if ($rating_id = $request->get('ratings')) {
-        $datatable->where('crmf.rating_id', $rating_id);
-    }
-
-    if ($request->get('search_date_from') && $request->get('search_date_to')) {
-        $from = $request->get('search_date_from');
-        $to = $request->get('search_date_to');
-        $datatable->whereBetween('crm_requests.created_at', [$from, $to]);
-    }
-
-    return $datatable->make(true);
-}
 
 
 
