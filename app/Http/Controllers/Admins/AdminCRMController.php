@@ -3503,6 +3503,7 @@ TRAX-Customer Experience';
                         $check_exists->save();
                     }
                 }
+
                 CrmRequest::where('id', $request->req_id)->update([
                     'status_id' => 4,
                 ]);

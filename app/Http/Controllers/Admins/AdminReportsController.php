@@ -2,85 +2,89 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\DailyVisit;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AgentCallMonitoring;
-use App\Http\Models\Admin\AgentDay;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\AgentDayLog;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\DailyVisitRating;
-use App\Http\Models\Admin\FintechPaymentDetails;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\OperationRidersCategory;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\BagStatus;
-use App\Http\Models\Admin\SalePersonTag;
-use App\Http\Models\Admin\StationDepositNote;
-use App\Http\Models\Admin\TraxPayTransaction;
-use App\Http\Models\BanksList;
-use App\Http\Models\City;
-use App\Http\Models\CorporateDefaultInsuranceCharge;
-use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CRM\CrmRequestAgentHistory;
-use App\Http\Models\CRM\CrmRequestRating;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CrmAgent;
-use App\Http\Models\Excel_reports\Debriefing;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\Rider;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\StationRecoveryReport;
-use App\Http\Models\StationRecoveryReportDeposit;
-use App\Http\Models\Shipment;
-use App\Http\Models\SubCategorySegment;
-use App\Http\Models\V2Pickup\V2PickupNoteRequest;
-use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\Zone;
-use App\RiderWiseDeliveryNote;
-use App\RiderWiseDeliveryNoteShipment;
-use App\RiderWiseDeliveryNoteSummary;
 use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\DeliveryNote;
-use App\Http\Models\Admin\FintechCompany;
-use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
-use App\Http\Models\Admin\MonthClosingResponsible;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Admin\Retail\RetailUser;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
 use PHPExcel_Cell;
+use App\DailyVisit;
 use PHPExcel_Style_Fill;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use Illuminate\Http\Request;
+use App\Http\Models\CrmAgent;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\RiderWiseDeliveryNote;
+use App\Http\Models\Admin\Admin;
 use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\OSAChargesLog;
-use App\Http\Models\Admin\ReturnRevertLog;
 use App\Http\Models\CRM\CRMCount;
-use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\ShipmentScanningJourney;
-use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\InsuranceCharge;
 use App\SpecialApprovalRequestAdmin;
 use function GuzzleHttp\Promise\all;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\ShipmentsJourney;
+use App\RiderWiseDeliveryNoteSummary;
+use App\Http\Models\Admin\AgentDayLog;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\SalePersonTag;
+use Illuminate\Support\Facades\Response;
+use App\Http\Models\Admin\FintechCompany;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\CRM\CrmRequestRating;
+use App\Http\Models\ShipmentStatusReason;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\MasterCargo\Bag;
+use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\StationRecoveryReport;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use App\Http\Models\Admin\DailyVisitRating;
+use App\Http\Models\CRM\CrmRequestFeedback;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\ShipmentScanningJourney;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\Admin\TraxPayTransaction;
+use App\Http\Models\CorporateInsuranceCharge;
+use App\Http\Models\Excel_reports\Debriefing;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\Http\Models\Admin\FintechPaymentDetails;
+use App\Http\Models\Admin\MasterCargo\BagStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Models\StationRecoveryReportDeposit;
+use App\Http\Models\V2Pickup\V2PickupNoteRequest;
+use App\Http\Models\Admin\MonthClosingResponsible;
+use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Models\CorporateDefaultInsuranceCharge;
+use App\Http\Models\V2Pickup\V2PickupRequestShipment;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\OrdinaryDiscrepancyReport;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
+use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 
 class AdminReportsController extends Controller
 {
@@ -7938,8 +7942,13 @@ class AdminReportsController extends Controller
                         DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.reference_1_id = delivery_notes.id and shipments_journey.shipper_status_id in (7,8,9,15,18,56) and verification = 1)')
                     );
             })
-            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type')
+            ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), 
+            DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 
+            'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type',
+            'delivery_notes.id as delivery_note')
             ->groupBy('r.id');
+
+            // dd($route_distribution_summary);
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
@@ -7958,6 +7967,48 @@ class AdminReportsController extends Controller
             ->addColumn('hbl_konnect_amount', function ($entry) {
                 $dn_ids = explode(',', $entry->dn_ids);
                 return DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+            })
+            ->editColumn('hbl_konnect_amount_percent', function ($entry) {
+                $dn_ids = explode(',', $entry->dn_ids);
+                $dncc_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+
+                $hbl_konnect_amount = DB::connection('reports')->table('hbl_konnect_transaction_delivery_notes')->whereIn('delivery_note_id', $dn_ids)->sum('transactions_amount');
+
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    return round(($hbl_konnect_amount / $dncc_amount) * 100, 2);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
+            ->editColumn('fintech_shipments_charges', function ($entry) {
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $entry->delivery_note)->pluck('shipment_id')->toArray();
+                $amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($amount > 0)
+                {
+                    return $amount;
+                }
+                else
+                {
+                    return '-';
+                }             
+            })
+            ->editColumn('fintech_amount_percent', function ($entry) {
+
+                $dn_ids = explode(',', $entry->dn_ids);
+                $dncc_amount = DB::connection('reports')->table('delivery_notes')->whereIn('id', $dn_ids)->sum('received_cod_amount');
+                $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $entry->delivery_note)->pluck('shipment_id')->toArray();
+                $fintech_amount = TraxPayTransaction::join('fintech_payment_details as fpd', 'fpd.trax_pay_id', '=', 'trax_pay_transactions.id')->whereIn('trax_pay_transactions.shipment_id', $delivery_note_shipment)->sum('fpd.cod_amount');
+                if($fintech_amount > 0 && $dncc_amount > 0 )
+                {
+                    return round(( $fintech_amount / $dncc_amount) * 100, 2);
+                }
+                else
+                {
+                    return '-';
+                }     
             })
             ->addColumn('delivered_shipments_per', function ($entry) {
                 if ($entry->shipments_count) {
@@ -12737,5 +12788,272 @@ class AdminReportsController extends Controller
 
         return $datatables->make(true);
     }
+
+    public function ordinary_discrepancy_report_index(){
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 698);
+        return view('admin.reports.ordinary_discrepancy_report')->with(['status' => '1']);
+        
+    }
+    public function ordinary_discrepancy_report_list(Request $request){
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 699);
+        }
+        $tracking_data = OrdinaryDiscrepancyReport::join('shipments','shipments.id','ordinary_discrepancy_reports.shipment_id')
+        ->leftjoin('admins', 'admins.id','ordinary_discrepancy_reports.admin_id')
+        ->leftjoin('users', 'users.id','shipments.user_id')
+        ->leftjoin('shipment_status as ss', 'ss.id','shipments.shipper_status_id')
+        ->leftjoin('cities as c', 'c.id','shipments.consignee_city_id')
+        ->leftjoin('user_shipping_infos as usi', 'usi.id','shipments.pickup_address_id')
+        ->leftjoin('cities as citi', 'citi.id','usi.city_id')
+        ->leftjoin('shipment_items as si', 'si.shipment_id','shipments.id')
+        // ->leftjoin('admin_hubs as ah', 'ah.admin_id','ordinary_discrepancy_reports.admin_id')
+        ->leftjoin('cities as ch', 'ch.id','admins.default_hub_id')
+        
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                );
+        })
+        ->select('shipments.tracking_number as tracking_number','sj.created_at as arrival_date','ss.name as shipment_status','users.name as shipper_name', 'citi.name as origin', 'c.name as destination',
+        'shipments.pieces as quantity_by_shipper','shipments.amount as cod_value', 'si.description as shipment_content_by_shipper', 'ordinary_discrepancy_reports.product_content as shipment_content_by_admin',
+        'ordinary_discrepancy_reports.picture_path as images','ordinary_discrepancy_reports.quantity as quantity_by_admin','ordinary_discrepancy_reports.remarks as remarks_by_admin',
+        'ordinary_discrepancy_reports.created_at as created_at','admins.name as updated_by','ch.name as admin_hub');
+
+        $datatables = Datatables::of($tracking_data)
+        ->editcolumn('images', function ($tracking_data) {
+            if ($tracking_data->images != null) {
+                $images = explode('|', $tracking_data->images);
+                $html = "";
+                foreach ($images as $image)
+                {
+                    $exists = Storage::disk('public')->exists($image);
+                    if ($exists) {
+                        $route = Storage::disk('public')->url($image);
+                    }
+                    else{
+                        $route = Storage::disk('s3')->temporaryUrl($image, now()->addMinutes(5));
+                    }
+                    $html .= '<a target="_blank" class="btn btn-sm btn-outline-info align-middle" href="' . $route . '"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View Image</span></a><br>';
+                }
+                return $html;
+            }
+            return "-";
+        })
+        ;
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatables->whereBetween('ordinary_discrepancy_reports.created_at', [$from, $to]);
+        } 
+        
+        return $datatables->make(true);
+    }
+
+    public function ordinary_discrepancy_report_tracking_data(Request $request){
+        $tracking_number = $request->tracking_number;
+        $shipment_id = substr($tracking_number, 6);
+
+        $tracking_data = Shipment::join('users','users.id','shipments.user_id')
+        ->leftjoin('shipment_status as ss', 'ss.id','shipments.shipper_status_id')
+        ->leftjoin('cities as c', 'c.id','shipments.consignee_city_id')
+        ->leftjoin('user_shipping_infos as usi', 'usi.id','shipments.pickup_address_id')
+        ->leftjoin('cities as citi', 'citi.id','usi.city_id')
+        ->leftjoin('shipment_items as si', 'si.shipment_id','shipments.id')
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where(
+                    'sj.id',
+                    '=',
+                    DB::connection('reports')->raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)')
+                );
+        })
+        ->select('citi.name as origin', 'c.name as destination','ss.name as shipment_status','sj.created_at as arrival_date',
+        'shipments.amount as cod_value','users.name as shipper_name', 'si.description as shipment_content_shipper','ss.id as shipment_status_id')
+        ->where('shipments.id',$shipment_id)->first();
+        
+
+        if($tracking_data && $tracking_data->shipment_status_id == 1){
+            return response()->json(['status' => 0, 'message' => 'Shipment on booked status cannot be track']);
+        }
+        else if($tracking_data){
+           
+            return response()->json(['status' => 1, 'data' => $tracking_data, 'tracking' => $tracking_number]);
+        }
+        else{
+            
+            return response()->json(['status' => 0, 'message' => 'Invalid Tracking Number']);
+        }
+
+    }
+
+    public function submit_tracking(Request $request){
+        if ($request->hasFile('picture_attached')) {
+            $validations = [
+                'picture_attached' => ['required', 'mimes:png,jpeg,jpg']
+            ];
+
+            $validate = Validator::make($request->all(), $validations);
+
+            if ($validate->fails()) {
+                return response()->json(['status' => 0, 'message' => $validate->errors()->first()]);
+            }
+        }
+
+        $date_time = Carbon::now();
+        $date = $date_time->format('Y-m-d');
+        $tracking_number = $request->tracking_numbers;
+        $shipment_id = substr($tracking_number, 6);
+        $data = Shipment::find($shipment_id);
+
+
+        if ($request->hasFile('picture_attached')) {
+            $file = $request->file('picture_attached');
+            $filename = 'Shipment_Image_' . $date . '.' . $file->extension();
+            $directory = 'ordinary_discrepancy_report\attachment' . $data->id . '';
+            Storage::disk('public')->putFileAs($directory, $file, $filename);
+            $image = $directory . '/' . $filename;
+        }
+        else {
+            return redirect()->back()->with('error', 'Incomplete Information!');
+        }
+        
+
+        
+        $get_data = OrdinaryDiscrepancyReport::where('shipment_id',$data->id)->get();
+        if(count($get_data) >= 3){
+            return response()->json(['status' => 0, 'message' => 'Same Shipment cannot add more than 3 times']);
+        }
+        else{
+            $ordinary_discrepancy_reports = new OrdinaryDiscrepancyReport;
+            $ordinary_discrepancy_reports->shipment_id = $data->id;
+            $ordinary_discrepancy_reports->user_id = $data->user_id;
+            $ordinary_discrepancy_reports->shipment_status_id = $data->shipper_status_id;
+            $ordinary_discrepancy_reports->city_id = $data->consignee_city_id;
+            $ordinary_discrepancy_reports->product_content = $request->shipment_content_admin;
+            $ordinary_discrepancy_reports->picture_path = $image;
+            $ordinary_discrepancy_reports->quantity = $request->quantity;
+            $ordinary_discrepancy_reports->remarks = $request->remarks;
+            $ordinary_discrepancy_reports->admin_id = Auth::id();
+            $ordinary_discrepancy_reports->save();
+
+            return response()->json(['status' => 1, 'message' => 'Shipment Updated Successfully']);
+        }
+    
+    }
+
+    public function csat_report_index()
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 694);
+        $agents = Admin::all();
+        $ratings = CrmRequestRating::all();
+        $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $formula_value = explode(',', $csat_formula->text ?? '');
+        $csat_score = CrmRequest::leftJoin('crm_request_feedbacks','crm_requests.id','crm_request_feedbacks.crm_request_id')
+        ->where('crm_requests.status_id', 4)
+        ->whereIn('crm_request_feedbacks.rating_id', $formula_value ?? [])
+        ->count();
+        $csat_score = $csat_score / ((CrmRequestFeedback::count() != 0 ? CrmRequestFeedback::count() : 1)) * 100; 
+
+        return view('admin.reports.csat_report')->with(['agents'=>$agents,'ratings'=>$ratings, 'csat_score'=>$csat_score]);
+    }
+
+
+    public function csat_report_list(Request $request)
+    {
+
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 695);
+        }
+
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
+        $case_types = explode(',', $csat_types->text ?? '');
+
+        if(isset($case_types)){
+            $case_types;
+        }else{
+            $case_types = [];
+        }
+
+
+        $csat_report = CrmRequest::leftjoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'crm_requests.shipment_id')
+                ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = crm_requests.shipment_id)'));
+        })->leftJoin('crm_request_feedbacks as crmf', 'crmf.crm_request_id','crm_requests.id')
+        ->select('crm_requests.agent_id as agent_id', 'crm_requests.id as id', 'crm_requests.case_nature_type_id as case_nature_type_id','crm_requests.status_id as status_id','crm_requests.created_at as created_at','sj.shipper_status_id as shipment_status','sj.shipment_id as shipment_id','crm_requests.updated_at as updated_at', 'crmf.rating_id as rating_id')
+        ->where('crm_requests.status_id', 4)->whereIn('crm_requests.case_nature_type_id', $case_types);
+
+        $datatable = Datatables::of($csat_report)->editColumn('agent_id', function($result){
+            if(isset($result->agent_id))
+            {
+                return $result->agent->name;
+            }else{
+                return '-';
+            }
+        })->editColumn('case_nature_type_id', function($result){
+            if(isset($result->case_nature_type_id))
+            {
+                return $result->nature_type->type;
+            }else{
+                return '-';
+            }
+        })->editColumn('status_id', function($result){
+            if(isset($result->status_id))
+            {
+                return $result->request_status->name;
+            }else{
+                return '-';
+            }
+        })->editColumn('shipment_status', function($result){
+            if(isset($result->shipment_status))
+            {
+                return $result->shipment->status_shipper->name ?? '-';
+            }else{
+                return '-';
+            }
+        })->editColumn('created_at', function($result){
+            $createdDate = Carbon::parse($result->created_at);
+            $updatedDate = Carbon::parse($result->updated_at);
+            $daysDifference = $createdDate->diffInDays($updatedDate);
+
+            if($daysDifference == 0){
+                return "1 Day";
+            }else{
+
+                return $daysDifference." Days";
+            }
+        })->editColumn('rating_id', function($result){
+            if(isset($result->rating))
+            {
+                $ratingValue = $result->rating->id;
+                $stars = str_repeat('⭐', $ratingValue); 
+                return $stars;
+            }else{
+                return '-';
+            }
+        });
+
+        if ($agent_id = $request->get('agents')) {
+            $datatable->where('crm_requests.agent_id', $agent_id);
+        }
+
+        if ($rating_id = $request->get('ratings')) {
+            $datatable->where('crmf.rating_id', $rating_id);
+        }
+
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('crm_requests.created_at', [$from, $to]);
+        }
+
+        return $datatable->make(true);
+    }
+
+
 
 }
