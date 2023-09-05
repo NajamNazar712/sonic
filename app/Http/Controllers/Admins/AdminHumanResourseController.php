@@ -449,7 +449,7 @@ class AdminHumanResourseController extends Controller
                 $join->on('eb.employee_id', '=', 'employees.id')
                     ->where('eb.id', '=', DB::raw('(select max(id) from employee_bank_informations where employee_bank_informations.employee_id = employees.id)'));
             })
-            ->leftjoin('zones as ez', 'ez.id', '=', 'employees.zone_id')
+            ->leftjoin('zones as ez', 'ez.id', '=', 'cities.zone_id')
             ->leftjoin('employee_religions as er', 'er.id', '=', 'employees.religion_id')
             ->leftjoin('employee_marital_statuses as ems', 'ems.id', '=', 'employees.marital_status_id')
             ->leftjoin('employee_shifts as ess', 'ess.id', '=', 'employees.shift_id')

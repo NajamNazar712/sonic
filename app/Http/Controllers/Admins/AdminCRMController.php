@@ -22,6 +22,7 @@ use App\Http\Models\Admin\RevertStatusRequest;
 use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
+use App\Http\Models\ConsigneeAddressArea;
 use App\Http\Models\CRM\CrmComments;
 use App\Http\Models\CRM\CrmConsigneeInfoPrint;
 use App\Http\Models\CRM\CrmPaymentShipment;
@@ -563,6 +564,8 @@ class AdminCRMController extends Controller
     }
 
     public function request_details(Request $request,$id){
+
+    
         $crm_request = CrmRequest::find($id);
         if($crm_request){
             $shipment_status = null;
@@ -1072,6 +1075,14 @@ class AdminCRMController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -1777,6 +1788,14 @@ class AdminCRMController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('zones',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where('z.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('tagged_to',function ($query,$keyword){
                 if ($keyword != '') {
                     $query->where(function($sub_query) use ($keyword) {
@@ -1959,7 +1978,7 @@ class AdminCRMController extends Controller
             ->orderColumn('tagged_to_kae', DB::raw('IF (crt.crm_request_tagging_type_id = 4, at.name, "")') . ' $1')
             
             ->addColumn('tagged_to_operation', function($requests){
-                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->get()->first();
+                $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',5)->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
                     if($admin){
@@ -2524,7 +2543,11 @@ class AdminCRMController extends Controller
                 $crm_tagging = CrmRequestTagging::where('crm_request_id',$requests->id)->where('crm_request_tagging_type_id',4)->get()->first();
                 if($crm_tagging){
                     $admin = Admin::find($crm_tagging->tagged_id);
-                    return $admin->name;
+                    if($admin){
+                        return $admin->name;
+                    }else{
+                        return '-';
+                    }
                 }else{
                     return '-';
                 }
@@ -3268,15 +3291,25 @@ class AdminCRMController extends Controller
                     }
                         if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                             $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                            $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
 
                         }else{
                             $crm_city_id = $crm_request->shipment->consignee_city_id;
+                            $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                         }
                         if($crm_request->case_nature_type_id != 1){
                             $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
                             if($crm_auto_tag_user->exists()){
 
-                                $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
+                                $crm_auto_tag_user_with_case_details = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id);
+        
+                                if($crm_auto_tag_user_with_case_details->exists()){
+                                    $crm_auto_tag_user = $crm_auto_tag_user_with_case_details->first();
+                                }
+                                else{
+                                    $crm_auto_tag_user = $crm_auto_tag_user->first();
+                                }
+
                                 $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
                                 if(!empty($tagged_crm_request)){
                                     if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
@@ -4004,9 +4037,11 @@ TRAX-Customer Experience';
 
                             if($crm_request->case_nature_type_id == 3 || $crm_request->case_nature_type_id == 5){
                                 $crm_city_id = $crm_request->shipment->pickup_address->city->id;
+                                $crm_city_area_id = $crm_request->shipment->pickup_address->city_area_id;
     
                             }else{
                                 $crm_city_id = $crm_request->shipment->consignee_city_id;
+                                $crm_city_area_id = ConsigneeAddressArea::where('shipment_id',$crm_request->shipment->id)->pluck('city_area_id')->first() ?? 0;
                             }
                             if($crm_request->shipper_id){
                                 $sales_tier_tag = SaleTierTag::where('user_id', $crm_request->shipper_id);
@@ -4058,47 +4093,105 @@ TRAX-Customer Experience';
         
                                 }
                             }
+
                             if($crm_request->case_nature_type_id != 1){
                             
                                 $crm_auto_tag_user = CrmAutoTagUser::where('city_id',$crm_city_id)->where('status',1);
+
                                 if($crm_auto_tag_user->exists()){
-        
-                                    $crm_auto_tag_user = $crm_auto_tag_user->get()->first();
-                                    $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
-                                    if(!empty($tagged_crm_request)){
-                                        if($tagged_crm_request['tagged_id'] != $crm_auto_tag_user->admin_id) {
-                                            CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+
+                                    $scenario1 = CrmAutoTagUser::where('city_id',$crm_city_id)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id)->where('status',1);
+                                    $scenario2 = CrmAutoTagUser::where('city_id',$crm_city_id)->where('city_area_id',$crm_city_area_id)->where('crm_case_nature_id',$crm_request->case_nature_id)->whereNull('crm_case_nature_type_id')->where('status',1);
+                                    $scenario3 = CrmAutoTagUser::where('city_id',$crm_city_id)->whereNull('city_area_id')->where('crm_case_nature_id',$crm_request->case_nature_id)->where('crm_case_nature_type_id',$crm_request->case_nature_type_id)->where('status',1);
+                                    $scenario4 = CrmAutoTagUser::where('city_id',$crm_city_id)->whereNull('city_area_id')->where('crm_case_nature_id',$crm_request->case_nature_id)->whereNull('crm_case_nature_type_id')->where('status',1);
+                                    $scenario5 = CrmAutoTagUser::where('city_id',$crm_city_id)->whereNull('city_area_id')->whereNull('crm_case_nature_id')->whereNull('crm_case_nature_type_id')->where('status',1);
+
+                                    $crm_auto_tag_user_count = 0;
+
+                                    if($scenario1->exists())
+                                    {
+                                        $crm_auto_tag_user_count = $scenario1->count();
+                                        $crm_auto_tag_user = $scenario1;
+                                    }
+                                    else if($scenario2->exists())
+                                    {
+                                        $crm_auto_tag_user_count = $scenario2->count();
+                                        $crm_auto_tag_user = $scenario2;
+                                    }
+                                    else if($scenario3->exists())
+                                    {
+                                        $crm_auto_tag_user_count = $scenario3->count();
+                                        $crm_auto_tag_user = $scenario3;
+                                    }
+                                    else if($scenario4->exists())
+                                    {
+                                        $crm_auto_tag_user_count = $scenario4->count();
+                                        $crm_auto_tag_user = $scenario4;
+                                    }
+                                    else if($scenario5->exists())
+                                    {
+                                        $crm_auto_tag_user_count = $scenario5->count();
+                                        $crm_auto_tag_user = $scenario5;
+                                    }
+
+                                    if($crm_auto_tag_user_count > 0)
+                                    {
+                                        if($crm_auto_tag_user_count > 1)
+                                        {
+                                            $crm_auto_tag_ids = $crm_auto_tag_user->pluck('admin_id')->toArray();
+                                            $min_tagged_user = CrmRequestTagging::select("tagged_id",DB::raw("count('tagged_id') as tagged_count"))->whereIn('tagged_id', $crm_auto_tag_ids)->groupBy('tagged_id')->orderBy('tagged_count','asc');
+                                            
+                                            if($min_tagged_user->exists())
+                                            {   
+                                                $min_tagged_user = $min_tagged_user->first();
+                                                $admin_id = $min_tagged_user->tagged_id;
+                                            }
+                                            else{
+                                                $admin_id = $crm_auto_tag_ids[0];
+                                            }
+
+                                        }
+                                        else{
+                                            $crm_auto_tag_user = $crm_auto_tag_user->first();
+                                            $admin_id = $crm_auto_tag_user->admin_id;
+                                        }
+            
+                                        $tagged_crm_request = CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->first();
+                                        if(!empty($tagged_crm_request)){
+                                            if($tagged_crm_request['tagged_id'] != $admin_id) {
+                                                CrmRequestTagging::where('crm_request_id', $crm_request->id)->where('crm_request_tagging_type_id',5)->update([
+                                                    'crm_request_tagging_type_id' => 5,
+                                                    'tagged_id' => $admin_id
+                                                ]);
+            
+                                                CrmRequestTaggingHistory::create([
+                                                    'crm_request_id' => $crm_request->id,
+                                                    'crm_request_tagging_type_id' => 5,
+                                                    'tagged_id' => $admin_id,
+                                                    'agent_id' => 306,
+                                                    'hub_id' => NULL
+                                                ]);
+                                                NotificationsController::send(31,$crm_request->id);
+                                            }
+                                        }
+                                        else{
+                                            CrmRequestTagging::create([
+                                                'crm_request_id' => $crm_request->id,
                                                 'crm_request_tagging_type_id' => 5,
-                                                'tagged_id' => $crm_auto_tag_user->admin_id
+                                                'tagged_id' => $admin_id,
+                                                'hub_id' => NULL
                                             ]);
-        
+            
                                             CrmRequestTaggingHistory::create([
                                                 'crm_request_id' => $crm_request->id,
                                                 'crm_request_tagging_type_id' => 5,
-                                                'tagged_id' => $crm_auto_tag_user->admin_id,
+                                                'tagged_id' => $admin_id,
                                                 'agent_id' => 306,
                                                 'hub_id' => NULL
                                             ]);
                                             NotificationsController::send(31,$crm_request->id);
                                         }
-                                    }
-                                    else{
-                                        CrmRequestTagging::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'hub_id' => NULL
-                                        ]);
-        
-                                        CrmRequestTaggingHistory::create([
-                                            'crm_request_id' => $crm_request->id,
-                                            'crm_request_tagging_type_id' => 5,
-                                            'tagged_id' => $crm_auto_tag_user->admin_id,
-                                            'agent_id' => 306,
-                                            'hub_id' => NULL
-                                        ]);
-                                        NotificationsController::send(31,$crm_request->id);
-                                    }
+                                    } 
                                 }
                             }
                         }
@@ -5759,33 +5852,32 @@ TRAX-Customer Experience';
         $crm_request_id = $request->image_crm_request_id;
         $image_ids = explode(',', $request->selected_ids);
         if(count($image_ids) == 0){
-            return redirect()->back()->with('error', 'No images selected!');
+            return redirect()->back()->with('error', 'No Attachments selected!');
         }
         $crm_request = CrmRequest::find($crm_request_id);
         if($crm_request){
             $crm_request_images = $crm_request->images->count();
-            if($crm_request_images == 2){
-                return redirect()->back()->with('error', 'Two images are already uploaded!');
+            if($crm_request_images == 5){
+                return redirect()->back()->with('error', 'Five Attachments are already uploaded!');
             }
 
             foreach ($image_ids as $id){
                     $file_name = 'crm_image_'.$id;
                     $image = $request->file($file_name);
-
                     $extension = $image->getClientOriginalExtension();
                     $random = rand(1000, 100000);
                     $now = Carbon::now();
                     $time = $now->year . '_' . $now->month;
-                    $generated_image_name = $time . $random . Auth::id() . '.' . $extension;
-                    $image->move(public_path('uploads/crm_request_images'), $generated_image_name);
+                    $generated_file_name = $time . $random . Auth::id() . '.' . $extension;
+                    $image->move(public_path('uploads/crm_request_images'), $generated_file_name);
                     $crm_image = new CrmRequestImage();
                     $crm_image->crm_request_id = $crm_request_id;
                     $crm_image->added_by = Auth::id();
-                    $crm_image->image = $generated_image_name;
+                    $crm_image->image = $generated_file_name;
                     $crm_image->save();
             }
 
-            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Images updated successfully']);
+            return redirect()->back()->with(['status' => 1, 'success' => 'CRM Attachments Uploaded successfully']);
 
         }
         return redirect()->back()->with(['status' => 0, 'error' => 'CRM Request Not found!']);

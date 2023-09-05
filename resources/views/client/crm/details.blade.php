@@ -8,13 +8,15 @@
             <div class="content-wrapper">
                 <div class="content-body">
                     <h1 class="mb-1">
-                        Request Details ({{str_pad($crm_details->id, 6, '0', STR_PAD_LEFT)}})
+                        Request Details ({{ str_pad($crm_details->id, 6, '0', STR_PAD_LEFT) }})
                         <div class="text-right mb-1">
-                            @if($crm_details['status_id'] == 4 && $reopen_check == true)
-                                <form action="{{route('cod.crm.request.re_open')}}" method="post" class="mt-2" id="reopen_form" novalidate="novalidate">
-                                    {{csrf_field()}}
-                                    <input type="hidden" name="req_id" value="{{$crm_details->id}}">
-                                    <button type="submit" class="btn btn-primary width-10-per" id="re_open"><span class="d-lg-block" style="color: white">Re-Open</span></button>
+                            @if ($crm_details['status_id'] == 4 && $reopen_check == true)
+                                <form action="{{ route('cod.crm.request.re_open') }}" method="post" class="mt-2"
+                                    id="reopen_form" novalidate="novalidate">
+                                    {{ csrf_field() }}
+                                    <input type="hidden" name="req_id" value="{{ $crm_details->id }}">
+                                    <button type="submit" class="btn btn-primary width-10-per" id="re_open"><span
+                                            class="d-lg-block" style="color: white">Re-Open</span></button>
                                 </form>
                             @endif
                         </div>
@@ -31,88 +33,94 @@
                                                 <tr>
                                                     <th scope="row">Tracking Number</th>
                                                     <td class="name">
-                                                        @if(!empty($crm_details->shipment_id))
-                                                            <h5 class="mb-0"><u><a href='{{route('cod.tracking.index')}}?tracking_number={{$crm_details->shipment->tracking_number}}' class='tracking' target='_blank'>{{$crm_details->shipment->tracking_number}}</a></u></h5>
+                                                        @if (!empty($crm_details->shipment_id))
+                                                            <h5 class="mb-0"><u><a
+                                                                        href='{{ route('cod.tracking.index') }}?tracking_number={{ $crm_details->shipment->tracking_number }}'
+                                                                        class='tracking'
+                                                                        target='_blank'>{{ $crm_details->shipment->tracking_number }}</a></u>
+                                                            </h5>
                                                         @endif
                                                     </td>
                                                 </tr>
-                                                @if(!empty($shipment_status))
-                                                <tr>
-                                                    <th scope="row">Shipment Status</th>
-                                                    <td class="name">
-                                                        <h5 class="mb-0">{{$shipment_status}}</h5>
-                                                    </td>
-                                                </tr>
+                                                @if (!empty($shipment_status))
+                                                    <tr>
+                                                        <th scope="row">Shipment Status</th>
+                                                        <td class="name">
+                                                            <h5 class="mb-0">{{ $shipment_status }}</h5>
+                                                        </td>
+                                                    </tr>
                                                 @endif
                                                 <tr>
                                                     <th scope="row">Case Nature</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->nature->name}}</h5>
+                                                        <h5 class="mb-0">{{ $crm_details->nature->name }}</h5>
                                                     </td>
                                                 </tr>
-                                                @if(!empty($crm_details->case_nature_type_id))
-                                                <tr>
-                                                    <th scope="row">Case Nature Type</th>
-                                                    <td class="name">
-                                                            <h5 class="mb-0">{{$crm_details->nature_type->type}}</h5>
-                                                    </td>
-                                                </tr>
+                                                @if (!empty($crm_details->case_nature_type_id))
+                                                    <tr>
+                                                        <th scope="row">Case Nature Type</th>
+                                                        <td class="name">
+                                                            <h5 class="mb-0">{{ $crm_details->nature_type->type }}</h5>
+                                                        </td>
+                                                    </tr>
                                                 @endif
                                                 <tr>
                                                     <th scope="row">Channel</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->channel->channel}}</h5>
+                                                        <h5 class="mb-0">{{ $crm_details->channel->channel }}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Status</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->request_status->name}}</h5>
+                                                        <h5 class="mb-0">{{ $crm_details->request_status->name }}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched By</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$launched_by}}</h5>
+                                                        <h5 class="mb-0">{{ $launched_by }}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Launched Date</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$crm_details->created_at}}</h5>
+                                                        <h5 class="mb-0">{{ $crm_details->created_at }}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Description</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{strip_tags($crm_details->description)}}</h5>
+                                                        <h5 class="mb-0">{{ strip_tags($crm_details->description) }}</h5>
                                                     </td>
                                                 </tr>
                                                 <tr>
                                                     <th scope="row">Insurance</th>
                                                     <td class="name">
-                                                        <h5 class="mb-0">{{$insurance}}</h5>
+                                                        <h5 class="mb-0">{{ $insurance }}</h5>
                                                     </td>
                                                 </tr>
                                             </tbody>
                                         </table>
                                     </div>
                                     <div class="col-6">
-                                            <div class="content-body chat-application">
-                                                <section class="chat-app-window vertical-scroll scroll-example height-430 ps-container ps-theme-dark ps-active-y always-visible" style="height: 400px; overflow-y: hidden;" >
-                                                    <div class="chats">
-                                                        @if(!empty($comments))
-                                                            @php
+                                        <div class="content-body chat-application">
+                                            <section
+                                                class="chat-app-window vertical-scroll scroll-example height-700 ps-container ps-theme-dark ps-active-y always-visible">
+                                                <div class="chats">
+                                                    @if (!empty($comments))
+                                                        @php
                                                             $shipper_flag = true;
                                                             $admin_flag = true;
                                                             $sub_flag = true;
-                                                            @endphp
-                                                        @foreach($comments as $comment)
-                                                            @if($comment->comment_by == 0)
+                                                        @endphp
+                                                        @foreach ($comments as $comment)
+                                                            @if ($comment->comment_by == 0)
                                                                 <div class="chat chat-left admin">
 
                                                                     <div class="chat-avatar">
-                                                                        <div class="badge block {{($admin_flag)? 'badge-admin':''}}">
+                                                                        <div
+                                                                            class="badge block {{ $admin_flag ? 'badge-admin' : '' }}">
                                                                             <i class="la la-user font-medium-2"></i>Agent
                                                                         </div>
                                                                     </div>
@@ -120,176 +128,202 @@
                                                                     <div class="chat-body">
                                                                         <div class="chat-content text-left">
                                                                             <p>{!! nl2br($comment->comment) !!}</p>
-                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <small>{{ $comment->created_at }}</small>
                                                                         </div>
                                                                     </div>
 
                                                                 </div>
-                                                                    @php
-                                                                        $admin_flag = false;
-                                                                        $shipper_flag = true;
-                                                                        $sub_flag = true;
-                                                                    @endphp
-                                                                @elseif($comment->comment_by == 1)
+                                                                @php
+                                                                    $admin_flag = false;
+                                                                    $shipper_flag = true;
+                                                                    $sub_flag = true;
+                                                                @endphp
+                                                            @elseif($comment->comment_by == 1)
                                                                 <div class="chat shipper">
-                                                                    @if($shipper_flag)
-                                                                    <div class="chat-avatar">
-                                                                        <div class="badge block badge-info">
-                                                                            <i class="la la-user font-medium-2"></i>You
+                                                                    @if ($shipper_flag)
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-info">
+                                                                                <i class="la la-user font-medium-2"></i>You
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
                                                                     @endif
                                                                     <div class="chat-body">
-                                                                        <div class="chat-content text-left {{($shipper_flag == false)? 'mr-3':'' }}">
+                                                                        <div
+                                                                            class="chat-content text-left {{ $shipper_flag == false ? 'mr-3' : '' }}">
                                                                             <p>{!! nl2br($comment->comment) !!}</p>
-                                                                            <small>{{$comment->created_at}}</small>
+                                                                            <small>{{ $comment->created_at }}</small>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                    @php
-                                                                        $admin_flag = true;
-                                                                        $shipper_flag = false;
-                                                                        $sub_flag = true;
-                                                                    @endphp
-                                                                @else
-                                                                    <div class="chat substitute-user">
-                                                                        @if($shipper_flag)
-                                                                            <div class="chat-avatar">
-                                                                                <div class="badge block badge-substitute-user">
-                                                                                    <i class="la la-user font-medium-2"></i>You
-                                                                                </div>
-                                                                            </div>
-                                                                        @endif
-                                                                        <div class="chat-body">
-                                                                            <div class="chat-content text-left {{($sub_flag == false)? 'mr-3':'' }}">
-                                                                                <p>{!! nl2br($comment->comment) !!}</p>
-                                                                                <small>{{$comment->created_at}}</small>
+                                                                @php
+                                                                    $admin_flag = true;
+                                                                    $shipper_flag = false;
+                                                                    $sub_flag = true;
+                                                                @endphp
+                                                            @else
+                                                                <div class="chat substitute-user">
+                                                                    @if ($shipper_flag)
+                                                                        <div class="chat-avatar">
+                                                                            <div class="badge block badge-substitute-user">
+                                                                                <i class="la la-user font-medium-2"></i>You
                                                                             </div>
                                                                         </div>
+                                                                    @endif
+                                                                    <div class="chat-body">
+                                                                        <div
+                                                                            class="chat-content text-left {{ $sub_flag == false ? 'mr-3' : '' }}">
+                                                                            <p>{!! nl2br($comment->comment) !!}</p>
+                                                                            <small>{{ $comment->created_at }}</small>
+                                                                        </div>
                                                                     </div>
-                                                                    @php
-                                                                        $admin_flag = true;
-                                                                        $shipper_flag = true;
-                                                                        $sub_flag = false;
-                                                                    @endphp
+                                                                </div>
+                                                                @php
+                                                                    $admin_flag = true;
+                                                                    $shipper_flag = true;
+                                                                    $sub_flag = false;
+                                                                @endphp
                                                             @endif
                                                         @endforeach
-                                                        @endif
+                                                    @endif
 
-                                                    </div>
-                                                </section>
-                                                <section class="chat-app-form">
-                                                    <form class="chat-app-input d-flex" id="chat_form">
-                                                        <fieldset class="form-group position-relative col-10 has-icon-left">
-                                                            <input type="hidden" id="last_comment_id" value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
-                                                            {{--<input type="text" class="form-control" id="chat_input" placeholder="Type your message">--}}
-                                                            <textarea id="chat_input" class="form-control width-400 height-75" placeholder="Type your message"></textarea>
+                                                </div>
+                                            </section>
+                                            <section class="chat-app-form">
+                                                <form class="chat-app-input d-flex" id="chat_form">
+                                                    <fieldset class="form-group position-relative col-10 has-icon-left ">
+                                                        <input type="hidden" id="last_comment_id"
+                                                            value="{{ $last_comment_id }}">
+                                                        {{-- <input type="text" class="form-control" id="chat_input" placeholder="Type your message"> --}}
+                                                        <textarea id="chat_input" class="form-control width-600 height-200 summernote" placeholder="Type your message"></textarea>
+                                                    </fieldset>
+
+                                                    <div class="display-inline-block col">
+                                                        <fieldset class="form-group position-relative has-icon-left m-0">
+                                                            <button id="chat_send" type="button"
+                                                                class="btn btn-block btn-info"><i
+                                                                    class="la la-paper-plane-o d-lg-none"></i>
+                                                                <span class="d-none d-lg-block">Send</span>
+                                                            </button>
                                                         </fieldset>
-
-                                                        <div class="display-inline-block col">
-                                                            <fieldset class="form-group position-relative has-icon-left m-0">
-                                                                <button id="chat_send" type="button" class="btn btn-block btn-info" ><i class="la la-paper-plane-o d-lg-none"></i>
-                                                                    <span class="d-none d-lg-block">Send</span>
-                                                                </button>
-                                                            </fieldset>
-                                                        </div>
-                                                    </form>
-                                                </section>
-                                            </div>
-
+                                                    </div>
+                                                </form>
+                                            </section>
                                         </div>
+
                                     </div>
                                 </div>
-
                             </div>
-                        </div>
 
-                        @if($crm_details['status_id'] == 4 || $crm_details['reopen_count'] > 0)
+                        </div>
+                    </div>
+
+                    @if ($crm_details['status_id'] == 4 || $crm_details['reopen_count'] > 0)
                         <div class="card">
                             <div class="card-body text-center">
                                 <h2>Feedback</h2>
                                 <div class="feedback">
-                                    @if(isset($crm_details->feedback))
-                                        @foreach($ratings as $rating)
-
-                                                @if($crm_details->feedback->rating_id === $rating->id)
-                                                    <div class="item">
-                                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
-                                                            <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" checked="checked" alt="{{ $rating->name }}" {{ ($give_feedback != true)? 'disabled':'' }}>
-                                                            <span>{{$rating->code}}</span>
-                                                        </label>
-                                                    </div>
-                                                @else
-                                                    <div class="item">
-                                                        <label for="{{ $rating->id }}" title="{{ $rating->name }}">
-                                                            <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" {{ ($give_feedback != true)? 'disabled':'' }}>
-                                                            <span>{{$rating->code}}</span>
-                                                        </label>
-                                                    </div>
-                                                @endif
-
+                                    @if (isset($crm_details->feedback))
+                                        @foreach ($ratings as $rating)
+                                            @if ($crm_details->feedback->rating_id === $rating->id)
+                                                <div class="item">
+                                                    <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                                        <input class="radio" type="radio" name="feedback"
+                                                            id="{{ $rating->id }}" value="{{ $rating->id }}"
+                                                            checked="checked" alt="{{ $rating->name }}"
+                                                            {{ $give_feedback != true ? 'disabled' : '' }}>
+                                                        <span>{{ $rating->code }}</span>
+                                                    </label>
+                                                </div>
+                                            @else
+                                                <div class="item">
+                                                    <label for="{{ $rating->id }}" title="{{ $rating->name }}">
+                                                        <input class="radio" type="radio" name="feedback"
+                                                            id="{{ $rating->id }}" value="{{ $rating->id }}"
+                                                            {{ $give_feedback != true ? 'disabled' : '' }}>
+                                                        <span>{{ $rating->code }}</span>
+                                                    </label>
+                                                </div>
+                                            @endif
                                         @endforeach
                                     @else
-                                        @foreach($ratings as $rating)
-
+                                        @foreach ($ratings as $rating)
                                             <div class="item">
                                                 <label for="{{ $rating->id }}" title="{{ $rating->name }}">
-                                                    <input class="radio" type="radio" name="feedback" id="{{ $rating->id }}" value="{{ $rating->id }}" {{ ($give_feedback != true)? 'disabled':'' }}>
-                                                    <span>{{$rating->code}}</span>
+                                                    <input class="radio" type="radio" name="feedback"
+                                                        id="{{ $rating->id }}" value="{{ $rating->id }}"
+                                                        {{ $give_feedback != true ? 'disabled' : '' }}>
+                                                    <span>{{ $rating->code }}</span>
                                                 </label>
                                             </div>
-
                                         @endforeach
                                     @endif
                                 </div>
                             </div>
                         </div>
-                        @endif
-                    </div>
+                    @endif
                 </div>
             </div>
+        </div>
 
     </section>
 
 @endsection
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/chat-application.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/forms/selects/select2.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/extensions/toastr.css') }}">
+    <link rel="stylesheet" type="text/css"
+        href="{{ asset('app-assets/vendors/css/tables/datatable/datatables.min.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/pages/chat-application.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/vendors/css/modal/sweetalert.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ asset('app-assets/css/plugins/summernote/summernote.css') }}">
+
     <style>
+        .note-editable {
+            text-transform: lowercase;
+        }
+        .note-editable:first-letter {
+            text-transform: capitalize;
+        }
+
         .chat-application .chat-app-window {
             padding: 20px 10px;
         }
-        .badge.badge-admin{
+
+
+        .badge.badge-admin {
             background-color: #edeef0;
-            color:#000;
+            color: #000;
         }
-        .badge.badge-substitute-user{
+
+        .badge.badge-substitute-user {
             background-color: deepskyblue;
         }
-        .chat-application .chats .substitute-user .chat-body .chat-content{
+
+        .chat-application .chats .substitute-user .chat-body .chat-content {
             background-color: deepskyblue;
         }
-        table, table.dataTable {
-             font-size: 14px !important;
+
+        table,
+        table.dataTable {
+            font-size: 14px !important;
         }
+
         .height-430 {
             height: 430px !important;
         }
-        .table tr th, .table tr td {
+
+        .table tr th,
+        .table tr td {
             vertical-align: middle !important;
         }
+
         .feedback {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
             align-items: center;
         }
+
         .feedback .item {
             width: 90px;
             height: 90px;
@@ -298,129 +332,188 @@
             align-items: center;
             user-select: none;
         }
+
         .feedback .radio {
             display: none;
         }
-        .feedback .radio ~ span {
+
+        .feedback .radio~span {
             font-size: 3rem;
             filter: grayscale(100);
             cursor: pointer;
             transition: 0.3s;
         }
 
-        .feedback .radio:checked ~ span {
+        .feedback .radio:checked~span {
             filter: grayscale(0);
             font-size: 4rem;
         }
-        .feedback .radio:hover ~ span {
+
+        .feedback .radio:hover~span {
             filter: grayscale(0);
             font-size: 4rem;
+        }
+
+
+        textarea#chat_input {
+            text-transform: lowercase;
+        }
+
+        .chat-application .chat-app-form {
+            position: relative;
+            padding: 20px 10px;
+            background-color: #edeef0;
+            overflow: hidden;
+            /* height: 280px; */
         }
     </style>
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/ui/scrollable.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/forms/select/select2.full.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/extensions/toastr.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/tables/datatable/datatables.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/js/scripts/tables/datatables/datatable-basic.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js') }}" type="text/javascript">
+    </script>
+    <script src="{{ asset('app-assets/js/scripts/ui/scrollable.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/vendors/js/extensions/sweetalert.min.js') }}" type="text/javascript"></script>
+    <script src="{{ asset('app-assets/js/scripts/summernote/summernote.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
-            $('#chat_form').on('submit',function (e) {
+
+
+            $('.summernote').summernote({
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                ]
+            });
+
+
+
+
+
+
+            $('#chat_form').on('submit', function(e) {
                 e.preventDefault();
             });
-            $('body').on('change', '#chat_form input', function () {
+            $('body').on('change', '#chat_form input', function() {
                 $(this).val($(this).val().trim());
             });
-            $('#chat_send').on('click', function () {
+            $('#chat_send').on('click', function() {
                 var flag = true;
                 var comment = $('#chat_input').val().replace(/(?:\r\n|\r|\n)/g, '<br>');
-                $('#chat_input').val('');
-                var request_id = '{{$crm_details->id}}';
-                if(comment == ''){
+                $(".summernote").summernote("code", "");
+
+                var request_id = '{{ $crm_details->id }}';
+                if (comment == '') {
                     flag = false;
                     toastr.error("Please Enter Comment first!", 'Error!', {
                         positionClass: 'toast-top-center',
                         containerId: 'toast-top-center'
                     });
                 }
-                if(flag){
+                if (flag) {
                     $.ajax({
                         url: '{!! route('cod.crm.comment.add') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
                             'comment': comment,
-                            'request_id':request_id
+                            'request_id': request_id
                         }
-                    }).done(function (data) {
-                        if(data.status){
+                    }).done(function(data) {
+                        if (data.status) {
                             // toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            var user = '{{session('user_type')}}';
+                            var user = '{{ session('user_type') }}';
                             var shipper = 'You';
-                            if(user == 1){
-                                if($('div.chat:last-child').hasClass('shipper')) {
-                                    var html = '<div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
+                            $('#chat_input').val();
+
+                            console.log(1)
+                            if (user == 1) {
+                                if ($('div.chat:last-child').hasClass('shipper')) {
+                                    var html = '<div class="chat-content text-left "><p>' + comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
-                                }else{
-                                    var html = '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
+                                } else {
+                                    var html =
+                                        '<div class="chat shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' +
+                                        shipper +
+                                        '</div></div><div class="chat-body"><div class="chat-content text-left"><p>' +
+                                        comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
-                            }else{
-                                if($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
+                            } else {
+                                if ($('div.chat:last-child').hasClass('substitute-user')) {
+                                    var html = '<div class="chat-content text-left "><p>' + comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
-                                }else{
-                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ shipper +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
+                                } else {
+                                    var html =
+                                        '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' +
+                                        shipper +
+                                        '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' +
+                                        comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }
 
 
-                                $('#last_comment_id').val(data.last_comment_id);
-                                updateScroll();
+                            $('#last_comment_id').val(data.last_comment_id);
+                            updateScroll();
                         }
                     });
                 }
             });
-            @if($crm_details->status_id != 4)
-            setInterval(function () {
-                var last_comment_id = parseInt($('#last_comment_id').val());
-                var request_id = '{{$crm_details->id}}';
-                get_latest_comment(last_comment_id,request_id);
+            @if ($crm_details->status_id != 4)
+                setInterval(function() {
+                    var last_comment_id = parseInt($('#last_comment_id').val());
+                    var request_id = '{{ $crm_details->id }}';
+                    get_latest_comment(last_comment_id, request_id);
 
-            },10000);
+                }, 10000);
             @endif
-            function get_latest_comment(comment_id,request_id) {
-                if(comment_id){
+            function get_latest_comment(comment_id, request_id) {
+                if (comment_id) {
                     $.ajax({
                         url: '{!! route('cod.crm.comment.get') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'comment_id':comment_id,
+                            'comment_id': comment_id,
                             'request_id': request_id
                         }
-                    }).done(function (data) {
-                        if(data.status){
-                            if(data.comment.comment_by === 0){
-                                if($('div.chat:last-child').hasClass('admin')){
-                                    var html = '<div class="chat-content text-left mr-3"><p>'+ data.comment.comment +'</p><small>{{Carbon\Carbon::now()}}</small></div>';
+                    }).done(function(data) {
+                        if (data.status) {
+                            if (data.comment.comment_by === 0) {
+                                if ($('div.chat:last-child').hasClass('admin')) {
+                                    var html = '<div class="chat-content text-left mr-3 "><p>' + data.comment
+                                        .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
-                                }else{
-                                    var html = '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
+                                } else {
+                                    var html =
+                                        '<div class="chat chat-left admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>Agent</div></div><div class="chat-body"><div class="chat-content text-left "><p>' +
+                                        data.comment.comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
-                            }else if(data.comment.comment_by === 2){
-                                if($('div.chat:last-child').hasClass('substitute-user')) {
-                                    var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div>';
+                            } else if (data.comment.comment_by === 2) {
+                                if ($('div.chat:last-child').hasClass('substitute-user')) {
+                                    var html = '<div class="chat-content text-left "><p>' + data.comment
+                                        .comment + '</p><small>{{ Carbon\Carbon::now() }}</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
-                                }else{
-                                    var html = '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>'+ data.name +'</div></div><div class="chat-body"><div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>{{Carbon\Carbon::now()}}</small></div></div></div>';
+                                } else {
+                                    var html =
+                                        '<div class="chat substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' +
+                                        data.name +
+                                        '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' +
+                                        data.comment.comment +
+                                        '</p><small>{{ Carbon\Carbon::now() }}</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             }
@@ -430,19 +523,20 @@
                     });
                 }
             }
-            function updateScroll(){
+
+            function updateScroll() {
                 const container = document.querySelector('.chat-app-window');
                 container.scrollTop = $('.chat-app-window')[0].scrollHeight;
 
             }
             updateScroll();
 
-            setInterval(function () {
+            setInterval(function() {
                 window.location.reload();
             }, 500000);
         });
 
-        $('#reopen_form').on('submit', function(e){
+        $('#reopen_form').on('submit', function(e) {
             e.preventDefault();
         }).validate({
             submitHandler: function(form) {
@@ -467,7 +561,7 @@
                     closeOnClickOutside: false,
                     closeOnEsc: false,
                     dangerMode: true
-                }).then(function (confirm) {
+                }).then(function(confirm) {
                     if (confirm) {
                         swal({
                             title: 'Please Wait!',
@@ -482,39 +576,40 @@
                 });
             }
         });
-        @if($crm_details->status_id == 4 && $reopen_check == true)
-        var request_id = '{{$crm_details->id}}';
-        var feedback_flag = true;
-        $('div.feedback .item').on('click', 'input[name="feedback"]', function (){
-            var rating_id = parseInt($(this).val());
-            if(rating_id && feedback_flag){
-                $.ajax({
-                    url: '{!! route('cod.crm.request.feedback') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'rating_id':rating_id,
-                        'request_id': request_id
-                    }
-                }).done(function (data) {
-                    if(data.status == 0){
-                        toastr.success(data.message, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        $('input[name="feedback"]').prop('disabled', true);
-                    }
-                    else{
-                        toastr.error(data.message, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                    feedback_flag = false;
-                });
-            }
-        });
-        $('.item label').tooltip({
-            placement : 'top'
-        });
+        @if ($crm_details->status_id == 4 && $reopen_check == true)
+            var request_id = '{{ $crm_details->id }}';
+            var feedback_flag = true;
+            $('div.feedback .item').on('click', 'input[name="feedback"]', function() {
+                var rating_id = parseInt($(this).val());
+                if (rating_id && feedback_flag) {
+                    $.ajax({
+                        url: '{!! route('cod.crm.request.feedback') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'rating_id': rating_id,
+                            'request_id': request_id
+                        }
+                    }).done(function(data) {
+                        if (data.status == 0) {
+                            toastr.success(data.message, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                            $('input[name="feedback"]').prop('disabled', true);
+                        } else {
+                            toastr.error(data.message, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                        feedback_flag = false;
+                    });
+                }
+            });
+            $('.item label').tooltip({
+                placement: 'top'
+            });
         @endif
-
     </script>
 @endsection
