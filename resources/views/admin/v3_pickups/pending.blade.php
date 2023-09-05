@@ -326,7 +326,10 @@
                         </div>
 
                         <div>
-                            <ul class="nav nav-tabs nav-iconfall nav-justified mb-2">
+                            <div class="d-flex justify-content-start vh-100 pl-1 mt-md-2">
+                                <p class="text-gray mb-0"> Customer Type </p>
+                            </div>
+                            <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-50">
                                 <li class="nav-item">
                                     <a class="nav-link active p-0" id="activeIcon32-tab1" data-toggle="tab"
                                        href="#activeIcon32" aria-controls="activeIcon32" aria-expanded="true">
