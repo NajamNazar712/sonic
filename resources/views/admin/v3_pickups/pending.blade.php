@@ -321,9 +321,11 @@
 
                     <div class="container">
 
-                        <div class="d-flex justify-content-start">
-                            <h4 class="text-bold-200"> Customer Information </h4>
-                        </div>
+                    <div class="d-flex justify-content-start vh-100 pl-1">
+
+                       <b class="text-dark"> Customer Information </b>
+
+                    </div>
 
                         <div>
                             <div class="d-flex justify-content-start vh-100 pl-1 mt-md-2">
@@ -346,7 +348,7 @@
                             <div role="tabpanel" class="tab-pane active" id="activeIcon32"
                                  aria-labelledby="activeIcon32-tab1" aria-expanded="true">
 
-                                    <div class="row align-items-center mt-md-3">
+                                    <div class="row align-items-center mt-md-2">
 
                                         <div class="col-12">
                                             <div class="form-group">
@@ -401,7 +403,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="col-10">
+                                        <div class="col-12">
                                             <div class="form-group">
                                                 <input type="text" placeholder="Caller Contact No" name="phone" id="reg_phone" class="form-control" data-rule-required="true"  data-msg-required="Contact Number is Required"/>
 
@@ -409,11 +411,301 @@
                                         </div>
                                     </div>
 
+                                    <div class="d-flex justify-content-start vh-100 pl-0">
+
+                                         <b class="text-dark"> Pickup Details </b>
+
+                                    </div>
+
+                                    <div class="d-flex justify-content-start vh-100 pl-0 mt-md-2">
+
+                                         <p class="text-gray mb-0"> Pickup Type </p>
+
+                                    </div>
+
+                                    <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-100 mb-md-1">
+                                        <li class="nav-item ml-md-0">
+                                            <a class="nav-link active p-0 pl-1 text-left" id="oneTimePickup-tab1" data-toggle="tab"
+                                            href="#oneTimePickup" aria-controls="oneTimePickup" aria-expanded="true">
+                                            <b> One-time Pickup </b>
+                                            <p> Request a pickup for a single use. </p>
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link p-0 pl-1 text-left" id="scheduledPickup-tab1" data-toggle="tab"
+                                            href="#scheduledPickup" aria-controls="scheduledPickup" aria-expanded="false">
+                                            <b> Scheduled Pickup </b>
+                                            <p> Set regular pickups for specific days every week.</p>
+                                            </a>
+                                        </li>
+                                    </ul>
+
+                                    <div class="tab-content">
+
+                                        <div role="tabpanel" class="tab-pane active" id="oneTimePickup" aria-labelledby="oneTimePickup-tab1" aria-expanded="true">
+
+                                        <div class="row justify-content-center align-items-center vh-100 mt-md-0">
+                                            <div class="col-6">
+
+                                                <div class="form-group">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                                    <span
+                                                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o"></span>
+                                                                    </span>
+                                                        </div>
+
+                                                        <input type="text" name="pickup_date"
+                                                            class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
+                                                            id="pickup_date" placeholder="Select Pickup Date"
+                                                            data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="preferred_time_range" id="preferred_time_range"
+                                                            class="form-control select2" data-rule-required="true"
+                                                            data-msg-required="Pickup Time Range is required">
+                                                        <option value=""> Pickup Time Range</option>
+
+                                                        @foreach($time_ranges as $time_range)
+                                                            <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
+                                                        @endforeach
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center">
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="product_id" id="product_select" class="form-control select2"
+                                                            data-rule-required="true" data-msg-required="Product is required">
+                                                        @foreach($products as $product)
+                                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
+                                                        @foreach($services as $service)
+                                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
+                                                        @endforeach
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <select name="shipment_type_id" id="shipment_select" class="form-control select2"
+                                                            data-rule-required="true" data-msg-required="Shipment Type is required">
+                                                        @foreach($pickup_shipment_types as $shipment_type)
+                                                            <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center">
+                                            <div class="col-12">
+                                                <div class="form-group input-group">
+
+                                                    <div class="input-group-prepend">
+
+                                                                <span class="input-group-text text-dark border-primary  rounded-left">
+                                                                    <span> Estimated Weight </span>
+                                                                </span>
+                                                    </div>
+
+                                                    <input type="text" id="estimated_weight" name="estimated_weight"
+                                                        class="form-control text-center" placeholder="Estimated Weight">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group input-group">
+                                                    <div class="input-group-prepend">
+
+                                                                <span class="input-group-text text-dark border-primary rounded-left">
+                                                                    <span> No of Shipments </span>
+                                                                </span>
+                                                    </div>
+                                                    <input type="text" id="shipments_count" name="shipments_count" class="form-control"
+                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <textarea type="text" name="remarks" class="form-control"
+                                                            placeholder="Remarks"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        </div>
+
+                                        <div role="tabpanel" class="tab-pane" id="scheduledPickup" aria-labelledby="scheduledPickup-tab1" aria-expanded="false">
+
+                                        <div class="d-flex justify-content-start vh-100 pl-0 mt-md-2">
+                                            <p class="text-gray mb-0"> Scheduled Days </p>
+                                        </div>
+
+
+                                          <div class="d-flex justify-content-start vh-100 pl-0 mt-md-2 scheduled_days_area">
+
+                                          <div class="col-2 mb-0 p-0">
+                                            <input checked type="checkbox" name='sa' id="sa">
+                                            <label for="sa" class="w-75 text-center" id="sa">Sa</label>
+                                            </div>
+                                            <div class="col-2 mb-0 p-0">
+                                            <input type="checkbox" name='su' id="su">
+                                            <label for="su" class="w-75 text-center" id="su">Su</label>
+                                           </div>
+
+                                          </div>
+
+
+                                        <div class="row justify-content-center align-items-center vh-100 mt-md-0">
+                                            <div class="col-6">
+
+                                                <div class="form-group">
+                                                    <div class="form-group input-group">
+                                                        <div class="input-group-prepend">
+                                                                    <span
+                                                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                                        <span class="la la-calendar-o"></span>
+                                                                    </span>
+                                                        </div>
+
+                                                        <input type="text" name="pickup_date"
+                                                            class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
+                                                            id="pickup_date" placeholder="Select Pickup Date"
+                                                            data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="preferred_time_range" id="preferred_time_range"
+                                                            class="form-control select2" data-rule-required="true"
+                                                            data-msg-required="Pickup Time Range is required">
+                                                        <option value=""> Pickup Time Range</option>
+
+                                                        @foreach($time_ranges as $time_range)
+                                                            <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
+                                                        @endforeach
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center">
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="product_id" id="product_select" class="form-control select2"
+                                                            data-rule-required="true" data-msg-required="Product is required">
+                                                        @foreach($products as $product)
+                                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-6">
+                                                <div class="form-group">
+                                                    <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
+                                                        @foreach($services as $service)
+                                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
+                                                        @endforeach
+
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <select name="shipment_type_id" id="shipment_select" class="form-control select2"
+                                                            data-rule-required="true" data-msg-required="Shipment Type is required">
+                                                        @foreach($pickup_shipment_types as $shipment_type)
+                                                            <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row justify-content-center align-items-center">
+                                            <div class="col-12">
+                                                <div class="form-group input-group">
+
+                                                    <div class="input-group-prepend">
+
+                                                                <span class="input-group-text text-dark border-primary  rounded-left">
+                                                                    <span> Estimated Weight </span>
+                                                                </span>
+                                                    </div>
+
+                                                    <input type="text" id="estimated_weight" name="estimated_weight"
+                                                        class="form-control text-center" placeholder="Estimated Weight">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group input-group">
+                                                    <div class="input-group-prepend">
+
+                                                                <span class="input-group-text text-dark border-primary rounded-left">
+                                                                    <span> No of Shipments </span>
+                                                                </span>
+                                                    </div>
+                                                    <input type="text" id="shipments_count" name="shipments_count" class="form-control"
+                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row justify-content-center align-items-center vh-100">
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <textarea type="text" name="remarks" class="form-control"
+                                                            placeholder="Remarks"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        </div>
+
+                                    </div>
+
                             </div>
+
                             <div class="tab-pane" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1"
                                  aria-expanded="false">
 
-                                <div class="row">
+                                <div class="row mt-md-2">
 
                                     <div class="col-6">
                                         <div class="form-group">
@@ -449,120 +741,7 @@
 
                         </div>
 
-
-                        <div class="d-flex justify-content-center align-items-center vh-100 mt-md-1">
-                            <div class="col-6">
-
-                                <div class="form-group">
-                                    <div class="form-group input-group">
-                                        <div class="input-group-prepend">
-                                                    <span
-                                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                        <span class="la la-calendar-o"></span>
-                                                    </span>
-                                        </div>
-
-                                        <input type="text" name="pickup_date"
-                                               class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
-                                               id="pickup_date" placeholder="Select Pickup Date"
-                                               data-rule-required="true" data-msg-required="Pickup Date is Required">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <select name="preferred_time_range" id="preferred_time_range"
-                                            class="form-control select2" data-rule-required="true"
-                                            data-msg-required="Pickup Time Range is required">
-                                        <option value=""> Pickup Time Range</option>
-
-                                        @foreach($time_ranges as $time_range)
-                                            <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
-                                        @endforeach
-
-                                    </select>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                        <div class="d-flex justify-content-center align-items-center">
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <select name="product_id" id="product_select" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="Product is required">
-                                        @foreach($products as $product)
-                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="col-6">
-                                <div class="form-group">
-                                    <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
-                                        @foreach($services as $service)
-                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                        @endforeach
-
-                                    </select>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="d-flex justify-content-center align-items-center vh-100">
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <select name="shipment_type_id" id="shipment_select" class="form-control select2"
-                                            data-rule-required="true" data-msg-required="Shipment Type is required">
-                                        @foreach($pickup_shipment_types as $shipment_type)
-                                            <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center align-items-center">
-                            <div class="col-12">
-                                <div class="form-group input-group">
-
-                                    <div class="input-group-prepend">
-
-                                                <span class="input-group-text text-dark border-primary  rounded-left">
-                                                    <span> Estimated Weight </span>
-                                                </span>
-                                    </div>
-
-                                    <input type="text" id="estimated_weight" name="estimated_weight"
-                                           class="form-control text-center" placeholder="Estimated Weight">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center align-items-center vh-100">
-                            <div class="col-12">
-                                <div class="form-group input-group">
-                                    <div class="input-group-prepend">
-
-                                                <span class="input-group-text text-dark border-primary rounded-left">
-                                                    <span> No of Shipments </span>
-                                                </span>
-                                    </div>
-                                    <input type="text" id="shipments_count" name="shipments_count" class="form-control"
-                                           data-rule-required="true" data-msg-required="No. of Shipments is required">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-center align-items-center vh-100">
-                            <div class="col-12">
-                                <div class="form-group">
-                                    <textarea type="text" name="remarks" class="form-control"
-                                              placeholder="Remarks"></textarea>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="d-flex justify-content-start align-items-center">
+                        <!-- <div class="d-flex justify-content-start align-items-center">
                             <div class="col-12">
                                 <div id="pickup_div" class="form-group text-left p-0 pt-md-0 pb-md-0">
                                     <label class="d-block"><strong>Regular Pickup</strong></label>
@@ -570,9 +749,104 @@
                                 </div>
                             </div>
 
+                        </div> -->
+
+                        <!-- start additional services -->
+
+                        <div class="d-flex justify-content-start vh-100 pl-1">
+                        <b class="text-dark"> Additional Services </b>
+                        </div>
+                        <div class="d-flex justify-content-start align-items-center">
+
+                        <!-- start service list -->
+
+                        <div class="services-list col-12">
+
+                            <!-- start service item 1 -->
+                            <div class="d-flex align-items-center service-item mt-md-1">
+                                <div class="col-md-6">
+                                    <p class="mb-0 text-dark"> Labour </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-add-item"> <i class="la la-minus"></i> </button>
+                                    </div>
+                                    <div class="col-md-4 p-0">
+                                        <input class="form-control text-center text-dark" type="text" value="0" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-remove-item"> <i class="la la-plus"></i> </button>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- end service item 1 -->
+
+                            <!-- start service item 2 -->
+                            <div class="d-flex align-items-center service-item mt-md-1">
+                                <div class="col-md-6">
+                                    <p class="mb-0 text-dark"> Lifter </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-add-item"> <i class="la la-minus"></i> </button>
+                                    </div>
+                                    <div class="col-md-4 p-0">
+                                        <input class="form-control text-center text-dark" type="text" value="0" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-remove-item"> <i class="la la-plus"></i> </button>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- end service item 2 -->
+
+                            <!-- start service item 3 -->
+                            <div class="d-flex align-items-center service-item mt-md-1">
+                                <div class="col-md-6">
+                                    <p class="mb-0 text-dark"> Packaging </p>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="row align-items-center">
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-add-item"> <i class="la la-minus"></i> </button>
+                                    </div>
+                                    <div class="col-md-4 p-0">
+                                        <input class="form-control text-center text-dark" type="text" value="0" />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button type="button" class="btn btn-info btn-service btn-remove-item"> <i class="la la-plus"></i> </button>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- end service item 3 -->
+
+
+
+                            <!-- start view more -->
+
+                            <div class="d-flex justify-content-start label-view-more vh-100 mt-md-1 pl-0">
+                               <b class="text-dark veiw_more"> View More <i class="la la-angle-down"></i> </b>
+                            </div>
+
+                            <!-- end view more -->
+
                         </div>
 
-                        <div class="row justify-content-center">
+                        <!-- end service list -->
+
+                        </div>
+
+                        <!-- end additional services -->
+
+                        <div class="row justify-content-center mt-md-2">
                             <div class="col-3">
                                 <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit
                                 </button>
@@ -602,6 +876,141 @@
         .legends {
             cursor: pointer;
         }
+
+        .custom-nav {
+           margin-left: 4px;
+        }
+
+        .custom-nav li {
+
+           border: 1px solid #CCCCCC;
+           border-radius: 4px;
+        }
+
+        .custom-nav li:first-child {
+
+           margin-right: 4px !important;
+        }
+
+        .custom-nav li:last-child {
+
+           margin-left: 4px !important;
+        }
+
+        .custom-nav .nav-item a.nav-link {
+
+            color: #CCCCCC;
+            border: 1px solid #CCCCCC !important;
+        }
+
+        .custom-nav .nav-item p {
+
+            line-height: 1.4;
+        }
+
+        .custom-nav .nav-item a.active {
+
+            color: #64A0D2 !important;
+            border: 1px solid #64A0D2 !important;
+            background-color: #F7FAFC !important;
+        }
+
+        .custom-nav .nav-item a:hover {
+
+            color: #64A0D2 !important;
+            border: 1px solid #64A0D2 !important;
+            background-color: #F7FAFC !important;
+        }
+
+        /* start scheduled days area */
+
+        /* Hide checkboxes */
+        .scheduled_days_area input[type="checkbox"] {
+        display: none;
+        }
+
+        /* Style labels for checkboxes */
+        .scheduled_days_area input + label {
+        display: inline-block;
+        border: 1px solid #64A0D2;
+        padding: 10px;
+        border-radius: 5px;
+        position: relative;
+        cursor: pointer;
+        }
+
+        /* Style the checkbox's unchecked state */
+        .scheduled_days_area input:checked + label {
+        border-color: #CCCCCC;
+        background: #fff;
+        color: #333;
+        }
+
+        /* Style the checkbox's unchecked state icon */
+        .scheduled_days_area input:checked + label:before {
+        font-size: 17px;
+        position: absolute;
+        left: 24px;
+        top: 6px;
+        opacity: 1;
+        }
+
+        /* Style the checkbox's unchecked state circle */
+        /* .scheduled_days_area input:checked + label:after {
+        position: absolute;
+        content: '';
+        opacity: 1;
+        left: 20px;
+        top: 11px;
+        width: 18px;
+        height: 18px;
+        line-height: 1;
+        /* border: 2px solid #333; */
+        /* border-radius: 50%; */
+        } */
+
+        /* end scheduled days area */
+
+        /* start addition services */
+
+        .service-item {
+
+            border: 1px solid #CCCCCC;
+            border-radius: 4px;
+            padding-top: 12px;
+            padding-bottom: 12px;
+
+        }
+
+        .btn-service {
+            border-radius: 50%;
+            padding: 4px;
+            width: 30px;
+            height: 30px;
+            transition: all 0.4s;
+        }
+
+        .btn-service:hover {
+
+            background: #6496BE !important;
+        }
+
+        .btn-service:active,
+        .btn-service:focus {
+
+            background: #6496BE !important;
+        }
+
+        .veiw_more {
+            color: #64A0D2 !important;
+        }
+
+        .veiw_more i {
+            font-size: 16px;
+        }
+
+        /* end addition services */
+
     </style>
 @endsection
 
