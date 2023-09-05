@@ -366,6 +366,15 @@ class CRMController extends Controller
                     $crm_request_status_history->save();
                     
                 }
+                else if($case_nature_type_id == 12)
+                {
+                    $crm_request->status_id = 4;
+                    $crm_request->save();
+                    $crm_request_status_history = new CrmRequestStatusHistory();
+                    $crm_request_status_history->crm_request_id = $id;
+                    $crm_request_status_history->status_id = 4;
+                    $crm_request_status_history->save();
+                }
                 // else if($case_nature_type_id == 12){
                 //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 ){
                         

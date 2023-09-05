@@ -1383,6 +1383,13 @@
                         $(this).val('').trigger('change');
                     }
                     else{
+                        table.rows().nodes().each(function (index) {
+                            var row = table.row(index);
+                            if ($(row.node()).hasClass('selected')) {
+                                var old_amount = $(row.node()).find('td.amount').text();
+                                $('#old_amount').val(old_amount);
+                            }
+                        });
                         $('#cod_change').removeClass('d-none');
                     }
                    
@@ -1876,7 +1883,7 @@
             $('#add_request_form').on('submit',function (e) {
                 e.preventDefault();
             });
-            $( "#add_request_form" ).validate({
+            $( "#add_request_form" ).validate({ 
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
@@ -2136,13 +2143,13 @@
                     else {
                         $('#AddNewRequest').attr('disabled',true);
                         swal({
-                                        title: 'Please Wait!',
-                                        text: 'Launching Request.',
-                                        icon: 'info',
-                                        buttons: false,
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
+                            title: 'Please Wait!',
+                            text: 'Launching Request.',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
                         $.ajax({
                             url: '{!! route('cod.crm.request.add') !!}',
                             method: 'POST',
@@ -2153,6 +2160,7 @@
                                 'complaint_id': complaint_id,
                                 'description': description,
                                 'alternate_phone': $('#alternate_phone').val(),
+                                'cod_new_amount': $('#new_amount').val(),
                                 // 'cod_amount': $('#cod_amount').val(),
                             }
                         })
