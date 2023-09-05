@@ -10401,7 +10401,7 @@ class NotificationsController extends Controller
                     $body=str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id = 222) {
+                } else if ($id == 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
                     
@@ -10414,7 +10414,6 @@ class NotificationsController extends Controller
 
                         $array[$shipperId][] = $item;
                     }
-
 
                     foreach ($array as $shipperId => $items) {
                         $ids = array();
@@ -10462,13 +10461,10 @@ class NotificationsController extends Controller
                         $html .= '</tbody>';
                         $html .= '</table>';
 
-
-
                         $body = str_replace('[preview]', $html, $notification->body);
                         $body = str_replace('[shipper]', $shipper_name ?? 'Valued Customer', $body);
                         self::email($subject, $body, $email);
                     }
-
                 } 
             }
         }
