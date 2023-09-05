@@ -43,8 +43,8 @@
                     <div class="col-5">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
-                                @foreach($riders as $rider)
-                                    <option value="{{$rider->id}}">{{$rider->name}} - {{$rider->trax_id}}</option>
+                                @foreach($options as $option)
+                                    <option value="{{ $option['value'] }}">{{ $option['text'] }}</option>
                                 @endforeach
                             </select>
                         </fieldset>

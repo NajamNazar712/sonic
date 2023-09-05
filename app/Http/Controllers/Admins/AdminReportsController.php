@@ -7877,9 +7877,24 @@ class AdminReportsController extends Controller
         $destination_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('status', 1)->get();
         $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $riders_cat = OperationRidersCategory::all();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'trax_id']);
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'trax_id', 'city_id']);
+        $cityIds = $riders->pluck('city_id')->toArray();
+        $rider_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('id',$cityIds)->get();
 
-        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
+        $options = [];
+
+        foreach ($riders as $rider) {
+            $riderCity = $rider_cities->firstWhere('id', $rider->city_id);
+
+            if ($riderCity) {
+                $options[] = [
+                    'value' => $rider->id,
+                    'text' => "{$rider->name} - {$rider->trax_id} ({$riderCity->name})",
+                ];
+            }
+        }
+        return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 
+        'zones' => $zones, 'riders_cat' => $riders_cat, 'options' => $options]);
     }
 
     public function route_distribution_list(Request $request)
