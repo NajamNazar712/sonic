@@ -11,7 +11,7 @@ class Notifications extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
-    public $subject, $body;
+    public $subject, $body, $head;
 
     /**
      * Create a new message instance.
@@ -36,6 +36,6 @@ class Notifications extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject($this->subject)->view('notifications.email')->with(['body' => $this->body]);
+        return $this->subject($this->subject)->view('notifications.email')->with([ 'body' => $this->body]);
     }
 }
