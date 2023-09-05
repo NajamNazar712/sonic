@@ -2875,8 +2875,8 @@ class AdminCargoManifestController extends Controller
             $from = $request->get('transit_from_date');
             $to = $request->get('transit_to_date');
 
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('cargo_manifests.created_at', [$from, $stop_date]);
+            // $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $datatables->whereBetween('cargo_manifests.created_at', [$from, $to]);
         }
         if (($request->search_filter_origin != null) && ($request->search_filter_destination != null)) {
             $origin = $request->get('search_filter_origin');

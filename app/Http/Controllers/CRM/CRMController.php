@@ -356,6 +356,9 @@ class CRMController extends Controller
 
         if($case_nature_id == 2){
             $shipment = Shipment::find($shipment_id);
+
+      
+
             if($shipment){
                 if($case_nature_type_id == 13){
                     $crm_request->status_id = 4;
@@ -427,6 +430,24 @@ class CRMController extends Controller
                     
                 }
             }
+
+            $comment = "Dear Customer,
+            Thank you for reaching out to us!
+            We want to inform you that your service request has been successfully received and processed. please dont hesitate to contact us. You can reach us at:
+            UAN # 021-111-11-8729 
+            Email:Info@trax.pk";
+            
+            $comment_by = 0;
+            $comment_type = 0;
+
+            $default_agent_setting = GlobalSettings::where('type', 'crm_default_agent');
+            if ($default_agent_setting->exists()) {
+                $default_agent_setting = $default_agent_setting->first();
+                $default_agent_id = $default_agent_setting->setting_value;
+            } else {
+                $default_agent_id = 306;
+            }
+            CRMCommentController::add($id, $default_agent_id, $comment_by, $comment_type, $comment,1);
         }
         return $crm_request->id;
     }

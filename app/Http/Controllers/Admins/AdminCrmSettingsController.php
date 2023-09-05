@@ -20,6 +20,7 @@ use App\Http\Models\CRM\Escalation\CrmEscalationTaggingShipmentStatus;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Support\Facades\Auth;
 use Yajra\Datatables\Datatables;
 use DB;
@@ -858,5 +859,73 @@ class AdminCrmSettingsController extends Controller
             $selected_levels['emails_bcc'][] = $email_text_bcc;
         }
         return response()->json(['status' => 1, 'selected_levels' => $selected_levels]);
+    }
+
+    public function csat_cases_setting_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 696);
+
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
+        $case_nature_types = CrmRequestCaseNatureType::all();
+
+        if(isset($csat_types)){
+            $csat_types = explode(',', $csat_types->text);
+            return view('admin.settings.CRM.csat_cases_type_setting')->with(['csat_types'=>$csat_types,'case_nature_types'=>$case_nature_types]);
+        }else{
+            $csat_types = [];
+            return view('admin.settings.CRM.csat_cases_type_setting')->with(['csat_types'=>$csat_types,'case_nature_types'=>$case_nature_types]);
+        }
+
+    }
+
+    public function csat_cases_setting_store(Request $request)
+    {
+        
+        $csat_types = GlobalSettings::where('type', 'csat_type')->latest()->first();
+        $case_types = $request->get('case_types');
+        $case_types = implode(',', $case_types);
+
+        if(!isset($csat_types))
+        {
+            GlobalSettings::create(['setting_value'=> 1 , 'type' => 'csat_type', 'text'=> $case_types]);
+            return redirect()->route('admin.settings.csat_cases_setting.index')->with('success', 'Updated Successfully');
+        }
+        else
+        {
+            GlobalSettings::where('type','=','csat_type')->update(['text' => $case_types]);
+            return redirect()->route('admin.settings.csat_cases_setting.index')->with('success', 'Updated Successfully');
+
+        }
+    }
+
+
+    public function csat_score_formula_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 701);
+
+        $formulas = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $formulas = explode(',', $formulas->text ?? '');
+
+        return view('admin.settings.CRM.csat_formula_setting')->with(['formulas'=>$formulas]);
+
+    }
+
+    public function csat_score_formula_store(Request $request)
+    {
+        $csat_formula = GlobalSettings::where('type', 'csat_formula')->latest()->first();
+        $values = $request->get('submitted_values');   
+        
+        if(!isset($csat_formula))
+        {
+            GlobalSettings::create(['setting_value'=> 1 , 'type' => 'csat_formula', 'text'=> $values]);
+            return redirect()->route('admin.settings.csat_cases_setting.formula.index')->with('success', 'Updated Successfully');
+        }
+        else
+        {
+            GlobalSettings::where('type','=','csat_formula')->update(['text' => $values]);
+            return redirect()->route('admin.settings.csat_cases_setting.formula.index')->with('success', 'Updated Successfully');
+
+        }
+
     }
 }
