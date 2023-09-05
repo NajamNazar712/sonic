@@ -7877,7 +7877,7 @@ class AdminReportsController extends Controller
         $destination_cities = DB::connection('reports')->table('cities')->select('id', 'name')->where('status', 1)->get();
         $zones = DB::connection('reports')->table('zones')->select('id', 'name')->get();
         $riders_cat = OperationRidersCategory::all();
-        $riders = DB::connection('reports')->table('riders')->get(['id', 'name']);
+        $riders = DB::connection('reports')->table('riders')->get(['id', 'name', 'trax_id']);
 
         return view('admin.reports.route_distribution_summary_report')->with(['hubs' => $hubs, 'destination_cities' => $destination_cities, 'zones' => $zones, 'riders' => $riders, 'riders_cat' => $riders_cat]);
     }
