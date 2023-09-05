@@ -365,7 +365,7 @@ d                         <div class="modal-content">
                                 </ul>
                                 <div class="tab-content px-1">
                                 <div role="tabpanel" class="tab-pane active" id="activeIcon32" aria-labelledby="activeIcon32-tab1" aria-expanded="true">
-                                    <div class="row justify-content-start align-items-center vh-100 mt-md-1">
+                                    <div class="row justify-content-start align-items-center vh-100 mt-md-2">
                                         <div class="col-8">
                                             <div class="form-group">
                                             <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
@@ -409,7 +409,7 @@ d                         <div class="modal-content">
                                     </div>
                                 </div>
                                 <div class="tab-pane" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1" aria-expanded="false">
-                                    <div class="row mt-md-1">
+                                    <div class="row mt-md-2">
                                         <div class="col-6">
                                             <div class="form-group">
                                             <input type="text" placeholder="Customer Name" name="customer_name" id="customer_name" class="form-control" data-rule-required="true" data-msg-required="Customer Name is Required"/>
@@ -586,6 +586,7 @@ d                         <div class="modal-content">
         .custom-nav .nav-item a.nav-link {
 
             color: #CCCCCC;
+            border: 1px solid #CCCCCC !important;
         }
 
         .custom-nav .nav-item a.active {
