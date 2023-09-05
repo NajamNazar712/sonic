@@ -7945,10 +7945,9 @@ class AdminReportsController extends Controller
             ->select('r.name as courier_name', DB::raw('count(s.id) as shipments_count'), DB::raw('count(ds.id) as delivered_shipments'), 
             DB::raw('count(cps.id) as confirmation_pending_shipments'), DB::raw('count(us.id) as undelivered_shipments'), 
             'c.name as hub', DB::raw('count(DISTINCT delivery_notes.id) as dn_no_count'), DB::raw('GROUP_CONCAT(DISTINCT delivery_notes.id) as dn_ids'), 'rt.name as rider_type',
-            'delivery_notes.id as delivery_note')
+            'delivery_notes.id as delivery_note','r.trax_id as rider_trax_id')
             ->groupBy('r.id');
 
-            // dd($route_distribution_summary);
 
         $datatables = Datatables::of($route_distribution_summary)
             ->setTotalRecords($count)
