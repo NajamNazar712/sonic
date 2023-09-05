@@ -349,117 +349,85 @@ d                         <div class="modal-content">
 
                                 </div>
 
+                                <div class="d-flex justify-content-start vh-100 pl-1 mt-md-2">
 
-                                    <ul class="nav nav-tabs nav-iconfall nav-justified">
-                                    <li class="nav-item">
-                                        <a class="nav-link active p-0" id="activeIcon32-tab1" data-toggle="tab" href="#activeIcon32" aria-controls="activeIcon32" aria-expanded="true"> Registered</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link p-0" id="linkIcon32-tab1" data-toggle="tab" href="#linkIcon32" aria-controls="linkIcon32" aria-expanded="false"> Walk-in</a>
-                                    </li>
-
-                                    </ul>
-                                    <div class="tab-content px-1">
-                                    <div role="tabpanel" class="tab-pane" id="activeIcon32" aria-labelledby="activeIcon32-tab1" aria-expanded="true">
-
-                                    <div class="row justify-content-start align-items-center vh-100 mt-md-1">
-
-                                    <div class="col-8">
-                                        <div class="form-group">
-                                            <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
-
-                                                    <option value="shipper name"> Customer </option>
-
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-
-                                      <p class="text-gray">Contact Person </p>
-                                      <p class="text-dark">Shahid Aslam </p>
-
-                                    </div>
-
-                                    <div class="col-6">
-
-                                      <p class="text-gray">Designation </p>
-                                      <p class="text-dark">Operational Manager </p>
-
-                                    </div>
-
-                                    <div class="col-6 mt-1">
-
-                                      <p class="text-gray">Mobile No </p>
-                                      <p class="text-dark">03414285511 </p>
-
-                                    </div>
-
-                                    <div class="col-6 mt-1">
-
-                                      <p class="text-gray">Customer </p>
-                                      <p class="text-dark">Regular </p>
-
-                                    </div>
-
-                                    <div class="col-10">
-                                        <div class="form-group">
-                                            <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
-
-                                                    <option value="Customer Reference"> Customer Reference </option>
-
-                                            </select>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-10">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Address" name="address" id="address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="col-10">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Caller Contact No" name="contactNo" id="contactNo" class="form-control" data-rule-required="true" data-msg-required="Contact Number is Required"/>
-
-                                        </div>
-                                    </div>
+                                   <p class="text-gray mb-0"> Customer Type </p>
 
                                 </div>
 
+                                <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-50">
+                                <li class="nav-item">
+                                    <a class="nav-link active p-0" id="activeIcon32-tab1" data-toggle="tab" href="#activeIcon32" aria-controls="activeIcon32" aria-expanded="true"> Registered</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link p-0" id="linkIcon32-tab1" data-toggle="tab" href="#linkIcon32" aria-controls="linkIcon32" aria-expanded="false"> Walk-in</a>
+                                </li>
+                                </ul>
+                                <div class="tab-content px-1">
+                                <div role="tabpanel" class="tab-pane active" id="activeIcon32" aria-labelledby="activeIcon32-tab1" aria-expanded="true">
+                                    <div class="row justify-content-start align-items-center vh-100 mt-md-1">
+                                        <div class="col-8">
+                                            <div class="form-group">
+                                            <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
+                                                <option value="shipper name"> Customer </option>
+                                            </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="text-gray">Contact Person </p>
+                                            <p class="text-dark">Shahid Aslam </p>
+                                        </div>
+                                        <div class="col-6">
+                                            <p class="text-gray">Designation </p>
+                                            <p class="text-dark">Operational Manager </p>
+                                        </div>
+                                        <div class="col-6 mt-1">
+                                            <p class="text-gray">Mobile No </p>
+                                            <p class="text-dark">03414285511 </p>
+                                        </div>
+                                        <div class="col-6 mt-1">
+                                            <p class="text-gray">Customer </p>
+                                            <p class="text-dark">Regular </p>
+                                        </div>
+                                        <div class="col-10">
+                                            <div class="form-group">
+                                            <select name="shipper_id" id="shippers" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
+                                                <option value="Customer Reference"> Customer Reference </option>
+                                            </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-10">
+                                            <div class="form-group">
+                                            <input type="text" placeholder="Address" name="address" id="address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-10">
+                                            <div class="form-group">
+                                            <input type="text" placeholder="Caller Contact No" name="contactNo" id="contactNo" class="form-control" data-rule-required="true" data-msg-required="Contact Number is Required"/>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="tab-pane active" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1" aria-expanded="false">
-
-                                     <div class="row">
-
-                                     <div class="col-6">
-                                        <div class="form-group">
+                                </div>
+                                <div class="tab-pane" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1" aria-expanded="false">
+                                    <div class="row mt-md-1">
+                                        <div class="col-6">
+                                            <div class="form-group">
                                             <input type="text" placeholder="Customer Name" name="customer_name" id="customer_name" class="form-control" data-rule-required="true" data-msg-required="Customer Name is Required"/>
-
+                                            </div>
                                         </div>
-                                     </div>
-
-                                     <div class="col-6">
-                                        <div class="form-group">
+                                        <div class="col-6">
+                                            <div class="form-group">
                                             <input type="text" placeholder="Designation" name="designation" id="designation" class="form-control" data-rule-required="true" data-msg-required="Designation is Required"/>
-
+                                            </div>
                                         </div>
-                                     </div>
-
-                                     <div class="col-6">
-                                        <div class="form-group">
+                                        <div class="col-6">
+                                            <div class="form-group">
                                             <input type="text" placeholder="Mobile Number" name="mobile_no" id="mobile_no" class="form-control" data-rule-required="true" data-msg-required="Mobile is Required"/>
-
+                                            </div>
                                         </div>
-                                     </div>
-
-
-                                     </div>
-
                                     </div>
-
-                                    </div>
+                                </div>
+                                </div>
 
 
                                 <div class="d-flex justify-content-center align-items-center vh-100 mt-md-1">
@@ -594,6 +562,46 @@ d                         <div class="modal-content">
         .legends{
             cursor:pointer;
         }
+
+        .custom-nav {
+           margin-left: 4px;
+        }
+
+        .custom-nav li {
+
+           border: 1px solid #CCCCCC;
+           border-radius: 4px;
+        }
+
+        .custom-nav li:first-child {
+
+           margin-right: 4px !important;
+        }
+
+        .custom-nav li:last-child {
+
+           margin-left: 4px !important;
+        }
+
+        .custom-nav .nav-item a.nav-link {
+
+            color: #CCCCCC;
+        }
+
+        .custom-nav .nav-item a.active {
+
+            color: #64A0D2 !important;
+            border: 1px solid #64A0D2 !important;
+            background-color: #F7FAFC !important;
+        }
+
+        .custom-nav .nav-item a:hover {
+
+            color: #64A0D2 !important;
+            border: 1px solid #64A0D2 !important;
+            background-color: #F7FAFC !important;
+        }
+
     </style>
 @endsection
 
