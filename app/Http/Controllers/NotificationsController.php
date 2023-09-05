@@ -10411,7 +10411,7 @@ class NotificationsController extends Controller
                     $body=str_replace('[preview]', $preview, $body);
 
                     self::email($subject, $body, $to, $cc);
-                } else if ($id = 222) {
+                } else if ($id == 222) {
                     $array = array();
                     $crm_case_closeds = $reference_1_id;
                     
