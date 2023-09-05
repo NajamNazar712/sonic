@@ -17,8 +17,14 @@ class CreateV3RegularPickupsTable extends Migration
             $table->increments('id');
             $table->integer('shipper_id')->index();
             $table->integer('pickup_address_id')->index();
+            $table->integer('pickup_request_id')->index();
+            $table->string('days');
             $table->tinyInteger('pickup')->default(0)->index();
             $table->tinyInteger('approval')->default(0)->index(); //1 - approved, 2 - rejected
+            $table->tinyInteger('requested_type')->default(0)->index(); //0 - shipper, 1 Admin
+            $table->integer('requested_by')->index();
+            $table->integer('approved_by')->nullable()->index();
+            $table->timestamp('approved_at')->index();
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
         });

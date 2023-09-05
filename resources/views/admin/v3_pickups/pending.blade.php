@@ -342,6 +342,9 @@
                             </ul>
                         </div>
                         <form id="add_request_form" method="post" enctype="multipart/form-data">
+                            @csrf
+                            @method('post')
+                            <input type="hidden" id="pickup_type_id" name="pickup_type_id" value="1">
                         <div class="tab-content px-1">
                             <div role="tabpanel" class="tab-pane active" id="activeIcon32"
                                  aria-labelledby="activeIcon32-tab1" aria-expanded="true">
@@ -527,14 +530,11 @@
                         <div class="d-flex justify-content-center align-items-center">
                             <div class="col-12">
                                 <div class="form-group input-group">
-
                                     <div class="input-group-prepend">
-
-                                                <span class="input-group-text text-dark border-primary  rounded-left">
-                                                    <span> Estimated Weight </span>
-                                                </span>
+                                            <span class="input-group-text text-dark border-primary  rounded-left">
+                                                <span> Estimated Weight </span>
+                                            </span>
                                     </div>
-
                                     <input type="text" id="estimated_weight" name="estimated_weight"
                                            class="form-control text-center" placeholder="Estimated Weight">
                                 </div>

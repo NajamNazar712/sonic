@@ -71,33 +71,41 @@ class V3AdminPickupsController extends Controller
 
         $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
-        $pickup_date = Carbon::parse($pickup_date)->now()->toDateTimeString();
+        $pickup_date = Carbon::parse($pickup_date)->toDateString();
 
         $shipper_id = $request->shipper_id;
         $pickup_address_id = $request->pickup_address_id;
-
-        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('status_id', 1)->exists()){
+        $time_range_id = $request->preferred_time_range;
+        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('status_id', 1)->exists()){
             return redirect()->back()->with('error', 'Pickup request already in-process!');
         }
 
-        $preferred_time_range = $request->preferred_time_range;
         $pickup_type_id = $request->pickup_type_id;
         $estimated_weight = $request->estimated_weight;
         $shipments_count = $request->shipments_count;
-        $remarks = $request->remarks;
+        $pieces = $request->pieces;
+        $special_request = $request->remarks;
+
+        $shipment_type_id = $request->shipment_type_id;
+        $product_id = $request->product_id;
+        $service_id = $request->service_id;
+        $walkin_name = $request->name;
+        $walkin_address = $request->address;
+        $walkin_contact = $request->phone;
+
 
         $pickup_address = UserShippingInfo::find($request->pickup_address_id);
 
-        $vendor = NULL;
-        $city_id = $pickup_address->city->id;
-        if($pickup_address->vendor !== null){
-            $vendor = $pickup_address->vendor;
-        }
 
-        AddV3PickupController::add($shipper_id, $pickup_address_id, $pickup_date, $city_id, $preferred_time_range, $pickup_type_id, $estimated_weight, $shipments_count, $remarks, 1, $admin_id, $vendor);
+        $city_id = $pickup_address->city->id;
+
+
+        AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
 
         if($request->has('pickup')){
-            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id);
+            $days = $request->days;
+            $days = implode(',', $days);
+            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $days, $admin_id, 1);
         }
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
@@ -886,6 +894,21 @@ class V3AdminPickupsController extends Controller
         $pickup_addresses = UserShippingInfo::with('city')->where('user_id', $shipper_id)->where('status', 1)->where('hidden', 0)->get();
 
         return response()->json(['status' => 0, 'pickup_addresses' => $pickup_addresses]);
+
+    }
+
+    public function pending_request_edit_info(Request $request)
+    {
+        $pickup_request_id = $request->pickup_request_id;
+
+        if (!$pickup_request_id) {
+            return response()->json(['status' => 1, 'error' => 'Something went wrong, please refresh and try again!']);
+        }
+
+        $pickup_request = V3PickupRequest::find($pickup_request_id);
+        if (!$pickup_request_id) {
+            return response()->json(['status' => 1, 'error' => 'Pickup request not found!']);
+        }
 
     }
 }

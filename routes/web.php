@@ -1266,6 +1266,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_list')->name('list');
             Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_assign')->name('assign');
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
+            Route::get('edit', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit_info')->name('edit');
         });
 
         Route::prefix('history')->name('history.')->group(function () {
