@@ -326,7 +326,6 @@ class ShipperCRMController extends Controller
     }
 
     public function add_request(Request $request){
-
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
@@ -339,20 +338,6 @@ class ShipperCRMController extends Controller
                 $alternate_phone = null;
             }
         }
-        if($request->has('cod_new_amount')){
-            if($request->cod_new_amount){
-                $cod_new_amount = $request->cod_new_amount;
-            }else{
-                $cod_new_amount = null;
-            }
-        }
-        // if($request->has('cod_amount')){
-        //     if($request->cod_amount){
-        //         $cod_amount = $request->cod_amount;
-        //     }else{
-        //         $cod_amount = null;
-        //     }
-        // }
 //        if($complaint_id == 23 && $receiving_sheet_id != null){
         if($complaint_id == 23){
             $description_text = $request->description ;
@@ -442,6 +427,7 @@ class ShipperCRMController extends Controller
                 }
             }
         }
+
         else{
             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                 $shipment_ids = explode(',', $request->input('shipment_ids'));
@@ -455,6 +441,11 @@ class ShipperCRMController extends Controller
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
                     if($shipment){
+
+                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
+                        {
+                            return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
+                        }
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
@@ -521,9 +512,16 @@ class ShipperCRMController extends Controller
                             }
                             else if($complaint_id == 12) // for cod change automation
                             {
-                                $shipment->amount = $cod_new_amount;
-                                $shipment->save();
+                                if($request->has('cod_new_amount')){
+                                    if($request->cod_new_amount){
+                                        $shipment->amount = $cod_new_amount;
+                                        $shipment->save();
+                                    }
+                                }
+                               
                             }
+
+                            
                             // else if($complaint_id == 12){
                             //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
                             //         if($shipment->amount != 0){
@@ -563,6 +561,11 @@ class ShipperCRMController extends Controller
                 if($shipment){
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
                     if($is_shipment){
+
+                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
+                        {
+                            return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
+                        }
 //                        dd($is_shipment);
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -603,10 +606,15 @@ class ShipperCRMController extends Controller
                             $shipment->consignee_phone_number_2 = $alternate_phone;
                             $shipment->save();
                         }
-                        else  if($complaint_id == 12) // for cod change automation
+                        else if($complaint_id == 12) // for cod change automation
                         {
-                            $shipment->amount = $cod_new_amount;
-                            $shipment->save();
+                            if($request->has('cod_new_amount')){
+                                if($request->cod_new_amount){
+                                    $shipment->amount = $cod_new_amount;
+                                    $shipment->save();
+                                }
+                            }
+                            
                         }
                         // else if($complaint_id == 12){
                         //     if($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 3 || $shipment->shipper_status_id == 4 || $shipment->shipper_status_id == 8 || $shipment->shipper_status_id == 7 || $shipment->shipper_status_id == 13 || $shipment->shipper_status_id == 52 || $shipment->shipper_status_id == 12){
