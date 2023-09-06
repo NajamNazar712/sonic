@@ -55,6 +55,7 @@ class CrmProgressReportCron extends Command
         ->where('updated_at','>=', Carbon::now()->subDay())
         ->get();
 
+
         NotificationsController::send(223, $crm_complaints, $crm_service_requests, $crm_claims);
     }
 }

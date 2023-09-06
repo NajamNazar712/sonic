@@ -10568,7 +10568,9 @@ class NotificationsController extends Controller
 
 
                     $html .= '</tr>';
-                    $html .= '<tbody><br/>';
+                    $html .= '<tbody>';
+
+                    $html .= '<br/>';
 
 
                     // Table for CRM Service Requests
@@ -10608,7 +10610,9 @@ class NotificationsController extends Controller
                     }
 
                     $html .= '</tr>';
-                    $html .= '</tbody><br/>';
+                    $html .= '</tbody>';
+                    $html .= '<br/>';
+
 
                     // Table for CRM Claims
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
@@ -10648,6 +10652,8 @@ class NotificationsController extends Controller
                     $html .= '</tr>';
                     $html .= '</tbody>';
 
+                    
+
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
                     $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8">Agents Summary Report</td></tr>';
@@ -10666,8 +10672,9 @@ class NotificationsController extends Controller
 
                     $agent = array();
 
-                    $closure_2_days = [];
+                    $index = 0;
 
+                    
                     foreach ($case_natures as $key => $value) {
                         $agent_id = $value["agent_id"];
                         $agent[$agent_id]['status_id'][] = $value['status_id'];
@@ -10679,6 +10686,9 @@ class NotificationsController extends Controller
 
                     foreach ($agent as $key => $value) {
 
+                        $index = $index + 1;
+
+                        $closure_2_days = [];
                         $created_at = $value['created_at'];
                         $updated_at = $value['updated_at'];
                         $statuses = $value['status_id'];
@@ -10686,7 +10696,7 @@ class NotificationsController extends Controller
                         foreach($created_at as $key => $created_time){
                             foreach($updated_at as $key_1 => $updated_time){
                                 foreach($statuses as $key_2 => $status){
-                                    if($created_time->diffInDays($updated_time) <= 2 && $status == 4){
+                                    if(($created_time->diffInDays($updated_time)) <= 2 && $status == 4){
                                         $closure_2_days[$key_2] = $status;
                                     }
                                 }
@@ -10710,7 +10720,7 @@ class NotificationsController extends Controller
                         $agent = Admin::where('id', $value['agent_id'])->value('name');
               
                         $html .= '<tr>';
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $key++ . '</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $index . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . date('y-m-d') . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $agent. '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($value["ticket_id"]) . '</td>';
