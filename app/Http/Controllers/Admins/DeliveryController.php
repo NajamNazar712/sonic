@@ -139,13 +139,6 @@ class DeliveryController extends Controller
         $hubs = City::where('hub', 1)->where('status', 1)->where('business_category_id', 1)->select('id', 'name')->get();
         $service_type = BookingType::all();
         $areas = CityArea::with('hubs')->where('status', 1)->get();
-
-        $shipment_status=null;
-        $shipping_mode=null;
-        $service_type=null;
-        $hubs=null;
-        $areas=null;
-
         return view('admin.delivery.pending.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'hubs' => $hubs, 'areas' => $areas]);
     }
 
