@@ -10569,8 +10569,9 @@ class NotificationsController extends Controller
 
                     $html .= '</tr>';
                     $html .= '<tbody>';
+                    $html .= '</table>';
 
-                    $html .= '<br/>';
+                    $html .= '<br>'; // Add a line break after the Claims table
 
 
                     // Table for CRM Service Requests
@@ -10611,7 +10612,9 @@ class NotificationsController extends Controller
 
                     $html .= '</tr>';
                     $html .= '</tbody>';
-                    $html .= '<br/>';
+                    $html .= '</table>';
+
+                    $html .= '<br>'; // Add a line break after the Claims table
 
 
                     // Table for CRM Claims
@@ -10651,10 +10654,13 @@ class NotificationsController extends Controller
                     }
                     $html .= '</tr>';
                     $html .= '</tbody>';
+                    $html .= '</table>';
+
+                    $html .= '<br>'; // Add a line break after the Claims table
 
                     
 
-                    $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
+                    $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
                     $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8">Agents Summary Report</td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
