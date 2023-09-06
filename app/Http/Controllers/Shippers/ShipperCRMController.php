@@ -437,6 +437,7 @@ class ShipperCRMController extends Controller
                     $shipment_ids = explode(',', $request->input('shipment_ids'));
                 }
             }
+            $message = "Request(s) successfully added";
             if(!empty($shipment_ids)){
                 foreach ($shipment_ids as $shipment_id) {
                     $shipment = Shipment::find($shipment_id);
@@ -449,7 +450,9 @@ class ShipperCRMController extends Controller
 
                         $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
+                        $already_lodged = false;
                         if($is_shipment){
+                            $already_lodged = true;
                             if($is_shipment->case_nature_id != $nature_id){
                                 if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                                     CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL , NULL, $request->product_cost,  $request->file('product_picture'), $request->file('invoice_picture'));
@@ -510,15 +513,16 @@ class ShipperCRMController extends Controller
                                 $shipment->consignee_phone_number_2 = $alternate_phone;
                                 $shipment->save();
                             }
-                            else if($complaint_id == 12) // for cod change automation
+                            else if($complaint_id == 12 && !$already_lodged) // for cod change automation
                             {
                                 if($request->has('cod_new_amount')){
                                     if($request->cod_new_amount){
-                                        $shipment->amount = $cod_new_amount;
+                                        
+                                        $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                        $shipment->amount = $request->cod_new_amount;
                                         $shipment->save();
                                     }
                                 }
-                               
                             }
 
                             
@@ -552,20 +556,24 @@ class ShipperCRMController extends Controller
                     }
 
                 }
-                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+                return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
 //            return ['status' => 1, 'success' => 'Request(s) successfully added'];
             }
             else if (!empty($shipment_id)){
 //                dd($shipment_id);
                 $shipment = Shipment::find($shipment_id);
                 if($shipment){
-                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
-                    if($is_shipment){
 
-                        if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
+                    if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
                         {
                             return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
                         }
+
+                    $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
+
+                    $already_lodged = false;
+                    if($is_shipment){    
+                        $already_lodged = true;                    
 //                        dd($is_shipment);
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){
@@ -606,12 +614,15 @@ class ShipperCRMController extends Controller
                             $shipment->consignee_phone_number_2 = $alternate_phone;
                             $shipment->save();
                         }
-                        else if($complaint_id == 12) // for cod change automation
+                        else if($complaint_id == 12 && !$already_lodged) // for cod change automation
                         {
                             if($request->has('cod_new_amount')){
                                 if($request->cod_new_amount){
-                                    $shipment->amount = $cod_new_amount;
+
+                                    $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                    $shipment->amount = $request->cod_new_amount;
                                     $shipment->save();
+
                                 }
                             }
                             
@@ -644,7 +655,7 @@ class ShipperCRMController extends Controller
                         }
                     }
                 }
-                return ['status' => 1, 'success' => 'Request(s) successfully added', 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
+                return ['status' => 1, 'success' => $message, 'flag' => $flag, 'already_existed_shipments' => $present_shipments, 'cannot_change' => $cannot_change];
             }
             else{
                 return ['status' => 0, 'error' => 'No shipments selected!'];
