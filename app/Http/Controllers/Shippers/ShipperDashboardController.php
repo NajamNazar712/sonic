@@ -85,6 +85,7 @@ use App\Http\Models\WMS\WmsStorageType;
 use App\Http\Models\WMS\WmsStorageTypeCharge;
 use App\Http\Models\WMS\WmsUserInformation;
 use App\RouteLocations;
+use GuzzleHttp\Client;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -2136,6 +2137,72 @@ class ShipperDashboardController extends Controller
         $visit->save();
 
         return back()->with(['success'=>'Visit Rated Successfully']);
+    }
+
+    public function mentor_health_index()
+    {
+        $details = User::join('cities as c','c.id','users.city_id')
+        ->where('users.id',session('user_id'))
+        ->select('users.id as user_id','users.name as company_name','users.email as company_email',
+            'users.phone as company_phone','users.city_id as company_city_id','c.name as company_city');
+        if ($details->exists())
+        {
+            $details = $details->first();
+        }
+        return view('client.mentor_health.mentor_health')->with(['details' => $details]);
+    }
+
+    public function mentor_health_add_request(Request $request)
+    {
+//        dd($request->all());
+        if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
+        {
+            if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
+
+                try
+                {
+                    $company_name = $request->company_name;
+                    $company_email = $request->company_email;
+                    $company_phone = $request->company_phone;
+                    $company_city = $request->company_city;
+
+                    $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
+
+                    $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'verify' => false , 'connect_timeout' => 60, 'timeout' => 60]);
+                    $response = $client->delete($url, [
+                        'form_params' => [
+//                        '$company_name' => $request->company_name,
+//                        '$company_email' => $request->company_email,
+//                        '$company_phone' => $request->company_phone,
+//                        '$company_city' => $request->company_city,
+
+                            '$company_name' => 'test011',
+                            '$company_email' => 'test011@gmail.com',
+                            '$company_phone' => '0313-0000001',
+                            '$company_city' => 'test011',
+                        ]
+                    ]);
+
+                    $client = new Client();
+                    $response = $client->request('Post', $url, [
+                        'headers' => [
+                            'Content-Type' => 'application/x-www-form-urlencoded',
+//                            'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
+                        ],
+//                        'body' => $request_body,
+                    ]);
+                    dd($response);
+                }
+                catch (\Throwable  $e)
+                {
+                 dd($e);
+                }
+            }
+        }
+        else
+        {
+            return back()->with(['error' => 'please provide the complete details !']);
+        }
     }
 
     
