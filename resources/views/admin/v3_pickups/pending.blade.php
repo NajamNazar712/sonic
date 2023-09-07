@@ -438,32 +438,37 @@
 
                                           <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
 
-                                            <div class="col-2 mb-0 p-0">
-                                                <input checked type="checkbox" name='sa' id="sa">
-                                                <label for="sa" class="w-75 text-center" id="sa">S</label>
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='sa' id="sa">
+                                                <label for="sa" class="w-100 text-center" id="sa">S</label>
                                             </div>
-                                            <div class="col-2 mb-0 p-0">
-                                                <input type="checkbox" name='su' id="su">
-                                                <label for="su" class="w-75 text-center" id="su">S</label>
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='su' id="su">
+                                                <label for="su" class="w-100 text-center" id="su">S</label>
                                            </div>
-                                           <div class="col-2 mb-0 p-0">
-                                                <input type="checkbox" name='mo' id="mo">
-                                                <label for="mo" class="w-75 text-center" id="mo">M</label>
-                                           </div>
-
-                                           <div class="col-2 mb-0 p-0">
-                                                <input type="checkbox" name='tu' id="tu">
-                                                <label for="tu" class="w-75 text-center" id="tu">T</label>
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='mo' id="mo">
+                                                <label for="mo" class="w-100 text-center" id="mo">M</label>
                                            </div>
 
-                                           <div class="col-2 mb-0 p-0">
-                                                <input type="checkbox" name='we' id="we">
-                                                <label for="we" class="w-75 text-center" id="we">W</label>
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='tu' id="tu">
+                                                <label for="tu" class="w-100 text-center" id="tu">T</label>
                                            </div>
 
-                                           <div class="col-2 mb-0 p-0">
-                                                <input type="checkbox" name='th' id="th">
-                                                <label for="th" class="w-75 text-center" id="th">T</label>
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='we' id="we">
+                                                <label for="we" class="w-100 text-center" id="we">W</label>
+                                           </div>
+
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='th' id="th">
+                                                <label for="th" class="w-100 text-center" id="th">T</label>
+                                           </div>
+
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='fr' id="fr">
+                                                <label for="fr" class="w-100 text-center" id="fr">F</label>
                                            </div>
 
                                           </div>
@@ -963,20 +968,21 @@
         /* Style labels for checkboxes */
         .scheduled_days_area input + label {
         display: inline-block;
-        border: 1px solid #64A0D2;
-        background: #64A0D2;
-        padding: 10px;
-        color: #fff;
+        border: 1px solid #CCCCCC;
+        background: #fff;
+        padding: 5px 10px;
+        color: #A3A3A3;
         border-radius: 5px;
         position: relative;
         cursor: pointer;
+        transition: all 0.3s;
         }
 
         /* Style the checkbox's unchecked state */
         .scheduled_days_area input:checked + label {
-        border-color: #CCCCCC;
-        background: #fff;
-        color: #333;
+        background: #F7FAFC;
+        border-color: #64A0D2;
+        color: #64A0D2;
         }
 
         /* Style the checkbox's unchecked state icon */
@@ -986,6 +992,22 @@
         left: 24px;
         top: 6px;
         opacity: 1;
+        }
+
+        /* .scheduled_days_area input + label:hover {
+            background: #fff;
+            border-color: #CCCCCC;
+            color: #000;
+        } */
+
+        .scheduled_days_area input:not(:checked) + label:hover {
+            background: #F7FAFC;
+            border-color: #64A0D2;
+            color: #64A0D2;
+        }
+
+        .scheduled_days_area .item-column {
+            margin-right: 10px;
         }
 
         /* end scheduled days area */
@@ -1803,6 +1825,18 @@
                         closeOnEsc: false
                     });
                     form.submit();
+                }
+            });
+
+            $('.apply-checked').change(function() {
+
+                if ($(this).is(':checked')) {
+
+                    $(this).attr('checked', 'checked');
+
+                } else {
+
+                    $(this).removeAttr('checked');
                 }
             });
 
