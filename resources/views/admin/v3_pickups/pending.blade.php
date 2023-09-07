@@ -1451,7 +1451,7 @@
                             return '';
                         }
                     },
-                    {data: 'date', name: 'date', class: 'align-middle date_time'},
+                    {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
                     {data: 'ask_time', name: 'ask_time', class: 'align-middle ask_time'},
                     {data: 'shipments', name: 'shipments', class: 'align-middle shipments'},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
