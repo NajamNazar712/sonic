@@ -2,6 +2,8 @@
      data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
+            <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-plus-circle"></i>TRAX Health</span><span class="font-weight-bold">Powered by Mentor Health</span></a></li>
+
             <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-bar-chart-o"></i>Order Management</span></a></li>
 
             <li class=" nav-item"><a href="{{route('cod.quick_search.index')}}"><span class="menu-title" data-i18n="nav.dash.main"><i class="la la-search"></i>Quick Search</span></a></li>
