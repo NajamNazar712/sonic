@@ -35,12 +35,13 @@ class AddV3PickupController extends Controller
 
     }
 
-    static public function add_regular_pickup ($shipper_id, $pickup_address_id, $days, $requested_by, $requested_type){
+    static public function add_regular_pickup ($shipper_id, $pickup_address_id, $pickup_request_id, $days, $requested_by, $requested_type){
         //0 Shipper, 1 - Admin
         $regular_pickup = V3RegularPickup::where(['shipper_id' => $shipper_id, 'pickup_address_id' => $pickup_address_id]);
 
         if($regular_pickup->exists()){
             $regular_pickup = $regular_pickup->first();
+            $regular_pickup->pickup_request_id = $pickup_request_id;
             $regular_pickup->days = $days;
             $regular_pickup->pickup = 1;
             $regular_pickup->approval = 0;
@@ -52,6 +53,7 @@ class AddV3PickupController extends Controller
             $regular_pickup = new V3RegularPickup();
             $regular_pickup->shipper_id = $shipper_id;
             $regular_pickup->pickup_address_id = $pickup_address_id;
+            $regular_pickup->pickup_request_id = $pickup_request_id;
             $regular_pickup->days = $days;
             $regular_pickup->pickup = 1;
             $regular_pickup->approval = 0;

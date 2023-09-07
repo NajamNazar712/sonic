@@ -124,10 +124,13 @@ class V3AdminPickupsController extends Controller
         }
 
 
-        if($request->has('pickup')){
-            $days = $request->days;
+        if($request->regular_pickup == 2){
+            $days = [];
+            foreach ($request->days as $index => $day){
+                $days[] = $day;
+            }
             $days = implode(',', $days);
-            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $days, $admin_id, 1);
+            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1);
         }
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
@@ -932,6 +935,5 @@ class V3AdminPickupsController extends Controller
         if (!$pickup_request_id) {
             return response()->json(['status' => 1, 'error' => 'Pickup request not found!']);
         }
-
     }
 }

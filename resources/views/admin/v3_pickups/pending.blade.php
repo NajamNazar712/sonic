@@ -309,7 +309,7 @@
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="AddRequestModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Add New Pickup</h4>
@@ -609,7 +609,7 @@
                                             </div>
                                             <div class="col-4 pl-0">
                                                 <div class="form-group input-group">
-                                                    <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight">
+                                                    <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
                                         </div>
