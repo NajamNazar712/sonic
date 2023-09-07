@@ -2154,7 +2154,6 @@ class ShipperDashboardController extends Controller
 
     public function mentor_health_add_request(Request $request)
     {
-//        dd($request->all());
         if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
         {
             if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
