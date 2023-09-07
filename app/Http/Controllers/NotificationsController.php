@@ -10488,25 +10488,31 @@ class NotificationsController extends Controller
 
                     foreach($crm_complaints as $key => $value)
                     {
-                         if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
-                            $crm_complaints_2_days_closure[] = $value;
-                         }
+                        if(isset($value['created_at'], $value['updated_at'])){
+                            if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
+                               $crm_complaints_2_days_closure[] = $value;
+                            }
+                        }
                     }
 
                     
                     foreach($crm_service_requests as $key => $value)
                     {
-                         if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
-                            $crm_services_2_days_closure[] = $value;
-                         }
+                        if(isset($value['created_at'], $value['updated_at'])){
+                            if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
+                                $crm_services_2_days_closure[] = $value;
+                            }
+                        }
                     }
 
                     
                     foreach($crm_claims as $key => $value)
                     {
-                         if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
-                            $crm_claims_2_days_closure[] = $value;
-                         }
+                        if(isset($value['created_at'], $value['updated_at'])){
+                            if ($value['status_id'] == 4 && $value['created_at']->diffInDays($value['updated_at']) <= 2){
+                                $crm_claims_2_days_closure[] = $value;
+                            }
+                        }
                     }
                     
                     
@@ -10532,7 +10538,7 @@ class NotificationsController extends Controller
                     // Table for CRM ComplaintsT
                     $html = '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
-                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7">Complaints</td></tr>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7"><strong>Complaints</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
@@ -10571,13 +10577,13 @@ class NotificationsController extends Controller
                     $html .= '<tbody>';
                     $html .= '</table>';
 
-                    $html .= '<br>'; // Add a line break after the Claims table
+                    $html .= '<br>'; 
 
 
                     // Table for CRM Service Requests
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
-                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7">Service Requests</td></tr>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7"><strong>Service Requests</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
@@ -10614,13 +10620,13 @@ class NotificationsController extends Controller
                     $html .= '</tbody>';
                     $html .= '</table>';
 
-                    $html .= '<br>'; // Add a line break after the Claims table
+                    $html .= '<br>'; 
 
 
                     // Table for CRM Claims
                     $html .= '<table style="width:100%; max-width:1100px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
-                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7">Claims</td></tr>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="7"><strong>Claims</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Date</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Launch</th>';
@@ -10656,13 +10662,13 @@ class NotificationsController extends Controller
                     $html .= '</tbody>';
                     $html .= '</table>';
 
-                    $html .= '<br>'; // Add a line break after the Claims table
+                    $html .= '<br>'; 
 
                     
 
                     $html .= '<table style="width:100%; max-width:1100px; margin-top:50px; border: 1px solid #ccc; border-collapse: collapse; margin: 0 auto;">';
                     $html .= '<thead>';
-                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8">Agents Summary Report</td></tr>';
+                    $html .= '<tr style="background-color: #f2f2f2; text-align: center;"><td colspan="8"><strong>Agents Summary Report</strong></td></tr>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">S. No</th>';
                     $html .= '<th style="padding:30px; border: 1px solid #ccc; text-align: left;">Date</th>';
                     $html .= '<th style="padding:10px; border: 1px solid #ccc; text-align: left;">Agent</th>';
@@ -10696,12 +10702,15 @@ class NotificationsController extends Controller
                         $created_at = $value['created_at'];
                         $updated_at = $value['updated_at'];
                         $statuses = $value['status_id'];
+
                         if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
                             $closure_2_days = []; 
                             for ($i = 0; $i < count($created_at); $i++) {
-                                $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
-                                if ($diffInDays <= 2 && $statuses[$i] === 4) {
-                                    $closure_2_days[] = 1;
+                                if(isset($created_at[$i], $updated_at[$i])){
+                                    $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                    if ($diffInDays <= 2 && $statuses[$i] === 4) {
+                                        $closure_2_days[] = 1;
+                                    }
                                 }
                             }
                         }
@@ -10716,7 +10725,6 @@ class NotificationsController extends Controller
                         $total_closed = count(array_filter($statuses, function ($item) use ($valueToCountClosed) {
                             return $item === $valueToCountClosed;
                         }));
-
 
                         $value['agent_id'] = array_unique($value['agent_id']);
                         $value['agent_id'] = implode(',',$value['agent_id']);
