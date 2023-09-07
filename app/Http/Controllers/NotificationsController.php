@@ -10551,16 +10551,16 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($complaints_closed).'</td>';
 
                     if(count($crm_complaints) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($complaints_closed) / (count($crm_complaints))).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($complaints_closed) / (count($crm_complaints)),2).'</td>';
 
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
                     }
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_complaints_2_days_closure).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure),2).'</td>';
                     if(count($complaints_closed) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_complaints_2_days_closure) / count($complaints_closed)).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_complaints_2_days_closure) / count($complaints_closed), 2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
@@ -10595,16 +10595,16 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($closed_serviced).'</td>';
                     if(count($crm_service_requests) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($closed_serviced) / (count($crm_service_requests))).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($closed_serviced) / (count($crm_service_requests)),2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
                     }
 
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_services_2_days_closure).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure),2).'</td>';
                     if(count($closed_serviced) > 0){
 
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_services_2_days_closure) / count($closed_serviced)).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_services_2_days_closure) / count($closed_serviced,2)).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
@@ -10638,16 +10638,16 @@ class NotificationsController extends Controller
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims).'</td>';
                     $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($closed_claimed).'</td>';
                     if(count($crm_claims) > 0){
-                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($closed_claimed) / (count($crm_claims) )).'</td>';
+                        $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($closed_claimed) / (count($crm_claims)), 2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
                     }
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.count($crm_claims_2_days_closure).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_2_days_closure),2).'</td>';
 
                     if(count($closed_claimed) > 0){
                     
-                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.(count($crm_claims_2_days_closure) / count($closed_claimed)).'</td>';
+                    $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($crm_claims_2_days_closure) / count($closed_claimed), 2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
@@ -10690,25 +10690,22 @@ class NotificationsController extends Controller
                         $agent[$agent_id]['updated_at'][] = $value['updated_at'];
                     }
 
-                    foreach ($agent as $key => $value) {
-
+                    foreach ($agent as $key => $value) 
+                    {
                         $index = $index + 1;
-
-                        $closure_2_days = [];
                         $created_at = $value['created_at'];
                         $updated_at = $value['updated_at'];
                         $statuses = $value['status_id'];
-
-                        foreach($created_at as $key => $created_time){
-                            foreach($updated_at as $key_1 => $updated_time){
-                                foreach($statuses as $key_2 => $status){
-                                    if(($created_time->diffInDays($updated_time)) <= 2 && $status == 4){
-                                        $closure_2_days[$key_2] = $status;
-                                    }
+                        if (count($created_at) === count($updated_at) && count($created_at) === count($statuses)) {
+                            $closure_2_days = []; 
+                            for ($i = 0; $i < count($created_at); $i++) {
+                                $diffInDays = $created_at[$i]->diffInDays($updated_at[$i]);                        
+                                if ($diffInDays <= 2 && $statuses[$i] === 4) {
+                                    $closure_2_days[] = 1;
                                 }
                             }
                         }
-
+                                                
                         $valueToCountProcess = 2;
                         $valueToCountClosed = 4;
 
@@ -10734,7 +10731,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . $total_closed . '</td>';
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . count($closure_2_days) . '</td>';
                         if($total_closed > 0){
-                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . (count($closure_2_days)/$total_closed) . '</td>';
+                            $html .= '<td style="padding:10px; border: 1px solid #ccc;">' . round(count($closure_2_days) / $total_closed, 2) . '</td>';
                         }else{
                             $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
                         }
