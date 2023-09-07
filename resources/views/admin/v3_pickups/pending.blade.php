@@ -71,28 +71,20 @@
                                 <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1"></th>
+                                    <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">ID</th>
-                                    <!-- <th class="border-primary border-darken-1">S. No.</th> -->
                                     <th class="border-primary border-darken-1">Date & Time</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
-                                    <th class="border-primary border-darken-1">Courier Type</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Pickup Time</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
-                                    <th class="border-primary border-darken-1">Picked Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Product</th>
-                                    <th clas="border-primary border-darken-1">Shipper</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Station</th>
-                                    <th class="border-primary border-darken-1">Route No</th>
-                                    <th clas="border-primary border-darken-1">Courier No</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
-                                    <th class="border-primary border-darken-1">Communication Mode</th>
-                                    <th class="border-primary border-darken-1">Requested By</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
-                                    <th class="border-primary border-darken-1">Additional Services</th>
-                                    <th class="borde-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -1451,30 +1443,18 @@
                             return '';
                         }
                     },
+                    {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
-                    {data: 'ask_time', name: 'ask_time', class: 'align-middle ask_time'},
-                    {data: 'shipments', name: 'shipments', class: 'align-middle shipments'},
+                    {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
+                    {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments'},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
-                    {data: 'courier_type', name: 'courier_type', class: 'align-middle courier_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'pickup_time', name: 'pickup_time', class: 'align-middle pickup_time'},
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
-                    {data: 'picked_weight', name: 'picked_weight', class: 'align-middle picked_weight'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
-                    {data: 'station', name: 'station', class: 'align-middle station'},
-                    {data: 'route_no', name: 'route_no', class: 'align-middle route_no'},
-                    {data: 'courier_no', name: 'courier_no', class: 'align-middle courier_no'},
-                    {data: 'assigned_courier', name: 'assigned_courier', class: 'align-middle assigned_courier'},
-                    {data: 'communication_mode', name: 'communication_mode', class: 'align-middle communication_mode'},
-                    {data: 'requested_by', name: 'requested_by', class: 'align-middle requested_by'},
+                    {data: 'hub', name: 'hub', class: 'align-middle station'},
+                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
-                    {
-                        data: 'additional_services',
-                        name: 'additional_services',
-                        class: 'align-middle additional_services'
-                    },
-                    {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
                     {
                         data: 'action',
                         name: 'action',
