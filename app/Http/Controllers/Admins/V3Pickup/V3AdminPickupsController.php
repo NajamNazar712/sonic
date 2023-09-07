@@ -70,7 +70,7 @@ class V3AdminPickupsController extends Controller
     }
 
     public function pickup_request_add(Request $request){
-        dd($request);
+//        dd($request);
         $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
         $pickup_date = Carbon::parse($pickup_date)->toDateString();

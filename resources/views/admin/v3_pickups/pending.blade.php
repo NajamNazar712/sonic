@@ -78,7 +78,6 @@
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Pickup Time</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
