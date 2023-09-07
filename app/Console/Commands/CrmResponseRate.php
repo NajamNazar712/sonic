@@ -2,14 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\NotificationsController;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\Rider;
-use App\Http\Models\ShipmentsJourney;
 use Carbon\Carbon;
+use App\Http\Models\Rider;
 use Illuminate\Console\Command;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\CRM\CrmRequest;
 use Illuminate\Support\Facades\Log;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\AdminDepartment;
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 
 class CrmResponseRate extends Command
 {
@@ -55,9 +58,10 @@ class CrmResponseRate extends Command
                                 ->join('cities as dh', 'dh.id', '=', 'dc.hub_id')
                                 ->leftjoin('crm_comments', 'crm_requests.id', '=','crm_comments.crm_request_id')
                                 ->where('crm_requests.created_at', ">=", Carbon::now()->subHours(24))
-                                ->select('crcn.name as case_nature','crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
+                                ->select('crm_comments.comment_by','crm_comments.comment_by_id','crcn.name as case_nature','crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
                                 ->groupBy('crm_requests.id')
                                 ->get();
+
 
         $responses= [];
 
@@ -116,29 +120,41 @@ class CrmResponseRate extends Command
             }
 
             $hubIndex = array_search($responsible_hub, array_column($responses, 'responsible_hub'));
-            
             if ($hubIndex !== false) {
-                // total_tagged is frequency of a hub in reqs
-                if ($req['comm_id']) {
-                    $responses[$hubIndex]['num_of_resps']++;
-                    // $num_of_resps=$responses[$hubIndex]['total_tagged']*$responses[$hubIndex]['response_rate']/100;
+
+
+                if ($req["comment_by"] == 0) {
+                    $responses[$hubIndex]['role_id'] = Admin::where('id',$req["comment_by_id"])->value('role_id');
+                    $responses[$hubIndex]['admin_role_id'] = AdminRole::where('id', $responses[$hubIndex]['role_id'])->value('department_id');
+                    $responses[$hubIndex]['department'] = AdminDepartment::where('id', $responses[$hubIndex]['admin_role_id'])->value('name');
+
                 }
+
+                if($responses[$hubIndex]['department'] == 'Operations')
+                {
+                    $responses[$hubIndex]['num_of_resps']++;
+                } 
+
+              
                 $responses[$hubIndex]['total_tagged']++;
 
                 $responses[$hubIndex]['response_rate'] = number_format(($responses[$hubIndex]['num_of_resps']/$responses[$hubIndex]['total_tagged']) * 100);
-                
 
+
+                
             } else {
                 if ($responsible_hub!="-") {
                     $responses[] = [
                         'responsible_hub' => $responsible_hub,
                         'total_tagged' => 1,
                         'response_rate' => ($req['comm_id']) ? "100" : "0",
-                        'num_of_resps' => ($req['comm_id']) ? 1 : 0
+                        'num_of_resps' => ($req['comm_id']) ? 1 : 0,
                     ];
                 }
+
                 }
-        }
+                
+            }
         
         if(count($responses) > 0){
             NotificationsController::send(221, array_slice($responses, 0, 3));
