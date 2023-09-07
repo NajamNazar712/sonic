@@ -338,6 +338,14 @@ class ShipperCRMController extends Controller
                 $alternate_phone = null;
             }
         }
+        if($request->has('is_automated_cod_change')){
+            if($request->is_automated_cod_change){
+                $is_automated_cod_change = true;
+            }else{
+                $is_automated_cod_change = false;
+            }
+        }
+
 //        if($complaint_id == 23 && $receiving_sheet_id != null){
         if($complaint_id == 23){
             $description_text = $request->description ;
@@ -499,11 +507,23 @@ class ShipperCRMController extends Controller
                                         $cannot_change = true;
                                     }
                                     else{
-                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                        if($complaint_id == 12 && $is_automated_cod_change)
+                                        {
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                        }
+                                        else{
+                                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                        }
                                     }
                                 }
                                 else{
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    if($complaint_id == 12 && $is_automated_cod_change)
+                                    {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                    }
+                                    else{
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
                                 }
                             }
                         }
@@ -513,10 +533,21 @@ class ShipperCRMController extends Controller
                                 $shipment->consignee_phone_number_2 = $alternate_phone;
                                 $shipment->save();
                             }
-                            else if($complaint_id == 12 && !$already_lodged) // for cod change automation
+                            else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                             {
                                 if($request->has('cod_new_amount')){
                                     if($request->cod_new_amount){
+
+                                        $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
+                                        $default_agent_id = 306;
+                                        $comment_by = 0;
+                                        $comment_type = 0;
+                                        $comment = "Dear Customer,
+                                                    Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system
+                                                    
+                                                    CRM automated Comment";
+                                        
+                                        CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
                                         
                                         $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                         $shipment->amount = $request->cod_new_amount;
@@ -583,11 +614,23 @@ class ShipperCRMController extends Controller
                                     $cannot_change = true;
                                 }
                                 else{
-                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    if($complaint_id == 12 && $is_automated_cod_change)
+                                    {
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                    }
+                                    else{
+                                        CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                    }
                                 }
                             }
                             else{
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                if($complaint_id == 12 && $is_automated_cod_change)
+                                {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
                             }
                         }else{
                             $present_shipments[] = $shipment->tracking_number;
@@ -601,11 +644,25 @@ class ShipperCRMController extends Controller
                                 $cannot_change = true;
                             }
                             else{
-                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                
+                                if($complaint_id == 12 && $is_automated_cod_change)
+                                {
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                                }
+                                else{
+                                    CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                                }
+                                
                             }
                         }
                         else{
-                            CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            if($complaint_id == 12 && $is_automated_cod_change)
+                            {
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, $is_automated_cod_change);
+                            }
+                            else{
+                                CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
+                            }
                         }
                     }
                     if($nature_id == 2){
@@ -614,15 +671,23 @@ class ShipperCRMController extends Controller
                             $shipment->consignee_phone_number_2 = $alternate_phone;
                             $shipment->save();
                         }
-                        else if($complaint_id == 12 && !$already_lodged) // for cod change automation
+                        else if($complaint_id == 12 && !$already_lodged && $is_automated_cod_change) // for cod change automation
                         {
                             if($request->has('cod_new_amount')){
                                 if($request->cod_new_amount){
 
+                                    $crm_request_id = CrmRequest::where('shipment_id', $shipment->id)->pluck('id')->first();
+                                    $default_agent_id = 306;
+                                    $comment_by = 0;
+                                    $comment_type = 0;
+                                    $comment = "Dear Customer,
+                                                Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
+                                    
+                                    CRMCommentController::add($crm_request_id, $default_agent_id, $comment_by, $comment_type, $comment,1);
+
                                     $message = "Request of “COD Change” from (Old amount: $shipment->amount) to (New amount: $request->cod_new_amount) has been updated on system";
                                     $shipment->amount = $request->cod_new_amount;
                                     $shipment->save();
-
                                 }
                             }
                             

@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Dashboard')
+@section('title', 'Order Management')
 
 @section('content')
     <div class="app-content content">
@@ -2158,7 +2158,7 @@
 
                             swal({
                                 title: 'Are You Sure?',
-                                text: 'Select Yes to consolidate shipments!',
+                                text: 'Select Yes to change COD!',
                                 icon: 'warning',
                                 buttons: {
                                     cancel: {
@@ -2199,6 +2199,7 @@
                                             'description': description,
                                             'alternate_phone': $('#alternate_phone').val(),
                                             'cod_new_amount': $('#new_amount').val(),
+                                            'is_automated_cod_change': 1,
                                         }
                                     })
                                     .done(function (data) {
@@ -2295,7 +2296,7 @@
                                     'complaint_id': complaint_id,
                                     'description': description,
                                     'alternate_phone': $('#alternate_phone').val(),
-                                    'cod_new_amount': $('#new_amount').val(),
+                                    'is_automated_cod_change': 1,
                                 }
                             })
                             .done(function (data) {
