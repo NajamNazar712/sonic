@@ -2158,44 +2158,46 @@ class ShipperDashboardController extends Controller
         if ($request->has('company_name') && $request->has('company_email') && $request->has('company_phone') && $request->has('company_city'))
         {
             if ($request->filled('company_name') && $request->filled('company_email') && $request->filled('company_phone') && $request->filled('company_city')) {
-
                 try
                 {
-                    $company_name = $request->company_name;
-                    $company_email = $request->company_email;
-                    $company_phone = $request->company_phone;
-                    $company_city = $request->company_city;
-
                     $url = 'https://qamhc.thementorhealth.com/api/partner/OnboardCorporate?token=d34931e3fc689a3081a41350fff38a56d8945dc5de92ff127eb706c318324d0b';
 
-                    $client = new Client(['base_uri' => $url, 'http_errors' => FALSE, 'verify' => false , 'connect_timeout' => 60, 'timeout' => 60]);
-                    $response = $client->delete($url, [
-                        'form_params' => [
-//                        '$company_name' => $request->company_name,
-//                        '$company_email' => $request->company_email,
-//                        '$company_phone' => $request->company_phone,
-//                        '$company_city' => $request->company_city,
-
-                            '$company_name' => 'test011',
-                            '$company_email' => 'test011@gmail.com',
-                            '$company_phone' => '0313-0000001',
-                            '$company_city' => 'test011',
-                        ]
+                    $client = new Client([
+                        'verify' => false, // Disable SSL verification
                     ]);
 
-                    $client = new Client();
-                    $response = $client->request('Post', $url, [
-                        'headers' => [
-                            'Content-Type' => 'application/x-www-form-urlencoded',
-//                            'Authorization' => 'Basic ' . base64_encode($client_id . ':' . $client_secret),
-                        ],
-//                        'body' => $request_body,
+                    $postData = [
+                        'full_name' => $request->company_name,
+                        'email' => $request->company_email,
+                        'phone' => $request->company_phone,
+                        'city_name' => $request->company_city,
+                    ];
+
+                    $response = $client->post($url, [
+                        'json' => $postData, // Send data as JSON
                     ]);
-                    dd($response);
+
+                    $statusCode = $response->getStatusCode();
+                    $responseBody = $response->getBody()->getContents();
+
+                    if ($statusCode === 200) {
+                        $responseData = json_decode($responseBody, true);
+                        if (stripos($responseBody, "This company already exists") !== false) {
+                            return back()->with(['info' => $responseData['Message']]);
+                        }
+                        else
+                        {
+                            return back()->with(['success' => $responseData['Message']]);
+                            //todo need to make a migration in which mentor health data will be store for journey
+                        }
+
+                    } else {
+                        return back()->with(['error' => 'API request failed']);
+                    }
                 }
                 catch (\Throwable  $e)
                 {
-                 dd($e);
+                    return back()->with(['error' => $e->getMessage()]);
                 }
             }
         }
