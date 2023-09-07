@@ -31,6 +31,8 @@ class AddV3PickupController extends Controller
         $pickup->sub_segment_id = $service_id;
         $pickup->save();
 
+        return $pickup->id;
+
     }
 
     static public function add_regular_pickup ($shipper_id, $pickup_address_id, $days, $requested_by, $requested_type){

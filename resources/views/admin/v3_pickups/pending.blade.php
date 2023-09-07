@@ -344,13 +344,13 @@
                                 </li>
                             </ul>
                         </div>
-                        <form id="add_request_form" method="post" enctype="multipart/form-data">
+                        <form id="add_pickup_request" method="post" action="{{ route('admin.v3_pickups.add') }}" >
                             @csrf
                             @method('post')
                             <input type="hidden" id="pickup_type_id" name="pickup_type_id" value="1">
+                            <input type="hidden" id="regular_pickup" name="regular_pickup" value="1">
                         <div class="tab-content px-1">
-                            <div role="tabpanel" class="tab-pane active" id="activeIcon32"
-                                 aria-labelledby="activeIcon32-tab1" aria-expanded="true">
+                            <div role="tabpanel" class="tab-pane active" id="activeIcon32" aria-labelledby="activeIcon32-tab1" aria-expanded="true">
 
                                     <div class="row align-items-center mt-md-2">
 
@@ -363,34 +363,6 @@
 
                                                 </select>
                                             </div>
-                                        </div>
-
-                                        <div class="col-6">
-
-                                            <p class="text-gray">Contact Person </p>
-                                            <p class="text-dark">Shahid Aslam </p>
-
-                                        </div>
-
-                                        <div class="col-6">
-
-                                            <p class="text-gray">Designation </p>
-                                            <p class="text-dark">Operational Manager </p>
-
-                                        </div>
-
-                                        <div class="col-6 mt-1">
-
-                                            <p class="text-gray">Mobile No </p>
-                                            <p class="text-dark">03414285511 </p>
-
-                                        </div>
-
-                                        <div class="col-6 mt-1">
-
-                                            <p class="text-gray">Customer </p>
-                                            <p class="text-dark">Regular </p>
-
                                         </div>
 
                                         <div class="col-12">
@@ -413,6 +385,22 @@
 
                                             </div>
                                         </div>
+
+                                        <div class="col-6">
+
+                                            <p class="text-gray font-weight-bold">Contact Person </p>
+                                            <p class="text-dark" id="poc"></p>
+
+                                        </div>
+
+                                        <div class="col-6 mt-1">
+
+                                            <p class="text-gray">Mobile No </p>
+                                            <p class="text-dark" id="poc_phone"></p>
+
+                                        </div>
+
+
                                     </div>
 
                                     <div class="d-flex justify-content-start vh-100 pl-0">
@@ -427,16 +415,16 @@
 
                                     </div>
 
-                                    <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-100 mb-md-1">
+                                    <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-100 mb-md-1" id="regular_section">
                                         <li class="nav-item ml-md-0">
-                                            <a class="nav-link active p-0 pl-1 text-left" id="oneTimePickup-tab1" data-toggle="tab"
+                                            <a class="nav-link active p-0 pl-1 text-left onetime" id="oneTimePickup-tab1" data-toggle="tab"
                                             href="#oneTimePickup" aria-controls="oneTimePickup" aria-expanded="true">
                                             <b> One-time Pickup </b>
                                             <p> Request a pickup for a single use. </p>
                                             </a>
                                         </li>
                                         <li class="nav-item">
-                                            <a class="nav-link p-0 pl-1 text-left" id="scheduledPickup-tab1" data-toggle="tab"
+                                            <a class="nav-link p-0 pl-1 text-left schedule" id="scheduledPickup-tab1" data-toggle="tab"
                                             href="#scheduledPickup" aria-controls="scheduledPickup" aria-expanded="false">
                                             <b> Scheduled Pickup </b>
                                             <p> Set regular pickups for specific days every week.</p>
@@ -502,7 +490,7 @@
 
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <input type="text" placeholder="Customer Name" name="customer_name"
+                                            <input type="text" placeholder="Customer Name" name="walkin_name"
                                                    id="customer_name" class="form-control" data-rule-required="true"
                                                    data-msg-required="Customer Name is Required"/>
 
@@ -511,22 +499,18 @@
 
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <input type="text" placeholder="Designation" name="designation"
-                                                   id="designation" class="form-control" data-rule-required="true"
-                                                   data-msg-required="Designation is Required"/>
-
-                                        </div>
-                                    </div>
-
-                                    <div class="col-6">
-                                        <div class="form-group">
-                                            <input type="text" placeholder="Mobile Number" name="mobile_no"
+                                            <input type="text" placeholder="Mobile Number" name="walkin_phone"
                                                    id="mobile_no" class="form-control" data-rule-required="true"
                                                    data-msg-required="Mobile is Required"/>
 
                                         </div>
                                     </div>
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <input type="text" placeholder="Address" name="walkin_address" id="walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
+                                        </div>
+                                    </div>
 
                                 </div>
 
@@ -556,20 +540,13 @@
                                                                     </span>
                                                         </div>
 
-                                                        <input type="text" name="pickup_date"
-                                                            class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
-                                                            id="pickup_date" placeholder="Select Pickup Date"
-                                                            data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                                        <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is Required">
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="col-6">
                                                 <div class="form-group">
-                                                    <select name="preferred_time_range" id="preferred_time_range"
-                                                            class="form-control select2" data-rule-required="true"
-                                                            data-msg-required="Pickup Time Range is required">
-                                                        <option value=""> Pickup Time Range</option>
-
+                                                    <select name="preferred_time_range" id="preferred_time_range" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Time is required">
                                                         @foreach($time_ranges as $time_range)
                                                             <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
                                                         @endforeach
@@ -596,9 +573,6 @@
                                             <div class="col-6">
                                                 <div class="form-group">
                                                     <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
-                                                        @foreach($services as $service)
-                                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                                        @endforeach
 
                                                     </select>
                                                 </div>
@@ -629,14 +603,13 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group input-group">
-                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="total_pieces_count" class="form-control text-left"
+                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
                                                 <div class="form-group input-group">
-                                                    <input type="text" id="estimated_weight" name="estimated_weight"
-                                                        class="form-control text-left" placeholder="Weight">
+                                                    <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight">
                                                 </div>
                                             </div>
                                         </div>
@@ -648,8 +621,7 @@
                                         <div class="row justify-content-center align-items-center vh-100 px-1">
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <textarea type="text" name="remarks" class="form-control"
-                                                            placeholder="Remarks"></textarea>
+                                                    <textarea type="text" name="remarks" class="form-control" placeholder="Additional Request"></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -664,48 +636,21 @@
                         <!-- start service list -->
 
                         <div class="services-list col-12">
+                            @foreach($additional_services as $additional_service)
 
-                            <!-- start service item 1 -->
                             <div class="d-flex align-items-center service-item mt-md-1">
                                 <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Labour </p>
+                                    <p class="mb-0 text-dark"> {{ $additional_service->name }} </p>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
+                                        <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
                                     </div>
                                 </div>
                             </div>
+                            @endforeach
 
-                            <!-- end service item 1 -->
 
-                            <!-- start service item 2 -->
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Lifter </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- end service item 2 -->
-
-                            <!-- start service item 3 -->
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Packaging </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- end service item 3 -->
 
                         </div>
 
@@ -880,7 +825,7 @@
 
                                             <div class="col-4 pl-0">
                                                 <div class="form-group input-group">
-                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="total_pieces_count" class="form-control text-left"
+                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required">
                                                 </div>
                                             </div>
@@ -930,33 +875,6 @@
 
                             <!-- end service item 1 -->
 
-                            <!-- start service item 2 -->
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Lifter </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- end service item 2 -->
-
-                            <!-- start service item 3 -->
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Packaging </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
-                                    </div>
-                                </div>
-                            </div>
-
-                            <!-- end service item 3 -->
 
                         </div>
 
@@ -1039,7 +957,6 @@
         }
 
         .custom-nav .nav-item a:hover {
-
             color: #64A0D2 !important;
             border: 1px solid #64A0D2 !important;
             background-color: #F7FAFC !important;
@@ -1079,20 +996,6 @@
         top: 6px;
         opacity: 1;
         }
-
-        /* Style the checkbox's unchecked state circle */
-        /* .scheduled_days_area input:checked + label:after {
-        position: absolute;
-        content: '';
-        opacity: 1;
-        left: 20px;
-        top: 11px;
-        width: 18px;
-        height: 18px;
-        line-height: 1;
-        /* border: 2px solid #333; */
-        /* border-radius: 50%; */
-        } */
 
         /* end scheduled days area */
 
@@ -1154,7 +1057,22 @@
 
 
         $(document).ready(function () {
+            $('#estimated_weight').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+            });
+            $('#shipments_count').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+            });
 
+            $('#total_pieces_count').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+            });
             var booking_from_date = $('#requested_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1237,13 +1155,30 @@
                     if(value.id == address_id){
                         $('#reg_address').val(value.pickup_address);
                         $('#reg_phone').val(value.phone);
+                        $('#poc').text(value.poc);
+                        $('#poc_phone').text(value.phone);
                     }
                 });
             });
 
+            var services = @json($services);
             $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
                 width: '100%'
+            }).bind('select2:select', function () {
+                var product_id = parseInt($(this).val());
+                $('#service_select').empty();
+                $.each(services, function(key,value) {
+                    if(value.segment_id == product_id){
+                        var name = value.name;
+                        var service_option = new Option(name, value.id, false, false);
+                        $('#service_select').append(service_option).trigger('change');
+                    }
+                });
+                $('#service_select').select2({
+                    placeholder: 'Select Service',
+                    width: '100%'
+                }).val(null).trigger('change');
             });
 
             $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
@@ -1253,6 +1188,11 @@
 
             $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
                 placeholder: 'Select Shipment Type',
+                width: '100%'
+            });
+
+            $('#preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
+                placeholder: 'Select Pickup Time*',
                 width: '100%'
             });
 
@@ -1266,6 +1206,15 @@
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
+            });
+
+            $('#regular_section').on('click', 'a',function (){
+                if($(this).hasClass('onetime')){
+                    $('#regular_pickup').val(1);
+                }
+                else if($(this).hasClass('schedule')){
+                    $('#regular_pickup').val(2);
+                }
             });
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
@@ -1842,16 +1791,11 @@
                 /* print(pickup_note_id); */
             });
 
-            $('#star_shippers_filter').on('click', function () {
-                $('#star_shippers_filter').val(1);
-                table.draw(true);
-                $('#star_shippers_filter').val(0);
-            });
 
             // increment and decrement buttons
 
             $('.quantity').TouchSpin({
-                min: 1,
+                min: 0,
                 max: 1000,
                 buttondown_class: 'btn btn-primary rounded-left',
                 buttonup_class: 'btn btn-primary rounded-right',
@@ -1860,6 +1804,26 @@
             }).bind('input change', function() {
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
+                }
+            });
+
+            $('#add_pickup_request').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#add_pickup_request button#add').prop('disabled', true);
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Pickup request is being added!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    form.submit();
                 }
             });
 

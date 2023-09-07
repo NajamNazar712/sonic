@@ -21,7 +21,9 @@ use App\Http\Models\V3Pickup\V3PickupRequestAttempt;
 use App\Http\Models\V3Pickup\V3PickupRequestLegend;
 use App\Http\Models\V3Pickup\V3PickupRequestNotPickReason;
 use App\Http\Models\V3Pickup\V3PickupRequestRiderStatus;
+use App\Http\Models\V3Pickup\V3PickupRequestService;
 use App\Http\Models\V3Pickup\V3PickupRequestStatus;
+use App\Http\Models\V3Pickup\V3PickupService;
 use App\Http\Models\V3Pickup\V3PickupShipmentType;
 use App\Http\Models\V3Pickup\V3PickupTimeRange;
 use App\Http\Models\V3Pickup\V3PickupType;
@@ -68,7 +70,7 @@ class V3AdminPickupsController extends Controller
     }
 
     public function pickup_request_add(Request $request){
-
+        dd($request);
         $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
         $pickup_date = Carbon::parse($pickup_date)->toDateString();
@@ -89,9 +91,18 @@ class V3AdminPickupsController extends Controller
         $shipment_type_id = $request->shipment_type_id;
         $product_id = $request->product_id;
         $service_id = $request->service_id;
-        $walkin_name = $request->name;
-        $walkin_address = $request->address;
-        $walkin_contact = $request->phone;
+        $walkin_name = '';
+        $walkin_address = '';
+        $walkin_contact = '';
+        if($pickup_type_id == 2){
+            $walkin_name = $request->walkin_name;
+            $walkin_address = $request->walkin_address;
+            $walkin_contact = $request->walkin_phone;
+        }
+        else{
+            $walkin_address = $request->address;
+            $walkin_contact = $request->phone;
+        }
 
 
         $pickup_address = UserShippingInfo::find($request->pickup_address_id);
@@ -100,7 +111,18 @@ class V3AdminPickupsController extends Controller
         $city_id = $pickup_address->city->id;
 
 
-        AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
+        $pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
+
+        foreach ($request->additional_services as $service_id => $service_count){
+            if($service_count > 0){
+                $additional_service = new V3PickupRequestService();
+                $additional_service->pickup_request_id = $pickup_request_id;
+                $additional_service->pickup_request_service_id = $service_id;
+                $additional_service->count = $service_count;
+                $additional_service->save();
+            }
+        }
+
 
         if($request->has('pickup')){
             $days = $request->days;
@@ -145,7 +167,8 @@ class V3AdminPickupsController extends Controller
         $products = Segment::all();
         $services = SubCategorySegment::all();
 
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services]);
+        $additional_services = V3PickupService::all();
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services]);
     }
 
     public function pending_requests_list(Request $request){
