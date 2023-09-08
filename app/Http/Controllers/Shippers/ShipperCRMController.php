@@ -338,6 +338,8 @@ class ShipperCRMController extends Controller
                 $alternate_phone = null;
             }
         }
+
+        $is_automated_cod_change = false;
         if($request->has('is_automated_cod_change')){
             if($request->is_automated_cod_change){
                 $is_automated_cod_change = true;
@@ -473,6 +475,7 @@ class ShipperCRMController extends Controller
                                             $cannot_change = true;
                                         }
                                         else{
+                                            
                                             CRMController::add($nature_id, $complaint_id, 1, 1, Auth::id(), $launched_by, $shipment_id, session('user_id'), NULL, $description);
                                         }
                                     }
@@ -596,15 +599,15 @@ class ShipperCRMController extends Controller
                 if($shipment){
 
                     if($complaint_id == 12 && in_array($shipment->shipper_status_id, [14, 30, 36, 37, 12, 20, 21, 22, 23, 24, 25, 44, 47, 48, 57,60, 51, 18, 5])) // for cod change automation
-                        {
-                            return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
-                        }
+                    {
+                        return ['status' => 0, 'error' => 'Request cannot be catered at this status of the shipment.'];
+                    }
 
                     $is_shipment = CrmRequest::where('shipment_id',$shipment_id)->where('case_nature_id',$nature_id)->first();
 
                     $already_lodged = false;
                     if($is_shipment){    
-                        $already_lodged = true;                    
+                        $already_lodged = true;
 //                        dd($is_shipment);
                         if($is_shipment->case_nature_id != $nature_id){
                             if($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 1){

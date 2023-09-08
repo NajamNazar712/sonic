@@ -1257,7 +1257,6 @@
                                                 'case_nature_id': case_nature_id,
                                                 'complaint_id': complaint_id,
                                                 'description': description,
-                                                'alternate_phone': $('#alternate_phone').val(),
                                                 'cod_new_amount': $('#new_amount').val(),
                                                 'is_automated_cod_change': 1,
                                             }
@@ -1335,7 +1334,6 @@
                                         'case_nature_id': case_nature_id,
                                         'complaint_id': complaint_id,
                                         'description': description,
-                                        'alternate_phone': $('#alternate_phone').val(),
                                     }
                                 })
                                 .done(function (data) {
