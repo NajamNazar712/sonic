@@ -18,7 +18,6 @@ class CreateV3PickupRequestShipmentsTable extends Migration
             $table->integer('pickup_request_id');
             $table->integer('shipment_id');
             $table->tinyInteger('status')->default(0);
-            $table->integer('pickup_note_id')->nullable()->index();
             $table->integer('rider_id')->nullable()->index();
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);

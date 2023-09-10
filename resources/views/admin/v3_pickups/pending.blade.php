@@ -56,12 +56,12 @@
                             </div>
 
                             <div class="container-fluid">
-                                <div class="row justify-content-start">
-                                    @foreach($pickup_statuses as $status)
+                                <div class="row justify-content-center">
+                                    <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
+                                    @foreach($statuses as $id => $status)
                                         <div>
-                                            <button type="button"
-                                                    class="btn btn-outline-secondary btn-min-width mr-1 mb-1">{{ $status->name }}
-                                                (10)
+                                            <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="{{ $id }}">{{ $status['name'] }}
+                                                ({{ $status['count'] }})
                                             </button>
                                         </div>
                                     @endforeach
@@ -439,35 +439,35 @@
                                           <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
 
                                             <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='sa' id="sa">
+                                                <input class="apply-checked" type="checkbox" name='days[1]' id="sa">
                                                 <label for="sa" class="w-100 text-center" id="sa">S</label>
                                             </div>
                                             <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='su' id="su">
+                                                <input class="apply-checked" type="checkbox" name='days[2]' id="su">
                                                 <label for="su" class="w-100 text-center" id="su">S</label>
                                            </div>
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='mo' id="mo">
+                                                <input class="apply-checked" type="checkbox" name='days[3]' id="mo">
                                                 <label for="mo" class="w-100 text-center" id="mo">M</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='tu' id="tu">
+                                                <input class="apply-checked" type="checkbox" name='days[4]' id="tu">
                                                 <label for="tu" class="w-100 text-center" id="tu">T</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='we' id="we">
+                                                <input class="apply-checked" type="checkbox" name='days[5]' id="we">
                                                 <label for="we" class="w-100 text-center" id="we">W</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='th' id="th">
+                                                <input class="apply-checked" type="checkbox" name='days[6]' id="th">
                                                 <label for="th" class="w-100 text-center" id="th">T</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='fr' id="fr">
+                                                <input class="apply-checked" type="checkbox" name='days[7]' id="fr">
                                                 <label for="fr" class="w-100 text-center" id="fr">F</label>
                                            </div>
 
@@ -1144,7 +1144,7 @@
                                 $('#pickup_address_id').append(pickup).trigger('change');
                             });
                             $('#pickup_address_id').select2({
-                                placeholder: 'Select pickup address',
+                                placeholder: 'Select Pickup Address',
                                 width: '100%'
                             }).val(null).trigger('change');
                         } else {
@@ -1433,11 +1433,10 @@
                 ajax: {
                     url: '{{ route('admin.v3_pickups.pending.list') }}',
                     data: function (d) {
-                        d.legend_filter = $('#legend_filter').val();
                         d.before_cut_off_time = $('#search_filter').val();
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
-                        d.star_shipper_filter = $('#star_shippers_filter').val();
+                        d.pickup_status_id = $('#status_filter_input').val();
                     }
                 },
                 rowId: 'id',
@@ -1792,7 +1791,11 @@
                 /* print(pickup_note_id); */
             });
 
-
+            $('body').on('click', 'button.pickup_status_btn', function(){
+                var status_id = $(this).attr('rel');
+               $('#status_filter_input').val(status_id);
+               table.draw();
+            });
             // increment and decrement buttons
 
             $('.quantity').TouchSpin({

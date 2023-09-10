@@ -16,6 +16,7 @@ class CreateV3PickupTimeRangesTable extends Migration
         Schema::create('v3_pickup_time_ranges', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->integer('city_id')->index();
             $table->timestamps();
         });
     }

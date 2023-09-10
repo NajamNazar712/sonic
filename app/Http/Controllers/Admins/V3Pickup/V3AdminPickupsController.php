@@ -70,7 +70,7 @@ class V3AdminPickupsController extends Controller
     }
 
     public function pickup_request_add(Request $request){
-//        dd($request);
+
         $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
         $pickup_date = Carbon::parse($pickup_date)->toDateString();
@@ -139,6 +139,8 @@ class V3AdminPickupsController extends Controller
     public function pending_requests_index(){
         ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
 
+        $statuses = array();
+
         if(session('department_id') == 7){
 
             if (in_array(session('id'), session('sale_users_bypass'))) {
@@ -161,6 +163,7 @@ class V3AdminPickupsController extends Controller
                 $query->whereIn('hub_id', session('hubs'));
             });
         }
+
         $not_pick_reasons = V3PickupRequestNotPickReason::all();
         $riders = $riders->get();
 
@@ -170,8 +173,14 @@ class V3AdminPickupsController extends Controller
         $products = Segment::all();
         $services = SubCategorySegment::all();
 
+        foreach($pickup_statuses as $pickup_status){
+            $statuses[$pickup_status->id]['name'] = $pickup_status->name;
+            $statuses[$pickup_status->id]['count'] = V3PickupRequest::where('pickup_date', Carbon::today())->where('status_id', $pickup_status->id)->count();
+        }
+
+
         $additional_services = V3PickupService::all();
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services]);
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses]);
     }
 
     public function pending_requests_list(Request $request){
@@ -230,32 +239,6 @@ class V3AdminPickupsController extends Controller
         }
 
         $datatables = Datatables::of($pickup_requests)
-            /*->setRowAttr([
-                'class' => function ($pickup_request) use ($today) {
-                    if ($pickup_request->star_status == 1)
-                    {
-                        return 'star_sippers';
-                    }
-                    if ($pickup_request->reverse_pickup == 1) {
-                        return 'reverse_pickup_row';
-                    }
-                    if ($pickup_request->vendor != null) {
-                        return 'vendor_row';
-                    } else if ($pickup_request->try_and_buy == 1) {
-                        return 'try_and_buy';
-                    } else if (($pickup_request->status_id == 3) && ($pickup_request->attempts == 1)) {
-                        return 'first_attempt';
-                    } else if (($pickup_request->status_id == 3) && ($pickup_request->attempts == 2)) {
-                        return 'second_attempt';
-                    } else if (($pickup_request->status_id == 3) && ($pickup_request->attempts > 2)) {
-                        return 'multiple_attempt';
-                    } else if ($pickup_request->after_cut_off_time) {
-                        return 'after_cut_off_time';
-                    } else if (Carbon::parse($pickup_request->pickup_created_at)->startOfDay()->diffInDays($today) <= 6) {
-                        return 'new_pickup';
-                    }
-                }
-            ])*/
 
             ->addColumn('shipment_pieces', function ($pickup_requests) {
                 return $pickup_requests->shipments . '/' . $pickup_requests->pieces;
@@ -263,7 +246,7 @@ class V3AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                     return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
-            ->addColumn('shipments_rider_picked', function ($pickup_request) {
+            ->addColumn('shipments_picked', function ($pickup_request) {
                 if ($pickup_request->received > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
                 } else {
@@ -312,35 +295,6 @@ class V3AdminPickupsController extends Controller
                 } else {
                     return '';
                 }
-            })
-            ->addColumn('aging', function ($pickup_requests) {
-                $requested_date = $pickup_requests->requested_date;
-                $settings = GlobalSettings::where('type', 'pickup_request_cut_off_time');
-                if ($settings->exists()) {
-                    $settings = $settings->first();
-                    $days = Carbon::createFromTime($settings->setting_value, '0', '0', 'Asia/Karachi');
-
-                    $startTime = Carbon::parse($requested_date);
-                    $endTime = Carbon::parse($days);
-
-                    $totalDuration =  $startTime->diffInHours($endTime) . ' Hrs';
-
-                    //$difference =  $requested_date->diff($days)->format('%H:%I:%S')." Minutes";
-                    //$difference=$requested_date-$days;
-                    return $totalDuration;
-                }
-                //$days = Carbon::createFromTime($rider_settings->setting_value, '0', '0', 'Asia/Karachi');
-            })
-            ->editColumn('brand_name', function ($pickup_requests) {
-                if ($pickup_requests->brand_name == null) {
-                    $shipper = User::find($pickup_requests->user_id);
-                    return $shipper->brand_name;
-                } else {
-                    return $pickup_requests->brand_name;
-                }
-            })
-            ->addColumn('all_remarks', function ($pickup_requests) {
-                return '<button class="btn btn-sm btn-outline-info align-middle all_remarks_btn" rel="' . $pickup_requests->id . '"><span class="align-middle">View Remarks</span></button>';
             });
 
 
@@ -350,7 +304,9 @@ class V3AdminPickupsController extends Controller
             $stop_date = Carbon::parse($to)->addDay(1)->toDateTimeString();
             $datatables->whereBetween('v3_pickup_requests.pickup_date', [$from, $stop_date]);
         }
-
+        if ($pickup_status_id = $request->get('pickup_status_id')) {
+            $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
+        }
         return $datatables->make(true);
 
     }

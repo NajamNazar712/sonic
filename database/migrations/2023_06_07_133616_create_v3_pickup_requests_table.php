@@ -43,6 +43,8 @@ class CreateV3PickupRequestsTable extends Migration
             $table->integer('sub_segment_id')->nullable()->index();
             $table->tinyInteger('generated_type')->default(0)->index(); //0 - shipper, 1 Admin
             $table->integer('generated_by')->index();
+            $table->timestamp('picked_at')->nullable();
+            $table->integer('services_count')->default(0);
             $table->timestamps();
             $table->index(['created_at', 'updated_at']);
         });
