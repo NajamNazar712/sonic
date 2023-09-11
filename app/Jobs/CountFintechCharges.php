@@ -130,7 +130,7 @@ class CountFintechCharges implements ShouldQueue
                     }
                 }
             }
-            catch(Exception $e){
+            catch(\Throwable $e){
                 Log::channel('trax_pay')->info('e ' . json_encode($e));
             }
         }
