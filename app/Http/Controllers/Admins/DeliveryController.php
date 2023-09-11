@@ -119,7 +119,7 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
 use App\Jobs\SwichPaymentGatewayApi;
 use App\Helpers\PayfastApiCall;
-
+use Illuminate\Support\Facades\Log;
 class DeliveryController extends Controller
 {
 
@@ -1154,6 +1154,8 @@ class DeliveryController extends Controller
                                 $payment_link = $payment_detials['payment_link'];
                                 $url = $payment_detials['url'];
                                 $shipments_id = array_wrap($shipment);
+                                Log::channel('trax_pay_test')->info('sh '. json_encode($shipments_id, true));
+
                                 CountFintechCharges::dispatch($shipments_id, $payment_link, $rand, $url);
                                 NotificationsController::send(12, $note->id, $shipment, $payment_link);
                             }
