@@ -49,8 +49,8 @@ class CountFintechCharges implements ShouldQueue
      */
     public function handle()
     {
-        Log::channel('trax_pay_test')->info('pl '.$this->payment_link);
-        Log::channel('trax_pay_test')->info('sh '. $this->valid_shipments);
+        // Log::channel('trax_pay_test')->info('pl '.$this->payment_link);
+        // Log::channel('trax_pay_test')->info('sh '. $this->valid_shipments);
         $valid_shipments = $this->valid_shipments;
         if(is_array($valid_shipments)){
             try{
@@ -102,8 +102,8 @@ class CountFintechCharges implements ShouldQueue
                         else{
                             $fintech_charges = $total_charges;
                         }
-                        Log::channel('trax_pay_test')->info('pl2 '. $this->payment_link);
-                        Log::channel('trax_pay_test')->info('vsv '. $valid_shipments_valuse);
+                        // Log::channel('trax_pay_test')->info('pl2 '. $this->payment_link);
+                        // Log::channel('trax_pay_test')->info('vsv '. $valid_shipments_valuse);
 
                         $traxpaytransaction = new TraxPayTransaction();
                         $traxpaytransaction::where('shipment_id',$valid_shipments_valuse)->update([
