@@ -50,7 +50,7 @@ class CountFintechCharges implements ShouldQueue
     public function handle()
     {
         // Log::channel('trax_pay_test')->info('pl '.$this->payment_link);
-        // Log::channel('trax_pay_test')->info('sh '. $this->valid_shipments);
+        Log::channel('trax_pay_test')->info($this->valid_shipments);
         $valid_shipments = $this->valid_shipments;
         if(is_array($valid_shipments)){
             try{
@@ -111,7 +111,7 @@ class CountFintechCharges implements ShouldQueue
                             'cod_amount'     => $total_cod_amount,
                             'fintech_amount' => $fintech_charges,
                         ]);
-                        Log::channel('trax_pay_test')->info('tpt '. $traxpaytransaction);
+                        // Log::channel('trax_pay_test')->info('tpt '. $traxpaytransaction);
                         $request_body  = array(
                             'payment_link'    => $this->payment_link,
                             'unique_code'     => $this->unique_key,
