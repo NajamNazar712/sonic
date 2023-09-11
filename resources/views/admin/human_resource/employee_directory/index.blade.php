@@ -123,6 +123,7 @@
                                     <th class="border-primary border-darken-1">Area</th>
                                     <th class="border-primary border-darken-1">CNIC</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
+                                    <th class="border-primary border-darken-1">Official Phone Number</th>
                                     <th class="border-primary border-darken-1">Official Email</th>
                                     <th class="border-primary border-darken-1">Employee Type</th>
                                     <th class="border-primary border-darken-1">Rider Main Category</th>
@@ -1277,6 +1278,7 @@
                             head.push('Area');
                             head.push('CNIC');
                             head.push('Phone No.');
+                            head.push('Official Phone Number');
                             head.push('Official Email');
                             head.push('Employee Type');
                             head.push('Rider Main Category');
@@ -1316,6 +1318,7 @@
                                 row.push(values.area);
                                 row.push(values.cnic);
                                 row.push(values.phone_number);
+                                row.push(values.official_phone_number);
                                 row.push(values.official_email);
                                 row.push(values.employee_type);
                                 row.push(values.rider_main_category);
@@ -1611,6 +1614,7 @@
                     {data: 'area', name: 'ca.name', class: 'align-middle area'},
                     {data: 'cnic', name: 'employees.cnic', class: 'align-middle cnic'},
                     {data: 'phone_number', name: 'employees.phone_number', class: 'align-middle phone_number'},
+                    {data: 'official_phone_number', name: 'employees.official_phone_number', class: 'align-middle official_phone_number'},
                     {data: 'official_email', name: 'employees.official_email', class: 'align-middle official_email'},
                     {data: 'employee_type', name: 'et.name', class: 'align-middle employee_type'},
                     {data: 'rider_main_category', name: 'rmc.name', class: 'align-middle rider_main_category'},
