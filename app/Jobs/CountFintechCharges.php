@@ -111,6 +111,7 @@ class CountFintechCharges implements ShouldQueue
                             'cod_amount'     => $total_cod_amount,
                             'fintech_amount' => $fintech_charges,
                         ]);
+                        Log::channel('trax_pay_test')->info('tpt '. $traxpaytransaction);
                         $request_body  = array(
                             'payment_link'    => $this->payment_link,
                             'unique_code'     => $this->unique_key,
