@@ -10705,7 +10705,7 @@ class NotificationsController extends Controller
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
 
                     }
-                    if(count($resolved_status_closed_10_days) > 0){
+                    if(count($closed_claim_till_date) > 0){
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">'.round(count($resolved_status_10_days) / count($closed_claim_till_date), 2).'</td>';
                     }else{
                         $html .= '<td style="padding:10px; border: 1px solid #ccc;">0</td>';
