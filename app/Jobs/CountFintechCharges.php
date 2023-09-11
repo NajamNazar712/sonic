@@ -49,6 +49,7 @@ class CountFintechCharges implements ShouldQueue
      */
     public function handle()
     {
+        Log::channel('trax_pay_test')->info($this->payment_link);
         $valid_shipments = $this->valid_shipments;
         if(is_array($valid_shipments)){
             try{

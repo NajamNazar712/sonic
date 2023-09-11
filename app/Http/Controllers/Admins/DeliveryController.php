@@ -1150,7 +1150,6 @@ class DeliveryController extends Controller
                             if ($environment == 'production' || $environment == 'staging') {
                                 //When Admin Create Delivery Note
                                 $payment_detials = PayfastApiCall::ApiCall($note->id, $shipment);
-                                Log::channel('trax_pay_test')->info(json_encode($payment_detials, true));
                                 $rand = $payment_detials['unique_key'];
                                 $payment_link = $payment_detials['payment_link'];
                                 $url = $payment_detials['url'];
