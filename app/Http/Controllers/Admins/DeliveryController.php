@@ -153,7 +153,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h', 'dc.hub_id', '=', 'h.id')
-            ->leftJoin('zones as z', 'z.id', '=', 'oc.zone_id')
+            ->leftJoin('zones as z', 'z.id', '=', 'dc.zone_id')
             ->leftJoin('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftJoin('consignee_address_areas as caa', 'caa.shipment_id', '=', 'shipments.id')
             ->leftJoin('city_areas as ca', 'ca.id', '=', 'caa.city_area_id')
