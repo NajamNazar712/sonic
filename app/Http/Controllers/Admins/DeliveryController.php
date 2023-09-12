@@ -1154,6 +1154,7 @@ class DeliveryController extends Controller
                                 $payment_link = $payment_details['payment_link'];
                                 $url = $payment_details['url'];
                                 Log::channel('trax_pay_test')->info('sh '. json_encode($shipment_id, true));
+                                
                                 CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url);
                                 NotificationsController::send(12, $note->id, $shipment, $payment_link);
                             }
