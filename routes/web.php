@@ -3152,6 +3152,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
         });
 
+        Route::prefix('rv_shipper_priority')->name('rv_shipper_priority.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rv_shipper_priority_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@rv_shipper_priority_store')->name('store');
+        });
+
         /*for shipper side*/
         // Routes: web.php
         Route::prefix('mms_report_setting')->name('mms_report.')->group(function () {
