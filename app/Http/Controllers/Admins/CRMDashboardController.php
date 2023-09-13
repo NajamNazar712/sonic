@@ -937,12 +937,12 @@ class CRMDashboardController extends Controller
                 $card_data['launched'] = self::agent($card_data['launched'],$agent_id);
             }
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
-            {   
+            {
                 $card_data['launched'] = self::dates($card_data['launched'],$from,$to);
             }
             else
             {
-                $card_data['launched']->whereBetween('created_at', [$thirtyDays, $today]);
+                $card_data['launched']->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
             } 
             if ($origin = $request->get('search_origin'))
             {   
@@ -981,12 +981,12 @@ class CRMDashboardController extends Controller
                 $card_data['in_process'] = self::agent($card_data['in_process'],$agent_id);
             }
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
-            {   
+            {
                 $card_data['in_process'] = self::dates($card_data['in_process'],$from,$to);
             }
             else
             {
-                $card_data['in_process']->whereBetween('created_at', [$thirtyDays, $today]);
+                $card_data['in_process']->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
@@ -1030,7 +1030,7 @@ class CRMDashboardController extends Controller
             }
             else
             {
-                $card_data['resolved']->whereBetween('created_at', [$thirtyDays, $today]);
+                $card_data['resolved']->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {  
@@ -1085,7 +1085,6 @@ class CRMDashboardController extends Controller
             } else {
                 $thirtyDaysAgo = now()->subDays(1);
                 $card_data['closed'] = self::dates($card_data['closed'], $thirtyDaysAgo, now());
-            
                 $card_feedback = CrmRequestFeedback::whereBetween('created_at', [$thirtyDaysAgo, now()])->pluck('crm_request_id')->toArray();
             
                 $card_total = $card_data['total']->filter(function ($item) use ($thirtyDaysAgo, $card_feedback) {
@@ -1128,38 +1127,28 @@ class CRMDashboardController extends Controller
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
-                $card_data['valid'] = self::agent($card_data['valid'],$agent_id);
+                    $card_data['valid'] = self::agent($card_data['valid'],$agent_id,0);
             }
+
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {
-                //$card_data['valid'] = self::dates($card_data['valid'],$from,$to,0);
-                if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
-                    $card_data['valid'] = self::dates($card_data['valid'],$from,$to, 0);
-                } else {
-                    $card_data['valid'] = self::dates($card_data['valid'],$from,$to,1);
-                }
+                $card_data['valid'] = self::dates($card_data['valid'],$from,$to,0);
             }
             else
             {
-                if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
-                    $card_data['valid'] = self::dates1($card_data['valid'],$thirtyDays,$today, 0);
-                } else {
-                    $card_data['valid'] = self::dates1($card_data['valid'],$thirtyDays,$today,1);
-                }
-
-                //$card_data['valid']->whereBetween('created_at', [$thirtyDays, $today]);
+                $card_data['valid'] = self::dates1($card_data['valid'],$thirtyDays,$today, 0);
             }
             if ($origin = $request->get('search_origin'))
             {
-                $card_data['valid'] = self::origin($card_data['valid'],$origin);
+                $card_data['valid'] = self::origin($card_data['valid'],$origin,0);
             }
             if ($destination = $request->get('search_destination'))
             {
-                $card_data['valid'] = self::destination($card_data['valid'],$destination);
+                $card_data['valid'] = self::destination($card_data['valid'],$destination,0);
             }
             if ($zone = $request->get('search_zone'))
             {
-                $card_data['valid']= self::zone($card_data['valid'],$zone);
+                $card_data['valid']= self::zone($card_data['valid'],$zone,0);
             }
             if ($search_case_nature = $request->get('search_case_nature'))
             {
@@ -1171,7 +1160,7 @@ class CRMDashboardController extends Controller
             }
             if ($shipment_status = $request->get('search_shipment_status'))
             {
-                $card_data['valid'] = self::shipment_status($card_data['valid'],$shipment_status);
+                $card_data['valid'] = self::shipment_status($card_data['valid'],$shipment_status,0);
             }
             if ($avg_tat = $request->get('avg_tat'))
             {
@@ -1183,7 +1172,7 @@ class CRMDashboardController extends Controller
             // whereBetween('created_at', [$thirtyDays, $today])->
             if($agent_id = $request->get('agent_id'))
             {
-                $card_data['in_valid'] = self::agent($card_data['in_valid'],$agent_id);
+                $card_data['in_valid'] = self::agent($card_data['in_valid'],$agent_id,0);
             }
             if (($from = $request->get('from_date')) && ($to = $request->get('to_date')))
             {   
@@ -1191,7 +1180,7 @@ class CRMDashboardController extends Controller
                 if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
                     $card_data['in_valid'] = self::dates($card_data['in_valid'],$from,$to, 0);
                 } else {
-                    $card_data['in_valid'] = self::dates($card_data['in_valid'],$from,$to,1);
+                    $card_data['in_valid'] = self::dates($card_data['in_valid'],$from,$to,0);
                 }
             }
             else
@@ -1199,17 +1188,19 @@ class CRMDashboardController extends Controller
                 if($request->get('search_case_nature') != null || $request->get('search_case_nature_type') != null){
                     $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today, 0);
                 } else {
-                    $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today,1);
+//dd($card_data['in_valid']->get());
+                    $card_data['in_valid'] = self::dates1($card_data['in_valid'],$thirtyDays,$today,0);
+
                 }
                 //$card_data['in_valid']->whereBetween('crm_requests.created_at', [$thirtyDays, $today]);
             }
             if ($origin = $request->get('search_origin'))
             {   
-                $card_data['in_valid'] = self::origin($card_data['in_valid'],$origin);
+                $card_data['in_valid'] = self::origin($card_data['in_valid'],$origin,0);
             }
             if ($destination = $request->get('search_destination'))
             {   
-                $card_data['in_valid'] = self::destination($card_data['in_valid'],$destination);
+                $card_data['in_valid'] = self::destination($card_data['in_valid'],$destination,0);
             }
             if ($zone = $request->get('search_zone'))
             {   
@@ -1225,7 +1216,7 @@ class CRMDashboardController extends Controller
             }    
             if ($shipment_status = $request->get('search_shipment_status'))
             {   
-                $card_data['in_valid'] = self::shipment_status($card_data['in_valid'],$shipment_status);
+                $card_data['in_valid'] = self::shipment_status($card_data['in_valid'],$shipment_status,0);
             } 
             if ($avg_tat = $request->get('avg_tat'))
             {   
@@ -1259,7 +1250,6 @@ class CRMDashboardController extends Controller
                 $card_data['in_process_ratio'] = $shipments !== 0 ? $card_total/$shipments : 0;
                 $card_data['total'] = $card_data['total']->count();
                 if ($card_data['total'] > 0) {
-                    // dd($card_data['closed_rate'],$card_total);
                     $card_data['in_valid_percentage'] = round(($card_data['in_valid'] / $card_data['total']) * 100, 2);
                     $card_data['closed_rate_percentage'] = $card_total !== 0
                     ? round(($card_data['closed_rate']) * 100, 2)
@@ -1285,50 +1275,90 @@ class CRMDashboardController extends Controller
         // }
     }
     // Cards Filter Functions
-    static function agent($query,$id)
+    static function agent($query,$id,$crm_request = 1)
     {
-        return $query->where('agent_id',$id);
+        if ($crm_request)
+        {
+            return $query->where('crm_requests.agent_id',$id);
+        }
+        else
+        {
+            return $query->where('crm_request_status_histories.agent_id',$id);
+        }
     }
     static function dates($query,$from,$to,$crm_request = 1)
     {
         if($crm_request)
         {
             $stop_date = Carbon::createFromFormat('Y-m-d H:i:s', $to)->endOfDay()->toDateTimeString();
-            return $query->whereBetween('created_at', [$from, $stop_date]);
+            return $query->whereBetween('crm_requests.created_at', [$from, $stop_date]);
         }
         else
         {
             $stop_date = Carbon::createFromFormat('Y-m-d H:i:s', $to)->endOfDay()->toDateTimeString();
-            return $query->whereBetween('crm_requests.created_at', [$from, $stop_date]);
+            return $query->whereBetween('crm_request_status_histories.created_at', [$from, $stop_date]);
         }
     }
     static function dates1($query,$from,$to,$crm_request = 1)
     {
+//        dd(2);
         if($crm_request)
         {
-            return  $query->whereBetween('created_at', [$from, $to]);
+//            dd(1);
+            return  $query->whereBetween('crm_requests.created_at', [$from, $to]);
         }
         else
         {
-            return  $query->whereBetween('crm_requests.created_at', [$from, $to]);
+            return  $query->whereBetween('crm_request_status_histories.created_at', [$from, $to]);
         }
     }
-    static function destination($query,$id)
+    static function destination($query,$id, $crm_request = 1)
     {
-       return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-       ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $id);
+        if($crm_request)
+        {
+            //dd(1);
+            return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $id);
+        }
+        else
+        {
+            //dd(2);
+            return $query->leftjoin('crm_requests', 'crm_request_status_histories.crm_request_id', '=', 'crm_requests.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')->where('dc.id', '=', $id);
+        }
     }
-    static function origin($query,$id)
+    static function origin($query,$id,$crm_request = 1)
     {
-       return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-       ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
-       ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $id);
+        if ($crm_request)
+        {
+            return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $id);
+        }
+        else
+        {
+            return $query->leftjoin('crm_requests', 'crm_request_status_histories.crm_request_id', '=', 'crm_requests.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')->where('oc.id', '=', $id);
+        }
     }
-    static function zone($query,$id)
+    static function zone($query,$id,$crm_request = 1)
     {
-        return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-        ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
-        ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $id);
+        if ($crm_request)
+        {
+            return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $id);
+        }
+        else
+        {
+            return $query->leftjoin('crm_requests', 'crm_request_status_histories.crm_request_id', '=', 'crm_requests.id')
+                ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->leftjoin('cities as dc', 'dc.id', '=', 's.consignee_city_id')
+                ->leftjoin('zones as z', 'z.id', '=', 'dc.zone_id')->where('z.id', '=', $id);
+        }
     }
     static function case_nature($query,$id, $crm_request = 1)
     {
@@ -1355,10 +1385,19 @@ class CRMDashboardController extends Controller
                 ->where('crcnt.id', '=', $id);
         }
     }
-    static function shipment_status($query,$id)
+    static function shipment_status($query,$id,$crm_request = 1)
     {
-        return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
-        ->where('s.shipper_status_id', '=', $id);
+        if ($crm_request)
+        {
+            return $query->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->where('s.shipper_status_id', '=', $id);
+        }
+        else
+        {
+            return $query->leftjoin('crm_requests as crmr','crmr.id','crm_request_status_histories.crm_request_id')
+            ->leftjoin('shipments as s', 's.id', '=', 'crm_requests.shipment_id')
+                ->where('s.shipper_status_id', '=', $id);
+        }
     }
     static function avg_tat($query,$id)
     {
