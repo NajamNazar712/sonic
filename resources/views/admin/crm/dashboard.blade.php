@@ -1422,14 +1422,14 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'dh.name', class: 'align-middle hub'},
                     {data: 'zone', name: 'z.id', class: 'align-middle zone'},
-                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false, searchable: false,},
-                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false, searchable: false,},
+                    {data: 'responsible_hub', name: 'responsible_hub', class: 'align-middle responsible_hub' ,orderable: false},
+                    {data: 'responsible_zone', name: 'responsible_zone', class: 'align-middle responsible_zone',orderable: false},
                     {data: 'status', name: 'status', class: 'align-middle shipment_status'},
-                    {data: 'crm_request_status', name: 'crs.name', class: 'align-middle crm_request_status'},
+                    {data: 'crm_request_status', name: 'crs.id', class: 'align-middle crm_request_status'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'last_status_date', name: 'crm_requests.updated_at', class: 'align-middle last_status_date'},
                     {data: 'case_nature', name: 'crcn.id', class: 'align-middle case_nature'},
-                    {data: 'case_nature_type', name: 'case_nature_type', class: 'align-middle case_nature_type'},
+                    {data: 'case_nature_type', name: 'crcnt.id', class: 'align-middle case_nature_type'},
                     {data: 'cod_value', name: 's.amount', class: 'align-middle cod_value'},
                     {data: 'description', name: 'crm_requests.description', class: 'align-middle description'},
                     {data: 'channel', name: 'crc.id', class: 'align-middle channel'},
@@ -1499,7 +1499,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') || $(header).is('.responsible_hub')|| $(header).is('.responsible_zone') ) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select') || $(header).is('.current_tat') ) {
                             $(td).appendTo($(search));
                         }
                         else if ($(header).is('.case_nature')) {
@@ -1581,33 +1581,33 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data2 = $.map({!! $case_nature !!}, function (obj) {
+                    var data22 = $.map({!! $case_natures !!}, function (obj) {
                         obj.id = obj.id;
 
                         return obj;
                     });
 
-                    var data2 = $.map({!! $case_nature !!}, function (obj) {
+                    var data22 = $.map({!! $case_natures !!}, function (obj) {
                         obj.text = obj.name;
 
                         return obj;
                     });
 
                     $('#case_nature').prepend('<option value="" selected></option>').select2({
-                        data:data2,
+                        data:data22,
                         placeholder: "Select Case Nature",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 
-                    var data3 = $.map({!! $case_nature_type !!}, function (obj) {
+                    var data3 = $.map({!! $case_nature_types !!}, function (obj) {
                         obj.id = obj.id;
 
                         return obj;
                     });
 
-                    var data3 = $.map({!! $case_nature_type !!}, function (obj) {
+                    var data3 = $.map({!! $case_nature_types !!}, function (obj) {
                         obj.text = obj.type;
 
                         return obj;
