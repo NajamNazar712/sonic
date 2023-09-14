@@ -547,7 +547,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
-
+    // cod.pickup
     Route::prefix('pickup')->name('pickup.')->group(function () {
         Route::get('', 'Shippers\ShipperPickupController@pickup_index')->name('index');
         Route::get('list', 'Shippers\ShipperPickupController@pickup_list')->name('list');
@@ -559,6 +559,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('add', 'Shippers\ShipperPickupController@add_pickup')->name('add');
         Route::post('add', 'Shippers\ShipperPickupController@add_pickup_submit')->name('add');
 
+        // Route::get('user_shipper_info', 'Shippers\ShipperPickupController@get_user_shipper_info')->name('user_shipper_info');
+        Route::post('pickup_request_services', 'Shippers\ShipperPickupController@get_pickup_request_services')->name('pickup_request_services');
     });
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function () {
@@ -1260,17 +1262,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('add', 'Admins\V3Pickup\V3AdminPickupsController@add_pickup_request')->name('add');
         Route::post('get_pickup_address', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_address')->name('get_pickup_address');
         Route::post('add', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_add')->name('add');
+        Route::PUT('update', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_update')->name('update');
 
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_index')->name('index');
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_list')->name('list');
             Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_assign')->name('assign');
+            Route::post('pickup_request_services', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_request_services')->name('pickup_request_services');
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
-            Route::get('edit', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit_info')->name('edit');
+            Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit_info')->name('edit');
         });
 
         Route::prefix('history')->name('history.')->group(function () {
-            Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@history_pickup_requests')->name('index');
+            
+            Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@history_pickup_index')->name('index');
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@history_list')->name('list');
         });
 

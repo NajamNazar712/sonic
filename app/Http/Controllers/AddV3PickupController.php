@@ -34,6 +34,32 @@ class AddV3PickupController extends Controller
         return $pickup->id;
 
     }
+    static public function update($pickup_request_id,$shipper_id, $pickup_type_id,$pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request = NULL, $generate_type = 0, $generated_by = null, $walkin_name = NULL, $walkin_address = NULL, $walkin_contact = NULL, $product_id = NULL, $service_id = NULL){
+
+        $pickup = V3PickupRequest::find($pickup_request_id);
+        $pickup->pickup_type = $pickup_type_id;
+        $pickup->shipper_id = $shipper_id;
+        $pickup->pickup_address_id = $pickup_address_id;
+        $pickup->pickup_date = $pickup_date;
+        $pickup->booked = $shipments_count;
+        $pickup->city_id = $city_id;
+        $pickup->time_range_id = $time_range_id;
+        $pickup->pickup_shipment_type_id = $shipment_type_id;
+        $pickup->weight = $estimated_weight;
+        $pickup->pieces = $pieces;
+        $pickup->special_request = $special_request;
+        $pickup->generated_type = $generate_type;
+        $pickup->generated_by = $generated_by;
+        $pickup->walkin_name = $walkin_name;
+        $pickup->walkin_address = $walkin_address;
+        $pickup->walkin_contact = $walkin_contact;
+        $pickup->segment_id = $product_id;
+        $pickup->sub_segment_id = $service_id;
+        $pickup->save();
+
+        return $pickup->id;
+
+    }
 
     static public function add_regular_pickup ($shipper_id, $pickup_address_id, $pickup_request_id, $days, $requested_by, $requested_type){
         //0 Shipper, 1 - Admin
