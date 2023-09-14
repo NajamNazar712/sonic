@@ -1351,6 +1351,14 @@ trait RvTrait
     protected function included_shippers($sorted_agents, $agent_id, $agent_shipment_id = null)
     {
         $shipment = null;
+
+        $rv_priority_shipper =  GlobalSettings::where('type', 'rv_shipper_priority');
+
+        if($rv_priority_shipper->exists()){
+            $rv_priority_shipper = $rv_priority_shipper->first();
+            $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
+        }
+
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
@@ -1362,8 +1370,9 @@ trait RvTrait
                 $included_shipper = $included_shipper->first();
                 $included_shippers = explode(',', $included_shipper['text']);
             }
+
         }
-        
+
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
         // If only_shippers setting is not found, initialize as an empty array
         $only_shippers = [];
@@ -1378,13 +1387,21 @@ trait RvTrait
             
             $shipments = [];
             
-            if (!empty($included_shippers)) {
-                $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                // ->where('id',1724981)
+            if (!($included_shippers[0] == "") || !($rv_priority_shippers[0] == "")) {
+                
+                $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
+                $mergeArr = array_unique($mergeArr);
+                $result = array_filter($mergeArr, function($value){
+                    return $value != '';
+                });
+
+
+                $shipments = Shipment::whereIn('user_id', $result)
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                ->whereIn('user_id', $included_shippers)
-                ->orderBy('id', 'ASC')
+                ->where('consignee_city_id', $agent['city_id'])                
+                ->orderBy('user_id', 'ASC')
                 ->get();
+
                 
                 if($shipments->isEmpty()){
                     continue;
@@ -1393,12 +1410,13 @@ trait RvTrait
             
             // Check if only_shippers exists (1 && 0)
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
+        
                 $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                 ->whereNotIn('user_id', $only_shippers)
-                    ->orderBy('id', 'ASC')
+                ->orderBy('id', 'ASC')
                     ->get();
-            }
+                }
 
             else if ($all_shipper_exists && !($included_shipper)->exists()) {
                 $shipments = [];

@@ -108,6 +108,40 @@
                                                             </div>
                                                         </div>
                                                     </div>
+
+                                                    <div class="col-4 pt-3">
+                                                        <div class="p-0">
+                                                            <h6>Intercept</h6>
+                                                            <div class="border table-responsive gray">
+                                                                <table class="table table-sm table-borderless mb-0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $intercept_count }}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 pt-3">
+                                                        <div class="p-0">
+                                                            <h6>On Hold</h6>
+                                                            <div class="border table-responsive gray">
+                                                                <table class="table table-sm table-borderless mb-0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $hold_count }}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
