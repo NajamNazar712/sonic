@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class RvAgentAssignHub extends Model
 {
-    protected $fillable = ['agent_id', 'city_id', 'priority'];
+    protected $fillable = ['agent_id', 'city_id', 'priority','zone_id'];
 }

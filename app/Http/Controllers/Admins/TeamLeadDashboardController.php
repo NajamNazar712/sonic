@@ -28,6 +28,7 @@ use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\Attendance\EmployeeAttendance;
 use App\Http\Models\HR\EmployeeType;
+use App\Http\Models\Zone;
 
 class TeamLeadDashboardController extends Controller
 {
@@ -49,9 +50,8 @@ class TeamLeadDashboardController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 703);
 
-        $hubs = City::where('status', '1')
+        $hubs = Zone::where('status', '1')
             ->where('business_category_id', '1')
-            ->where('hub', '1')
             ->select('id', 'name')
             ->get();
 
@@ -62,10 +62,12 @@ class TeamLeadDashboardController extends Controller
         // });
 
         $employee_additional_days = EmployeeAdditionalDay::get();
+        
+        $empid = Admin::find(Auth::id())->employee_id;
 
         $employee_statuses = EmployeeStatus::all();
 
-        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
+        $number_of_available_agents = Employee::where('employee_type_id', 1)->where('line_manager_id', $empid)->where('staff_category_id', 3)->where('is_line_manager', 0)->pluck('id')->toArray();
 
         $Attendance = EmployeeAttendance::whereIn('employee_id', $number_of_available_agents)
             ->whereDate('attendance_date', '=', now()->format('Y-m-d'))
@@ -206,7 +208,7 @@ class TeamLeadDashboardController extends Controller
         }
 
         $empid = Admin::find(Auth::id())->employee_id;
-
+        
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -361,11 +363,11 @@ class TeamLeadDashboardController extends Controller
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
 
-                                $rv_city = RvAgentAssignHub::where('agent_id', $result->staff_id)->orderBy('priority', 'ASC')->get();
-                                $rv_city = $rv_city->pluck('city_id')->toArray();
+                                $rv_city = RvAgentAssignHub::where('agent_id', $result->employee_id)->orderBy('priority', 'ASC')->get();
+                                $rv_city = $rv_city->pluck('zone_id')->toArray();
 
                                 $rv_city = implode(',', $rv_city);
-                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->employee_id . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
@@ -402,29 +404,43 @@ class TeamLeadDashboardController extends Controller
     // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
+        $zones = [];
         $sorted_hubs = explode(',', $request->unsorted_hubs);
-
+        foreach($sorted_hubs as $key => $value){
+            $zones[] = City::where('zone_id', $value)->get();
+        }
+        $totalCount = collect($zones)->sum(function ($array) {
+            return $array->count();
+        });
         try {
             $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id);
             if ($rvAgentAssignHub) {
                 $rvAgentAssignHub->delete();
             }
-
-            foreach ($sorted_hubs as $key => $value) {
-                if ($value == null) {
+            $count  = 0 ;
+            foreach($sorted_hubs as $key => $value){
+                for ($i = 0 ; $i < $totalCount ; $i++) {
+                    if (!isset($zones[$key][$i])) {
                     break;
                 } else {
-
-                    $priority = $key + 1;
+                  $count = $count + 1;
                     RvAgentAssignHub::create([
                         'agent_id' => $request->employee_id,
-                        'city_id' => $value,
-                        'priority' => $priority,
+                        'city_id' => $zones[$key][$i]['id'],
+                        'zone_id' => $zones[$key][$i]['zone_id'],
+                        'priority' => $count,
                     ]);
                 }
             }
+        }
 
+        if($count > 0){
             return redirect()->route('admin.team_lead.index')->with('success', 'Assigned SuccessFully');
+
+        }else{
+            return redirect()->route('admin.team_lead.index')->with('error', 'Zone Not Assigned');
+
+        }
         } catch (Exception $ex) {
 
             return redirect()->route('admin.team_lead.index')->with('error', $ex->getMessage());
