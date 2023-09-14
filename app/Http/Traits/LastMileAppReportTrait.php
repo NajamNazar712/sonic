@@ -1,6 +1,7 @@
 <?php
 namespace App\Http\Traits;
 
+use App\DeliveryNoteErrorLog;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Rider;
 use App\RiderWiseDeliveryNote;
@@ -11,6 +12,16 @@ use phpDocumentor\Reflection\Types\Null_;
 
 trait LastMileAppReportTrait
 {
+
+    public function createDeliveryNoteErrorLog($delivery_note_id, $shipment_id, $message) {
+
+        DeliveryNoteErrorLog::create([
+            'delivery_note_id' => $delivery_note_id,
+            'shipment_id' => $shipment_id,
+            'message' => $message,
+        ]);
+        
+    }
      public function rider_wise_delivery_note($shipment_id, $delivery_note_id, $rider_id, $shipper_status_id,
                                                     $added_at, $rider_delivery, $via)
      {
