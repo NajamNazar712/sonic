@@ -137,6 +137,28 @@ class ShipperShipmentBookController extends Controller
         return $user_shipping_info->id;
     }
 
+    static public function update_pickup_addres($pickup_address_id,$user_id, $address, $person_of_contact, $vendor, $phone_number, $email_address, $city_id, $default, $hidden = FALSE){
+       
+        $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+
+        $user_shipping_info->user_id = $user_id;
+        $user_shipping_info->pickup_address = $address;
+        $user_shipping_info->poc = $person_of_contact;
+        $user_shipping_info->vendor = $vendor;
+        $user_shipping_info->phone = $phone_number;
+        $user_shipping_info->email = $email_address;
+        $user_shipping_info->city_id = $city_id;
+        $user_shipping_info->default_address = $default;
+
+        if ($hidden) {
+            $user_shipping_info->hidden = 2;
+        }
+
+        $user_shipping_info->save();
+        return $user_shipping_info->id;
+    }
+    
+
 
     static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $charges_mode_id, $try_and_buy_charges, $pieces, $self_collection, $business_category_id, $open_shipment, $return_address_id,$parcel_value = null)
     {

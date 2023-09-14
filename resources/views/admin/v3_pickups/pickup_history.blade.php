@@ -1,5 +1,6 @@
-@extends('client.layout.master')
-@section('title','Pickups History')
+@extends('admin.layout.master')
+
+@section('title', 'Pending Pickups')
 
 @section('content')
     <div class="app-content content">
@@ -14,7 +15,7 @@
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            @include('client.inc.messages')
+                            @include('admin.inc.messages')
 
                             <div class="container">
                                 <div class="row justify-content-center">
@@ -113,7 +114,6 @@
                     </div>
                 </div>
                 <!--Shipments popup -->
-
                 <!--Shipments popup pending booking-->
                 <div class="modal fade" id="pending_bookings_modal" data-backdrop="static" role="dialog"
                      aria-labelledby="pending_bookings_modal" aria-hidden="true">
@@ -140,284 +140,6 @@
         </div>
     </div>
 
-    <!-- start of add request popup modal -->
-    <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AddRequestModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-md" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Add New Pickup</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        {{-- <div class="d-flex justify-content-start vh-100 pl-1">
-                            <b class="text-dark"> Customer Information </b>
-                        </div> --}}
-                        <form id="add_pickup_request" method="post" action="{{ route('cod.pickup.add') }}" >
-                            @csrf
-                            @method('post')
-                            <input type="hidden" id="pickup_type_id" name="pickup_type_id" value="1">
-                            <input type="hidden" id="regular_pickup" name="regular_pickup" value="1">
-                                    <div class="tab-content px-1">
-                                        <div role="tabpanel" class="tab-pane active" id="activeIcon32" aria-labelledby="activeIcon32-tab1" aria-expanded="true">
-
-                                                <div class="row align-items-center mt-md-2">
-                                                  
-                                                    <div class="col-12">
-                                                        <div class="form-group">
-                                                            <label>Pickup Address</label>
-                                                            <select name="pickup_address_id" id="pickup_address_id" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
-                                                                @foreach ($pickup_addresses as $pickup_address)
-                                                                     <option value="{{ $pickup_address->id }}" data-address="{{ $pickup_address->pickup_address }}" data-phone="{{ $pickup_address->phone }}" data-poc="{{ $pickup_address->poc }}">{{$pickup_address->city->name .'-'.$pickup_address->pickup_address  }}</option>
-                                                                @endforeach
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="form-group">
-                                                            <label>Address</label>
-                                                            <input type="text" placeholder="Address" name="address" id="reg_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
-
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12">
-                                                        <div class="form-group">
-                                                            <label>Phone</label>
-                                                            <input type="text" placeholder="Caller Contact No" name="phone" id="reg_phone" class="form-control" data-rule-required="true"  data-msg-required="Contact Number is Required"/>
-
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-6">
-                                                        <p class="text-gray font-weight-bold">Contact Person </p>
-                                                        <p class="text-dark" id="poc"></p>
-                                                    </div>
-
-                                                    <div class="col-6 mt-1">
-                                                        <p class="text-gray">Mobile No </p>
-                                                        <p class="text-dark" id="poc_phone"></p>
-                                                    </div>
-                                                </div>
-
-                                                <div class="d-flex justify-content-start vh-100 pl-0">
-                                                    <b class="text-dark"> Pickup Details </b>
-                                                </div>
-
-                                                <div class="d-flex justify-content-start vh-100 pl-0 mt-md-2">
-                                                     <p class="text-gray mb-0"> Pickup Type </p>
-                                                </div>
-
-                                                <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-100 mb-md-1" id="regular_section">
-                                                    <li class="nav-item ml-md-0">
-                                                        <a class="nav-link active p-0 pl-1 text-left onetime" id="oneTimePickup-tab1" data-toggle="tab"
-                                                        href="#oneTimePickup" aria-controls="oneTimePickup" aria-expanded="true">
-                                                        <b> One-time Pickup </b>
-                                                        <p> Request a pickup for a single use. </p>
-                                                        </a>
-                                                    </li>
-                                                    <li class="nav-item">
-                                                        <a class="nav-link p-0 pl-1 text-left schedule" id="scheduledPickup-tab1" data-toggle="tab"
-                                                        href="#scheduledPickup" aria-controls="scheduledPickup" aria-expanded="false">
-                                                        <b> Scheduled Pickup </b>
-                                                        <p> Set regular pickups for specific days every week.</p>
-                                                        </a>
-                                                    </li>
-                                                </ul>
-
-                                                <div class="tab-content">
-
-                                                    <div role="tabpanel" class="tab-pane active" id="oneTimePickup" aria-labelledby="oneTimePickup-tab1" aria-expanded="true">
-
-                                                    </div>
-
-                                                    <div role="tabpanel" class="tab-pane" id="scheduledPickup" aria-labelledby="scheduledPickup-tab1" aria-expanded="false">
-
-                                                    <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1">
-                                                        <p class="text-gray mb-0"> Scheduled Days </p>
-                                                    </div>
-
-
-                                                        <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
-
-                                                    
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[1]' id="mo">
-                                                            <label for="mo" class="w-100 text-center" id="mo">Mo</label>
-                                                        </div>
-
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[2]' id="tu">
-                                                            <label for="tu" class="w-100 text-center" id="tu">Tu</label>
-                                                        </div>
-
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[3]' id="we">
-                                                            <label for="we" class="w-100 text-center" id="we">We</label>
-                                                        </div>
-
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[4]' id="th">
-                                                            <label for="th" class="w-100 text-center" id="th">Th</label>
-                                                        </div>
-
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[5]' id="fr">
-                                                            <label for="fr" class="w-100 text-center" id="fr">Fr</label>
-                                                        </div>
-
-                                                        <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[6]' id="sa">
-                                                            <label for="sa" class="w-100 text-center" id="sa">Sa</label>
-                                                        </div>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-
-                                        </div>
-                                    </div>
-                                    <div class="row justify-content-center align-items-center vh-100 mt-md-0 px-1">
-                                            <div class="col-6">
-
-                                                <div class="form-group">
-                                                    <div class="form-group input-group">
-                                                        <div class="input-group-prepend">
-                                                                    <span
-                                                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                                        <span class="la la-calendar-o"></span>
-                                                                    </span>
-                                                        </div>
-
-                                                        <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is Required">
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="preferred_time_range" id="preferred_time_range" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Time is required">
-                                                        @foreach($time_ranges as $time_range)
-                                                            <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
-                                                        @endforeach
-
-                                                    </select>
-                                                </div>
-                                            </div>
-                                    </div>
-                                    <div class="row justify-content-center align-items-center px-1">
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="product_id" id="product_select" class="form-control select2"
-                                                            data-rule-required="true" data-msg-required="Product is required" >
-                                                        {{-- @foreach($products as $product) --}}
-                                                            <option value="{{ $product->id }}" selected>{{ $product->name }}</option>
-                                                        {{-- @endforeach --}}
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="service_id" id="service_select" class="form-control select2">
-                                                        @foreach ($product->subCategorySegment as $service)
-                                                        <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-
-                                    </div>
-                                    <div class="row justify-content-start align-items-center vh-100 px-1">
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="shipment_type_id" id="shipment_select" class="form-control select2"
-                                                            data-rule-required="true" data-msg-required="Shipment Type is required">
-                                                        @foreach($pickup_shipment_types as $shipment_type)
-                                                            <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                    </div>
-                                    <div class="row align-items-center vh-100 px-1">
-                                            <div class="col-4">
-                                                {{-- input-group --}}
-                                                <div class="form-group">
-                                                    <label>Shipments</label>
-                                                    <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-4 pl-0">
-                                                <div class="form-group">
-                                                    <label>Total Pieces</label>
-                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="Total Pieces is required">
-                                                </div>
-                                            </div>
-                                            <div class="col-4 pl-0">
-                                                <div class="form-group">
-                                                    <label>Weight</label>
-                                                    <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
-                                                </div>
-                                            </div>
-                                    </div>
-                                    <div class="row justify-content-center align-items-center px-1">
-                                    </div>
-                                    <div class="row justify-content-center align-items-center vh-100 px-1">
-                                            <div class="col-12">
-                                                <div class="form-group">
-                                                    <label>Additional Request</label>
-                                                    <textarea type="text" name="remarks" class="form-control" placeholder="Additional Request"></textarea>
-                                                </div>
-                                            </div>
-                                    </div>
-                                <!-- start additional services -->
-                                    <div class="d-flex justify-content-start vh-100 pl-1">
-                                         <b class="text-dark"> Additional Services </b>
-                                    </div>
-                                    <div class="d-flex justify-content-start align-items-center">
-                                        <!-- start service list -->
-
-                                            <div class="services-list col-12">
-                                                @foreach($additional_services as $additional_service)
-
-                                                <div class="d-flex align-items-center service-item mt-md-1">
-                                                    <div class="col-md-6">
-                                                        <p class="mb-0 text-dark"> {{ $additional_service->name }} </p>
-                                                    </div>
-                                                    <div class="col-md-6">
-                                                        <div class="form-group input-group mb-0">
-                                                            <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                @endforeach
-                                            </div>
-
-                                        <!-- end service list -->
-
-                                    </div>
-                                <!-- end additional services -->
-                                    <div class="row justify-content-center mt-md-2">
-                                        <div class="col-3">
-                                            <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit
-                                            </button>
-                                        </div>
-                                    </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-   <!-- end of add request popup modal -->
 
     <div class="modal fade" id="AllRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AllRemarksModal"
          aria-hidden="true">
@@ -463,42 +185,43 @@
         </div>
     </div>
 
+
     <!---- start of show additional services modal---->
     <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
-        aria-labelledby="AdditionalServiceModal"
-        aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Additional Services</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div class="container">
-                        
-                        <table class="table table-bordered">
-                                <thead>
-                                        <tr role="row" class="bg-primary white">
-                                            <th class="border-primary border-darken-1">S. No.</th>
-                                            <th class="border-primary border-darken-1">Service</th>
-                                            <th class="border-primary border-darken-1">Qty</th>
-                                        </tr>
-                                </thead>
-                                <tbody>
+    aria-labelledby="AddRequestModal"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Additional Services</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <div class="container">
+                   
+                   <table class="table table-bordered">
+                        <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Qty</th>
+                                </tr>
+                        </thead>
+                        <tbody>
 
-                                </tbody>
+                        </tbody>
 
-                            </table>
-                        <!-- end additional services -->
+                    </table>
+                   <!-- end additional services -->
 
-                        
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+                 
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
     <!----end of show additional services modal --->
 
 @endsection
@@ -575,7 +298,7 @@
         display: inline-block;
         border: 1px solid #CCCCCC;
         background: #fff;
-        padding: 5px 1px;
+        padding: 5px 10px;
         color: #A3A3A3;
         border-radius: 5px;
         position: relative;
@@ -657,7 +380,6 @@
         /* end addition services */
 
     </style>
-        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 @endsection
 
 @section('js')
@@ -665,15 +387,12 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
             type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-
+    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}?v=24052022" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
 
     <script>
 
@@ -696,66 +415,6 @@
                     }
                 }
             });
-            var pickup_date = $('#pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::today() }}',
-                // format: 'dd mmmm, yyyy',
-                format: 'yyyy-mm-dd',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd',
-                hiddenSuffix: '_formatted',
-            });
-
-            $('#reg_phone').inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-            $('#pickup_address_id').prepend('<option value="" selected="selected">Select Pickup Address</option>').select2({
-                placeholder: 'Select Pickup Address',
-                width: '100%'
-            }).on('select2:select', function (e) {
-                var address = e.params.data.element.getAttribute('data-address');
-                var phone = e.params.data.element.getAttribute('data-phone');
-                var poc = e.params.data.element.getAttribute('data-poc');
-                $('#reg_address').val(address);
-                $('#reg_phone').val(phone);
-                $("#poc").text(poc);
-                $("#poc_phone").text(phone);
-                
-            });
-
-           
-            $('#regular_section').on('click', 'a',function (){
-                if($(this).hasClass('onetime')){
-                    $('#regular_pickup').val(1);
-                }
-                else if($(this).hasClass('schedule')){
-                    $('#regular_pickup').val(2);
-                }
-            });
-            $('#preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
-                placeholder: 'Select Pickup Time*',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request') 
-            });
-
-            $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
-                    placeholder: 'Select Service',
-                    width: '100%',
-                    dropdownParent:$('#add_pickup_request')
-            });
-            
-            $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
-                placeholder: 'Select Shipment Type',
-                width: '100%',
-                dropdownParent:$('#add_pickup_request')
-            });
-            // $('#product_select').select2({
-            //     placeholder: 'Select Product',
-            //     width: '100%',
-            //     dropdownParent:$('#add_pickup_request')
-            // });
-            $('#product_select').prop('disabled', true);
-
             var booking_to_date = $('#requested_to_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -782,7 +441,7 @@
                     params.length = -1;
                     params.excel = true;
                     var jsonResult = $.ajax({
-                        url: '{{ route('cod.pickup.list') }}',
+                        url: '{{ route('admin.v3_pickups.history.list') }}',
                         data: params,
                         success: function (result) {
                             head = [];
@@ -861,21 +520,15 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-
-                    {
-                        text: '<i class="la la-plus"></i> Add New',
-                        className: 'btn btn-primary request_add',
-                        action: function (e, dt, node, config) {
-                            $('#AddRequestModal').modal('show');
-                        }
-                    },
                     {
                         extend: 'excel',
                         title: 'Pending Pickups Requests',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }
+                    },
+                    'reset'
                 ],
+                
                 scrollX: true, scrollY: '500px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
@@ -886,7 +539,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('cod.pickup.list') }}',
+                    url: '{{ route('admin.v3_pickups.history.list') }}',
                     data: function (d) {
                         d.requested_from_date = $('#requested_from_date').val();
                         d.requested_to_date = $('#requested_to_date').val();
@@ -932,7 +585,11 @@
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1042,19 +699,7 @@
                table.draw();
             });
 
-            // $('.quantity').TouchSpin({
-            //     min: 0,
-            //     max: 1000,
-            //     buttondown_class: 'btn btn-primary rounded-left',
-            //     buttonup_class: 'btn btn-primary rounded-right',
-            //     buttondown_txt: '<i class="ft-minus"></i>',
-            //     buttonup_txt: '<i class="ft-plus"></i>'
-            // }).bind('input change', function() {
-            //     if ($(this).hasClass('danger')) {
-            //         $(this).valid();
-            //     }
-            // });
-
+        
 
             $('#add_pickup_request').validate({
                 errorClass: 'danger',
@@ -1093,7 +738,7 @@
         function showadditionalservices(event,pickup_request_id){
             $("#AdditionalServiceModal table tbody").empty();
             $.ajax({
-                url:'{{ route('cod.pickup.pickup_request_services') }}',
+                url:'{{ route('admin.v3_pickups.pending.pickup_request_services') }}',
                 method:'POST',
                 data:{
                     'pickup_request_id':pickup_request_id,

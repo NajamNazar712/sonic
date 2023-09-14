@@ -23,7 +23,13 @@ use App\Http\Models\V3Pickup\V3PickupType;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\Segment;
+use App\Http\Models\Product;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\V3Pickup\V3PickupRequestService;
+use App\Http\Models\V3Pickup\V3PickupService;
+use App\Http\Models\V3Pickup\V3PickupShipmentType;
 use Yajra\Datatables\Datatables;
 use Illuminate\Support\Facades\DB;
 
@@ -40,6 +46,10 @@ class ShipperPickupController extends Controller
     {
 
         $permission = session('permissions');
+
+        $user_id=session('user_id');
+        $user=User::find($user_id);
+        $segment_id=$user->segment_id;
 
         $case_nature = CrmRequestCaseNature::get();
         $row = array();
@@ -66,99 +76,142 @@ class ShipperPickupController extends Controller
         $case_nature_type_complaints = CrmRequestCaseNatureType::where('nature_id', '=', 1)->where('status_id', 1)->get();
         $case_nature_type_service_requests = CrmRequestCaseNatureType::where('nature_id', '=', 2)->where('status_id', 1)->get();
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
-        return view('client.pickups.index')->with(['case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'case_permission'=>$permission]);
+        $pickup_addresses = UserShippingInfo::with('city')->where('user_id',  117)->where('status', 1)->where('hidden', 0)->get();
+        $product = Segment::with('subCategorySegment')->find($segment_id);
+        $time_ranges = V3PickupTimeRange::all();
+        $pickup_shipment_types = V3PickupShipmentType::all();
+        $additional_services = V3PickupService::all();
+        // ->where('id',$segment_id)->get();
+      
+        return view('client.pickups.index')->with(['additional_services'=>$additional_services,'pickup_shipment_types'=>$pickup_shipment_types,'time_ranges'=>$time_ranges,'product'=>$product,'pickup_addresses'=>$pickup_addresses,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'case_permission'=>$permission]);
     }
 
-    public function pickup_list()
+    public function pickup_list(Request $request)
     {
-        $pickups = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
-            ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-            ->join('v3_pickup_request_statuses as vprs', 'vprs.id', '=', 'v3_pickup_requests.status_id')
-            ->select('v3_pickup_requests.id', 'v3_pickup_requests.id as pickup_request_id', 'v3_pickup_requests.pickup_date as requested_at', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'v3_pickup_requests.booked', 'v3_pickup_requests.received', 'v3_pickup_requests.received_wo_scan', 'v3_pickup_requests.attempts', 'v3_pickup_requests.status_id', 'v3_pickup_requests.rider_status', 'usi.vendor', 'vprs.name as status', 'v3_pickup_requests.renew as renew', 'v3_pickup_requests.remarks')
-            ->where('v3_pickup_requests.shipper_id', session('user_id'));
+        $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
+                ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
+                ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+                ->join('cities as h', 'ci.hub_id', '=', 'h.id')
+                ->join('v3_pickup_types as vpt', 'vpt.id', '=', 'v3_pickup_requests.pickup_type')
+                ->join('v3_pickup_time_ranges as ptr', 'ptr.id', '=', 'v3_pickup_requests.time_range_id')
+                ->join('v3_pickup_request_statuses as prs', 'prs.id', '=', 'v3_pickup_requests.status_id')
+                ->join('v3_pickup_shipment_types as pst', 'pst.id', '=', 'v3_pickup_requests.pickup_shipment_type_id')
+                ->leftjoin('riders as cr', 'cr.id', '=', 'v3_pickup_requests.current_rider_id')
+                ->leftjoin('riders as lr', 'lr.id', '=', 'v3_pickup_requests.last_rider_id')
+                ->leftjoin('segments as seg', 'seg.id', '=', 'v3_pickup_requests.segment_id')
+                ->leftJoin('v3_pickup_request_attempts as vpa', function ($join) {
+                    $join->on('vpa.pickup_request_id', '=', 'v3_pickup_requests.id')
+                        ->where(
+                            'vpa.id',
+                            '=',
+                            DB::raw('(select max(id) from v3_pickup_request_attempts where v3_pickup_request_attempts.pickup_request_id = v3_pickup_requests.id)')
+                        );
+                })
+                ->leftJoin('v3_rider_pickups as vpr', function ($join) {
+                    $join->on('vpr.pickup_request_id', '=', 'v3_pickup_requests.id')
+                        ->where(
+                            'vpr.id',
+                            '=',
+                            DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
+                        );
+                })
+                ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
+                ->where('v3_pickup_requests.shipper_id', session('user_id'));
 
+            $datatables = Datatables::of($pickup_requests)
 
-        return Datatables::of($pickups)
-            ->editColumn('pickup_request_id', function ($pickup_request) {
-                return str_pad($pickup_request->pickup_request_id, 6, '0', STR_PAD_LEFT);
-            })
-            ->editColumn('booked_button', function ($pickup_request) {
-                return $pickup_request->booked;
-            })
-            ->editColumn('received_button', function ($pickup_request) {
-                if ($pickup_request->received != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('scanned_button', function ($pickup_request) {
-                if ($pickup_request->scanned != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received_wo_scan . '</button>';
-                } else {
-                    return 0;
-                }
-            })
-            ->addColumn('remarks', function ($pickup_request) {
-                return $pickup_request->remarks;
-            })
-            ->addColumn('attempt_date_time', function ($pickup_request) {
-                $attempts = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->id);
-                $all_attempt = '';
-                if ($attempts->exists()) {
-                    $attempts = $attempts->get();
-                    foreach ($attempts as $attempt) {
-                        if ($all_attempt == '') {
-                            $all_attempt = $attempt->attempt_date;
+                ->addColumn('shipment_pieces', function ($pickup_requests) {
+                    return $pickup_requests->shipments . '/' . $pickup_requests->pieces;
+                })
+                ->editColumn('pickup_request_id', function ($pickup_requests) {
+                        return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+                })
+                ->addColumn('shipments_picked', function ($pickup_request) {
+                    if ($pickup_request->received > 0) {
+                        return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
+                    } else {
+                        return 0;
+                    }
+                })
+                ->addColumn('services_count_btn', function ($pickup_requests) {
+                    
+                    if ($pickup_requests->services_count > 0) {
+                        return '<button class="btn btn-md btn-primary align-middle" onclick="showadditionalservices(event,'.$pickup_requests->id.')">'. $pickup_requests->services_count .'</button>';
+                    } else {
+                        return '';
+                    }
+                })
+                ->addColumn('attempted_date', function ($pickup_requests) {
+                    $attempted_date = '';
+                    $attempts = V3PickupRequestAttempt::where('pickup_request_id', $pickup_requests->id);
+                    if ($attempts->exists()) {
+                        $attempted_date_rows = $attempts->pluck('attempt_date')->toArray();
+                        if (count($attempted_date_rows) > 0) {
+                            foreach ($attempted_date_rows as $index => $attempt_date) {
+                                $attempted_date .= $attempt_date . ',' . PHP_EOL;
+                            }
                         }
-                        else {
-                            $all_attempt = $all_attempt . '<br/>' . $attempt->attempt_date;
-                        }
                     }
-                }
-                return $all_attempt;
-            })
-            ->addColumn('action', function ($pickup_request) {
-                $add_remarks = '<button type="button" class="dropdown-item add_remarks"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">Add Remarks</div></button>';
-                $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
-                $renew = '<button type="button" class="dropdown-item renew"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Renew</div></button>';
+                    return $attempted_date;
+                })
+                ->addColumn('action', function ($reminder_request) {
+                    // $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
 
-                $pickup_attempt = V3PickupRequestAttempt::where('pickup_request_id', $pickup_request->pickup_request_id);
-                $dropdown = '';
-                if ($pickup_attempt->exists() || ($pickup_request->rider_status == 1 && $pickup_request->status_id != 4) || ($pickup_request->status_id == 4 && $pickup_request->renew == 0)) {
-                    $dropdown = '
-                          <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                            <div class="dropdown-menu dropdown-menu-sm">
-                        ';
-                    if ($pickup_attempt->exists()) {
-                        $dropdown .= $add_remarks;
+                    $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
+
+                    $edit_button='<a href="javascript:void(0);" class="dropdown-item edit_pickup_request" data-action="edit"><i class="ft-plus-square primary"></i> 
+                    Edit </a>';
+    
+                    
+                    $dropdown = "
+                        <div class='btn-group'>
+                        <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+                            <div class='dropdown-menu dropdown-menu-sm'>";
+
+                    // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
+                    //     $dropdown .= $reminder_button;
+                    // }
+
+                    if($reminder_request->pickup_type_id==2){
+                       
+                        $dropdown.=$edit_button;
+                    }
+                   
+                    if ($reminder_request->reverse_pickup == 1 && $reminder_request->rev_remarks == null) {
+
+                        $dropdown .= $remarks_button;
                     }
 
-                    if ($pickup_request->rider_status == 1 && $pickup_request->status_id != 4) {
-                        $dropdown .= $cancel_button;
-                    }
-                    if ($pickup_request->status_id == 4 && $pickup_request->renew == 0) {
-                        $dropdown .= $renew;
-                    }
-                    $dropdown .= '
+                    $dropdown .= "
                             </div>
-                          </div>
-                        ';
-                }
+                        </div>
+                    ";
 
+                    return $dropdown;
+                    
+                });
 
-                return $dropdown;
-            })
-            ->editColumn('view_details', function ($pickup_request) {
-//                if ($pickup_request->received != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . 'View Details' . '</button>';
-//                } else {
-//                    return 0;
-//                }
-            })
-            ->make(true);
+            if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+                $from = $request->get('requested_from_date');
+                $to = $request->get('requested_to_date');
+                $stop_date = Carbon::parse($to)->addDay(1)->toDateTimeString();
+                $datatables->whereBetween('v3_pickup_requests.pickup_date', [$from, $stop_date]);
+            }
+            if ($pickup_status_id = $request->get('pickup_status_id')) {
+                $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
+            }
+            return $datatables->make(true);
+    }
+
+    public function get_pickup_request_services(Request $request){
+      
+        $pickup_request_id=$request->pickup_request_id;
+
+        $pickup_request_services=V3PickupService::join('v3_pickup_request_services','v3_pickup_services.id','=','v3_pickup_request_services.pickup_request_service_id')
+        ->select('v3_pickup_services.id as id','v3_pickup_services.name as service_name','v3_pickup_request_services.count as count')->where('v3_pickup_request_services.pickup_request_id','=', $pickup_request_id)->get();
+
+        return response()->json(['status' => 0, 'pickup_request_services' => $pickup_request_services]);
+
     }
 
     public function view_details(Request $request)
@@ -278,43 +331,68 @@ class ShipperPickupController extends Controller
         return view('client.pickups.add_pickup')->with(['pickup_addresses' => $pickup_addresses, 'pickup_types' => $pickup_types, 'time_ranges' => $time_ranges]);
     }
 
+  
     public function add_pickup_submit(Request $request){
-        $user_id = session('user_id');
 
+        $user_id = session('user_id');
+        
         $pickup_date = $request->pickup_date_formatted;
-        $pickup_date = Carbon::parse($pickup_date)->now()->toDateTimeString();
-        $shipper_id = $user_id;
+        $pickup_date = Carbon::parse($pickup_date)->toDateString();
+
+        $shipper_id =  $user_id;
         $pickup_address_id = $request->pickup_address_id;
-        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('status_id', 1)->exists()){
+        $time_range_id = $request->preferred_time_range;
+        if(V3PickupRequest::where('shipper_id', $shipper_id)->where('pickup_address_id', $pickup_address_id)->where('time_range_id', $time_range_id)->where('status_id', 1)->exists()){
             return redirect()->back()->with('error', 'Pickup request already in-process!');
         }
 
-        $preferred_time_range = $request->preferred_time_range;
         $pickup_type_id = $request->pickup_type_id;
         $estimated_weight = $request->estimated_weight;
         $shipments_count = $request->shipments_count;
-        $remarks = $request->remarks;
+        $pieces = $request->pieces;
+        $special_request = $request->remarks;
 
-        $pickup_address = UserShippingInfo::where('id', $request->pickup_address_id)->where('user_id', $shipper_id)->first();
+        $shipment_type_id = $request->shipment_type_id;
+        $product_id = $request->product_id;
+        $service_id = $request->service_id;
+       
+        $walkin_name='';
+        $walkin_address = $request->address;
+        $walkin_contact = $request->phone;
+    
 
-        if($pickup_address){
-            $vendor = NULL;
-            $city_id = $pickup_address->city->id;
-            if($pickup_address->vendor !== null){
-                $vendor = $pickup_address->vendor;
+      
+        $pickup_address = UserShippingInfo::find($pickup_address_id);
+
+        $city_id = $pickup_address->city->id;
+       
+        $pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 0, $user_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
+
+        $additonalservice_count=0;
+        foreach ($request->additional_services as $service_id => $service_count){
+            if($service_count > 0){
+                $additonalservice_count+=1;
+                $additional_service = new V3PickupRequestService();
+                $additional_service->pickup_request_id = $pickup_request_id;
+                $additional_service->pickup_request_service_id = $service_id;
+                $additional_service->count = $service_count;
+                $additional_service->save();
             }
-
-            $pickup = V3PickupRequest::where(['shipper_id' => $shipper_id, 'pickup_address_id' => $pickup_address_id, 'status_id' => 1, 'pickup_date' => $pickup_date]);
-            if($pickup->exists()){
-                return redirect()->back()->with('error', 'Pickup request already in process!');
-            }
-            AddV3PickupController::add($shipper_id, $pickup_address_id, $pickup_date, $city_id, $preferred_time_range, $pickup_type_id, $estimated_weight, $shipments_count, $remarks, 0, $shipper_id, $vendor);
-
-            if($request->has('pickup')){
-                AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id);
-            }
-
-            return redirect()->back()->with('success', 'Pickup request added successfully!');
+        }     
+        if($additonalservice_count>0){
+            V3PickupRequest::where('id', $pickup_request_id)
+            ->update(['services_count' => $additonalservice_count]);
         }
+       
+
+        if($request->regular_pickup == 2 && $request->pickup_type_id==1){
+            $days = [];
+            foreach ($request->days as $index => $day){
+                $days[] = $index;
+            }
+            $days = implode(',', $days);
+            AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $user_id, 0);
+        }
+        return redirect()->back()->with('success', 'Pickup request added successfully!');
     }
 }

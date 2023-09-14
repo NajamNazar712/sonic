@@ -77,6 +77,7 @@
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
+                                    <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
@@ -300,7 +301,7 @@
     <div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog"
          aria-labelledby="AddRequestModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Add New Pickup</h4>
@@ -323,14 +324,14 @@
                             <div class="d-flex justify-content-start vh-100 pl-1 mt-md-2">
                                 <p class="text-gray mb-0"> Customer Type </p>
                             </div>
-                            <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-50">
+                            <ul class="nav nav-tabs nav-iconfall custom-nav nav-justified w-50" id="customer_type">
                                 <li class="nav-item">
-                                    <a class="nav-link active p-0" id="activeIcon32-tab1" data-toggle="tab"
+                                    <a class="nav-link active p-0 registered" id="activeIcon32-tab1" data-toggle="tab"
                                        href="#activeIcon32" aria-controls="activeIcon32" aria-expanded="true">
                                         Registered</a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link p-0" id="linkIcon32-tab1" data-toggle="tab" href="#linkIcon32"
+                                    <a class="nav-link p-0 walk_in" id="linkIcon32-tab1" data-toggle="tab" href="#linkIcon32"
                                        aria-controls="linkIcon32" aria-expanded="false"> Walk-in</a>
                                 </li>
                             </ul>
@@ -347,6 +348,7 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
+                                               
                                                 <select name="shipper_id" id="shippers_select" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
                                                     @foreach($shippers as $shipper)
                                                         <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
@@ -365,6 +367,7 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
+                                                <label>Address</label>
                                                 <input type="text" placeholder="Address" name="address" id="reg_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
                                             </div>
@@ -372,6 +375,7 @@
 
                                         <div class="col-12">
                                             <div class="form-group">
+                                                <label>Phone</label>
                                                 <input type="text" placeholder="Caller Contact No" name="phone" id="reg_phone" class="form-control" data-rule-required="true"  data-msg-required="Contact Number is Required"/>
 
                                             </div>
@@ -438,38 +442,40 @@
 
                                           <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
 
-                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[1]' id="sa">
-                                                <label for="sa" class="w-100 text-center" id="sa">S</label>
-                                            </div>
-                                            <div class="col-1 mb-0 item-column p-0">
+                                            
+                                            {{-- <div class="col-1 mb-0 item-column p-0">
                                                 <input class="apply-checked" type="checkbox" name='days[2]' id="su">
                                                 <label for="su" class="w-100 text-center" id="su">S</label>
-                                           </div>
+                                           </div> --}}
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[3]' id="mo">
-                                                <label for="mo" class="w-100 text-center" id="mo">M</label>
+                                                <input class="apply-checked" type="checkbox" name='days[1]' id="mo">
+                                                <label for="mo" class="w-100 text-center" id="mo">Mo</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[4]' id="tu">
-                                                <label for="tu" class="w-100 text-center" id="tu">T</label>
+                                                <input class="apply-checked" type="checkbox" name='days[2]' id="tu">
+                                                <label for="tu" class="w-100 text-center" id="tu">Tu</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[5]' id="we">
-                                                <label for="we" class="w-100 text-center" id="we">W</label>
+                                                <input class="apply-checked" type="checkbox" name='days[3]' id="we">
+                                                <label for="we" class="w-100 text-center" id="we">We</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[6]' id="th">
-                                                <label for="th" class="w-100 text-center" id="th">T</label>
+                                                <input class="apply-checked" type="checkbox" name='days[4]' id="th">
+                                                <label for="th" class="w-100 text-center" id="th">Th</label>
                                            </div>
 
                                            <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[7]' id="fr">
-                                                <label for="fr" class="w-100 text-center" id="fr">F</label>
+                                                <input class="apply-checked" type="checkbox" name='days[5]' id="fr">
+                                                <label for="fr" class="w-100 text-center" id="fr">Fr</label>
                                            </div>
+
+                                           <div class="col-1 mb-0 item-column p-0">
+                                                <input class="apply-checked" type="checkbox" name='days[6]' id="sa">
+                                                <label for="sa" class="w-100 text-center" id="sa">Sa</label>
+                                            </div>
 
                                           </div>
 
@@ -524,7 +530,7 @@
 
                         </div> -->
 
-                        <div class="row justify-content-center align-items-center vh-100 mt-md-0 px-1">
+                                      <div class="row justify-content-center align-items-center vh-100 mt-md-0 px-1">
                                             <div class="col-6">
 
                                                 <div class="form-group">
@@ -550,8 +556,6 @@
                                                     </select>
                                                 </div>
                                             </div>
-
-
                                         </div>
 
                                         <div class="row justify-content-center align-items-center px-1">
@@ -568,7 +572,7 @@
 
                                             <div class="col-6">
                                                 <div class="form-group">
-                                                    <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
+                                                    <select name="service_id" id="service_select" class="form-control select2">
 
                                                     </select>
                                                 </div>
@@ -591,20 +595,24 @@
 
                                         <div class="row align-items-center vh-100 px-1">
                                             <div class="col-4">
-                                                <div class="form-group input-group">
+                                                {{-- input-group --}}
+                                                <div class="form-group">
+                                                    <label>Shipments</label>
                                                     <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="No. of Shipments is required">
                                                 </div>
                                             </div>
 
                                             <div class="col-4 pl-0">
-                                                <div class="form-group input-group">
+                                                <div class="form-group">
+                                                    <label>Total Pieces</label>
                                                     <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
                                                         data-rule-required="true" data-msg-required="Total Pieces is required">
                                                 </div>
                                             </div>
                                             <div class="col-4 pl-0">
-                                                <div class="form-group input-group">
+                                                <div class="form-group">
+                                                    <label>Weight</label>
                                                     <input type="text" id="estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
                                                 </div>
                                             </div>
@@ -617,6 +625,7 @@
                                         <div class="row justify-content-center align-items-center vh-100 px-1">
                                             <div class="col-12">
                                                 <div class="form-group">
+                                                    <label>Additional Request</label>
                                                     <textarea type="text" name="remarks" class="form-control" placeholder="Additional Request"></textarea>
                                                 </div>
                                             </div>
@@ -625,32 +634,32 @@
                         <!-- start additional services -->
 
                         <div class="d-flex justify-content-start vh-100 pl-1">
-                        <b class="text-dark"> Additional Services </b>
+                             <b class="text-dark"> Additional Services </b>
                         </div>
+
                         <div class="d-flex justify-content-start align-items-center">
+                            <!-- start service list -->
 
-                        <!-- start service list -->
+                                <div class="services-list col-12">
+                                    @foreach($additional_services as $additional_service)
 
-                        <div class="services-list col-12">
-                            @foreach($additional_services as $additional_service)
-
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> {{ $additional_service->name }} </p>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                    <div class="d-flex align-items-center service-item mt-md-1">
+                                        <div class="col-md-6">
+                                            <p class="mb-0 text-dark"> {{ $additional_service->name }} </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group input-group mb-0">
+                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                            </div>
+                                        </div>
                                     </div>
+                                    @endforeach
+
+
+
                                 </div>
-                            </div>
-                            @endforeach
 
-
-
-                        </div>
-
-                        <!-- end service list -->
+                            <!-- end service list -->
 
                         </div>
 
@@ -686,207 +695,182 @@
                 </div>
                 <div class="modal-body">
 
-
                     <div class="container">
 
-                    <div class="d-flex justify-content-start vh-100 pl-1">
-
-                       <b class="text-dark"> Customer Information </b>
-
-                    </div>
-
-                        <div>
-                            <div class="d-flex justify-content-start vh-100 pl-1 mt-md-2">
-                             <p class="text-gray mb-0"> Customer Type </p>
+                        <div class="d-flex justify-content-start vh-100 pl-1">
+                        <b class="text-dark"> Customer Information </b>
                         </div>
 
-                        </div>
-                        <form id="add_request_form" method="post" enctype="multipart/form-data">
-
-                                    <div class="row align-items-center mt-md-2 px-1">
-
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <select name="shipper_id" id="shippers_select" class="form-control select2" data-rule-required="true" data-msg-required="Customer is Required">
-                                                    <!-- @foreach($shippers as $shipper) -->
-                                                        <!-- <option value="{{ $shipper->id }}">{{ $shipper->name }}</option> -->
-                                                        <option value="option 1">option 1</option>
-                                                        <option value="option 2">option 2</option>
-                                                        <option value="option 3">option 3</option>
-
-                                                        <!-- @endforeach -->
-
-                                                </select>
-                                            </div>
-                                        </div>
-
-
-                                        <div class="col-12">
-                                            <div class="form-group">
-                                                <input type="text" placeholder="Address" name="address" id="reg_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
-
-                                            </div>
-                                        </div>
-
-                                    </div>
-
-                        <div class="d-flex justify-content-start vh-100 px-1">
-
-                                         <b class="text-dark"> Pickup Details </b>
-
-                                    </div>
-
-                        <div class="row justify-content-center align-items-center vh-100 mt-md-1 px-1">
-                                            <div class="col-6">
-
-                                                <div class="form-group">
-                                                    <div class="form-group input-group">
-                                                        <div class="input-group-prepend">
-                                                                    <span
-                                                                            class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                                                        <span class="la la-calendar-o"></span>
-                                                                    </span>
-                                                        </div>
-
-                                                        <input type="text" name="pickup_date"
-                                                            class="form-control pickadate bg-primary border-primary white rounded-right require_one pickup_date"
-                                                            id="pickup_date" placeholder="Select Pickup Date"
-                                                            data-rule-required="true" data-msg-required="Pickup Date is Required">
-                                                    </div>
-                                                </div>
-                                            </div>
+                        <form id="update_pickup_request" method="post" enctype="multipart/form-data" action="{{ route('admin.v3_pickups.update') }}">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" id="pickup_type_id" name="pickup_type_id" value="2">
+                            <input type="hidden" name="edit_pickup_address_id" id="edit_pickup_address_id">
+                            <input type="hidden" name="pickup_request_id" id="pickup_request_id">
+                            <div class="tab-content px-1">
+                                <div class="tab-pane active" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1"
+                                     aria-expanded="false">
+                                    <div class="row mt-md-2">
                                             <div class="col-6">
                                                 <div class="form-group">
-                                                    <select name="preferred_time_range" id="preferred_time_range"
-                                                            class="form-control select2" data-rule-required="true"
-                                                            data-msg-required="Pickup Time Range is required">
-                                                        <option value=""> Pickup Time Range</option>
+                                                    <input type="text" placeholder="Customer Name" name="walkin_name"
+                                                            id="edit_customer_name" class="form-control" data-rule-required="true"
+                                                            data-msg-required="Customer Name is Required"/>
 
-                                                        @foreach($time_ranges as $time_range)
-                                                            <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
-                                                        @endforeach
-
-                                                    </select>
-                                                </div>
-                                            </div>
-
-
-                                        </div>
-
-                                        <div class="row justify-content-center align-items-center px-1">
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="product_id" id="product_select" class="form-control select2"
-                                                            data-rule-required="true" data-msg-required="Product is required">
-                                                        @foreach($products as $product)
-                                                            <option value="{{ $product->id }}">{{ $product->name }}</option>
-                                                        @endforeach
-                                                    </select>
                                                 </div>
                                             </div>
 
                                             <div class="col-6">
                                                 <div class="form-group">
-                                                    <select name="service_id" id="service_select" class="form-control select2" data-rule-required="true" data-msg-required="Service is Required">
-                                                        @foreach($services as $service)
-                                                            <option value="{{ $service->id }}">{{ $service->name }}</option>
-                                                        @endforeach
+                                                    <input type="text" placeholder="Mobile Number" name="walkin_phone"
+                                                            id="edit_mobile_no" class="form-control" data-rule-required="true"
+                                                            data-msg-required="Mobile is Required"/>
 
-                                                    </select>
                                                 </div>
                                             </div>
-
-                                        </div>
-
-                                        <div class="row justify-content-start align-items-center vh-100 px-1">
-                                            <div class="col-6">
-                                                <div class="form-group">
-                                                    <select name="shipment_type_id" id="shipment_select" class="form-control select2"
-                                                            data-rule-required="true" data-msg-required="Shipment Type is required">
-                                                        @foreach($pickup_shipment_types as $shipment_type)
-                                                            <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row align-items-center vh-100 px-1">
-                                            <div class="col-4">
-                                                <div class="form-group input-group">
-                                                    <input type="text" id="shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="No. of Shipments is required">
-                                                </div>
-                                            </div>
-
-                                            <div class="col-4 pl-0">
-                                                <div class="form-group input-group">
-                                                    <input type="text" id="total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
-                                                        data-rule-required="true" data-msg-required="Total Pieces is required">
-                                                </div>
-                                            </div>
-                                            <div class="col-4 pl-0">
-                                                <div class="form-group input-group">
-                                                    <input type="text" id="estimated_weight" name="estimated_weight"
-                                                        class="form-control text-left" placeholder="Weight">
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row justify-content-center align-items-center px-1">
-
-                                        </div>
-
-                                        <div class="row justify-content-center align-items-center vh-100 px-1">
                                             <div class="col-12">
                                                 <div class="form-group">
-                                                    <textarea type="text" name="remarks" class="form-control"
-                                                            placeholder="Remarks"></textarea>
+                                                    <input type="text" placeholder="Address" name="walkin_address" id="edit_walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
+
                                                 </div>
                                             </div>
-                                        </div>
-
-                        <!-- start additional services -->
-
-                        <div class="d-flex justify-content-start vh-100 pl-1">
-                        <b class="text-dark"> Additional Services </b>
-                        </div>
-                        <div class="d-flex justify-content-start align-items-center">
-
-                        <!-- start service list -->
-
-                        <div class="services-list col-12">
-
-                            <!-- start service item 1 -->
-                            <div class="d-flex align-items-center service-item mt-md-1">
-                                <div class="col-md-6">
-                                    <p class="mb-0 text-dark"> Labour </p>
+                                    </div>
                                 </div>
-                                <div class="col-md-6">
-                                    <div class="form-group input-group mb-0">
-                                        <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Qty.*" data-rule-required="true" data-msg-required="Item Quantity is required">
+                            </div>
+                            <div class="row justify-content-center align-items-center vh-100 mt-md-0 px-1">
+                                <div class="col-6">
+
+                                    <div class="form-group">
+                                        <div class="form-group input-group">
+                                            <div class="input-group-prepend">
+                                                        <span
+                                                                class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                            <span class="la la-calendar-o"></span>
+                                                        </span>
+                                            </div>
+
+                                            <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right require_one edit_pickup_date" id="edit_pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is Required">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <select name="preferred_time_range" id="edit_preferred_time_range" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Time is required">
+                                            @foreach($time_ranges as $time_range)
+                                                <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
+                                            @endforeach
+
+                                        </select>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- end service item 1 -->
+                            <div class="row justify-content-center align-items-center px-1">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <select name="product_id" id="edit_product_select" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="Product is required">
+                                            @foreach($products as $product)
+                                                <option value="{{ $product->id }}">{{ $product->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
 
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <select name="service_id" id="edit_service_select" class="form-control select2">
 
-                        </div>
+                                        </select>
+                                    </div>
+                                </div>
 
-                        <!-- end service list -->
-
-                        </div>
-
-                        <!-- end additional services -->
-
-                        <div class="row justify-content-center mt-md-2">
-                            <div class="col-3">
-                                <button id="AddNewRequest" type="submit" class="btn btn-primary btn-block">Submit
-                                </button>
                             </div>
-                        </div>
+
+                            <div class="row justify-content-start align-items-center vh-100 px-1">
+                                <div class="col-6">
+                                    <div class="form-group">
+                                        <select name="shipment_type_id" id="edit_shipment_select" class="form-control select2"
+                                                data-rule-required="true" data-msg-required="Shipment Type is required">
+                                            @foreach($pickup_shipment_types as $shipment_type)
+                                                <option value="{{ $shipment_type->id }}">{{ $shipment_type->name }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row align-items-center vh-100 px-1">
+                                <div class="col-4">
+                                    <div class="form-group input-group">
+                                        <input type="text" id="edit_shipments_count" placeholder="Shipments" name="shipments_count" class="form-control text-left"
+                                            data-rule-required="true" data-msg-required="No. of Shipments is required">
+                                    </div>
+                                </div>
+
+                                <div class="col-4 pl-0">
+                                    <div class="form-group input-group">
+                                        <input type="text" id="edit_total_pieces_count" placeholder="Total Pieces" name="pieces" class="form-control text-left"
+                                            data-rule-required="true" data-msg-required="Total Pieces is required">
+                                    </div>
+                                </div>
+                                <div class="col-4 pl-0">
+                                    <div class="form-group input-group">
+                                        <input type="text" id="edit_estimated_weight" name="estimated_weight" class="form-control text-left" placeholder="Weight" data-rule-required="true" data-msg-required="Weight is required">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row justify-content-center align-items-center px-1">
+
+                            </div>
+
+                            <div class="row justify-content-center align-items-center vh-100 px-1">
+                                <div class="col-12">
+                                    <div class="form-group">
+                                        <textarea type="text" name="remarks" id="edit_additional_request" class="form-control" placeholder="Additional Request"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                             <!-- start additional services -->
+
+                            <div class="d-flex justify-content-start vh-100 pl-1">
+                                <b class="text-dark"> Additional Services </b>
+                            </div>
+
+                            <div class="d-flex justify-content-start align-items-center">
+                            <!-- start service list -->
+                                <div class="edit-services-list col-12">
+                                    @foreach($additional_services as $additional_service)
+                                    <div class="d-flex align-items-center service-item mt-md-1">
+                                        <div class="col-md-6">
+                                            <p class="mb-0 text-dark"> {{ $additional_service->name }} </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group input-group mb-0">
+                                                <input type="text" name="additional_services[{{ $additional_service->id }}]" id="edit_a_service_{{ $additional_service->id }}" value="0" class="form-control text-center quantity" placeholder="Item Qty.">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+
+                                </div>
+
+                            <!-- end service list -->
+
+                            </div>
+
+                             <!-- end additional services -->
+
+                            <div class="row justify-content-center mt-md-2">
+                                <div class="col-3">
+                                    <button id="update_pickup_request_btn_submit" type="submit" class="btn btn-primary btn-block">Update
+                                    </button>
+                                </div>
+                            </div>
                         </form>
+
                     </div>
 
                 </div>
@@ -895,6 +879,54 @@
     </div>
 
     <!-- end of edit request popup modal -->
+
+    <!---- start of show additional services modal---->
+    <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
+    aria-labelledby="AdditionalServiceModal"
+    aria-hidden="true">
+   <div class="modal-dialog modal-lg" role="document">
+       <div class="modal-content">
+           <div class="modal-header bg-primary white">
+               <h4 class="modal-title white">Additional Services</h4>
+               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                   <span aria-hidden="true">&times;</span>
+               </button>
+           </div>
+           <div class="modal-body">
+               <div class="container">
+                   <!-- start additional services -->
+                   {{-- <div class="d-flex justify-content-start vh-100 pl-1">
+                         <b class="text-dark"> Additional Services </b>
+                   </div>--}}
+                   {{-- <div class="d-flex justify-content-start align-items-center">
+                        <!-- start service list -->
+                            <div class="services-list col-12 additionalservices">
+                              
+                            </div>
+                         <!-- end service list -->
+                   </div>  --}}
+                   <table class="table table-bordered">
+                        <thead>
+                                <tr role="row" class="bg-primary white">
+                                    <th class="border-primary border-darken-1">S. No.</th>
+                                    <th class="border-primary border-darken-1">Service</th>
+                                    <th class="border-primary border-darken-1">Qty</th>
+                                </tr>
+                        </thead>
+                        <tbody>
+
+                        </tbody>
+
+                    </table>
+                   <!-- end additional services -->
+
+                 
+               </div>
+           </div>
+       </div>
+   </div>
+</div>
+    <!----end of show additional services modal --->
 
 @endsection
 
@@ -970,7 +1002,7 @@
         display: inline-block;
         border: 1px solid #CCCCCC;
         background: #fff;
-        padding: 5px 10px;
+        padding: 5px 1px;
         color: #A3A3A3;
         border-radius: 5px;
         position: relative;
@@ -1122,11 +1154,11 @@
             $('#shippers_select').prepend('<option value="" selected="selected">Select Shippers</option>').select2({
                 placeholder: 'Select Customer',
                 width: '100%',
+                dropdownParent:$('#add_pickup_request')
             }).bind('select2:select', function () {
                 var shipper_id = parseInt($(this).val());
                 if (shipper_id) {
                     $('#pickup_address_id').empty();
-
 
                     $.ajax({
                         url: '{{ route('admin.v3_pickups.pending.shipper_info') }}',
@@ -1147,6 +1179,8 @@
                                 placeholder: 'Select Pickup Address',
                                 width: '100%'
                             }).val(null).trigger('change');
+                            $('#product_select').val(data.product_id).trigger('change');
+                            $('#product_select').attr('disabled', true);
                         } else {
                             toastr.error('No pickup address found!', 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -1177,8 +1211,9 @@
             var services = @json($services);
             $('#product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
                 placeholder: 'Select Product',
-                width: '100%'
-            }).bind('select2:select', function () {
+                width: '100%',
+                dropdownParent:$('#add_pickup_request')
+            }).bind('change', function () {
                 var product_id = parseInt($(this).val());
                 $('#service_select').empty();
                 $.each(services, function(key,value) {
@@ -1190,25 +1225,69 @@
                 });
                 $('#service_select').select2({
                     placeholder: 'Select Service',
-                    width: '100%'
+                    width: '100%',
+                    dropdownParent:$('#add_pickup_request')
                 }).val(null).trigger('change');
             });
 
+            $('#edit_product_select').prepend('<option value="" selected="selected">Select Product</option>').select2({
+                placeholder: 'Select Product',
+                width: '100%',
+                dropdownParent:$('#update_pickup_request')
+            }).bind('change', function () {
+                var product_id = parseInt($(this).val());
+                $('#edit_service_select').empty();
+                $.each(services, function(key,value) {
+                    if(value.segment_id == product_id){
+                        var name = value.name;
+                        var service_option = new Option(name, value.id, false, false);
+                        $('#edit_service_select').append(service_option).trigger('change');
+                    }
+                });
+                $('#edit_service_select').select2({
+                    placeholder: 'Select Service',
+                    width: '100%',
+                    dropdownParent:$('#update_pickup_request')
+                }).val(null).trigger('change');
+            });
+            
+            
+
             $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
                 placeholder: 'Select Service',
-                width: '100%'
+                width: '100%',
+                dropdownParent:$('#add_pickup_request')
+            });
+            $("#edit_service_select").prepend('<option value="" selected="selected">Select Service</option>').select2({
+                placeholder: 'Select Service',
+                width: '100%',
+                dropdownParent:$('#update_pickup_request')
             });
 
             $('#shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
                 placeholder: 'Select Shipment Type',
-                width: '100%'
+                width: '100%',
+                dropdownParent:$('#add_pickup_request')
             });
+            $('#edit_shipment_select').prepend('<option value="" selected="selected">Select Shipment Type</option>').select2({
+                placeholder: 'Select Shipment Type',
+                width: '100%',
+                dropdownParent:$('#update_pickup_request')
+            });
+            
 
             $('#preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
                 placeholder: 'Select Pickup Time*',
-                width: '100%'
+                width: '100%',
+                dropdownParent:$('#add_pickup_request') 
             });
-
+            $('#edit_preferred_time_range').prepend('<option value="" selected="selected">Pickup Time</option>').select2({
+                placeholder: 'Select Pickup Time*',
+                width: '100%',
+                dropdownParent:$('#update_pickup_request') 
+            });
+            
+            
             var pickup_date = $('#pickup_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1220,7 +1299,26 @@
                 formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
             });
+            var edit_pickup_date = $('#edit_pickup_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                min: '{{ Carbon\Carbon::today() }}',
+                // format: 'dd mmmm, yyyy',
+                format: 'yyyy-mm-dd',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd',
+                hiddenSuffix: '_formatted',
+            });
 
+            $('#customer_type').on('click', 'a',function (){
+                if($(this).hasClass('registered')){
+                    $('#pickup_type_id').val(1);
+                }
+                else if($(this).hasClass('walk_in')){
+                    $('#pickup_type_id').val(2);
+                }
+            });
             $('#regular_section').on('click', 'a',function (){
                 if($(this).hasClass('onetime')){
                     $('#regular_pickup').val(1);
@@ -1229,6 +1327,8 @@
                     $('#regular_pickup').val(2);
                 }
             });
+        
+        
 
             jQuery.fn.DataTable.Api.register('buttons.exportData()', function (options) {
                 if (this.context.length) {
@@ -1466,8 +1566,9 @@
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
                     {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
-                    {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments'},
+                    {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
+                    {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
@@ -1504,7 +1605,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
+                        if ($(header).is('.action') || $(header).is('.select') || $(header).is('.serial_number') || $(header).is('.shipments') || $(header).is('.status') || $(header).is('.trax_reason') || $(header).is('.trax_remarks') || $(header).is('.shipper_remarks') || $(header).is('.attempted_date') || $(header).is('.action') || $(header).is('.rider_remarks') || $(header).is('.brand_name') || $(header).is('.all_remarks')) {
                             $(td).appendTo($(search));
                         } else {
                             var current = $(input).appendTo($(search)).on('change', function () {
@@ -1591,19 +1692,19 @@
                 }
             });
 
-            $('#update_pickup_modal .reason').select2({
+            $('#EditRequestModal .reason').select2({
                 width: '100%',
                 placeholder: 'Not Pick Reason*',
-                dropdownParent: $('#update_pickup_modal')
+                dropdownParent: $('#EditRequestModal')
             }).bind('change', function () {
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
             });
-            $('body').on('change', '#update_pickup_modal #trax_remarks', function () {
+            $('body').on('change', '#EditRequestModal #trax_remarks', function () {
                 $(this).val($(this).val().trim());
             });
-            $('#update_pickup_modal form').validate({
+            $('#EditRequestModal form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function (error, element) {
@@ -1731,6 +1832,49 @@
                     });
                 } */
             });
+            // var additional_services=@json($additional_services);
+            $('body').on('click','.edit_pickup_request',function(){
+                var pickup_request_id =$(this).closest('tr').find('.pickup_request_id').text();
+                // $(".edit-services-list").empty();
+                $('.edit-services-list input').val(0);
+                $.ajax({
+                    url:'{{route('admin.v3_pickups.pending.edit',['id'=>':id']) }}'.replace(':id',pickup_request_id),
+                    method:'GET'
+                }).done(function(data){
+                    var pickup_request=data.pickup_request;
+                    var pickup_request_services=pickup_request.pickup_request_services;
+                    if(data.status==0){
+                        $("#pickup_request_id").val(pickup_request.id);
+                        $("#edit_customer_name").val(pickup_request.walkin_name);
+                        $("#edit_mobile_no").val(pickup_request.walkin_contact);
+                        $("#edit_walkin_address").val(pickup_request.walkin_address);
+                        $("#edit_customer_name").val(pickup_request.walkin_name);
+                        $("#edit_pickup_date").val(pickup_request.pickup_date).trigger('change');
+                        $("#edit_preferred_time_range").val(pickup_request.time_range_id).trigger('change');
+                        $("#edit_product_select").val(pickup_request.segment_id).trigger('change');
+                        $("#edit_service_select").val(pickup_request.sub_segment_id).trigger('change');
+                        $("#edit_shipment_select").val(pickup_request.pickup_shipment_type_id).trigger('change');
+                        $("#edit_shipments_count").val(pickup_request.booked);
+                        $("#edit_total_pieces_count").val(pickup_request.pieces);
+                        $("#edit_estimated_weight").val(pickup_request.weight);
+                        $("#edit_additional_request").val(pickup_request.special_request);
+                        $("#edit_pickup_address_id").val(pickup_request.pickup_address_id);
+                     
+
+                        $.each(pickup_request_services,function(key,value){
+                            $("#edit_a_service_"+value.id).val(value.pivot.count);
+                        });
+                    }else {
+                            toastr.error('No pickup Request found!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                    }
+                   
+                });
+                $("#EditRequestModal").modal("show");
+            });
+            
             $('#AddRemarksModal').on('hidden.bs.modal', function () {
                 $('#add_remark').val('');
             });
@@ -1755,7 +1899,7 @@
                 var pickup_req_id = parseInt($(this).attr('rel'));
 
 
-                console.log(pickup_req_id);
+                // console.log(pickup_req_id);
 
                 $.ajax({
                     url: '{!! route('admin.v2_pickups.pending.all_remarks') !!}',
@@ -1844,5 +1988,33 @@
             });
 
         });
+        
+        function showadditionalservices(event,pickup_request_id){
+            $("#AdditionalServiceModal table tbody").empty();
+            $.ajax({
+                url:'{{ route('admin.v3_pickups.pending.pickup_request_services') }}',
+                method:'POST',
+                data:{
+                    'pickup_request_id':pickup_request_id,
+                    '_token':'{{ csrf_token() }}'
+                }
+            }).done(function(data){
+                if (data.status == 0) {
+                    // console.log(data);
+                    // var pickup_request_services=data.additional_services[0].pickup_request_services;
+                            $.each(data.pickup_request_services,function(key,value) {
+                            //   $(".additionalservices").append('<div class="d-flex align-items-center service-item mt-md-1"><div class="col-md-6"><p class="mb-0 text-dark">'+value.service_name+' </p></div> <div class="col-md-6"><div class="form-group input-group mb-0"><input type="text" value='+value.count+' class="form-control text-center" readonly></div></div> </div>')
+                              $("#AdditionalServiceModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle service_name">'+value.service_name+'</td><td class=" align-middle service_count">'+value.count+'</td></tr>')
+                            });
+                        
+                        } else {
+                            toastr.error('No Additional Service found!', 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                        });
+                }
+            })
+           $("#AdditionalServiceModal").modal("show");
+        }
     </script>
 @endsection
