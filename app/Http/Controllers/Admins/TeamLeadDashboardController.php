@@ -374,11 +374,11 @@ class TeamLeadDashboardController extends Controller
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
 
-                                $rv_city = RvAgentAssignHub::where('agent_id', $result->employee_id)->orderBy('priority', 'ASC')->get();
+                                $rv_city = RvAgentAssignHub::where('agent_id', $result->sid)->orderBy('priority', 'ASC')->get();
                                 $rv_city = $rv_city->pluck('zone_id')->toArray();
 
                                 $rv_city = implode(',', $rv_city);
-                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->employee_id . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
+                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
@@ -415,6 +415,7 @@ class TeamLeadDashboardController extends Controller
     // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
+
         $zones = [];
         $sorted_zones = explode(',', $request->unsorted_zones);
         foreach ($sorted_zones as $key => $value) {
@@ -424,9 +425,12 @@ class TeamLeadDashboardController extends Controller
             return $array->count();
         });
         try {
-            $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id);
-            if ($rvAgentAssignHub) {
-                $rvAgentAssignHub->delete();
+            $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id)->get();
+
+            if ($rvAgentAssignHub->isNotEmpty()) {
+                $rvAgentAssignHub->each(function ($id) {
+                    $id->delete();
+                });
             }
             $count = 0;
             foreach ($sorted_zones as $key => $value) {

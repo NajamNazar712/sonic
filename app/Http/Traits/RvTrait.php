@@ -1480,6 +1480,7 @@ trait RvTrait
                         // Shipment is found and already in working state or return is completed, new shipment will get to agent
                         $find_shipment_assigned_agent = RvShipmentAssignAgent::where('shipment_id', $shipment->id)->first();
                         if ($find_shipment_assigned_agent) {
+                            $shipment = null;
                             continue;
                         }
 
