@@ -697,7 +697,7 @@
                             novalidate="novalidate">
                             @csrf
                             <div class="form-group text-left">
-                                <input type="text" id="shipment_id" value="">
+                                <input type="hidden" id="shipment_id" value="">
                                 <select name="call_finding_dropdown" class="form-control select2"
                                     id="call_finding_dropdown" data-rule-required="true"
                                     data-msg-required="Call Finding is required">
