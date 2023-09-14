@@ -99,11 +99,11 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
-                            <input type="hidden" class="unsorted_hubs" name="unsorted_hubs">
+                            <input type="hidden" class="unsorted_zones" name="unsorted_zones">
                             <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple
                                 style="width: 100%;">
-                                @foreach ($hubs as $hub)
-                                    <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                @foreach ($zones as $zone)
+                                    <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                                 @endforeach
                             </select>
 
@@ -406,7 +406,7 @@
                 var selectedValue = $('#search_origin').val();
 
                 if (selectedValue == '') {
-                    $('#select_message_error').text('Please select at least one Hub');
+                    $('#select_message_error').text('Please select at least one zone');
                 } else {
                     this.submit();
                 }
@@ -751,7 +751,7 @@
                 rowCallback: function(row, data, index) {
                     // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
-
+                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -784,9 +784,17 @@
                         '<option value="1">Permanent</option>'+
                     '</select>';
 
+
+                    var currentTime = new Date();
+                    var year = currentTime.getFullYear();
+                    var month = String(currentTime.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1 and pad with '0'
+                    var day = String(currentTime.getDate()).padStart(2, '0');
+
+                    var formattedDate = year + '-' + month + '-' + day
+
                     var employee_attendance = '<select name="employee_attendance" id="employee_attendance" class="select2 form-control">' +
-                        '<option value="1">Offline</option>'+
-                        '<option value="2">Online</option>'+
+                        '<option value="Offline">Offline</option>'+
+                        `<option value="${formattedDate}">Online</option>`+
                     '</select>';
 
                     this.api().columns().every(function(column_id) {
@@ -820,7 +828,8 @@
                         }else if($(header).is('.attendance_date'))
                         {
                             $(employee_attendance).appendTo($(search))
-                                .on( 'change', function () {
+                            .on( 'change', function () {
+                                console.log($(this).val());
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
@@ -1215,7 +1224,7 @@
             });
 
             // Initialize with default values
-            var defaultValues = {!! $hubs->pluck('id') !!};
+            var defaultValues = {!! $zones->pluck('id') !!};
             $select2.val(defaultValues).trigger('change');
 
             // Cache order of initial values
@@ -1265,13 +1274,13 @@
                     $input.before($el);
                 });
 
-                $('.unsorted_hubs').val(stringList);
+                $('.unsorted_zones').val(stringList);
 
                 var selectedIds = $('#search_origin').find('option:selected').map(function() {
                     return $(this).val();
                 }).get();
 
-                var idArray = $('.unsorted_hubs').val().split(',');
+                var idArray = $('.unsorted_zones').val().split(',');
 
                 selectedIds = selectedIds.filter(function(item) {
                     return idArray.indexOf(item) === -1;
@@ -1280,7 +1289,7 @@
                 // Append values from array 2 to the end of array 1
                 selectedIds = selectedIds.concat(idArray);
 
-                $('.unsorted_hubs').val(selectedIds)
+                $('.unsorted_zones').val(selectedIds)
 
             }
 

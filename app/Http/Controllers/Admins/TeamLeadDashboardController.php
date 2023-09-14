@@ -50,7 +50,7 @@ class TeamLeadDashboardController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 703);
 
-        $hubs = Zone::where('status', '1')
+        $zones = Zone::where('status', '1')
             ->where('business_category_id', '1')
             ->select('id', 'name')
             ->get();
@@ -62,7 +62,7 @@ class TeamLeadDashboardController extends Controller
         // });
 
         $employee_additional_days = EmployeeAdditionalDay::get();
-        
+
         $empid = Admin::find(Auth::id())->employee_id;
 
         $employee_statuses = EmployeeStatus::all();
@@ -79,11 +79,11 @@ class TeamLeadDashboardController extends Controller
             ->get();
 
 
-            $employee_types = EmployeeType::all();
+        $employee_types = EmployeeType::all();
 
 
 
-        return view('admin.leads.team_lead')->with(['employee_types' => $employee_types,'employee_statuses' => $employee_statuses, 'hubs' => $hubs, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
+        return view('admin.leads.team_lead')->with(['employee_types' => $employee_types, 'employee_statuses' => $employee_statuses, 'zones' => $zones, 'employee_additional_days' => $employee_additional_days, 'number_of_available_agents' => $Attendance]);
     }
 
     public function shipment_assign_index()
@@ -208,7 +208,7 @@ class TeamLeadDashboardController extends Controller
         }
 
         $empid = Admin::find(Auth::id())->employee_id;
-        
+
         $employees = Employee::join('cities', 'employees.city_id', '=', 'cities.id')
             ->leftjoin('employees as lm', 'lm.id', 'employees.line_manager_id')
             ->leftjoin('admin_departments as ads', 'ads.id', '=', 'employees.department_id')
@@ -232,7 +232,7 @@ class TeamLeadDashboardController extends Controller
                     ->havingRaw('COUNT(DISTINCT rvab.agent_id) > 1');
             })
 
-            ->select(['employees.rider_type_id as rider_type_id','rvab.city_id as rv_city_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
+            ->select(['employees.rider_type_id as rider_type_id', 'rvab.city_id as rv_city_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
@@ -323,6 +323,17 @@ class TeamLeadDashboardController extends Controller
                     return '<button class="btn btn-sm btn-outline-info align-middle assigned_shipment"  data-assigned=' . implode(',', $tracking_number) . '>' . count($tracking_number) . '</button>';
                 }
             })
+            ->filterColumn('ea.attendance_date', function ($query, $keyword) {
+
+                if ($keyword != '' && $keyword != "Offline") {
+                    $query->where('ea.attendance_date', "like", "%" . $keyword . "%");
+
+                } else if($keyword == "Offline") {
+
+                    $query->whereDate('ea.created_at', '!=', Carbon::Today());
+                }
+            })
+
             ->filterColumn('ads.name', function ($query, $keyword) {
 
                 if ($keyword != '') {
@@ -345,9 +356,9 @@ class TeamLeadDashboardController extends Controller
                 // dd($user);
                 $date = Carbon::parse($user->attendance_date);
                 if ($date->isToday() && isset($user->attendance_date)) {
-                    return "Online";
+                    return 'Online';
                 } else {
-                    return "Offline";
+                    return 'Offline';
                 }
             })
             ->addColumn("action", function ($result) {
@@ -405,8 +416,8 @@ class TeamLeadDashboardController extends Controller
     public function assign_hub_agent(Request $request)
     {
         $zones = [];
-        $sorted_hubs = explode(',', $request->unsorted_hubs);
-        foreach($sorted_hubs as $key => $value){
+        $sorted_zones = explode(',', $request->unsorted_zones);
+        foreach ($sorted_zones as $key => $value) {
             $zones[] = City::where('zone_id', $value)->get();
         }
         $totalCount = collect($zones)->sum(function ($array) {
@@ -417,30 +428,29 @@ class TeamLeadDashboardController extends Controller
             if ($rvAgentAssignHub) {
                 $rvAgentAssignHub->delete();
             }
-            $count  = 0 ;
-            foreach($sorted_hubs as $key => $value){
-                for ($i = 0 ; $i < $totalCount ; $i++) {
+            $count = 0;
+            foreach ($sorted_zones as $key => $value) {
+                for ($i = 0; $i < $totalCount; $i++) {
                     if (!isset($zones[$key][$i])) {
-                    break;
-                } else {
-                  $count = $count + 1;
-                    RvAgentAssignHub::create([
-                        'agent_id' => $request->employee_id,
-                        'city_id' => $zones[$key][$i]['id'],
-                        'zone_id' => $zones[$key][$i]['zone_id'],
-                        'priority' => $count,
-                    ]);
+                        break;
+                    } else {
+                        $count = $count + 1;
+                        RvAgentAssignHub::create([
+                            'agent_id' => $request->employee_id,
+                            'city_id' => $zones[$key][$i]['id'],
+                            'zone_id' => $zones[$key][$i]['zone_id'],
+                            'priority' => $count,
+                        ]);
+                    }
                 }
             }
-        }
+            if ($count > 0) {
+                return redirect()->route('admin.team_lead.index')->with('success', 'Assigned Successfully');
 
-        if($count > 0){
-            return redirect()->route('admin.team_lead.index')->with('success', 'Assigned SuccessFully');
+            } else {
+                return redirect()->route('admin.team_lead.index')->with('error', 'Zone Not Assigned');
 
-        }else{
-            return redirect()->route('admin.team_lead.index')->with('error', 'Zone Not Assigned');
-
-        }
+            }
         } catch (Exception $ex) {
 
             return redirect()->route('admin.team_lead.index')->with('error', $ex->getMessage());
