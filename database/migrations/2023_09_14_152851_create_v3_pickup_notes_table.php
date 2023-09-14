@@ -15,6 +15,12 @@ class CreateV3PickupNotesTable extends Migration
     {
         Schema::create('v3_pickup_notes', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('rider_id')->index();
+            $table->integer('pickups')->index();
+            $table->tinyInteger('status')->index();
+            $table->integer('shipments')->default(0);
+            $table->integer('arrived_shipments')->default(0);
+            $table->integer('shipments_scanned_by_rider')->default(0);
             $table->timestamps();
         });
     }

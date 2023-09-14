@@ -15,6 +15,10 @@ class CreateV3PickupNoteRequestsTable extends Migration
     {
         Schema::create('v3_pickup_note_requests', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('pickup_note_id')->index();
+            $table->integer('pickup_request_id')->index();
+            $table->tinyInteger('status')->default(0)->index();
+            $table->integer('ordering')->index();
             $table->timestamps();
         });
     }
