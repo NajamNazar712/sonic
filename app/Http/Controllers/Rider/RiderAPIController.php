@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
 use App\RiderAssignedHubForDeliveryNote;
