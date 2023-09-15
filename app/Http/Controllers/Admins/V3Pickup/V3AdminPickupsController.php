@@ -148,7 +148,7 @@ class V3AdminPickupsController extends Controller
         }
 
         $this->auto_pickup_assign($pickup_request_id);
-        
+
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
     }
