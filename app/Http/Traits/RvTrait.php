@@ -1359,6 +1359,11 @@ trait RvTrait
             $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
         }
 
+        $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
+            return $value != "";
+        });
+
+
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
@@ -1372,6 +1377,11 @@ trait RvTrait
             }
 
         }
+        
+        $included_shippers = array_filter($included_shippers, function($value){
+            return $value != "";
+        });
+
 
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
         // If only_shippers setting is not found, initialize as an empty array
@@ -1381,13 +1391,17 @@ trait RvTrait
             $only_shipper = $only_shipper->first();
             $only_shippers = explode(',', $only_shipper['text']);
         }
+
+        $only_shippers = array_filter($only_shippers, function($value){
+            return $value != "";
+        });
+
         
         foreach ($sorted_agents as $key => $agent) {
 
-            
             $shipments = [];
             
-            if (!($included_shippers[0] == "") || !($rv_priority_shippers[0] == "")) {
+            if (!empty($included_shippers) || (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
                 
                 $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                 $mergeArr = array_unique($mergeArr);

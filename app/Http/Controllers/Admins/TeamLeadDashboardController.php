@@ -417,7 +417,6 @@ class TeamLeadDashboardController extends Controller
     // Description: this method is used for Assign Agent AS per Priority
     public function assign_hub_agent(Request $request)
     {
-
         $zones = [];
         $sorted_zones = explode(',', $request->unsorted_zones);
         foreach ($sorted_zones as $key => $value) {
@@ -434,6 +433,7 @@ class TeamLeadDashboardController extends Controller
                     $id->delete();
                 });
             }
+            
             $count = 0;
             foreach ($sorted_zones as $key => $value) {
                 for ($i = 0; $i < $totalCount; $i++) {

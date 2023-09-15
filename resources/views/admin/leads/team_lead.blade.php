@@ -1192,39 +1192,46 @@
                 });
             });
 
-            var SelectedCities = [];
-            var SelectedCitiesName = [];
-            var CityName = null
-                $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
-                    var employeeId = $(this).attr('data-id');
-                    var cities = $(this).attr('data-city');
-                    $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
-                        employeeId + '">');
-                    selectedCities = cities.toString().split(',');
-                    if (cities != null) {
-                        $('#search_origin option').each(function() {
-                            var optionValue = $(this).val();
-                            if (selectedCities.includes(optionValue)) {
-                                var cityIndex = selectedCities.indexOf(optionValue);
-                                if (cityIndex > -1) {
-                                    $('#search_origin').append($(this));
-                                    cityName = $(this).text();
-                                    $(this).prop('selected', true);
+            $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
+                var employeeId = $(this).attr('data-id');
+                cities = $(this).attr('data-city');
+                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' + employeeId + '">');
+                selectedCities = cities.toString().split(',');
 
-                                }
+                console.log(selectedCities);
+                if (cities != null) {
+                    var selectedOptions = [];
+                    $('#search_origin option').each(function() {
+                        var optionValue = $(this).val();
+                        if (selectedCities.includes(optionValue)) {
+                            selectedOptions.push($(this));
+                        }
+                        $(this).prop('selected', false);
+                    });
 
-                                $('input[name="unsorted_zones"]').val(selectedCities);
-                            } else {
-                                $(this).prop('selected', false);
-                            }
+                    $('#search_origin').empty();
+                    $.each(selectedCities, function(index, value) {
+                        var option = selectedOptions.find(function(opt) {
+                            return opt.val() === value;
                         });
-                        $('#search_origin').trigger('change');
-                        $('#AssignHubModal').modal('show');
-                    } else if (rv_city == null) {
-                        $("#search_origin option").prop("selected", false).trigger("change");
-                        $('#AssignHubModal').modal('show');
-                    }
-                });
+                        if (option) {
+                            $('#search_origin').append(option);
+                            option.prop('selected', true);
+                        }
+                    });
+
+                    $('input[name="unsorted_zones"]').val(selectedCities);
+
+                    $('#search_origin').trigger('change');
+                    $('#AssignHubModal').modal('show');
+                } else if (rv_city == null) {
+                    $("#search_origin option").prop("selected", false).trigger("change");
+                    $('#AssignHubModal').modal('show');
+                }
+            });
+
+            
+
 
 
 
