@@ -2892,6 +2892,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
         });
+
+        Route::prefix('rv_report')->name('rv_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
+        });
     });
 
     //Reports end
@@ -4100,7 +4105,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@shipment_assign_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@shipment_assign_list')->name('list');
     });
-
+    
 
     Route::prefix('leads')->name('leads.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');
