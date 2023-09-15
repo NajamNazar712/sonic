@@ -5683,7 +5683,7 @@ class ReturnController extends Controller
                                 }
 
                             }
-                            $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url);
+                            $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url ?? null);
                         }
                     }
                     
