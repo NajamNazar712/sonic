@@ -1267,7 +1267,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_index')->name('index');
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_list')->name('list');
-            Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_assign')->name('assign');
+            Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@rider_assign')->name('assign');
             Route::post('pickup_request_services', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_request_services')->name('pickup_request_services');
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
             Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit_info')->name('edit');
