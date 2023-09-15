@@ -228,11 +228,11 @@ class TeamLeadDashboardController extends Controller
             })
             ->leftJoin('rv_agent_assign_hubs as rvab', function ($join) {
                 $join->on('rvab.agent_id', '=', 'staff.id')
-                    ->groupBy('rvab.city_id')
+                    ->groupBy('rvab.zone_id')
                     ->havingRaw('COUNT(DISTINCT rvab.agent_id) > 1');
             })
 
-            ->select(['employees.rider_type_id as rider_type_id', 'rvab.city_id as rv_city_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
+            ->select(['employees.rider_type_id as rider_type_id', 'rvab.zone_id as rv_zone_id', 'ea.attendance_date as attendance_date', 'employees.id as employee_id', 'employees.name as employee_name', 'employees.city_id as city_id', 'cities.name as city', 'employees.trax_id', 'employees.request_status_id', 'employees.status_id as status_id', 'employees.employee_type_id', 'employees.cnic', 'employees.phone_number', 'et.name as employee_type', 'es.name as status', 'ads.name as department_name', 'employees.shift_id as shift_id', 'est.name as staff_category', 'employees.staff_category_id', 'employees.joining_date', 'ed.name as designation', 'staff.id as staff_id', 'employees.is_line_manager', 'lm.name as line_manager', 'employees.line_manager_id', 'employees.last_working_date as last_working_date', 'employees.official_email as official_email', 'employees.confirmation_status', 'employees.old_trax_id as old_trax_id', 'employees.remarks as remarks', 'staff.id as sid'])
             ->where('employees.staff_category_id', 3)
             ->where('employees.line_manager_id', $empid)
             ->where('employees.is_line_manager', 0)
@@ -374,11 +374,13 @@ class TeamLeadDashboardController extends Controller
                         if ($result->status_id == 1 || $result->status_id == 3) {
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {
 
-                                $rv_city = RvAgentAssignHub::where('agent_id', $result->sid)->orderBy('priority', 'ASC')->get();
-                                $rv_city = $rv_city->pluck('zone_id')->toArray();
+                                $rv_zone = RvAgentAssignHub::where('agent_id', $result->sid)->orderBy('priority', 'ASC')->get();
+                                $rv_zone = $rv_zone->pluck('zone_id')->toArray();
+                                $rv_zone = array_unique( $rv_zone);
+                                $rv_zone = implode(',', $rv_zone);
 
-                                $rv_city = implode(',', $rv_city);
-                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_city . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Hub</div></div></button>';
+                                
+                                $dropdown .= '<button type="button" class="dropdown-item assign_hub" data-id="' . $result->sid . '" data-city="' . $rv_zone . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Assign Zones</div></div></button>';
                                 $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">De-Activate Staff</div></button>';
                             }
                             if (session('role_id') == 1 || in_array(903, session('permissions'))) {

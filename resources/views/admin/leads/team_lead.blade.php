@@ -304,6 +304,7 @@
         .statusOnhold {
             background-color: #154360;
         }
+
     </style>
 @endsection
 
@@ -448,8 +449,11 @@
             var territory = '';
 
             $("#search_origin").select2({
-                placeholder: "Select Hub",
+                placeholder: "Select Zone",
                 width: '100%'
+            }).on('change', function(){
+                $('#select_message_error').text('');
+
             });
 
             $("#reference_id").prepend('<option value="" selected></option>').select2({
@@ -1189,38 +1193,45 @@
             });
 
             var SelectedCities = [];
-            $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
-                var employeeId = $(this).attr('data-id');
-                var cities = $(this).attr('data-city');
-                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
-                    employeeId + '">');
-                selectedCities = cities.toString().split(',');
-                if (cities != null) {
-                    $('#search_origin option').each(function() {
-                        var optionValue = $(this).val();
-                        if (selectedCities.includes(optionValue)) {
-                            var cityIndex = selectedCities.indexOf(optionValue);
-                            if (cityIndex > -1) {
-                                $(this).detach();
-                                $('#search_origin').prepend($(this));
+            var SelectedCitiesName = [];
+            var CityName = null
+                $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
+                    var employeeId = $(this).attr('data-id');
+                    var cities = $(this).attr('data-city');
+                    $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
+                        employeeId + '">');
+                    selectedCities = cities.toString().split(',');
+                    if (cities != null) {
+                        $('#search_origin option').each(function() {
+                            var optionValue = $(this).val();
+                            if (selectedCities.includes(optionValue)) {
+                                var cityIndex = selectedCities.indexOf(optionValue);
+                                if (cityIndex > -1) {
+                                    $('#search_origin').append($(this));
+                                    cityName = $(this).text();
+                                    $(this).prop('selected', true);
+
+                                }
+
+                                $('input[name="unsorted_zones"]').val(selectedCities);
+                            } else {
+                                $(this).prop('selected', false);
                             }
-                            $(this).prop('selected', true);
-                        } else {
-                            $(this).prop('selected', false);
-                        }
-                    });
-                    $('#search_origin').trigger('change');
-                    $('#AssignHubModal').modal('show');
-                } else if (rv_city == null) {
-                    $("#search_origin option").prop("selected", false).trigger("change");
-                    $('#AssignHubModal').modal('show');
-                }
-            });
+                        });
+                        $('#search_origin').trigger('change');
+                        $('#AssignHubModal').modal('show');
+                    } else if (rv_city == null) {
+                        $("#search_origin option").prop("selected", false).trigger("change");
+                        $('#AssignHubModal').modal('show');
+                    }
+                });
+
 
 
             var $select2 = $('#search_origin').select2({
                 templateSelection: template,
-                width: '100%'
+                width: '100%',
+                placeholder: 'Select Zones',
             });
 
             // Initialize with default values
