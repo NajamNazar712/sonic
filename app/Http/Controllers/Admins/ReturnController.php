@@ -6789,31 +6789,36 @@ class ReturnController extends Controller
     // Therefore, we are now only passing the consignee ID, which is 2, in the call_to_id.
     public function update_call_status(Request $request){
 
-        $shipment = Shipment::find($request->shipment_id);
-        
-        if (!$shipment) {
-            return response()->json(['status' => 0]);
+        $shipment_ids = explode(',',$request->shipment_id);
+
+        foreach ($shipment_ids as $shipment_id) {
+            # code...
+            $shipment = Shipment::find($shipment_id);
+            
+            if (!$shipment) {
+                return response()->json(['status' => 0]);
+            }
+    
+            $status = new StatusRemark();
+            $status->shipment_id = $shipment_id;
+            $status->call_finding_id = $request->call_finding_id;
+            $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
+            $status->call_to_id = 2;
+            $status->sub_status_call_finding_remarks = $request->custom_remark;
+            $status->shipment_status_id = $shipment->shipper_status_id;
+            $status->updated_by = Auth::id();
+    
+            $status->save();
+    
+            //adding status_remark_id in rcp_assigned_shipments table
+            $add_status_remarks_id = RcpAssignedShipment::where('shipment_id',$shipment_id)->latest()->first();
+            if($add_status_remarks_id){
+                $add_status_remarks_id->status_remarks_id = $status->id;
+                $add_status_remarks_id->save();
+            }
+    
+            return response()->json(['status' => 1]);
         }
-
-        $status = new StatusRemark();
-        $status->shipment_id = $request->shipment_id;
-        $status->call_finding_id = $request->call_finding_id;
-        $status->sub_status_call_finding_id = $request->sub_status_call_finding_id;
-        $status->call_to_id = 2;
-        $status->sub_status_call_finding_remarks = $request->custom_remark;
-        $status->shipment_status_id = $shipment->shipper_status_id;
-        $status->updated_by = Auth::id();
-
-        $status->save();
-
-        //adding status_remark_id in rcp_assigned_shipments table
-        $add_status_remarks_id = RcpAssignedShipment::where('shipment_id',$request->shipment_id)->latest()->first();
-        if($add_status_remarks_id){
-            $add_status_remarks_id->status_remarks_id = $status->id;
-            $add_status_remarks_id->save();
-        }
-
-        return response()->json(['status' => 1]);
     }
     public function call_status_history(Request $request)
     {
