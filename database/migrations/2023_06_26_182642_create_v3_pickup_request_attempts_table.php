@@ -21,7 +21,6 @@ class CreateV3PickupRequestAttemptsTable extends Migration
             $table->integer('shipments_received')->nullable()->index();
             $table->integer('reason_id')->nullable()->index();
             $table->string('trax_remarks')->nullable();
-            $table->string('shipper_remarks')->nullable();
             $table->timestamp('attempt_date')->index();
             $table->integer('assigned_by')->index();
             $table->timestamps();

@@ -332,7 +332,7 @@ class ProcessRetailShipmentBookingDB implements ShouldQueue
         }
 
 
-        AdminPickupsController::generate($shipment_id);
+//        AdminPickupsController::generate($shipment_id);
         NotificationsController::send(115, $tracking_number, $shipper_info->id);
     }
 }
