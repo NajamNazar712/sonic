@@ -88,7 +88,7 @@
         <div class="modal-dialog modal-lg justify-content-center" role="document">
             <div class="modal-content">
                 <div class="modal-header text-center">
-                    <h4 class="modal-title w-100 font-weight-bold">Select Hub</h4>
+                    <h4 class="modal-title w-100 font-weight-bold">Select Zones</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -99,11 +99,11 @@
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
                             <!-- Adjust the column width as per your preference -->
-                            <input type="hidden" class="unsorted_hubs" name="unsorted_hubs">
+                            <input type="hidden" class="unsorted_zones" name="unsorted_zones">
                             <select name="assign_hubs[]" id="search_origin" class="form-control select2" multiple
                                 style="width: 100%;">
-                                @foreach ($hubs as $hub)
-                                    <option value="{{ $hub->id }}">{{ $hub->name }}</option>
+                                @foreach ($zones as $zone)
+                                    <option value="{{ $zone->id }}">{{ $zone->name }}</option>
                                 @endforeach
                             </select>
 
@@ -304,6 +304,7 @@
         .statusOnhold {
             background-color: #154360;
         }
+
     </style>
 @endsection
 
@@ -406,7 +407,7 @@
                 var selectedValue = $('#search_origin').val();
 
                 if (selectedValue == '') {
-                    $('#select_message_error').text('Please select at least one Hub');
+                    $('#select_message_error').text('Please select at least one zone');
                 } else {
                     this.submit();
                 }
@@ -448,8 +449,11 @@
             var territory = '';
 
             $("#search_origin").select2({
-                placeholder: "Select Hub",
+                placeholder: "Select Zone",
                 width: '100%'
+            }).on('change', function(){
+                $('#select_message_error').text('');
+
             });
 
             $("#reference_id").prepend('<option value="" selected></option>').select2({
@@ -751,7 +755,7 @@
                 rowCallback: function(row, data, index) {
                     // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
-
+                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -784,9 +788,17 @@
                         '<option value="1">Permanent</option>'+
                     '</select>';
 
+
+                    var currentTime = new Date();
+                    var year = currentTime.getFullYear();
+                    var month = String(currentTime.getMonth() + 1).padStart(2, '0'); // Months are 0-based, so add 1 and pad with '0'
+                    var day = String(currentTime.getDate()).padStart(2, '0');
+
+                    var formattedDate = year + '-' + month + '-' + day
+
                     var employee_attendance = '<select name="employee_attendance" id="employee_attendance" class="select2 form-control">' +
-                        '<option value="1">Offline</option>'+
-                        '<option value="2">Online</option>'+
+                        '<option value="Offline">Offline</option>'+
+                        `<option value="${formattedDate}">Online</option>`+
                     '</select>';
 
                     this.api().columns().every(function(column_id) {
@@ -820,7 +832,8 @@
                         }else if($(header).is('.attendance_date'))
                         {
                             $(employee_attendance).appendTo($(search))
-                                .on( 'change', function () {
+                            .on( 'change', function () {
+                                console.log($(this).val());
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
@@ -1180,42 +1193,49 @@
             });
 
             var SelectedCities = [];
-            $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
-                var employeeId = $(this).attr('data-id');
-                var cities = $(this).attr('data-city');
-                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
-                    employeeId + '">');
-                selectedCities = cities.toString().split(',');
-                if (cities != null) {
-                    $('#search_origin option').each(function() {
-                        var optionValue = $(this).val();
-                        if (selectedCities.includes(optionValue)) {
-                            var cityIndex = selectedCities.indexOf(optionValue);
-                            if (cityIndex > -1) {
-                                $(this).detach();
-                                $('#search_origin').prepend($(this));
+            var SelectedCitiesName = [];
+            var CityName = null
+                $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
+                    var employeeId = $(this).attr('data-id');
+                    var cities = $(this).attr('data-city');
+                    $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
+                        employeeId + '">');
+                    selectedCities = cities.toString().split(',');
+                    if (cities != null) {
+                        $('#search_origin option').each(function() {
+                            var optionValue = $(this).val();
+                            if (selectedCities.includes(optionValue)) {
+                                var cityIndex = selectedCities.indexOf(optionValue);
+                                if (cityIndex > -1) {
+                                    $('#search_origin').append($(this));
+                                    cityName = $(this).text();
+                                    $(this).prop('selected', true);
+
+                                }
+
+                                $('input[name="unsorted_zones"]').val(selectedCities);
+                            } else {
+                                $(this).prop('selected', false);
                             }
-                            $(this).prop('selected', true);
-                        } else {
-                            $(this).prop('selected', false);
-                        }
-                    });
-                    $('#search_origin').trigger('change');
-                    $('#AssignHubModal').modal('show');
-                } else if (rv_city == null) {
-                    $("#search_origin option").prop("selected", false).trigger("change");
-                    $('#AssignHubModal').modal('show');
-                }
-            });
+                        });
+                        $('#search_origin').trigger('change');
+                        $('#AssignHubModal').modal('show');
+                    } else if (rv_city == null) {
+                        $("#search_origin option").prop("selected", false).trigger("change");
+                        $('#AssignHubModal').modal('show');
+                    }
+                });
+
 
 
             var $select2 = $('#search_origin').select2({
                 templateSelection: template,
-                width: '100%'
+                width: '100%',
+                placeholder: 'Select Zones',
             });
 
             // Initialize with default values
-            var defaultValues = {!! $hubs->pluck('id') !!};
+            var defaultValues = {!! $zones->pluck('id') !!};
             $select2.val(defaultValues).trigger('change');
 
             // Cache order of initial values
@@ -1265,13 +1285,13 @@
                     $input.before($el);
                 });
 
-                $('.unsorted_hubs').val(stringList);
+                $('.unsorted_zones').val(stringList);
 
                 var selectedIds = $('#search_origin').find('option:selected').map(function() {
                     return $(this).val();
                 }).get();
 
-                var idArray = $('.unsorted_hubs').val().split(',');
+                var idArray = $('.unsorted_zones').val().split(',');
 
                 selectedIds = selectedIds.filter(function(item) {
                     return idArray.indexOf(item) === -1;
@@ -1280,7 +1300,7 @@
                 // Append values from array 2 to the end of array 1
                 selectedIds = selectedIds.concat(idArray);
 
-                $('.unsorted_hubs').val(selectedIds)
+                $('.unsorted_zones').val(selectedIds)
 
             }
 
