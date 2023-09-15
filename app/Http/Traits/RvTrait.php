@@ -1504,7 +1504,7 @@ trait RvTrait
             else {
                 //No Shipment Found in Assigned Hub
                 // return false;
-                return response()->json(['status' => 1, 'error' => '1 No Shipment Found in Assigned Hub']);
+                return response()->json(['status' => 1, 'error' => 'No Zone Assigned']);
             }
         }
         return $shipment;
