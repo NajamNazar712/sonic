@@ -1199,7 +1199,7 @@
                         $(this).prop('selected', false);
                     });
 
-                    $.each(selectedCities, function(index, value) {
+                        $.each(selectedCities, function(index, value) {
                         var option = selectedOptions.find(function(opt) {
                             return opt.val() === value;
                         });

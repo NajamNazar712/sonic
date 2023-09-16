@@ -11852,7 +11852,7 @@ class AdminReportsController extends Controller
         ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aass.id')
         ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
         ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
-        ->select('shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub','shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks', 'rv_shipment_assign_agents.updated_at as action_date', 'admins.name as action_updated_by','employees.name as rcp_agent_updated_by', 'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 'rv_shipment_assign_agents.unresponsive_count as call_count',);
+        ->select('shipments.id as shipment_id','shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub','shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks', 'rv_shipment_assign_agents.updated_at as action_date', 'admins.name as action_updated_by','employees.name as rcp_agent_updated_by', 'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 'rv_shipment_assign_agents.unresponsive_count as call_count',);
         // dd($rv_report->get());
         $datatable = Datatables::of($rv_report)
                     ->editColumn('rv_status', function($rv_report) {
@@ -11895,12 +11895,23 @@ class AdminReportsController extends Controller
                             return '-';
                         }
                     })
-                    // HARD CODED
                     ->addColumn('delivery_attempt_count', function($rv_report) {
-                        return 0;
+                        $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
+
+                        $delivered_status = array_filter($shipper_status, function($value){
+                            return $value === 14;
+                        });
+
+                        return count($delivered_status);
                     })
                     ->addColumn('re_attempt_count', function($rv_report) {
-                        return 0;
+                        $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
+
+                        $reattempt = array_filter($shipper_status, function($value){
+                            return $value === 13;
+                        });
+
+                        return count($reattempt);                    
                     });
 
         return $datatable->make(true);

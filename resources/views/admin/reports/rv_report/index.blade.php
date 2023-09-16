@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Assigned Agent Shipments')
+@section('title', 'Rv Report')
 
 @section('content')
     <div class="app-content content">
