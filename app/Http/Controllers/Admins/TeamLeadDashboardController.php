@@ -415,19 +415,20 @@ class TeamLeadDashboardController extends Controller
     // Sidebar: N/A
     // URL: team_lead/submit
     // Description: this method is used for Assign Agent AS per Priority
-    public function assign_hub_agent(Request $request)
+    public function assign_zone_agent(Request $request)
     {
         $zones = [];
         $sorted_zones = explode(',', $request->unsorted_zones);
+
         foreach ($sorted_zones as $key => $value) {
             $zones[] = City::where('zone_id', $value)->get();
+            $count_zone[] = City::where('zone_id', $value)->count();
         }
-        $totalCount = collect($zones)->sum(function ($array) {
-            return $array->count();
-        });
+
+        $count_zone = max($count_zone);
+
         try {
             $rvAgentAssignHub = RvAgentAssignHub::where('agent_id', $request->employee_id)->get();
-
             if ($rvAgentAssignHub->isNotEmpty()) {
                 $rvAgentAssignHub->each(function ($id) {
                     $id->delete();
@@ -436,7 +437,7 @@ class TeamLeadDashboardController extends Controller
             
             $count = 0;
             foreach ($sorted_zones as $key => $value) {
-                for ($i = 0; $i < $totalCount; $i++) {
+                for ($i = 0; $i < $count_zone; $i++) {
                     if (!isset($zones[$key][$i])) {
                         break;
                     } else {

@@ -4092,7 +4092,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('team_lead')->name('team_lead.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@team_lead_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@team_lead_list')->name('list');
-        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_hub_agent')->name('assign_hub_agent');
+        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_zone_agent')->name('assign_zone_agent');
         Route::post('deactivate_staff', 'Admins\TeamLeadDashboardController@deactivate_staff')->name('deactivate_staff');
         Route::post('activate_staff', 'Admins\TeamLeadDashboardController@activate_staff')->name('activate_staff');
         Route::post('add_additional_days', 'Admins\TeamLeadDashboardController@add_additional_days')->name('add_additional_days');

@@ -90,7 +90,7 @@
                     </button>
                 </div>
                 <form id="assign_agent_hubs" novalidate="novalidate" method="post"
-                    action="{{ route('admin.team_lead.assign_hub_agent') }}">
+                    action="{{ route('admin.team_lead.assign_zone_agent') }}">
                     @csrf
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
