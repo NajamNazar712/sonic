@@ -45,6 +45,7 @@
                                     <th class="border-primary border-darken-1">Fake Status</th>
                                     <th class="border-primary border-darken-1">Delivery Attempt Count</th>
                                     <th class="border-primary border-darken-1">Re-Attempt Count</th>
+                                    <th class="border-primary border-darken-1">Call History</th>
                                     <th class="border-primary border-darken-1">Call Count</th>
                                 </tr>
                                 </thead>
@@ -55,6 +56,44 @@
             </div>
         </div>
     </div>
+
+    
+    <div class="modal fade" id="unresponsive_count" data-backdrop="static" role="dialog" aria-labelledby="unresponsive_count" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title">Call History</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Calling Date</th>
+                                <th>Calling Time</th>
+                                <th>Call Findings</th>
+                                <th>Unresponsive Finding</th>
+                                <th>Other Remarks</th>
+                                <th>User</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                       
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
 @endsection
 
 @section('css')
@@ -279,7 +318,6 @@
                 order: [[0, 'asc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
-                    // {data: 'serial_number', name: 'serial_number', class: 'align-middle serial_number', searchable: false,orderable:false, targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle trax_id',searchable: false,orderable:false},
                     {data: 'shipper_name', name: 'shipper_name', class: 'align-middle serial_number',searchable: false,orderable:false},
                     {data: 'origin', name: 'origin', class: 'text-center align-middle trax_id',searchable: false,orderable:false},
@@ -305,15 +343,46 @@
                     {data: 'fake_status', name: 'fake_status', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 'delivery_attempt_count', name: 'delivery_attempt_count', class: 'align-middle designation',searchable: false,orderable:false},
                     {data: 're_attempt_count', name: 're_attempt_count', class: 'align-middle designation',searchable: false,orderable:false},
+                    {data: 'unresponsive_count', name: 'unresponsive_count', class: 'align-middle unresponsive_count',searchable: false,orderable:false},
                     {data: 'call_count', name: 'call_count', class: 'align-middle designation',searchable: false,orderable:false},
                 ],
                 rowCallback: function(row, data, index) {
-                    // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
-                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
             });
+
+            $('body').on('click', '.unresponsive_count_label', function() {
+                     var dataId = $(this).attr('data-shipments');
+                    $.ajax({
+                        url: '{!! route('admin.reports.rv_report.rv_call_history') !!}',
+                        method: 'GET',
+                        data: { id: dataId },
+                        dataType: 'json',
+                        success: function(response) {
+                            var tableBody = $('#unresponsive_count').find('tbody');
+                            tableBody.empty();
+                            $.each(response.data, function(index, rowData) {
+                                var dateTimeParts = rowData.created_at.split(' ');
+                                var row = $('<tr>');
+                                row.append($('<td>').text(dateTimeParts[0])); // Display date
+                                row.append($('<td>').text(dateTimeParts[1])); // Display time
+                                row.append($('<td>').text('Unresponsive'));
+                                row.append($('<td>').text(rowData.rv_call_finding.remark));
+                                row.append($('<td>').text(rowData.remarks));
+                                row.append($('<td>').text(rowData.user.name));
+                                tableBody.append(row);
+                            });
+
+                            $("#unresponsive_count").modal('show');
+                        },
+                        error: function(xhr, status, error) {
+                            // Handle errors here
+                            console.error(xhr, status, error);
+                        }
+                    });
+                });
+
 
       
         });
