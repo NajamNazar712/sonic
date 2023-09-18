@@ -79,6 +79,7 @@
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Route Code</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
@@ -227,10 +228,10 @@
                 </div>
                 <div class="modal-body text-center">
                     <form method="post" id="add_remarks_form"
-                          action="{{ route('admin.v2_pickups.pending.add_remarks') }}"
+                          action="{{ route('admin.v3_pickups.add_pickup_remark') }}"
                           class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
                         @csrf
-                        <input type="hidden" id="add_remarks_pickup_note_id" name="v2_pickup_req_id">
+                        <input type="hidden" id="remark_pickup_request_id" name="remark_pickup_request_id">
                         <div class="form-group ml-1">
                             <input type="text" name="add_remark" id="add_remark" class="form-control"
                                    data-rule-required="true" data-msg-required="Remarks is required"
@@ -884,47 +885,47 @@
     <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
     aria-labelledby="AdditionalServiceModal"
     aria-hidden="true">
-   <div class="modal-dialog modal-lg" role="document">
-       <div class="modal-content">
-           <div class="modal-header bg-primary white">
-               <h4 class="modal-title white">Additional Services</h4>
-               <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                   <span aria-hidden="true">&times;</span>
-               </button>
-           </div>
-           <div class="modal-body">
-               <div class="container">
-                   <!-- start additional services -->
-                   {{-- <div class="d-flex justify-content-start vh-100 pl-1">
-                         <b class="text-dark"> Additional Services </b>
-                   </div>--}}
-                   {{-- <div class="d-flex justify-content-start align-items-center">
-                        <!-- start service list -->
-                            <div class="services-list col-12 additionalservices">
-                              
-                            </div>
-                         <!-- end service list -->
-                   </div>  --}}
-                   <table class="table table-bordered">
-                        <thead>
-                                <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">Service</th>
-                                    <th class="border-primary border-darken-1">Qty</th>
-                                </tr>
-                        </thead>
-                        <tbody>
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Additional Services</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container">
+                    <!-- start additional services -->
+                    {{-- <div class="d-flex justify-content-start vh-100 pl-1">
+                            <b class="text-dark"> Additional Services </b>
+                    </div>--}}
+                    {{-- <div class="d-flex justify-content-start align-items-center">
+                            <!-- start service list -->
+                                <div class="services-list col-12 additionalservices">
+                                
+                                </div>
+                            <!-- end service list -->
+                    </div>  --}}
+                    <table class="table table-bordered">
+                            <thead>
+                                    <tr role="row" class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No.</th>
+                                        <th class="border-primary border-darken-1">Service</th>
+                                        <th class="border-primary border-darken-1">Qty</th>
+                                    </tr>
+                            </thead>
+                            <tbody>
 
-                        </tbody>
+                            </tbody>
 
-                    </table>
-                   <!-- end additional services -->
+                        </table>
+                    <!-- end additional services -->
 
-                 
-               </div>
-           </div>
-       </div>
-   </div>
+                    
+                </div>
+            </div>
+        </div>
+        </div>
 </div>
     <!----end of show additional services modal --->
 
@@ -1083,6 +1084,10 @@
         }
 
         /* end addition services */
+        .delay_time{
+            /* background-color: #FF0000; */
+            background-color: #FFA500;
+        }
 
     </style>
 @endsection
@@ -1571,6 +1576,7 @@
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
@@ -1776,9 +1782,26 @@
 
             $('body').on('click', '.addRemarks', function () {
                 var action = $(this).data('action');
-                var row_id = $(this).parents('tr').attr('id');
+                // var row_id = $(this).parents('tr').attr('id');
+                var pickup_request_id=$(this).closest('tr').find('.pickup_request_id').text();
+                
+                $.ajax({
+                    url:'{{route('admin.v3_pickups.get_pickup_remarks',['id'=>':id']) }}'.replace(':id',pickup_request_id),
+                    method:'GET'
+                }).done(function(data){
+                    if(data.status==0){
+                        $("#add_remark").val(data.pickup_request_attempt[0].trax_remarks);
+                    }else{
+                        toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                         });
+                    }
+                });
                 $('#AddRemarksModal').modal('show');
-                $('#add_remarks_pickup_note_id').val(row_id);
+                $("#remark_pickup_request_id").val(pickup_request_id);
+                
+                // $('#add_remarks_pickup_note_id').val(row_id);
 
                 /* if(action === 'reattempt'){
                     var atext = 'Select Yes to put Reminder!';
@@ -1878,6 +1901,7 @@
             
             $('#AddRemarksModal').on('hidden.bs.modal', function () {
                 $('#add_remark').val('');
+                $("#remark_pickup_request_id").val('');
             });
             $("#add_remarks_form").validate({
                 errorClass: "danger",
@@ -2012,7 +2036,7 @@
                             toastr.error('No Additional Service found!', 'Error!', {
                                 positionClass: 'toast-top-center',
                                 containerId: 'toast-top-center'
-                        });
+                         });
                 }
             })
            $("#AdditionalServiceModal").modal("show");

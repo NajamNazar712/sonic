@@ -78,12 +78,11 @@ class ShipperPickupController extends Controller
         $case_nature_type_claims = CrmRequestCaseNatureType::where('nature_id', '=', 4)->where('status_id', 1)->get();
         $pickup_addresses = UserShippingInfo::with('city')->where('user_id',  117)->where('status', 1)->where('hidden', 0)->get();
         $product = Segment::with('subCategorySegment')->find($segment_id);
-        $time_ranges = V3PickupTimeRange::all();
         $pickup_shipment_types = V3PickupShipmentType::all();
         $additional_services = V3PickupService::all();
         // ->where('id',$segment_id)->get();
       
-        return view('client.pickups.index')->with(['additional_services'=>$additional_services,'pickup_shipment_types'=>$pickup_shipment_types,'time_ranges'=>$time_ranges,'product'=>$product,'pickup_addresses'=>$pickup_addresses,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'case_permission'=>$permission]);
+        return view('client.pickups.index')->with(['additional_services'=>$additional_services,'pickup_shipment_types'=>$pickup_shipment_types,'product'=>$product,'pickup_addresses'=>$pickup_addresses,'case_nature' => $case_nature, 'case_nature_complaints' => $case_nature_type_complaints, 'case_nature_service_requests' => $case_nature_type_service_requests, 'case_nature_type_claims' => $case_nature_type_claims, 'case_permission'=>$permission]);
     }
 
     public function pickup_list(Request $request)
@@ -214,6 +213,12 @@ class ShipperPickupController extends Controller
 
     }
 
+    public function get_time_ranges(Request $request){
+        $pickup_address_id=$request->pickup_address_id;
+        $address=UserShippingInfo::find($pickup_address_id);
+        $time_ranges = V3PickupTimeRange::where('city_id',$address->city_id)->get();
+         return response()->json(['status'=>0,'time_ranges'=>$time_ranges]);
+    }
     public function view_details(Request $request)
     {
 

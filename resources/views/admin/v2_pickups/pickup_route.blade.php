@@ -107,7 +107,13 @@
                             </fieldset>
                         </div>
                     </div>
-
+                    <div class="row mb-2">
+                        <div class="col">
+                            <fieldset class="form-group">
+                                <input type="text" class="form-control" name="short_code" placeholder="Short Code" required data-rule-required="true" data-msg-required="This field is required">
+                            </fieldset>
+                        </div>
+                    </div>
                      <input type="text"  name="route_type_id" hidden value="1">
 
                     <div class="row mb-2">
@@ -187,7 +193,13 @@
                                     </fieldset>
                                 </div>
                             </div>
-
+                            <div class="row mb-2">
+                                <div class="col">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="short_code"  id="short_code" placeholder="Short Code" required data-rule-required="true" data-msg-required="This field is required">
+                                    </fieldset>
+                                </div>
+                            </div>
                             <input type="text" name="route_type_id" hidden value="1">
 
                             <div class="row mb-2">
@@ -593,6 +605,7 @@
                                     var end = data.details.end;
                                     var rider_id = data.details.rider_id;
                                     var junctions = data.details.junctions;
+                                    var short_code=data.details.short_code;
 
                                     $('#city_id').val(city_id).trigger('change');
                                     $('#route_code').val(route_code);
@@ -600,6 +613,7 @@
                                     $('#end').val(end);
                                     $('#rider_id').val(rider_id).trigger('change');
                                     $('#junstion_edit').val(junctions);
+                                    $('#short_code').val(short_code);
                                 //});
                                 $('#edit_route_modal').modal('show');
                                 var route = '{!! route('admin.management.route.edit', ':id') !!}';

@@ -561,7 +561,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         // Route::get('user_shipper_info', 'Shippers\ShipperPickupController@get_user_shipper_info')->name('user_shipper_info');
         Route::post('pickup_request_services', 'Shippers\ShipperPickupController@get_pickup_request_services')->name('pickup_request_services');
+        Route::post('time_ranges', 'Shippers\ShipperPickupController@get_time_ranges')->name('time_ranges');
     });
+    
 
     Route::prefix('multiple_pieces')->name('multiple_pieces.')->group(function () {
         Route::get('', 'Shippers\ShipperShipmentPieceController@hold_index')->name('index');
@@ -1263,6 +1265,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('get_pickup_address', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_address')->name('get_pickup_address');
         Route::post('add', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_add')->name('add');
         Route::PUT('update', 'Admins\V3Pickup\V3AdminPickupsController@pickup_request_update')->name('update');
+        Route::get('get_pickup_remarks/{id}','Admins\V3Pickup\V3AdminPickupsController@get_pickup_remarks')->name('get_pickup_remarks');
+        Route::POST('add_pickup_remark','Admins\V3Pickup\V3AdminPickupsController@add_pickup_remark')->name('add_pickup_remark');
 
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_index')->name('index');

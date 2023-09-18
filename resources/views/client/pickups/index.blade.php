@@ -302,9 +302,9 @@
                                             <div class="col-6">
                                                 <div class="form-group">
                                                     <select name="preferred_time_range" id="preferred_time_range" class="form-control select2" data-rule-required="true" data-msg-required="Pickup Time is required">
-                                                        @foreach($time_ranges as $time_range)
+                                                        {{-- @foreach($time_ranges as $time_range)
                                                             <option value="{{ $time_range->id }}">{{ $time_range->name }}</option>
-                                                        @endforeach
+                                                        @endforeach --}}
 
                                                     </select>
                                                 </div>
@@ -722,9 +722,50 @@
                 $("#poc").text(poc);
                 $("#poc_phone").text(phone);
                 
+            }).bind('change',function(){
+                var pickup_address_id=parseInt($(this).val());
+                $("#preferred_time_range").empty();
+                $.ajax({
+                        url: '{!! route('cod.pickup.time_ranges') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'pickup_address_id': pickup_address_id
+                        }
+                }).done(function(data){
+                    if(data.status==0){
+                        $('#preferred_time_range').prepend('<option value="" selected="selected">Select Pickup Time*</option>');
+                        $.each(data.time_ranges, function(key,value){
+                            var time_range = new Option(value.name, value.id, false, false);
+                            $('#preferred_time_range').append(time_range).trigger('change');
+                        });
+                    }
+                });
+                
             });
-
-           
+            // $("#pickup_address_id").on('change',function(){
+            //     var pickup_address_id=parseInt((this).val());
+            //     $("#preferred_time_range").empty();
+            //     $.ajax({
+            //             url: '{!! route('cod.pickup.time_ranges') !!}',
+            //             method: 'POST',
+            //             data: {
+            //                 '_token': '{{ csrf_token() }}',
+            //                 'pickup_address_id': pickup_address_id
+            //             }
+            //         })
+            //         .done(function (data) {
+            //             if (data.status==0) {
+            //                 var shipments = '';
+            //                 if (data.booked) {
+            //                     $.each(data.time_ranges, function (index, time_ranges) {
+            //                         console.log(time_ranges.name);
+            //                         $('#preferred_time_range').append('<option value='+time_ranges.id+'>'+time_ranges.name+'</option>');
+            //                     });
+            //                 }
+            //             }
+            //         });
+            // });
             $('#regular_section').on('click', 'a',function (){
                 if($(this).hasClass('onetime')){
                     $('#regular_pickup').val(1);
@@ -971,14 +1012,14 @@
                 $('#bookings_modal .modal-body').html('');
                 $('#bookings_modal').modal('show');
 
-                $.ajax({
-                    url: '{!! route('admin.v2_pickups.pending.bookings.all') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'pickup_request_id': id
-                    }
-                })
+                    $.ajax({
+                        url: '{!! route('admin.v2_pickups.pending.bookings.all') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'pickup_request_id': id
+                        }
+                    })
                     .done(function (data) {
                         if (data) {
                             var shipments = '';

@@ -79,6 +79,7 @@
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Additional Services</th>
+                                    <th class="border-primary border-darken-1">Route Code</th>
                                     {{-- <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th> --}}
                                     <th class="border-primary border-darken-1">Product</th>
@@ -1574,6 +1575,7 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
+                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
                     // {data: 'status', name: 'status', class: 'align-middle status'},
                     // {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
