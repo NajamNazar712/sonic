@@ -1206,7 +1206,7 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-
+            'reports.rv_report.index'=>905,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
 

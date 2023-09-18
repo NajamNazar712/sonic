@@ -17,7 +17,7 @@
                             <div class="border-primary">
                                 <div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290"></div>
                                 <div class="d-flex flex-wrap align-items-center bg-primary">
-                                    <div class="font-medium-3 white" style="margin:auto;";>Virtual RCP Agent Screen
+                                    <div class="font-medium-3 white" style="margin:auto;";>Virtual Rv Agent Screen
                                     </div>
                                 </div>
 
