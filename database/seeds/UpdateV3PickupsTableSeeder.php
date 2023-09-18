@@ -55,7 +55,6 @@ class UpdateV3PickupsTableSeeder extends Seeder
             array('id' => 5, 'name' => 'Reached'),
             array('id' => 6, 'name' => 'Picked'),
             array('id' => 7, 'name' => 'Rescheduled'),
-            array('id' => 8, 'name' => 'Delayed'),
         ));
 
         DB::table('v3_pickup_request_not_pick_reasons')->truncate();

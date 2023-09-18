@@ -19,4 +19,8 @@ class V3PickupRequest extends Model
         return $this->belongsToMany(V3PickupService::class,'v3_pickup_request_services','pickup_request_id','pickup_request_service_id')
         ->withPivot('count');
     }
+
+    public function rider() {
+        return $this->belongsTo('App\Http\Models\Rider','current_rider_id','id');
+    }
 }

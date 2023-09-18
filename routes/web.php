@@ -1290,6 +1290,48 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@history_list')->name('list');
         });
 
+        Route::prefix('arrival')->name('arrival.')->group(function () {
+            /*Route::prefix('bulk')->name('bulk.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_bulk_shipment_details')->name('shipment_details');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::prefix('piece')->name('piece.')->group(function () {
+                    Route::post('piece_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_details')->name('piece_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@bulk_arrival_submit')->name('store');
+            });*/
+
+            Route::prefix('individual')->name('individual.')->group(function () {
+                Route::get('', 'Admins\V3Pickup\V3AdminPickupsController@arrival_individual_index')->name('index');
+                Route::post('shipment_details', 'Admins\V3Pickup\V3AdminPickupsController@arrival_individual_shipment_details')->name('shipment_details');
+                Route::post('shipment_remove', 'Admins\V3Pickup\V3AdminPickupsController@arrival_individual_shipment_remove')->name('shipment_remove');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V3Pickup\V3AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V3Pickup\V3AdminPickupsController@individual_arrival_submit')->name('store');
+            });
+
+            /*Route::prefix('project_shippers')->name('project_shippers.')->group(function () {
+                Route::get('', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_index')->name('index');
+                Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_shipment_details')->name('shipment_details');
+                Route::post('shipment_remove', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_shipment_remove')->name('shipment_remove');
+                Route::prefix('try_and_buy')->name('try_and_buy.')->group(function () {
+                    Route::post('item_details', 'Admins\AdminPickupsController@try_and_buy_item_details')->name('item_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_try_and_buy_shipment_details')->name('shipment_details');
+                });
+                Route::prefix('piece')->name('piece.')->group(function () {
+                    Route::post('piece_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_details')->name('piece_details');
+                    Route::post('shipment_details', 'Admins\V2Pickup\V2AdminPickupsController@arrival_piece_shipment_details')->name('shipment_details');
+                });
+                Route::post('store', 'Admins\V2Pickup\V2AdminPickupsController@project_shippers_store')->name('store');
+            });*/
+        });
+
     });
 
     Route::prefix('delivery')->name('delivery.')->group(function () {
