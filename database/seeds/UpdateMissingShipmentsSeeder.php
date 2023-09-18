@@ -1,7 +1,9 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use DB;
+
+use Illuminate\Support\Facades\DB;
+
 class UpdateMissingShipmentsSeeder extends Seeder
 {
     /**
