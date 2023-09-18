@@ -90,7 +90,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                     $data_booking = $response_booking->getBody();
 
                     $payload_booking = json_decode($data_booking);
-                    Log::channel('trax_pay_test')->info(json_encode($payload_booking, true));
+                    Log::channel('trax_pay_test')->info($tracking_number . ' : ' .json_encode($payload_booking, true));
                     if ($payload_booking->status == 0) {
                         $new_tracking_number = $payload_booking->tracking_number;
                         Log::channel('trax_pay_test')->info('new tracking: '. $new_tracking_number . 'old tracking' . $tracking_number);
