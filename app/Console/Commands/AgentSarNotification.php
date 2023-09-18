@@ -55,7 +55,7 @@ class AgentSarNotification extends Command
             // rv_assign_agent_status_id' 7 (Shipper Advised Request) and Check If State Is 2 (Unassign Assigned)
             $sendEmail = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
             ->where('rv_state_id', 2)
-            ->where('unresponsive_count', 3)
+            ->where('unresponsive_count', 2)
             ->where('updated_at', '<', $currentDateTime->subHours(4))
             ->where('unresponsive_email_count', '<', 6)
             ->get(); // Check if 4 hours have passed
@@ -76,7 +76,7 @@ class AgentSarNotification extends Command
                 // the system will automatically update the shipment status to "Return Confirm."
                 $shipmentsToUpdate = RvShipmentAssignAgent::where('rv_assign_agent_status_id', 7)
                     ->where('rv_state_id', 2)
-                    ->where('unresponsive_count', 3)
+                    ->where('unresponsive_count', 2)
                     ->where('unresponsive_email_count', 6)
                     ->get(); // Check if unresponsive_email_count 6 which means that 24 hours have passed
         
