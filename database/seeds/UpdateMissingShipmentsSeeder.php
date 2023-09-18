@@ -50,39 +50,45 @@ class UpdateMissingShipmentsSeeder extends Seeder
                     $open_shipment = $shipment_details->is_open;
                 }
 
-                $parcel_value = $shipment->amount;
+
                 $token = User::find($shipment->user_id)->api_token;
+
+                $booking_data = [
+                    'service_type_id' => $shipment->booking_type_id,
+                    'pickup_address_id' => $shipment->pickup_address_id,
+                    'information_display' => $shipment->information_display,
+                    'consignee_city_id' => $shipment->consignee_city_id,
+                    'consignee_name' => $shipment->consignee_name,
+                    'consignee_address' => $shipment->consignee_address,
+                    'consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                    'consignee_email_address' => $shipment->consignee_email,
+                    'order_id' => $shipment->order_id,
+                    'item_product_type_id' => $product_type_id,
+                    'item_description' => $item_description,
+                    'item_quantity' => $item_quantity,
+                    'item_insurance' => 0,
+                    'pickup_date' => Carbon::now('Asia/Karachi')->toDateString(),
+                    'estimated_weight' => $shipment->estimated_weight,
+                    'shipping_mode_id' => $shipment->shipping_mode_id,
+                    'amount' => $shipment->amount,
+                    'payment_mode_id' => $shipment->payment_mode_id,
+                    'special_instructions' => $shipment->special_instructions,
+                    'pieces_quantity' => $shipment->pieces,
+                    'delivery_type_id' => $shipment->walk_in_delivery_type_id,
+                    'open_shipment' => $open_shipment,
+                ];
+
+                if($shipment->amount == 0){
+                    $parcel_value = $shipment->amount;
+                    $booking_data['parcel_value'] = $parcel_value;
+                }
 
                 $client = new Client(['http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
                 $response_booking = $client->post($booking_url, [
                     'headers' => [
                         'Authorization' => $token
                     ],
-                    'form_params' => [
-                        'service_type_id' => $shipment->booking_type_id,
-                        'pickup_address_id' => $shipment->pickup_address_id,
-                        'information_display' => $shipment->information_display,
-                        'consignee_city_id' => $shipment->consignee_city_id,
-                        'consignee_name' => $shipment->consignee_name,
-                        'consignee_address' => $shipment->consignee_address,
-                        'consignee_phone_number_1' => $shipment->consignee_phone_number_1,
-                        'consignee_email_address' => $shipment->consignee_email,
-                        'order_id' => $shipment->order_id,
-                        'item_product_type_id' => $product_type_id,
-                        'item_description' => $item_description,
-                        'item_quantity' => $item_quantity,
-                        'item_insurance' => 0,
-                        'pickup_date' => Carbon::now('Asia/Karachi')->toDateString(),
-                        'estimated_weight' => $shipment->estimated_weight,
-                        'shipping_mode_id' => $shipment->shipping_mode_id,
-                        'amount' => $shipment->amount,
-                        'payment_mode_id' => $shipment->payment_mode_id,
-                        'special_instructions' => $shipment->special_instructions,
-                        'pieces_quantity' => $shipment->pieces,
-                        'delivery_type_id' => $shipment->walk_in_delivery_type_id,
-                        'open_shipment' => $open_shipment,
-                        'parcel_value' => $shipment->amount > 0 ? 0 : $parcel_value,
-                    ]
+                    'form_params' => $booking_data
                 ]);
 
                 $status_code = $response_booking->getStatusCode();
