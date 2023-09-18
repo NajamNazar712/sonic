@@ -8554,7 +8554,7 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
-    public function sms_notification_return_delivered_to_shipper_index()
+    public function sms_notifications_limit_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 655);
 
@@ -8620,7 +8620,7 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.sms_notification_return_delivered_to_shipper_index')->with(['shippers' => $shippers, 'excluded_shippers' => $excluded_shippers, 'only_shippers' => $only_shippers, 'all_shippers' => $all_shippers, 'notification_details' => $notification_details]);
     }
 
-    public function sms_notification_return_delivered_to_shipper_update(Request $request)
+    public function sms_notifications_limit_update(Request $request)
     {
         if ($request->has('all_shipper_toggle'))
         {
