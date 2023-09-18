@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
 use App\RiderAssignedHubForDeliveryNote;
@@ -8937,262 +8938,275 @@ RiderAPIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
-            $rider_id = $request->rider_id;
 
-            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-//                $added_at = $request->added_at;
-            if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
+            try {
+                //code...
+                DB::beginTransaction();
+                $rider_id = $request->rider_id;
 
-                        $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+                $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+                //$added_at = $request->added_at;
+                if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
+                    if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('dn.id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) { {
 
-                        $rider_delivery = new RiderDelivery();
+                            $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
-                        $rider_delivery->added_at = $added_at;
-                        $rider_delivery->delivery_note_id = $request->delivery_note_id;
-                        $rider_delivery->shipment_id = $request->shipment_id;
-                        $rider_delivery->rider_id = $request->rider_id;
-                        $rider_delivery->start_location_latitude = $request->start_location_latitude;
-                        $rider_delivery->start_location_longitude = $request->start_location_longitude;
-                        $rider_delivery->actual_location_latitude = $request->actual_location_latitude;
-                        $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
-                        $rider_delivery->rider_status_id = 14;
-                        $rider_delivery->delivered_status = 1;
-                        $received_by = NULL;
-                        if ($request->has('receiver_name')) {
-                            $receiver_name = str_replace('"', '', $request->receiver_name);
-                            $received_by = $receiver_name;
-                        }
+                            $rider_delivery = new RiderDelivery();
 
-                        $cnic = str_replace('"', '', $request->cnic);
-                        if ($cnic != "Empty") {
-                            $rider_delivery->cnic = $cnic;
-                        } else {
-                            $cnic = NULL;
-                        }
-
-                        $relation = str_replace('"', '', $request->relation);
-                        if ($relation != "Empty") {
-                            $rider_delivery->relation = $relation;
-                        } else {
-                            $relation = NULL;
-                        }
-
-                        $shipment = Shipment::find($request->shipment_id);
-
-                        $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
-                        $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
-                        $consignee_address = $shipment->consignee_address;
-
-                        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
-                            $sub_query->where('phone_number', $consignee_phone_number_1)
-                                ->orwhere('phone_number', $consignee_phone_number_2);
-                        })->where('address', $consignee_address);
-
-                        if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
-                            $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
-
-                            $rider_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
-
-                            if ($coordinates->exists()) {
-                                $coordinates = $coordinates->latest()->first();
-
-                                $rider_delivery->current_location_latitude = $coordinates->lat;
-                                $rider_delivery->current_location_longitude = $coordinates->long;
-
-                                $origin = $coordinates->lat . ',' . $coordinates->long;
-
-                                $distance = $this->distance($origin, $destination);
-
-                                $rider_delivery->distance_from_current_to_actual = $distance;
+                            $rider_delivery->added_at = $added_at;
+                            $rider_delivery->delivery_note_id = $request->delivery_note_id;
+                            $rider_delivery->shipment_id = $request->shipment_id;
+                            $rider_delivery->rider_id = $request->rider_id;
+                            $rider_delivery->start_location_latitude = $request->start_location_latitude;
+                            $rider_delivery->start_location_longitude = $request->start_location_longitude;
+                            $rider_delivery->actual_location_latitude = $request->actual_location_latitude;
+                            $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
+                            $rider_delivery->rider_status_id = 14;
+                            $rider_delivery->delivered_status = 1;
+                            $received_by = NULL;
+                            if ($request->has('receiver_name')) {
+                                $receiver_name = str_replace('"', '', $request->receiver_name);
+                                $received_by = $receiver_name;
                             }
-                        } else {
-                            $rider_delivery->distance_from_start_to_actual = 0;
 
-                            if ($coordinates->exists()) {
-                                $rider_delivery->current_location_latitude = $coordinates->lat;
-                                $rider_delivery->current_location_longitude = $coordinates->long;
-                                $rider_delivery->distance_from_current_to_actual = 0;
+                            $cnic = str_replace('"', '', $request->cnic);
+                            if ($cnic != "Empty") {
+                                $rider_delivery->cnic = $cnic;
+                            } else {
+                                $cnic = NULL;
                             }
-                        }
-                        $rider_delivery->save();
 
-                        if ($request->has('picture')) {
-                            $time = Carbon::now()->toDateString();
-                            $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '_' . $time . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
-                            $rider_delivery->picture_path = $picture_path;
-                            $rider_delivery->save();
-                        }
-                        if ($request->has('cnic_image')) {
-                            $time = Carbon::now()->toDateString();
-                            $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '_' . $time . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->cnic_image));
-                            $rider_delivery->cnic_image = $picture_path;
-                            $rider_delivery->save();
-                        }
-                        if ($request->has('house_image')) {
-                            $time = Carbon::now()->toDateString();
-                            $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
-                            $rider_delivery->house_image = $picture_path;
-                            $rider_delivery->save();
-                        }
-                        if ($request->has('replacement_image')) {
-                            $time = Carbon::now()->toDateString();
-                            $picture_path = 'rider_delivery/replacement_image_' . $rider_delivery->id . '_' . $time . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_image));
-                            $rider_delivery->replacement_image = $picture_path;
-                            $rider_delivery->save();
-                        }
-                        if ($request->has('ccd_image')) {
-                            $time = Carbon::now()->toDateString();
-                            $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '_' . $time . '.png';
-                            Storage::disk('public')->put($picture_path, file_get_contents($request->ccd_image));
-                            $rider_delivery->ccd_image = $picture_path;
-                            $rider_delivery->save();
-                        }
+                            $relation = str_replace('"', '', $request->relation);
+                            if ($relation != "Empty") {
+                                $rider_delivery->relation = $relation;
+                            } else {
+                                $relation = NULL;
+                            }
 
-                        if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
-                            
-                            if ($request->distribution == 1) {
-                                if ($request->has('distribution_items_list')) {
-                                    $distribution_items = json_decode($request->distribution_items_list, true);
-                                    foreach ($distribution_items as $distribution_item) {
-                                        $product = ShipmentDistributionProduct::find($distribution_item["pid"]);
-                                        $product->total_delivered_units = $distribution_item["delivered_qty"];
-                                        $product->received_amount = round($distribution_item["total_amount_in_double"]);
-                                        $total_delivered_skus = $distribution_item["delivered_qty"] / $product->units_per_item;
-                                        $product->total_delivered_skus = (int)$total_delivered_skus;
-                                        $product->save();
-                                    }
-                                    $shipment->shipper_status_id = 14;
-                                    $shipment->consignee_status_id = 14;
-                                    $shipment->received_amount = round($request->total_cod_amount);
-                                    $shipment->amount = round($request->total_cod_amount);
-                                    DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-                                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                            $shipment = Shipment::find($request->shipment_id);
+
+                            $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
+                            $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
+                            $consignee_address = $shipment->consignee_address;
+
+                            $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                                $sub_query->where('phone_number', $consignee_phone_number_1)
+                                    ->orwhere('phone_number', $consignee_phone_number_2);
+                            })->where('address', $consignee_address);
+
+                            if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                                $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+
+                                $rider_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
+
+                                if ($coordinates->exists()) {
+                                    $coordinates = $coordinates->latest()->first();
+
+                                    $rider_delivery->current_location_latitude = $coordinates->lat;
+                                    $rider_delivery->current_location_longitude = $coordinates->long;
+
+                                    $origin = $coordinates->lat . ',' . $coordinates->long;
+
+                                    $distance = $this->distance($origin, $destination);
+
+                                    $rider_delivery->distance_from_current_to_actual = $distance;
+                                }
+                            } else {
+                                $rider_delivery->distance_from_start_to_actual = 0;
+
+                                if ($coordinates->exists()) {
+                                    $rider_delivery->current_location_latitude = $coordinates->lat;
+                                    $rider_delivery->current_location_longitude = $coordinates->long;
+                                    $rider_delivery->distance_from_current_to_actual = 0;
+                                }
+                            }
+                            $rider_delivery->save();
+
+                            if ($request->has('picture')) {
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_delivery/picture_' . $rider_delivery->id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                                $rider_delivery->picture_path = $picture_path;
+                                $rider_delivery->save();
+                            }
+                            if ($request->has('cnic_image')) {
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_delivery/cnic_image_' . $rider_delivery->id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->cnic_image));
+                                $rider_delivery->cnic_image = $picture_path;
+                                $rider_delivery->save();
+                            }
+                            if ($request->has('house_image')) {
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_delivery/house_image_' . $rider_delivery->id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->house_image));
+                                $rider_delivery->house_image = $picture_path;
+                                $rider_delivery->save();
+                            }
+                            if ($request->has('replacement_image')) {
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_delivery/replacement_image_' . $rider_delivery->id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->replacement_image));
+                                $rider_delivery->replacement_image = $picture_path;
+                                $rider_delivery->save();
+                            }
+                            if ($request->has('ccd_image')) {
+                                $time = Carbon::now()->toDateString();
+                                $picture_path = 'rider_delivery/ccd_image_' . $rider_delivery->id . '_' . $time . '.png';
+                                Storage::disk('public')->put($picture_path, file_get_contents($request->ccd_image));
+                                $rider_delivery->ccd_image = $picture_path;
+                                $rider_delivery->save();
+                            }
+
+                            if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
                                 
+                                if ($request->distribution == 1) {
+                                    if ($request->has('distribution_items_list')) {
+                                        $distribution_items = json_decode($request->distribution_items_list, true);
+                                        foreach ($distribution_items as $distribution_item) {
+                                            $product = ShipmentDistributionProduct::find($distribution_item["pid"]);
+                                            $product->total_delivered_units = $distribution_item["delivered_qty"];
+                                            $product->received_amount = round($distribution_item["total_amount_in_double"]);
+                                            $total_delivered_skus = $distribution_item["delivered_qty"] / $product->units_per_item;
+                                            $product->total_delivered_skus = (int)$total_delivered_skus;
+                                            $product->save();
+                                        }
+                                        $shipment->shipper_status_id = 14;
+                                        $shipment->consignee_status_id = 14;
+                                        $shipment->received_amount = round($request->total_cod_amount);
+                                        $shipment->amount = round($request->total_cod_amount);
+                                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
+                                        ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                    
+                                        $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                    }
+                                }
+                                elseif ($shipment->booking_type_id == 2) {
+                                    $shipment->shipper_status_id = 30;
+                                    $shipment->consignee_status_id = 30;
+                                    $shipment->received_amount = $shipment->amount;
+                                    DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
+                                    ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+
+                                    $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
+
+                                    $details = ['tracking_number' => $shipment->tracking_number, 'shipper_number_1' => $shipment->user->phone, 'shipper_number_2' => $shipment->user->phone2, 'name' => $shipment->consignee_name, 'consignee_number_1' => $shipment->consignee_phone_number_1, 'consignee_number_2' => $shipment->consignee_phone_number_2, 'shipper_name' => $shipment->user->name];
+                                    NotificationsController::send(183, $details);
+                                    NotificationsController::send(184, $details);
+                                    $rider_delivery->rider_status_id = 30;
+                                }
+                                else if ($shipment->booking_type_id == 3) {
+                                    $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
+                                    $item_ids = explode(',', $res);
+                                    $total_cod = 0;
+                                    foreach ($item_ids as $item_id) {
+                                        $shipment_item = ShipmentItem::find($item_id);
+                                        $total_cod += $shipment_item->price;
+                                        $shipment_item->bought = 1;
+                                        $shipment_item->save();
+                                    }
+                                    $shipment = Shipment::find($shipment->id);
+                                    $total_cod += $shipment->try_and_buy_fees;
+                                    $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
+                                    $delivered_parcels = count($item_ids);
+                                    if ($total_parcels == $delivered_parcels) {
+                                        Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
+                                        ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                        $rider_delivery->rider_status_id = 36;
+
+                                        $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
+                                    } else {
+                                        Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
+                                        ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                                        $rider_delivery->rider_status_id = 37;
+
+                                        $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,37,$added_at,$rider_delivery,2);
+                                    }
+                                    DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
+                                }
+                                else if ($shipment->booking_type_id == 4) {
+                                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+
                                     $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+                                
+                                    if ($shipment->charges_mode_id == 1) {
+                                        $shipment->shipper_status_id = 14;
+                                        $shipment->consignee_status_id = 14;
+
+                                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
+                                    } else {
+                                        $shipment->shipper_status_id = 14;
+                                        $shipment->consignee_status_id = 14;
+                                        $shipment->received_amount = $shipment->amount;
+                                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
+                                    }
                                 }
-                            }
-                            elseif ($shipment->booking_type_id == 2) {
-                                $shipment->shipper_status_id = 30;
-                                $shipment->consignee_status_id = 30;
-                                $shipment->received_amount = $shipment->amount;
-                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 2, 'update_type' => 1]);
-                                ShipmentsJourneyController::add($shipment->id, 30, 30, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-
-                                $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,30,$added_at,$rider_delivery,2);
-
-                                $details = ['tracking_number' => $shipment->tracking_number, 'shipper_number_1' => $shipment->user->phone, 'shipper_number_2' => $shipment->user->phone2, 'name' => $shipment->consignee_name, 'consignee_number_1' => $shipment->consignee_phone_number_1, 'consignee_number_2' => $shipment->consignee_phone_number_2, 'shipper_name' => $shipment->user->name];
-                                NotificationsController::send(183, $details);
-                                NotificationsController::send(184, $details);
-                                $rider_delivery->rider_status_id = 30;
-                            }
-                            else if ($shipment->booking_type_id == 3) {
-                                $res = str_replace(array('[', ']', '"'), '', $request->trybuy_id_list);
-                                $item_ids = explode(',', $res);
-                                $total_cod = 0;
-                                foreach ($item_ids as $item_id) {
-                                    $shipment_item = ShipmentItem::find($item_id);
-                                    $total_cod += $shipment_item->price;
-                                    $shipment_item->bought = 1;
-                                    $shipment_item->save();
-                                }
-                                $shipment = Shipment::find($shipment->id);
-                                $total_cod += $shipment->try_and_buy_fees;
-                                $total_parcels = ShipmentItem::where('shipment_id', $shipment->id)->count();
-                                $delivered_parcels = count($item_ids);
-                                if ($total_parcels == $delivered_parcels) {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
-                                    ShipmentsJourneyController::add($shipment->id, 36, 36, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-                                    $rider_delivery->rider_status_id = 36;
-
-                                    $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,36,$added_at,$rider_delivery,2);
-                                } else {
-                                    Shipment::where('id', $shipment->id)->update(['amount' => $total_cod, 'received_amount' => $total_cod, 'shipper_status_id' => 37, 'consignee_status_id' => 37]);
-                                    ShipmentsJourneyController::add($shipment->id, 37, 37, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-                                    $rider_delivery->rider_status_id = 37;
-
-                                    $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,37,$added_at,$rider_delivery,2);
-                                }
-                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 5, 'update_type' => 1]);
-                            }
-                            else if ($shipment->booking_type_id == 4) {
-                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
-
-                                $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
-                               
-                                if ($shipment->charges_mode_id == 1) {
-                                    $shipment->shipper_status_id = 14;
-                                    $shipment->consignee_status_id = 14;
-
-                                    DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 7, 'update_type' => 1]);
-                                } else {
+                                else {
                                     $shipment->shipper_status_id = 14;
                                     $shipment->consignee_status_id = 14;
                                     $shipment->received_amount = $shipment->amount;
                                     DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
+                                    ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+
+                                    /*if($shipment->packaging_material_request == 1){
+                                        self::delivery_packaging_material_update($shipment->tracking_number);
+                                    }*/
+
+                                    $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
+
                                 }
+                                $shipment->delivery_in_route = 0;
+                                $shipment->save();
                             }
-                            else {
-                                $shipment->shipper_status_id = 14;
-                                $shipment->consignee_status_id = 14;
-                                $shipment->received_amount = $shipment->amount;
-                                DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 6, 'update_type' => 1]);
-                                ShipmentsJourneyController::add($shipment->id, 14, 14, NULL, NULL, NULL, NULL, $request->delivery_note_id, NULL, 1, $received_by, $rider_id, $cnic, $relation);
+                            $rider_delivery->save();
 
-                                /*if($shipment->packaging_material_request == 1){
-                                    self::delivery_packaging_material_update($shipment->tracking_number);
-                                }*/
-
-                                $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,14,$added_at,$rider_delivery,2);
-
+                            if ($request->has('dbf_otp_entered')) {
+                                $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
+                                if ($shipment_verification->exists()) {
+                                    $shipment_verification = $shipment_verification->first();
+                                } else {
+                                    $shipment_verification = new ShipmentOtpVerification();
+                                    $shipment_verification->shipment_id = $shipment->id;
+                                }
+                                $shipment_verification->via_dbf_otp = $request->dbf_otp_entered;
+                                $shipment_verification->save();
                             }
-                            $shipment->delivery_in_route = 0;
-                            $shipment->save();
+                            $message = 'Shipment is marked as delivered Successfully';
                         }
-                        $rider_delivery->save();
-
-                        if ($request->has('dbf_otp_entered')) {
-                            $shipment_verification = ShipmentOtpVerification::where('shipment_id', $shipment->id);
-                            if ($shipment_verification->exists()) {
-                                $shipment_verification = $shipment_verification->first();
-                            } else {
-                                $shipment_verification = new ShipmentOtpVerification();
-                                $shipment_verification->shipment_id = $shipment->id;
-                            }
-                            $shipment_verification->via_dbf_otp = $request->dbf_otp_entered;
-                            $shipment_verification->save();
-                        }
-                        $message = 'Shipment is marked as delivered Successfully';
+                    } else {
+                        $message = 'Shipment is marked as delivered already';
                     }
-                } else {
-                    $message = 'Shipment is marked as delivered already';
                 }
+                $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
+                if(count($delivered_shipment_ids) > 0){
+                    $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
+                        $query->where(function ($sub_query) {
+                            $sub_query->where('booking_type_id', '!=', 4);
+                        })
+                            ->orWhere(function ($sub_query) {
+                                $sub_query->where('booking_type_id', '=', 4)
+                                    ->where('charges_mode_id', '=', 2);
+                            });
+                    })->sum('received_amount');
+                    $count = count($delivered_shipment_ids);
+                    $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+                    $delivery_note_data->delivered_shipments = $count;
+                    $delivery_note_data->received_cod_amount = $dncc_amount;
+                    $delivery_note_data->last_updated_at = Carbon::now();
+                    $delivery_note_data->status_updated_at = Carbon::now();
+                    $delivery_note_data->save();
+                }
+                DB::commit();
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
+            } catch (\Throwable $th) {
+                DB::rollback();
+
+                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
+                return response()->json(['status' => 1, 'message' => 'Something Went Wrong!']);
+
+                //throw $th;
             }
         }
-        $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', '>', 1)->where('status', '!=', 8)->select('shipment_id')->get();
-        if(count($delivered_shipment_ids) > 0){
-            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->where(function ($query) {
-                $query->where(function ($sub_query) {
-                    $sub_query->where('booking_type_id', '!=', 4);
-                })
-                    ->orWhere(function ($sub_query) {
-                        $sub_query->where('booking_type_id', '=', 4)
-                            ->where('charges_mode_id', '=', 2);
-                    });
-            })->sum('received_amount');
-            $count = count($delivered_shipment_ids);
-            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
-            $delivery_note_data->delivered_shipments = $count;
-            $delivery_note_data->received_cod_amount = $dncc_amount;
-            $delivery_note_data->last_updated_at = Carbon::now();
-            $delivery_note_data->status_updated_at = Carbon::now();
-            $delivery_note_data->save();
-        }
-        return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
     }
 
     public function return_shipment_delivered_v2(Request $request)
@@ -11359,202 +11373,217 @@ RiderAPIController extends Controller
 
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
-        } else {
+        }
+        else {
+            try {
+                //code...
+                DB::beginTransaction();
 
-            $rc_flag = false;
-            $rider_id = $request->rider_id;
+                $rc_flag = false;
+                $rider_id = $request->rider_id;
 
-            $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-//            $added_at = $request->added_at;
-            $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
-            if ($shipment_journey->exists()) {
-                $shipment_journey = $shipment_journey->first();
-                if ($shipment_journey->shipper_status_id == 5) {
-                    if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
-                        if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
-                            if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
-                                $shipments = ShipmentsJourney::select('shipper_status_id', 'status_reason_id')
-                                    ->where('reference_1_id', $request->delivery_note_id)
-                                    ->where('shipment_id', $request->shipment_id)
-                                    ->where('shipper_status_id', $request->shipper_status_id)
-                                    ->where('status_reason_id', $request->status_reason_id)
-                                    ->where('rider_id', $rider_id);
-                                if (!$shipments->exists()) {
-                                    $shipment = Shipment::find($request->shipment_id);
+                $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
+                //$added_at = $request->added_at;
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $request->shipment_id)->orderBy('id', 'DESC');
+                if ($shipment_journey->exists()) {
+                    $shipment_journey = $shipment_journey->first();
+                    if ($shipment_journey->shipper_status_id == 5) {
+                        if (!RiderDelivery::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('delivered_status', 1)->exists()) {
+                            if (!Shipment::where('id', $request->shipment_id)->whereIn('shipper_status_id', [14, 30, 36, 37, 20, 52, 13])->exists()) {
+                                if (DeliveryNoteShipment::join('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', 'dn.id')->where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $request->shipment_id)->where('dn.rider_id', $rider_id)->exists()) {
+                                    $shipments = ShipmentsJourney::select('shipper_status_id', 'status_reason_id')
+                                        ->where('reference_1_id', $request->delivery_note_id)
+                                        ->where('shipment_id', $request->shipment_id)
+                                        ->where('shipper_status_id', $request->shipper_status_id)
+                                        ->where('status_reason_id', $request->status_reason_id)
+                                        ->where('rider_id', $rider_id);
+                                    if (!$shipments->exists()) {
+                                        $shipment = Shipment::find($request->shipment_id);
 
-                                    $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
+                                        $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
 
-                                    $rider_delivery = new RiderDelivery();
+                                        $rider_delivery = new RiderDelivery();
 
-                                    $rider_delivery->added_at = $added_at;
-                                    $rider_delivery->delivery_note_id = $request->delivery_note_id;
-                                    $rider_delivery->shipment_id = $request->shipment_id;
-                                    $rider_delivery->rider_id = $request->rider_id;
-                                    $rider_delivery->start_location_latitude = $request->start_location_latitude;
-                                    $rider_delivery->start_location_longitude = $request->start_location_longitude;
-                                    $rider_delivery->actual_location_latitude = $request->actual_location_latitude;
-                                    $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
-                                    $rider_delivery->rider_status_id = $request->shipper_status_id;
-                                    $rider_delivery->rider_status_reason_id = $request->status_reason_id;
-                                    $rider_delivery->delivered_status = 0;
+                                        $rider_delivery->added_at = $added_at;
+                                        $rider_delivery->delivery_note_id = $request->delivery_note_id;
+                                        $rider_delivery->shipment_id = $request->shipment_id;
+                                        $rider_delivery->rider_id = $request->rider_id;
+                                        $rider_delivery->start_location_latitude = $request->start_location_latitude;
+                                        $rider_delivery->start_location_longitude = $request->start_location_longitude;
+                                        $rider_delivery->actual_location_latitude = $request->actual_location_latitude;
+                                        $rider_delivery->actual_location_longitude = $request->actual_location_longitude;
+                                        $rider_delivery->rider_status_id = $request->shipper_status_id;
+                                        $rider_delivery->rider_status_reason_id = $request->status_reason_id;
+                                        $rider_delivery->delivered_status = 0;
 
-                                    $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
-                                    $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
-                                    $consignee_address = $shipment->consignee_address;
+                                        $consignee_phone_number_1 = $shipment->consignee_phone_number_1;
+                                        $consignee_phone_number_2 = $shipment->consignee_phone_number_2;
+                                        $consignee_address = $shipment->consignee_address;
 
-                                    $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
-                                        $sub_query->where('phone_number', $consignee_phone_number_1)
-                                            ->orwhere('phone_number', $consignee_phone_number_2);
-                                    })->where('address', $consignee_address);
+                                        $coordinates = ConsigneeLocation::where(function ($sub_query) use ($consignee_phone_number_1, $consignee_phone_number_2) {
+                                            $sub_query->where('phone_number', $consignee_phone_number_1)
+                                                ->orwhere('phone_number', $consignee_phone_number_2);
+                                        })->where('address', $consignee_address);
 
-                                    if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
-                                        $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
+                                        if ($request->actual_location_latitude > 0 && $request->actual_location_longitude > 0) {
+                                            $origin = $request->start_location_latitude . ',' . $request->start_location_longitude;
 
-                                        $rider_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
+                                            $rider_delivery->distance_from_start_to_actual = $this->distance($origin, $destination);
 
-                                        if ($coordinates->exists()) {
-                                            $coordinates = $coordinates->latest()->first();
+                                            if ($coordinates->exists()) {
+                                                $coordinates = $coordinates->latest()->first();
 
-                                            $rider_delivery->current_location_latitude = $coordinates->lat;
-                                            $rider_delivery->current_location_longitude = $coordinates->long;
+                                                $rider_delivery->current_location_latitude = $coordinates->lat;
+                                                $rider_delivery->current_location_longitude = $coordinates->long;
 
-                                            $origin = $coordinates->lat . ',' . $coordinates->long;
+                                                $origin = $coordinates->lat . ',' . $coordinates->long;
 
-                                            $distance = $this->distance($origin, $destination);
+                                                $distance = $this->distance($origin, $destination);
 
-                                            $rider_delivery->distance_from_current_to_actual = $distance;
-                                        }
-                                    } else {
-                                        $rider_delivery->distance_from_start_to_actual = 0;
-
-                                        if ($coordinates->exists()) {
-                                            $rider_delivery->current_location_latitude = $coordinates->lat;
-                                            $rider_delivery->current_location_longitude = $coordinates->long;
-                                            $rider_delivery->distance_from_current_to_actual = 0;
-                                        }
-                                    }
-                                    if ($request->has('otp_entered') && $request->status_reason_id == 8) {
-                                        $rider_delivery->otp_entered = $request->otp_entered;
-                                        if ($request->otp_entered == 1) {
-                                            $rc_flag = true;
-                                        }
-                                    }
-                                    $rider_delivery->save();
-
-                                    $time = Carbon::now()->toDateString();
-                                    $picture_path = 'rider_delivery/' . $rider_delivery->id . '_' . $time . '.png';
-                                    Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
-                                    $rider_delivery->picture_path = $picture_path;
-                                    $rider_delivery->save();
-                                    $environment = config('app.env');
-
-                                    if ($request->has('audio')) {
-                                        $time = Carbon::now()->toDateString();
-                                        if ($environment == 'production') {
-                                            $extension = $request->file('audio')->getClientOriginalExtension();
-                                            $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
-                                            Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
-                                            $rider_delivery->audio_path = $audio_path;
-                                            $rider_delivery->save();
-                                        } else {
-                                            $extension = $request->file('audio')->getClientOriginalExtension();
-                                            $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
-                                            Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
-                                            $rider_delivery->audio_path = $audio_path;
-                                            $rider_delivery->save();
-                                        }
-                                    }
-
-                                    if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
-
-                                        $shipment->shipper_status_id = $request->shipper_status_id;
-                                        $shipment->consignee_status_id = $request->shipper_status_id;
-                                        $shipment->delivery_in_route = 0;
-
-                                        if (in_array($request->open_box, [1, 2])) {
-                                            $shipment->open_box = 1;
-                                            $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
-                                            if ($shipment_open_box->exists()) {
-                                                $shipment_open_box = $shipment_open_box->first();
-                                            } else {
-                                                $shipment_open_box = new ShipmentOpenBox();
-                                                $shipment_open_box->shipment_id = $shipment->id;
+                                                $rider_delivery->distance_from_current_to_actual = $distance;
                                             }
-                                            $shipment_open_box->open_box_type = $request->open_box;
-                                            $shipment_open_box->save();
                                         } else {
-                                            $shipment->open_box = 0;
+                                            $rider_delivery->distance_from_start_to_actual = 0;
+
+                                            if ($coordinates->exists()) {
+                                                $rider_delivery->current_location_latitude = $coordinates->lat;
+                                                $rider_delivery->current_location_longitude = $coordinates->long;
+                                                $rider_delivery->distance_from_current_to_actual = 0;
+                                            }
                                         }
-                                        $shipment->save();
+                                        if ($request->has('otp_entered') && $request->status_reason_id == 8) {
+                                            $rider_delivery->otp_entered = $request->otp_entered;
+                                            if ($request->otp_entered == 1) {
+                                                $rc_flag = true;
+                                            }
+                                        }
+                                        $rider_delivery->save();
 
-                                        $remarks = NULL;
-                                        if ($request->has('remarks')) {
-                                            $remarks = $request->remarks;
+                                        $time = Carbon::now()->toDateString();
+                                        $picture_path = 'rider_delivery/' . $rider_delivery->id . '_' . $time . '.png';
+                                        Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
+                                        $rider_delivery->picture_path = $picture_path;
+                                        $rider_delivery->save();
+                                        $environment = config('app.env');
+
+                                        if ($request->has('audio')) {
+                                            $time = Carbon::now()->toDateString();
+                                            if ($environment == 'production') {
+                                                $extension = $request->file('audio')->getClientOriginalExtension();
+                                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                                Storage::disk('s3')->put($audio_path, file_get_contents($request->audio));
+                                                $rider_delivery->audio_path = $audio_path;
+                                                $rider_delivery->save();
+                                            } else {
+                                                $extension = $request->file('audio')->getClientOriginalExtension();
+                                                $audio_path = 'rider_delivery_audio/' . $rider_delivery->id . '-' . $time . '.' . $extension;
+                                                Storage::disk('public')->put($audio_path, file_get_contents($request->audio));
+                                                $rider_delivery->audio_path = $audio_path;
+                                                $rider_delivery->save();
+                                            }
                                         }
 
-                                        $remarks_id = NULL;
-                                        if ($request->has('remarks_id')) {
-                                            $remarks_id = $request->remarks_id;
+                                        if (DeliveryNote::where('id', $request->delivery_note_id)->where('pending_status', 0)->exists()) {
+
+                                            $shipment->shipper_status_id = $request->shipper_status_id;
+                                            $shipment->consignee_status_id = $request->shipper_status_id;
+                                            $shipment->delivery_in_route = 0;
+
+                                            if (in_array($request->open_box, [1, 2])) {
+                                                $shipment->open_box = 1;
+                                                $shipment_open_box = ShipmentOpenBox::where('shipment_id', $shipment->id);
+                                                if ($shipment_open_box->exists()) {
+                                                    $shipment_open_box = $shipment_open_box->first();
+                                                } else {
+                                                    $shipment_open_box = new ShipmentOpenBox();
+                                                    $shipment_open_box->shipment_id = $shipment->id;
+                                                }
+                                                $shipment_open_box->open_box_type = $request->open_box;
+                                                $shipment_open_box->save();
+                                            } else {
+                                                $shipment->open_box = 0;
+                                            }
+                                            $shipment->save();
+
+                                            $remarks = NULL;
+                                            if ($request->has('remarks')) {
+                                                $remarks = $request->remarks;
+                                            }
+
+                                            $remarks_id = NULL;
+                                            if ($request->has('remarks_id')) {
+                                                $remarks_id = $request->remarks_id;
+                                            }
+
+                                            ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
+                                            DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
+
+
+                                            $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
+                                            if (!$rider_delivery_note_status->exists()) {
+                                                $new_status = new RiderDeliveryNoteStatus();
+                                                $new_status->delivery_note_id = $request->delivery_note_id;
+                                                $new_status->status = 2;
+                                                $new_status->save();
+                                            } else {
+                                                $rider_delivery_note_status = $rider_delivery_note_status->first();
+                                                $rider_delivery_note_status->status = 2;
+                                                $rider_delivery_note_status->save();
+                                            }
+
+                                            $this->rider_wise_delivery_note($shipment->id, $request->delivery_note_id, $rider_id, $request->shipper_status_id, $added_at, $rider_delivery, 2);
+
+                                            if ($request->shipper_status_id != 7) {
+                                                NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
+                                            }
                                         }
 
-                                        ShipmentsJourneyController::add($shipment->id, $request->shipper_status_id, $request->shipper_status_id, $request->status_reason_id, $remarks, NULL, NULL, $request->delivery_note_id, NULL, 0, NULL, $rider_id, NULL, NULL, $remarks_id);
-                                        DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('shipment_id', $shipment->id)->update(['status' => 1, 'update_type' => 1]);
-
-
-                                        $rider_delivery_note_status = RiderDeliveryNoteStatus::where('delivery_note_id', $request->delivery_note_id);
-                                        if (!$rider_delivery_note_status->exists()) {
-                                            $new_status = new RiderDeliveryNoteStatus();
-                                            $new_status->delivery_note_id = $request->delivery_note_id;
-                                            $new_status->status = 2;
-                                            $new_status->save();
-                                        } else {
-                                            $rider_delivery_note_status = $rider_delivery_note_status->first();
-                                            $rider_delivery_note_status->status = 2;
-                                            $rider_delivery_note_status->save();
+                                        if ($rc_flag == true) {
+                                            $otp_bypass = $this->otp_bypass($shipment->user_id);
+                                            if ($otp_bypass) {
+                                                $this->auto_return_confirm($shipment->id);
+                                                ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
+                                            } else {
+                                                $arr['shipment_id'] = $request->shipment_id;
+                                                $arr['delivery_note_id'] = $request->delivery_note_id;
+                                                dispatch(new ProcessAgentCallMonitoring($arr));
+                                            }
                                         }
-
-                                        $this->rider_wise_delivery_note($shipment->id,$request->delivery_note_id,$rider_id,$request->shipper_status_id,$added_at,$rider_delivery,2);
-
-                                        if ($request->shipper_status_id != 7) {
-                                            NotificationsController::send(145, $shipment->id, $request->delivery_note_id);
-                                        }
-                                    }
-
-                                    if ($rc_flag == true) {
-                                        $otp_bypass = $this->otp_bypass($shipment->user_id);
-                                        if ($otp_bypass) {
-                                            $this->auto_return_confirm($shipment->id);
-                                            ShipmentsJourneyController::add($shipment->id, 20, 20, 8, $remarks, NULL, 346, $request->delivery_note_id, NULL, 1, NULL, $rider_id, NULL, NULL, $remarks_id);
-                                        } else {
+                                        if ($rc_flag == false) {
                                             $arr['shipment_id'] = $request->shipment_id;
                                             $arr['delivery_note_id'] = $request->delivery_note_id;
                                             dispatch(new ProcessAgentCallMonitoring($arr));
                                         }
-                                    }
-                                    if ($rc_flag == false) {
-                                        $arr['shipment_id'] = $request->shipment_id;
-                                        $arr['delivery_note_id'] = $request->delivery_note_id;
-                                        dispatch(new ProcessAgentCallMonitoring($arr));
-                                    }
 
-                                    $message = 'Shipment is marked as Undelivered Successfully';
-                                } else {
-                                    $message = 'Shipment is already marked as Undelivered';
+                                        $message = 'Shipment is marked as Undelivered Successfully';
+                                    } else {
+                                        $message = 'Shipment is already marked as Undelivered';
+                                    }
                                 }
+                            } else {
+                                $message = 'Shipment status is already marked';
                             }
                         } else {
-                            $message = 'Shipment status is already marked';
+                            $message = 'Shipment is already marked as Delivered';
                         }
                     } else {
-                        $message = 'Shipment is already marked as Delivered';
+                        $message = 'Shipment is not for Out for Delivery';
                     }
                 } else {
                     $message = 'Shipment is not for Out for Delivery';
                 }
-            } else {
-                $message = 'Shipment is not for Out for Delivery';
+                DB::commit();
+                return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
             }
-            return response()->json(['status' => 0, 'message' => $message, 'delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $request->shipment_id]);
+            catch (\Throwable $th)
+            {
+                DB::rollback();
+
+                $this->createDeliveryNoteErrorLog($request->delivery_note_id, $request->shipment_id, $th->getMessage());
+                return response()->json(['status' => 1,  'message' => 'Something Went Wrong!']);
+
+                //throw $th;
+            }
         }
     }
 
@@ -14374,6 +14403,78 @@ RiderAPIController extends Controller
             $delivery_note_data->save();
 
             return response()->json(['status' => 0, 'message' => 'Delivery Note is ready for verification!', 'delivery_note_id' => $request->delivery_note_id]);
+        }
+    }
+
+    public function pickup_summary_v3(Request $request)
+    {
+        $rider_id = $request->rider_id;
+
+        $pickup_note = V3PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
+
+        if ($pickup_note->exists()) {
+            $pickup_note = $pickup_note->first();
+
+            $information = array();
+
+            $information['pickup_note_id'] = $pickup_note->id;
+
+            $information['summary'] = array();
+            $information['summary']['pickups'] = 0;
+
+            $information['summary']['received']['pickups'] = 0;
+
+            $rider = Rider::find($rider_id);
+            $city = City::find($rider->city_id);
+
+            if ($city->location_latitude && $city->location_longitude) {
+                $starting_location = $city->location_latitude . ',' . $city->location_longitude;
+
+                $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+                $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
+            }
+
+            $pickup_note->fresh();
+
+            $pickup_note_requests = $pickup_note->pickup_note_requests->sortBy('ordering');
+
+            $information['pickups'] = array();
+
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $information['summary']['pickups']++;
+
+                $pickup_request = $pickup_note_request->pickup_request;
+
+                $pickup_address = $pickup_request->pickup_address;
+
+                $pickup = array();
+
+                $pickup['pickup_request_id'] = $pickup_request->id;
+                $pickup['status'] = $pickup_note_request->status;
+                $pickup['ordering'] = $pickup_note_request->ordering;
+
+                $booked_shipments = $pickup_request->booked;
+
+                $pickup['shipments'] = $booked_shipments;
+
+                if ($pickup_note_request->status) {
+                    $information['summary']['received']['pickups']++;
+                }
+
+                $pickup['shipper_name'] = $pickup_address->user->name;
+                $pickup['person_of_contact'] = $pickup_address->poc;
+                $pickup['phone_number'] = $pickup_address->phone;
+                $pickup['address'] = $pickup_address->pickup_address;
+                $pickup['location_latitude'] = $pickup_address->location_latitude;
+                $pickup['location_longitude'] = $pickup_address->location_longitude;
+
+                $information['pickups'][] = $pickup;
+            }
+
+            return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
+        } else {
+            return response()->json(['status' => 0, 'message' => 'No Pickup(s) Assigned']);
         }
     }
 }

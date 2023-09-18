@@ -673,7 +673,7 @@ class UserManagementController extends Controller
             }
         }
 
-        return redirect()->route('admin.crm.permissions')->with(['success' => 'Deleted Succesfullu']);
+        return redirect()->route('admin.crm.permissions')->with(['success' => 'Deleted Succesfully']);
 
     }
 
