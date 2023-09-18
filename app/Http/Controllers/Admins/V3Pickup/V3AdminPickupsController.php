@@ -1458,20 +1458,13 @@ class V3AdminPickupsController extends Controller
                             }
                         }
                     }
-                    //here update amount
-                    // if($shipment->booking_type_id==6){
 
-                    // $ftl_request = FtlRequest::where('shipment_id',$shipment->id)->first();
-                    // $other_amount = FtlRequestAdditionalCost::where('ftl_request_id',$ftl_request->id)->sum('amount');
-                    // //amount or received_amount need to confirm
-                    // $shipment->amount= ((($ftl_request->freight_charges/$ftl_request->weight)*$actual_weight)-$other_amount);
-                    // }
                     $shipment->actual_weight = $actual_weight;
                     $shipment->save();
 
                     $rider_picked = false;
                     if(!$rider_assigned_flag){
-                        $v2_pickup_note_request = V2PickupNoteRequest::where('pickup_request_id',$pickup_request_id)->latest()->first();
+                        $v2_pickup_note_request = V3PickupNoteRequest::where('pickup_request_id',$pickup_request_id)->latest()->first();
                         if($v2_pickup_note_request){
                             $check_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->where('shipper_status_id',53)->where('reference_1_id',$pickup_request_id)->where('reference_2_id',$v2_pickup_note_request->pickup_note_id)->latest()->first();
                             if($check_journey){
@@ -1496,7 +1489,7 @@ class V3AdminPickupsController extends Controller
                     $details['city'] = $shipment->consignee_city->name;
                     $details['hub'] = $shipment->consignee_city->hub_city->name;
 
-                    $id = Auth::user();
+
 
                     ShipmentScanningJourneyController::add($shipment->id, 1, 1, Auth::id(), null, null);
                     return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
