@@ -75,7 +75,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                         'pieces_quantity' => $shipment->pieces,
                         'delivery_type_id' => $shipment->walk_in_delivery_type_id,
                         'open_shipment' => $open_shipment,
-                        'parcel_value' => $shipment->parcel_value
+                        'parcel_value' => $shipment->amount
                     ]
                 ]);
 
