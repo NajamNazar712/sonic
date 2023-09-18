@@ -50,7 +50,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                     $open_shipment = $shipment_details->is_open;
                 }
 
-
+                $parcel_value = $shipment->amount;
                 $token = User::find($shipment->user_id)->api_token;
 
                 $client = new Client(['http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
@@ -81,7 +81,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                         'pieces_quantity' => $shipment->pieces,
                         'delivery_type_id' => $shipment->walk_in_delivery_type_id,
                         'open_shipment' => $open_shipment,
-                        'parcel_value' => $shipment->amount
+                        'parcel_value' => $shipment->amount > 0 ? 0 : $parcel_value,
                     ]
                 ]);
 
