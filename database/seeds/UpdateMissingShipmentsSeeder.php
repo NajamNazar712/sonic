@@ -81,11 +81,10 @@ class UpdateMissingShipmentsSeeder extends Seeder
 
                 $status_code = $response_booking->getStatusCode();
                 if ($status_code == 200) {
-                    Log::channel('trax_pay_test')->info('here');
                     $data_booking = $response_booking->getBody();
 
                     $payload_booking = json_decode($data_booking);
-
+                    Log::channel('trax_pay_test')->info('sh '. json_encode($payload_booking, true));
                     if ($payload_booking->status == 0) {
                         $new_tracking_number = $payload_booking->tracking_number;
 
