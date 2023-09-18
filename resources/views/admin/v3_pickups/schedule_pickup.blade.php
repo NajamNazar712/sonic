@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Pending Pickups
+                    Schedule Pickups
                 </h1>
 
                 <div class="card">
@@ -73,15 +73,16 @@
                                     <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
                                     <th class="border-primary border-darken-1">ID</th>
+                                    <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Date & Time</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Additional Services</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Shipments Picked</th>
+                                    {{-- <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1">Shipments Picked</th> --}}
                                     <th class="border-primary border-darken-1">Product</th>
-                                    <th class="border-primary border-darken-1">Shipper</th>
+                     
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
@@ -1015,7 +1016,6 @@
             background: #5587b4;
             border-color: #64A0D2;
             color: #fff;
-
         }
 
         /* Style the checkbox's unchecked state icon */
@@ -1420,13 +1420,13 @@
                 @if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
 
                 buttons: [
-                    {
-                        text: '<i class="la la-plus"></i> Add New',
-                        className: 'btn btn-primary request_add',
-                        action: function (e, dt, node, config) {
-                            $('#AddRequestModal').modal('show');
-                        }
-                    },
+                    // {
+                    //     text: '<i class="la la-plus"></i> Add New',
+                    //     className: 'btn btn-primary request_add',
+                    //     action: function (e, dt, node, config) {
+                    //         $('#AddRequestModal').modal('show');
+                    //     }
+                    // },
                         @if (session('role_id') == 1 || in_array(19, session('permissions')))
 
                     {
@@ -1532,7 +1532,7 @@
                 },
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.v3_pickups.pending.list') }}',
+                    url: '{{ route('admin.v3_pickups.pending.schedule.list') }}',
                     data: function (d) {
                         d.before_cut_off_time = $('#search_filter').val();
                         d.requested_from_date = $('#requested_from_date').val();
@@ -1565,15 +1565,19 @@
                         }
                     },
                     {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
+                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
+                        return row.user_id +'-'+ row.shipper;
+
+                    }},
                     {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
                     {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                    // {data: 'status', name: 'status', class: 'align-middle status'},
+                    // {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
-                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
+              
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
@@ -1937,12 +1941,75 @@
             });
 
             $('body').on('click', 'button.pickup_status_btn', function(){
+                
                 var status_id = $(this).attr('rel');
                $('#status_filter_input').val(status_id);
                table.draw();
             });
-            // increment and decrement buttons
 
+            //Approve button schedule
+            $('body').on('click','.approve_schedule',function(){
+                $currentrow=$(this).closest('tr');
+                var pickup_request_id = $currentrow.find('.pickup_request_id').text();
+                $.ajax({
+                    url:'{!! route('admin.v3_pickups.pending.schedule.approved') !!}',
+                    method:"POST",
+                    data:{
+                        'pickup_request_id':pickup_request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function(data){
+                    if(data.status==0){
+                        $currentrow.find('.approve_schedule').remove();
+                        $currentrow.find('.reject_schedule').remove();
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+               
+                    }else {
+                        toastr.error('Something went wrong, please refresh and try again!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                   
+                });
+            });
+            //Schedule Reject
+            $('body').on('click','.reject_schedule',function(){
+                $currentrow=$(this).closest('tr');
+                var pickup_request_id = $currentrow.find('.pickup_request_id').text();
+                $.ajax({
+                    url:'{!! route('admin.v3_pickups.pending.schedule.rejected') !!}',
+                    method:"POST",
+                    data:{
+                        'pickup_request_id':pickup_request_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function(data){
+                    if(data.status==0){
+                        $currentrow.find('.approve_schedule').remove();
+                        $currentrow.find('.reject_schedule').remove();
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+               
+                    }else {
+                        toastr.error('Something went wrong, please refresh and try again!', 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                   
+                });
+            });  
+
+            $('body').on('click','.reject_schedule',function(){
+                
+            });
+            // increment and decrement buttons
             $('.quantity').TouchSpin({
                 min: 0,
                 max: 1000,

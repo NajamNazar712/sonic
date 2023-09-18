@@ -157,6 +157,7 @@
                         {{-- <div class="d-flex justify-content-start vh-100 pl-1">
                             <b class="text-dark"> Customer Information </b>
                         </div> --}}
+                        <h4 class="text-center"><b>{{ucfirst(Auth::user()->name)}}</b></h4>
                         <form id="add_pickup_request" method="post" action="{{ route('cod.pickup.add') }}" >
                             @csrf
                             @method('post')
@@ -585,9 +586,9 @@
 
         /* Style the checkbox's unchecked state */
         .scheduled_days_area input:checked + label {
-        background: #F7FAFC;
-        border-color: #64A0D2;
-        color: #64A0D2;
+            background: #5587b4;
+            border-color: #64A0D2;
+            color: #fff;
         }
 
         /* Style the checkbox's unchecked state icon */
@@ -1042,18 +1043,18 @@
                table.draw();
             });
 
-            // $('.quantity').TouchSpin({
-            //     min: 0,
-            //     max: 1000,
-            //     buttondown_class: 'btn btn-primary rounded-left',
-            //     buttonup_class: 'btn btn-primary rounded-right',
-            //     buttondown_txt: '<i class="ft-minus"></i>',
-            //     buttonup_txt: '<i class="ft-plus"></i>'
-            // }).bind('input change', function() {
-            //     if ($(this).hasClass('danger')) {
-            //         $(this).valid();
-            //     }
-            // });
+            $('.quantity').TouchSpin({
+                min: 0,
+                max: 1000,
+                buttondown_class: 'btn btn-primary rounded-left',
+                buttonup_class: 'btn btn-primary rounded-right',
+                buttondown_txt: '<i class="ft-minus"></i>',
+                buttonup_txt: '<i class="ft-plus"></i>'
+            }).bind('input change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+            });
 
 
             $('#add_pickup_request').validate({

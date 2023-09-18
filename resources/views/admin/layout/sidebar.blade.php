@@ -237,6 +237,10 @@
                                                 History</a></li>
                                     @endif
                                     @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                                    <li><a class="menu-item"
+                                           href="{{ route('admin.v3_pickups.pending.schedule.index') }}">Schedule Pickups</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(17, session('permissions')))
                                         <li><a class="menu-item"
                                                href="{{ route('admin.v2_pickups.pending.index') }}">Pending</a></li>
                                     @endif

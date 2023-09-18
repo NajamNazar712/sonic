@@ -1270,11 +1270,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('assign', 'Admins\V3Pickup\V3AdminPickupsController@pending_requests_assign')->name('assign');
             Route::post('pickup_request_services', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_request_services')->name('pickup_request_services');
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
-            Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit_info')->name('edit');
+            Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit')->name('edit');
+
+            Route::prefix('schedule')->name('schedule.')->group(function(){
+                Route::get('/','Admins\V3Pickup\V3AdminPickupsController@schedule_requests_index')->name('index');
+                Route::get('list','Admins\V3Pickup\V3AdminPickupsController@schedule_requests_list')->name('list');
+                Route::POST('approved','Admins\V3Pickup\V3AdminPickupsController@schedule_approved')->name('approved');
+                Route::POST('rejected','Admins\V3Pickup\V3AdminPickupsController@schedule_rejected')->name('rejected');
+                
+            });
         });
 
         Route::prefix('history')->name('history.')->group(function () {
-            
             Route::get('/', 'Admins\V3Pickup\V3AdminPickupsController@history_pickup_index')->name('index');
             Route::get('list', 'Admins\V3Pickup\V3AdminPickupsController@history_list')->name('list');
         });

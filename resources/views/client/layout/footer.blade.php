@@ -11,6 +11,8 @@
   <!-- BEGIN MODERN JS-->
   <script src="{{asset('app-assets/js/core/app-menu.js')}}" type="text/javascript"></script>
   <script src="{{asset('app-assets/js/core/app.js')}}" type="text/javascript"></script>
+  <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
+
   <!-- END MODERN JS-->
 
 

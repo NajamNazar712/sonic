@@ -308,9 +308,9 @@
 
         /* Style the checkbox's unchecked state */
         .scheduled_days_area input:checked + label {
-        background: #F7FAFC;
-        border-color: #64A0D2;
-        color: #64A0D2;
+            background: #5587b4;
+            border-color: #64A0D2;
+            color: #fff;
         }
 
         /* Style the checkbox's unchecked state icon */
