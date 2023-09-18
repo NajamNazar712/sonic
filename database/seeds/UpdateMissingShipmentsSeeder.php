@@ -45,7 +45,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                 }
 
 
-                $token = User::find($shipment->user_id)->token;
+                $token = User::find($shipment->user_id)->api_token;
 
                 $client = new Client(['http_errors' => FALSE, 'connect_timeout' => 60, 'timeout' => 60]);
                 $response_booking = $client->post($booking_url, [
@@ -84,7 +84,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                     $data_booking = $response_booking->getBody();
 
                     $payload_booking = json_decode($data_booking);
-                    Log::channel('trax_pay_test')->info('sh '. json_encode($payload_booking, true));
+                   
                     if ($payload_booking->status == 0) {
                         $new_tracking_number = $payload_booking->tracking_number;
 
