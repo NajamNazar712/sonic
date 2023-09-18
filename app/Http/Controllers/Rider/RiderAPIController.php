@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Rider;
 
 use App\Http\Models\V3Pickup\V3PickupNote;
+use App\Http\Models\V3Pickup\V3PickupNoteRequest;
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
 use App\RiderAssignedHubForDeliveryNote;
@@ -14406,6 +14407,68 @@ RiderAPIController extends Controller
         }
     }
 
+    private function set_order_v3($starting_location, $pickup_note_id, $pickup_note_requests)
+    {
+        $ordered = TRUE;
+
+        foreach ($pickup_note_requests as $pickup_note_request) {
+            if (!$pickup_note_request->ordering) {
+                $ordered = FALSE;
+
+                break;
+            }
+        }
+
+        if (!$ordered) {
+            $order = array();
+
+            $order_number = 1;
+
+            $pickup_requests_with_location = array();
+
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $pickup_request = $pickup_note_request->pickup_request;
+                $pickup_address = $pickup_request->pickup_address;
+
+                if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
+                    $pickup_request = $pickup_note_request->pickup_request;
+
+                    $pickup_requests_with_location[$pickup_request->id] = $pickup_request;
+                } else {
+                    $pickup_note_request->ordering = $order_number;
+
+                    $pickup_note_request->save();
+
+                    $order_number++;
+                }
+            }
+
+            while (!empty($pickup_requests_with_location)) {
+                $distances = array();
+
+                foreach ($pickup_requests_with_location as $pickup_request) {
+                    $pickup_address = $pickup_request->pickup_address;
+
+                    $destination = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+
+                    $distances[$pickup_request->id] = $this->distance($starting_location, $destination);
+                }
+
+                $pickup_request_id = min(array_keys($distances, min($distances)));
+
+                V3PickupNoteRequest::where('pickup_note_id', $pickup_note_id)->where('pickup_request_id', $pickup_request_id)->update(['ordering' => $order_number]);
+
+                $order_number++;
+
+                $pickup_address = $pickup_requests_with_location[$pickup_request_id]->pickup_address;
+
+                $starting_location = $pickup_address->location_latitude . ',' . $pickup_address->location_longitude;
+
+                unset($pickup_requests_with_location[$pickup_request_id]);
+            }
+        }
+    }
+
     public function pickup_summary_v3(Request $request)
     {
         $rider_id = $request->rider_id;
@@ -14477,4 +14540,5 @@ RiderAPIController extends Controller
             return response()->json(['status' => 0, 'message' => 'No Pickup(s) Assigned']);
         }
     }
+
 }
