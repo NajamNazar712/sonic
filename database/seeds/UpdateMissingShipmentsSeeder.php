@@ -79,7 +79,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
                 ];
 
                 if($shipment->amount == 0){
-                    $parcel_value = $shipment->amount;
+                    $parcel_value = $shipment->parcel_value;
                     $booking_data['parcel_value'] = $parcel_value;
                 }
 
