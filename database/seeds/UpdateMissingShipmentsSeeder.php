@@ -17,7 +17,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $tracking_numbers = [28812428456203];
+        $tracking_numbers = [10730228456761, 10724328456791, 10711928456809, 10731228456823, 10750028456845, 10720228456862, 10725128456877, 10717428456907, 10714428456931, 10720228456950, 10724428456979];
 
         foreach ($tracking_numbers as $tracking_number){
             $shipment = DB::connection('gcp')->table('shipments')->where('tracking_number', $tracking_number)->first();
