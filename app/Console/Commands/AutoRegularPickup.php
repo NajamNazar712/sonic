@@ -3,24 +3,23 @@
 namespace App\Console\Commands;
 
 use App\Http\Admins\V3Pickup\V3PickupCronController;
-use App\Http\Controllers\Admins\V2Pickup\V2PickupCronController;
 use Illuminate\Console\Command;
 
-class ArrivalAutoNotPicked extends Command
+class AutoRegularPickup extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'arrival:autonotpicked';
+    protected $signature = 'auto:regular_pickup';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Arrival Auto Not Picked Cron';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -40,8 +39,5 @@ class ArrivalAutoNotPicked extends Command
     public function handle()
     {
         V3PickupCronController::regular_pickups_create();
-//        V2PickupCronController::ready_pickups();
-//        V2PickupCronController::arrival_not_picked();
-//        V2PickupCronController::auto_pickup_assign();
     }
 }
