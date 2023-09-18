@@ -229,18 +229,18 @@ trait RvTrait
         $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
         $shipment_assign_agent_table_columns = $this->shipment_assign_agent_table_columns($request, $assigned_agent);
-        if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count < 3) {
+        if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count < 2) {
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
 
         } 
-        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
+        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 2) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 7; //set status to Shipper Advise Requested 
             $shipment_assign_agent_table_columns['rv_state_id'] = 2; //unassign shipment
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
 
         } 
-        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 4) {
+        else if ($request->rv_assign_agent_status_id == 6 && $shipment_assign_agent->unresponsive_count == 3) {
             $shipment_assign_agent_table_columns['rv_assign_agent_status_id'] = 3; //set status to return confirm
             $shipment_assign_agent_table_columns['rv_assign_agent_sub_status_id'] = 4; //set status as shipment completed
             $shipment_assign_agent_table_columns['unresponsive_attempt_time'] = Carbon::now();
@@ -625,14 +625,14 @@ trait RvTrait
         $rv_shipment_assign_agent->unresponsive_attempt_time = Carbon::now();
 
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
-        if ($rv_shipment_assign_agent->unresponsive_count == 3) {
+        if ($rv_shipment_assign_agent->unresponsive_count == 2) {
             $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
             $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
 
         }
 
         //if unresponsive count 4 & rv_state_id is 3 (Open) then shipment status will be auto return confirm
-        else if ($rv_shipment_assign_agent->unresponsive_count == 4) {
+        else if ($rv_shipment_assign_agent->unresponsive_count == 3) {
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
         }
@@ -1359,6 +1359,11 @@ trait RvTrait
             $rv_priority_shippers = explode(',', $rv_priority_shipper['text']);
         }
 
+        $rv_priority_shippers = array_filter($rv_priority_shippers, function($value){
+            return $value != "";
+        });
+
+
         $all_shipper_exists =  GlobalSettings::where('type', 'rv_disable_shippers_all_shippers')->where('setting_value', 1)->exists();
         // If excluded_shippers setting is not found, initialize as an empty array
         $included_shippers = [];
@@ -1372,6 +1377,11 @@ trait RvTrait
             }
 
         }
+        
+        $included_shippers = array_filter($included_shippers, function($value){
+            return $value != "";
+        });
+
 
         $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
         // If only_shippers setting is not found, initialize as an empty array
@@ -1381,13 +1391,17 @@ trait RvTrait
             $only_shipper = $only_shipper->first();
             $only_shippers = explode(',', $only_shipper['text']);
         }
+
+        $only_shippers = array_filter($only_shippers, function($value){
+            return $value != "";
+        });
+
         
         foreach ($sorted_agents as $key => $agent) {
 
-            
             $shipments = [];
             
-            if (!($included_shippers[0] == "") || !($rv_priority_shippers[0] == "")) {
+            if (!empty($included_shippers) || (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
                 
                 $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                 $mergeArr = array_unique($mergeArr);

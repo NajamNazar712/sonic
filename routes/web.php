@@ -2892,6 +2892,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overland_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@overland_list')->name('list');
         });
+
+        Route::prefix('rv_report')->name('rv_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
+        });
     });
 
     //Reports end
@@ -4087,7 +4092,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('team_lead')->name('team_lead.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@team_lead_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@team_lead_list')->name('list');
-        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_hub_agent')->name('assign_hub_agent');
+        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_zone_agent')->name('assign_zone_agent');
         Route::post('deactivate_staff', 'Admins\TeamLeadDashboardController@deactivate_staff')->name('deactivate_staff');
         Route::post('activate_staff', 'Admins\TeamLeadDashboardController@activate_staff')->name('activate_staff');
         Route::post('add_additional_days', 'Admins\TeamLeadDashboardController@add_additional_days')->name('add_additional_days');
@@ -4100,7 +4105,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@shipment_assign_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@shipment_assign_list')->name('list');
     });
-
+    
 
     Route::prefix('leads')->name('leads.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');

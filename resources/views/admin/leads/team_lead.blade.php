@@ -7,15 +7,11 @@
         Team Leads Management
     </h1>
 
-
     @include('admin.inc.messages')
-
-
 
     {{-- <input type="hidden" class="datepicker"> --}}
     <div class="modal fade" id="joiningDateModal" tabindex="-1" role="dialog" aria-labelledby="joiningDateModalLabel"
         aria-hidden="true">
-
     </div>
 
     <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal"
@@ -94,7 +90,7 @@
                     </button>
                 </div>
                 <form id="assign_agent_hubs" novalidate="novalidate" method="post"
-                    action="{{ route('admin.team_lead.assign_hub_agent') }}">
+                    action="{{ route('admin.team_lead.assign_zone_agent') }}">
                     @csrf
                     <div class="modal-body mx-3 d-flex justify-content-center">
                         <div class="col-12 col-md-8 col-lg-6 mt-1">
@@ -666,7 +662,6 @@
                 ],
                 rowId: 'employee_id',
                 columns: [
-                    // {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {
                         orderable: false,
                         searchable: false,
@@ -753,9 +748,7 @@
                     }
                 ],
                 rowCallback: function(row, data, index) {
-                    // $('td:eq(0)', row).addClass('select-checkbox');
                     var info = table.page.info();
-                    console.log(data);
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -833,7 +826,6 @@
                         {
                             $(employee_attendance).appendTo($(search))
                             .on( 'change', function () {
-                                console.log($(this).val());
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
@@ -1192,41 +1184,40 @@
                 });
             });
 
-            var SelectedCities = [];
-            var SelectedCitiesName = [];
-            var CityName = null
-                $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
-                    var employeeId = $(this).attr('data-id');
-                    var cities = $(this).attr('data-city');
-                    $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' +
-                        employeeId + '">');
-                    selectedCities = cities.toString().split(',');
-                    if (cities != null) {
-                        $('#search_origin option').each(function() {
-                            var optionValue = $(this).val();
-                            if (selectedCities.includes(optionValue)) {
-                                var cityIndex = selectedCities.indexOf(optionValue);
-                                if (cityIndex > -1) {
-                                    $('#search_origin').append($(this));
-                                    cityName = $(this).text();
-                                    $(this).prop('selected', true);
+            $('body').on('click', 'tr td .dropdown-menu .dropdown-item.assign_hub', function() {
+                var employeeId = $(this).attr('data-id');
+                cities = $(this).attr('data-city');
+                $('#assign_agent_hubs').append('<input type="hidden" name="employee_id" value="' + employeeId + '">');
+                selectedCities = cities.toString().split(',');
+                if (cities != null) {
+                    var selectedOptions = [];
+                    $('#search_origin option').each(function() {
+                        var optionValue = $(this).val();
+                        if (selectedCities.includes(optionValue)) {
+                            selectedOptions.push($(this));
+                        }
+                        $(this).prop('selected', false);
+                    });
 
-                                }
-
-                                $('input[name="unsorted_zones"]').val(selectedCities);
-                            } else {
-                                $(this).prop('selected', false);
-                            }
+                        $.each(selectedCities, function(index, value) {
+                        var option = selectedOptions.find(function(opt) {
+                            return opt.val() === value;
                         });
-                        $('#search_origin').trigger('change');
-                        $('#AssignHubModal').modal('show');
-                    } else if (rv_city == null) {
-                        $("#search_origin option").prop("selected", false).trigger("change");
-                        $('#AssignHubModal').modal('show');
-                    }
-                });
+                        if (option) {
+                            $('#search_origin').append(option);
+                            option.prop('selected', true);
+                        }
+                    });
 
+                    $('input[name="unsorted_zones"]').val(selectedCities);
 
+                    $('#search_origin').trigger('change');
+                    $('#AssignHubModal').modal('show');
+                } else if (rv_city == null) {
+                    $("#search_origin option").prop("selected", false).trigger("change");
+                    $('#AssignHubModal').modal('show');
+                }
+            });
 
             var $select2 = $('#search_origin').select2({
                 templateSelection: template,
