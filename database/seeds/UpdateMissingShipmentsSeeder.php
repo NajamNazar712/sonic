@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use Illuminate\Database\Seeder;
 
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class UpdateMissingShipmentsSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $tracking_numbers = [15822328455044, 15827128455051];
+        $tracking_numbers = [28812428456203];
 
         foreach ($tracking_numbers as $tracking_number){
             $shipment = DB::connection('gcp')->table('shipments')->where('tracking_number', $tracking_number)->first();
@@ -80,6 +81,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
 
                 $status_code = $response_booking->getStatusCode();
                 if ($status_code == 200) {
+                    Log::channel('trax_pay_test')->info('here');
                     $data_booking = $response_booking->getBody();
 
                     $payload_booking = json_decode($data_booking);
