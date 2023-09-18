@@ -19,7 +19,7 @@ class AutoRegularPickup extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Regular Pickup Generation and Auto Assigning';
 
     /**
      * Create a new command instance.
