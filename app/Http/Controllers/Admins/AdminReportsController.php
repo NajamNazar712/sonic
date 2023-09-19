@@ -11932,9 +11932,13 @@ class AdminReportsController extends Controller
                                 return '-';
                             }
                         }
-
-
                     });
+                    
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->whereBetween('shipments.created_at', [$from, $to]);
+        }
 
         return $datatable->make(true);
     }
