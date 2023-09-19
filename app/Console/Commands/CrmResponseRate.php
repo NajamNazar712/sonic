@@ -121,24 +121,19 @@ class CrmResponseRate extends Command
 
             $hubIndex = array_search($responsible_hub, array_column($responses, 'responsible_hub'));
             if ($hubIndex !== false) {
-
-
                 if ($req["comment_by"] == 0) {
-                    $responses[$hubIndex]['role_id'] = Admin::where('id',$req["comment_by_id"])->value('role_id');
-                    $responses[$hubIndex]['admin_role_id'] = AdminRole::where('id', $responses[$hubIndex]['role_id'])->value('department_id');
-                    $responses[$hubIndex]['department'] = AdminDepartment::where('id', $responses[$hubIndex]['admin_role_id'])->value('name');
+                    $role_id = Admin::where('id',$req["comment_by_id"])->value('role_id');
+                    $admin_role_id = AdminRole::where('id', $role_id)->value('department_id');
+                    $dept = AdminDepartment::where('id', $admin_role_id)->value('name');
 
                 }
 
-                if($responses[$hubIndex]['department'] == 'Operations')
+                if($dept == 'Operations')
                 {
                     $responses[$hubIndex]['num_of_resps']++;
+                    $responses[$hubIndex]['total_tagged']++;
+                    $responses[$hubIndex]['response_rate'] = number_format(($responses[$hubIndex]['num_of_resps']/$responses[$hubIndex]['total_tagged']) * 100);
                 } 
-
-              
-                $responses[$hubIndex]['total_tagged']++;
-
-                $responses[$hubIndex]['response_rate'] = number_format(($responses[$hubIndex]['num_of_resps']/$responses[$hubIndex]['total_tagged']) * 100);
 
 
                 
