@@ -16,8 +16,13 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div id="search_form" class="row mb-2 justify-content-center">
-                                <div class="col-4 ">
-                                    <div class="form-group input-group ml-1">
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                                    </fieldset>
+                                </div>
+                                <div class="col-4">
+                                    <div class="form-group input-group">
                                         <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o"></span>
@@ -27,8 +32,8 @@
                                         <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                                     </div>
                                 </div>
-                                <div class="col-4 ">
-                                    <div class="form-group input-group ml-1">
+                                <div class="col-4">
+                                    <div class="form-group input-group">
                                         <div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                         <span class="la la-calendar-o"></span>
@@ -66,7 +71,7 @@
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action Updated By</th>
-                                    <th class="border-primary border-darken-1">RCP Agent Updated By</th>
+                                    <th class="border-primary border-darken-1">RCP tracking_nums Updated By</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
@@ -322,7 +327,11 @@
 
     <script>
         $(document).ready(function() {
-
+            $('#search_tracking_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -372,6 +381,7 @@
                 ajax: {
                     url: '{{ route('admin.reports.rv_report.list')}}',
                     data: function (d) {
+                        d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
