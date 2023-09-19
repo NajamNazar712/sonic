@@ -55,35 +55,19 @@
 
                             </div>
 
-                            <div class="container-fluid">
-                                <div class="row justify-content-center">
-                                    <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
-                                    @foreach($statuses as $id => $status)
-                                        <div>
-                                            <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="{{ $id }}">{{ $status['name'] }}
-                                                ({{ $status['count'] }})
-                                            </button>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
+                           
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
-                                    <th class="border-primary border-darken-1"></th>
                                     <th class="border-primary border-darken-1">S. No.</th>
-                                    <th class="border-primary border-darken-1">ID</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
-                                    <th class="border-primary border-darken-1">Date & Time</th>
                                     <th class="border-primary border-darken-1">Ask Time</th>
                                     <th class="border-primary border-darken-1">Shipments/Pieces</th>
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
-                                    {{-- <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Shipments Picked</th> --}}
+                                    <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Product</th>
-                     
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
@@ -1418,112 +1402,18 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
-
-                buttons: [
-                    // {
-                    //     text: '<i class="la la-plus"></i> Add New',
-                    //     className: 'btn btn-primary request_add',
-                    //     action: function (e, dt, node, config) {
-                    //         $('#AddRequestModal').modal('show');
-                    //     }
-                    // },
-                        @if (session('role_id') == 1 || in_array(19, session('permissions')))
-
-                    {
-                        text: 'Assign',
-                        className: 'btn btn-primary assign',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            $('#assign_to_rider .rider').val(null).trigger('change');
-
-                            $('#assign_to_rider').modal('show');
-                        }
-                    },
-
-                        @endif
-                    {
-                        extend: 'excel',
-                        title: 'Pending Pickups Requests',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
-                    {
-                        extend: 'selectAll',
-                        text: 'Select All',
-                        className: 'select_all',
-                        action: function (e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function (index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.select();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index === -1) {
-                                        selected_rows.push(id);
-                                    }
-
-                                    table.button('.assign').enable();
-                                    table.button('.update').enable();
-
-                                }
-                            });
-                        }
-                    }, {
-                        extend: 'selectNone',
-                        text: 'Select None',
-                        className: 'select_none',
-                        action: function (e) {
-                            e.preventDefault();
-
-                            table.rows().nodes().each(function (index) {
-                                var row = table.row(index);
-
-                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                    row.deselect();
-
-                                    id = parseInt(row.id());
-
-                                    var index = $.inArray(id, selected_rows);
-
-                                    if (index !== -1) {
-                                        selected_rows.splice(index, 1);
-                                    }
-
-                                    if (selected_rows.length == 0) {
-                                        table.button('.assign').disable();
-                                        table.button('.update').disable();
-                                    }
-                                }
-                            });
-                        }
-                    },
-                    'reset'
-                ],
-                @else
+              
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Pending Pickups Requests',
+                        title: 'Schedule Pickups',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                     'reset'
                 ],
-                @endif
+              
                 scrollX: true, scrollY: '500px',
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
-                },
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
@@ -1544,16 +1434,7 @@
                 rowId: 'id',
                 order: [[2, 'desc']],
                 columns: [
-                    {
-                        data: 'id',
-                        orderable: false,
-                        searchable: false,
-                        class: 'text-center align-middle select select-checkbox p-1',
-                        targets: 0,
-                        render: function (data, type, row) {
-                            return '';
-                        }
-                    },
+                   
                     {
                         data: 'serial_number',
                         orderable: false,
@@ -1565,21 +1446,18 @@
                             return '';
                         }
                     },
-                    {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
+                    // {data: 'pickup_request_id', name: 'pickup_request_id', class: 'align-middle pickup_request_id'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
 
                     }},
-                    {data: 'pickup_date', name: 'pickup_date', class: 'align-middle pickup_date'},
                     {data: 'time_range', name: 'time_range', class: 'align-middle ask_time'},
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    // {data: 'status', name: 'status', class: 'align-middle status'},
-                    // {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
-              
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
@@ -1594,12 +1472,7 @@
                 ],
                 rowCallback: function (row, data, index) {
                     var info = table.page.info();
-
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function () {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1839,49 +1712,7 @@
                     });
                 } */
             });
-            // var additional_services=@json($additional_services);
-            $('body').on('click','.edit_pickup_request',function(){
-                var pickup_request_id =$(this).closest('tr').find('.pickup_request_id').text();
-                // $(".edit-services-list").empty();
-                $('.edit-services-list input').val(0);
-                $.ajax({
-                    url:'{{route('admin.v3_pickups.pending.edit',['id'=>':id']) }}'.replace(':id',pickup_request_id),
-                    method:'GET'
-                }).done(function(data){
-                    var pickup_request=data.pickup_request;
-                    var pickup_request_services=pickup_request.pickup_request_services;
-                    if(data.status==0){
-                        $("#pickup_request_id").val(pickup_request.id);
-                        $("#edit_customer_name").val(pickup_request.walkin_name);
-                        $("#edit_mobile_no").val(pickup_request.walkin_contact);
-                        $("#edit_walkin_address").val(pickup_request.walkin_address);
-                        $("#edit_customer_name").val(pickup_request.walkin_name);
-                        $("#edit_pickup_date").val(pickup_request.pickup_date).trigger('change');
-                        $("#edit_preferred_time_range").val(pickup_request.time_range_id).trigger('change');
-                        $("#edit_product_select").val(pickup_request.segment_id).trigger('change');
-                        $("#edit_service_select").val(pickup_request.sub_segment_id).trigger('change');
-                        $("#edit_shipment_select").val(pickup_request.pickup_shipment_type_id).trigger('change');
-                        $("#edit_shipments_count").val(pickup_request.booked);
-                        $("#edit_total_pieces_count").val(pickup_request.pieces);
-                        $("#edit_estimated_weight").val(pickup_request.weight);
-                        $("#edit_additional_request").val(pickup_request.special_request);
-                        $("#edit_pickup_address_id").val(pickup_request.pickup_address_id);
-                     
-
-                        $.each(pickup_request_services,function(key,value){
-                            $("#edit_a_service_"+value.id).val(value.pivot.count);
-                        });
-                    }else {
-                            toastr.error('No pickup Request found!', 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                    }
-                   
-                });
-                $("#EditRequestModal").modal("show");
-            });
-            
+       
             $('#AddRemarksModal').on('hidden.bs.modal', function () {
                 $('#add_remark').val('');
             });
@@ -1951,19 +1782,19 @@
 
             //Approve button schedule
             $('body').on('click','.approve_schedule',function(){
-                $currentrow=$(this).closest('tr');
-                var pickup_request_id = $currentrow.find('.pickup_request_id').text();
+                var currentrow=$(this).closest('tr');
+                var regular_pickup_id=currentrow.attr('id');
                 $.ajax({
                     url:'{!! route('admin.v3_pickups.pending.schedule.approved') !!}',
                     method:"POST",
                     data:{
-                        'pickup_request_id':pickup_request_id,
+                        'regular_pickup_id':regular_pickup_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function(data){
                     if(data.status==0){
-                        $currentrow.find('.approve_schedule').remove();
-                        $currentrow.find('.reject_schedule').remove();
+                        currentrow.find('.approve_schedule').remove();
+                        currentrow.find('.reject_schedule').remove();
                         toastr.success(data.success, 'Success!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
@@ -1980,19 +1811,19 @@
             });
             //Schedule Reject
             $('body').on('click','.reject_schedule',function(){
-                $currentrow=$(this).closest('tr');
-                var pickup_request_id = $currentrow.find('.pickup_request_id').text();
+                var currentrow=$(this).closest('tr');
+                var regular_pickup_id=currentrow.attr('id');
                 $.ajax({
                     url:'{!! route('admin.v3_pickups.pending.schedule.rejected') !!}',
                     method:"POST",
                     data:{
-                        'pickup_request_id':pickup_request_id,
+                        'regular_pickup_id':regular_pickup_id,
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function(data){
                     if(data.status==0){
-                        $currentrow.find('.approve_schedule').remove();
-                        $currentrow.find('.reject_schedule').remove();
+                        currentrow.find('.approve_schedule').remove();
+                        currentrow.find('.reject_schedule').remove();
                         toastr.success(data.success, 'Success!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'

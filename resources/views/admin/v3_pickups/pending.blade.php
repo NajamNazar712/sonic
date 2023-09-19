@@ -58,8 +58,11 @@
                             <div class="container-fluid">
                                 <div class="row justify-content-center">
                                     <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
+                                    <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="0">All
+                                    </button>
                                     @foreach($statuses as $id => $status)
                                         <div>
+                                          
                                             <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="{{ $id }}">{{ $status['name'] }}
                                                 ({{ $status['count'] }})
                                             </button>
@@ -80,6 +83,7 @@
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
@@ -980,9 +984,11 @@
 
         .custom-nav .nav-item a.active {
 
-            color: #64A0D2 !important;
+            /* color: #64A0D2 !important; */
             border: 1px solid #64A0D2 !important;
-            background-color: #F7FAFC !important;
+            /* background-color: #F7FAFC !important; */
+            color: #fff!important;
+            background: #5587b4!important;
         }
 
         .custom-nav .nav-item a:hover {
@@ -1085,8 +1091,11 @@
 
         /* end addition services */
         .delay_time{
+            background-color: #8fc5ea;
+            /* background-color: #9fa1ae; */
+            color: white;
             /* background-color: #FF0000; */
-            background-color: #FFA500;
+            /* background-color: #FFA500; */
         }
 
     </style>
@@ -1323,6 +1332,7 @@
                 }
                 else if($(this).hasClass('walk_in')){
                     $('#pickup_type_id').val(2);
+                    $("#service_select").attr('data-rule-required',true).attr('data-msg-required',"Service is required");
                 }
             });
             $('#regular_section').on('click', 'a',function (){
@@ -1429,7 +1439,10 @@
                         text: '<i class="la la-plus"></i> Add New',
                         className: 'btn btn-primary request_add',
                         action: function (e, dt, node, config) {
+                            $("#add_pickup_request")[0].reset();
+                            $("#add_pickup_request select").val(null).trigger('change.select2');
                             $('#AddRequestModal').modal('show');
+                         
                         }
                     },
                         @if (session('role_id') == 1 || in_array(19, session('permissions')))
@@ -1577,6 +1590,7 @@
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id'},
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
@@ -1784,12 +1798,12 @@
                 var action = $(this).data('action');
                 // var row_id = $(this).parents('tr').attr('id');
                 var pickup_request_id=$(this).closest('tr').find('.pickup_request_id').text();
-                
+                // var pickup_request_id=parseInt($(this).parent('tr').attr('id'));
                 $.ajax({
                     url:'{{route('admin.v3_pickups.get_pickup_remarks',['id'=>':id']) }}'.replace(':id',pickup_request_id),
                     method:'GET'
                 }).done(function(data){
-                    if(data.status==0){
+                    if(data.status==0 && data.pickup_request_attempt.length>0){
                         $("#add_remark").val(data.pickup_request_attempt[0].trax_remarks);
                     }else{
                         toastr.error(data.error, 'Error!', {
@@ -1859,6 +1873,8 @@
             // var additional_services=@json($additional_services);
             $('body').on('click','.edit_pickup_request',function(){
                 var pickup_request_id =$(this).closest('tr').find('.pickup_request_id').text();
+                // var pickup_request_id=parseInt($(this).parent('tr').attr('id'));
+                // console.log($(this).parent('tr'));
                 // $(".edit-services-list").empty();
                 $('.edit-services-list input').val(0);
                 $.ajax({

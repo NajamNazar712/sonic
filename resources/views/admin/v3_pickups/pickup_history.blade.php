@@ -79,6 +79,7 @@
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider ID</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
@@ -569,6 +570,7 @@
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id'},
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},

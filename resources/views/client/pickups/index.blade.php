@@ -553,9 +553,11 @@
 
         .custom-nav .nav-item a.active {
 
-            color: #64A0D2 !important;
+            /* color: #64A0D2 !important; */
             border: 1px solid #64A0D2 !important;
-            background-color: #F7FAFC !important;
+            /* background-color: #F7FAFC !important; */
+            color: #fff!important;
+            background: #5587b4!important;
         }
 
         .custom-nav .nav-item a:hover {
@@ -589,6 +591,7 @@
             background: #5587b4;
             border-color: #64A0D2;
             color: #fff;
+
         }
 
         /* Style the checkbox's unchecked state icon */
@@ -656,6 +659,13 @@
         }
 
         /* end addition services */
+        .delay_time{
+            background-color: #8fc5ea;
+            /* background-color: #9fa1ae; */
+            color: white;
+            /* background-color: #FF0000; */
+            /* background-color: #FFA500; */
+        }
 
     </style>
         <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
