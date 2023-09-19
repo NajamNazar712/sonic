@@ -315,7 +315,7 @@
                     url: '{{ route('admin.reports.rv_report.list')}}'
                 },
                 // rowId: 'id',
-                order: [[0, 'asc']],
+                order: [[1, 'asc']],
                 columns: [
                     {name: 'serial_number', class: 'align-middle serial_number', orderable: false, searchable: false, targets: 0, render: function(data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'tracking_number', class: 'text-center align-middle trax_id',searchable: false,orderable:false},
