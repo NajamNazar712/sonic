@@ -616,6 +616,7 @@ trait RvTrait
 
         $status = new RvAgentCallHistory();
         $status->shipment_id= $request->shipment_id;
+        $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
         $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
         $status->call_to_id = $request->call_to_id; //Shipper or Consignee
         $status->remarks = $rv_shipment_assign_agent->remarks;
