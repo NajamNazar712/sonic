@@ -76,6 +76,7 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\HR\Employee;
 
 class AdminReportsController extends Controller
 {
@@ -11833,9 +11834,8 @@ class AdminReportsController extends Controller
 
     public function rv_report_index()
     {
-
         ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
-
+        
         return view('admin.reports.rv_report.index');
     }
 
@@ -11933,7 +11933,10 @@ class AdminReportsController extends Controller
                             }
                         }
                     });
-                    
+         
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
