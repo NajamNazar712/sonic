@@ -568,6 +568,7 @@
                                     <table class="table table-bordered">
                                         <thead>
                                             <tr>
+                                                <th>S No</th>
                                                 <th>Calling Date</th>
                                                 <th>Calling Time</th>
                                                 <th>Call Findings</th>
@@ -647,16 +648,17 @@
                                 $('#call_history').removeClass('d-none');
                             }
                             $.each(response.data, function(index, rowData) {
-                                var dateTimeParts = rowData.created_at.split(' ');
+                                var dateTimeParts = rowData.data.created_at.split(' ');
                                 var row = $('<tr>');
+                                row.append($('<td>').text(index + 1)); 
                                 row.append($('<td>').text(dateTimeParts[0])); // Display date
                                 row.append($('<td>').text(dateTimeParts[1])); // Display time
                                 row.append($('<td>').text('Unresponsive'));
-                                row.append($('<td>').text(rowData.rv_call_finding.remark));
-                                row.append($('<td>').text(rowData.remarks));
-                                row.append($('<td>').text(rowData.user.name));
+                                row.append($('<td>').text(rowData.data.rv_call_finding.remark));
+                                row.append($('<td>').text(rowData.data.remarks != null ? rowData.data.remarks : '-'));
+                                row.append($('<td>').text(rowData.user_name));
                                 tableBody.append(row);
-                            });
+                        });
 
                         },
                         error: function(xhr, status, error) {
