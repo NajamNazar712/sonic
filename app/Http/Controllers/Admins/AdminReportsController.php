@@ -11934,6 +11934,15 @@ class AdminReportsController extends Controller
                         }
                     });
 
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->whereBetween('shipments.created_at', [$from, $to]);
+        }   
+
         return $datatable->make(true);
     }
 
