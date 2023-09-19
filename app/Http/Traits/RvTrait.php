@@ -615,7 +615,7 @@ trait RvTrait
         $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
 
         $status = new RvAgentCallHistory();
-        $status->rv_shipment_assign_agent_id = $rv_shipment_assign_agent->id;
+        $status->shipment_id= $request->shipment_id;
         $status->call_finding_id = $request->rv_assign_agent_sub_status_id; //call finding reasons
         $status->call_to_id = $request->call_to_id; //Shipper or Consignee
         $status->remarks = $rv_shipment_assign_agent->remarks;
