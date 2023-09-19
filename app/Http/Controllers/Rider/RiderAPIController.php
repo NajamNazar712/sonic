@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Rider;
 
 use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Http\Models\V3Pickup\V3PickupNoteRequest;
+use App\Http\Models\V3Pickup\V3PickupRequest;
 use App\Jobs\ProcessTraxPayExpireDeliveryNote;
 use App\RiderWiseDeliveryNoteSummary;
 use App\RiderAssignedHubForDeliveryNote;
@@ -14533,6 +14534,11 @@ RiderAPIController extends Controller
                 $pickup['location_longitude'] = $pickup_address->location_longitude;
 
                 $information['pickups'][] = $pickup;
+
+                $pickup_request = V3PickupRequest::find($pickup_request->id);
+                $pickup_request->status_id = 3;
+                $pickup_request->save();
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
