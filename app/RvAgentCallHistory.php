@@ -14,6 +14,6 @@ class RvAgentCallHistory extends Model
     
     public function user()
     {
-       return $this->belongsTo('App\Http\Models\Admin\Admin', 'rv_shipment_assign_agent_id', 'id');
+       return $this->belongsTo('App\Http\Models\RvShipmentAssignAgent', 'rv_shipment_assign_agent_id', 'id');
     }
 }

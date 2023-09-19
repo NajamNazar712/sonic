@@ -76,7 +76,6 @@ use App\Http\Models\V2Pickup\V2PickupRequestShipment;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
-use App\Http\Models\HR\Employee;
 
 class AdminReportsController extends Controller
 {
@@ -11834,8 +11833,9 @@ class AdminReportsController extends Controller
 
     public function rv_report_index()
     {
+
         ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
-        
+
         return view('admin.reports.rv_report.index');
     }
 
@@ -11933,7 +11933,7 @@ class AdminReportsController extends Controller
                             }
                         }
                     });
-         
+
         if ($tracking_num = $request->get('search_tracking_no')) {
             $rv_report->where('shipments.tracking_number', '=', $tracking_num);
         }
@@ -11941,14 +11941,24 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $rv_report->whereBetween('shipments.created_at', [$from, $to]);
-        }
+        }   
 
         return $datatable->make(true);
     }
 
     public function rv_call_history(Request $request)
     {
-        $data = RvAgentCallHistory::with(['rv_call_finding','user'])->where('shipment_id',$request->id)->get();
-        return response()->json(['data'=> $data]);
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding', 'user'])->where('shipment_id', $request->id)->get();
+    
+        foreach ($data as $item) {
+            $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
+            $mergedArray[] = [
+                'data' => $item,
+                'user_name' => $userData,
+            ];
+        }
+        
+        return response()->json(['data' => $mergedArray]);
     }
 }

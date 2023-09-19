@@ -612,7 +612,7 @@
                                 shipment += '<td style="width: 45%;">' + ((data.shipment.consignee_name != null &&
                                     data.shipment.consignee_name !=
                                     null) ? data.shipment.consignee_name : '----------------') + '</td>';
-                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td><strong>Destination</strong></td>';
                                 shipment += '<td>' + ((data.consignee_city.name != null &&
                                     data.consignee_city.name !=
                                     null) ? data.consignee_city.name : '----------------') + '</td>';
