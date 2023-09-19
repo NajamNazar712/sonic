@@ -1936,6 +1936,7 @@ class GlobalSettingsController extends Controller
     
     public function rv_shipper_priority_index()
     {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 906);
         $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
         $settings = GlobalSettings::where('type', 'rv_shipper_priority');
         $rv_shipper_priorities = array();

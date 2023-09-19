@@ -859,7 +859,7 @@ class Permission
             'settings.multiple_sale_tagging.list' => 279,
 
             'settings.foc_account.index' => 302,
-            'settings.rv_shipper_priority.index'=> 904,
+            'settings.rv_shipper_priority.index'=> 906,
             'settings.minimum_chargeable_weight.index' => 303,
 
             'settings.sales.projection.percentage.index' => 313,
