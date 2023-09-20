@@ -5740,9 +5740,6 @@ class NotificationsController extends Controller
                         if ($person['zone']->id == 1) {
                             $cc[] = 'waqas.shaikh@trax.pk';
                             $cc[] = 'nabeel.ahmed@trax.pk';
-                        } else if ($person['zone']->id == 3) {
-                            $cc[] = 'abbas.niazi@trax.pk';
-                            $cc[] = '';
                         } else if ($person['zone']->id == 2) {
                             $cc[] = 'ali.qureshi@trax.pk';
                             $cc[] = 'adeel.ali@trax.pk';
@@ -6235,8 +6232,6 @@ class NotificationsController extends Controller
                     //                  $to = array_merge($to, $admin->pluck('email')->toArray());
                     //              }
                     $to[] = 'syed.sharique@trax.pk';
-                    $to[] = 'balaj.khan@trax.pk';
-                    $to[] = 'bilal.shah@trax.pk';
 
 
                     self::email($subject, $body, $to);
@@ -8103,7 +8098,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = 'Inactive Rider For 2 Days or More ';
-                    $to = ['talha.motiwala@trax.pk', 'wasiq.edhi@trax.pk', 'rameel.khan@trax.pk', 'abdul.ahad@trax.pk', 'fahad.ahmed@trax.pk', 'fabiha.shahid@trax.pk'];
+                    $to = ['abdul.ahad@trax.pk'];
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 141) {
                     $retail_done_payment_report = RetailDonePaymentsReport::get();
@@ -8663,7 +8658,7 @@ class NotificationsController extends Controller
                     $body_updated = $body;
                     $body_updated = str_replace('[preview]', $html, $body_updated);
                     $subject = ' Rider Deactivation';
-                    $to = ['hasnain.saleem@trax.pk', 'abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk', 'ali.raza@trax.pk'];
+                    $to = ['abdul.ahad@trax.pk', 'saleem.abbas@trax.pk', 'nadeem.sarwar@trax.pk', 'hr.dept@trax.pk', 'danish.zahid@trax.pk', 'ali.raza@trax.pk'];
 
                     self::email($subject, $body_updated, $to);
                 } else if ($id == 156) {
@@ -9613,12 +9608,12 @@ class NotificationsController extends Controller
 
                         if ($employee->line_manager) {
                             if ($employee->line_manager->official_email) {
-                                $to = ['muhammad.sohail@trax.pk', 'shahzad.ali@trax.pk', $employee->line_manager->official_email];
+                                $to = ['shahzad.ali@trax.pk', $employee->line_manager->official_email];
                             } else {
-                                $to = ['muhammad.sohail@trax.pk', 'shahzad.ali@trax.pk'];
+                                $to = ['shahzad.ali@trax.pk'];
                             }
                         } else {
-                            $to = ['muhammad.sohail@trax.pk', 'shahzad.ali@trax.pk'];
+                            $to = ['shahzad.ali@trax.pk'];
                         }
 
                         self::email($subject, $body, $to);
