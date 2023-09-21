@@ -48,22 +48,21 @@ class CrmResponseRate extends Command
     public function handle()
     {
         $requests = CrmRequest::leftjoin('crm_request_case_nature as crcn', 'crcn.id', '=', 'crm_requests.case_nature_id')
-                                ->join('shipments as ships', 'crm_requests.shipment_id', '=', 'ships.id')
-                                ->join('shipment_status as ss', 'ss.id', '=', 'ships.shipper_status_id')
-                                ->join('user_shipping_infos as usi', 'ships.pickup_address_id', '=', 'usi.id')
-                                ->join('cities as oc', 'oc.id', '=', 'usi.city_id')
-                                ->join('cities as och', 'och.id', '=', 'oc.hub_id')
-                                ->join('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
-                                ->join('cities as dc', 'dc.id', '=', 'ships.consignee_city_id')
-                                ->join('cities as dh', 'dh.id', '=', 'dc.hub_id')
+                                ->leftjoin('shipments as ships', 'crm_requests.shipment_id', '=', 'ships.id')
+                                ->leftjoin('shipment_status as ss', 'ss.id', '=', 'ships.shipper_status_id')
+                                ->leftjoin('user_shipping_infos as usi', 'ships.pickup_address_id', '=', 'usi.id')
+                                ->leftjoin('cities as oc', 'oc.id', '=', 'usi.city_id')
+                                ->leftjoin('cities as och', 'och.id', '=', 'oc.hub_id')
+                                ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
+                                ->leftjoin('cities as dc', 'dc.id', '=', 'ships.consignee_city_id')
+                                ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
                                 ->leftjoin('crm_comments', 'crm_requests.id', '=','crm_comments.crm_request_id')
                                 ->where('crm_requests.created_at', ">=", Carbon::now()->subHours(24))
                                 ->select('crm_comments.comment_by','crm_comments.comment_by_id','crcn.name as case_nature','crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
                                 ->groupBy('crm_requests.id')
                                 ->get();
 
-
-        $responses= [];
+        $responses = [];
 
         foreach($requests as $req) {
             $responsible_hub = "";
@@ -119,31 +118,33 @@ class CrmResponseRate extends Command
                 $responsible_hub = "-";
             }
 
+            if ($responsible_hub=='-') {
+                continue;
+            } 
+
             $hubIndex = array_search($responsible_hub, array_column($responses, 'responsible_hub'));
+
+            $role_id = Admin::where('id',$req["comment_by_id"])->value('role_id');
+            $admin_role_id = AdminRole::where('id', $role_id)->value('department_id');
+            $dept = AdminDepartment::where('id', $admin_role_id)->value('name');
+            $deptIsOperation = $dept == 'Operations';
+
             if ($hubIndex !== false) {
-                if ($req["comment_by"] == 0) {
-                    $role_id = Admin::where('id',$req["comment_by_id"])->value('role_id');
-                    $admin_role_id = AdminRole::where('id', $role_id)->value('department_id');
-                    $dept = AdminDepartment::where('id', $admin_role_id)->value('name');
 
-                }
+                $responses[$hubIndex]['total_tagged']++;
 
-                if($dept == 'Operations')
-                {
+                if ($deptIsOperation) {
                     $responses[$hubIndex]['num_of_resps']++;
-                    $responses[$hubIndex]['total_tagged']++;
                     $responses[$hubIndex]['response_rate'] = number_format(($responses[$hubIndex]['num_of_resps']/$responses[$hubIndex]['total_tagged']) * 100);
-                } 
-
-
+                }
                 
             } else {
-                if ($responsible_hub!="-") {
+                if (true) {
                     $responses[] = [
                         'responsible_hub' => $responsible_hub,
                         'total_tagged' => 1,
-                        'response_rate' => ($req['comm_id']) ? "100" : "0",
-                        'num_of_resps' => ($req['comm_id']) ? 1 : 0,
+                        'response_rate' => ($req['comm_id'] && $deptIsOperation) ? "100" : "0",
+                        'num_of_resps' => ($req['comm_id'] && $deptIsOperation) ? 1 : 0,
                     ];
                 }
 
@@ -151,6 +152,8 @@ class CrmResponseRate extends Command
                 
             }
         
+        dd('RESPONSES', $responses);
+
         if(count($responses) > 0){
             NotificationsController::send(221, array_slice($responses, 0, 3));
         }else{
