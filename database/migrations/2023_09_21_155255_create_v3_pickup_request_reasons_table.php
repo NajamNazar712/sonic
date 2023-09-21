@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateV3PickupRequestNotPickReasonsTable extends Migration
+class CreateV3PickupRequestReasonsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,10 @@ class CreateV3PickupRequestNotPickReasonsTable extends Migration
      */
     public function up()
     {
-        Schema::create('v3_pickup_request_not_pick_reasons', function (Blueprint $table) {
+        Schema::create('v3_pickup_request_reasons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
+            $table->tinyInteger('type');
             $table->timestamps();
         });
     }
@@ -27,6 +28,6 @@ class CreateV3PickupRequestNotPickReasonsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('v3_pickup_request_not_pick_reasons');
+        Schema::dropIfExists('v3_pickup_request_reasons');
     }
 }
