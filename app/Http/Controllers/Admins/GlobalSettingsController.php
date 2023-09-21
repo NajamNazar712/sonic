@@ -1086,8 +1086,9 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    if (!empty($include_ids)) {
-                        $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+
+                    if (count($request->shippers) > 0) {
+                        $users = User::whereIn('id', $request->shippers)->get();
                     } else {
                         $users = User::whereIn('id', $include_ids)->get();
                     }

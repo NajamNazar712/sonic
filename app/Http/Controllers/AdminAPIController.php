@@ -10448,7 +10448,7 @@ class AdminAPIController extends Controller
                     $role_id = $request->admin_role_id;
                     $admin_hubs = $request->admin_hubs;
                     $rider_id = $request->rider_id;
-                    
+                    $flag = true;
                     $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49, 55, 59);
                     if ($request->tracking != '') {
                         $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
