@@ -151,8 +151,6 @@ class CrmResponseRate extends Command
                 }
                 
             }
-        
-        dd('RESPONSES', $responses);
 
         if(count($responses) > 0){
             NotificationsController::send(221, array_slice($responses, 0, 3));
