@@ -18,7 +18,7 @@ class UpdateMissingShipmentsSeeder extends Seeder
      */
     public function run()
     {
-        $tracking_numbers = [20211028456622, 20213428455544, 20217228455686, 20217228455720, 20217228455783, 20222328456577, 20222328456600, 20225128455335, 22313428456951, 22320228456897, 22320228456903, 22320228456906, 22320228456933, 25125128455528, 29314428455898];
+        $tracking_numbers = [20217228455686, 20217228455720, 20217228455783, 20222328456577, 20222328456600, 20211028456622, 20225128455335, 20213428455544, 22314428456829, 25125128455528, 20220228456524];
 
 
         foreach ($tracking_numbers as $tracking_number){
@@ -80,6 +80,9 @@ class UpdateMissingShipmentsSeeder extends Seeder
 
                 if($shipment->amount == 0){
                     $parcel_value = $shipment->parcel_value;
+                    if($parcel_value == 0 || $parcel_value == null){
+                        $parcel_value = 1;
+                    }
                     $booking_data['parcel_value'] = $parcel_value;
                 }
 
