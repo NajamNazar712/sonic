@@ -79,7 +79,7 @@
                                         </span>
                                     </div>
 
-                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Assigned Date (From)">
+                                    <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Assigned Date (From)" title="Assigned Date (From)" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
                             </div>
                             <div class="col-4 ">
@@ -89,7 +89,7 @@
                                             <span class="la la-calendar-o"></span>
                                         </span>
                                     </div>
-                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Assigned Date (To)">
+                                    <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Assigned Date (To)" title="Assigned Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                                 </div>
 
                             </div>
@@ -98,7 +98,7 @@
                             </div>
                         </div>
 
-                        <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <table class="table table-bordered datatable" id="datatable" style="z-index: 3; width:100%;">
                             <thead>
                                 <tr role="row" class="bg-primary white">
                                     <th class="border-primary border-darken-1">Logged At</th>
@@ -288,6 +288,7 @@
             , pageLength: 10
             , pagingType: 'full_numbers'
             , processing: true
+            , deferLoading: 0
             , language: {
                 processing: data_table_loader
             }

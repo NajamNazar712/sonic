@@ -1694,6 +1694,17 @@
                         @endif
                         @if (session('role_id') == 1 || in_array(905, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.reports.rv_report.index') }}">Overall RV Action Report</a></li>
+                        @if (session('role_id') == 1 || in_array(892, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.operations_performance.index') }}">Operations Performance Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(894, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.hbl_konnect.index') }}">Hbl Konnect Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(895, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.pay_fast_report.index') }}">Pay Fast Report</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(896, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.reports.fintech_report.index') }}">Fintech Report</a></li>
                         @endif
                     </ul>
                 </li>
@@ -2255,6 +2266,9 @@
                                                 href="{{ route('admin.settings.auto_delivery_note_verification.index') }}">Auto
                                                 Delivery Note Verification</a></li>
                                     @endif
+                                        @if (session('role_id') == 1 || in_array(836, session('permissions')))
+                                            <li><a class="menu-item" href="{{route('admin.settings.rider_assigned_hub.index')}}">Rider Assigned Hub</a></li>
+                                        @endif
 
                                 </ul>
                             </li>
@@ -2437,7 +2451,10 @@
                                             <li><a class="menu-item"
                                                     href="{{ route('admin.settings.ticker.index') }}">Ticker</a></li>
                                         @endif
-
+                                        @if (session('role_id') == 1 || in_array(891, session('permissions')))
+                                        <li><a class="menu-item"
+                                                href="{{ route('admin.settings.background_image.index') }}">Background Image</a></li>
+                                        @endif
 
                                         @if (session('role_id') == 1 || in_array(466, session('permissions')))
                                             <li><a class="menu-item"

@@ -179,7 +179,12 @@ class AdminMonthClosingController extends Controller
                         DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
             })
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status', 'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address', 'shipments.shipper_status_id')
+
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin',
+            'dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone',
+            'shipments.amount as cod_amount','u.name as shipper', 'mc.id as month_closing_id','mc.remarks','mcs.name as closing_status',
+             'mc.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status',
+             'mct.name as closing_type','shipments.consignee_address', 'shipments.shipper_status_id', 'sj.created_at as arrival_date')
             ->whereIn('shipments.shipper_status_id', $month_closing_status)
             ->where(function($query) {
                 $query->whereNull('mc.status_id')
@@ -362,8 +367,20 @@ class AdminMonthClosingController extends Controller
                     ->where('cr.id','=',
                         DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = month_closings.shipment_id)'));
             })
+
+            ->leftjoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = month_closings.shipment_id and shipments_journey.shipper_status_id = 2)'));
+            })
+
             ->leftjoin('crm_request_case_nature_types as crn','crn.id','=','cr.case_nature_type_id')
-            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks','mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address','month_closings.closing_updated_at')
+            ->select('shipments.id as shipment_id','shipments.tracking_number as tracking_number_link','shipments.tracking_number',
+            'oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone',
+            'shipments.amount as cod_amount','u.name as shipper', 'month_closings.id as month_closing_id','month_closings.remarks',
+            'mcs.name as closing_status', 'month_closings.status_id as month_closing_status_id', 'cr.id as claim_id', 'cr.id as claim_id_link', 
+            'crn.type as claim_type','ss.name as current_status','mct.name as closing_type','shipments.consignee_address',
+            'month_closings.closing_updated_at', 'sj.created_at as arrival_date')
             ->whereIn('month_closings.status_id', [2,3]);
 
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
@@ -444,54 +461,6 @@ class AdminMonthClosingController extends Controller
                                 if(in_array($shipment_details->shipper_status_id, $replacement_try_and_buy_statuses)){
                                     AdminFinanceController::replacement_or_try_and_buy_adjust_in_payment($shipment_details->id);
                                 }
-//                                if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
-//                                    $bag_shipment = BagShipment::where('shipment_id', $shipment_details->id);
-//                                    if ($bag_shipment->exists()) {
-//                                        $bag_shipment = $bag_shipment->max('bag_id');
-//
-//                                        $bag = Bag::find($bag_shipment);
-//                                        $bag->shipment()->where('shipment_id', $shipment_details->id)->delete();
-//                                        if (in_array($bag->status_id, [2, 3, 5, 6])) {
-//                                            $shipments_count = $bag->shipments;
-//                                            $shipment_weight = $bag->shipment_weight;
-//                                            $shipments_count = $shipments_count - 1;
-//                                            $bag->shipments = $shipments_count;
-//                                            $bag->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-////                                            if ($shipments_count == 0) {
-////                                                $bag->status_id = 5;
-////                                            }
-//                                            $bag->save();
-////                                            $shipment_details->shipper_status_id = 51;
-////                                            $shipment_details->consignee_status_id = 51;
-////                                            $shipment_details->save();
-////                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-//                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
-//
-////                                    return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-//                                        }
-////                                        else if ($cargo->status_id == 4) {
-////                                            $shipments_count = $cargo->shipments;
-////                                            $shipments_received_count = $cargo->received_shipments;
-////                                            $shipment_weight = $cargo->shipment_weight;
-////                                            $shipments_count = $shipments_count - 1;
-////                                            $cargo->shipments = $shipments_count;
-////                                            $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-////                                            if ($shipments_count == 0) {
-////                                                $cargo->status_id = 5;
-////                                            } else if ($shipments_count == $shipments_received_count) {
-////                                                $cargo->status_id = 3;
-////                                            }
-////                                            $cargo->save();
-//////                                            $shipment_details->shipper_status_id = 51;
-//////                                            $shipment_details->consignee_status_id = 51;
-//////                                            $shipment_details->save();
-//////                                            ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, $remarks, NULL, Auth::id());
-////                                            $success[$shipment_details->tracking_number] = 'Shipment is successfully added to Month Closing!';
-////
-////                                        }
-//                                    }
-//
-//                                }
 
                                 if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
                                     $bag_shipment = CargoManifestBagShipments::where('shipment_id', $shipment_details->id);

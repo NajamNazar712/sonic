@@ -10,6 +10,41 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-12 ">
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                            <div class="col">
+                                <div class="form-group input-group ">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_from"
+                                        class="form-control pickadate bg-primary border-primary white rounded-right"
+                                        id="search_date_from" placeholder="Status From Date" title="Status From Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                    <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="search_date_to"
+                                        class="form-control pickadate bg-primary border-primary white rounded-right"
+                                        id="search_date_to" placeholder="Status To Date" title="Status To Date" data-value="{{ Carbon\Carbon::today() }}">
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="form-group ml-1">
+                                    <button type="button" id="search_filter_btn" class="btn btn-primary">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -43,15 +78,48 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+
+            var search_date_to = $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
+            var search_date_from = $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -126,11 +194,18 @@
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
+                deferLoading: 0,
                 language: {
                     processing: data_table_loader
                 },
                 serverSide: true,
-                ajax: '{{ route('admin.return.cx_sales.list') }}',
+                ajax: {
+                    url: '{{ route('admin.return.cx_sales.list') }}',
+                    data: function (d) {
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                    }
+                },
                 rowId: 'shId',
                 order: [[14, 'desc']],
                 columns: [
@@ -281,6 +356,10 @@
                     }
                 });
             @endif
+
+            $('#search_filter_btn').on('click',function () {
+                table.draw(true);
+            });
         });
     </script>
 @endsection

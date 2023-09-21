@@ -635,6 +635,9 @@ class Permission
             'reports.quick_scanned_report.index' => 877,
             'reports.quick_scanned_report.list' => 877,
 
+            'reports.fintech_report.index' => 896,
+            'reports.fintech_report.list' => 896,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
@@ -978,6 +981,10 @@ class Permission
 
             'admin.settings.rv_disable_shippers.index'=> 889,
             'admin.settings.rv_disable_shippers.store'=> 889,
+            'settings.background_image.index' => 891,
+            'settings.background_image.store' => 891,
+
+            'settings.rider_assigned_hub.index' => 893,
 
 
             'dashboard.userwise' => 333,
@@ -1239,6 +1246,15 @@ class Permission
 
             'reports.work_code_master.index' => 532,
             'reports.work_code_master.list' => 532,
+
+
+            
+            'admin.reports.pay_fast_report.index' => 894,
+            'admin.reports.pay_fast_report.list' => 894,
+
+
+            'admin.reports.hbl_konnect.index' => 895,
+            'admin.reports.hbl_konnect.list' => 895,
             
             'incidence_monitoring.index' => 535,
             'incidence_monitoring.list' => 535,
@@ -1384,6 +1400,9 @@ class Permission
  			'management.shipment_received.index' => 878,
             'return.shipper_return_receiving.history.index' => 885,
             'reports.overland.index' => 886,
+
+            'reports.operations_performance.index' => 892,
+            'reports.operations_performance.export_to_excel' => 892,
         ],
         'shipper' => [
             'shipment.book.index' => 1,

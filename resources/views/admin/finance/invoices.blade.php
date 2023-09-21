@@ -16,7 +16,7 @@
 
 				<div class="container">
 					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -25,10 +25,10 @@
 								</div>
 								<input type="text" name="invoice_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_from" placeholder="Invoicing Date From">
+									   id="invoice_from" placeholder="Invoicing Date From" title="Invoicing Date From">
 							</div>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -37,34 +37,10 @@
 								</div>
 								<input type="text" name="invoice_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="invoice_to" placeholder="Invoicing Date To">
+									   id="invoice_to" placeholder="Invoicing Date To" title="Invoicing Date To">
 							</div>
 						</div>
-						<div class="col-md-2">
-							<div class="form-group input-group" style="margin-top: -20px ">
-								<button type="button" id="search_filter_btn"
-										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
-											class="la la-search" style="margin-right: 10px"></i> Search
-								</button>
-							</div>
-						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
-					</div>
-				</div>
-				{{--END--}}
-
-				{{--DATE RANGE FILTER FOR GENERATION--}}
-
-				<div class="container">
-					<div class="row">
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -73,10 +49,10 @@
 								</div>
 								<input type="text" name="generation_from"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_from" placeholder="Generation Date From">
+									   id="generation_from" placeholder="Generation Date From" title="Generation Date From">
 							</div>
 						</div>
-						<div class="col-md-4">
+						<div class="col-md-3">
 							<div class="form-group input-group">
 								<div class="input-group-prepend">
                                     <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -85,28 +61,24 @@
 								</div>
 								<input type="text" name="generation_to"
 									   class="form-control bg-primary border-primary white rounded-right"
-									   id="generation_to" placeholder="Generation Date To">
+									   id="generation_to" placeholder="Generation Date To" title="Generation Date To">
 							</div>
 						</div>
+					</div>
+					<div class="row justify-content-center">
 						<div class="col-md-2">
 							<div class="form-group input-group" style="margin-top: -20px ">
-								<button type="button" id="search_filter_btn_generation"
+								<button type="button" id="search_filter_btn"
 										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
 											class="la la-search" style="margin-right: 10px"></i> Search
 								</button>
 							</div>
 						</div>
-						{{--						<div class="col-md-2">--}}
-						{{--							<div class="form-group input-group" style="margin-top: -20px; margin-left: -43px; ">--}}
-						{{--								<button type="button" id="refresh_filter_btn_generation"--}}
-						{{--										class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i--}}
-						{{--											class="la la-refresh" style="margin-right: 10px"></i> Refresh--}}
-						{{--								</button>--}}
-						{{--							</div>--}}
-						{{--						</div>--}}
 					</div>
 				</div>
 				{{--END--}}
+
+				{{--DATE RANGE FILTER FOR GENERATION--}}
 
 				<div class="col justify-content-end mb-3">
 					<div class="card-header">
@@ -405,7 +377,7 @@
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
 						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format:'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -420,8 +392,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -437,8 +408,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -453,8 +423,7 @@
 						firstDay: 1,
 						clear: '',
 						max: '{{ Carbon\Carbon::now() }}',
-						// format: 'dd mmmm, yyyy',
-						format: 'yyyy-mm-dd',
+						format: 'dd mmmm, yyyy',
 						selectYears: true,
 						selectMonths: true,
 						formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -751,11 +720,11 @@
 						pageLength: 50,
 						pagingType: 'full_numbers',
 						processing: true,
+						deferLoading: 0,
 						language: {
 							processing: data_table_loader
 						},
 						serverSide: true,
-						{{--ajax: '{{ route('admin.finance.invoices.list') }}',--}}
 						ajax:{
 							url: '{{ route('admin.finance.invoices.list') }}',
 							data: function (d) {
@@ -1440,10 +1409,6 @@
 						}
 					});
 					$('#search_filter_btn').on('click',function () {
-						table.draw(true);
-					});
-
-					$('#search_filter_btn_generation').on('click',function () {
 						table.draw(true);
 					});
 

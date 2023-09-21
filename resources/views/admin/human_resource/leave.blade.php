@@ -406,7 +406,7 @@
         var booking_from_date = $('#requested_from_date').pickadate({
             // max: '{{ Carbon\Carbon::today()->month(8)->endOfMonth() }}',
             min: '{{ Carbon\Carbon::now()}}',
-            format: 'yyyy-mm-dd',
+            format: 'dd mmmm, yyyy',
             firstDay: 1,
             clear: '',
             selectYears: true,
@@ -423,7 +423,7 @@
             firstDay: 1,
             clear: '',
             // max: '{{ Carbon\Carbon::today()->month(8)->endOfMonth() }}',
-            format: 'yyyy-mm-dd',
+            format: 'dd mmmm, yyyy',
             selectYears: true,
             selectMonths: true,
             formatSubmit: 'yyyy-mm-dd 23:59:59',
