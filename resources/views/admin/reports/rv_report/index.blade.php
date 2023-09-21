@@ -376,7 +376,6 @@
                 firstDay: 1,
                 clear: '',
                 max: currDate,
-                maxDate: new Date(2013, 1, 18),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
