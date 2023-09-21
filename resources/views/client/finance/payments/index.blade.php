@@ -32,10 +32,11 @@
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
-										<th class="border-primary border-darken-1">Total Shipments</th>
-										<th class="border-primary border-darken-1">Delivered Shipments</th>
-										<th class="border-primary border-darken-1">Returned Shipments</th>
-										<th class="border-primary border-darken-1">Adjusted Shipments</th>
+										<th class="border-primary border-darken-1">Total Shipment(s)</th>
+										<th class="border-primary border-darken-1">Delivered Shipment(s)</th>
+										<th class="border-primary border-darken-1">Returned Shipment(s)</th>
+										<th class="border-primary border-darken-1">Adjusted Shipment(s)</th>
+										<th class="border-primary border-darken-1">Fintech Shipment(s)</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
@@ -108,6 +109,26 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="fintech_shipments" role="dialog" aria-labelledby="fintech_shipments_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="fintech_shipments_title">Fintech Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
 							<div class="modal fade text-left" id="AddRequestModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AddRequestModal"
 								 aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
@@ -193,10 +214,11 @@
                             head.push('City');
                             head.push('Phone No(s).');
                             head.push('Address');
-                            head.push('Total Shipments');
-                            head.push('Delivered Shipments');
-                            head.push('Returned Shipments');
-                            head.push('Adjusted Shipments');
+                            head.push('Total Shipment(s)');
+                            head.push('Delivered Shipment(s)');
+                            head.push('Returned Shipment(s)');
+                            head.push('Adjusted Shipment(s)');
+                            head.push('Fintech Shipment(s)');
                             head.push('Total Amount');
                             head.push('Total Charges');
                             head.push('Total GST');
@@ -222,6 +244,7 @@
                                 row.push(values.delivered_shipments_count);
                                 row.push(values.returned_shipments_count);
                                 row.push(values.adjusted_shipments_count);
+                                row.push(values.count_fintech_shipments);
                                 row.push(values.total_amount);
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
@@ -282,6 +305,7 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
+					{data:'count_fintech_shipments', name: 'count_fintech_shipments', class: 'align-middle text-center count_fintech_shipments', orderable: false, searchable: false},
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', sortable: false},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', sortable: false},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', sortable: false},
@@ -491,6 +515,45 @@
 						$('#adjusted_shipments .modal-body').html(tracking_numbers);
 
 						$('#adjusted_shipments').modal('show');
+					}
+				});
+			});
+
+			$('#datatable tbody').on('click', 'tr td.count_fintech_shipments button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#fintech_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('cod.finance.payments.fintech_shipments') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(details) {
+					if (details) {
+						var html = '';
+						html += '<table class="table table-sm datatable text-center">';
+						html += '<thead><tr><th>S No.</th><th>Tracking Number</th><th>Cod Amount</th><th>Fintech Charges</th><th>Received Cod Amount</th><th>Created Date</th></tr></thead>';
+						html += '<tbody>';
+						$.each(details.data, function(index, shipment) {
+							console.log(shipment);
+							html += '<tr>' +
+										'<td>' + index + 1 + '</td>' +
+										'<td>' + shipment.tracking_number + '</td>' +
+										'<td>' + shipment.cod_amount + '</td>' +
+										'<td>' + shipment.fintech_charges + '</td>' +
+										'<td>' + shipment.received_amount + '</td>' +
+										'<td>' + shipment.created_at + '</td>' +
+									'</tr>';
+						});
+						html += '</tbody></table>';
+
+						$('#fintech_shipments .modal-body').html(html);
+
+						$('#fintech_shipments').modal('show');
 					}
 				});
 			});

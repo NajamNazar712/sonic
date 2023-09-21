@@ -230,6 +230,44 @@
 												<span aria-hidden="true">×</span>
 											</button>
 										</div>
+
+										<div class="container mt-5">
+											<div class="row">
+												<div class="col-md-4">
+													<div class="form-group input-group">
+														<div class="input-group-prepend">
+																					<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																					<span class="la la-calendar-o small-calender-icon"></span>
+																					</span>
+														</div>
+														<input type="text" name="requested_from_date"
+															class="form-control bg-primary border-primary white rounded-right"
+															id="requested_from_date" placeholder="Requested Date From">
+													</div>
+												</div>
+												<div class="col-md-4">
+													<div class="form-group input-group">
+														<div class="input-group-prepend">
+																					<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																					<span class="la la-calendar-o small-calender-icon"></span>
+																					</span>
+														</div>
+														<input type="text" name="requested_to_date"
+															class="form-control bg-primary border-primary white rounded-right"
+															id="requested_to_date" placeholder="Requested Date To">
+													</div>
+												</div>
+												<div class="col-md-2">
+													<div class="form-group input-group" style="margin-top: -20px ">
+														<button type="button" id="search_filter_btn"
+																class="float-right mb-1 mt-2 btn btn-outline-primary btn-min-width"><i
+																	class="la la-search" style="margin-right: 10px"></i> Search
+														</button>
+													</div>
+												</div>
+											</div>
+										</div>
+
 										<div class="modal-body">
 											<table class="table table-bordered datatable" id="make_payments_datatable" style="z-index: 3;">
 												<thead>
@@ -342,6 +380,8 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
@@ -350,9 +390,47 @@
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('js/datatable_buttons.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
+
+			$('#requested_from_date').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#requested_to_date').pickadate('picker').set('min', $('#requested_from_date').pickadate('picker').get('select'));
+					}
+				}
+			});
+			
+			$('#requested_to_date').pickadate({
+				firstDay: 1,
+				clear: '',
+				max: '{{ Carbon\Carbon::now() }}',
+				// format: 'dd mmmm, yyyy',
+				format: 'yyyy-mm-dd',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 23:59:59',
+				hiddenSuffix: '_formatted',
+				onSet: function (context) {
+					if (context.select) {
+						$('#requested_from_date').pickadate('picker').set('max', $('#requested_to_date').pickadate('picker').get('select'));
+					}
+				}
+			});
+
 			@if (session('print'))
 				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
 			@endif
@@ -855,6 +933,8 @@
 					url: '{{ route('admin.finance.make_payments.shipment_list') }}',
 					data: function (d) {
 						d.ids = selected_rows;
+						d.requested_from_date =$('input[name="requested_from_date_formatted"]').val();
+                        d.requested_to_date = $('input[name="requested_to_date_formatted"]').val();
 					}
 				},
 				rowId: 'id',
@@ -939,6 +1019,10 @@
 					}
 				}
 			});
+
+			$('#search_filter_btn').on('click',function () {
+                make_payments_table.draw(true);
+            });
 
 			$('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 				var id = parseInt($(this).parent('tr').attr('id'));

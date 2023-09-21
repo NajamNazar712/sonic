@@ -70,11 +70,7 @@
 											
 										</div>
 									</div>
-									<div class="col-12">
-										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Update</button>
-										</div>
-									</div>
+									
 								</div>
 							</form>
 						</div>

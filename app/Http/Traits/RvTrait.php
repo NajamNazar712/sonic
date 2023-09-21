@@ -1402,7 +1402,7 @@ trait RvTrait
 
             $shipments = [];
             
-            if (!empty($included_shippers) || (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
+            if (!empty($included_shippers) && (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
                 
                 $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                 $mergeArr = array_unique($mergeArr);
@@ -1410,11 +1410,12 @@ trait RvTrait
                     return $value != '';
                 });
 
+                $exploded_result = implode(',', $result);
 
                 $shipments = Shipment::whereIn('user_id', $result)
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                ->where('consignee_city_id', $agent['city_id'])                
-                ->orderBy('user_id', 'ASC')
+                ->where('consignee_city_id', $agent['city_id'])  
+                ->orderByRaw("FIELD(user_id, $exploded_result)")
                 ->get();
 
                 
@@ -1430,8 +1431,9 @@ trait RvTrait
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                 ->whereNotIn('user_id', $only_shippers)
                 ->orderBy('id', 'ASC')
-                    ->get();
-                }
+                ->get();
+            }
+                
 
             else if ($all_shipper_exists && !($included_shipper)->exists()) {
                 $shipments = [];
@@ -1519,7 +1521,7 @@ trait RvTrait
             else {
                 //No Shipment Found in Assigned Hub
                 // return false;
-                return response()->json(['status' => 1, 'error' => 'No Zone Assigned']);
+                return response()->json(['status' => 1, 'error' => 'No zone assigned or shipment not found']);
             }
         }
         return $shipment;

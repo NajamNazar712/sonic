@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Overall Rv Action Report')
+@section('title', 'Overall RV Action Report')
 
 @section('content')
     <div class="app-content content">

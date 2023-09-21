@@ -269,7 +269,7 @@
             var last_working_date = $('#last_working_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                format: 'yyyy-mm-dd',
+                format: 'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd',

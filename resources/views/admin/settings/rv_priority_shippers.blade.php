@@ -12,6 +12,7 @@
                     RV Priority Shipper
                 </h1>
 
+                {{-- {{ dd($rv_shipper_priorities) }} --}}
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -24,9 +25,9 @@
                                         {{ csrf_field() }}
                                         <div class="row mb-2 justify-content-center">
                                             <div class="col-12 form-group">
-                                                <select name="shippers[]" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
+                                                <select name="shippers[]" class="unsorted_zones" id="shippers_select" class="form-control select2" multiple="multiple" data-msg-required="Atleast one shipper is required" data-rule-required="true" required="required">
                                                     @foreach($shippers as $shipper)
-                                                        <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                                        <option value="{{$shipper->id}}" {{ in_array($shipper->id, $rv_shipper_priorities) ? 'selected' : '' }}>{{$shipper->name}}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -55,67 +56,94 @@
 
     <script>
         $(document).ready(function() {
-
-            $('#shippers_select').select2({
-                placeholder:'Shippers',
-                width:'100%',
-                allowClear:true
-            }).bind('select2:select', function () {
-
-                if($(this).val().length != 0){
-                    $('#settings_form').find('button[type=submit]').prop('disabled', false);
-                }
+            var $select2 = $('#shippers_select').select2({
+                templateSelection: template,
+                width: '100%',
+                placeholder: 'Select Zones',
             });
+            
+            var defaultValues = {!! json_encode($rv_shipper_priorities) !!};
 
-            $('#shippers_select').on('select2:unselect', function () {
-               if($(this).val().length == 0){
-                   $('#settings_form').find('button[type=submit]').prop('disabled', true);
-               }
-            });
+                 // Initialize with default values
+            $select2.val(defaultValues).trigger('change');
 
-            @if(count($rv_shipper_priorities) > 0)
-                var ids = @json($rv_shipper_priorities);
-                $('#shippers_select').val(ids).trigger('change');
-            @endif
+            // Cache order of initial values
+            var preservedOrder = defaultValues.slice();
 
-            $('#settings_form').validate({
-                // ignore: ":not(:visible),:disabled",
-                errorClass: 'danger',
-                successClass: 'success',
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function (form) {
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to update RV Priority Shippers!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if(confirm){
-                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                            blockPagePermanently();
-                            form.submit();
+            $select2.on('select2:select select2:unselect', selectionHandler);
+
+            function selectionHandler(e) {
+                var val = e.params.data.id;
+
+                switch (e.type) {
+                    case 'select2:select':
+                        preservedOrder.push(val);
+                        break;
+                    case 'select2:unselect':
+                        var foundIndex = preservedOrder.indexOf(val);
+                        if (foundIndex >= 0) {
+                            preservedOrder.splice(foundIndex, 1);
                         }
-                    });
+                        break;
                 }
-            });
+
+                // Store the updated order
+                $select2.data('preserved-order', preservedOrder);
+
+                // Render selections in the preserved order
+                select2_renderSelections($select2);
+            }
+
+            function select2_renderSelections($select2) {
+                var order = $select2.data('preserved-order') || [];
+                var $container = $select2.next('.select2-container');
+                var $tags = $container.find('li.select2-selection__choice');
+                var $input = $tags.last().next();
+
+
+                var stringList = order.filter(function(item) {
+                    return typeof item === 'string';
+                });
+
+
+                // Apply tag order
+                order.forEach(function(val) {
+                    var $el = $tags.filter(function(i, tag) {
+                        return $(tag).data('data').id === val;
+                    });
+                    $input.before($el);
+                });
+
+                var selectedIds = $select2.val() || []; 
+        
+                var unsortedZonesValue = $('.unsorted_zones').val();
+
+                if (typeof unsortedZonesValue === 'string') {
+                    var idArray = unsortedZonesValue.split(',');
+                } else {
+                    return;
+                }
+
+                selectedIds = selectedIds.filter(function(item) {
+                    return idArray.indexOf(item) === -1;
+                });
+
+                selectedIds = selectedIds.concat(idArray);
+
+                $('.unsorted_zones').val(selectedIds)
+
+            }
+
+            /**
+             * Customize the display of each option in the dropdown.
+             * @param data
+             * @param container
+             */
+            function template(data, container) {
+                return data.text;
+            }
+
         });
+     
     </script>
 @endsection
