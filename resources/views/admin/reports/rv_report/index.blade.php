@@ -25,7 +25,11 @@
                                 {{-- Search by shipper name --}}
                                 <div class="col-4">
                                     <fieldset class="form-group">
-                                        <input type="text" class="form-control" name="search_shipper_name" id="search_shipper_name" placeholder="Search Shipper Name">
+                                        <select name="search_shipper_name" id="search_shipper_name" class="form-control select2">
+                                            @foreach($shippers as $shipper)
+                                                <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                            @endforeach
+                                        </select>
                                     </fieldset>
                                 </div>
                                 {{-- Search date from filter --}}
@@ -343,29 +347,44 @@
                 'allowMinus': false,
                 'allowPlus': false
             });
+
+            var currDate='{{ Carbon\Carbon::now() }}';
             $('#search_form #search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: currDate,
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        var fromDate = $('#search_form #search_date_from').pickadate('picker').get('select');
+                        $('#search_form #search_date_to').pickadate('picker').set('min', fromDate);
+
+                        // toDate returns 'invalid date', logic is to be corrected
+                        var toDate = new Date();
+                        console.log("new date", toDate);
+                        toDate.setDate(new Date(fromDate.year, fromDate.month, fromDate.date + 30));
+
+                        $('#search_form #search_date_to').pickadate('picker').set('max', toDate);
                     }
                 }
             });
+
             $('#search_form #search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
+                max: currDate,
+                maxDate: new Date(2013, 1, 18),
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    if (context.select) {    
+                        var toDate = $('#search_form #search_date_to').pickadate('picker').get('select');
+                        $('#search_form #search_date_from').pickadate('picker').set('max', toDate);
                     }
                 }
             });

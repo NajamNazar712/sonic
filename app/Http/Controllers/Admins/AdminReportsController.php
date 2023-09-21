@@ -11836,7 +11836,12 @@ class AdminReportsController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
 
-        return view('admin.reports.rv_report.index');
+        $shippers= RvShipmentAssignAgent::join('shipments', 'rv_shipment_assign_agents.shipment_id','shipments.id')
+        ->leftjoin('users', 'shipments.user_id', 'users.id')->select('users.id', 'users.name')->groupBy('shipments.id')->get();
+
+        return view('admin.reports.rv_report.index', [
+            'shippers' => $shippers
+        ]);
     }
 
     public function rv_report_list(Request $request)
@@ -11844,9 +11849,7 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
         }
-        // if (! ($request->get('search_date_from') && $request->get('search_date_to') && $request->get('search_tracking_no'))) {
-        //     return response()->json([]);
-        // }
+
 
         $rv_report = RvShipmentAssignAgent::join('shipments', 'rv_shipment_assign_agents.shipment_id','shipments.id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
