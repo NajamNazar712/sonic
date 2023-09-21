@@ -13,7 +13,7 @@ class ModulePermissionForCallHistoryBulkSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 906, 'name' => 'Return - Call History Bulk', 'module_id' => 14),
+            array('id' => 906, 'name' => 'Return - Call History Bulk', 'module_id' => 7),
         ));
     }
 }
