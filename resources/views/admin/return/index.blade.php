@@ -922,7 +922,7 @@
                             success: function(response) {
                                 if (response.status == 1) {
                                     swal({
-                                        text: 'Call Status Updated Successfully',
+                                        text: 'Call History Updated Successfully',
                                         icon: 'success',
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
@@ -1597,7 +1597,7 @@
                                 },
                             @endif,
 
-                            @if (session('role_id') == 1)
+                            @if (session('role_id') == 1 || in_array(906, session('permissions')))
                                 {
                                     text: 'Call History',
                                     className: 'btn btn-primary call_history',

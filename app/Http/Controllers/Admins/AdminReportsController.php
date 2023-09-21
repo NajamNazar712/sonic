@@ -12080,6 +12080,10 @@ class AdminReportsController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
         }
+        // if (! ($request->get('search_date_from') && $request->get('search_date_to') && $request->get('search_tracking_no'))) {
+        //     return response()->json([]);
+        // }
+
         $rv_report = RvShipmentAssignAgent::join('shipments', 'rv_shipment_assign_agents.shipment_id','shipments.id')
         ->leftjoin('users', 'shipments.user_id', 'users.id')
         ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
@@ -12172,6 +12176,9 @@ class AdminReportsController extends Controller
 
         if ($tracking_num = $request->get('search_tracking_no')) {
             $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($shipper_name = $request->get('search_shipper_name')) {
+            $rv_report->where('shipments.shipper_name', '=', $shipper_name);
         }
         if ($request->get('search_date_from') && $request->get('search_date_to')) {
             $from = $request->get('search_date_from');

@@ -71,7 +71,6 @@
                 <th class="border-primary border-darken-1">Designation</th>
                 <th class="border-primary border-darken-1">Department</th>
                 <th class="border-primary border-darken-1">Employee Status</th>
-                <th class="border-primary border-darken-1">Last Working Date</th>
                 <th class="border-primary border-darken-1">Confirmation Status</th>
                 <th class="border-primary border-darken-1">Available</th>
                 <th class="border-primary border-darken-1"></th>
@@ -526,7 +525,6 @@
                             head.push('Department Name');
                             head.push('Line Manager');
                             head.push('Employee Status');
-                            head.push('Last Working Date');
                             head.push('Confirmation Status');
                             head.push('Available');
 
@@ -545,7 +543,6 @@
                                 row.push(values.department_name);
                                 row.push(values.line_manager);
                                 row.push(values.status);
-                                row.push(values.last_working_date);
                                 row.push(values.confirmation_status);
                                 row.push(values.attendance_date);
 
@@ -658,7 +655,7 @@
                     }
                 },
                 order: [
-                    [2, 'desc']
+                    [1, 'desc']
                 ],
                 rowId: 'employee_id',
                 columns: [
@@ -724,11 +721,7 @@
                         name: 'es.id',
                         class: 'align-middle status'
                     },
-                    {
-                        data: 'last_working_date',
-                        name: 'employees.last_working_date',
-                        class: 'align-middle last_working_date'
-                    },
+               
                     {
                         data: 'confirmation_status',
                         name: 'employees.confirmation_status',

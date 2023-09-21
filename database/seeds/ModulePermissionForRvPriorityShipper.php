@@ -12,13 +12,13 @@ class ModulePermissionForRvPriorityShipper extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 906, 'name' => 'Setting - RV Priority Shipper', 'module_id' => 14),
+            array('id' => 904, 'name' => 'Setting - RV Priority Shipper', 'module_id' => 14),
         ));
 
 
         $timestamp = \Carbon\Carbon::now()->format('Y-m-d H:i:s');
         DB::table('admins_screen_list')->insert(array(
-            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > RV Priority Shipper', 'url'=>'admin.settings.rv_shipper_priority.index', 'permission_id' => 906),           
+            array('created_at' => $timestamp, 'updated_at' => $timestamp, 'name' => 'Settings > Shippers > RV Priority Shipper', 'url'=>'admin.settings.rv_shipper_priority.index', 'permission_id' => 904),           
         ));
 
     }

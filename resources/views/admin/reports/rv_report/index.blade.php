@@ -16,22 +16,31 @@
                         <div class="card-body">
                             @include('admin.inc.messages')
                             <div id="search_form" class="row mb-2 justify-content-center">
+                                {{-- Search by tracking number --}}
                                 <div class="col-4">
                                     <fieldset class="form-group">
                                         <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                                     </fieldset>
                                 </div>
+                                {{-- Search by shipper name --}}
+                                <div class="col-4">
+                                    <fieldset class="form-group">
+                                        <input type="text" class="form-control" name="search_shipper_name" id="search_shipper_name" placeholder="Search Shipper Name">
+                                    </fieldset>
+                                </div>
+                                {{-- Search date from filter --}}
                                 <div class="col-4">
                                     <div class="form-group input-group">
                                         <div class="input-group-prepend">
-                                    <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                        <span class="la la-calendar-o"></span>
-                                    </span>
+                                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                                <span class="la la-calendar-o"></span>
+                                            </span>
                                         </div>
-        
+                                        
                                         <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                                     </div>
                                 </div>
+                                {{-- Search date to filter --}}
                                 <div class="col-4">
                                     <div class="form-group input-group">
                                         <div class="input-group-prepend">
@@ -44,6 +53,7 @@
                                     </div>
         
                                 </div>
+                                {{-- Search btn --}}
                                 <div class="col-2">
                                     <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                                 </div>
@@ -373,6 +383,7 @@
                 autoWidth: false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
+                deferLoading: 0,
                 pagingType: 'full_numbers',
                 processing: true,
                 language: {
@@ -426,7 +437,15 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-                table.draw();
+                var trackingNo = $('#search_tracking_no').val();
+                var shipperName = $('#search_shipper_name').val();
+                var dateFrom = $('input[name="search_date_from_formatted"]').val();
+                var dateTo = $('input[name="search_date_to_formatted"]').val();
+
+                if (shipperName !== '' || trackingNo !== '' || (dateFrom !== '' && dateTo !== '')) {
+                    table.draw();
+                }
+
             });
 
             $('body').on('click', '.unresponsive_count_label', function() {
