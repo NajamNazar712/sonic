@@ -475,19 +475,19 @@ class V3AdminPickupsController extends Controller
 
     public function add_pickup_remark(Request $request){
        
-        $pickup_request_id=$request->remark_pickup_request_id;
-        $add_remark=$request->add_remark;
-        if(V3PickupRequestAttempt::where('pickup_request_id',$pickup_request_id)->update(['trax_remarks'=>$add_remark])){
+        $pickup_request_id = $request->remark_pickup_request_id;
+        $add_remark = $request->add_remark;
+        if(V3PickupRequestAttempt::where('pickup_request_id', $pickup_request_id)->update(['trax_remarks' => $add_remark])){
                 return redirect()->back()->with('success', 'Remarks Add Successfully');
         }
     }
     public function get_pickup_remarks($id){
-        $pickup_request_id=$id;
+        $pickup_request_id = $id;
         if (!$pickup_request_id) {
             return response()->json(['status' => 1, 'error' => 'Something went wrong, please refresh and try again!']);
         }
-        $pickup_request_attempt=V3PickupRequestAttempt::select('trax_remarks')->where('pickup_request_id',$pickup_request_id)->get();
-        return response()->json(['status'=>0,'pickup_request_attempt'=>$pickup_request_attempt]);
+        $pickup_request_attempt = V3PickupRequestAttempt::select('trax_remarks')->where('pickup_request_id', $pickup_request_id)->get();
+        return response()->json(['status' => 0,'pickup_request_attempt' => $pickup_request_attempt]);
     }
 
     public function schedule_requests_index(){

@@ -29,11 +29,9 @@ class CreateV3PickupRequestsTable extends Migration
             $table->integer('status_id')->default(1)->index();
             $table->integer('attempts')->default(0)->index();
             $table->integer('current_rider_id')->nullable()->index();
-            $table->integer('last_rider_id')->nullable()->index();
             $table->integer('last_updated_by')->nullable()->index();
             $table->tinyInteger('try_and_buy')->nullable()->index();
             $table->tinyInteger('reverse_pickup')->nullable()->index();
-            $table->tinyInteger('reschedule')->default(0)->index();
             $table->integer('reschedule_request_id')->nullable()->index();
             $table->string('special_request')->nullable();
             $table->string('walkin_name')->nullable();
