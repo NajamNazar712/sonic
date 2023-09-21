@@ -922,7 +922,7 @@
                             success: function(response) {
                                 if (response.status == 1) {
                                     swal({
-                                        text: 'Call Status Updated Successfully',
+                                        text: 'Call History Updated Successfully',
                                         icon: 'success',
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
