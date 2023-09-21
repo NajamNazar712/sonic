@@ -465,7 +465,7 @@ class APIController extends Controller
         /********************************NOTE********************************/
         /*This API is also using from Trax App Booking Form and Shopify, Please Concern with Mobile Team also Before Adding any required Parameter*/
         $user_id = $request->user_id;
-
+        $flag = null;
 
         Validator::extend('phone_number', function ($attribute, $value, $parameters) {
             if ($value) {
@@ -572,7 +572,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2', 'nullable', 'numeric', 'min:0'],
-                'parcel_value' => ['nullable', 'numeric', 'min:1'],
+                'parcel_value' => ['nullable','numeric','digits_between:1,1000000'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function ($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -623,7 +623,6 @@ class APIController extends Controller
                 }
             }
         } else {
-//            dd('type not 1');
             $rules = [
                 'service_type_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('booking_types', 'id')->where(function ($query) {
                     $query->whereNotIn('id', [4]);
@@ -648,7 +647,7 @@ class APIController extends Controller
 
                 'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
                 'amount' => ['required_if:service_type_id,1,2,3', 'nullable', 'numeric', 'between:0,1000000'],
-                'parcel_value' => ['nullable', 'numeric', 'between:1,1000000'],
+                'parcel_value' => ['nullable','numeric','between:1,1000000'],
                 // 'payment_mode_id' => ['required_if:service_type_id,1,2,3', 'nullable', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
                 //     $query->whereNotIn('id', [3]);
                 // })],
@@ -714,7 +713,7 @@ class APIController extends Controller
                 })];
             }
         }
-
+        
         $shipment_pre_book = ShipmentPrebook::where('user_id', $user_id);
         if ($shipment_pre_book->exists()) {
             $rules['order_id'] = ['required', 'integer', 'between:0,1000000000000', Rule::unique('shipments', 'order_id')->where(function ($query) use ($user_id) {
@@ -737,6 +736,27 @@ class APIController extends Controller
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
+
+            if ($request->input('amount') == 0 || $request->input('amount') === null) {
+                $amount = $request->input('amount');
+                $parcel_value = $request->input('parcel_value');
+                if ($amount == 0) {
+                    if ($parcel_value <= 0 || $parcel_value == null) {
+                        $flag = false;
+                    } else {
+                        $flag = true;
+                    }
+                } else {
+                    $flag = true;
+                }
+            } else {
+                $flag = true;
+            }
+            if (!$flag)
+            {
+                return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => 'Parcel value is required when collection amount is zero, and should be greater then 0']);
+            }
+
             $consignee_phone_number_1 = $this->phone_number($request->consignee_phone_number_1);
 
             if ($request->filled('consignee_phone_number_2')) {
@@ -1076,8 +1096,6 @@ class APIController extends Controller
                 $parcel_value = 0;
             }
 
-
-//            dd('response',$request->all(),$amount,$parcel_value);
 
             $business_category_id = 1;
             if ($user_type['account_type_id'] == 1) {
