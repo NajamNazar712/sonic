@@ -1402,7 +1402,7 @@ trait RvTrait
 
             $shipments = [];
             
-            if (!empty($included_shippers) || (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
+            if (!empty($included_shippers) && (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
                 
                 $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                 $mergeArr = array_unique($mergeArr);
@@ -1412,7 +1412,7 @@ trait RvTrait
 
                 $exploded_result = implode(',', $result);
 
-                $shipments = Shipment::whereIn('user_id', [1091,117])
+                $shipments = Shipment::whereIn('user_id', $result)
                 ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                 ->where('consignee_city_id', $agent['city_id'])  
                 ->orderByRaw("FIELD(user_id, $exploded_result)")
