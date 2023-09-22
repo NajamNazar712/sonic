@@ -55,7 +55,6 @@ use App\Http\Models\Admin\DailyVisitRating;
 use App\Http\Models\Shipper\SubstituteUser;
 use App\Http\Models\V2Pickup\V2RiderPickup;
 use App\Http\Models\Admin\Retail\RetailUser;
-use App\Http\Models\ShipmentScanningJourney;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\TraxPayTransaction;
@@ -83,6 +82,7 @@ use App\Http\Models\Admin\OperationRidersCategory;
 use App\Http\Controllers\Admins\ActivityTrailController;
 use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
+use App\Http\Models\ShipmentScanningJourney;
 use function GuzzleHttp\Promise\all;
 
 class AdminReportsController extends Controller
