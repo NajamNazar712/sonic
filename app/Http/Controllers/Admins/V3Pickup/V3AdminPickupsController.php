@@ -415,9 +415,9 @@ class V3AdminPickupsController extends Controller
         $datatables = Datatables::of($pickup_requests)
         ->setRowAttr([
                 'class'=>function($pickup_request){
-                    if($pickup_request->status_id==2 || $pickup_request->status_id==3 || $pickup_request->status_id==4){
-                        $time_range=explode('-',$pickup_request->time_range);
-                        $time_range=Carbon::createFromFormat('h A',trim($time_range[1]));
+                    if(in_array($pickup_request->status_id, [2, 3, 4])){
+                        $time_range = explode('-',$pickup_request->time_range);
+                        $time_range = Carbon::createFromFormat('h A',trim($time_range[1]));
                         if(Carbon::now()->greaterThan( $time_range)){
                            return 'delay_time';
                         }
@@ -509,7 +509,12 @@ class V3AdminPickupsController extends Controller
             $datatables->whereBetween('v3_pickup_requests.pickup_date', [$from, $stop_date]);
         }
         if ($pickup_status_id = $request->get('pickup_status_id')) {
-            $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
+            if($pickup_status_id == 0){
+                $datatables->where('v3_pickup_requests.status_id', [1,2,3,4,5,6,7]);
+            }
+            else{
+                $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
+            }
         }
         return $datatables->make(true);
 
@@ -1581,11 +1586,11 @@ class V3AdminPickupsController extends Controller
 
     public function arrival_individual_shipment_details(Request $request)
     {
+        $rider_id = $request->rider_id;
         $shipment = Shipment::where('tracking_number', $request->tracking_number);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
-
 
             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('user_id', 'shipper_status_id')->orderby('id', 'desc')->first();
             if ($shipment_journey->shipper_status_id == 17) {
@@ -1622,10 +1627,10 @@ class V3AdminPickupsController extends Controller
             if ($settings) {
                 $global_rider_id = $settings->setting_value;
             } else {
-                $global_rider_id = 0;
+                $global_rider_id = 346;
             }
 
-            if ($shipment->shipper_status_id == 1 || $shipment->shipper_status_id == 17 || $shipment->shipper_status_id == 53 || $shipment->shipper_status_id == 61 || $shipment->shipper_status_id == 62 || $shipment->shipper_status_id == 64) {
+            if (in_array($shipment->shipper_status_id, [1, 17, 53, 61, 62, 64])) {
                 if ($shipment->booking_type_id == 3) {
 
                     $details = array();
