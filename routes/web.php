@@ -1281,6 +1281,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list','Admins\V3Pickup\V3AdminPickupsController@schedule_requests_list')->name('list');
                 Route::POST('approved','Admins\V3Pickup\V3AdminPickupsController@schedule_approved')->name('approved');
                 Route::POST('rejected','Admins\V3Pickup\V3AdminPickupsController@schedule_rejected')->name('rejected');
+                Route::get('/regular_pickup_days/{id}','Admins\V3Pickup\V3AdminPickupsController@get_regular_pickup_days')->name('regular_pickup_days');
+                Route::PUT('/pickup_days_update','Admins\V3Pickup\V3AdminPickupsController@pickup_days_update')->name('pickup_days_update');
+
                 
             });
         });

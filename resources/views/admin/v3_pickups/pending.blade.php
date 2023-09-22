@@ -68,6 +68,16 @@
                                             </button>
                                         </div>
                                     @endforeach
+                                   
+                                  {{-- <div class="col">
+                                    <div class="form-group">
+                                        <select  id="status_filter_input" name="pickup_status_id" class="select2 pickup_status_select" >
+                                            @foreach($statuses as $id => $status)
+                                                <option value="{{ $id }}" selected="selected">{{ $status['name'] }} ({{ $status['count'] }})</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                  </div> --}}
                                 </div>
                             </div>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -82,13 +92,14 @@
                                     <th class="border-primary border-darken-1">Weight (KG)</th>
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Route Code</th>
-                                    <th class="border-primary border-darken-1">Rider ID</th>
-                                    <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Product</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Station</th>
+                                    <th class="border-primary border-darken-1">Route Code</th>
+                                    <th class="border-primary border-darken-1">Rider</th>
+                                    <th class="border-primary border-darken-1">Rider Phone</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
+                                    <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
@@ -356,7 +367,7 @@
                                                
                                                 <select name="shipper_id" id="shippers_select" class="form-control select2" data-rule-required="true" data-msg-required="Shippers is Required">
                                                     @foreach($shippers as $shipper)
-                                                        <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
+                                                        <option value="{{ $shipper->id }}">{{ $shipper->id .'-'. $shipper->name }}</option>
                                                     @endforeach
 
                                                 </select>
@@ -445,44 +456,44 @@
                                         </div>
 
 
-                                          <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
+                                        <div class="d-flex justify-content-start vh-100 pl-0 mt-md-1 mb-md-1 scheduled_days_area">
 
                                             
                                             {{-- <div class="col-1 mb-0 item-column p-0">
                                                 <input class="apply-checked" type="checkbox" name='days[2]' id="su">
                                                 <label for="su" class="w-100 text-center" id="su">S</label>
                                            </div> --}}
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[1]' id="mo">
-                                                <label for="mo" class="w-100 text-center" id="mo">Mo</label>
-                                           </div>
-
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[2]' id="tu">
-                                                <label for="tu" class="w-100 text-center" id="tu">Tu</label>
-                                           </div>
-
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[3]' id="we">
-                                                <label for="we" class="w-100 text-center" id="we">We</label>
-                                           </div>
-
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[4]' id="th">
-                                                <label for="th" class="w-100 text-center" id="th">Th</label>
-                                           </div>
-
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[5]' id="fr">
-                                                <label for="fr" class="w-100 text-center" id="fr">Fr</label>
-                                           </div>
-
-                                           <div class="col-1 mb-0 item-column p-0">
-                                                <input class="apply-checked" type="checkbox" name='days[6]' id="sa">
-                                                <label for="sa" class="w-100 text-center" id="sa">Sa</label>
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[1]' id="mo">
+                                                    <label for="mo" class="w-100 text-center" id="mo">Mo</label>
                                             </div>
 
-                                          </div>
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[2]' id="tu">
+                                                    <label for="tu" class="w-100 text-center" id="tu">Tu</label>
+                                            </div>
+
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[3]' id="we">
+                                                    <label for="we" class="w-100 text-center" id="we">We</label>
+                                            </div>
+
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[4]' id="th">
+                                                    <label for="th" class="w-100 text-center" id="th">Th</label>
+                                            </div>
+
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[5]' id="fr">
+                                                    <label for="fr" class="w-100 text-center" id="fr">Fr</label>
+                                            </div>
+
+                                            <div class="col-1 mb-0 item-column p-0">
+                                                    <input class="apply-checked" type="checkbox" name='days[6]' id="sa">
+                                                    <label for="sa" class="w-100 text-center" id="sa">Sa</label>
+                                            </div>
+
+                                        </div>
 
                                         </div>
 
@@ -709,14 +720,16 @@
                         <form id="update_pickup_request" method="post" enctype="multipart/form-data" action="{{ route('admin.v3_pickups.update') }}">
                             @csrf
                             @method('PUT')
-                            <input type="hidden" id="pickup_type_id" name="pickup_type_id" value="2">
+                            <input type="hidden" id="edit_pickup_type_id" name="pickup_type_id" value="2">
                             <input type="hidden" name="edit_pickup_address_id" id="edit_pickup_address_id">
-                            <input type="hidden" name="pickup_request_id" id="pickup_request_id">
+                            <input type="hidden" name="pickup_request_id" id="edit_pickup_request_id">
+                            <input type="hidden" name="edit_shipper_id" id="edit_shipper_id">
+                            <input type="hidden" name="edit_city_id" id="edit_city_id">
                             <div class="tab-content px-1">
                                 <div class="tab-pane active" id="linkIcon32" role="tabpanel" aria-labelledby="linkIcon32-tab1"
                                      aria-expanded="false">
                                     <div class="row mt-md-2">
-                                            <div class="col-6">
+                                            <div class="col-12">
                                                 <div class="form-group">
                                                     <input type="text" placeholder="Customer Name" name="walkin_name"
                                                             id="edit_customer_name" class="form-control" data-rule-required="true"
@@ -724,21 +737,33 @@
 
                                                 </div>
                                             </div>
-
-                                            <div class="col-6">
+                                            <div class="col-12 pickup_address_div">
                                                 <div class="form-group">
+                                                    <label>Pickup Address</label>
+                                                    <input type="text" placeholder="Pickup Address" name="pickup_address"
+                                                            id="edit_pickup_address" class="form-control" data-rule-required="true"
+                                                            data-msg-required="Customer Pickup Address Required"/>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <label>Address</label>
+                                                    <input type="text" placeholder="Address" name="walkin_address" id="edit_walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
+
+                                                </div>
+                                            </div>
+                                            <div class="col-12">
+                                                <div class="form-group">
+                                                    <label>Phone</label>
                                                     <input type="text" placeholder="Mobile Number" name="walkin_phone"
                                                             id="edit_mobile_no" class="form-control" data-rule-required="true"
                                                             data-msg-required="Mobile is Required"/>
 
                                                 </div>
                                             </div>
-                                            <div class="col-12">
-                                                <div class="form-group">
-                                                    <input type="text" placeholder="Address" name="walkin_address" id="edit_walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
-
-                                                </div>
-                                            </div>
+                                            
                                     </div>
                                 </div>
                             </div>
@@ -1133,6 +1158,13 @@
                 'allowMinus': false,
                 'allowPlus': false,
             });
+
+            // $('#status_filter_input').prepend('<option value="0" selected="selected">All</option>').select2({
+            //     placeholder: 'Select Status',
+            //     width: '30%',
+            //     // dropdownParent:$('#add_pickup_request')
+            // });
+
             var booking_from_date = $('#requested_from_date').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -1192,7 +1224,8 @@
                             });
                             $('#pickup_address_id').select2({
                                 placeholder: 'Select Pickup Address',
-                                width: '100%'
+                                width: '100%',
+                                dropdownParent:$('#add_pickup_request')
                             }).val(null).trigger('change');
                             $('#product_select').val(data.product_id).trigger('change');
                             $('#product_select').attr('disabled', true);
@@ -1209,7 +1242,8 @@
             $('#reg_phone').inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
             $('#pickup_address_id').prepend('<option value="" selected="selected">Select Pickup Address</option>').select2({
                placeholder: 'Select Pickup Address',
-               width: '100%'
+               width: '100%',
+               dropdownParent:$('#add_pickup_request')
             }).bind('select2:select', function () {
                 var address_id = parseInt($(this).val());
 
@@ -1589,13 +1623,29 @@
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
-                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id'},
-                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
-                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper'},
+                    {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
+                        return row.user_id +'-'+ row.shipper;
+
+                    }},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
+                    {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
+                    {data: 'rider_id', name: 'rider_id', class: 'align-middle rider_id',
+                    render: function (data, type, row) {
+                            if (row.rider_id !== null) {
+                                return row.rider_id + ' - ' + row.rider_name;
+                            } else {
+                                return ''; 
+                            }
+                        }
+                    },
+                    {data: 'rider_phone', name: 'rider_phone', class: 'align-middle rider_phone'},
                     {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
+                    {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
+                  
+                    // {data: 'shipper', name: 'shipper', class: 'align-middle shipper',},
+                   
+                  
                     {data: 'special_request', name: 'special_request', class: 'align-middle special_request'},
                     {
                         data: 'action',
@@ -1732,7 +1782,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function (form) {
-
+                    $("#edit_product_select").attr('disabled',false);
                     swal({
                         text: 'Are you sure, you want to update the following pickup(s)?',
                         icon: 'info',
@@ -1796,15 +1846,13 @@
 
             $('body').on('click', '.addRemarks', function () {
                 var action = $(this).data('action');
-                // var row_id = $(this).parents('tr').attr('id');
-                var pickup_request_id=$(this).closest('tr').find('.pickup_request_id').text();
-                // var pickup_request_id=parseInt($(this).parent('tr').attr('id'));
+                var pickup_request_id=parseInt($(this).closest('tr').attr('id'));
                 $.ajax({
                     url:'{{route('admin.v3_pickups.get_pickup_remarks',['id'=>':id']) }}'.replace(':id',pickup_request_id),
                     method:'GET'
                 }).done(function(data){
-                    if(data.status==0 && data.pickup_request_attempt.length>0){
-                        $("#add_remark").val(data.pickup_request_attempt[0].trax_remarks);
+                    if(data.status==0){
+                        $("#add_remark").val(data.pickup_request_attempt.trax_remarks);
                     }else{
                         toastr.error(data.error, 'Error!', {
                                 positionClass: 'toast-top-center',
@@ -1872,35 +1920,48 @@
             });
             // var additional_services=@json($additional_services);
             $('body').on('click','.edit_pickup_request',function(){
-                var pickup_request_id =$(this).closest('tr').find('.pickup_request_id').text();
-                // var pickup_request_id=parseInt($(this).parent('tr').attr('id'));
-                // console.log($(this).parent('tr'));
-                // $(".edit-services-list").empty();
-                $('.edit-services-list input').val(0);
+                $(".pickup_address_div").hide();
+                var pickup_request_id=parseInt($(this).closest('tr').attr('id'));
                 $.ajax({
                     url:'{{route('admin.v3_pickups.pending.edit',['id'=>':id']) }}'.replace(':id',pickup_request_id),
                     method:'GET'
                 }).done(function(data){
+                
                     var pickup_request=data.pickup_request;
                     var pickup_request_services=pickup_request.pickup_request_services;
+                    var shipinfos=pickup_request.pickup_address;
+                    var user=shipinfos.user;
+                  
                     if(data.status==0){
-                        $("#pickup_request_id").val(pickup_request.id);
-                        $("#edit_customer_name").val(pickup_request.walkin_name);
+                        $("#edit_pickup_request_id").val(pickup_request.id);
+                        
+                        if(pickup_request.pickup_type == 1){
+                           
+                            $("#edit_customer_name").val(user.id +'-'+ user.name).attr('disabled',true);
+                            $("#edit_pickup_address").val(shipinfos.pickup_address).attr('disabled',true);
+                            $("#edit_product_select").val(pickup_request.segment_id).trigger('change').attr('disabled',true);
+                            $(".pickup_address_div").show();
+                        } else{
+                            $("#edit_customer_name").val(pickup_request.walkin_name).attr('disabled',false);
+                             $("#edit_product_select").val(pickup_request.segment_id).trigger('change');
+
+                        }
+                       
+                        $("#edit_pickup_type_id").val(pickup_request.pickup_type);
+                        $("#edit_shipper_id").val(user.id);
+                        $("#edit_city_id").val(pickup_request.city_id);
                         $("#edit_mobile_no").val(pickup_request.walkin_contact);
                         $("#edit_walkin_address").val(pickup_request.walkin_address);
-                        $("#edit_customer_name").val(pickup_request.walkin_name);
                         $("#edit_pickup_date").val(pickup_request.pickup_date).trigger('change');
                         $("#edit_preferred_time_range").val(pickup_request.time_range_id).trigger('change');
-                        $("#edit_product_select").val(pickup_request.segment_id).trigger('change');
+                      
                         $("#edit_service_select").val(pickup_request.sub_segment_id).trigger('change');
                         $("#edit_shipment_select").val(pickup_request.pickup_shipment_type_id).trigger('change');
                         $("#edit_shipments_count").val(pickup_request.booked);
                         $("#edit_total_pieces_count").val(pickup_request.pieces);
-                        $("#edit_estimated_weight").val(pickup_request.weight);
+                        $("#edit_estimated_weight").val(pickup_request.weight); 
                         $("#edit_additional_request").val(pickup_request.special_request);
                         $("#edit_pickup_address_id").val(pickup_request.pickup_address_id);
-                     
-
                         $.each(pickup_request_services,function(key,value){
                             $("#edit_a_service_"+value.id).val(value.pivot.count);
                         });
@@ -1981,6 +2042,9 @@
                $('#status_filter_input').val(status_id);
                table.draw();
             });
+            // $("body").on('change','#status_filter_input',function(){
+            //     table.draw();
+            // });
             // increment and decrement buttons
 
             $('.quantity').TouchSpin({
@@ -2004,6 +2068,7 @@
                 },
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
+                    $('#product_select').attr('disabled', false);
                     swal({
                         title: 'Please Wait!',
                         text: 'Pickup request is being added!',

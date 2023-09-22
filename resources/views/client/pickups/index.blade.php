@@ -251,7 +251,7 @@
                                                         </div>
 
                                                         <div class="col-1 mb-0 item-column p-0">
-                                                            <input class="apply-checked" type="checkbox" name='days[2]' id="tu">
+                                                            <input class="apply-checked" type="checkbox" name='days[2]' id="tu" >
                                                             <label for="tu" class="w-100 text-center" id="tu">Tu</label>
                                                         </div>
 
