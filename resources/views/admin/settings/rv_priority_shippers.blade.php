@@ -80,7 +80,7 @@
             // Cache the original order of selected values
             var selectedOrder = defaultValues.slice();
 
-            $select2.on('select2:select', function (e) {
+            $select2.on('select2:select', function(e) {
                 // When a new option is selected, add it to the selectedOrder
                 selectedOrder.push(e.params.data.id);
 
@@ -90,19 +90,21 @@
                 $select2.val(selectedOrder).trigger('change');
             });
 
-            $select2.on('select2:unselect', function (e) {
+            $select2.on('select2:unselect', function(e) {
                 // When an option is unselected, remove it from the selectedOrder
                 var index = selectedOrder.indexOf(e.params.data.id);
                 if (index !== -1) {
                     selectedOrder.splice(index, 1);
+                    $('.unsorted_zones').val(selectedOrder.join(', '));
+
                 }
             });
 
-            $select2.on('select2:clear', function () {
+            $select2.on('select2:clear', function() {
                 // When all options are cleared, reset the selectedOrder
                 selectedOrder = [];
             });
-            
+
 
             /**
              * Customize the display of each option in the dropdown.
@@ -144,21 +146,31 @@
 
                         // Add a click event handler to the remove button
                         $removeButton.on('click', function() {
+                            // Find the index of the selectedOption to be removed
+                            var selectedIndex = selectedOptions.findIndex(function(option) {
+                                return option.id === selectedOption.id;
+                            });
+
+                            if (selectedIndex !== -1) {
+                                // Remove the option from the selectedOptions array
+                                selectedOptions.splice(selectedIndex, 1);
+
+                                // Remove the ID from the selectedIds array
+                                selectedIds = selectedOptions.map(function(option) {
+                                    return option.id;
+                                });
+
+                                // Remove the ID from the selectedOrder array
+                                selectedOrder = selectedOrder.filter(function(id) {
+                                    return id !== selectedOption.id;
+                                });
+
+                                // Update the input field value
+                                $('.unsorted_zones').val(selectedOrder.join(', '));
+                            }
+
                             // Remove the option from the selection container
                             $option.remove();
-
-                            // Remove the ID from the selectedIds array
-                            selectedIds = selectedIds.filter(function(id) {
-                                return id !== selectedOption.id;
-                            });
-
-                            // Remove the ID from the selectedOrder array
-                            selectedOrder = selectedOrder.filter(function(id) {
-                                return id !== selectedOption.id;
-                            });
-
-                            // Update the input field value
-                            $('.unsorted_zones').val(selectedIds.join(', '));
                         });
                     }
                 });

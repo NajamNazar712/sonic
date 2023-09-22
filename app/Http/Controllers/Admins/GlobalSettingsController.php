@@ -1956,13 +1956,14 @@ class GlobalSettingsController extends Controller
 
     public function rv_shipper_priority_store(Request $request)
     {
+
         $values_array = array_map('trim', explode(',', $request->unsorted_zones));
         $unique_values_array = array_unique($values_array);
         $result_str = implode(',', $unique_values_array);
         
-        if ($request->has('shippers')) {
+        if ($request->has('unsorted_zones')) {
 
-            if (count($request->shippers) > 0) {
+            if (count($unique_values_array) > 0) {
 
                 $settings = GlobalSettings::where('type', 'rv_shipper_priority');
 
