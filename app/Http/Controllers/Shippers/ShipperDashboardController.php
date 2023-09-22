@@ -837,7 +837,7 @@ class ShipperDashboardController extends Controller
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {
-                    $query->where('shipments_journey.shipper_status_id', $keyword);
+                    $query->where('shipments.shipper_status_id', $keyword);
                 }
                 else {
                     $query->whereRaw('false');
