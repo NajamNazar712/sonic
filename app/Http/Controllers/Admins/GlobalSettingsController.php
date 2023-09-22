@@ -1956,7 +1956,6 @@ class GlobalSettingsController extends Controller
 
     public function rv_shipper_priority_store(Request $request)
     {
-
         $values_array = array_map('trim', explode(',', $request->unsorted_zones));
         $unique_values_array = array_unique($values_array);
         $result_str = implode(',', $unique_values_array);

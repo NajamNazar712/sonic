@@ -34,8 +34,7 @@
                                                     data-msg-required="Atleast one shipper is required"
                                                     data-rule-required="true" required="required">
                                                     @foreach ($shippers as $shipper)
-                                                        <option value="{{ $shipper->id }}"
-                                                            {{ in_array($shipper->id, $rv_shipper_priorities) ? 'selected' : '' }}>
+                                                        <option value="{{ $shipper->id }}">
                                                             {{ $shipper->name }}</option>
                                                     @endforeach
                                                 </select>
@@ -83,28 +82,30 @@
             $select2.on('select2:select', function(e) {
                 // When a new option is selected, add it to the selectedOrder
                 selectedOrder.push(e.params.data.id);
-
-                $('.unsorted_zones').val(selectedOrder.join(', '));
-
-                // Update the Select2 value to reflect the new order
-                $select2.val(selectedOrder).trigger('change');
+                updateSelectedOrder();
             });
 
             $select2.on('select2:unselect', function(e) {
-                // When an option is unselected, remove it from the selectedOrder
                 var index = selectedOrder.indexOf(e.params.data.id);
                 if (index !== -1) {
                     selectedOrder.splice(index, 1);
-                    $('.unsorted_zones').val(selectedOrder.join(', '));
-
+                    updateSelectedOrder();
                 }
             });
 
             $select2.on('select2:clear', function() {
                 // When all options are cleared, reset the selectedOrder
                 selectedOrder = [];
+                updateSelectedOrder();
             });
 
+            function updateSelectedOrder() {
+                // Update the Select2 value to reflect the new order
+                $select2.val(selectedOrder).trigger('change');
+
+                // Update the hidden input field with the current order
+                $('.unsorted_zones').val(selectedOrder.join(', '));
+            }
 
             /**
              * Customize the display of each option in the dropdown.
@@ -184,10 +185,6 @@
 
             // Call the function to display selections in the desired order and add remove buttons
             customOrderSelections();
-
-
-
-
 
         });
     </script>
