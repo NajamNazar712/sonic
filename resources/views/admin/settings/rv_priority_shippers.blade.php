@@ -66,6 +66,35 @@
 
     <script>
         $(document).ready(function() {
+            var defaultValues = {!! json_encode($rv_shipper_priorities) !!};
+            var displayed_items = defaultValues;
+
+            function customPreSelect() {
+                let items = defaultValues;
+                $("#shippers_select").val('').trigger('change');
+                initSelect(items);
+            }
+
+            function initSelect(items) {
+                items.forEach(item => {
+                    if ($.trim(item).length != 0) {
+                        let value = $("#shippers_select option[value='" + item + "']").text();
+                        if (value !== null) {
+                            $("#shippers_select option[value='" + item + "']").remove();
+                            $("#shippers_select").append(new Option(value, item, true, true));
+                        }
+                    }
+                });
+
+                // Initialize Select2 after adding options
+                $('#shippers_select').select2();
+            }
+
+            // Initialize Select2 initially
+            $('#shippers_select').select2();
+
+            // Call the customPreSelect function to pre-select items
+            customPreSelect();
             var $select2 = $('#shippers_select').select2({
                 templateSelection: template,
                 width: '100%',
@@ -76,36 +105,72 @@
             var defaultValues = {!! json_encode($rv_shipper_priorities) !!};
             $select2.val(defaultValues).trigger('change');
 
-            // Cache the original order of selected values
-            var selectedOrder = defaultValues.slice();
+            // Cache order of initial values
+            var preservedOrder = defaultValues.slice();
 
-            $select2.on('select2:select', function(e) {
-                // When a new option is selected, add it to the selectedOrder
-                selectedOrder.push(e.params.data.id);
-                updateSelectedOrder();
-            });
+            $select2.on('select2:select select2:unselect', selectionHandler);
 
-            $select2.on('select2:unselect', function(e) {
-                var index = selectedOrder.indexOf(e.params.data.id);
-                if (index !== -1) {
-                    selectedOrder.splice(index, 1);
-                    updateSelectedOrder();
+            function selectionHandler(e) {
+                var val = e.params.data.id;
+
+                switch (e.type) {
+                    case 'select2:select':
+                        preservedOrder.push(val);
+                        break;
+                    case 'select2:unselect':
+                        var foundIndex = preservedOrder.indexOf(val);
+                        if (foundIndex >= 0) {
+                            preservedOrder.splice(foundIndex, 1);
+                        }
+                        break;
                 }
-            });
 
-            $select2.on('select2:clear', function() {
-                // When all options are cleared, reset the selectedOrder
-                selectedOrder = [];
-                updateSelectedOrder();
-            });
+                // Store the updated order
+                $select2.data('preserved-order', preservedOrder);
 
-            function updateSelectedOrder() {
-                // Update the Select2 value to reflect the new order
-                $select2.val(selectedOrder).trigger('change');
-
-                // Update the hidden input field with the current order
-                $('.unsorted_zones').val(selectedOrder.join(', '));
+                // Render selections in the preserved order
+                select2_renderSelections($select2);
             }
+
+            function select2_renderSelections($select2) {
+                var order = $select2.data('preserved-order') || [];
+                var $container = $select2.next('.select2-container');
+                var $tags = $container.find('li.select2-selection__choice');
+                var $input = $tags.last().next();
+
+
+                var stringList = order.filter(function(item) {
+                    return typeof item === 'string';
+                });
+
+
+                // Apply tag order
+                order.forEach(function(val) {
+                    var $el = $tags.filter(function(i, tag) {
+                        return $(tag).data('data').id === val;
+                    });
+                    $input.before($el);
+                });
+
+                $('.unsorted_zones').val(stringList);
+
+                var selectedIds = $('#search_origin').find('option:selected').map(function() {
+                    return $(this).val();
+                }).get();
+
+                var idArray = $('.unsorted_zones').val().split(',');
+
+                selectedIds = selectedIds.filter(function(item) {
+                    return idArray.indexOf(item) === -1;
+                });
+
+                // Append values from array 2 to the end of array 1
+                selectedIds = selectedIds.concat(idArray);
+
+                $('.unsorted_zones').val(selectedIds)
+
+            }
+
 
             /**
              * Customize the display of each option in the dropdown.
@@ -116,75 +181,7 @@
                 return data.text;
             }
 
-            function customOrderSelections() {
-                var $selectedOptions = $select2.select2('data');
-                var $selectionContainer = $select2.next('.select2-container').find('.select2-selection__rendered');
-                var selectedIds = [];
-                var selectedOrder = [];
 
-                // Clear the existing selections
-                $selectionContainer.empty();
-
-                // Append selections in the desired order
-                defaultValues.forEach(function(value) {
-                    var selectedOption = $selectedOptions.find(function(option) {
-                        return option.id == value;
-                    });
-                    if (selectedOption) {
-                        var $option = $('<span class="select2-selection__choice"></span>');
-                        var $removeButton = $(
-                            '<span class="select2-selection__choice__remove" tabindex="-1">×</span>');
-
-                        $option.text(selectedOption.text);
-                        $option.attr('title', selectedOption.text);
-                        $option.append($removeButton);
-                        $selectionContainer.append($option);
-
-                        // Add the selected value to the selectedIds array
-                        selectedIds.push(selectedOption.id);
-                        // Add the selected value to the selectedOrder array to maintain order
-                        selectedOrder.push(selectedOption.id);
-
-                        // Add a click event handler to the remove button
-                        $removeButton.on('click', function() {
-                            // Find the index of the selectedOption to be removed
-                            var selectedIndex = selectedOptions.findIndex(function(option) {
-                                return option.id === selectedOption.id;
-                            });
-
-                            if (selectedIndex !== -1) {
-                                // Remove the option from the selectedOptions array
-                                selectedOptions.splice(selectedIndex, 1);
-
-                                // Remove the ID from the selectedIds array
-                                selectedIds = selectedOptions.map(function(option) {
-                                    return option.id;
-                                });
-
-                                // Remove the ID from the selectedOrder array
-                                selectedOrder = selectedOrder.filter(function(id) {
-                                    return id !== selectedOption.id;
-                                });
-
-                                // Update the input field value
-                                $('.unsorted_zones').val(selectedOrder.join(', '));
-                            }
-
-                            // Remove the option from the selection container
-                            $option.remove();
-                        });
-                    }
-                });
-
-                // Set the selectedIds as the value of the input field
-                $('.unsorted_zones').val(selectedIds.join(', '));
-
-                // Restore the original order of selected options in the dropdown
-                $select2.val(selectedOrder).trigger('change');
-            }
-
-            // Call the function to display selections in the desired order and add remove buttons
-            customOrderSelections();
 
         });
     </script>
