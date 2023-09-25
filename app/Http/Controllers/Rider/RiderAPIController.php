@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Rider;
 
+use App\Http\Controllers\Admins\V3Pickup\V3PickupRequestJourneysController;
 use App\Http\Models\V3Pickup\V3PickupNote;
 use App\Http\Models\V3Pickup\V3PickupNoteRequest;
 use App\Http\Models\V3Pickup\V3PickupRequest;
@@ -14536,8 +14537,12 @@ RiderAPIController extends Controller
                 $information['pickups'][] = $pickup;
 
                 $pickup_request = V3PickupRequest::find($pickup_request->id);
-                $pickup_request->status_id = 3;
-                $pickup_request->save();
+                if($pickup_request->status_id == 2){
+                    $pickup_request->status_id = 3;
+                    $pickup_request->save();
+                    V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request->id, 3,2, $rider_id);
+                }
+
 
             }
 
