@@ -187,7 +187,10 @@ class ReturnController extends Controller
                         and rv_shipment_assign_agents.rv_state_id = 1)'));
                         
             })
-            
+            ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
+                $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
+                    ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
+            })
             ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
             ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
@@ -224,8 +227,8 @@ class ReturnController extends Controller
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
              'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
              'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
-
             ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
+            ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){

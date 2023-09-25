@@ -2,38 +2,39 @@
 
 namespace App\Http\Traits;
 
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
-use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
+use Carbon\Carbon;
+use App\RvShipmentAgent;
+use App\RvAgentCallHistory;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\User;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Admin\StatusRemark;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\RvAssignAgentStatus;
+use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\RvShipmentAssignAgentDetails;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\InterceptReBookRequest;
-use App\Http\Models\InterceptReBookRequestHistory;
-use App\Http\Models\RestrictedCityIntercept;
-use App\Http\Models\RvAssignAgentStatus;
-use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\RvShipmentAssignAgentDetails;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\User;
-use App\RvAgentCallHistory;
-use App\RvShipmentAgent;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
+use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
 
 trait RvTrait
 {
@@ -497,6 +498,8 @@ trait RvTrait
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
+
+            DB::beginTransaction();
             $s_amount = str_replace(",", "", $request->amount);
             $amount = intval($s_amount);
             $shipment = Shipment::find($request->shipment_id);
@@ -593,12 +596,16 @@ trait RvTrait
                                 $shipment_parcel_image->save();
                             }
                         }
+
+                        DB::commit();
                         return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                     }
                 } else {
+                    DB::rollBack();
                     return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
+                DB::rollBack();
                 return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
             }
         }
