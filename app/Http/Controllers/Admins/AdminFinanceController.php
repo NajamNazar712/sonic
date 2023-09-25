@@ -10853,6 +10853,7 @@ class AdminFinanceController extends Controller
             })
             ->join('admins as sales_person', 'sales_person.id', '=', 'spt.admin_id')
             ->leftjoin('banks_lists as b', 'invoices.company_bank_id', '=', 'b.id')
+            ->leftjoin('invoice_upload_slips as ius', 'invoices.id', '=', 'ius.invoice_id')
             ->join('invoice_statuses as is', 'invoices.status_id', '=', 'is.id')
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
@@ -10862,7 +10863,7 @@ class AdminFinanceController extends Controller
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
             'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
             'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
-            'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 
+            'ius.amount as received_amount', 'invoices.tax_amount as tax_amount', 'ius.deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
@@ -10951,6 +10952,9 @@ class AdminFinanceController extends Controller
                     return $invoice->shipper;
                 }
             })
+            ->addColumn('excel_shipper', function ($invoice) {
+                return $invoice->shipper;
+            })
             ->addColumn('account', function ($invoice) {
                 if ($invoice->account_type == 2) {
                     return 'Corporate Account';
@@ -11028,7 +11032,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deposit_date', function ($invoice) {
                 if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->deposit_date)->format('Y-m-d');
                 } else {
                     return '';
                 }
