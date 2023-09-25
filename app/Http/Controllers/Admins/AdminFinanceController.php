@@ -10857,7 +10857,7 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->leftJoin(DB::raw('(SELECT invoice_id, deposit_date, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id ORDER BY id DESC) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
+            ->leftJoin(DB::raw('(SELECT invoice_id, deposit_date, SUM(amount) as total_received_amount FROM invoice_upload_slips ORDER BY id DESC GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
             'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
