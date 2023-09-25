@@ -10858,12 +10858,13 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftJoin(DB::raw('(SELECT invoice_id, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
             'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
             'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
             'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
-            DB::raw('(SELECT SUM(ius_sub.amount) FROM invoice_upload_slips AS ius_sub WHERE ius_sub.invoice_id = invoices.id) as received_amount'), 
+            'ius_sub.total_received_amount as received_amount',
             'invoices.tax_amount as tax_amount', 'ius.deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
