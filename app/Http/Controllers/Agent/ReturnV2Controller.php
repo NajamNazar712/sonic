@@ -132,6 +132,7 @@ class ReturnV2Controller extends Controller
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
                         
+
                         if ($shipment) {
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
@@ -214,7 +215,7 @@ class ReturnV2Controller extends Controller
 
                         else{
                             //No Shipment Found in Assigned Hub
-                            return response()->json(['status' => 5, 'errors' => 'No Zone Assigned']);
+                            return response()->json(['status' => 5, 'errors' => 'No Shipment Is Found']);
                         }
 
                     } else {

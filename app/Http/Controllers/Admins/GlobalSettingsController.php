@@ -1948,8 +1948,7 @@ class GlobalSettingsController extends Controller
 
         if ($settings->exists()) {
             $settings = $settings->first();
-
-            $rv_shipper_priorities = array_map('intval', explode(',', $settings->text));
+            $rv_shipper_priorities = array_map('strval', explode(',', $settings->text));
         }
         return view('admin.settings.rv_priority_shippers')->with(['shippers' => $shippers, 'rv_shipper_priorities' => $rv_shipper_priorities]);
     }
@@ -1957,10 +1956,13 @@ class GlobalSettingsController extends Controller
 
     public function rv_shipper_priority_store(Request $request)
     {
-        if ($request->has('shippers')) {
+        $values_array = array_map('trim', explode(',', $request->unsorted_zones));
+        $unique_values_array = array_unique($values_array);
+        $result_str = implode(',', $unique_values_array);
+        
+        if ($request->has('unsorted_zones')) {
 
-            if (count($request->shippers) > 0) {
-                $shippers = implode(',', $request->shippers);
+            if (count($unique_values_array) > 0) {
 
                 $settings = GlobalSettings::where('type', 'rv_shipper_priority');
 
@@ -1972,7 +1974,7 @@ class GlobalSettingsController extends Controller
                     $settings->type = 'rv_shipper_priority';
                     $settings->setting_value = 0;
                 }
-                $settings->text = $shippers;
+                $settings->text = $result_str;
                 $settings->save();
             }
             return redirect()->back()->with('success', 'Settings Updated!');

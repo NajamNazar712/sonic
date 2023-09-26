@@ -1446,7 +1446,7 @@
                                                                     if (data.status == 0) 
                                                                     {
                                                                         $('#AssignAgentModal').modal('hide');
-                                                                        toastr.success(data .success,
+                                                                        toastr.success(data.success,
                                                                                 'Success!', {
                                                                                     positionClass: 'toast-bottom-center',
                                                                                     containerId: 'toast-bottom-center'
@@ -1456,6 +1456,7 @@
                                                                                table.draw();
                                                                             } 
                                                                             else {
+                                                                                console.log(data);
                                                                                 toastr.error(data.error,
                                                                                 'Error!', {
                                                                                     positionClass: 'toast-top-center',

@@ -2,38 +2,39 @@
 
 namespace App\Http\Traits;
 
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
-use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentsJourneyController;
+use Carbon\Carbon;
+use App\RvShipmentAgent;
+use App\RvAgentCallHistory;
+use Illuminate\Http\Request;
+use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\User;
+use Illuminate\Support\Facades\DB;
+use App\Http\Models\CRM\CrmRequest;
 use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Models\ShipmentsJourney;
+use App\Http\Models\Admin\StatusRemark;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\RvAssignAgentStatus;
+use App\Http\Models\Admin\GlobalSettings;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\InterceptReBookRequest;
+use App\Http\Models\RestrictedCityIntercept;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\RvShipmentAssignAgentDetails;
+use App\Http\Models\InterceptReBookRequestHistory;
+use App\Http\Models\ShipmentReplacementParcelImage;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\ReattemptPercentageForShipper;
 use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\InterceptReBookRequest;
-use App\Http\Models\InterceptReBookRequestHistory;
-use App\Http\Models\RestrictedCityIntercept;
-use App\Http\Models\RvAssignAgentStatus;
-use App\Http\Models\RvShipmentAssignAgent;
-use App\Http\Models\RvShipmentAssignAgentDetails;
-use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentReplacementParcelImage;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\Shipper\User;
-use App\RvAgentCallHistory;
-use App\RvShipmentAgent;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
+use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
 
 trait RvTrait
 {
@@ -497,6 +498,8 @@ trait RvTrait
         if ($validate->fails()) {
             return back()->with(['error' => "Invalid File Format Of Replacement Parcel Image"]);
         } else {
+
+            DB::beginTransaction();
             $s_amount = str_replace(",", "", $request->amount);
             $amount = intval($s_amount);
             $shipment = Shipment::find($request->shipment_id);
@@ -593,12 +596,16 @@ trait RvTrait
                                 $shipment_parcel_image->save();
                             }
                         }
+
+                        DB::commit();
                         return redirect()->back()->with('success', 'Intercept/Re-Book request submitted against Tracking Number: ' . $shipment['tracking_number']);
                     }
                 } else {
+                    DB::rollBack();
                     return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
+                DB::rollBack();
                 return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
             }
         }
@@ -627,8 +634,12 @@ trait RvTrait
 
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if ($rv_shipment_assign_agent->unresponsive_count == 2) {
-            $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
-            $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
+            //updating the shipment status to unresponsive(65) in shipments table
+            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+
+            //updating the shipment status to unresponsive(65) in shipments journey table
+            ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
+            return response()->json(['status' => 1]); 
 
         }
 
@@ -637,13 +648,6 @@ trait RvTrait
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
         }
-
-        //updating the shipment status to unresponsive(65) in shipments table
-        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-
-        //updating the shipment status to unresponsive(65) in shipments journey table
-        ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
-        return response()->json(['status' => 1]);
     }
 
 
@@ -1401,27 +1405,42 @@ trait RvTrait
         foreach ($sorted_agents as $key => $agent) {
 
             $shipments = [];
+
+            if($agent_shipment_id)
+                $agent_shipment_id;
             
-            if (!empty($included_shippers) && (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
+            else if (!empty($included_shippers)) {
                 
-                $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
-                $mergeArr = array_unique($mergeArr);
-                $result = array_filter($mergeArr, function($value){
-                    return $value != '';
-                });
+                $flag = false;
 
-                $exploded_result = implode(',', $result);
-
-                $shipments = Shipment::whereIn('user_id', $result)
-                ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                ->where('consignee_city_id', $agent['city_id'])  
-                ->orderByRaw("FIELD(user_id, $exploded_result)")
-                ->get();
-
+                if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
+                    $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
+                    $mergeArr = array_unique($mergeArr);
+                    $result = array_filter($mergeArr, function($value){
+                        return $value != '';
+                    });
+                
+                    $exploded_result = implode(',', $result);
+                
+                    $flag = true;
+                }
+                
+                $shipments = Shipment::whereIn('user_id', $flag ? $result : [$agent['city_id']])
+                    ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
+                    ->where('consignee_city_id', $agent['city_id']);
+                
+                if ($flag == true){
+                    $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+                } else {
+                    $shipments->orderBy('id', 'ASC');
+                }
+                
+                $shipments = $shipments->get();
                 
                 if($shipments->isEmpty()){
                     continue;
                 }
+                
             }
             
             // Check if only_shippers exists (1 && 0)
@@ -1441,7 +1460,7 @@ trait RvTrait
 
             
             // check if shipments exist
-            if (count($shipments)) {
+            if (count($shipments) || $agent_shipment_id) {
                 
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){

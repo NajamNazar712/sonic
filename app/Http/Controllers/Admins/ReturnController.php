@@ -2,98 +2,101 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Controllers\Admins\AdminFinanceController;
-use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
-use App\Http\Controllers\Admins\ShipmentChargesController;
-use App\Http\Controllers\EmployeeAttendanceController;
-use App\Http\Controllers\ShipmentScanningJourneyController;
-use App\Http\Controllers\ShipmentsJourneyController;
-use App\Http\Controllers\NotificationsController;
-use App\Http\Controllers\ShipmentOpenBoxJourneyController;
-use App\Http\Models\Admin\AdminRole;
-use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
-use App\Http\Models\Admin\DeliveryNoteShipment;
-use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\RcpAssignedAgent;
-use App\Http\Models\Admin\RcpAssignedShipment;
-use App\Http\Models\Admin\RcpAssignedShipmentLog;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteImage;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\http\Models\Admin\ReturnReasonMandatoryShipper;
-use App\Http\Models\Admin\ReturnReattemptRatio;
-use App\Http\Models\Admin\StatusRemark;
-use App\Http\Models\Admin\SubStatusCallFinding;
-use App\Http\Models\Blacklist\BlacklistSetting;
-use App\Http\Models\BookingType;
+use DB;
+use Carbon\Carbon;
+use function foo\func;
 use App\Http\Models\City;
-use App\Http\Models\ConsolidationShipments;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\EmployeeDeviceToken;
-use App\Http\Models\HR\StaffCategory;
-use App\Http\Models\PackagingMaterialRequest;
-use App\Http\Models\PackagingMaterialRequestDetail;
-use App\Http\Models\PackagingMaterialRequestHistory;
-use App\Http\Models\PendingPayment;
-use App\Http\Models\PendingPaymentShipment;
-use App\Http\Models\ReturnAssignedShipments;
-use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Zone;
 use App\Http\Models\Rider;
-use App\Http\Models\RiderDelivery;
 use App\Http\Models\Route;
+use Illuminate\Support\Str;
+use App\Http\Traits\RvTrait;
+use Illuminate\Http\Request;
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentPiece;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\Shipper\ReturnSheet;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
-use App\Http\Models\WarehouseStock;
+use App\Jobs\RCPSmsToConsignee;
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\BookingType;
+use App\Http\Models\HR\Employee;
+use App\Http\Models\ShipmentOtp;
+use Yajra\Datatables\Datatables;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\RcpManualSms;
-use App\Http\Models\Zone;
-use App\Jobs\RCPSmsToConsignee;
-use App\ReturnDeliveredToShipperSms;
-use App\ReturnDeliveredToShipperTicker;
-use Carbon\Carbon;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\Attendance\EmployeeAttendance;
-use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
-use App\Http\Models\AgentReturnConfirmation;
-use App\Http\Models\ReturnAssignedShipmentLogs;
-use Illuminate\Support\Facades\Auth;
-use DB;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use Yajra\Datatables\Datatables;
-use Yajra\Datatables\Services\DataTable;
-use function foo\func;
-use App\Http\Models\Shipper\UserShippingInfo;
-use Illuminate\Support\Str;
-use App\Http\Models\Admin\NonServiceArea;
-use App\Http\Models\Admin\OsaChargesLog;
-use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
-use App\Http\Models\Admin\ReturnRevertLog;
-use App\Http\Models\Admin\RiderCategoryByPass;
-use App\Http\Models\ConsigneeRefusedReason;
-use App\Http\Models\Handover\Handover;
-use App\Http\Models\Handover\HandoverShipments;
-use App\Http\Models\Rider\RiderDeliveryNoteRequest;
-use App\Http\Models\Rider\RiderReturnNoteRequest;
-use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
-use App\Http\Models\RvAgentAssignHub;
-use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use App\Http\Models\RiderDelivery;
+use App\Http\Models\ShipmentPiece;
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\ShipmentDetail;
-use App\Http\Models\ShipmentOtp;
-use App\Http\Traits\RvTrait;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\WarehouseStock;
+use App\Http\Controllers\Controller;
+use App\Http\Models\Admin\AdminRole;
+use App\ReturnDeliveredToShipperSms;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\HR\StaffCategory;
+use App\Http\Models\RvAgentAssignHub;
+use App\Http\Models\ShipmentsJourney;
+use Illuminate\Filesystem\Filesystem;
+use App\Http\Models\Handover\Handover;
+use App\Http\Models\Admin\StatusRemark;
+use App\ReturnDeliveredToShipperTicker;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use App\Http\Models\Admin\OsaChargesLog;
+use App\Http\Models\EmployeeDeviceToken;
+use App\Http\Models\Shipper\ReturnSheet;
+use Yajra\Datatables\Services\DataTable;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\ShipmentStatusReason;
+use Illuminate\Support\Facades\Validator;
+use App\Http\Models\Admin\ReturnNoteImage;
+use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\Admin\RcpAssignedAgent;
+use App\Http\Models\ConsigneeRefusedReason;
+use App\Http\Models\ConsolidationShipments;
+use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\AgentReturnConfirmation;
+use App\Http\Models\ReturnAssignedShipments;
+use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Admin\RcpAssignedShipment;
+use App\Http\Models\Admin\RiderCategoryByPass;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\ReturnReattemptRatio;
+use App\Http\Models\Admin\SubStatusCallFinding;
+use App\Http\Models\Blacklist\BlacklistSetting;
+use App\Http\Models\Handover\HandoverShipments;
+use App\Http\Models\ReturnAssignedShipmentLogs;
 use App\Jobs\ProcessOneLinkDeliveryNoteShipment;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Models\Admin\RcpAssignedShipmentLog;
+use App\Http\Models\Rider\RiderReturnNoteRequest;
+use App\Http\Models\PackagingMaterialRequestDetail;
+use App\Http\Models\Rider\RiderDeliveryNoteRequest;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Models\PackagingMaterialRequestHistory;
+use App\Http\Controllers\EmployeeAttendanceController;
+use App\Http\Models\Warehouse\WarehouseFulfilmentHubs;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\http\Models\Admin\ReturnReasonMandatoryShipper;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendance;
+use App\Http\Models\ReturnConfirmationPendingSmsAttempt;
+use App\Http\Models\Admin\DeliveryLocationMappingKeyword;
+use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
+use App\Http\Models\Rider\RiderReturnNoteRequestShipment;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\ShipmentOpenBoxJourneyController;
+use App\Http\Controllers\ShipmentScanningJourneyController;
+use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
+use App\Http\Controllers\Admins\Handover\HandoverShipmentJourneyController;
 
 class ReturnController extends Controller
 {
@@ -107,7 +110,9 @@ class ReturnController extends Controller
 
     public function return_view()
     {
+        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 26);
+        $empid = Admin::find(Auth::id())->employee_id;
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
@@ -126,9 +131,7 @@ class ReturnController extends Controller
         $percentage_total_of_shipment = (($total_of_shipments)/($total_shipments) * 100);
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
         $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
-        $agents = AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')
-            ->where('admin_roles.department_id', 3)
-            ->where('a.status', 1)->get();  
+        $agents = Employee::where('trax_id','like','%Trax-C%')->where('line_manager_id', $empid)->get();
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'percentage_total_of_shipment'=>$percentage_total_of_shipment,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
     }
 
@@ -187,7 +190,10 @@ class ReturnController extends Controller
                         and rv_shipment_assign_agents.rv_state_id = 1)'));
                         
             })
-            
+            ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
+                $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
+                    ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
+            })
             ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
             ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
             ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
@@ -224,8 +230,8 @@ class ReturnController extends Controller
              'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
              'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
              'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
-
             ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
+            ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
             ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
@@ -5011,35 +5017,40 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         $agent_id = $request->admin_id;
-        // Get all assigned agent to hubs priority wise
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
-        if($sorted_agents->isNotEmpty())
+        $admin_id = Admin::where('employee_id', $agent_id)->first();
+        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
+        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
+        $shipment_ids =  $request->shipment_ids;
+        $no_zone_shipment = [];
+        
+        if(!empty($sorted_agents_zones))
         {
-            $shipment_ids = $request->shipment_ids;
-            if ($shipment_ids)
+           foreach ($shipment_ids as $shipment_id)
+           {
+            $shipment = Shipment::where('id',$shipment_id)->first();
+            if($shipment->exists())
             {
-                foreach ($shipment_ids as $shipment_id) 
-                {
-                    //this function checks if the shipper is included not and and assign the shipment to agent
-                    $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
-                    
-                    if($include_shippers){
-                        return $include_shippers;
-                        // return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
-                    }
-                    else{
-                        return response()->json(['status' => 1, 'error' => 'Shipper is disabled']);
-                    }
+                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
+                    $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
+                }else{
+                    $no_zone_shipment[] = $shipment->id;
                 }
-                return response()->json(['status' => 0, 'success' => 'Shipments Assigned successfully']);
             }
-            else{
-                return response()->json(['status' => 1, 'error' => 'No Shipment found!']);
-            }
+        } 
+
+        if(!empty($no_zone_shipment)){
+            $no_zone_shipment = implode(',', $no_zone_shipment);
+            return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Number Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned']);
+        }else{
+            return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
+
         }
-        else{
-            return response()->json(['status' => 1, 'error' => 'Hub is not assigned to this agent']);
+
+        }else{
+            return response()->json(['status'=> 1, 'error'=>'No Zone Againt This User Found']);
         }
+        
+                   
     }
 
     //Assigning and Unassigning Shipments to agents by uploading excel sheet (Upload Agent Modal in Rcp Screen)
