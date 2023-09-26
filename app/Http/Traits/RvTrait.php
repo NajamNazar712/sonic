@@ -634,8 +634,12 @@ trait RvTrait
 
         //if unresponsive count is 3 unassigned the shipment & set the assign_agent_status_id to 7, the shipment will be shown to to the shipper 
         if ($rv_shipment_assign_agent->unresponsive_count == 2) {
-            $shipment->shipment_status_id = 65; //set shipment status to Shipper Advise Requested 
-            $shipment->consignee_status_id = 65; //set consignee status to Shipper Advise Requested 
+            //updating the shipment status to unresponsive(65) in shipments table
+            Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
+
+            //updating the shipment status to unresponsive(65) in shipments journey table
+            ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
+            return response()->json(['status' => 1]); 
 
         }
 
@@ -644,13 +648,6 @@ trait RvTrait
             Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
             ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, $user_id, Auth::id());
         }
-
-        //updating the shipment status to unresponsive(65) in shipments table
-        Shipment::where('id', $request->shipment_id)->update(['shipper_status_id' => 65, 'consignee_status_id' => 65]);
-
-        //updating the shipment status to unresponsive(65) in shipments journey table
-        ShipmentsJourneyController::add($request->shipment_id, 65, 65, 12, NULL, $user_id, Auth::id());
-        return response()->json(['status' => 1]);
     }
 
 
@@ -1408,8 +1405,11 @@ trait RvTrait
         foreach ($sorted_agents as $key => $agent) {
 
             $shipments = [];
+
+            if($agent_shipment_id)
+                $agent_shipment_id;
             
-            if (!empty($included_shippers) && (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
+            else if (!empty($included_shippers) && (!empty($rv_priority_shippers) && !($only_shipper->exists()))) {
                 
                 $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                 $mergeArr = array_unique($mergeArr);
@@ -1448,7 +1448,7 @@ trait RvTrait
 
             
             // check if shipments exist
-            if (count($shipments)) {
+            if (count($shipments) || $agent_shipment_id) {
                 
                 //this check will work only if admin will assign shipment manually to agent 
                 if($agent_shipment_id){
