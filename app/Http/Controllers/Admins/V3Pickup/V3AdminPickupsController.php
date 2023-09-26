@@ -40,6 +40,7 @@ use App\Http\Models\V3Pickup\V3PickupRequest;
 use App\Http\Models\V3Pickup\V3PickupRequestAttempt;
 use App\Http\Models\V3Pickup\V3PickupRequestLegend;
 use App\Http\Models\V3Pickup\V3PickupRequestNotPickReason;
+use App\Http\Models\V3Pickup\V3PickupRequestReason;
 use App\Http\Models\V3Pickup\V3PickupRequestRiderStatus;
 use App\Http\Models\V3Pickup\V3PickupRequestService;
 use App\Http\Models\V3Pickup\V3PickupRequestShipment;
@@ -65,26 +66,6 @@ class V3AdminPickupsController extends Controller
 
         $this->middleware('Permission');
     }
-    public function add_pickup_request()
-    {
-        if(session('department_id') == 7){
-
-            if (in_array(session('id'), session('sale_users_bypass'))) {
-                $shippers = User::where('status',3)->get();
-            }
-            else{
-                $shippers = User::where('status',3)->whereIn('id',session('tagged_shippers'));
-            }
-
-        }
-        else{
-            $shippers = User::where('status',3)->get();
-        }
-
-        $pickup_types = V3PickupType::all();
-        $time_ranges = V3PickupTimeRange::all();
-        return view('admin.v3_pickups.add_pickup')->with(['shippers' => $shippers, 'pickup_types' => $pickup_types, 'time_ranges' => $time_ranges]);
-    }
 
     public function get_pickup_address(Request $request)
     {
@@ -95,9 +76,7 @@ class V3AdminPickupsController extends Controller
 
     public function pickup_request_add(Request $request){
 
-      
-    
-        $admin_id =session('id');
+        $admin_id = Auth::id();
         $pickup_date = $request->pickup_date_formatted;
         $pickup_date = Carbon::parse($pickup_date)->toDateString();
 
@@ -117,6 +96,28 @@ class V3AdminPickupsController extends Controller
         $shipment_type_id = $request->shipment_type_id;
         $product_id = $request->product_id;
         $service_id = $request->service_id;
+
+        if($pickup_address_id){
+            $pickup_address = UserShippingInfo::find($pickup_address_id);
+
+            $city_id = $pickup_address->city->id;
+        }
+        else{
+            $city_id = $request->city_id;
+        }
+
+        $walkin_account_id = 117;
+
+        if($pickup_type_id == 2){
+            $walk_in_user = GlobalSettings::where('type', 'Walk-In')->first();
+            if ($walk_in_user){
+                $walkin_account_id = $walk_in_user->setting_value;
+            }
+
+            $shipper_id = $walkin_account_id;
+        }
+
+
         $walkin_name = '';
         $walkin_address = '';
         $walkin_contact = '';
@@ -126,8 +127,8 @@ class V3AdminPickupsController extends Controller
             $walkin_contact = $request->walkin_phone;
 
             //walking process
-            $pickup_address_id = ShipperShipmentBookController::add_pickup_address(117, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),
-            'test@gmail.com',101,0,true);
+            $pickup_address_id = ShipperShipmentBookController::add_pickup_address($shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),
+            'info@trax.pk',$city_id,0,true);
            
         }
         else{
@@ -135,20 +136,13 @@ class V3AdminPickupsController extends Controller
             $walkin_contact = $request->phone;
         }
 
-      
-        $pickup_address = UserShippingInfo::find($pickup_address_id);
-
-        $city_id = $pickup_address->city->id;
-
-        $shipper_id=(is_null($shipper_id)?$pickup_address->user_id:$shipper_id);
-
        
         $pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
 
-        $additonalservice_count=0;
+        $additonal_service_count = 0;
         foreach ($request->additional_services as $service_id => $service_count){
             if($service_count > 0){
-                $additonalservice_count+=1;
+                $additonal_service_count += 1;
                 $additional_service = new V3PickupRequestService();
                 $additional_service->pickup_request_id = $pickup_request_id;
                 $additional_service->pickup_request_service_id = $service_id;
@@ -156,13 +150,12 @@ class V3AdminPickupsController extends Controller
                 $additional_service->save();
             }
         }     
-        if($additonalservice_count>0){
-            V3PickupRequest::where('id', $pickup_request_id)
-            ->update(['services_count' => $additonalservice_count]);
+        if($additonal_service_count > 0){
+            V3PickupRequest::where('id', $pickup_request_id)->update(['services_count' => $additonal_service_count]);
         }
-       
+        V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request_id, 1,1, $admin_id);
 
-        if($request->regular_pickup == 2 && $request->pickup_type_id==1){
+        if($request->regular_pickup == 2 && $request->pickup_type_id == 1){
             $days = [];
             foreach ($request->days as $index => $day){
                 $days[] = $index;
@@ -171,7 +164,9 @@ class V3AdminPickupsController extends Controller
             AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1);
         }
 
-        $this->auto_pickup_assign($pickup_request_id);
+        if($pickup_type_id == 1){
+            $this->auto_pickup_assign($pickup_request_id);
+        }
 
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
@@ -331,7 +326,15 @@ class V3AdminPickupsController extends Controller
             });
         }
 
-        // $not_pick_reasons = V3PickupRequestNotPickReason::all();/
+        if (session('role_id') == 1){
+            $cities = City::where('pickup', 1)->where('status', 1)->get();
+        }
+        else{
+            $cities = City::whereIn('id', session('hubs'))->get();
+        }
+
+
+        $pickup_reasons = V3PickupRequestReason::all();
         $riders = $riders->get();
 
         $pickup_shipment_types = V3PickupShipmentType::all();
@@ -347,7 +350,7 @@ class V3AdminPickupsController extends Controller
 
         $additional_services = V3PickupService::all();
 
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses]);
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'pickup_reasons' => $pickup_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses, 'cities' => $cities]);
     }
 
     public function pending_requests_list(Request $request){
@@ -874,7 +877,7 @@ class V3AdminPickupsController extends Controller
             });
         }
 
-        // $not_pick_reasons = V3PickupRequestNotPickReason::all();d
+        $pickup_reasons = V3PickupRequestReason::all();
         $riders = $riders->get();
 
         $pickup_shipment_types = V3PickupShipmentType::all();
@@ -890,7 +893,7 @@ class V3AdminPickupsController extends Controller
 
 
         $additional_services = V3PickupService::all();
-        return view('admin.v3_pickups.pickup_history')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses]);
+        return view('admin.v3_pickups.pickup_history')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'pickup_reasons' => $pickup_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses]);
     }
 
     public function history_list(Request $request)

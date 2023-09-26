@@ -530,6 +530,16 @@
                                         </div>
                                     </div>
 
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <select name="city_id" id="city_id_select" class="form-control select2" data-rule-required="true" data-msg-required="Pickup City is required">
+                                                @foreach($cities as $city)
+                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                             </div>
@@ -1299,8 +1309,12 @@
                     dropdownParent:$('#update_pickup_request')
                 }).val(null).trigger('change');
             });
-            
-            
+
+            $('#city_id_select').prepend('<option value="" selected="selected">Select Pickup City</option>').select2({
+                placeholder: 'Select Pickup City',
+                width: '100%',
+                dropdownParent:$('#add_pickup_request')
+            });
 
             $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
                 placeholder: 'Select Service',

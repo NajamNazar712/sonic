@@ -13,9 +13,9 @@ class V3PickupRequestJourneysController extends Controller
         $pickup_request_journey = new V3PickupRequestsJourney();
         $pickup_request_journey->pickup_request_id = $pickup_request_id;
         $pickup_request_journey->status = $status;
-        $pickup_request_journey->type = $type; //0 shipper ,1 admins
+        $pickup_request_journey->type = $type; //0 shipper ,1 admins, 2 rider
         $pickup_request_journey->status_by = $status_by;
         $pickup_request_journey->Save();
-        // return $pickup_request_journey->id;
+
     }
 }
