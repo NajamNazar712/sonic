@@ -220,11 +220,11 @@ class V3AdminPickupsController extends Controller
 
         
         if( $pickup_type_id ==  2){
-             $pickup_address_id=ShipperShipmentBookController::update_pickup_addres($pickup_address_id,$shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),'test@gmail.com', $city_id,0,true);
+             $pickup_address_id=ShipperShipmentBookController::update_pickup_addres($pickup_address_id,$shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),'info@trax.pk', $city_id,0,true);
         }
 
 
-        if($pickup_date >Carbon::today()->toDateString()){
+        if($pickup_date >Carbon::today()->toDateString() && $pickup_type_id == 1){
            
             $new_pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
            
@@ -288,8 +288,8 @@ class V3AdminPickupsController extends Controller
                         V3PickupRequestService::where('pickup_request_id',$pickup_request_id)->where('pickup_request_service_id',$service_id)->delete();
                     }
                 }
-               
-                $pickup_request_id = AddV3PickupController::update($pickup_request_id,$shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id,$additonalservice_count);
+             
+               AddV3PickupController::update($pickup_request_id,$shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id,$additonalservice_count,$admin_id);
                 // V3PickupRequest::where('id', $pickup_request_id)
                 // ->update(['services_count' => $additonalservice_count]);
         }
@@ -437,7 +437,7 @@ class V3AdminPickupsController extends Controller
             ->editColumn('status',function($pickup_requests) use  ($statuses){
                 if($pickup_requests->status_id != 7){
                    
-                        $selectbox = '<select name="status_id" id="status_id" class="form-control">';
+                        $selectbox = '<select name="status_id" id="status_id" class="form-control" >';
                         foreach ($statuses as $status) {
                           if($status->id >= $pickup_requests->status_id){
                             
@@ -1488,7 +1488,6 @@ class V3AdminPickupsController extends Controller
         if(RouteLocations::where('pickup_address_id',$pickup_address_id)->exists()){
             $route = RouteLocations::where('pickup_address_id',$pickup_address_id)->first();
             $route_status = Route::find($route->route_id);
-           
             if($route_status->status != 1 ){
                 return false;
             }

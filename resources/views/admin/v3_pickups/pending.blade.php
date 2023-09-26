@@ -60,6 +60,7 @@
                                     <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
                                     <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="0">All
                                     </button>
+                                   
                                     @foreach($statuses as $id => $status)
                                         <div>
                                           
@@ -68,6 +69,14 @@
                                             </button>
                                         </div>
                                     @endforeach
+                                   
+                                    <select class="select select2 mb-1" id="select_status">
+                                        <option value="0" selected>All</option>
+                                        @foreach ($statuses as $id => $status)
+                                             <option value="{{ $id }}">{{  $status['name'] }}</option>
+                                        @endforeach
+                                        
+                                    </select>
                                    
                                   {{-- <div class="col">
                                     <div class="form-group">
@@ -1728,6 +1737,10 @@
                     table.button('.update').disable();
                 }
             });
+            $('#select_status').select2({
+                width: '15%',
+                placeholder: 'Select Status*'
+            });
 
             $('#assign_to_rider .rider').select2({
                 width: '100%',
@@ -2057,10 +2070,15 @@
                $('#status_filter_input').val(status_id);
                table.draw();
             });
+            $("body").on('change','#select_status',function(){
+                var status_id=$(this).val();
+                $('#status_filter_input').val(status_id);
+                table.draw();
+            });
+
             $("body").on('change','#status_id',function(){
                 var status_id=$(this).val();
                 var pickup_request_id=$(this).closest('tr').attr('id');
-                console.log(status_id);
                 $.ajax({
                     url:'{{ route('admin.v3_pickups.pending.update_status') }}',
                     method:'PUT',
@@ -2085,9 +2103,7 @@
                 });
             });
         
-            // $("body").on('change','#status_filter_input',function(){
-            //     table.draw();
-            // });
+           
             // increment and decrement buttons
 
             $('.quantity').TouchSpin({
