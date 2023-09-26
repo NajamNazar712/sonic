@@ -1377,6 +1377,8 @@
                     $('#regular_pickup').val(2);
                 }
             });
+
+           
         
         
 
@@ -1622,11 +1624,10 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false,width: '300px'},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
-
                     }},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
@@ -2042,6 +2043,34 @@
                $('#status_filter_input').val(status_id);
                table.draw();
             });
+            $("body").on('change','#status_id',function(){
+                var status_id=$(this).val();
+                var pickup_request_id=$(this).closest('tr').attr('id');
+                console.log(status_id);
+                $.ajax({
+                    url:'{{ route('admin.v3_pickups.pending.update_status') }}',
+                    method:'PUT',
+                    data:{
+                        'pickup_request_id':pickup_request_id,
+                        'status_id':status_id,
+                        '_token':'{{ csrf_token() }}'
+                    }
+                }).done(function(data){
+                    if(data.status==0){
+                        table.draw();
+                        toastr.success(data.success, 'Success!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }else{
+                        toastr.error(data.error, 'Error!', {
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
+                        });
+                    }
+                });
+            });
+        
             // $("body").on('change','#status_filter_input',function(){
             //     table.draw();
             // });
