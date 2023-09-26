@@ -85,7 +85,7 @@
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action Updated By</th>
-                                    <th class="border-primary border-darken-1">RCP tracking_nums Updated By</th>
+                                    <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
