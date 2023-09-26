@@ -412,6 +412,7 @@
                     url: '{{ route('admin.reports.rv_report.list')}}',
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_shipper_name = $('#search_shipper_name').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
