@@ -85,7 +85,7 @@
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action Updated By</th>
-                                    <th class="border-primary border-darken-1">RCP tracking_nums Updated By</th>
+                                    <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
@@ -412,6 +412,7 @@
                     url: '{{ route('admin.reports.rv_report.list')}}',
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_shipper_name = $('#search_shipper_name').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
