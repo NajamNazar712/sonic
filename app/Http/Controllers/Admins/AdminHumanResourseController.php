@@ -236,7 +236,10 @@ class AdminHumanResourseController extends Controller
 
     public static function assign_zones_to_user($employee_id)
     {
-        $cities = City::all();
+        $cities = City::where('status', '1')
+        ->where('business_category_id', '1')
+        ->get();
+        
         $admin = Admin::where('employee_id', $employee_id);
 
         if($admin->exists()){
