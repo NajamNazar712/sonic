@@ -87,6 +87,7 @@ class ShipperPickupController extends Controller
 
     public function pickup_list(Request $request)
     {
+        $user_id=session('user_id');
         $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
                 ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
                 ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
@@ -115,7 +116,7 @@ class ShipperPickupController extends Controller
                         );
                 })
                 ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
-                ->where('v3_pickup_requests.shipper_id', session('user_id'));
+                ->where('v3_pickup_requests.shipper_id',  $user_id);
 
             $datatables = Datatables::of($pickup_requests)
 
@@ -200,6 +201,196 @@ class ShipperPickupController extends Controller
                 $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
             }
             return $datatables->make(true);
+    }
+
+    public function schedule_requests_index(){
+    
+        // ActivityTrailController::createActivityTrailLog(Auth::id(), 6);
+
+        // $statuses = array();
+      
+
+        // if(session('department_id') == 7){
+
+        //     if (in_array(session('id'), session('sale_users_bypass'))) {
+        //         $shippers = User::where('status',3)->get();
+        //     }
+        //     else{
+        //         $shippers = User::where('status',3)->whereIn('id',session('tagged_shippers'));
+        //     }
+
+        // }
+        // else{
+        //     $shippers = User::where('status',3)->get();
+        // }
+        
+        // $riders = Rider::where('status', 1)->select(['id', 'name', 'trax_id']);
+        // $pickup_statuses = V3PickupRequestStatus::all();
+
+        // if (session('role_id') != 1) {
+        //     $riders = $riders->whereHas('city', function ($query) {
+        //         $query->whereIn('hub_id', session('hubs'));
+        //     });
+        // }
+     
+        // // $not_pick_reasons = V3PickupRequestNotPickReason::all();
+        // $riders = $riders->get();
+
+        // $pickup_shipment_types = V3PickupShipmentType::all();
+        // $time_ranges = V3PickupTimeRange::all();
+
+        // $products = Segment::all();
+        // $services = SubCategorySegment::all();
+
+        // foreach($pickup_statuses as $pickup_status){
+        //     $statuses[$pickup_status->id]['name'] = $pickup_status->name;
+        //     $statuses[$pickup_status->id]['count'] = V3PickupRequest::whereDate('pickup_date', Carbon::today())->where('status_id', $pickup_status->id)->count();
+        // }
+        // 'pickup_statuses' => $pickup_statuses, 'not_pick_reasons' => $not_pick_reasons
+    ///    $additional_services = V3PickupService::all();
+        return view('client.pickups.schedule_pickup');
+        // ->with(['riders' => $riders, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services]);
+    }
+    
+
+    public function schedule_requests_list(Request $request){
+       
+        $user_id=session('user_id');
+
+        // if ($request->get('excel') && $request->get('excel') == true) {
+        //     ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
+        // }
+        // $today = Carbon::now()->startOfDay();
+        $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
+            ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
+            ->join('v3_regular_pickups as rp','v3_pickup_requests.id','=','rp.pickup_request_id')
+            ->leftjoin('route_locations as rl', 'rl.pickup_address_id', '=', 'v3_pickup_requests.pickup_address_id')
+            ->leftjoin('routes as rt', 'rt.id', '=', 'rl.route_id')
+            // ->leftjoin('rider_routes as rr', 'rr.route_id', '=', 'rt.id')
+            ->leftjoin('riders as rd', 'rd.route_id', '=', 'rt.id')
+            ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+            ->join('cities as h', 'ci.hub_id', '=', 'h.id')
+            ->join('v3_pickup_types as vpt', 'vpt.id', '=', 'v3_pickup_requests.pickup_type')
+            ->join('v3_pickup_time_ranges as ptr', 'ptr.id', '=', 'v3_pickup_requests.time_range_id')
+            ->join('v3_pickup_request_statuses as prs', 'prs.id', '=', 'v3_pickup_requests.status_id')
+            ->join('v3_pickup_shipment_types as pst', 'pst.id', '=', 'v3_pickup_requests.pickup_shipment_type_id')
+            ->leftjoin('riders as cr', 'cr.id', '=', 'v3_pickup_requests.current_rider_id')
+            // ->leftjoin('riders as lr', 'lr.id', '=', 'v3_pickup_requests.last_rider_id')
+            ->leftjoin('segments as seg', 'seg.id', '=', 'v3_pickup_requests.segment_id')
+            ->leftJoin('v3_pickup_request_attempts as vpa', function ($join) {
+                $join->on('vpa.pickup_request_id', '=', 'v3_pickup_requests.id')
+                    ->where(
+                        'vpa.id',
+                        '=',
+                        DB::raw('(select max(id) from v3_pickup_request_attempts where v3_pickup_request_attempts.pickup_request_id = v3_pickup_requests.id)')
+                    );
+            })
+            ->leftJoin('v3_rider_pickups as vpr', function ($join) {
+                $join->on('vpr.pickup_request_id', '=', 'v3_pickup_requests.id')
+                    ->where(
+                        'vpr.id',
+                        '=',
+                        DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
+                    );
+            })
+            ->select('v3_pickup_requests.shipper_id as shipper_id','rp.id','rp.days','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','rp.pickup','rp.approval','rt.short_code as route_code','rd.id as rider_id')
+            ->where('v3_pickup_requests.shipper_id',$user_id)->get();
+         
+            // ->whereDate('v3_pickup_requests.pickup_date', Carbon::today());
+    
+
+        
+        $datatables = Datatables::of($pickup_requests)
+
+            ->addColumn('shipment_pieces', function ($pickup_requests) {
+                return $pickup_requests->shipments . '/' . $pickup_requests->pieces;
+            })
+            ->editColumn('pickup_request_id', function ($pickup_requests) {
+                    return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->addColumn('shipments_picked', function ($pickup_request) {
+                if ($pickup_request->received > 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
+                } else {
+                    return 0;
+                }
+            })
+            ->addColumn('services_count_btn', function ($pickup_requests) {
+                
+                if ($pickup_requests->services_count > 0) {
+                    return '<button class="btn btn-md btn-primary align-middle" onclick="showadditionalservices(event,'.$pickup_requests->pickup_request_id.')">'. $pickup_requests->services_count .'</button>';
+                } else {
+                    return '';
+                }
+            })
+            ->addColumn('attempted_date', function ($pickup_requests) {
+                $attempted_date = '';
+                $attempts = V3PickupRequestAttempt::where('pickup_request_id', $pickup_requests->id);
+                if ($attempts->exists()) {
+                    $attempted_date_rows = $attempts->pluck('attempt_date')->toArray();
+                    if (count($attempted_date_rows) > 0) {
+                        foreach ($attempted_date_rows as $index => $attempt_date) {
+                            $attempted_date .= $attempt_date . ',' . PHP_EOL;
+                        }
+                    }
+                }
+                return $attempted_date;
+            });
+            // ->addColumn('action', function ($reminder_request) {
+                
+            //     // $reminder_button = '<a href="javascript:void(0);" class="dropdown-item reminderMarkStatus" data-action="reminder"><i class="ft-plus-circle primary"></i> Reminder </a>';
+            //     // $edit_button='<a href="javascript:void(0);" class="dropdown-item edit_pickup_request" data-action="edit"><i class="ft-plus-square primary"></i> 
+            //     // Edit </a>';
+            //     // $approve_button='<a href="javascript:void(0);" class="dropdown-item approve_schedule" data-action="approve"><i class="ft-plus-square success"></i> Approve</a>';
+            //     // $reject_button='<a href="javascript:void(0);" class="dropdown-item reject_schedule" data-action="reject"><i class="ft-plus-square danger"></i> Reject</a>';
+
+            //     // $rescheduledays='<a href="javascript:void(0);" class="dropdown-item reschedule_days" data-action="reschedule_days"><i class="ft-plus-square info"></i> Reschedule Days</a>';
+
+            //     // $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
+
+                
+            //     // if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
+            //     //     $dropdown = "
+            //     //         <div class='btn-group'>
+            //     //            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
+            //     //             <div class='dropdown-menu dropdown-menu-sm'>";
+                    
+            //     //     $dropdown.=$rescheduledays;
+
+            //     //     if($reminder_request->approval==0 && $reminder_request->pickup==0){
+            //     //         $dropdown.=$approve_button;
+            //     //         $dropdown.=$reject_button;
+            //     //     }else if( $reminder_request->approval==2 && $reminder_request->pickup==0){
+            //     //         $dropdown.=$approve_button;
+            //     //     }else if($reminder_request->pickup==1 && $reminder_request->approval==1){
+            //     //         $dropdown.=$reject_button;
+            //     //     }
+                
+                    
+
+            //     //     $dropdown .= "
+            //     //             </div>
+            //     //         </div>
+            //     //     ";
+
+            //     //     return $dropdown;
+            //     // } else {
+            //     //     return '';
+            //     // }
+            // });
+
+
+        if ($request->get('requested_from_date') && $request->get('requested_to_date')) {
+            $from = $request->get('requested_from_date');
+            $to = $request->get('requested_to_date');
+            $stop_date = Carbon::parse($to)->addDay(1)->toDateTimeString();
+            $datatables->whereBetween('v3_pickup_requests.pickup_date', [$from, $stop_date]);
+        }
+        if ($pickup_status_id = $request->get('pickup_status_id')) {
+            $datatables->where('v3_pickup_requests.status_id', $pickup_status_id);
+        }
+       
+        return $datatables->make(true);
     }
 
     public function get_pickup_request_services(Request $request){

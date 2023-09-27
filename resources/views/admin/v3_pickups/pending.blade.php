@@ -239,33 +239,72 @@
         </div>
     </div>
 
-    <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
-         aria-hidden="true">
+    <!-- start of add remark modal -->
+        <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
+            aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Remarks</h4>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form method="post" id="add_remarks_form"
+                            action="{{ route('admin.v3_pickups.add_pickup_remark') }}"
+                            class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                            @csrf
+                            <input type="hidden" id="remark_pickup_request_id" name="remark_pickup_request_id">
+                            <div class="form-group ml-1">
+                                <input type="text" name="add_remark" id="add_remark" class="form-control"
+                                    data-rule-required="true" data-msg-required="Remarks is required"
+                                    placeholder="Add Remarks*">
+
+                            </div>
+
+
+                            <div class="form-group ml-1">
+                                <button type="submit" name="add" class="btn btn-primary">Add</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    <!-- end of add remark modal -->
+
+    <!-- start of update request status modal -->
+    <div class="modal fade" id="UpdateRequestStatusModal" data-backdrop="static" role="dialog" aria-labelledby="UpdateRequestStatusModal"
+        aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add Remarks</h4>
+                    <h4 class="modal-title">Change Status</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form method="post" id="add_remarks_form"
-                          action="{{ route('admin.v3_pickups.add_pickup_remark') }}"
-                          class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form method="post" id="update_request_status_form"
+                        action="{{ route('admin.v3_pickups.pending.update_status') }}"
+                        class="form-horizontal mb-1" novalidate="novalidate">
+                        @method('PUT')
                         @csrf
-                        <input type="hidden" id="remark_pickup_request_id" name="remark_pickup_request_id">
+                        <input type="hidden" name="pickup_request_id" id="pickup_request_id">
                         <div class="form-group ml-1">
-                            <input type="text" name="add_remark" id="add_remark" class="form-control"
-                                   data-rule-required="true" data-msg-required="Remarks is required"
-                                   placeholder="Add Remarks*">
-
+                            <select class="select2" name="status_id" id="status_id">
+                               
+                            </select>
                         </div>
-
-
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary">Add</button>
+                            <button type="submit" name="add" class="btn btn-primary">Update</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -276,7 +315,7 @@
             </div>
         </div>
     </div>
-
+    <!-- end  of update request status modal -->
 
     <div class="modal fade" id="AllRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AllRemarksModal"
          aria-hidden="true">
@@ -931,8 +970,8 @@
 
     <!---- start of show additional services modal---->
     <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
-    aria-labelledby="AdditionalServiceModal"
-    aria-hidden="true">
+        aria-labelledby="AdditionalServiceModal"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary white">
@@ -974,7 +1013,7 @@
             </div>
         </div>
         </div>
-</div>
+    </div>
     <!----end of show additional services modal --->
 
 @endsection
@@ -1647,7 +1686,7 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false,width: '300px'},
+                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
@@ -2076,32 +2115,30 @@
                 table.draw();
             });
 
-            $("body").on('change','#status_id',function(){
-                var status_id=$(this).val();
-                var pickup_request_id=$(this).closest('tr').attr('id');
-                $.ajax({
-                    url:'{{ route('admin.v3_pickups.pending.update_status') }}',
-                    method:'PUT',
-                    data:{
-                        'pickup_request_id':pickup_request_id,
-                        'status_id':status_id,
-                        '_token':'{{ csrf_token() }}'
-                    }
-                }).done(function(data){
-                    if(data.status==0){
-                        table.draw();
-                        toastr.success(data.success, 'Success!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }else{
-                        toastr.error(data.error, 'Error!', {
-                            positionClass: 'toast-top-center',
-                            containerId: 'toast-top-center'
-                        });
-                    }
-                });
+            $('#status_id').select2({
+                width: '100%',
+                dropdownParent: $('#UpdateRequestStatusModal')
             });
+            
+            var statuses=@json($statuses);
+            $('body').on('click','.update_request_status',function(){
+            $("#status_id").empty();
+              var current_status_id=$(this).data('current_status_id');
+              var pickup_request_id=$(this).closest('tr').attr('id');
+              $("#pickup_request_id").val(pickup_request_id);
+            $.each(statuses,function(status_id,value){
+                if(status_id >=current_status_id){
+                    if(current_status_id==status_id){
+                            $("#status_id").append('<option value='+status_id+' selected>'+value.name+'</option>');
+                    }else{
+                            $("#status_id").append('<option value='+status_id+'>'+value.name+'</option>');
+                    }
+                }
+            });
+                $("#UpdateRequestStatusModal").modal("show");
+            });
+
+          
         
            
             // increment and decrement buttons

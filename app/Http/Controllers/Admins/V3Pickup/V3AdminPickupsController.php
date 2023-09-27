@@ -164,9 +164,9 @@ class V3AdminPickupsController extends Controller
             AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1);
         }
 
-        if($pickup_type_id == 1){
-            $this->auto_pickup_assign($pickup_request_id);
-        }
+        // if($pickup_type_id == 1){
+        //     $this->auto_pickup_assign($pickup_request_id);
+        // }
 
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
@@ -245,7 +245,7 @@ class V3AdminPickupsController extends Controller
             ->update(['services_count' => $additonalservice_count]); 
            
             // update existing pickup request and set reschedule_request_id
-            V3PickupRequest::where('id',$pickup_request_id)->update(['status_id'=>7,'reschedule_request_id' => $new_pickup_request_id]);
+            V3PickupRequest::where('id',$pickup_request_id)->update(['status_id'=>8,'reschedule_request_id' => $new_pickup_request_id]);
 
             // update regular pickup and update new pickup_request_id in existing regular pickup
             $regular_pickup=V3RegularPickup::where('pickup_request_id',$pickup_request_id)->first();
@@ -256,7 +256,7 @@ class V3AdminPickupsController extends Controller
             }
 
             //rider auto assign
-            $this->auto_pickup_assign($new_pickup_request_id);
+            // $this->auto_pickup_assign($new_pickup_request_id);
 
             // update pickup request service  and update new pickup_request_id in existing pickup request service 
             // V3PickupRequestService::where('pickup_request_id',$pickup_request_id)->update(['pickup_request_id' => $new_pickup_request_id]);
@@ -434,31 +434,7 @@ class V3AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                     return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('status',function($pickup_requests) use  ($statuses){
-                if($pickup_requests->status_id != 7){
-                   
-                        $selectbox = '<select name="status_id" id="status_id" class="form-control" >';
-                        foreach ($statuses as $status) {
-                          if($status->id >= $pickup_requests->status_id){
-                            
-                                if($status->id == $pickup_requests->status_id){
-                                    $selectbox .= '<option value='.$status->id.' selected>'.$status->name.'</option>';
-                                }else{
-                                    $selectbox .= '<option value='.$status->id.'>'.$status->name.'</option>';
-            
-                                }
-                             
-                          }
-                          
-                        }
-                        $selectbox .= '</select>';
-                        return  $selectbox;
-                       
-                }else{
-                    return $pickup_requests->status;
-                }
-               
-            })
+         
             ->addColumn('shipments_picked', function ($pickup_request) {
                 if ($pickup_request->received > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
@@ -496,16 +472,22 @@ class V3AdminPickupsController extends Controller
 
                 $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
+                $update_request_status='<a href="javascript:void(0);" class="dropdown-item update_request_status" data-action="Update Status" data-current_status_id='.$reminder_request->status_id.'><i class="ft-plus-square primary"></i> Change Status</a>';
+
                 if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
                     $dropdown = "
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 
-                    if($reminder_request->pickup_type_id==1 && $reminder_request->status_id!=7){
+                    if($reminder_request->pickup_type_id==1 && $reminder_request->status_id!=8){
                         $dropdown.=$edit_button_reschedule;
                     }else if ($reminder_request->pickup_type_id==2){
                         $dropdown.=$edit_button;
+                    }
+
+                    if($reminder_request->status_id!=1 &&  $reminder_request->status_id!=2 && $reminder_request->status_id!=8){
+                        $dropdown.=$update_request_status;
                     }
                     // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                     //     $dropdown .= $reminder_button;
@@ -568,7 +550,8 @@ class V3AdminPickupsController extends Controller
         return response()->json(['status'=>0,'pickup_request_attempt'=>$pickup_request_attempt]);
     }
 
-    public function pending_request_update_status(Request $request){
+    public function pending_request_status_update(Request $request){
+       
         $user_id=session('id');
         $pickup_request_id = $request->pickup_request_id;
         $status_id = $request->status_id;
@@ -577,11 +560,11 @@ class V3AdminPickupsController extends Controller
             $pickup_request->status_id = $status_id;
             $pickup_request->last_updated_by = $user_id;
             if($pickup_request->save()){
-                return response()->json(['status' => 0, 'success' => 'Status update successfully']);
+                return redirect()->back()->with('success','Status update successfully');
             }
-            return response()->json(['status' => 1, 'error' => 'Something went wrong, please refresh and try again!']);
+                return redirect()->back()->with('error','Something went wrong, please refresh and try again!');
         }else{
-            return response()->json(['status' => 1, 'error' => 'Pickup Request Status not found!']);
+                return redirect()->back()->with('error','Pickup Request Status not found!');
         }
     }
 
