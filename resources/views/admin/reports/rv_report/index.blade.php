@@ -342,6 +342,14 @@
 
     <script>
         $(document).ready(function() {
+
+            
+        $('#search_shipper_name').prepend('<option value="" selected="selected"></option>')
+            .select2({
+                width: '100%',
+                placeholder: 'Select Shippers',
+                allowClear: true,
+            }); 
             $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -396,7 +404,8 @@
                     title: 'Trax Directory',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn d-none',
-                }],
+                    
+                },'reset'],
                 scrollX: true, scrollY: '500px',
                 autoWidth: false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
