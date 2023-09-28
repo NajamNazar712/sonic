@@ -1174,7 +1174,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_approve(Request $request)
-    {  dd(1);
+    {  
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
