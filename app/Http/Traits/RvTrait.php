@@ -1411,7 +1411,7 @@ trait RvTrait
             if($agent_shipment_id)
                 $agent_shipment_id;
             
-            else if (!empty($included_shippers) || $rv_priority_shipper->exists()) {
+            else if (!empty($included_shippers)) {
                 
                 $flag = false;
                 
