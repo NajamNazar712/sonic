@@ -145,6 +145,7 @@ use App\Http\Models\Admin\FintechCompanyCharges;
 use App\Http\Models\Admin\standard_fintech_charges;
 use App\Http\Models\Admin\UserFintectCharges;
 use App\Jobs\SwichPaymentGatewayApi;
+use App\RiderAssignedHubForDeliveryNote;
 use Session;
 //End
 use Carbon\Carbon;
@@ -157,6 +158,9 @@ use Illuminate\Validation\Rule;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpParser\Node\Expr\Ternary;
 use Yajra\Datatables\Datatables;
+use App\Http\Models\Admin\BackgroundImage;
+use App\Http\Models\HR\Employee;
+
 class GlobalSettingsController extends Controller
 {
     public function __construct()
@@ -1079,8 +1083,9 @@ class GlobalSettingsController extends Controller
                 if (count($request->shippers) > 0) {
 
                     $shipping_modes = ShippingMode::all();
-                    if (!empty($include_ids)) {
-                        $users = User::whereIn('id', $request->shippers)->whereIn('id', $include_ids)->get();
+
+                    if (count($request->shippers) > 0) {
+                        $users = User::whereIn('id', $request->shippers)->get();
                     } else {
                         $users = User::whereIn('id', $include_ids)->get();
                     }
@@ -5774,16 +5779,21 @@ class GlobalSettingsController extends Controller
     public function crm_auto_tagging_index()
     {
         ActivityTrailController::createActivityTrailLog(Auth::id(), 474);
-        $agents = Admin::select('id', 'name')->whereIn('role_id', [9, 10, 11, 33, 55])->where('status', 1)->get(); //37,28 role
+        $operation_depart_ids = Employee::where('department_id', 6)->pluck('id')->toArray();
+        $agents = Admin::select('id', 'name')->whereIn('employee_id', $operation_depart_ids)->where('status', 1)->get(); //37,28 role
         $cities = city::where('status', 1)->get();
-        return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents, 'cities' => $cities]);
+        $case_natures = CrmRequestCaseNature::all();
+        return view('admin.settings.CRM.auto_tagging')->with(['agents' => $agents, 'cities' => $cities, 'case_natures' => $case_natures]);
     }
 
     public function crm_auto_tagging_list()
     {
         $roles = CrmAutoTagUser::join('admins as ad', 'ad.id', '=', 'crm_auto_tag_users.admin_id')
             ->join('cities as c', 'c.id', 'crm_auto_tag_users.city_id')
-            ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status');
+            ->leftJoin('city_areas as ca', 'ca.id', 'crm_auto_tag_users.city_area_id')
+            ->leftJoin('crm_request_case_nature as cn', 'cn.id', 'crm_auto_tag_users.crm_case_nature_id')
+            ->leftJoin('crm_request_case_nature_types as cnt', 'cnt.id', 'crm_auto_tag_users.crm_case_nature_type_id')
+            ->select('crm_auto_tag_users.id', 'ad.name as agent_name', 'c.name as city_name', 'crm_auto_tag_users.status', 'ca.name as city_area_name', 'cn.name as case_natue', 'cnt.type as case_nature_type');
 
         $datatables = Datatables::of($roles)
             ->addColumn('action', function ($roles) {
@@ -5816,19 +5826,77 @@ class GlobalSettingsController extends Controller
                 } else {
                     return 'Disable';
                 }
+            })
+            ->editColumn('city_area_name', function ($roles) {
+                if ($roles->city_area_name) {
+                    return $roles->city_area_name;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
+            })
+            ->editColumn('case_natue', function ($roles) {
+                if ($roles->case_natue) {
+                    return $roles->case_natue;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
+            })
+            ->editColumn('case_nature_type', function ($roles) {
+                if ($roles->case_nature_type) {
+                    return $roles->case_nature_type;
+                } else {
+                    return '<p class="text-center"> -- </p>';
+                }
             });
 
         return $datatables->make(true);
     }
 
+    public function hub_areas(Request $request)
+    {
+        $validations = [
+            'city_id' => 'required|numeric',
+        ];
+
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return [];
+        }
+        
+        $city_id = $request->city_id;
+        $hub_areas = CityArea::where('city_id',$city_id)->select('id','name')->get();
+
+        return $hub_areas;
+    }
+
+    public function case_nature_types(Request $request)
+    {
+        $validations = [
+            'crm_case_nature_id' => 'required|numeric',
+        ];
+
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return [];
+        }
+        
+        $crm_case_nature_id = $request->crm_case_nature_id;
+        $case_nature_types = CrmRequestCaseNatureType::where('nature_id',$crm_case_nature_id)->select('id','type as name')->get();
+
+        return $case_nature_types;
+    }
+
     public function crm_auto_tagging_submit(Request $request)
     {
-        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id);
+        
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id)->where('admin_id', $request->admin_id)->where('status', 1);
         if (!$crm_agent->exists()) {
             CrmAutoTagUser::create($request->all());
             return redirect()->back()->with('success', 'Agent Added!');
         } else {
-            return redirect()->back()->with('error', 'Location already exist, Please edit the Tagged user');
+            return redirect()->back()->with('error', 'Selected User on this Location already exist, Please edit the Tagged user');
         }
     }
 
@@ -5839,7 +5907,14 @@ class GlobalSettingsController extends Controller
         $agent_id = $crm_agent_data->admin_id;
         $city_id = $crm_agent_data->city_id;
         $crm_agent_id = $crm_agent_data->id;
-        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id]);
+        $city_area_id = $crm_agent_data->city_area_id;
+        $crm_case_nature_id = $crm_agent_data->crm_case_nature_id;
+        $crm_case_nature_type_id = $crm_agent_data->crm_case_nature_type_id;
+
+        $city_areas = CityArea::where('city_id',$city_id)->select('id','name')->get();
+        $crm_case_nature_types = CrmRequestCaseNatureType::where('nature_id',$crm_case_nature_id)->select('id','type as name')->get();
+        
+        return response()->json(['status' => 1, 'agent_id' => $agent_id, 'city_id' => $city_id, 'crm_agent_id' => $crm_agent_id, 'city_area_id' => $city_area_id, 'crm_case_nature_id' => $crm_case_nature_id, 'crm_case_nature_type_id' => $crm_case_nature_type_id, 'city_areas' => $city_areas, 'crm_case_nature_types' => $crm_case_nature_types]);
     }
 
     public function crm_auto_tagging_delete(Request $request)
@@ -5851,12 +5926,23 @@ class GlobalSettingsController extends Controller
 
     public function crm_auto_tagging_update(Request $request)
     {
-        $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
 
-        $crm_agent_data->admin_id = $request->admin_id;
-        $crm_agent_data->city_id = $request->city_id;
-        $crm_agent_data->save();
-        return redirect()->back()->with('success', 'Agent Updated!');
+        $crm_agent = CrmAutoTagUser::where('city_id', $request->city_id)->where('city_area_id', $request->city_area_id)->where('crm_case_nature_id', $request->crm_case_nature_id)->where('crm_case_nature_type_id', $request->crm_case_nature_type_id);
+        if (!$crm_agent->exists()) {
+            $crm_agent_data = CrmAutoTagUser::find($request->crm_agent_id);
+
+            $crm_agent_data->admin_id = $request->admin_id;
+            $crm_agent_data->city_id = $request->city_id;
+            $crm_agent_data->city_area_id = $request->city_area_id;
+            $crm_agent_data->crm_case_nature_id = $request->crm_case_nature_id;
+            $crm_agent_data->crm_case_nature_type_id = $request->crm_case_nature_type_id;
+            $crm_agent_data->save();
+            return redirect()->back()->with('success', 'Agent Updated!');
+        } else {
+            return redirect()->back()->with('error', 'User on this Location already exist, Please edit the Tagged user');
+        }
+
+        
     }
 
     public function crm_auto_tagging_enable_disable(Request $request)
@@ -8790,5 +8876,152 @@ class GlobalSettingsController extends Controller
         } else {
             return redirect()->back()->with('error', 'No shippers selected!');
         }
+    }
+
+    public function background_image_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 683);
+        $background_image = BackgroundImage::orderBy('id', 'ASC')->get();
+        return view('admin.settings.background_image')->with(['id' => 1, 'background_image' => $background_image]);
+    }
+    public function background_image_store(Request $request)
+    {
+        
+        $request->validate([
+            'upload_image' => 'nullable|mimes:jpeg,png,jpg|max:2048',
+        ],[
+            'upload_image.max' => 'The image must be less than 2 Megabytes.',
+            'upload_image.mimes' => 'The upload image must be a file of type jpeg, png, jpg.',
+        ]);
+
+        if (!$request->hasFile('upload_image')) {
+            return redirect()->back()->with(['error' => 'No Image Provided']);
+        }
+
+        if ($request->hasFile('upload_image')) {
+            if ($request->has('background_image_id_1')) {
+                $image_id = $request->get('background_image_id_1');
+                $background_image = BackgroundImage::find($image_id);
+                Storage::disk('public')->delete($background_image->picture_path);
+            } else {
+
+                $background_image = new BackgroundImage();
+                $background_image->save();
+            }
+
+            $picture_path = 'background_image/' . $background_image->id . '.png';
+            Storage::disk('public')->put($picture_path, file_get_contents($request->upload_image));
+            $background_image->picture_path = $picture_path;
+            $background_image->version = carbon::now();
+            $background_image->background_image_screen_id = 1;
+            
+            $background_image->save();
+        }
+        return redirect()->back()->with(['success' => 'Image Uploaded!']);
+    }
+
+    public function rider_assigned_hub_index(Request $request)
+    {
+        //ActivityTrailController::createActivityTrailLog(Auth::id(), 645);
+
+        $admin_id = auth()->id();
+        $admin_hubs = session('hubs');
+
+        $existing_riders = RiderAssignedHubForDeliveryNote::all()->pluck('rider_id');
+
+        $riders = Rider::leftjoin('employees as e','e.id','riders.employee_id')
+            ->leftjoin('cities as c','c.id','riders.city_id')
+            ->whereIn('riders.city_id',$admin_hubs)
+            ->where('riders.blacklist', 0)
+            ->whereNotIn('riders.id',$existing_riders)
+            ->select('riders.id as id','riders.name as name','e.trax_id as trax_id','c.name as city_name')
+            ->get();
+
+//        dd($riders);
+
+        $hubs = City::whereIn('id',$admin_hubs)->where('hub',1)->select('id','name')->get();
+        return view('admin.settings.last_mile.rider_assigned_hub')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
+
+    public function rider_assigned_hub_list()
+    {
+        $reasons = RiderAssignedHubForDeliveryNote::join('riders as r','r.id','rider_assigned_hub_for_delivery_notes.rider_id')
+        ->select('rider_assigned_hub_for_delivery_notes.id as id','r.id as rider_id', 'r.name as name','rider_assigned_hub_for_delivery_notes.hubs as hubs');
+
+        $datatable = Datatables::of($reasons)
+            ->addColumn('hubs', function ($data) {
+                $rider_id = $data->rider_id;
+                $hubs = $data->hubs;
+                $count = count( explode(',',$hubs));
+                return '<button ref="'.$rider_id.'" class="btn btn-sm btn-outline-info align-middle hubs_count">'.$count.'</button>';
+            })->addColumn('action', function ($data) {
+
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                if (session('role_id') == 1 || in_array(896, session('permissions'))) {
+                    $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                }
+                return $dropdown;
+            });
+
+        return $datatable->make(true);
+    }
+
+    public function rider_assigned_hub_add(Request $request)
+    {
+        $rider_id = $request->select_rider_id;
+        $rider_hubs = $request->hubs;
+
+        $rider_selected_hubs = implode(',',$rider_hubs);
+
+        $check_setting = RiderAssignedHubForDeliveryNote::where('rider_id',$rider_id);
+        if (!$check_setting->exists())
+        {
+            $new_setting = new RiderAssignedHubForDeliveryNote();
+            $new_setting->rider_id = $rider_id;
+            $new_setting->hubs = $rider_selected_hubs;
+            $new_setting->save();
+        }
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function rider_assigned_hub_edit(Request $request)
+    {
+        $rider_info = array();
+        $id = $request->id;
+        $rider = RiderAssignedHubForDeliveryNote::find($id);
+
+        $rider_info['id'] = $rider->id;
+        $hub_ids = explode(',',$rider->hubs);
+
+        $hub_name = City::whereIn('id',$hub_ids)->select('name','id')->get();
+
+        $rider_info['hubs'] = $hub_name->toArray();
+        return response(['status' => 0,'data'=>$rider_info]);
+    }
+
+    public function rider_assigned_hub_edit_submit(Request $request)
+    {
+        $id = $request->edit_id;
+        $hubs = implode(',',$request->edit_hubs);
+
+        $existing_rider = RiderAssignedHubForDeliveryNote::where('id',$id)->update(['hubs' => $hubs]);
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function rider_assigned_hub_count(Request $request)
+    {
+        $id = $request->id;
+        $hub_id = RiderAssignedHubForDeliveryNote::find($id);
+        $hub_id = explode(',',$hub_id->hubs);
+
+        $hubs = City::whereIn('id',$hub_id)->select('name')->get()->pluck('name');
+
+        return response(['hubs'=>$hubs]);
     }
 }

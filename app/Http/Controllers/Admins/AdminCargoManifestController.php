@@ -418,6 +418,17 @@ class AdminCargoManifestController extends Controller
             $shipments = $shipments->where('shipments.shipment_type', 2);
         }
 
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from') . ' 00:00:00';
+                $to = $request->get('search_date_to') . ' 23:59:59';
+                $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $shipments->whereDate('shipments_journey.created_at', $from);
+            }
+        }
+
         $datatables = Datatables::of($shipments)
             ->setRowAttr([
                 'class' => function ($shipments) {
@@ -1170,6 +1181,10 @@ class AdminCargoManifestController extends Controller
         $open_box_ids = explode(',', $request->input('open_box_ids'));
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
+
+            if(!$shipment->actual_weight){
+                return back()->withErrors('Shipment actual weight is missing');
+            }
 
             if (!in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 unset($shipment_ids[$key]);
@@ -2864,8 +2879,8 @@ class AdminCargoManifestController extends Controller
             $from = $request->get('transit_from_date');
             $to = $request->get('transit_to_date');
 
-            $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
-            $datatables->whereBetween('cargo_manifests.created_at', [$from, $stop_date]);
+            // $stop_date = date('Y-m-d H:i:s', strtotime($to . ' +1 day'));
+            $datatables->whereBetween('cargo_manifests.created_at', [$from, $to]);
         }
         if (($request->search_filter_origin != null) && ($request->search_filter_destination != null)) {
             $origin = $request->get('search_filter_origin');

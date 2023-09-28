@@ -56,10 +56,10 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">CCD Receipts</th>
-                        <th class="border-primary border-darken-1">Fintech Shipments</th>
+                        <th class="border-primary border-darken-1">Fintech Amount</th>
                         <th class="border-primary border-darken-1">HBL Konnect Amount</th>
                         <th class="border-primary border-darken-1">Cash Amount</th>
+                        <th class="border-primary border-darken-1">CCD Receipts</th>
                         <th class="border-primary border-darken-1">1Link Payment Shipment(s)</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -110,10 +110,14 @@
                         <th width="70">#</th>
                         <th width="140">Tracking #</th>
                         <th width="120">COD Amount</th>
-                        <th width="150">Fintech Charges</th>
-                        <th width="150">Received COD Amount </th>
-                        <th width="140">Created Date</th>
+                        <th width="150">Payment ID</th>
+                        <th width="140">Transaction Date</th>
                     </tr>
+
+                    <div id="no_transaction_message" style="display: none;">
+                        <h3><strong>No transactions have been made.</strong></h3>
+                    </div>
+
                     <tbody id="shipment_table">
                     <tbody>
                   </table>
@@ -393,6 +397,7 @@
                             head.push('Updated By');
                             head.push('Updated Date');
                             head.push('DNCC Amount');
+                            head.push('Fintech Amount');
                             head.push('HBL Konnect  Amount');
                             head.push('Cash Amount');
                             head.push('One Link Payment Count');
@@ -416,6 +421,7 @@
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
                                 row.push(values.amount);
+                                row.push(values.count_fintech_shipments.sum);
                                 row.push(values.transactions_amount);
                                 row.push(values.cash_amount);
                                 row.push(values.one_link_payment_count);
@@ -634,12 +640,10 @@
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
-                    
-                    { data:'count_fintech_shipments' ,name: 'count_fintech_shipments', class: 'align-middle count_fintech_shipments',orderable: false, searchable: false},
-                    
+                    { data:'count_fintech_shipments.link' ,name: 'count_fintech_shipments.link', class: 'align-middle count_fintech_shipments.link',orderable: false, searchable: false},
                     { data:'transactions_amount_link' ,name: 'hktdn.transactions_amount', class: 'align-middle transactions_amount'},
                     { data:'cash_amount' ,name: 'hktdn.cash_amount', class: 'align-middle cash_amount',orderable: false, searchable: false},
+                    { data:'ccd_image' ,name: 'ccd_image', class: 'align-middle ccd_image',orderable: false, searchable: false},
                     { data:'one_link_payment_count_button' ,name: 'delivery_notes.one_link_payment_count', class: 'align-middle text-center one_link_payment_count'},
                     { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
@@ -650,6 +654,24 @@
                     if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
+
+                    var fintech_sum = $(row).find('#myButton');
+                    var dccn_amount = parseFloat(data.amount.replace(/,/g, ''));
+                    fintech_sum = fintech_sum[0].innerText
+                    fintech_sum = parseFloat(fintech_sum)
+
+                    if(data.transactions_amount == null){
+                        
+                        data.transactions_amount = 0
+                    }
+                    value = dccn_amount - fintech_sum - data.transactions_amount - data.one_link_amount;
+
+                    if (value < 0) {
+                        value = 0;
+                    }                    
+                    
+                    $('td:eq(18)', row).html(value);
+
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -1265,32 +1287,42 @@
 
         });
 
-    function fintechshipmentsshow(event,id){
+
+    function fintechshipmentsshowfintech(event,id){
         var y = 1;
         $("#shipment_table").html('');
         $.ajax({
             type : 'get',
-            url  : "{{route('admin.delivery.cash_collection.pending.showshipment')}}",
+            url  : "{{route('admin.delivery.cash_collection.pending.fintechshipment')}}",
             data : {id:id},
             success:function(res){
                 if(res.status == 200){
                     $("#fintech_modal").modal('show');
+                    $("#no_transaction_message").hide();
+                    $("#fintech_modal tr").show();
+
                     for(let x of res.data){
                         $("#shipment_table").append(`
                             <tr>
                             <td>${y++}</td>
                             <td>${x.trackingNo}</td>
                             <td>${x.COD_amount}</td>
-                            <td>${x.fintech_charges}</td>
-                            <td>${x.received_amount}</td>
+                            <td>${x.transaction_id}</td>
                             <td>${x.Date}</td>
                             </tr>
                         `);
                     }
-                } 
+                } else{
+                    $("#fintech_modal").modal('show');
+                    $("#fintech_modal tr").hide();
+                    $("#no_transaction_message").show();
+
+
+                }
             }
         });
     }
+
 
 
 

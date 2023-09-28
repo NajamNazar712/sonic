@@ -23,6 +23,8 @@
 								</button>
 							</div>
 							<div class="modal-body text-center">
+                                <button id="selectAllBtn" class="btn btn-primary">Select All</button>
+                                <button id="deSelectAllBtn" class="btn btn-primary">Un Select All</button>
 								<form id="assign_hub_form" action="{{route('admin.user_management.users.assign_hubs')}}" method="post">
 									@method('POST')
 									@csrf
@@ -34,6 +36,8 @@
                                                     <option value="{{$hub->id}}">{{$hub->name}}</option>
                                                 @endforeach
                                             </select>
+                                            <div class="d-none text-danger" id="assign_hubs_msg_error">Please Select Hub(s)</div>
+
                                         </div>
 										<div class="row justify-content-center">
 											<div class="col-6">
@@ -134,6 +138,18 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
+    <style>
+        #selectAllBtn {
+
+            margin-bottom: 10px
+        }
+
+        #deSelectAllBtn {
+
+            margin-bottom: 10px
+        }
+    </style>
+
 @endsection
 
 @section('js')
@@ -145,6 +161,29 @@
 
 	<script type="text/javascript">
 		$(document).ready(function() {
+
+            var selectedValue = [];
+
+$('#hub_select').select2().on('change', function() {
+    selectedValue = $('#hub_select').val();
+    $('#assign_hubs_msg_error').addClass('d-none')
+
+});
+
+$('#selectAllBtn').on('click', function() {
+    $('#hub_select').val($('#hub_select option').map(function() {
+        return $(this).val();
+    })).trigger('change');
+
+});
+
+$('#deSelectAllBtn').on('click', function() {
+                $('#hub_select').val([]).trigger('change');
+            });
+
+            $('#selectAllBtn').click(function() {
+                $('#hub_select option').prop('selected', true);
+            });
 			$('#hub_select').select2({
                 placeholder:'Select Hub',
                 width:'100%',
@@ -328,7 +367,7 @@
 					{data: 'official_phone_number', name: 'admins.official_phone_number', class: 'align-middle official_phone_number'},
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
-					{data: 'designation', name: 'admins.designation', class: 'align-middle designation'},
+					{data: 'designation', name: 'ed.id', class: 'align-middle designation'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
 					{data: 'default_hub', name: 'h.name', class: 'align-middle default_hub'},
 					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
@@ -359,6 +398,8 @@
                         '<option value="0">Disable</option>' +
                         '<option value="1">Enable</option>' +
                         '</select>';
+					var employee_designation_select = '<select name="employee_designation_select" id="employee_designation_select" class="select2 form-control"></select>';
+
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -371,6 +412,12 @@
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
                         }
+						else if ($(header).is('.designation')) {
+							$(employee_designation_select).appendTo($(search))
+									.on('change', function () {
+										column.search($(this).val(), false, false, true).draw();
+									}).wrap(td);
+						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -380,6 +427,21 @@
 								current.val(column.search());
 							}
 						}
+					});
+
+					var data = $.map({!! $employee_designations !!}, function (obj) {
+						obj.id = obj.id;
+						obj.text = obj.name;
+
+						return obj;
+					});
+
+					$('#employee_designation_select').prepend('<option value="" selected></option>').select2({
+						data:data,
+						placeholder: "Select Designation",
+						width:'100%',
+						containerCssClass: 'select-xs',
+						dropdownCssClass: 'form-control-sm p-0'
 					});
 					
                     $("#status_select").prepend('<option value="" selected></option>').select2({
@@ -577,26 +639,34 @@
                 }
 			});
 			
-			$( "#assign_hub_form" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+            $("#assign_hub_form").validate({
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Multiple Hub has been assigned!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-						});
-						
-                        form.submit();
-                }
-			});
+errorClass: "danger",
+errorPlacement: function(error, element) {
+    error.addClass('w-100').appendTo(element.parent('.form-group'));
+},
+submitHandler: function(form) {
+    if (selectedValue.length > 0) {
+
+        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+        swal({
+            title: 'Please Wait!',
+            text: 'Multiple Hub has been assigned!',
+            icon: 'info',
+            buttons: false,
+            closeOnClickOutside: false,
+            closeOnEsc: false
+        });
+
+        form.submit();
+
+    } else {
+        $('#assign_hubs_msg_error').removeClass('d-none');
+    }
+}
+});
+
 			
 
 		});

@@ -5620,94 +5620,99 @@ class AdminFinanceController extends Controller
     {
         $shipment = Shipment::find($shipment_id);
         if ($shipment->shipment_type == 1) {
-            $user_bank_id = NULL;
+            if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
-            $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
-
-            if ($user_bank_id) {
-                $user_bank_id = $user_bank_id->id;
-            }
-
-            $done_payment = new DonePayment();
-
-            $done_payment->user_id = $shipment->user_id;
-            $done_payment->total_shipments = 1;
-
-            if ($type == 0) {
-                $done_payment->delivered_shipments = 1;
-            } else {
-                $done_payment->returned_shipments = 1;
-            }
-            $done_payment->user_bank_info_id = $user_bank_id;
-            $done_payment->status = 1;
-
-            $done_payment->save();
-            if ($type == 0) {
-                $charges = ($shipment->amount - $shipment->gst);
-            } else {
-                $charges = ($shipment->received_amount - $shipment->gst);
-            }
-
-            $done_payment_shipment = new DonePaymentShipment();
-
-            $done_payment_shipment->done_payment_id = $done_payment->id;
-            $done_payment_shipment->shipment_id = $shipment_id;
-            $done_payment_shipment->type = $type;
-            $done_payment_shipment->amount = 0;
-            $done_payment_shipment->charges = $charges;
-            $done_payment_shipment->gst = $shipment->gst;
-            $done_payment_shipment->payable = $shipment->amount;
-
-            $done_payment_shipment->save();
-
-            $shipment->payment_status_id = 7;
-
-            $shipment->save();
-            $packaging_material_charges = 0;
-            $adjustment_amount = 0;
-            $shipment = Shipment::find($shipment_id);
-
-            if ($shipment->packaging_material_request) {
-                $packaging_material_charges = $shipment->packaging_material_charges;
-                if ($packaging_material_charges == null) {
-                    $packaging_material_charges = 0;
+                $user_bank_id = NULL;
+    
+                $user_bank_id = UserBankInfo::where('user_id', $shipment->user_id)->where('default_bank', 1)->select('id')->first();
+    
+                if ($user_bank_id) {
+                    $user_bank_id = $user_bank_id->id;
                 }
+    
+                $done_payment = new DonePayment();
+    
+                $done_payment->user_id = $shipment->user_id;
+                $done_payment->total_shipments = 1;
+    
+                if ($type == 0) {
+                    $done_payment->delivered_shipments = 1;
+                } else {
+                    $done_payment->returned_shipments = 1;
+                }
+                $done_payment->user_bank_info_id = $user_bank_id;
+                $done_payment->status = 1;
+    
+                $done_payment->save();
+                if ($type == 0) {
+                    $charges = ($shipment->amount - $shipment->gst);
+                } else {
+                    $charges = ($shipment->received_amount - $shipment->gst);
+                }
+    
+                $done_payment_shipment = new DonePaymentShipment();
+    
+                $done_payment_shipment->done_payment_id = $done_payment->id;
+                $done_payment_shipment->shipment_id = $shipment_id;
+                $done_payment_shipment->type = $type;
+                $done_payment_shipment->amount = 0;
+                $done_payment_shipment->charges = $charges;
+                $done_payment_shipment->gst = $shipment->gst;
+                $done_payment_shipment->payable = $shipment->amount;
+    
+                $done_payment_shipment->save();
+    
+                $shipment->payment_status_id = 7;
+    
+                $shipment->save();
+                $packaging_material_charges = 0;
+                $adjustment_amount = 0;
+                $shipment = Shipment::find($shipment_id);
+    
+                if ($shipment->packaging_material_request) {
+                    $packaging_material_charges = $shipment->packaging_material_charges;
+                    if ($packaging_material_charges == null) {
+                        $packaging_material_charges = 0;
+                    }
+                }
+                self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges, $adjustment_amount);
+                ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
+                ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
             }
-            self::add_done_payment_charges($done_payment->id, 0, $charges, $shipment->gst, $shipment->amount, $packaging_material_charges, $adjustment_amount);
-            ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id);
-            ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id);
         } else {
             if ($type == 0) {
                 $retail_shipment = RetailShipment::where('shipment_id', $shipment->id)->first();
 
                 if ($retail_shipment->shipping_mode == 3) {
+                    if(DonePaymentShipment::where('shipment_id', $shipment_id)->where('type', $type)->exists()){
 
-                    $done_payment = new DonePayment();
+                        $done_payment = new DonePayment();
 
-                    $done_payment->user_id = $retail_shipment->shipper_account_no;
-                    $done_payment->total_shipments = 1;
-                    $done_payment->delivered_shipments = 1;
-                    $done_payment->status = 1;
+                        $done_payment->user_id = $retail_shipment->shipper_account_no;
+                        $done_payment->total_shipments = 1;
+                        $done_payment->delivered_shipments = 1;
+                        $done_payment->status = 1;
 
-                    $done_payment->save();
+                        $done_payment->save();
 
-                    $done_payment_shipment = new DonePaymentShipment();
+                        $done_payment_shipment = new DonePaymentShipment();
 
-                    $done_payment_shipment->retail_done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $shipment_id;
-                    $done_payment_shipment->type = $type;
-                    $done_payment_shipment->amount = 0;
-                    $done_payment_shipment->payable = $shipment->amount;
+                        $done_payment_shipment->retail_done_payment_id = $done_payment->id;
+                        $done_payment_shipment->shipment_id = $shipment_id;
+                        $done_payment_shipment->type = $type;
+                        $done_payment_shipment->amount = 0;
+                        $done_payment_shipment->payable = $shipment->amount;
 
-                    $done_payment_shipment->save();
+                        $done_payment_shipment->save();
 
-                    $shipment->payment_status_id = 7;
+                        $shipment->payment_status_id = 7;
 
-                    $shipment->save();
-                    $adjustment_amount = 0;
-                    self::add_done_payment_charges($done_payment->id, 0, 0, 0, $shipment->amount, 0, $adjustment_amount, 1);
-                    ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id, 1);
-                    ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
+                        $shipment->save();
+                        $adjustment_amount = 0;
+                        self::add_done_payment_charges($done_payment->id, 0, 0, 0, $shipment->amount, 0, $adjustment_amount, 1);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id(), '', $done_payment->id, 1);
+                        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id(), '', $done_payment->id, 1);
+                    }
                 }
             }
         }
@@ -7914,20 +7919,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8097,7 +8102,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -8105,7 +8110,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -8502,7 +8507,7 @@ class AdminFinanceController extends Controller
                       <tbody>
                         <tr>
                           <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
-                          <td class="color secondary">' . self::amount_to_words() . ' Only</td>
+                          <td class="color secondary">' . self::amount_to_words($invoice->total_invoice_amount) . ' Only</td>
                         </tr>
                       </tbody>
                     </table>
@@ -8513,20 +8518,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -9001,25 +9006,21 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
-                          <td>Meezan Bank</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
-                        </tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
+                        <td>Meezan Bank</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                        <td>Trax Online Pvt. Ltd.</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                        <td>0104111731</td>
+                      </tr>
+                      <tr>
+                        <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                        <td>PK02MEZN0099120104111731</td>
+                      </tr>
                         </tbody>
                     </table>
 
@@ -9185,7 +9186,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -9193,7 +9194,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -9598,24 +9599,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -10036,20 +10033,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -10311,7 +10308,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -10319,7 +10316,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
@@ -10737,20 +10734,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -10860,12 +10857,14 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+            ->leftJoin(DB::raw('(SELECT invoice_id, MAX(deposit_date) as latest_deposit_date, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
             'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
             'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
             'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
-            'invoices.received_amount as received_amount', 'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 
+            'ius_sub.total_received_amount as received_amount',
+            'invoices.tax_amount as tax_amount', 'ius_sub.latest_deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
@@ -10954,6 +10953,9 @@ class AdminFinanceController extends Controller
                     return $invoice->shipper;
                 }
             })
+            ->addColumn('excel_shipper', function ($invoice) {
+                return $invoice->shipper;
+            })
             ->addColumn('account', function ($invoice) {
                 if ($invoice->account_type == 2) {
                     return 'Corporate Account';
@@ -11031,7 +11033,7 @@ class AdminFinanceController extends Controller
             })
             ->editColumn('deposit_date', function ($invoice) {
                 if ($invoice->deposit_date) {
-                    return Carbon::parse($invoice->received_date)->format('Y-m-d');
+                    return Carbon::parse($invoice->deposit_date)->format('Y-m-d');
                 } else {
                     return '';
                 }
@@ -12099,7 +12101,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -12107,7 +12109,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
@@ -14606,7 +14608,7 @@ class AdminFinanceController extends Controller
                         <tr>
                           <td class="text-left align-middle">
                             <img src="' . asset('img/trax_logo_new.png') . '" width="100" class="d-block mb-1">
-                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Trax Online Pvt. Ltd.</strong></div>
                             <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
                             <div><strong>NTN:</strong> 7930679-5</div>
                           </td>
@@ -15203,24 +15205,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
-                        </tr> 
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Code.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch Address.</strong></td>
-                          <td>Liaqatabad Market Malir Branch</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                         </tbody>
                     </table>
@@ -15629,20 +15627,20 @@ class AdminFinanceController extends Controller
                           <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
-                        </tr>
-                        <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank Name</strong></td>
                           <td>Meezan Bank</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account Title</strong></td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
-                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
-                          <td>9912</td>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0104111731</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>
+                          <td>PK02MEZN0099120104111731</td>
                         </tr>
                       </tbody>
                     </table>
@@ -15765,7 +15763,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
-                          <td>Trax Online Private Limited</td>
+                          <td>Trax Online Pvt. Ltd.</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
@@ -15773,7 +15771,7 @@ class AdminFinanceController extends Controller
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
-                          <td>0102951143</td>
+                          <td>0104111731</td>
                         </tr>
                         <tr>
                           <td class="color secondary" style="width: 150px;"><strong>IBAN No.</strong></td>

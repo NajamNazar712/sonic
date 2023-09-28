@@ -4688,6 +4688,17 @@ class ReturnController extends Controller
             });
         }
 
+        if ($request->get('search_date_from')) {
+            if ($request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $shipments->whereBetween('shipments_journey.created_at', [$from, $to]);
+            } else {
+                $from = $request->get('search_date_from');
+                $shipments->whereDate('shipments_journey.created_at', $from);
+            }
+        }
+
         $datatables = Datatables::of($shipments)
             ->editColumn('amount', function ($shipment) {
                 return number_format($shipment->amount);
@@ -5266,7 +5277,7 @@ class ReturnController extends Controller
                                     }
                                 }
                             }
-                            $details[] = array('id' => $return_note_image->id, 'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(), 'image' => $img_url);
+                            $details[] = array('id' => $return_note_image->id,'date' => Carbon::parse($return_note_image->created_at)->toDateTimeString(),'image'=> $img_url ?? null);
                         }
                     }
 
@@ -5356,7 +5367,17 @@ class ReturnController extends Controller
  ->join('city_areas as ca', 'ca.id', '=', 'r.area_id')
             ->select('ca.name as area','return_notes.id as return_note_id', 'z.name as zone', 'return_notes.created_at as created_at', 'r.trax_id as riderid', 'r.name as rider', 'return_notes.shipments_count as total_shipments', 'c.name as city', DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `adns` where `adns`.`return_note_id` = `return_notes`.`id` AND `adns`.`update_type` = 1) AS `shipments_rider_updated`'), DB::raw('(SELECT COUNT(shipment_id) as id FROM `return_note_shipments` AS `dns` where `dns`.`return_note_id` = `return_notes`.`id` AND `dns`.`update_type` = 0 AND `dns`.`status` > 0) AS `shipments_dbf_updated`'));
 
-
+        
+            if ($request->get('search_date_from')) {
+                if ($request->get('search_date_to')) {
+                    $from = $request->get('search_date_from');
+                    $to = $request->get('search_date_to');
+                    $return_deliveries->whereBetween('return_notes.created_at', [$from, $to]);
+                } else {
+                    $from = $request->get('search_date_from');
+                    $return_deliveries->whereDate('return_notes.created_at', $from);
+                }
+            }
 
         $datatable = Datatables::of($return_deliveries)
             ->addColumn('return_note', function ($return_deliveries) {
