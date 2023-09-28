@@ -395,7 +395,8 @@ class V3AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                     );
             })
-            ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','rt.short_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
+        
+            ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts','cr.id as current_rider_id', 'cr.name as current_rider', 'cr.phone as current_rider_phone', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','rt.short_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
             ->whereDate('v3_pickup_requests.pickup_date', Carbon::today());
             // ->where('v3_pickup_requests.status_id', '=',1);
 
@@ -486,9 +487,9 @@ class V3AdminPickupsController extends Controller
                         $dropdown.=$edit_button;
                     }
 
-                    if($reminder_request->status_id!=1 &&  $reminder_request->status_id!=2 && $reminder_request->status_id!=8){
+                   if($reminder_request->status_id!=1  && $reminder_request->status_id!=8){
                         $dropdown.=$update_request_status;
-                    }
+                    } 
                     // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                     //     $dropdown .= $reminder_button;
                     // }
@@ -557,12 +558,16 @@ class V3AdminPickupsController extends Controller
         $status_id = $request->status_id;
         if(V3PickupRequestStatus::where('id',$status_id)->exists()){
             $pickup_request = V3PickupRequest::find($pickup_request_id);
-            $pickup_request->status_id = $status_id;
-            $pickup_request->last_updated_by = $user_id;
-            if($pickup_request->save()){
-                return redirect()->back()->with('success','Status update successfully');
+            if($pickup_request->current_rider_id){
+                $pickup_request->status_id = $status_id;
+                $pickup_request->last_updated_by = $user_id;
+                if($pickup_request->save()){
+                    return redirect()->back()->with('success','Status update successfully');
+                }
+                    return redirect()->back()->with('error','Something went wrong, please refresh and try again!');
             }
-                return redirect()->back()->with('error','Something went wrong, please refresh and try again!');
+            return redirect()->back()->with('error','The rider has not been assigned!');
+           
         }else{
                 return redirect()->back()->with('error','Pickup Request Status not found!');
         }

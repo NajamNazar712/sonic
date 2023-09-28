@@ -396,10 +396,11 @@ class ShipperPickupController extends Controller
     public function get_pickup_request_services(Request $request){
       
         $pickup_request_id=$request->pickup_request_id;
+      
 
         $pickup_request_services=V3PickupService::join('v3_pickup_request_services','v3_pickup_services.id','=','v3_pickup_request_services.pickup_request_service_id')
         ->select('v3_pickup_services.id as id','v3_pickup_services.name as service_name','v3_pickup_request_services.count as count')->where('v3_pickup_request_services.pickup_request_id','=', $pickup_request_id)->get();
-
+       
         return response()->json(['status' => 0, 'pickup_request_services' => $pickup_request_services]);
 
     }

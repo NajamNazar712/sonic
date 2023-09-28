@@ -108,6 +108,7 @@
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Rider Phone</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
+                                    <th class="border-primary border-darken-1">Assigned Courier Phone</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Action</th>
@@ -1703,7 +1704,18 @@
                         }
                     },
                     {data: 'rider_phone', name: 'rider_phone', class: 'align-middle rider_phone'},
-                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
+                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider',
+                      render:function(data,type,row){
+                        if(row.current_rider_id!==null){
+                            return row.current_rider_id + ' - ' + row.current_rider;
+                        }else{
+                            return '';
+                        }
+                      }
+                
+                    },
+                    {data: 'current_rider_phone', name: 'current_rider_phone', class: 'align-middle current_rider_phone'},
+
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                   
                     // {data: 'shipper', name: 'shipper', class: 'align-middle shipper',},
@@ -2127,13 +2139,16 @@
               var pickup_request_id=$(this).closest('tr').attr('id');
               $("#pickup_request_id").val(pickup_request_id);
             $.each(statuses,function(status_id,value){
-                if(status_id >=current_status_id){
-                    if(current_status_id==status_id){
-                            $("#status_id").append('<option value='+status_id+' selected>'+value.name+'</option>');
-                    }else{
-                            $("#status_id").append('<option value='+status_id+'>'+value.name+'</option>');
+                if(status_id!=8){
+                    if(status_id >=current_status_id){
+                        if(current_status_id==status_id){
+                                $("#status_id").append('<option value='+status_id+' selected>'+value.name+'</option>');
+                        }else{
+                                $("#status_id").append('<option value='+status_id+'>'+value.name+'</option>');
+                        }
                     }
                 }
+              
             });
                 $("#UpdateRequestStatusModal").modal("show");
             });

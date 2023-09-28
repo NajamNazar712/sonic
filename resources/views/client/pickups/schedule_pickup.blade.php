@@ -82,6 +82,53 @@
                     </div>
                 </div>
 
+  <!---- start of show additional services modal---->
+  <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
+  aria-labelledby="AdditionalServiceModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+  <div class="modal-content">
+      <div class="modal-header bg-primary white">
+          <h4 class="modal-title white">Additional Services</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      <div class="modal-body">
+          <div class="container">
+              <!-- start additional services -->
+              {{-- <div class="d-flex justify-content-start vh-100 pl-1">
+                      <b class="text-dark"> Additional Services </b>
+              </div>--}}
+              {{-- <div class="d-flex justify-content-start align-items-center">
+                      <!-- start service list -->
+                          <div class="services-list col-12 additionalservices">
+                          
+                          </div>
+                      <!-- end service list -->
+              </div>  --}}
+              <table class="table table-bordered">
+                      <thead>
+                              <tr role="row" class="bg-primary white">
+                                  <th class="border-primary border-darken-1">S. No.</th>
+                                  <th class="border-primary border-darken-1">Service</th>
+                                  <th class="border-primary border-darken-1">Qty</th>
+                              </tr>
+                      </thead>
+                      <tbody>
+
+                      </tbody>
+
+                  </table>
+              <!-- end additional services -->
+
+              
+          </div>
+      </div>
+  </div>
+  </div>
+</div>
+<!----end of show additional services modal --->
 
 @endsection
 
@@ -490,6 +537,7 @@
                     '_token':'{{ csrf_token() }}'
                 }
             }).done(function(data){
+                
                 if (data.status == 0) {
                             $.each(data.pickup_request_services,function(key,value) {
                               $("#AdditionalServiceModal table tbody").append('<tr id="8" role="row" class="odd"><td class=" align-middle status">'+(key+1)+'</td><td class=" align-middle service_name">'+value.service_name+'</td><td class=" align-middle service_count">'+value.count+'</td></tr>')
