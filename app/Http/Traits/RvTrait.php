@@ -618,6 +618,7 @@ trait RvTrait
                 }
             } else {
                 DB::rollBack();
+                $request->request->set('rv_assign_agent_status_id', null); //passing rv_assign_agent_status_id as 'null' instead of '3' when error occurs in intercept 
                 return redirect()->back()->with('error', 'Shipment is already updated with Status : ' . $shipment_status . ' against Tracking Number: ' . $shipment['tracking_number']);
             }
         }
