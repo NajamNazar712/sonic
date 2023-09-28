@@ -56,9 +56,15 @@ class CrmResponseRate extends Command
                                 ->leftjoin('zones as ocz', 'ocz.id', '=', 'oc.zone_id')
                                 ->leftjoin('cities as dc', 'dc.id', '=', 'ships.consignee_city_id')
                                 ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
-                                ->leftjoin('crm_comments', function($join){
+                                ->leftjoin('crm_comments', function ($join) {
                                     $join->on('crm_requests.id', '=', 'crm_comments.crm_request_id')
-                                    ->where('crm_comments.comment_type', '=', 1);
+                                        ->where('crm_comments.comment_type', '=', 1)
+                                        ->whereIn('crm_comments.comment_by_id', function ($subquery) {
+                                            $subquery->select('admins.id')
+                                                ->from('crm_comments')
+                                                ->join('admins', 'crm_comments.comment_by_id', '=', 'admins.id')
+                                                ->join('admin_roles', 'admins.role_id', '=', 'admin_roles.id');
+                                        });
                                 })
                                 ->where('crm_requests.created_at', ">=", Carbon::now()->subHours(24))
                                 ->select('crm_comments.comment_by','crm_comments.comment_by_id', 'crcn.name as case_nature','crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
