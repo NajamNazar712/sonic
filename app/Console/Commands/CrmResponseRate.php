@@ -58,13 +58,11 @@ class CrmResponseRate extends Command
                                 ->leftjoin('cities as dh', 'dh.id', '=', 'dc.hub_id')
                                 ->leftjoin('crm_comments', function($join){
                                     $join->on('crm_requests.id', '=', 'crm_comments.crm_request_id')
-                                    ->where('crm_comments.comment_type', '!=', 0);
+                                    ->where('crm_comments.comment_type', '=', 1);
                                 })
                                 ->where('crm_requests.created_at', ">=", Carbon::now()->subHours(24))
                                 ->select('crm_comments.comment_by','crm_comments.comment_by_id', 'crcn.name as case_nature','crm_requests.id as req_id','crm_comments.id as comm_id', 'crm_requests.shipment_id as ship_id','ss.id as ship_status_id','och.name as origin_hub', 'dh.name as hub')
                                 ->get(); 
-        
-        // dd($requests);
 
         $responses = [];
 
