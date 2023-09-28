@@ -10,7 +10,6 @@
 
 
     <div class="card">
-
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
@@ -194,7 +193,15 @@
                                 </div>
                             </div>
                         </div>
+                        
+                    <div class="alert alert-danger d-none shipment_msg_error">
                     </div>
+
+                    <div class="alert alert-success d-none shipment_msg_success">
+                    </div>
+                    </div>
+
+
 
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
@@ -1445,25 +1452,42 @@
                                                                 .done(function(data) {
                                                                     if (data.status == 0) 
                                                                     {
-                                                                        $('#AssignAgentModal').modal('hide');
-                                                                        toastr.success(data.success,
-                                                                                'Success!', {
-                                                                                    positionClass: 'toast-bottom-center',
-                                                                                    containerId: 'toast-bottom-center'
-                                                                                });
-                                                                                
-                                                                                // Reload the table after showing the toastr notification
-                                                                               table.draw();
+                                                                        const $divElement = $('.shipment_msg_success');
+
+                                                                                // Check if the $divElement exists and has the d-none class
+                                                                                if ($divElement.length && $divElement.hasClass('d-none')) {
+                                                                                    // Remove the d-none class
+                                                                                    $divElement.removeClass('d-none');
+
+                                                                                    // Append text to the div
+                                                                                    $divElement.text(data.success);
+                                                                                }
+                                                                                $('#AssignAgentModal').modal('hide');
+
+                                                                                // setTimeout(function() {
+                                                                                //     $divElement.addClass('d-none');
+                                                                                // }, 10000); //
+
+                                                                                table.draw()
                                                                             } 
                                                                             else {
-                                                                                console.log(data);
-                                                                                toastr.error(data.error,
-                                                                                'Error!', {
-                                                                                    positionClass: 'toast-top-center',
-                                                                                    containerId: 'toast-top-center'
-                                                                                });
-                                                                                // Reload the table after showing the toastr notification
-                                                                               table.draw();
+                                                                                const $divElement = $('.shipment_msg_error');
+
+                                                                                // Check if the $divElement exists and has the d-none class
+                                                                                if ($divElement.length && $divElement.hasClass('d-none')) {
+                                                                                    // Remove the d-none class
+                                                                                    $divElement.removeClass('d-none');
+
+                                                                                    // Append text to the div
+                                                                                    $divElement.text(data.error);
+                                                                                }
+                                                                                $('#AssignAgentModal').modal('hide');
+
+                                                                                // setTimeout(function() {
+                                                                                //     $divElement.addClass('d-none');
+                                                                                // }, 10000); //
+
+                                                                                table.draw();
                                                                             }
                                                                             
                                                                     selected_rows  = [];
@@ -1598,7 +1622,7 @@
                                 },
                             @endif,
 
-                            @if (session('role_id') == 1 || in_array(906, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(907, session('permissions')))
                                 {
                                     text: 'Call History',
                                     className: 'btn btn-primary call_history',

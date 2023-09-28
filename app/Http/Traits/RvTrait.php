@@ -35,6 +35,8 @@ use App\Http\Models\Admin\ReattemptShipmentStatusRemarks;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\CheckDisputeShipmentsController;
 use App\Http\Controllers\Admins\AdminInterceptRebookRequestHistoryController;
+use App\Http\Models\ShipmentStatusReason;
+use App\RvAssignAgentSubStatus;
 
 trait RvTrait
 {
@@ -401,12 +403,13 @@ trait RvTrait
     {
         $remarks = (isset($request['remarks']) && $request['remarks'] !== null) ? $request['remarks'] : null;
         $parcel = Shipment::find($request->shipment_id);
-
+        $rv_sub_status = RvAssignAgentSubStatus::where('id', $request->rv_assign_agent_sub_status_id)->value('name');
+        $shipment_status_reason = ShipmentStatusReason::where('name', 'like', '%' . $rv_sub_status . '%')->first()->id;
+        
         //these both could be null 
-        $return_reason = $request->single_return_reason_select;
         $consignee_refused_reasons = $request->consignee_refused_reasons;
         //
-
+        
         $dispute_check = CheckDisputeShipmentsController::check($parcel->id);
         if (!$dispute_check) {
             return ['status' => 0, 'error' => 'Shipment is in Dispute! For further assistance, please contact QA (CX)'];
@@ -422,7 +425,7 @@ trait RvTrait
         // 12 = Shipment - Reason Validation Required
         // 15 = Shipment - On Hold for Self Collection
         // 52 = Shipment - Re-Attempt Requested
-        // 65 = Shipment - Shipper Advise Requested
+        // 65 = Shipment - Shipper Advise Requested 
 
         if (in_array($parcel->shipper_status_id, [7, 8, 9, 12, 15, 52, 65])) {
 
@@ -447,7 +450,7 @@ trait RvTrait
                     AdminFinanceController::done_payment($request->shipment_id, 1);
                 }
             }
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $return_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_status_reason, $remarks, NULL, Auth::id(), null, null, 1, null, null, null, null, $consignee_refused_reasons);
 
             return ['status' => 1, 'success' => "Shipment successfully marked as Shipment - Return Confirm"];
         }
@@ -1400,29 +1403,30 @@ trait RvTrait
 
         
         foreach ($sorted_agents as $key => $agent) {
-
             $shipments = [];
-
+            
             if($agent_shipment_id)
                 $agent_shipment_id;
             
             else if (!empty($included_shippers)) {
                 
                 $flag = false;
-
+                
                 if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
                     $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                     $mergeArr = array_unique($mergeArr);
                     $result = array_filter($mergeArr, function($value){
                         return $value != '';
                     });
-                
+
+                    
                     $exploded_result = implode(',', $result);
-                
+                    
                     $flag = true;
                 }
                 
-                $shipments = Shipment::whereIn('user_id', $flag ? $result : [$agent['city_id']])
+
+                $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->where('consignee_city_id', $agent['city_id']);
                 

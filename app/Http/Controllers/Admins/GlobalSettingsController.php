@@ -1972,7 +1972,7 @@ class GlobalSettingsController extends Controller
                     $settings = new GlobalSettings();
 
                     $settings->type = 'rv_shipper_priority';
-                    $settings->setting_value = 0;
+                    $settings->setting_value = 1;
                 }
                 $settings->text = $result_str;
                 $settings->save();

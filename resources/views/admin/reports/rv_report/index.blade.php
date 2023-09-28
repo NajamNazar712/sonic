@@ -85,7 +85,7 @@
                                     <th class="border-primary border-darken-1">Remarks</th>
                                     <th class="border-primary border-darken-1">Action Date</th>
                                     <th class="border-primary border-darken-1">Action Updated By</th>
-                                    <th class="border-primary border-darken-1">RCP tracking_nums Updated By</th>
+                                    <th class="border-primary border-darken-1">RCP Agent Updated By</th>
                                     <th class="border-primary border-darken-1">Current Status</th>
                                     <th class="border-primary border-darken-1">Current Status Date</th>
                                     <th class="border-primary border-darken-1">Fake Status</th>
@@ -342,6 +342,14 @@
 
     <script>
         $(document).ready(function() {
+
+            
+        $('#search_shipper_name').prepend('<option value="" selected="selected"></option>')
+            .select2({
+                width: '100%',
+                placeholder: 'Select Shippers',
+                allowClear: true,
+            }); 
             $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -396,7 +404,8 @@
                     title: 'Trax Directory',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                     className: 'btn btn-primary datatable_excel_btn d-none',
-                }],
+                    
+                },'reset'],
                 scrollX: true, scrollY: '500px',
                 autoWidth: false,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
@@ -412,6 +421,7 @@
                     url: '{{ route('admin.reports.rv_report.list')}}',
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_shipper_name = $('#search_shipper_name').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }

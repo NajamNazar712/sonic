@@ -5017,9 +5017,9 @@ class ReturnController extends Controller
     public function assign_agent(Request $request)
     {
         $agent_id = $request->admin_id;
-        $admin_id = Admin::where('employee_id', $agent_id)->first();
-        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
-        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
+        $admin = Admin::where('employee_id', $agent_id)->first();
+        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin->id)->orderBy('priority', 'ASC')->get();
+        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
         
@@ -5031,7 +5031,7 @@ class ReturnController extends Controller
             if($shipment->exists())
             {
                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
-                    $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
+                    $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                 }else{
                     $no_zone_shipment[] = $shipment->id;
                 }
@@ -5040,7 +5040,7 @@ class ReturnController extends Controller
 
         if(!empty($no_zone_shipment)){
             $no_zone_shipment = implode(',', $no_zone_shipment);
-            return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Number Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned']);
+            return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Number Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
         }else{
             return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
 
@@ -5049,8 +5049,7 @@ class ReturnController extends Controller
         }else{
             return response()->json(['status'=> 1, 'error'=>'No Zone Against This User Found']);
         }
-        
-                   
+           
     }
 
     //Assigning and Unassigning Shipments to agents by uploading excel sheet (Upload Agent Modal in Rcp Screen)
