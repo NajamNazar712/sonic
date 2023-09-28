@@ -328,7 +328,9 @@ trait RvTrait
                         break;
                 }
             }
-        } else {
+        } 
+        else {
+            return ['status' => 0, 'error' => "Something went wrong"];
         }
     }
 
@@ -518,11 +520,17 @@ trait RvTrait
 
             // if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
             if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) {
-                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
+                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name 
+                || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 
+                || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email 
+                || $shipment['amount'] != $amount) 
+                {
                     if ($shipment['intercepted'] == 1) {
 
                         return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
-                    } else {
+                    } 
+                    else 
+                    {
                         $shipment = Shipment::find($request->shipment_id);
                         $s_amount = str_replace(",", "", "$request->amount");
                         $amount = (int)$s_amount;
@@ -605,6 +613,7 @@ trait RvTrait
                     }
                 } else {
                     DB::rollBack();
+                    $request->request->set('rv_assign_agent_status_id', null); //passing rv_assign_agent_status_id as 'null' instead of '3' when error occurs in intercept 
                     return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
@@ -1018,17 +1027,6 @@ trait RvTrait
                         $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
-                        // if ($return_assign_shipment) {
-                        //     $return_assign_shipment->status = 0;
-                        //     $return_assign_shipment->save();
-
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 1;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-                        // }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
                     }
@@ -1411,40 +1409,29 @@ trait RvTrait
             if($agent_shipment_id)
                 $agent_shipment_id;
             
-            else if (!empty($included_shippers)) {
-                
-                $flag = false;
-                
+            else if (!empty($included_shippers)) {              
+                $flag = false;                
                 if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
                     $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                     $mergeArr = array_unique($mergeArr);
                     $result = array_filter($mergeArr, function($value){
                         return $value != '';
                     });
-
-                    
-                    $exploded_result = implode(',', $result);
-                    
+                    $exploded_result = implode(',', $result);                    
                     $flag = true;
-                }
-                
-
+                }              
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->where('consignee_city_id', $agent['city_id']);
-                
                 if ($flag == true){
                     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
                 } else {
                     $shipments->orderBy('id', 'ASC');
-                }
-                
+                } 
                 $shipments = $shipments->get();
-                
                 if($shipments->isEmpty()){
                     continue;
-                }
-                
+                }  
             }
             
             // Check if only_shippers exists (1 && 0)

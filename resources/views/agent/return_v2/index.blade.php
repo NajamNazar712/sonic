@@ -795,7 +795,7 @@
 
                                 shipment +=
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
-                                shipment += '<option hidden value="">Select Action (*)</option>';
+                                shipment += '<option hidden value="">Select Action *</option>';
 
                                 @foreach ($shipment_statuses as $status)
                                 shipment +=
@@ -1053,7 +1053,7 @@
                         .done(function(data) {
                             if (data.status == 1 && (id == 1 || id == 5)) {
                                 var options = '';
-                                options += '<option hidden value="">Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason *</option>';
 
                                 $.each(data.reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1074,7 +1074,7 @@
 
                             } else if (data.status == 1 && (id == 6)) { //unresponsive
                                 var options = '';
-                                options += '<option hidden value="">Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason *</option>';
 
                                 $.each(data.unresponsive_reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1278,26 +1278,26 @@
                                 $.each(errors, function(field, messages) {
                                     var errorMessage;
                                     if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
-                                        errorMessage = '* Action is Required';
+                                        errorMessage = 'Action is Required';
                                         $('#rv_assign_agent_status_error').text(errorMessage);
                                         $('#shipment_remarks').css('margin-bottom', '17px');
                                     }
 
                                     if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
-                                        errorMessage = '* Reason is Required';
+                                        errorMessage = 'Reason is Required';
                                         $('#rv_assign_agent_sub_status_error').text(errorMessage);
                                     }
 
                                     if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
                                         if (checkbox == 1) {
-                                            errorMessage = '* Fake Status is Required';
+                                            errorMessage = 'Fake Status is Required';
                                             $('#rv_assign_agent_fake_status_id_error').text(
                                                 errorMessage);
                                         }
                                     }
 
                                     if (field === 'remarks' && $("#shipment_remarks").val() === "") {
-                                        errorMessage = '* Remarks is Required';
+                                        errorMessage = 'Remarks is Required';
                                         $('#shipment_remarks_error').text(errorMessage);
                                     }
                 
