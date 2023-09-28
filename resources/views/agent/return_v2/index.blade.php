@@ -17,7 +17,7 @@
                             <div class="border-primary">
                                 <div class="d-flex flex-wrap align-items-center" style="background-color: #0EE290"></div>
                                 <div class="d-flex flex-wrap align-items-center bg-primary">
-                                    <div class="font-medium-3 white" style="margin:auto;";>Virtual RCP Agent Screen
+                                    <div class="font-medium-3 white" style="margin:auto;";>Virtual Rv Agent Screen
                                     </div>
                                 </div>
 
@@ -101,6 +101,40 @@
                                                                         <tr>
                                                                             <td class="text-center">
                                                                                 <strong>{{ $unresponsive_count }}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 pt-3">
+                                                        <div class="p-0">
+                                                            <h6>Intercept</h6>
+                                                            <div class="border table-responsive gray">
+                                                                <table class="table table-sm table-borderless mb-0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $intercept_count }}</strong>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-4 pt-3">
+                                                        <div class="p-0">
+                                                            <h6>On Hold</h6>
+                                                            <div class="border table-responsive gray">
+                                                                <table class="table table-sm table-borderless mb-0">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td class="text-center">
+                                                                                <strong>{{ $hold_count }}</strong>
                                                                             </td>
                                                                         </tr>
                                                                     </tbody>
@@ -578,7 +612,7 @@
                                 shipment += '<td style="width: 45%;">' + ((data.shipment.consignee_name != null &&
                                     data.shipment.consignee_name !=
                                     null) ? data.shipment.consignee_name : '----------------') + '</td>';
-                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td><strong>Destination</strong></td>';
                                 shipment += '<td>' + ((data.consignee_city.name != null &&
                                     data.consignee_city.name !=
                                     null) ? data.consignee_city.name : '----------------') + '</td>';
@@ -606,7 +640,7 @@
 
 
                                 shipment += '<div class="col-12 mt-2">';
-                                shipment += '<h4><u>Order Information</u></h4>';
+                                shipment += '<h4 class="text-center"><u>Order Information</u></h4>';
                                 shipment += '<div class="border table-responsive black">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
 
@@ -685,8 +719,8 @@
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Reason:</strong></th>';
 
-                                shipment += '<td>' + ((data.rider_details.reason.name != null) ? data
-                                    .rider_details.reason.name : '-----------') + '</td>';
+                                shipment += '<td>' + ((data.rider_details.reason != null) ? data
+                                    .rider_details.reason : '-----------') + '</td>';
                                 shipment +=
                                     '<th style="padding-right:0px" class="col-1"><strong>Attempted Time:</strong></th>';
                                 shipment += '<td>' + ((data.rider_details.attempted_time != null) ? data
@@ -761,7 +795,7 @@
 
                                 shipment +=
                                     '<th><strong><select class="form-control" id="shipment_status" name="shipment_status">';
-                                shipment += '<option disabled selected hidden>Select Action (*)</option>';
+                                shipment += '<option hidden value="">Select Action *</option>';
 
                                 @foreach ($shipment_statuses as $status)
                                 shipment +=
@@ -821,7 +855,7 @@
 
                                 shipment +=
                                     '<td class="col-5"><strong><select class="form-control" id="fake_status_id" name="fake_status_id" disabled>';
-                                shipment += '<option disabled selected hidden>Select Fake Status</option>';
+                                shipment += '<option hidden value="">Select Fake Status</option>';
 
                                 @foreach ($fake_status_remarks as $fsk)
                                     shipment +=
@@ -1019,7 +1053,7 @@
                         .done(function(data) {
                             if (data.status == 1 && (id == 1 || id == 5)) {
                                 var options = '';
-                                options += '<option disabled selected hidden>Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason *</option>';
 
                                 $.each(data.reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1040,7 +1074,7 @@
 
                             } else if (data.status == 1 && (id == 6)) { //unresponsive
                                 var options = '';
-                                options += '<option disabled selected hidden>Select Reason (*)</option>';
+                                options += '<option hidden value="">Select Reason *</option>';
 
                                 $.each(data.unresponsive_reasons, function(index, reason) {
                                     options += '<option value="' + reason.id + '">' + reason
@@ -1244,26 +1278,26 @@
                                 $.each(errors, function(field, messages) {
                                     var errorMessage;
                                     if (field === 'rv_assign_agent_status_id' && $("#shipment_status").val() === "") {
-                                        errorMessage = '* Action is Required';
+                                        errorMessage = 'Action is Required';
                                         $('#rv_assign_agent_status_error').text(errorMessage);
                                         $('#shipment_remarks').css('margin-bottom', '17px');
                                     }
 
                                     if (field === 'rv_assign_agent_sub_status_id' && $("#shipment_reason").val() === "" && $("#shipment_status").is(':empty') === false) {
-                                        errorMessage = '* Reason is Required';
+                                        errorMessage = 'Reason is Required';
                                         $('#rv_assign_agent_sub_status_error').text(errorMessage);
                                     }
 
                                     if (field === 'rv_fake_status_id' && $("#fake_status_id").val() === "") {
                                         if (checkbox == 1) {
-                                            errorMessage = '* Fake Status is Required';
+                                            errorMessage = 'Fake Status is Required';
                                             $('#rv_assign_agent_fake_status_id_error').text(
                                                 errorMessage);
                                         }
                                     }
 
                                     if (field === 'remarks' && $("#shipment_remarks").val() === "") {
-                                        errorMessage = '* Remarks is Required';
+                                        errorMessage = 'Remarks is Required';
                                         $('#shipment_remarks_error').text(errorMessage);
                                     }
                 

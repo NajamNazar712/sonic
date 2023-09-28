@@ -2023,7 +2023,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('upload', 'Admins\AdminTrackingController@shipment_position_upload')->name('upload');
             Route::get('list', 'Admins\AdminTrackingController@shipment_position_list')->name('list');
         });
-
     });
 
     Route::prefix('quick_tracking')->name('quick_tracking.')->group(function () {
@@ -2892,7 +2891,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('scanned_shipments', 'Admins\AdminReportsController@rider_pickup_scanned_shipments')->name('scanned_shipments');
             Route::post('arrived_shipments', 'Admins\AdminReportsController@rider_pickup_arrived_shipments')->name('arrived_shipments');
             Route::post('without_scan_shipments', 'Admins\AdminReportsController@rider_pickup_without_scan_shipments')->name('without_scan_shipments');
-
         });
         Route::prefix('revenue_report_by_invoice')->name('revenue_report_by_invoice.')->group(function () {
             Route::get('', 'Admins\AdminRevenueReportsController@revenue_report_by_invoice_index')->name('index');
@@ -2927,6 +2925,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('fintech')->name('fintech_report.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@fintech_report_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@fintech_report_list')->name('list');
+        });
+
+        Route::prefix('rv_report')->name('rv_report.')->group(function () {
+            Route::get('', 'Admins\AdminReportsController@rv_report_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@rv_report_list')->name('list');
+            Route::get('rv_call_history', 'Admins\AdminReportsController@rv_call_history')->name('rv_call_history');
+
         });
     });
 
@@ -3186,6 +3191,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('foc_account')->name('foc_account.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@foc_account_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@foc_account_store')->name('store');
+        });
+
+        Route::prefix('rv_shipper_priority')->name('rv_shipper_priority.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@rv_shipper_priority_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@rv_shipper_priority_store')->name('store');
         });
 
         /*for shipper side*/
@@ -4135,7 +4145,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('team_lead')->name('team_lead.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@team_lead_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@team_lead_list')->name('list');
-        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_hub_agent')->name('assign_hub_agent');
+        Route::post('submit', 'Admins\TeamLeadDashboardController@assign_zone_agent')->name('assign_zone_agent');
         Route::post('deactivate_staff', 'Admins\TeamLeadDashboardController@deactivate_staff')->name('deactivate_staff');
         Route::post('activate_staff', 'Admins\TeamLeadDashboardController@activate_staff')->name('activate_staff');
         Route::post('add_additional_days', 'Admins\TeamLeadDashboardController@add_additional_days')->name('add_additional_days');
@@ -4148,7 +4158,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('', 'Admins\TeamLeadDashboardController@shipment_assign_index')->name('index');
         Route::get('list', 'Admins\TeamLeadDashboardController@shipment_assign_list')->name('list');
     });
-
+    
 
     Route::prefix('leads')->name('leads.')->group(function () {
         Route::get('', 'Admins\LeadManagementController@index')->name('index');

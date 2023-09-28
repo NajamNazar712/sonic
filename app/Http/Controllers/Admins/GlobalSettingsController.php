@@ -1938,6 +1938,51 @@ class GlobalSettingsController extends Controller
         }
     }
 
+    
+    public function rv_shipper_priority_index()
+    {
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 906);
+        $shippers = User::where('status', 3)->where('blacklist', 0)->select('id', 'name')->get();
+        $settings = GlobalSettings::where('type', 'rv_shipper_priority');
+        $rv_shipper_priorities = array();
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+            $rv_shipper_priorities = array_map('strval', explode(',', $settings->text));
+        }
+        return view('admin.settings.rv_priority_shippers')->with(['shippers' => $shippers, 'rv_shipper_priorities' => $rv_shipper_priorities]);
+    }
+
+
+    public function rv_shipper_priority_store(Request $request)
+    {
+        $values_array = array_map('trim', explode(',', $request->unsorted_zones));
+        $unique_values_array = array_unique($values_array);
+        $result_str = implode(',', $unique_values_array);
+        
+        if ($request->has('unsorted_zones')) {
+
+            if (count($unique_values_array) > 0) {
+
+                $settings = GlobalSettings::where('type', 'rv_shipper_priority');
+
+                if ($settings->exists()) {
+                    $settings = $settings->first();
+                } else {
+                    $settings = new GlobalSettings();
+
+                    $settings->type = 'rv_shipper_priority';
+                    $settings->setting_value = 1;
+                }
+                $settings->text = $result_str;
+                $settings->save();
+            }
+            return redirect()->back()->with('success', 'Settings Updated!');
+        } else {
+            return redirect()->back()->with('error', 'No shippers selected!');
+        }
+    }
+
     /*for mms setting controller*/
     public function mms_report_index()
     {

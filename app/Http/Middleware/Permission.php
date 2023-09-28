@@ -26,7 +26,7 @@ class Permission
             'dispute.update' => 3,
             'dispute.update.submit' => 3,
             'dispute.shipments.index' => 702,
-
+            'team_lead.index' => 903,
             'accounts.pending' => 5,
             'accounts.pending.ajax' => 5,
             'accounts.active' => 11,
@@ -862,6 +862,7 @@ class Permission
             'settings.multiple_sale_tagging.list' => 279,
 
             'settings.foc_account.index' => 302,
+            'settings.rv_shipper_priority.index'=> 906,
             'settings.minimum_chargeable_weight.index' => 303,
 
             'settings.sales.projection.percentage.index' => 313,
@@ -1212,7 +1213,7 @@ class Permission
             'settings.escalation.in_process.edit.index' => 517,
 			'reports.operation_service_level.index' => 524,
             'reports.operation_service_level.list' => 524,
-
+            'reports.rv_report.index'=>905,
             'reports.debriefing.agent_list' => 676,
             'reports.debriefing.agent_index' => 676,
 

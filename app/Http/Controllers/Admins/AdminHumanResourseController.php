@@ -82,6 +82,7 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocation;
 use App\Http\Models\Admin\Attendance\EmployeeAttendanceActionLog;
 use App\Http\Models\Admin\Fuel\Rider\RiderFuelAllocationDeliveryNote;
+use App\Http\Models\RvAgentAssignHub;
 use App\Http\Traits\CommonTrait;
 
 class AdminHumanResourseController extends Controller
@@ -233,6 +234,30 @@ class AdminHumanResourseController extends Controller
         }
     }
 
+    public static function assign_zones_to_user($employee_id)
+    {
+        $cities = City::where('status', '1')
+        ->where('business_category_id', '1')
+        ->get();
+        
+        $admin = Admin::where('employee_id', $employee_id);
+
+        if($admin->exists()){
+            $admin = $admin->first();
+            if($admin->employee->staff_category_id == 3){
+                foreach($cities as $key => $city)
+                {
+                    RvAgentAssignHub::create([
+                        'agent_id'=>$admin->id,
+                        'city_id'=>$city->id,
+                        'zone_id'=>$city->zone_id,
+                        'priority'=>$key+1,
+                    ]);
+                }
+            }
+        }
+    }
+
     public function employee_approve_individual_function(Request $request)
     {
         $employee_id = $request->employee_id;
@@ -278,16 +303,15 @@ class AdminHumanResourseController extends Controller
                 if ($request->has('joining_date_formatted')) {
                     $employee->joining_date = $request->joining_date_formatted;
                 }
-
+                
                 $employee->save();
-
+                
                 if ($employee->employee_type_id == 1) {
-
+                    
                     $admin = Admin::where('trax_id', $employee->trax_id)->where('trax_id', '!=', null);
 
                     if ($admin->doesntExist()) {
                         $admin = new Admin();
-
                         $admin->name = $employee->name;
                         $admin->email = $employee->official_email;
                         $admin->phone_number = $employee->phone_number;
@@ -310,7 +334,10 @@ class AdminHumanResourseController extends Controller
                         $admin->trax_id = $employee->trax_id;
                         $admin->employee_id = $employee->id;
 
+                        
                         $admin->save();
+                        
+                        $this->assign_zones_to_user($employee->id);
 
                         if (count($employee->designation->hubs) == 0) {
                             $admin_hub = new AdminHub();
@@ -1146,7 +1173,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_approve(Request $request)
-    {
+    {  
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
@@ -1186,6 +1213,7 @@ class AdminHumanResourseController extends Controller
                     if($employee->staff_category_id == 3){
                         $employee->status_id = 3; // Set "Active No info" when contractual
                         $employee->confirmation_status = 2; //Set probation intially
+
                     }
                     $employee->save();
 
@@ -5308,6 +5336,8 @@ class AdminHumanResourseController extends Controller
                 else if ($employee->staff_category_id == 3) { //For contractual into staff
                     $global_setting = GlobalSettings::where('type', 'latest_employee_id');
                     $trax_id_prefix = 'Trax';
+
+
                     if ($global_setting->exists()) {
                         $global_setting = $global_setting->first();
                         $trax_id = $global_setting->setting_value + 1;

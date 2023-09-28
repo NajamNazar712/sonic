@@ -115,7 +115,7 @@ class AgentLoginController extends Controller
                     }
                 }
             } else {
-                $errors = 'You Have To Be Contractual';
+                $errors = 'Your Account is Disabled, Contact Admin';
                 return redirect()->back()->withErrors($errors);
             }
         } else {

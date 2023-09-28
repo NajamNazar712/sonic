@@ -10,7 +10,6 @@
 
 
     <div class="card">
-
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
@@ -194,7 +193,15 @@
                                 </div>
                             </div>
                         </div>
+                        
+                    <div class="alert alert-danger d-none shipment_msg_error">
                     </div>
+
+                    <div class="alert alert-success d-none shipment_msg_success">
+                    </div>
+                    </div>
+
+
 
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
@@ -872,6 +879,8 @@
 
         <script type="text/javascript">
             var selected_rows = [];
+
+            console.log(selected_rows);
             var restricted_rows = [];
             var tableagent = $('#agenttable').DataTable({
                 scrollY: '200px',
@@ -920,7 +929,7 @@
                             success: function(response) {
                                 if (response.status == 1) {
                                     swal({
-                                        text: 'Call Status Updated Successfully',
+                                        text: 'Call History Updated Successfully',
                                         icon: 'success',
                                         closeOnClickOutside: false,
                                         closeOnEsc: false
@@ -1443,24 +1452,42 @@
                                                                 .done(function(data) {
                                                                     if (data.status == 0) 
                                                                     {
-                                                                        $('#AssignAgentModal').modal('hide');
-                                                                        toastr.success(data .success,
-                                                                                'Success!', {
-                                                                                    positionClass: 'toast-bottom-center',
-                                                                                    containerId: 'toast-bottom-center'
-                                                                                });
-                                                                                
-                                                                                // Reload the table after showing the toastr notification
-                                                                               table.draw();
+                                                                        const $divElement = $('.shipment_msg_success');
+
+                                                                                // Check if the $divElement exists and has the d-none class
+                                                                                if ($divElement.length && $divElement.hasClass('d-none')) {
+                                                                                    // Remove the d-none class
+                                                                                    $divElement.removeClass('d-none');
+
+                                                                                    // Append text to the div
+                                                                                    $divElement.text(data.success);
+                                                                                }
+                                                                                $('#AssignAgentModal').modal('hide');
+
+                                                                                // setTimeout(function() {
+                                                                                //     $divElement.addClass('d-none');
+                                                                                // }, 10000); //
+
+                                                                                table.draw()
                                                                             } 
                                                                             else {
-                                                                                toastr.error(data.error,
-                                                                                'Error!', {
-                                                                                    positionClass: 'toast-top-center',
-                                                                                    containerId: 'toast-top-center'
-                                                                                });
-                                                                                // Reload the table after showing the toastr notification
-                                                                               table.draw();
+                                                                                const $divElement = $('.shipment_msg_error');
+
+                                                                                // Check if the $divElement exists and has the d-none class
+                                                                                if ($divElement.length && $divElement.hasClass('d-none')) {
+                                                                                    // Remove the d-none class
+                                                                                    $divElement.removeClass('d-none');
+
+                                                                                    // Append text to the div
+                                                                                    $divElement.text(data.error);
+                                                                                }
+                                                                                $('#AssignAgentModal').modal('hide');
+
+                                                                                // setTimeout(function() {
+                                                                                //     $divElement.addClass('d-none');
+                                                                                // }, 10000); //
+
+                                                                                table.draw();
                                                                             }
                                                                             
                                                                     selected_rows  = [];
@@ -1593,7 +1620,29 @@
                                         }
                                     }
                                 },
-                            @endif
+                            @endif,
+
+                            @if (session('role_id') == 1 || in_array(907, session('permissions')))
+                                {
+                                    text: 'Call History',
+                                    className: 'btn btn-primary call_history',
+                                    enabled: false,
+                                    action: function(e, dt, node, config) {
+                                        if (selected_rows !== '' && restricted_rows.length == 0) {
+                                            $('#update_call_status_modal').modal('show');
+                                            $('#shipment_id').val(call_history);
+
+
+                                        } else {
+                                            var error = "Not selected any shipments!";
+                                            toastr.error(error, 'Error!', {
+                                                positionClass: 'toast-top-center',
+                                                containerId: 'toast-top-center'
+                                            });
+                                        }
+                                    }
+                                },
+                            @endif,
 
                             @if (session('role_id') == 1 || in_array(46, session('permissions')))
                                 {
@@ -1690,6 +1739,7 @@
                                         }
                                     }
                                 },
+                                
                             @endif {
                                 extend: 'excel',
                                 title: 'Return Marked',
@@ -2041,6 +2091,8 @@
 
                 var hub_ids = [];
 
+                var call_history = [];
+
                 $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
                     var id = parseInt($(this).parent('tr').attr('id'));
@@ -2048,7 +2100,23 @@
                     var con_id = parseInt($(this).parent('tr').attr('consolidation_id'));
                     var assigned_agent_id = table.row($(this).parents('tr')).data().assigned_agent_id;
                     var tat = table.row($(this).parents('tr')).data().confirmation_on;
+                    var id = parseInt($(this).parent('tr').attr('id'));
+                    
+                    var index = call_history.indexOf(id);                    
+                    if (index === -1) {
+                        call_history.push(id);
+                    } else {
+                        call_history.splice(index, 1);
+                    }
 
+
+                    if(call_history.length > 0){
+                        table.button('.call_history').enable();
+                    }else{
+                        table.button('.call_history').disable();
+                    }
+                    
+                    console.log(call_history.length);
                     if (con_id) {
                         if (hub_ids.length == 0) {
                             hub_ids.push(hub_id);
@@ -2079,16 +2147,18 @@
                                     }
                                     selected_rows.splice(rindex, 1);
                                 }
-                                if (selected_rows.length > 0) {
+                                if (selected_rows.length > 0 || call_history.length > 0) {
                                     table.button('.confirm').enable();
                                     table.button('.assign').enable();
                                     table.button('.re-attempt').enable();
                                     table.button('.un-assign').enable();
+
                                 } else {
                                     table.button('.confirm').disable();
                                     table.button('.assign').disable();
                                     table.button('.re-attempt').disable();
                                     table.button('.un-assign').disable();
+
                                 }
                             }
                         });

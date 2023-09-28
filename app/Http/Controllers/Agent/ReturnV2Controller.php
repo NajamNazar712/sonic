@@ -54,12 +54,14 @@ class ReturnV2Controller extends Controller
         $shipment_statuses = RvAssignAgentStatus::where('is_active', 1)->where('is_visible', 1)->get();
         $fake_status_remarks = RvFakeStatus::get();
         $sub_status_return = RvAssignAgentSubStatus::where('rv_assign_agent_status_id', 1)->where('is_active', 1)->pluck('id')->toArray();
-        $agent = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->get();
+        $agent = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', '!=', '')->get();
         $unresponsive_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 6)->count();
         $reattempt_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 2)->count();
+        $intercept_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 3)->count();
+        $hold_count = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 5)->count();
         $refused_on_call = RvShipmentAssignAgent::where('agent_id', '=', Auth::id())->where('rv_assign_agent_status_id', 1)->whereIn('rv_assign_agent_sub_status_id', $sub_status_return)->count();
 
-        return view('agent.return_v2.index')->with(['user' => $user, 'shipment_statuses' => $shipment_statuses, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
+        return view('agent.return_v2.index')->with(['hold_count'=>$hold_count,'intercept_count'=>$intercept_count,'user' => $user, 'shipment_statuses' => $shipment_statuses, 'fake_status_remarks' => $fake_status_remarks, 'agent_total_tickets' => $agent, 'unresponsive_count' => $unresponsive_count, 'reattempt_count' => $reattempt_count, 'refused_on_call' => $refused_on_call]);
     }
 
     // Heading: N/A
@@ -104,7 +106,7 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-        // Get all assigned agent to hubs priority wise
+
         $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
 
         $admin = Admin::where('id', Auth::id());
@@ -114,6 +116,7 @@ class ReturnV2Controller extends Controller
             $this->mark_attendance($admin);
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
+            $shipment = [];
             if ($employee->exists()) {
                 $current_time = Carbon::now();
                 $employee = $employee->first();
@@ -126,9 +129,10 @@ class ReturnV2Controller extends Controller
                         // Assuming $sorted_agents is an array containing agents with their city_id
 
                         $agent_id = Auth::id();
-                        $shipment = [];
 
                         $shipment = $this->included_shippers($sorted_agents, $agent_id);
+                        
+
                         if ($shipment) {
                             try {
                                 $shipper_city = $shipment->pickup_address->city;
@@ -153,15 +157,15 @@ class ReturnV2Controller extends Controller
                                     $detail_product_infos[] = $detail_product;
                                 }
 
-                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->first();
+                                $rider_info = RiderDelivery::where('shipment_id', $shipment->id)->latest()->first();
 
                                 if (isset($rider_info)) {
-                                    $rider_info = $rider_info->first();
                                     $rider_details['reason'] = ShipmentStatusReason::where('id', $rider_info->rider_status_reason_id)->first();
-                                    $rider_details['reason'] = $rider_details['reason'] ? $rider_details['reason'] : '-';
+                                    $rider_details['reason'] = $rider_details['reason']['name'] ? $rider_details['reason']['name'] : '-';
                                     $rider_details['attempted_time'] = (isset($rider_info->created_at)) ? ($rider_info->created_at)->format('Y/m/d H:i:s') : '-';
                                     $rider_details['remarks'] = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
                                     $rider_details['remarks'] = $rider_details['remarks']->remarks ?? '-';
+
                                 } else {
                                     $rider_details['reason'] = '-';
                                     $rider_details['attempted_time'] = '-';
@@ -211,7 +215,7 @@ class ReturnV2Controller extends Controller
 
                         else{
                             //No Shipment Found in Assigned Hub
-                            return response()->json(['status' => 5, 'errors' => 'No Shipment Found in Assigned Hub']);
+                            return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
                         }
 
                     } else {

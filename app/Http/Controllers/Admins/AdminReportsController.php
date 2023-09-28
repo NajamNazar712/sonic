@@ -2,84 +2,87 @@
 
 namespace App\Http\Controllers\Admins;
 
+use Carbon\Carbon;
+use PHPExcel_Cell;
 use App\DailyVisit;
-use App\Http\Controllers\Admins\ActivityTrailController;
-use App\Http\Models\Admin\AdminDepartment;
-use App\Http\Models\Admin\AgentCallMonitoring;
+use PHPExcel_Style_Fill;
+use App\Http\Models\City;
+use App\Http\Models\Zone;
+use App\Http\Models\Rider;
+use App\RvAgentCallHistory;
+use Illuminate\Http\Request;
+use App\Http\Models\CrmAgent;
+use App\Http\Models\Shipment;
+use App\Http\Models\BanksList;
+use App\Http\Models\Admin\Admin;
+use Yajra\Datatables\Datatables;
+use App\Http\Models\CRM\CRMCount;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
+use Illuminate\Support\Facades\DB;
 use App\Http\Models\Admin\AgentDay;
+use App\Http\Models\CRM\CrmRequest;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\InsuranceCharge;
+use App\SpecialApprovalRequestAdmin;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\File;
+use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\MultipleSaleLead;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Admin\AgentDayLog;
-use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
-use App\Http\Models\Admin\DailyVisitRating;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\SubCategorySegment;
+use Illuminate\Support\Facades\Storage;
+use App\Http\Models\Admin\OSAChargesLog;
+use App\Http\Models\Admin\SalePersonTag;
+use Illuminate\Support\Facades\Response;
 use App\Http\Models\Admin\FintechPaymentDetails;
 use App\Http\Models\Admin\GlobalSettings;
-use App\Http\Models\Admin\OperationRidersCategory;
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRM\CrmRequestRating;
+use App\Http\Models\ShipmentStatusReason;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use App\Http\Models\Admin\AdminDepartment;
 use App\Http\Models\Admin\MasterCargo\Bag;
-use App\Http\Models\Admin\MasterCargo\BagStatus;
-use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\Admin\ReturnRevertLog;
+use App\Http\Models\RvShipmentAssignAgent;
+use App\Http\Models\StationRecoveryReport;
+use App\Http\Models\V2Pickup\V2PickupNote;
+use App\Http\Models\Admin\DailyVisitRating;
+use App\Http\Models\Shipper\SubstituteUser;
+use App\Http\Models\V2Pickup\V2RiderPickup;
+use App\Http\Models\Admin\Retail\RetailUser;
+use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\TraxPayTransaction;
-use App\Http\Models\BanksList;
-use App\Http\Models\City;
 use App\Http\Models\CorporateDefaultInsuranceCharge;
 use App\Http\Models\CorporateInsuranceCharge;
-use App\Http\Models\CRM\CrmRequestAgentHistory;
-use App\Http\Models\CRM\CrmRequestRating;
-use App\Http\Models\CRM\CrmRequest;
-use App\Http\Models\CRM\CrmRequestStatusHistory;
-use App\Http\Models\CrmAgent;
 use App\Http\Models\Excel_reports\Debriefing;
-use App\Http\Models\InsuranceCharge;
-use App\Http\Models\MultipleSaleLead;
-use App\Http\Models\Rider;
-use App\Http\Models\ShipmentsJourney;
-use App\Http\Models\ShipmentStatus;
-use App\Http\Models\ShipmentStatusReason;
-use App\Http\Models\ShippingMode;
-use App\Http\Models\StationRecoveryReport;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use App\Http\Models\Admin\AgentCallMonitoring;
+use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\CRM\CrmRequestAgentHistory;
+use App\Http\Models\Admin\MasterCargo\BagStatus;
+use App\Http\Models\CRM\CrmRequestStatusHistory;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use App\Http\Models\RvShipmentAssignAgentDetails;
 use App\Http\Models\StationRecoveryReportDeposit;
-use App\Http\Models\Shipment;
-use App\Http\Models\SubCategorySegment;
 use App\Http\Models\V2Pickup\V2PickupNoteRequest;
 use App\Http\Models\V2Pickup\V2PickupRequestShipment;
-use App\Http\Models\V2Pickup\V2RiderPickup;
-use App\Http\Models\Zone;
 use App\RiderWiseDeliveryNote;
 use App\RiderWiseDeliveryNoteShipment;
 use App\RiderWiseDeliveryNoteSummary;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\FintechCompany;
 use App\Http\Models\Admin\HBLKonnect\HblKonnectTransaction;
 use App\Http\Models\Admin\MonthClosingResponsible;
-use App\Http\Models\Admin\ReturnNote;
-use App\Http\Models\Admin\ReturnNoteShipment;
-use App\Http\Models\Shipper\User;
-use App\Http\Models\Shipper\SubstituteUser;
-use App\Http\Models\Admin\Retail\RetailUser;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
-use PHPExcel_Cell;
-use PHPExcel_Style_Fill;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
-use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
-use Yajra\Datatables\Datatables;
-use App\Http\Models\Admin\OSAChargesLog;
-use App\Http\Models\Admin\ReturnRevertLog;
-use App\Http\Models\CRM\CRMCount;
+use App\Http\Models\Admin\OperationRidersCategory;
+use App\Http\Controllers\Admins\ActivityTrailController;
+use App\Http\Models\Admin\CargoManifest\CargoManifestBagShipments;
 use App\Http\Models\Admin\OneLink\OneLinkOutForDeliveryShipmentPayment;
 use App\Http\Models\ShipmentScanningJourney;
-use App\Http\Models\V2Pickup\V2PickupNote;
-use App\SpecialApprovalRequestAdmin;
 use function GuzzleHttp\Promise\all;
 
 class AdminReportsController extends Controller
@@ -2018,7 +2021,7 @@ class AdminReportsController extends Controller
 
         $details_shipper['header'] = ['S. No.', 'Origin', 'Sales Person', 'Shipper Name(s) (Account No(s))', 'No. of Parcels Booked', 'No of Parcels Received', 'Revenue without GST', 'Avg/Parcel Revenue', 'Actual Weight', 'Avg. Actual Weight/Parcel', 'Avg. Revenue On Actual Weight', 'Chargeable Weight', 'Avg. Chargeable Weight/Parcel', 'Avg. Revenue On Chargeable Weight', 'Collection Amount', 'Avg. Amount Collection', '% Rev. on Amount Collection'];
 
-        //        $details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
+        //$details_shipper['header'] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 0;
 
         if ($sales_tagging == TRUE) {
@@ -5954,8 +5957,8 @@ class AdminReportsController extends Controller
 
         $from = Carbon::today()->subMonth(1)->firstOfMonth()->toDateTimeString();
         $to = Carbon::today()->subMonth(1)->endOfMonth()->toDateTimeString();
-        //        $from = Carbon::today()->firstOfMonth()->toDateTimeString();
-//        $to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
+        //$from = Carbon::today()->firstOfMonth()->toDateTimeString();
+        //$to = Carbon::parse($from)->addDays(24)->endOfDay()->toDateTimeString();
 
         //Next
 
@@ -7120,9 +7123,9 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            //            ->editColumn('phone', function ($shipments) {
-//                return $shipments->phone1 . "<br>" . $shipments->phone2;
-//            })
+        //->editColumn('phone', function ($shipments) {
+        //return $shipments->phone1 . "<br>" . $shipments->phone2;
+        //})
             ->filterColumn('phone', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
@@ -12049,6 +12052,149 @@ class AdminReportsController extends Controller
 
         return $datatable->make(true);
 
+    }
+
+    public function rv_report_index()
+    {
+
+        ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
+
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
+
+        return view('admin.reports.rv_report.index', [
+            'shippers' => $shippers
+        ]);
+    }
+
+    public function rv_report_list(Request $request)
+    {   
+        if ($request->get('excel') && $request->get('excel') == true) {
+            ActivityTrailController::createActivityTrailLog(Auth::id(), 705);
+        }
+
+
+        $rv_report = RvShipmentAssignAgent::join('shipments', 'rv_shipment_assign_agents.shipment_id','shipments.id')
+        ->leftjoin('users', 'shipments.user_id', 'users.id')
+        ->leftjoin('user_shipping_infos as uso', 'shipments.pickup_address_id', 'uso.id')
+        ->leftjoin('city_areas as area', 'uso.city_area_id', 'area.id')
+        ->leftjoin('cities as origin_city', 'uso.city_id', 'origin_city.id')
+        ->leftjoin('cities as destination_city', 'shipments.consignee_city_id', 'destination_city.id')
+        ->leftjoin('cities as hub', 'destination_city.hub_id', 'hub.id')
+        ->leftjoin('shipping_modes', 'shipments.shipping_mode_id', 'shipping_modes.id')
+        ->leftjoin('booking_types', 'shipments.booking_type_id', 'booking_types.id')
+        ->leftjoin('employees', 'rv_shipment_assign_agents.agent_id', 'employees.id')
+        ->leftjoin('shipments_journey', 'rv_shipment_assign_agents.shipments_journey_id', 'shipments_journey.id')
+        ->leftjoin('admins', 'shipments_journey.admin_id', 'admins.id')
+        ->leftjoin('rv_assign_agent_statuses as rv_aas', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aas.id')
+        ->leftjoin('rv_assign_agent_sub_statuses as rv_aass', 'rv_shipment_assign_agents.rv_assign_agent_status_id', 'rv_aass.id')
+        ->leftjoin('shipment_status as s_status', 'shipments.shipper_status_id', 's_status.id')
+        ->leftjoin('rv_fake_statuses as rv_fakes', 'rv_shipment_assign_agents.rv_fake_status_id','rv_fakes.id')
+        ->select('shipments.id as shipment_id','shipments.created_at as arrival_date', 'shipments.tracking_number as tracking_number', 'users.name as shipper_name', 'origin_city.name as origin', 'area.name as area', 'destination_city.name as destination', 'hub.name as hub','shipments.consignee_name as consignee_name', 'shipments.consignee_phone_number_1 as number', 'shipments.consignee_address as address', 'shipments.amount as cod_amount', 'shipments.estimated_weight as weight', 'shipping_modes.mode as shipping_mode', 'booking_types.booking_type as service_type', 'rv_aas.name as rv_status', 'rv_aass.name as reason', 'rv_shipment_assign_agents.remarks as remarks', 'rv_shipment_assign_agents.updated_at as action_date', 'admins.name as action_updated_by','employees.name as rcp_agent_updated_by', 'rv_fakes.name as fake_status', 's_status.name as current_status', 'shipments.updated_at as current_status_date', 'rv_shipment_assign_agents.unresponsive_count as call_count')->groupBy('shipments.id');
+
+        // dd($rv_report->pluck('shipper_name'));
+        $datatable = Datatables::of($rv_report)
+                    ->editColumn('tracking_number', function($rv_report) {
+                        $route = route('admin.tracking.index');
+                        return "<u><a href='{$route}?tracking_number=$rv_report->tracking_number' class='tracking' target='_blank'>$rv_report->tracking_number</a></u>";
+                    })
+                    ->editColumn('rv_status', function($rv_report) {
+                        if ($rv_report['rv_status']=="") {
+                            return '-';
+                        }
+                        else {
+                            return $rv_report['rv_status'];
+                        }
+                    })
+                    ->editColumn('remarks', function($rv_report) {
+                        if ($rv_report['remarks']=="") {
+                            return '-';
+                        }
+                        else {
+                            return $rv_report['remarks'];
+                        }
+                    })
+                    ->editColumn('fake_status', function($rv_report) {
+                        if ($rv_report['fake_status']) {
+                            return $rv_report['fake_status'];
+                        }
+                        else {
+                            return '-';
+                        }
+                    })
+                    ->editColumn('action_updated_by', function($rv_report) {
+                        if ($rv_report['action_updated_by']) {
+                            return $rv_report['action_updated_by'];
+                        }
+                        else {
+                            return '-';
+                        }
+                    })
+                    ->editColumn('rcp_agent_updated_by', function($rv_report) {
+                        if ($rv_report['rcp_agent_updated_by']) {
+                            return $rv_report['rcp_agent_updated_by'];
+                        }
+                        else {
+                            return '-';
+                        }
+                    })
+                    ->addColumn('delivery_attempt_count', function($rv_report) {
+                        $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
+                        $delivered_status = array_filter($shipper_status, function($value){
+                            return $value === 14;
+                        });
+                        return count($delivered_status);
+                    })
+                    ->addColumn('re_attempt_count', function($rv_report) {
+                        $shipper_status = $rv_report->shipment->shipment_journey->pluck('shipper_status_id')->toArray();
+                        $reattempt = array_filter($shipper_status, function($value){
+                            return $value === 13;
+                        });
+                        return count($reattempt);                    
+                    })
+                    ->addColumn('unresponsive_count', function($rv_report){
+                        $rv_shipment_count_check =  DB::table('rv_shipment_assign_agents')->where('shipment_id', $rv_report->shipment_id);
+                        if($rv_shipment_count_check->exists()){
+                            $rv_shipment_count_check = $rv_shipment_count_check->first();
+                            if($rv_shipment_count_check->unresponsive_count > 0){
+                                $unresponsive_count = DB::table('rv_shipment_assign_agents')->where('shipment_id', $rv_report->shipment_id)->pluck('unresponsive_count')->toArray();
+                                $unresponsive_count = array_sum($unresponsive_count);
+                                return '<button type="button" class="btn btn-sm btn-outline-info align-middle unresponsive_count_label" data-shipments = '.$rv_report->shipment_id.'><i class="la la-lg la-phone align-middle"></i> <span class="align-middle">' .$unresponsive_count .'</span></button>';
+                            }else{
+                                return '-';
+                            }
+                        }
+                    });
+
+        if ($tracking_num = $request->get('search_tracking_no')) {
+            $rv_report->where('shipments.tracking_number', '=', $tracking_num);
+        }
+        if ($shipper_id = $request->get('search_shipper_name')) {
+            $shipper_name = User::where('id', $shipper_id)->value('name');
+            $rv_report->where('users.name', '=', $shipper_name);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $rv_report->whereBetween('shipments.created_at', [$from, $to]);
+        }   
+
+        return $datatable->make(true);
+    }
+
+    public function rv_call_history(Request $request)
+    {
+        $mergedArray = [];
+        $data = RvAgentCallHistory::with(['rv_call_finding', 'user'])->where('shipment_id', $request->id)->get();
+    
+        foreach ($data as $item) {
+            $userData = Admin::where('id', $item['user']['updated_by_id'])->value('name');
+            $mergedArray[] = [
+                'data' => $item,
+                'user_name' => $userData,
+            ];
+        }
+        
+        return response()->json(['data' => $mergedArray]);
     }
 
     public function operations_performance_index()

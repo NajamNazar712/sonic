@@ -16,4 +16,9 @@ class RvShipmentAssignAgent extends Model
    {
       return $this->belongsTo('App\RvAssignAgentSubStatus', 'rv_assign_agent_sub_status_id', 'id');
    }
+
+   public function shipment()
+   {
+      return $this->belongsTo('App\Http\Models\Shipment', 'shipment_id', 'id');
+   }
 }
