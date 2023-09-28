@@ -326,7 +326,9 @@ trait RvTrait
                         break;
                 }
             }
-        } else {
+        } 
+        else {
+            return ['status' => 0, 'error' => "Something went wrong"];
         }
     }
 
@@ -515,11 +517,17 @@ trait RvTrait
 
             // if ($shipment['shipper_status_id'] == 12 || $shipment['shipper_status_id'] == 52 || $crm == true) {
             if (in_array($shipment->shipper_status_id, [7, 8, 9, 12, 15, 52, 65]) || $crm == true) {
-                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email || $shipment['amount'] != $amount) {
+                if ($shipment['consignee_city_id'] != $request->consignee_city || $shipment['consignee_name'] != $request->consignee_name 
+                || $shipment['consignee_address'] != $request->consignee_address || $shipment['consignee_phone_number_1'] != $request->consignee_phone_number_1 
+                || $shipment['consignee_phone_number_2'] != $request->consignee_phone_number_2 || $shipment['consignee_email'] != $request->consignee_email 
+                || $shipment['amount'] != $amount) 
+                {
                     if ($shipment['intercepted'] == 1) {
 
                         return redirect()->back()->with('error', 'Intercept/Re-Book is already requested against Tracking Number: ' . $shipment['tracking_number']);
-                    } else {
+                    } 
+                    else 
+                    {
                         $shipment = Shipment::find($request->shipment_id);
                         $s_amount = str_replace(",", "", "$request->amount");
                         $amount = (int)$s_amount;
@@ -1015,17 +1023,6 @@ trait RvTrait
                         $shipment_details->consignee_status_id = 13;
                         ShipmentsJourneyController::add($shipment_details->id, 13, 13, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
-                        // $return_assign_shipment = ReturnAssignedShipments::where('shipment_id', $shipment_details->id)->latest()->first();
-                        // if ($return_assign_shipment) {
-                        //     $return_assign_shipment->status = 0;
-                        //     $return_assign_shipment->save();
-
-                        //     $return_assign_log = new ReturnAssignedShipmentLogs();
-                        //     $return_assign_log->return_assign_shipment_id = $return_assign_shipment->id;
-                        //     $return_assign_log->status = 1;
-                        //     $return_assign_log->assigned_by = Auth::id();
-                        //     $return_assign_log->save();
-                        // }
                         NotificationsController::send(15, 0, $shipment_details->id);
                         NotificationsController::send(16, 0, $shipment_details->id);
                     }

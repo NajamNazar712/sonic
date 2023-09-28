@@ -5047,7 +5047,7 @@ class ReturnController extends Controller
         }
 
         }else{
-            return response()->json(['status'=> 1, 'error'=>'No Zone Againt This User Found']);
+            return response()->json(['status'=> 1, 'error'=>'No Zone Against This User Found']);
         }
         
                    
@@ -5063,11 +5063,12 @@ class ReturnController extends Controller
             'required' => ':attribute is Required.',
             'integer' => ':attribute must be an Integer.',
             'digits_between' => ':attribute must be between :min and :max Digits.',
-            'unique' => ':attribute is already Present.'
+            'unique' => ':attribute is already Present.',
+            'regex' => ':attribute must start with "Trax-C-" and be followed by digits.',
         ];
         $rules_with_agent = [
             'tracking_number' => ['required', 'integer'],
-            'agent_id' => ['required', 'integer']
+            'agent_id' => ['required', 'regex:/^Trax-C-\d+$/']
         ];
 
         $rules_without_agent = [
@@ -5145,52 +5146,70 @@ class ReturnController extends Controller
                     if (!Shipment::where('tracking_number', $row['tracking_number'])->whereIn('shipper_status_id', [12, 52])->exists()) {
                         $errors['Row #' . $row_id][] = 'Shipment is not valid #' . $row['tracking_number'];
                     }
-                    if (!empty($row['agent_id'])) { //if agent = 1 or 2 or 3
-                        if (!AdminRole::leftjoin('admins as a', 'a.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 3)->where('a.status', 1)->where('a.id', $row['agent_id'])->exists()) {
-                            $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id']; //remove for ticket no 4934
+                    if (!empty($row['agent_id'])) {
+                        $agent = Employee::where('trax_id', $row['agent_id'])->first();
+                        if (!$agent) {
+                            $errors['Row #' . $row_id][] = 'Agent ID is not valid #' . $row['agent_id'];
                         }
                     }
                 }
             }
             if(empty($errors)){
-
                 $already_assigned_shipment = array();
                 $tracking_numbers = array();
-                foreach ($rows as $key => $row) {
+                foreach ($rows as $key => $row) 
+                {
                     $row_id = $key + 2;
-                    $tracking_number = trim($row['tracking_number']); //111
-                    $agent_id = trim($row['agent_id']); //22
-
+                    $tracking_number = trim($row['tracking_number']);
                     $shipment = Shipment::where('tracking_number', $tracking_number)->first();
                     $shipment_id = $shipment->id;
 
                     //if agent row is empty unassign the shipment id 
-                    $this->rv_unassign_agents(null, $shipment_id);
-
-
-                    //if agent row is not empty assign the shipment to an agent
-                    if (!empty($agent_id)) {
-                        
-                        // Get all assigned agent to hubs priority wise
-                        $sorted_agents = RvAgentAssignHub::where('agent_id', $agent_id)->orderBy('priority', 'ASC')->get();
-                        if($sorted_agents->isNotEmpty())
+                    if($row['agent_id'] = null){
+                        $this->rv_unassign_agents(null, $shipment_id);
+                    }
+                    else{
+                        $agent_id = Employee::where('trax_id',$row['agent_id'])->first();
+                        $admin_id = Admin::where('employee_id', $agent_id->id)->first();
+                        $sorted_agents = RvAgentAssignHub::where('agent_id', $admin_id->id)->orderBy('priority', 'ASC')->get();
+                        $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin_id->id)->pluck('zone_id')->toArray();
+    
+                        $no_zone_shipment = [];
+                        if(!empty($sorted_agents_zones))
                         {
-                            
-                            // included_shippers is checking if the shipper is included and assign the shipment to an agent
-                            $include_shippers = $this->included_shippers($sorted_agents, $agent_id, $shipment_id);
-
-                            if($include_shippers ==true){
-                                $tracking_numbers['Row #' . $row_id] = $tracking_number;
-                            }
-                            else{
-                                return redirect()->back()->with('error', 'Shipper is disabled');
+                            $shipment = Shipment::where('id',$shipment_id)->first();
+                            if($shipment->exists())
+                            {
+                                
+                                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
+                                    $include_shippers = $this->included_shippers($sorted_agents, $admin_id->id, $shipment_id); 
+                                    if($include_shippers == true){
+                                        $tracking_numbers['Row #' . $row_id] = $tracking_number;
+                                    }
+                                    else{
+                                        return redirect()->back()->with('error', 'Shipper is disabled');
+                                    }
+                                }
+                                else{
+                                    $no_zone_shipment[] = $shipment->id;
+                                }
+    
+                                if(!empty($no_zone_shipment)){
+                                    $no_zone_shipment = implode(',', $no_zone_shipment);
+                                    return redirect()->back()->with('error', 'No Shipment Of These Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned');
+                                }
+                                else{
+                                    return redirect()->back()->with('success', 'Shipments Assigned Successfully');
+                                }
                             }
                         }
+    
                         else{
-                            return redirect()->back()->with('error', 'Hub is not assigned to the agent');
+                            return redirect()->back()->with('error', 'Zone is not assigned to the agent');
                         }
+                    }
                 }
-            }
+
                 $tracking_numbers = implode(' | ', array_map(function ($row, $tracking_number) {
                     return $row . ': ' . $tracking_number;
                 }, array_keys($tracking_numbers), $tracking_numbers));
