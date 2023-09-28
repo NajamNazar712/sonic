@@ -605,6 +605,7 @@ trait RvTrait
                     }
                 } else {
                     DB::rollBack();
+                    $request->request->set('rv_assign_agent_status_id', null); //passing rv_assign_agent_status_id as 'null' instead of '3' when error occurs in intercept 
                     return redirect()->back()->with('error', 'Shipment is already book with same details against Tracking Number: ' . $shipment['tracking_number']);
                 }
             } else {
@@ -1411,40 +1412,29 @@ trait RvTrait
             if($agent_shipment_id)
                 $agent_shipment_id;
             
-            else if (!empty($included_shippers)) {
-                
-                $flag = false;
-                
+            else if (!empty($included_shippers)) {              
+                $flag = false;                
                 if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
                     $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
                     $mergeArr = array_unique($mergeArr);
                     $result = array_filter($mergeArr, function($value){
                         return $value != '';
                     });
-
-                    
-                    $exploded_result = implode(',', $result);
-                    
+                    $exploded_result = implode(',', $result);                    
                     $flag = true;
-                }
-                
-
+                }              
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->where('consignee_city_id', $agent['city_id']);
-                
                 if ($flag == true){
                     $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
                 } else {
                     $shipments->orderBy('id', 'ASC');
-                }
-                
+                } 
                 $shipments = $shipments->get();
-                
                 if($shipments->isEmpty()){
                     continue;
-                }
-                
+                }  
             }
             
             // Check if only_shippers exists (1 && 0)
