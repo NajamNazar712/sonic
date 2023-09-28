@@ -241,12 +241,10 @@ class AdminHumanResourseController extends Controller
         ->get();
         
         $admin = Admin::where('employee_id', $employee_id);
-        $employee = Employee::where('id', $employee_id);
 
         if($admin->exists()){
             $admin = $admin->first();
-            $employee = $employee->first();
-            if($employee->staff_category_id == 3){
+            if($admin->employee->staff_category_id == 3){
                 foreach($cities as $key => $city)
                 {
                     RvAgentAssignHub::create([
