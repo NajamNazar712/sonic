@@ -241,22 +241,23 @@ class AdminHumanResourseController extends Controller
         ->get();
         
         $admin = Admin::where('employee_id', $employee_id);
+        $employee = Employee::where('id', $employee_id);
 
         if($admin->exists()){
             $admin = $admin->first();
-            foreach($cities as $key => $city)
-            {
-                RvAgentAssignHub::create([
-                    'agent_id'=>$admin->id,
-                    'city_id'=>$city->id,
-                    'zone_id'=>$city->zone_id,
-                    'priority'=>$key+1,
-                ]);
+            $employee = $employee->first();
+            if($employee->staff_category_id == 3){
+                foreach($cities as $key => $city)
+                {
+                    RvAgentAssignHub::create([
+                        'agent_id'=>$admin->id,
+                        'city_id'=>$city->id,
+                        'zone_id'=>$city->zone_id,
+                        'priority'=>$key+1,
+                    ]);
+                }
             }
-            
-            
         }
-
     }
 
     public function employee_approve_individual_function(Request $request)
