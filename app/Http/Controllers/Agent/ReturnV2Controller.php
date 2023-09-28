@@ -215,7 +215,7 @@ class ReturnV2Controller extends Controller
 
                         else{
                             //No Shipment Found in Assigned Hub
-                            return response()->json(['status' => 5, 'errors' => 'No Shipment Is Found']);
+                            return response()->json(['status' => 5, 'errors' => 'No zone assigned or shipment not found']);
                         }
 
                     } else {

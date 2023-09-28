@@ -5049,8 +5049,7 @@ class ReturnController extends Controller
         }else{
             return response()->json(['status'=> 1, 'error'=>'No Zone Againt This User Found']);
         }
-        
-                   
+           
     }
 
     //Assigning and Unassigning Shipments to agents by uploading excel sheet (Upload Agent Modal in Rcp Screen)

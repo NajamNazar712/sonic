@@ -12059,8 +12059,7 @@ class AdminReportsController extends Controller
 
         ActivityTrailController::createActivityTrailLog(Auth::id(), 704);
 
-        $shippers= RvShipmentAssignAgent::leftjoin('shipments', 'rv_shipment_assign_agents.shipment_id','shipments.id')
-        ->leftjoin('users', 'shipments.user_id', 'users.id')->select('users.id', 'users.name')->groupBy('users.name')->get();
+        $shippers = User::where('status', 3)->select('id', 'name')->get();
 
         return view('admin.reports.rv_report.index', [
             'shippers' => $shippers

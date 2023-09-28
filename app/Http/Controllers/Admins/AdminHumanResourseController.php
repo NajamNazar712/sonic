@@ -244,19 +244,18 @@ class AdminHumanResourseController extends Controller
 
         if($admin->exists()){
             $admin = $admin->first();
-            foreach($cities as $key => $city)
-            {
-                RvAgentAssignHub::create([
-                    'agent_id'=>$admin->id,
-                    'city_id'=>$city->id,
-                    'zone_id'=>$city->zone_id,
-                    'priority'=>$key+1,
-                ]);
+            if($admin->employee->staff_category_id == 3){
+                foreach($cities as $key => $city)
+                {
+                    RvAgentAssignHub::create([
+                        'agent_id'=>$admin->id,
+                        'city_id'=>$city->id,
+                        'zone_id'=>$city->zone_id,
+                        'priority'=>$key+1,
+                    ]);
+                }
             }
-            
-            
         }
-
     }
 
     public function employee_approve_individual_function(Request $request)
@@ -1174,7 +1173,7 @@ class AdminHumanResourseController extends Controller
     }
 
     public function employee_directory_approve(Request $request)
-    {  dd(1);
+    {  
         if (is_array($request->employee_ids)) {
             foreach ($request->employee_ids as $employee_id) {
                 $employee = Employee::find($employee_id);
