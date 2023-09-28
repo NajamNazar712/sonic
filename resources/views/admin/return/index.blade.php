@@ -1622,7 +1622,7 @@
                                 },
                             @endif,
 
-                            @if (session('role_id') == 1 || in_array(906, session('permissions')))
+                            @if (session('role_id') == 1 || in_array(907, session('permissions')))
                                 {
                                     text: 'Call History',
                                     className: 'btn btn-primary call_history',
