@@ -1104,7 +1104,7 @@ class DeliveryController extends Controller
                             }
                         }
                     }
-
+                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
                     $handover_shipments = HandoverShipments::where('shipment_id', $shipment)->whereIn('status', [1, 3]);
                     if ($handover_shipments->exists()) {
                         $handover_shipments = $handover_shipments->first();
@@ -1160,16 +1160,16 @@ class DeliveryController extends Controller
                                 Log::channel('trax_pay_test')->info('sh '. json_encode($shipment_id, true));
                                 
                                 CountFintechCharges::dispatch($shipment_id, $payment_link, $rand, $url);
-                                NotificationsController::send(12, $note->id, $shipment, $payment_link);
+                                NotificationsController::send(12, $note->id, $shipment_id, $payment_link);
                             }
                         }
                     } else {
                         $shipment_otp->otp = null;
                         $shipment_otp->save();
                     }
-                    ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-                    NotificationsController::send(10, $note->id, $shipment);
-                    NotificationsController::send(11, $note->id, $shipment);
+                    
+                    NotificationsController::send(10, $note->id, $shipment_id);
+                    NotificationsController::send(11, $note->id, $shipment_id);
 
                 }
                 $process_one_link['shipment_ids'] = $valid_shipments;
