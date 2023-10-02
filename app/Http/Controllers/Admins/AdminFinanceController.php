@@ -4559,13 +4559,13 @@ class AdminFinanceController extends Controller
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+//            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
             ->leftjoin('pending_payment_calculations as ppc', 'ppc.pending_payment_id', '=', 'pending_payments.id')
-            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+//            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
 //            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', DB::raw('SUM(s.packaging_charges)'), 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'),'sts.status as star_status')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status')
             ->groupBy('pending_payments.id');
 
             // dd($pending_payments);
@@ -4770,7 +4770,8 @@ class AdminFinanceController extends Controller
         }
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+            $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
+            ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
                 ->where('ss.tracking_number', '=', $tracking_number);
         }
 
