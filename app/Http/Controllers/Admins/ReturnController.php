@@ -112,26 +112,26 @@ class ReturnController extends Controller
     {
         
         ActivityTrailController::createActivityTrailLog(Auth::id(), 26);
-        $empid = Admin::find(Auth::id())->employee_id;
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
-        $total_shipments = count(Shipment::get()) > 0 ? count(Shipment::get()) : 1;
+        // $total_of_shipments = count(Shipment::whereIn('shipper_status_id', [7,8,9,15,12,65])->get());
+        $total_of_shipments = Shipment::whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->count();
+        // $total_shipments = count(Shipment::get()) > 0 ? count(Shipment::get()) : 1;
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         $sub_status_call_finding = SubStatusCallFinding::all();
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
-        $percentage_reason_validation_required = (count($reason_validation_required)/($total_shipments) * 100);
+        $percentage_reason_validation_required = (count($reason_validation_required)/($total_of_shipments) * 100);
         $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->get();
-        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/($total_shipments) * 100);
-        $total_of_shipments = count($reason_validation_required) + count($shipper_advised_requested);
-        $percentage_total_of_shipment = (($total_of_shipments)/($total_shipments) * 100);
+        $percentage_shipper_advised_requested = (count($shipper_advised_requested)/($total_of_shipments) * 100);
+        // $percentage_total_of_shipment = (($total_of_shipments)/($total_shipments) * 100);
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
         $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
-        $agents = Employee::where('trax_id','like','%Trax-C%')->where('line_manager_id', $empid)->get();
+        $agents = Employee::where('trax_id','like','%Trax-C%')->get();
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'percentage_total_of_shipment'=>$percentage_total_of_shipment,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
     }
 
@@ -5022,6 +5022,10 @@ class ReturnController extends Controller
         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
+
+        $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
+        $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
+
         
         if(!empty($sorted_agents_zones))
         {
@@ -5033,21 +5037,28 @@ class ReturnController extends Controller
                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                 }else{
-                    $no_zone_shipment[] = $shipment->id;
+                    $no_zone_shipment[] = $shipment->tracking_number;
                 }
             }
         } 
 
-        if(!empty($no_zone_shipment)){
+        if(!empty($no_zone_shipment) || !empty($already_assigned)){
             $no_zone_shipment = implode(',', $no_zone_shipment);
-            return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Number Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+            $already_assigned = implode(',', $already_assigned);
+
+            if ($already_assigned == ''){
+                return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+
+            }else{
+                return response()->json(['status'=> 1, 'error'=>'These Shipment Are Already Assigned '.$already_assigned.'.X No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+            }
         }else{
             return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
 
         }
 
         }else{
-            return response()->json(['status'=> 1, 'error'=>'No Zone Against This User Found']);
+            return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
         }
            
     }
@@ -6872,18 +6883,20 @@ class ReturnController extends Controller
     }
     public function call_status_history(Request $request)
     {
+        $shipment = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
+        ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rv_shipment_assign_agents.rv_assign_agent_sub_status_id')
+        ->leftJoin('admins','admins.id','rv_shipment_assign_agents.agent_id')
+        ->leftJoin('shipments','shipments.id','rv_shipment_assign_agents.shipment_id')
+        ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
+        ->where('rv_shipment_assign_agents.shipment_id',$request->shipment_id)
 
-        $shipment = StatusRemark::leftJoin('sub_status_call_findings','sub_status_call_findings.id','status_remarks.sub_status_call_finding_id')
-        ->leftJoin('shipment_status','shipment_status.id','status_remarks.shipment_status_id')
-        ->leftJoin('admins','admins.id','status_remarks.updated_by')
-        ->where('status_remarks.shipment_id',$request->shipment_id)
+        ->select('rv_shipment_assign_agents.updated_at as updated_at','admins.name as updated_by',
+        'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
+        'rvass.name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
+        'shipment_status.name as current_shipment_status')
 
-        ->select('status_remarks.updated_at as updated_at','status_remarks.updated_by as updated_by',
-        'status_remarks.sub_status_call_finding_remarks as sub_status_call_finding_remarks','status_remarks.call_to_id as call_to_id',
-        'status_remarks.updated_at as updated_at','status_remarks.call_finding_id as call_finding_id','sub_status_call_findings.remark as remark',
-        'shipment_status.name as status', 'admins.name as updated_by')
-        ->orderBy('status_remarks.updated_at','desc')
-        ->where('call_to_id',2)
+        ->orderBy('rv_shipment_assign_agents.updated_at','desc')
+        ->where('call_to_id',1) // 1 is for consiee and 0 is for shipper
         ->limit(10)->get();
         
         return $shipment;

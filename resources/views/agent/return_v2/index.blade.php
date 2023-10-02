@@ -979,6 +979,15 @@
                                     containerId: 'toast-top-center'
                                 });
                             }
+
+                            else if (data.status == 6) {
+                                $('#get_ticket_button').prop('disabled', false);
+                                var error = "Please Enable Location!";
+                                toastr.error(error, 'Error!', {
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
+                                });
+                            } 
                         })
                 }
 
