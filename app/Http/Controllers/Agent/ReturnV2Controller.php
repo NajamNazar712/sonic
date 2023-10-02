@@ -106,14 +106,19 @@ class ReturnV2Controller extends Controller
     // Description:
     public function get_ticket(Request $request)
     {
-
+        
         $sorted_agents = RvAgentAssignHub::where('agent_id', $request->auth_id)->orderBy('priority', 'ASC')->get();
 
         $admin = Admin::where('id', Auth::id());
 
         if ($admin->exists()) {
             $admin = $admin->first();
-            $this->mark_attendance($admin);
+
+            if(session('latitude') != null){
+                $this->mark_attendance($admin);
+            }else{
+                return response()->json(['status' => 6]);
+            }
             $employee = Employee::where('phone_number', $admin->phone_number)->where('staff_category_id', 3)->where('status_id', '!=', 2);
 
             $shipment = [];

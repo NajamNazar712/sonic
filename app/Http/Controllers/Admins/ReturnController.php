@@ -112,7 +112,6 @@ class ReturnController extends Controller
     {
         
         ActivityTrailController::createActivityTrailLog(Auth::id(), 26);
-        $empid = Admin::find(Auth::id())->employee_id;
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
@@ -131,7 +130,7 @@ class ReturnController extends Controller
         $percentage_total_of_shipment = (($total_of_shipments)/($total_shipments) * 100);
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
         $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
-        $agents = Employee::where('trax_id','like','%Trax-C%')->where('line_manager_id', $empid)->get();
+        $agents = Employee::where('trax_id','like','%Trax-C%')->get();
         return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'percentage_total_of_shipment'=>$percentage_total_of_shipment,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
     }
 
@@ -5022,6 +5021,10 @@ class ReturnController extends Controller
         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
+
+        $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
+        $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
+
         
         if(!empty($sorted_agents_zones))
         {
@@ -5033,21 +5036,28 @@ class ReturnController extends Controller
                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                 }else{
-                    $no_zone_shipment[] = $shipment->id;
+                    $no_zone_shipment[] = $shipment->tracking_number;
                 }
             }
         } 
 
-        if(!empty($no_zone_shipment)){
+        if(!empty($no_zone_shipment) || !empty($already_assigned)){
             $no_zone_shipment = implode(',', $no_zone_shipment);
-            return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Number Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+            $already_assigned = implode(',', $already_assigned);
+
+            if ($already_assigned == ''){
+                return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+
+            }else{
+                return response()->json(['status'=> 1, 'error'=>'These Shipment Are Already Assigned '.$already_assigned.'.X No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
+            }
         }else{
             return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
 
         }
 
         }else{
-            return response()->json(['status'=> 1, 'error'=>'No Zone Against This User Found']);
+            return response()->json(['status'=> 1, 'error'=>'No Zone Assigned To Agent']);
         }
            
     }

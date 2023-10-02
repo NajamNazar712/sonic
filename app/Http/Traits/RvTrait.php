@@ -1413,14 +1413,17 @@ trait RvTrait
             else if (!empty($included_shippers)) {              
                 $flag = false;                
                 if (!empty($rv_priority_shippers) && !($only_shipper->exists())){
-                    $mergeArr = array_merge($rv_priority_shippers, $included_shippers );
+                    $rv_priority_value = array_intersect($rv_priority_shippers, $included_shippers);
+                    $mergeArr = array_merge($rv_priority_value, $included_shippers);
                     $mergeArr = array_unique($mergeArr);
                     $result = array_filter($mergeArr, function($value){
                         return $value != '';
                     });
                     $exploded_result = implode(',', $result);                    
                     $flag = true;
-                }              
+                }   
+
+                
                 $shipments = Shipment::whereIn('user_id', $flag ? $result : $included_shippers)
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->where('consignee_city_id', $agent['city_id']);

@@ -194,7 +194,7 @@
                             </div>
                         </div>
                         
-                    <div class="alert alert-danger d-none shipment_msg_error">
+                    <div class="alert alert-warning d-none shipment_msg_error">
                     </div>
 
                     <div class="alert alert-success d-none shipment_msg_success">
@@ -1471,24 +1471,35 @@
                                                                                 table.draw()
                                                                             } 
                                                                             else {
-                                                                                const $divElement = $('.shipment_msg_error');
+                                                                            const $divElement = $('.shipment_msg_error');
 
-                                                                                // Check if the $divElement exists and has the d-none class
-                                                                                if ($divElement.length && $divElement.hasClass('d-none')) {
-                                                                                    // Remove the d-none class
-                                                                                    $divElement.removeClass('d-none');
+                                                                            // Check if the $divElement exists and has the d-none class
+                                                                            if ($divElement.length && $divElement.hasClass('d-none')) {
+                                                                                // Remove the d-none class
+                                                                                $divElement.removeClass('d-none');
 
-                                                                                    // Append text to the div
-                                                                                    $divElement.text(data.error);
+                                                                                // Check if data.error is a jQuery object or a DOM element
+                                                                                if (data.error instanceof jQuery) {
+                                                                                    // If data.error is a jQuery object, set its HTML content
+                                                                                    data.error.html(data.error.html().replace('X', '<br />'));
+                                                                                } else if (typeof data.error === 'string') {
+                                                                                    // If data.error is a string, you can process it accordingly
+                                                                                    // For example, split it and join with '<br />' to insert line breaks
+                                                                                    data.error = data.error.split('X').join('<br />');
                                                                                 }
-                                                                                $('#AssignAgentModal').modal('hide');
 
-                                                                                // setTimeout(function() {
-                                                                                //     $divElement.addClass('d-none');
-                                                                                // }, 10000); //
-
-                                                                                table.draw();
+                                                                                // Append text to the div
+                                                                                $divElement.html(data.error);
                                                                             }
+
+                                                                            $('#AssignAgentModal').modal('hide');
+
+                                                                            // setTimeout(function() {
+                                                                            //     $divElement.addClass('d-none');
+                                                                            // }, 10000); //
+
+                                                                            table.draw();
+                                                                        }
                                                                             
                                                                     selected_rows  = [];
                                                                     restricted_rows = [];
