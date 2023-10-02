@@ -6890,8 +6890,8 @@ class ReturnController extends Controller
         ->where('rv_shipment_assign_agents.shipment_id',$request->shipment_id)
 
         ->select('rv_shipment_assign_agents.updated_at as updated_at','admins.name as updated_by',
-        'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.name as call_finding_id', 
-        'rvass.shipment_status_name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
+        'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
+        'rvass.name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
         'shipment_status.name as current_shipment_status')
 
         ->orderBy('rv_shipment_assign_agents.updated_at','desc')
