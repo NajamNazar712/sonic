@@ -4630,7 +4630,7 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
