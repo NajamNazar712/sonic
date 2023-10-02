@@ -419,9 +419,10 @@ class RiderAPIController extends Controller
             $order_number = 1;
 
             $pickup_requests_with_location = array();
-
+                
             foreach ($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = $pickup_note_request->pickup_request;
+                
                 $pickup_address = $pickup_request->pickup_address;
 
                 if ($pickup_address->location_latitude && $pickup_address->location_longitude) {
@@ -629,7 +630,7 @@ class RiderAPIController extends Controller
 
     public function pickup_summary(Request $request)
     {
-        return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
+        //return response()->json(['status' => 0, 'message' => 'Please Update Your Bolt App']);
         $rider_id = $request->rider_id;
 
         $pickup_note = PickupNote::where('rider_id', $rider_id)->whereIn('status_id', [2, 3]);
@@ -653,7 +654,6 @@ class RiderAPIController extends Controller
                 $starting_location = $city->location_latitude . ',' . $city->location_longitude;
 
                 $pickup_note_requests = $pickup_note->pickup_note_requests;
-
                 $this->set_order($starting_location, $pickup_note->id, $pickup_note_requests);
             }
 
@@ -3800,8 +3800,8 @@ class RiderAPIController extends Controller
     {
         $rules = [
             'added_at' => ['required'],
-            'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
-            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id'],
+            'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v3_pickup_notes,id'],
+            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v3_pickup_requests,id'],
             'start_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
             'start_location_longitude' => ['required', 'regex:/^[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/'],
             'actual_location_latitude' => ['required', 'regex:/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?)$/'],
@@ -3811,11 +3811,10 @@ class RiderAPIController extends Controller
             'picture' => ['required', 'image'],
             'audio' => ['nullable', 'file']
         ];
-
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
-
+        try{
         if ($validate->fails()) {
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
@@ -3830,8 +3829,9 @@ class RiderAPIController extends Controller
                     $pickup_address = $pickup_request->pickup_address;
 
                     $pickup_request->status_id = 3;
-                    $pickup_request->pickup_in_route = 0;
-                    $pickup_request->save();
+                    // $pickup_request->pickup_in_route = 0;
+                    // $pickup_request->save();
+                    try{
                     $pickup_request_attempt = $pickup_request->pickup_attempt_latest->where('rider_id', $rider_id)->first();
                     $pickup_request_attempt->reason_id = $request->reason_id;
                     $pickup_request_attempt->save();
@@ -3876,11 +3876,16 @@ class RiderAPIController extends Controller
                     $rider_pickup->rider_remarks = str_replace("\"", "", $request->rider_remarks);
 
                     $rider_pickup->save();
-
+                }catch(Exception $exc){
+                    return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $exc]);            
+                }
+                    try{
                     $picture_path = 'rider_pickup/' . $rider_pickup->id . '.png';
 
                     Storage::disk('public')->put($picture_path, file_get_contents($request->picture));
-
+                    }catch(Exception $exImage){
+                        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $exImage]);
+                    }
                     $rider_pickup->picture_path = $picture_path;
 
                     $rider_pickup->save();
@@ -3915,6 +3920,9 @@ class RiderAPIController extends Controller
 
             return response()->json(['status' => 0, 'message' => 'Pickup Not Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
         }
+    }catch(Exception $ex){
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $ex]);
+    }
     }
     public function return_shipment_undelivered_v2(Request $request)
     {
@@ -11467,13 +11475,14 @@ class RiderAPIController extends Controller
         }
     }
 
-
     public function pickup_pick_v4(Request $request)
     {
+
+
         $rules = [
             'added_at' => ['required'],
-            'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_notes,id'],
-            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v2_pickup_requests,id'],
+            'pickup_note_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v3_pickup_notes,id'],
+            'pickup_request_id' => ['required', 'integer', 'digits_between:1,10', 'exists:v3_pickup_requests,id'],
             'start_location_latitude' => ['required'],
             'start_location_longitude' => ['required'],
             'actual_location_latitude' => ['required'],
@@ -11482,7 +11491,6 @@ class RiderAPIController extends Controller
             'shipments' => ['nullable', 'integer', 'digits_between:1,10'],
             'picture' => ['nullable', 'image']
         ];
-
         $validate = Validator::make($request->all(), $rules, $this->messages);
 
         $validate->setAttributeNames($this->names);
@@ -11491,14 +11499,14 @@ class RiderAPIController extends Controller
             return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
         } else {
             $rider_id = $request->rider_id;
-
+            
+            try{
             $added_at = Carbon::createFromTimestampMs($request->added_at)->toDateTimeString();
-
             if (!V3RiderPickup::where('pickup_note_id', $request->pickup_note_id)->where('pickup_request_id', $request->pickup_request_id)->where('pickup_type', 1)->where('added_at', $added_at)->exists()) {
                 if (V3PickupRequest::where('id', $request->pickup_request_id)->where('current_rider_id', $rider_id)->exists()) {
                     $pickup_request = V3PickupRequest::find($request->pickup_request_id);
-                    $pickup_request->pickup_in_route = 0;
-                    $pickup_request->save();
+                    // $pickup_request->pickup_in_route = 0;
+                    // $pickup_request->save();
                     $pickup_address = $pickup_request->pickup_address;
 
                     $destination = $request->actual_location_latitude . ',' . $request->actual_location_longitude;
@@ -11598,10 +11606,14 @@ class RiderAPIController extends Controller
                     }
                 }
             }
-
+        }catch(Exception $ex){
+            return response()->json(['status' => 1, 'error' => $ex]);
+        
+        }
             return response()->json(['status' => 0, 'message' => 'Pickup Pick Successfully', 'pickup_note_id' => $request->pickup_note_id, 'pickup_request_id' => $request->pickup_request_id]);
         }
     }
+
 
     public function shipment_undelivered_v3(Request $request)
     {
@@ -14702,7 +14714,6 @@ class RiderAPIController extends Controller
     public function pickup_summary_v3(Request $request)
     {
         $rider_id = $request->rider_id;
-
         $pickup_note = V3PickupNote::where('rider_id', $rider_id)->where('status', 0)->orderBy('id', 'DESC');
 
         if ($pickup_note->exists()) {
@@ -14724,14 +14735,12 @@ class RiderAPIController extends Controller
                 $starting_location = $city->location_latitude . ',' . $city->location_longitude;
 
                 $pickup_note_requests = $pickup_note->pickup_note_requests;
-
-                $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
+               $this->set_order_v2($starting_location, $pickup_note->id, $pickup_note_requests);
             }
 
             $pickup_note->fresh();
 
             $pickup_note_requests = $pickup_note->pickup_note_requests->sortBy('ordering');
-
             $information['pickups'] = array();
 
             foreach ($pickup_note_requests as $pickup_note_request) {
@@ -14764,12 +14773,12 @@ class RiderAPIController extends Controller
 
                 $information['pickups'][] = $pickup;
 
-                $pickup_request = V3PickupRequest::find($pickup_request->id);
-                if ($pickup_request->status_id == 2) {
-                    $pickup_request->status_id = 3;
-                    $pickup_request->save();
-                    V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request->id, 3, 2, $rider_id);
-                }
+                // $pickup_request = V3PickupRequest::find($pickup_request->id);
+                // if ($pickup_request->status_id == 2) {
+                //     $pickup_request->status_id = 3;
+                //     $pickup_request->save();
+                //     V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request->id, 3, 2, $rider_id);
+                // }
 
 
             }
@@ -14796,12 +14805,13 @@ class RiderAPIController extends Controller
             $rider_profile = $rider_profile->get();
             $data = array();
             $data['profile'] = $rider_profile;
-            $data['reasons'] = V3PickupRequestReason::all()->where('active','t');
+            $data['reasons'] = V3PickupRequestReason::all()->where('active', 't');
             return response()->json(['status' => 0, 'rider' => $data]);
         } else {
             return response()->json(['status' => 1, 'message' => "Rider Profile Not Found"]);
         }
     }
+
 
     public function pickup_Accept_Reject_v3(Request $request)
     {
@@ -14821,44 +14831,27 @@ class RiderAPIController extends Controller
                 $count++;
                 $pickup_request_id = $pickupAck['pickup_request_id'];
                 $result = array();
-                $acknowledge_id = '';
-                try {
-                    $acknowledge_id = $pickupAck['acknowledge_id'];
-                } catch (Exception $ex) {
-
-                }
                 $acknowledge_at = '';
+
                 try {
                     $acknowledge_at = $pickupAck['acknowledge_at'];
                 } catch (Exception $ex) {
 
                 }
-                
-                $reached_id = '';
-                try {
-                    $reached_id = $pickupAck['reached_id'];
-                } catch (Exception $ex) {
 
-                }
                 $reached_at = '';
                 try {
                     $reached_at = $pickupAck['reached_at'];
                 } catch (Exception $ex) {
 
                 }
-                $reject_id = '';
+                $picked_at = '';
                 try {
-                    $reject_id = $pickupAck['reject_id'];
+                    $picked_at = $pickupAck['picked_at'];
                 } catch (Exception $ex) {
 
                 }
 
-                $reject_reason_id = '';
-                try {
-                    $reject_reason_id = $pickupAck['reject_reason_id'];
-                } catch (Exception $ex) {
-
-                }
                 $reject_at = '';
                 try {
                     $reject_at = $pickupAck['reject_at'];
@@ -14867,34 +14860,42 @@ class RiderAPIController extends Controller
                 }
                 // main parent status      
                 $pickup_request = V3PickupRequest::find($pickup_request_id);
-                    $result['pickup_request_id'] = $pickup_request_id;
-                    if ($reached_id!='') {
-                        $pickup_request->status_id = $reached_id;
-                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, $reached_id, 2, $rider_id, $reached_at);
-                        $result['reached_id'] = $reached_id;
-                        $result['reached_at'] = $reached_id;
-                 
-                    } else if ($acknowledge_id!='') {
-                        $pickup_request->status_id = $acknowledge_id;
-                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, $acknowledge_id, 2, $rider_id, $acknowledge_at);
-                        $result['acknowledged_id'] = $acknowledge_id;
-                        $result['acknowledged_at'] = $acknowledge_at;
-                 
-                    } else {
-                        $information[$count]['reject_id'] = $reject_id;
-                        $pickup_request->status_id = $reject_id;
-                        V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, $reject_id, 2, $rider_id, $reject_at);
-                        $result['rejected_id'] = $reject_id;
-                        $result['rejected_at'] = $reject_at;
-                        $result['rejected_reason'] = V3PickupRequestReason::find($reject_reason_id);
-                        
-                 
-                    }
-                    $pickup_request->save();
-                    $information[$count]= $result;
+                $result['pickup_request_id'] = $pickup_request_id;
+                if ($acknowledge_at != '') {
+                    $pickup_request->status_id = 4;
+                    V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, 4, 2, $rider_id, $acknowledge_at);
+                    $result['acknowledged_id'] = 4;
+                    $result['acknowledged_at'] = $acknowledge_at;
+
+                }
+
+                if ($reached_at != '') {
+                    $pickup_request->status_id = 5;
+                    V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, 5, 2, $rider_id, $reached_at);
+                    $result['reached_id'] = 5;
+                    $result['reached_at'] = $reached_at;
+                }
+                if ($picked_at != '') {
+                    $pickup_request->status_id = 6;
+                    V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, 6, 2, $rider_id, $reached_at);
+                    $result['picked_id'] = 6;
+                    $result['picked_at'] = $picked_at;
+                }
 
 
-                
+                if ($reject_at != '') {
+                    $result['reject_id'] = 7;
+                    $pickup_request->status_id = 7;
+                    V3PickupRequestJourneysController::add_pickup_request_journey_with_created_at($pickup_request->id, 7, 2, $rider_id, $reject_at);
+                    $result['rejected_id'] = 7;
+                    $result['rejected_at'] = $reject_at;
+                    $result['rejected_reason'] = V3PickupRequestReason::find($pickupAck['reject_reason_id']);
+                }
+                $pickup_request->save();
+                $information[$count] = $result;
+
+
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Saved!', 'information' => $information]);
