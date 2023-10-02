@@ -17,15 +17,15 @@ class RemoveDuplicatePendingPaymentShipments extends Seeder
         ];
 
         $pps = PendingPaymentShipment::where('type', 0)
-        ->whereIn('shipment_id', $shipment_ids)
-        // ->groupBy('shipment_id')
-        // ->having(DB::raw('count(shipment_id)'), '>', 1)
+        // ->whereIn('shipment_id', $shipment_ids)
+        ->groupBy('shipment_id')
+        ->having(DB::raw('count(shipment_id)'), '>', 1)
         // ->take(1)
         ->get();
         dd($pps);
 
-        foreach ($pps as $key => $shipment) {
-            PendingPaymentShipment::where('type', 0)->where('shipment_id', $shipment)->first();
-        }
+        // foreach ($pps as $key => $shipment) {
+        //     PendingPaymentShipment::where('type', 0)->where('shipment_id', $shipment)->first();
+        // }
     }
 }
