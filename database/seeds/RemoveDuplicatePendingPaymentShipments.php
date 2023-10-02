@@ -41,9 +41,6 @@ class RemoveDuplicatePendingPaymentShipments extends Seeder
                         $value->delete();
                         PendingPayment::where('id', $value->pending_payment_id)->decrement('total_shipments',1);
                         PendingPayment::where('id', $value->pending_payment_id)->decrement('delivered_shipments',1);
-                        dd($value);
-                        
-                        
                     } 
                 }
             }
