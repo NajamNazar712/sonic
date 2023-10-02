@@ -20,6 +20,7 @@ class RemoveDuplicateRetailPendingPaymentShipments extends Seeder
         ->whereIn('shipment_id', $shipment_ids)
         ->groupBy('shipment_id')
         ->having(DB::raw('count(shipment_id)'), '>', 1)
+        ->take(1)
         ->delete();
     }
 }
