@@ -38,9 +38,9 @@ class RemoveDuplicatePendingPaymentShipments extends Seeder
                 foreach ($new_pps as $key => $value) {
                     if($key != 0){
 
-                        dd($value);
                         $value->delete();
                         PendingPayment::where('id', $value->pending_payment_id)->decrementEach(['total_shipments' => 1, 'delivered_shipments' => 1]);
+                        dd($value);
                         
                         
                     } 
