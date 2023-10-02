@@ -2,11 +2,16 @@
 
 namespace App\Http\Models\V3Pickup;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class V3PickupRequest extends Model
 {
 
+
+    public function getPickupDateAttribute(){
+        return Carbon::parse($this->attributes['pickup_date'])->toDateString();
+    }
     public function pickup_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
     }

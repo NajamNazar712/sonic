@@ -1301,12 +1301,13 @@
                     }
                 }).done(function(data){
                     if(data.status==0){
-                        currentrow.find('.approve_schedule').remove();
-                        currentrow.find('.reject_schedule').remove();
+                        // currentrow.find('.approve_schedule').remove();
+                        // currentrow.find('.reject_schedule').remove();
                         toastr.success(data.success, 'Success!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                        table.draw();
                
                     }else {
                         toastr.error('Something went wrong, please refresh and try again!', 'Error!', {
@@ -1330,12 +1331,14 @@
                     }
                 }).done(function(data){
                     if(data.status==0){
-                        currentrow.find('.approve_schedule').remove();
-                        currentrow.find('.reject_schedule').remove();
-                        toastr.success(data.success, 'Success!', {
+                        // currentrow.find('.approve_schedule').remove();
+                        // currentrow.find('.reject_schedule').remove();
+                        
+                        toastr.info(data.success, 'Success!', {
                             positionClass: 'toast-top-center',
                             containerId: 'toast-top-center'
                         });
+                        table.draw();
                
                     }else {
                         toastr.error('Something went wrong, please refresh and try again!', 'Error!', {

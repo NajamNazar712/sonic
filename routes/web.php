@@ -559,6 +559,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('add', 'Shippers\ShipperPickupController@add_pickup')->name('add');
         Route::post('add', 'Shippers\ShipperPickupController@add_pickup_submit')->name('add');
 
+        Route::prefix('schedule')->name('schedule.')->group(function(){
+            Route::get('','Shippers\ShipperPickupController@schedule_requests_index')->name('index');
+            Route::get('list', 'Shippers\ShipperPickupController@schedule_requests_list')->name('list');
+        });
+        
+
         // Route::get('user_shipper_info', 'Shippers\ShipperPickupController@get_user_shipper_info')->name('user_shipper_info');
         Route::post('pickup_request_services', 'Shippers\ShipperPickupController@get_pickup_request_services')->name('pickup_request_services');
         Route::post('time_ranges', 'Shippers\ShipperPickupController@get_time_ranges')->name('time_ranges');
@@ -1275,6 +1281,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('pickup_request_services', 'Admins\V3Pickup\V3AdminPickupsController@get_pickup_request_services')->name('pickup_request_services');
             Route::post('shipper_info', 'Admins\V3Pickup\V3AdminPickupsController@get_shipper_info')->name('shipper_info');
             Route::get('edit/{id}', 'Admins\V3Pickup\V3AdminPickupsController@pending_request_edit')->name('edit');
+            Route::PUT('update_status','Admins\V3Pickup\V3AdminPickupsController@pending_request_status_update')->name('update_status');
 
             Route::prefix('schedule')->name('schedule.')->group(function(){
                 Route::get('/','Admins\V3Pickup\V3AdminPickupsController@schedule_requests_index')->name('index');
@@ -1283,7 +1290,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::POST('rejected','Admins\V3Pickup\V3AdminPickupsController@schedule_rejected')->name('rejected');
                 Route::get('/regular_pickup_days/{id}','Admins\V3Pickup\V3AdminPickupsController@get_regular_pickup_days')->name('regular_pickup_days');
                 Route::PUT('/pickup_days_update','Admins\V3Pickup\V3AdminPickupsController@pickup_days_update')->name('pickup_days_update');
-
                 
             });
         });
