@@ -1440,12 +1440,26 @@ trait RvTrait
             
             // Check if only_shippers exists (1 && 0)
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
-        
-                $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
-                ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
-                ->whereNotIn('user_id', $only_shippers)
-                ->orderBy('id', 'ASC')
-                ->get();
+                $flag = false;                
+                if (!empty($rv_priority_shippers)) {
+                    $flag = true;
+                    $exploded_result = implode(',', $rv_priority_shippers);                    
+                    $shipments = Shipment::where('consignee_city_id', $agent['city_id'])
+                    ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65]);
+
+                    if($flag == true){
+                       $shipments->whereIn('user_id', $rv_priority_shippers);
+                    }else{
+                        $shipments->whereNotIn('user_id', $only_shippers);
+                    }
+                    if ($flag == true){
+                        $shipments->orderByRaw("FIELD(user_id, $exploded_result)");
+                    } else {
+                        $shipments->orderBy('id', 'ASC');
+                    } 
+                    $shipments = $shipments->get();
+
+                }
             }
                 
 
