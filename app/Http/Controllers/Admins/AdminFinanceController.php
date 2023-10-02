@@ -7123,7 +7123,7 @@ class AdminFinanceController extends Controller
         }
 
 
-        $current_date = Carbon::now()->startOfMonth()->startOfDay();
+        $current_date = Carbon::now()->startOfDay();
         $current_date_string = $current_date->toDateString();
         // dd($current_date_string);
 //        $cities = City::all();
