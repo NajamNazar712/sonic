@@ -1443,13 +1443,18 @@ trait RvTrait
             // Check if only_shippers exists (1 && 0)
             else if (!empty($only_shippers) && !($all_shipper_exists)) {
                 $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+
+
                 $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
                     return !in_array($value, $only_shippers);
                 });
-                
+                $rv_priority_shippers = array_filter($rv_priority_shippers, function($value)  use ($only_shippers) {
+                    return !in_array($value, $only_shippers);
+                });
+
                 $mergeArr = array_merge($rv_priority_shippers, $all_shippers);
                 $mergeArr = array_unique($mergeArr);
-                $result = array_filter($mergeArr, function($value){
+                $result = array_filter($mergeArr, function($value){ 
                     return $value != '';
                 });
                 
@@ -1459,7 +1464,7 @@ trait RvTrait
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->whereIn('user_id', $result);
 
-                    if(!empty($rv_priority_shippers) && !($only_shipper->exists())){
+                    if(!empty($rv_priority_shippers)){
                         $flag = true;
                     }else{
                         $flag = false;
