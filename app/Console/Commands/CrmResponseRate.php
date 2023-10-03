@@ -74,8 +74,6 @@ class CrmResponseRate extends Command
                                 // ->groupBy('crm_request_id')
                                 ->get();
 
-        // dd($requests);
-
         $responses = [];
         $unique_requests = [];
 
@@ -139,12 +137,6 @@ class CrmResponseRate extends Command
 
             $hubIndex = array_search($responsible_hub, array_column($responses, 'responsible_hub'));
 
-            // -------- Code to check admin's dept has been commented b/c dept is checked using the subquery above -------
-
-            // $role_id = Admin::where('id',$req["comment_by_id"])->value('role_id');
-            // $admin_role_id = AdminRole::where('id', $role_id)->value('department_id');
-            // $dept_id = AdminDepartment::where('id', $admin_role_id)->value('id');
-            // $deptIsOperation = $dept_id == 6;
             $commentType = $req['comment_type']==1 || $req['comment_type']==2;
             $request_id= $req['req_id'];
 
@@ -169,12 +161,10 @@ class CrmResponseRate extends Command
                     'response_rate' => ($commentType) ? "100" : "0",
                     'num_of_resps' => ($commentType) ? 1 : 0,
                 ];
-                
+
                 array_push($unique_requests, $request_id);
             }        
         }
-
-        dd($responses, $unique_requests);
 
         if(count($responses) > 0){
             NotificationsController::send(221, array_slice($responses, 0, 3));
