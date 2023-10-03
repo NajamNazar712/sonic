@@ -708,7 +708,9 @@
                                 <select name="call_finding_dropdown" class="form-control select2"
                                     id="call_finding_dropdown" data-rule-required="true"
                                     data-msg-required="Call Finding is required">
-                                    <option value="1">Unresponsive</option>
+
+                                    {{-- id 6 is for unresposive is in rv_assign_agent_statuses table --}}
+                                    <option value="6">Unresponsive</option>  
                                 </select>
                             </div>
 
@@ -716,7 +718,7 @@
                                 <select name="sub_status_call_finding" class="form-control select2"
                                     id="sub_status_call_finding">
                                     @foreach ($sub_status_call_finding as $sscf)
-                                        <option value="{{ $sscf->id }}">{{ $sscf->remark }}</option>
+                                        <option value="{{ $sscf->id }}">{{ $sscf->name }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -729,8 +731,8 @@
                             <div class="form-group text-left">
                                 <select name="call_to" class="form-control select2" id="call_to"
                                     data-rule-required="true" data-msg-required="Call To is required">
-                                    <option value="1">Shippper</option>
-                                    <option value="2">Consigneee</option>
+                                    {{-- <option value="0">Shippper</option> --}}
+                                    <option value="1">Consigneee</option>
                                 </select>
                             </div>
 
@@ -879,8 +881,6 @@
 
         <script type="text/javascript">
             var selected_rows = [];
-
-            console.log(selected_rows);
             var restricted_rows = [];
             var tableagent = $('#agenttable').DataTable({
                 scrollY: '200px',
@@ -917,7 +917,7 @@
                             shipment_id: $('#shipment_id').val(),
                             call_finding_id: $('#call_finding_dropdown').val(),
                             sub_status_call_finding_id: $('#sub_status_call_finding').val(),
-                            custom_remark: $('#custom_remark').val(),
+                            remarks: $('#custom_remark').val(),
                             call_to_id: $('#call_to').val(),
                             '_token': '{{ csrf_token() }}'
                         };
@@ -985,15 +985,16 @@
                                     var updated_at = value.updated_at;
                                     var trimmedDateTime = updated_at.substring(0, 10);
                                     var trimmedTime = updated_at.substring(11, 16);
-                                    var remark = value.remark;
                                     var call_finding_id = value.call_finding_id;
                                     var call_finding_reason_id = value.call_finding_reason_id;
-                                    var custom_remarks = value.sub_status_call_finding_remarks;
-                                    if (custom_remarks == null) {
-                                        custom_remarks = '-';
+                                    
+                                    var remarks = value.remarks;
+                                    if (remarks == null) {
+                                        remarks = '-';
                                     }
                                     var current_shipment_status = value.current_shipment_status;
                                     var updated_by = value.updated_by;
+
                                     var call_to_id = value.call_to_id;
                                     if (call_to_id == 1) {
                                         call_to_id = 'Consignee'
@@ -1009,8 +1010,7 @@
 
                                     tableHtml += '<tr><td class="p-1">' + trimmedDateTime +
                                         '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +
-                                        '</td><td>' + remark + '</td><td>' + custom_remarks +
-                                        '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
+                                        '</td><td>' + remarks + '</td><td>' + call_to_id + '</td><td>' + current_shipment_status +
                                         '</td><td>' + updated_by + '</td></tr>';
                                 });
 
@@ -1072,7 +1072,7 @@
                 $("#call_finding_dropdown").change(function() {
                     var selectedValue = $(this).val();
 
-                    if (selectedValue === '1') {
+                    if (selectedValue === '6') {
                         $('.sub_status_call_finding_container').removeClass('d-none');
                         $('#sub_status_call_finding').attr('data-rule-required', true);
                         $('#sub_status_call_finding').attr('data-msg-required', 'Call Finding is required');
@@ -1088,8 +1088,7 @@
 
                 $("#sub_status_call_finding").change(function() {
                     var selectedValue = $(this).val();
-
-                    if (selectedValue === '7') {
+                    if (selectedValue === '19') {
                         $('.custom_remark_container').removeClass('d-none');
                         $('#custom_remark').attr('data-rule-required', true);
                         $('#custom_remark').attr('data-msg-required', 'Other text is required');
@@ -2128,8 +2127,8 @@
                     }else{
                         table.button('.call_history').disable();
                     }
+
                     
-                    console.log(call_history.length);
                     if (con_id) {
                         if (hub_ids.length == 0) {
                             hub_ids.push(hub_id);

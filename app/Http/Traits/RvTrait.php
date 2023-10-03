@@ -632,7 +632,7 @@ trait RvTrait
     {
         $shipment = Shipment::find($request->shipment_id);
         $user_id = $shipment->user_id;
-        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->first();
+        $rv_shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->latest()->first();
 
         $status = new RvAgentCallHistory();
         $status->shipment_id= $request->shipment_id;
