@@ -5055,8 +5055,15 @@ class ReturnController extends Controller
         if(!empty($sorted_agents_zones)){
            foreach($shipment_ids as $shipment_id){
             $shipment = Shipment::where('id', $shipment_id)->first();
+            $currentDateTime = Carbon::now();
+            $shipment_journey = $shipment->shipment_journey;
+            
+            $shipment_journey = $shipment_journey->sortBy(function ($item) use ($currentDateTime) {
+                return abs($item->created_at->diffInSeconds($currentDateTime));
+            })->first();
+
             if($shipment->exists()){
-                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
+                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
