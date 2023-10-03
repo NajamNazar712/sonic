@@ -325,7 +325,7 @@ class AdminCargoManifestController extends Controller
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as ohc', 'oc.hub_id', '=', 'ohc.id')
-            ->leftJoin('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
+            ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
             ->leftjoin('user_shipping_infos as rsi', function ($join) {
                 $join->on('shipments.return_address_id', '=', 'rsi.id')
                     ->whereNotNull('shipments.return_address_id')
