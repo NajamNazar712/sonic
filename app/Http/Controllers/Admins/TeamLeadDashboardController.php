@@ -471,7 +471,7 @@ class TeamLeadDashboardController extends Controller
 
         if ($get_employee->exists()) {
             $get_employee->update([
-                'status_id' => '3',
+                'status_id' => '2',
             ]);
         }
 

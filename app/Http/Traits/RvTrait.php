@@ -1459,7 +1459,7 @@ trait RvTrait
                     ->whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])
                     ->whereIn('user_id', $result);
 
-                    if(!empty($rv_priority_shippers)){
+                    if(!empty($rv_priority_shippers) && !($only_shipper->exists())){
                         $flag = true;
                     }else{
                         $flag = false;
