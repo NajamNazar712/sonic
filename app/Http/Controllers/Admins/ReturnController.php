@@ -5022,7 +5022,6 @@ class ReturnController extends Controller
         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
-        $count = count($shipment_ids);
 
         $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
         $included_shippers = [];
@@ -5054,11 +5053,11 @@ class ReturnController extends Controller
         $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
 
         if(!empty($sorted_agents_zones)){
-           for($i = 0;  $i < $count; $i++){
-            $shipment = Shipment::where('id', $shipment_ids[$i])->first();
+           foreach($shipment_ids as $shipment_id){
+            $shipment = Shipment::where('id', $shipment_id)->first();
             if($shipment->exists()){
                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
-                    $this->included_shippers($sorted_agents, $admin->id, $shipment_ids[$i]); 
+                    $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
                 }
