@@ -5024,17 +5024,40 @@ class ReturnController extends Controller
         $no_zone_shipment = [];
         $count = count($shipment_ids);
 
+        $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+        $included_shippers = [];
+        if ($included_shipper->exists()) {
+            $flag = true;
+            $included_shipper = $included_shipper->first();
+            $included_shippers = explode(',', $included_shipper['text']);
+            $included_shippers = array_filter($included_shippers, function($value){
+                return $value != "";
+            });
+        }
+
+        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+        $only_shippers = [];
+        if ($only_shipper->exists()) {
+            $flag = false;
+            $only_shipper = $only_shipper->first();
+            $only_shippers = explode(',', $only_shipper['text']);
+            $only_shippers = array_filter($only_shippers, function($value){
+                return $value != "";
+            });
+            $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+            $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+                return !in_array($value, $only_shippers);
+            });
+        }
+
         $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
         $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
 
-        if(!empty($sorted_agents_zones))
-        {
-           for($i = 0;  $i < $count; $i++)
-           {
+        if(!empty($sorted_agents_zones)){
+           for($i = 0;  $i < $count; $i++){
             $shipment = Shipment::where('id', $shipment_ids[$i])->first();
-            if($shipment->exists())
-            {
-                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
+            if($shipment->exists()){
+                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_ids[$i]); 
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
