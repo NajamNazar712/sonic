@@ -12830,6 +12830,10 @@ RiderAPIController extends Controller
                         {
                             $flag = true;
                         }
+                        else
+                        {
+                            $flag = false;
+                        }
                         // rider assigned hub setting end
 
                         if ($flag) {
@@ -12896,6 +12900,10 @@ RiderAPIController extends Controller
                                     elseif ($request->hub_id == $hub_id)
                                     {
                                         $flag = true;
+                                    }
+                                    else
+                                    {
+                                        $flag = false;
                                     }
                                     // rider assigned hub setting end
                                     

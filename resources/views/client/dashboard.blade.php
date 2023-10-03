@@ -1165,12 +1165,7 @@
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
@@ -1183,12 +1178,7 @@
                     });
                     var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
                         obj.text = obj.booking_type;
-
                         return obj;
                     });
 
@@ -1201,12 +1191,7 @@
                     });
                     var data3 = $.map({!! $products !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data3 = $.map({!! $products !!}, function (obj) {
                         obj.text = obj.product_name;
-
                         return obj;
                     });
 
@@ -1219,14 +1204,10 @@
                     });
                     var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
+
                     $("#payment_select").prepend('<option value="" selected></option>').select2({
                         data: data4,
                         placeholder: "Select Payment",
@@ -1238,7 +1219,6 @@
                     var data6 = $.map({!! $payment_module !!}, function (obj) {
                         obj.id = obj.id;
                         obj.text = obj.mode;
-
                         return obj;
                     });
                     $("#payment_mode").prepend('<option value="" selected></option>').select2({
