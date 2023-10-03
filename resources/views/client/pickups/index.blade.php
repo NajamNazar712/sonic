@@ -1116,6 +1116,7 @@
                 },
                 submitHandler: function(form) {
                     $('#add_pickup_request button#add').prop('disabled', true);
+                    $('#product_select').attr('disabled', false);
                     swal({
                         title: 'Please Wait!',
                         text: 'Pickup request is being added!',
