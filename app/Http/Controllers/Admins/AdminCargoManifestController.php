@@ -2147,7 +2147,7 @@ class AdminCargoManifestController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 405);
         }
-        $bags = CargoManifestBag::leftjoin('manifest_bags as mcb', function ($join) {
+        $bags = DB::connection('reports')->table('cargo_manifest_bags')->leftjoin('manifest_bags as mcb', function ($join) {
             $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
                 ->where('mcb.id', '=',
                     DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
