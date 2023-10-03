@@ -964,7 +964,7 @@
                             } 
                             else if (data.status == 2) {
                                 $('#get_ticket_button').prop('disabled', false);
-                                var error = "No Shipment Assigned!";
+                                var error = "No Shipment Remaining Or Shipper is disabled!";
                                 toastr.error(error, 'Error!', {
                                     positionClass: 'toast-top-center',
                                     containerId: 'toast-top-center'
