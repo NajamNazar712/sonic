@@ -13084,6 +13084,10 @@ class RiderAPIController extends Controller
                         } elseif ($rider_hub == $admin_hub) {
                             $flag = true;
                         }
+                        else
+                        {
+                            $flag = false;
+                        }
                         // rider assigned hub setting end
 
                         if ($flag) {
@@ -13142,6 +13146,10 @@ class RiderAPIController extends Controller
                                         }
                                     } elseif ($request->hub_id == $hub_id) {
                                         $flag = true;
+                                    }
+                                    else
+                                    {
+                                        $flag = false;
                                     }
                                     // rider assigned hub setting end
 
@@ -14779,8 +14787,6 @@ class RiderAPIController extends Controller
                 //     $pickup_request->save();
                 //     V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request->id, 3, 2, $rider_id);
                 // }
-
-
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);

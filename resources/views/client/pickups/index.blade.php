@@ -8,7 +8,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                     Pickups History
+                     Pickups Request
                 </h1>
 
                 <div class="card">

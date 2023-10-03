@@ -126,8 +126,8 @@
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
 										<th class="border-primary border-darken-1">Total WHT</th>
-										<th class="border-primary border-darken-1">Packing Charges</th>
-										<th class="border-primary border-darken-1">Fintech Charges</th>
+{{--										<th class="border-primary border-darken-1">Packing Charges</th>--}}
+{{--										<th class="border-primary border-darken-1">Fintech Charges</th>--}}
 										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
@@ -532,7 +532,7 @@
                             head.push('Total Charges');
                             head.push('Total GST');
                             head.push('Total WHT');
-                            head.push('Packing Charges');
+                            // head.push('Packing Charges');
                             head.push('Total Deductable');
                             head.push('Total Payable');
                             head.push('Bank');
@@ -566,7 +566,7 @@
                                 row.push(values.total_charges);
                                 row.push(values.total_gst);
                                 row.push(values.total_wht);
-                                row.push(values.packaging_charges);
+                                // row.push(values.packaging_charges);
                                 row.push(values.total_deductable);
                                 row.push(values.total_payable);
                                 row.push(values.bank);
@@ -732,8 +732,8 @@
 					{data:'total_charges', name: 'ppc.charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'ppc.gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_wht', name: 'ppc.wht', class: 'align-middle text-center total_wht', orderable: false},
-					{data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
-					{data:'fintech_charges', name: 's.fintech_charges', class: 'align-middle text-center fintech_charges'},
+					// {data:'packaging_charges', name: 's.packaging_charges', class: 'align-middle text-center packaging_charges', orderable: false},
+					// {data:'fintech_charges', name: 's.fintech_charges', class: 'align-middle text-center fintech_charges'},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'ppc.payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'bank', class: 'align-middle text-center bank'},

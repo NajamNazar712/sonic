@@ -66,26 +66,6 @@ class V3AdminPickupsController extends Controller
 
         $this->middleware('Permission');
     }
-    public function add_pickup_request()
-    {
-        if(session('department_id') == 7){
-
-            if (in_array(session('id'), session('sale_users_bypass'))) {
-                $shippers = User::where('status',3)->get();
-            }
-            else{
-                $shippers = User::where('status',3)->whereIn('id',session('tagged_shippers'));
-            }
-
-        }
-        else{
-            $shippers = User::where('status',3)->get();
-        }
-
-        $pickup_types = V3PickupType::all();
-        $time_ranges = V3PickupTimeRange::all();
-        return view('admin.v3_pickups.add_pickup')->with(['shippers' => $shippers, 'pickup_types' => $pickup_types, 'time_ranges' => $time_ranges]);
-    }
 
     public function get_pickup_address(Request $request)
     {
@@ -117,10 +97,26 @@ class V3AdminPickupsController extends Controller
         $product_id = $request->product_id;
         $service_id = $request->service_id;
 
+        if($pickup_address_id){
+            $pickup_address = UserShippingInfo::find($pickup_address_id);
+
+            $city_id = $pickup_address->city->id;
+        }
+        else{
+            $city_id = $request->city_id;
+        }
+
         $walkin_account_id = 117;
+
         if($pickup_type_id == 2){
+            $walk_in_user = GlobalSettings::where('type', 'Walk-In')->first();
+            if ($walk_in_user){
+                $walkin_account_id = $walk_in_user->setting_value;
+            }
+
             $shipper_id = $walkin_account_id;
         }
+
 
         $walkin_name = '';
         $walkin_address = '';
@@ -132,19 +128,13 @@ class V3AdminPickupsController extends Controller
 
             //walking process
             $pickup_address_id = ShipperShipmentBookController::add_pickup_address($shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),
-            NULL,202,0,true);
+            'info@trax.pk',$city_id,0,true);
            
         }
         else{
             $walkin_address = $request->address;
             $walkin_contact = $request->phone;
         }
-      
-        $pickup_address = UserShippingInfo::find($pickup_address_id);
-
-        $city_id = $pickup_address->city->id;
-
-
 
        
         $pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request, 1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
@@ -174,9 +164,9 @@ class V3AdminPickupsController extends Controller
             AddV3PickupController::add_regular_pickup($shipper_id, $pickup_address_id, $pickup_request_id,$days, $admin_id, 1);
         }
 
-        if($pickup_type_id == 1){
-            $this->auto_pickup_assign($pickup_request_id);
-        }
+        // if($pickup_type_id == 1){
+        //     $this->auto_pickup_assign($pickup_request_id);
+        // }
 
         return redirect()->back()->with('success', 'Pickup request added successfully!');
 
@@ -230,11 +220,11 @@ class V3AdminPickupsController extends Controller
 
         
         if( $pickup_type_id ==  2){
-             $pickup_address_id=ShipperShipmentBookController::update_pickup_addres($pickup_address_id,$shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),'test@gmail.com', $city_id,0,true);
+             $pickup_address_id=ShipperShipmentBookController::update_pickup_addres($pickup_address_id,$shipper_id, $walkin_address,$walkin_name,null, substr_replace($walkin_contact, '-', 4, 0),'info@trax.pk', $city_id,0,true);
         }
 
 
-        if($pickup_date >Carbon::today()->toDateString()){
+        if($pickup_date >Carbon::today()->toDateString() && $pickup_type_id == 1){
            
             $new_pickup_request_id = AddV3PickupController::add($shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id);
            
@@ -255,7 +245,7 @@ class V3AdminPickupsController extends Controller
             ->update(['services_count' => $additonalservice_count]); 
            
             // update existing pickup request and set reschedule_request_id
-            V3PickupRequest::where('id',$pickup_request_id)->update(['status_id'=>7,'reschedule_request_id' => $new_pickup_request_id]);
+            V3PickupRequest::where('id',$pickup_request_id)->update(['status_id'=>8,'reschedule_request_id' => $new_pickup_request_id]);
 
             // update regular pickup and update new pickup_request_id in existing regular pickup
             $regular_pickup=V3RegularPickup::where('pickup_request_id',$pickup_request_id)->first();
@@ -266,7 +256,7 @@ class V3AdminPickupsController extends Controller
             }
 
             //rider auto assign
-            $this->auto_pickup_assign($new_pickup_request_id);
+            // $this->auto_pickup_assign($new_pickup_request_id);
 
             // update pickup request service  and update new pickup_request_id in existing pickup request service 
             // V3PickupRequestService::where('pickup_request_id',$pickup_request_id)->update(['pickup_request_id' => $new_pickup_request_id]);
@@ -298,8 +288,8 @@ class V3AdminPickupsController extends Controller
                         V3PickupRequestService::where('pickup_request_id',$pickup_request_id)->where('pickup_request_service_id',$service_id)->delete();
                     }
                 }
-               
-                $pickup_request_id = AddV3PickupController::update($pickup_request_id,$shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id,$additonalservice_count);
+             
+               AddV3PickupController::update($pickup_request_id,$shipper_id, $pickup_type_id, $pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request,1, $admin_id, $walkin_name, $walkin_address, $walkin_contact, $product_id, $service_id,$additonalservice_count,$admin_id);
                 // V3PickupRequest::where('id', $pickup_request_id)
                 // ->update(['services_count' => $additonalservice_count]);
         }
@@ -336,6 +326,14 @@ class V3AdminPickupsController extends Controller
             });
         }
 
+        if (session('role_id') == 1){
+            $cities = City::where('pickup', 1)->where('status', 1)->get();
+        }
+        else{
+            $cities = City::whereIn('id', session('hubs'))->get();
+        }
+
+
         $pickup_reasons = V3PickupRequestReason::all();
         $riders = $riders->get();
 
@@ -352,7 +350,7 @@ class V3AdminPickupsController extends Controller
 
         $additional_services = V3PickupService::all();
 
-        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'pickup_reasons' => $pickup_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses]);
+        return view('admin.v3_pickups.pending')->with(['riders' => $riders, 'pickup_statuses' => $pickup_statuses, 'pickup_reasons' => $pickup_reasons, 'shippers' => $shippers, 'pickup_shipment_types' => $pickup_shipment_types, 'time_ranges' => $time_ranges, 'products' => $products, 'services' => $services, 'additional_services' => $additional_services, 'statuses' => $statuses, 'cities' => $cities]);
     }
 
     public function pending_requests_list(Request $request){
@@ -364,6 +362,7 @@ class V3AdminPickupsController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(), 66);
         }
         $today = Carbon::now()->startOfDay();
+        $statuses=V3PickupRequestStatus::where('id','!=',7)->get();
         $pickup_requests = V3PickupRequest::join('users as u', 'v3_pickup_requests.shipper_id', '=', 'u.id')
             ->join('user_shipping_infos as usi', 'v3_pickup_requests.pickup_address_id', '=', 'usi.id')
             ->leftjoin('route_locations as rl', 'rl.pickup_address_id', '=', 'v3_pickup_requests.pickup_address_id')
@@ -396,7 +395,8 @@ class V3AdminPickupsController extends Controller
                         DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                     );
             })
-            ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','rt.short_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
+        
+            ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status','prs.id as status_id', 'v3_pickup_requests.attempts','cr.id as current_rider_id', 'cr.name as current_rider', 'cr.phone as current_rider_phone', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type','vpt.id as pickup_type_id', 'pst.name as shipment_type', 'seg.name as product','rt.short_code as route_code','rd.id as rider_id','rd.name as rider_name','rd.phone as rider_phone','v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by')
             ->whereDate('v3_pickup_requests.pickup_date', Carbon::today());
             // ->where('v3_pickup_requests.status_id', '=',1);
 
@@ -435,6 +435,7 @@ class V3AdminPickupsController extends Controller
             ->editColumn('pickup_request_id', function ($pickup_requests) {
                     return str_pad($pickup_requests->pickup_request_id, 6, '0', STR_PAD_LEFT);
             })
+         
             ->addColumn('shipments_picked', function ($pickup_request) {
                 if ($pickup_request->received > 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->received . '</button>';
@@ -472,17 +473,23 @@ class V3AdminPickupsController extends Controller
 
                 $remarks_button = '<a href="javascript:void(0);" class="dropdown-item addRemarks" data-action="reminder"><i class="ft-plus-circle primary"></i> Add Remarks </a>';
 
+                $update_request_status='<a href="javascript:void(0);" class="dropdown-item update_request_status" data-action="Update Status" data-current_status_id='.$reminder_request->status_id.'><i class="ft-plus-square primary"></i> Change Status</a>';
+
                 if (session('role_id') == 1 || count(array_intersect([583], session('permissions'))) !== 0) {
                     $dropdown = "
                         <div class='btn-group'>
                            <button type='button' class='btn btn-sm btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'>Actions</button>
                             <div class='dropdown-menu dropdown-menu-sm'>";
 
-                    if($reminder_request->pickup_type_id==1){
+                    if($reminder_request->pickup_type_id==1 && $reminder_request->status_id!=8){
                         $dropdown.=$edit_button_reschedule;
                     }else if ($reminder_request->pickup_type_id==2){
                         $dropdown.=$edit_button;
                     }
+
+                   if($reminder_request->status_id!=1  && $reminder_request->status_id!=8){
+                        $dropdown.=$update_request_status;
+                    } 
                     // if ((session('role_id') == 1 || (in_array(583, session('permissions'))))) {
                     //     $dropdown .= $reminder_button;
                     // }
@@ -542,6 +549,28 @@ class V3AdminPickupsController extends Controller
         }
         $pickup_request_attempt = V3PickupRequestAttempt::select('trax_remarks')->where('pickup_request_id',$pickup_request_id)->latest()->first();
         return response()->json(['status'=>0,'pickup_request_attempt'=>$pickup_request_attempt]);
+    }
+
+    public function pending_request_status_update(Request $request){
+       
+        $user_id=session('id');
+        $pickup_request_id = $request->pickup_request_id;
+        $status_id = $request->status_id;
+        if(V3PickupRequestStatus::where('id',$status_id)->exists()){
+            $pickup_request = V3PickupRequest::find($pickup_request_id);
+            if($pickup_request->current_rider_id){
+                $pickup_request->status_id = $status_id;
+                $pickup_request->last_updated_by = $user_id;
+                if($pickup_request->save()){
+                    return redirect()->back()->with('success','Status update successfully');
+                }
+                    return redirect()->back()->with('error','Something went wrong, please refresh and try again!');
+            }
+            return redirect()->back()->with('error','The rider has not been assigned!');
+           
+        }else{
+                return redirect()->back()->with('error','Pickup Request Status not found!');
+        }
     }
 
     public function schedule_requests_index(){
@@ -894,7 +923,7 @@ class V3AdminPickupsController extends Controller
                             DB::raw('(select max(id) from v2_rider_pickups where v2_rider_pickups.pickup_request_id = v3_pickup_requests.id)')
                         );
                 })
-                ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'lr.name as last_rider', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','rt.short_code as route_code','rd.id as rider_id')
+                ->select('v3_pickup_requests.id','v3_pickup_requests.services_count as services_count', 'v3_pickup_requests.id as pickup_request_id', 'u.id as user_id', 'v3_pickup_requests.pickup_date', 'v3_pickup_requests.created_at as pickup_created_at', 'ptr.name as time_range', 'v3_pickup_requests.booked as shipments', 'v3_pickup_requests.pieces', 'v3_pickup_requests.weight','u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'prs.name as status', 'v3_pickup_requests.attempts', 'cr.name as current_rider', 'cr.phone as current_rider_contact', 'v3_pickup_requests.status_id', 'v3_pickup_requests.received as shipments_picked', 'v3_pickup_requests.special_request', 'h.name as hub', 'vpt.name as pickup_type', 'pst.name as shipment_type', 'seg.name as product', 'v3_pickup_requests.generated_type', 'v3_pickup_requests.generated_by','rt.short_code as route_code','rd.id as rider_id')
                 ->where('v3_pickup_requests.status_id', '>',1);
                 // ->where('prs.name','Confirmed');
                 // ->where('v3_pickup_requests.shipper_id',session('id'));
@@ -1447,7 +1476,6 @@ class V3AdminPickupsController extends Controller
         if(RouteLocations::where('pickup_address_id',$pickup_address_id)->exists()){
             $route = RouteLocations::where('pickup_address_id',$pickup_address_id)->first();
             $route_status = Route::find($route->route_id);
-           
             if($route_status->status != 1 ){
                 return false;
             }

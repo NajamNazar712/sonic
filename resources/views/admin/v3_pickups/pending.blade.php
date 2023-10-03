@@ -60,6 +60,7 @@
                                     <input type="hidden" value="0" id="status_filter_input" name="pickup_status_id">
                                     <button type="button" class="btn btn-outline-secondary btn-min-width mr-1 mb-1 pickup_status_btn" rel="0">All
                                     </button>
+                                   
                                     @foreach($statuses as $id => $status)
                                         <div>
                                           
@@ -68,6 +69,14 @@
                                             </button>
                                         </div>
                                     @endforeach
+                                   
+                                    <select class="select select2 mb-1" id="select_status">
+                                        <option value="0" selected>All</option>
+                                        @foreach ($statuses as $id => $status)
+                                             <option value="{{ $id }}">{{  $status['name'] }}</option>
+                                        @endforeach
+                                        
+                                    </select>
                                    
                                   {{-- <div class="col">
                                     <div class="form-group">
@@ -99,6 +108,7 @@
                                     <th class="border-primary border-darken-1">Rider</th>
                                     <th class="border-primary border-darken-1">Rider Phone</th>
                                     <th class="border-primary border-darken-1">Assigned Courier</th>
+                                    <th class="border-primary border-darken-1">Assigned Courier Phone</th>
                                     <th class="border-primary border-darken-1">Shipments Picked</th>
                                     <th class="border-primary border-darken-1">Special Request</th>
                                     <th class="border-primary border-darken-1">Action</th>
@@ -230,33 +240,72 @@
         </div>
     </div>
 
-    <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
-         aria-hidden="true">
+    <!-- start of add remark modal -->
+        <div class="modal fade" id="AddRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AddRemarksModal"
+            aria-hidden="true">
+            <div class="modal-dialog modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Add Remarks</h4>
+
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <form method="post" id="add_remarks_form"
+                            action="{{ route('admin.v3_pickups.add_pickup_remark') }}"
+                            class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                            @csrf
+                            <input type="hidden" id="remark_pickup_request_id" name="remark_pickup_request_id">
+                            <div class="form-group ml-1">
+                                <input type="text" name="add_remark" id="add_remark" class="form-control"
+                                    data-rule-required="true" data-msg-required="Remarks is required"
+                                    placeholder="Add Remarks*">
+
+                            </div>
+
+
+                            <div class="form-group ml-1">
+                                <button type="submit" name="add" class="btn btn-primary">Add</button>
+                                <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                            </div>
+                        </form>
+
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    <!-- end of add remark modal -->
+
+    <!-- start of update request status modal -->
+    <div class="modal fade" id="UpdateRequestStatusModal" data-backdrop="static" role="dialog" aria-labelledby="UpdateRequestStatusModal"
+        aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title">Add Remarks</h4>
+                    <h4 class="modal-title">Change Status</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <form method="post" id="add_remarks_form"
-                          action="{{ route('admin.v3_pickups.add_pickup_remark') }}"
-                          class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+                    <form method="post" id="update_request_status_form"
+                        action="{{ route('admin.v3_pickups.pending.update_status') }}"
+                        class="form-horizontal mb-1" novalidate="novalidate">
+                        @method('PUT')
                         @csrf
-                        <input type="hidden" id="remark_pickup_request_id" name="remark_pickup_request_id">
+                        <input type="hidden" name="pickup_request_id" id="pickup_request_id">
                         <div class="form-group ml-1">
-                            <input type="text" name="add_remark" id="add_remark" class="form-control"
-                                   data-rule-required="true" data-msg-required="Remarks is required"
-                                   placeholder="Add Remarks*">
-
+                            <select class="select2" name="status_id" id="status_id">
+                               
+                            </select>
                         </div>
-
-
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary">Add</button>
+                            <button type="submit" name="add" class="btn btn-primary">Update</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -267,7 +316,7 @@
             </div>
         </div>
     </div>
-
+    <!-- end  of update request status modal -->
 
     <div class="modal fade" id="AllRemarksModal" data-backdrop="static" role="dialog" aria-labelledby="AllRemarksModal"
          aria-hidden="true">
@@ -527,6 +576,16 @@
                                         <div class="form-group">
                                             <input type="text" placeholder="Address" name="walkin_address" id="walkin_address" class="form-control" data-rule-required="true" data-msg-required="Address is Required"/>
 
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12">
+                                        <div class="form-group">
+                                            <select name="city_id" id="city_id_select" class="form-control select2" data-rule-required="true" data-msg-required="Pickup City is required">
+                                                @foreach($cities as $city)
+                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                @endforeach
+                                            </select>
                                         </div>
                                     </div>
 
@@ -912,8 +971,8 @@
 
     <!---- start of show additional services modal---->
     <div class="modal fade text-left" id="AdditionalServiceModal" data-backdrop="static" tabindex="-1" role="dialog"
-    aria-labelledby="AdditionalServiceModal"
-    aria-hidden="true">
+        aria-labelledby="AdditionalServiceModal"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header bg-primary white">
@@ -955,7 +1014,7 @@
             </div>
         </div>
         </div>
-</div>
+    </div>
     <!----end of show additional services modal --->
 
 @endsection
@@ -1299,8 +1358,12 @@
                     dropdownParent:$('#update_pickup_request')
                 }).val(null).trigger('change');
             });
-            
-            
+
+            $('#city_id_select').prepend('<option value="" selected="selected">Select Pickup City</option>').select2({
+                placeholder: 'Select Pickup City',
+                width: '100%',
+                dropdownParent:$('#add_pickup_request')
+            });
 
             $('#service_select').prepend('<option value="" selected="selected">Select Service</option>').select2({
                 placeholder: 'Select Service',
@@ -1377,6 +1440,8 @@
                     $('#regular_pickup').val(2);
                 }
             });
+
+           
         
         
 
@@ -1622,11 +1687,10 @@
                     {data: 'shipment_pieces', name: 'shipment_pieces', class: 'align-middle shipments', orderable: false},
                     {data: 'weight', name: 'weight', class: 'align-middle weight'},
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
                     {data: 'product', name: 'product', class: 'align-middle product'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
-
                     }},
                     {data: 'hub', name: 'hub', class: 'align-middle station'},
                     {data: 'route_code', name: 'route_code', class: 'align-middle route_code'},
@@ -1640,7 +1704,18 @@
                         }
                     },
                     {data: 'rider_phone', name: 'rider_phone', class: 'align-middle rider_phone'},
-                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider'},
+                    {data: 'current_rider', name: 'current_rider', class: 'align-middle current_rider',
+                      render:function(data,type,row){
+                        if(row.current_rider_id!==null){
+                            return row.current_rider_id + ' - ' + row.current_rider;
+                        }else{
+                            return '';
+                        }
+                      }
+                
+                    },
+                    {data: 'current_rider_phone', name: 'current_rider_phone', class: 'align-middle current_rider_phone'},
+
                     {data: 'shipments_picked', name: 'shipments_picked', class: 'align-middle shipments_picked'},
                   
                     // {data: 'shipper', name: 'shipper', class: 'align-middle shipper',},
@@ -1712,6 +1787,10 @@
                     table.button('.assign').disable();
                     table.button('.update').disable();
                 }
+            });
+            $('#select_status').select2({
+                width: '15%',
+                placeholder: 'Select Status*'
             });
 
             $('#assign_to_rider .rider').select2({
@@ -2042,9 +2121,41 @@
                $('#status_filter_input').val(status_id);
                table.draw();
             });
-            // $("body").on('change','#status_filter_input',function(){
-            //     table.draw();
-            // });
+            $("body").on('change','#select_status',function(){
+                var status_id=$(this).val();
+                $('#status_filter_input').val(status_id);
+                table.draw();
+            });
+
+            $('#status_id').select2({
+                width: '100%',
+                dropdownParent: $('#UpdateRequestStatusModal')
+            });
+            
+            var statuses=@json($statuses);
+            $('body').on('click','.update_request_status',function(){
+            $("#status_id").empty();
+              var current_status_id=$(this).data('current_status_id');
+              var pickup_request_id=$(this).closest('tr').attr('id');
+              $("#pickup_request_id").val(pickup_request_id);
+            $.each(statuses,function(status_id,value){
+                if(status_id!=8){
+                    if(status_id >=current_status_id){
+                        if(current_status_id==status_id){
+                                $("#status_id").append('<option value='+status_id+' selected>'+value.name+'</option>');
+                        }else{
+                                $("#status_id").append('<option value='+status_id+'>'+value.name+'</option>');
+                        }
+                    }
+                }
+              
+            });
+                $("#UpdateRequestStatusModal").modal("show");
+            });
+
+          
+        
+           
             // increment and decrement buttons
 
             $('.quantity').TouchSpin({

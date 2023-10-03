@@ -34,7 +34,7 @@ class AddV3PickupController extends Controller
         return $pickup->id;
 
     }
-    static public function update($pickup_request_id,$shipper_id, $pickup_type_id,$pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request = NULL, $generate_type = 0, $generated_by = null, $walkin_name = NULL, $walkin_address = NULL, $walkin_contact = NULL, $product_id = NULL, $service_id = NULL,$services_count = NULL){
+    static public function update($pickup_request_id,$shipper_id, $pickup_type_id,$pickup_address_id, $pickup_date, $city_id, $time_range_id, $shipment_type_id, $estimated_weight, $shipments_count, $pieces, $special_request = NULL, $generate_type = 0, $generated_by = null, $walkin_name = NULL, $walkin_address = NULL, $walkin_contact = NULL, $product_id = NULL, $service_id = NULL,$services_count = NULL,$last_updated_by = NULL){
 
         $pickup = V3PickupRequest::find($pickup_request_id);
         $pickup->pickup_type = $pickup_type_id;
@@ -55,8 +55,8 @@ class AddV3PickupController extends Controller
         $pickup->walkin_contact = $walkin_contact;
         $pickup->segment_id = $product_id;
         $pickup->sub_segment_id = $service_id;
-        $pickup->services_count=$services_count;
-
+        $pickup->services_count = $services_count;
+        $pickup->last_updated_by = $last_updated_by;
         $pickup->save();
 
         return $pickup->id;

@@ -1182,6 +1182,10 @@ class AdminCargoManifestController extends Controller
         foreach ($shipment_ids as $key => $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
+            if(!$shipment->actual_weight){
+                return back()->withErrors('Shipment actual weight is missing');
+            }
+
             if (!in_array($shipment->shipper_status_id, [2, 20, 30, 37, 49, 55])) {
                 unset($shipment_ids[$key]);
             }
@@ -2143,7 +2147,7 @@ class AdminCargoManifestController extends Controller
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 405);
         }
-        $bags = CargoManifestBag::leftjoin('manifest_bags as mcb', function ($join) {
+        $bags = DB::connection('reports')->table('cargo_manifest_bags')->leftjoin('manifest_bags as mcb', function ($join) {
             $join->on('mcb.cargo_manifest_bag_id', '=', 'cargo_manifest_bags.id')
                 ->where('mcb.id', '=',
                     DB::raw('(select max(id) from manifest_bags where manifest_bags.cargo_manifest_bag_id = cargo_manifest_bags.id)'));
