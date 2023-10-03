@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'SMS notification status delivered to shipper')
+@section('title', 'SMS Notifications Limit')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                   SMS Notification Setting
+                   SMS Notifications Limit
                 </h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
@@ -19,7 +19,7 @@
                             {{--todo--}}
                             <div class="row justify-content-center">
                                 <div class="col-md-6">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sms_notification_return_delivered_to_shipper.update') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.sms_notifications_limit.update') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="bg-blue">

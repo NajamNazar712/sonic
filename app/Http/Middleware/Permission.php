@@ -1393,7 +1393,7 @@ class Permission
             'delivery.delivery_shipments.index'=> 859,
         
             'management.riders.rider_remarks.index'=>862,
- 			'settings.sms_notification_return_delivered_to_shipper.index' => 861,
+ 			'settings.sms_notifications_limit.index' => 861,
             'return.rcp_agent_cn.index' => 876,
             'return.new_rcp_agent_shipments.index' => 876,
  			'accounts.substitute_account_management.index' => 873,
