@@ -12,7 +12,7 @@ use App\Http\Models\PickupNotPickReason;
 use App\Http\Models\RiderPickup;
 use App\Http\Models\RiderPickupShipment;
 use App\Http\Models\PickupAction;
-use App\Http\Models\RiderPickupActionLog;
+use App\Http\Models\RiderPickupActionLog; 
 use App\Http\Models\V2Pickup\V2PickupNote;
 use App\Http\Models\V2Pickup\V2PickupRequest;
 use App\Http\Models\V2Pickup\V2RiderPickup;

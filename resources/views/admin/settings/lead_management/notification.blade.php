@@ -42,7 +42,7 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Edit Notification</h4>
+                    <h4 class="modal-title" id="">Edit Notificationv</h4>
                 </div>
                 <form method="post" id="notification_edit" action="{{route('admin.settings.lead_notification.update')}}" novalidate="novalidate" enctype="multipart/form-data">
                     @csrf
@@ -58,7 +58,7 @@
 
                         <div class="form-group">
                             <label>Body</label>
-                            <textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required" data-rule-field="true"></textarea>
+                            <textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required" data-rule-field="true" rows="6" cols="50"></textarea>
                         </div>
 
                         <div class="form-group">

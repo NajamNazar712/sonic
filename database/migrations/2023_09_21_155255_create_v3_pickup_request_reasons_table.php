@@ -16,7 +16,9 @@ class CreateV3PickupRequestReasonsTable extends Migration
         Schema::create('v3_pickup_request_reasons', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name');
-            $table->tinyInteger('type');
+            $table->tinyInteger('type'); // using for differnciate messages of reason like(not pick = 0, pick = 1)
+            $table->string('status'); // using for to add filter get select reasons from pick and not pick based reasons
+            $table->string('active'); // using for soft delete
             $table->timestamps();
         });
     }
