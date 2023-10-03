@@ -14787,6 +14787,7 @@ class RiderAPIController extends Controller
                 //     $pickup_request->save();
                 //     V3PickupRequestJourneysController::add_pickup_request_journey($pickup_request->id, 3, 2, $rider_id);
                 // }
+
             }
 
             return response()->json(['status' => 0, 'message' => 'Pickup(s) are Assigned', 'information' => $information]);
