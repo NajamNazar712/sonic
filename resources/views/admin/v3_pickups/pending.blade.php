@@ -102,6 +102,7 @@
                                     <th class="border-primary border-darken-1">Additional Services</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Product</th>
+                                    <th class="border-primary border-darken-1">Shippment Type</th>
                                     <th class="border-primary border-darken-1">Shipper</th>
                                     <th class="border-primary border-darken-1">Station</th>
                                     <th class="border-primary border-darken-1">Route Code</th>
@@ -1689,6 +1690,7 @@
                     {data: 'services_count_btn', name: 'services_count', class: 'align-middle text-center services_count'},
                     {data: 'status', name: 'status', class: 'align-middle text-center status', orderable: false, searchable: false},
                     {data: 'product', name: 'product', class: 'align-middle product'},
+                    {data: 'shippment_type', name: 'shippment_type', class: 'align-middle text-center shippment_type'},
                     {data: 'shipper', name: 'shipper', class: 'align-middle shipper',render:function(data,type,row){
                         return row.user_id +'-'+ row.shipper;
                     }},
