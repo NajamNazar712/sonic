@@ -10570,6 +10570,11 @@ class AdminAPIController extends Controller
                                         {
                                             $flag = true;
                                         }
+                                        else
+                                        {
+
+                                            $flag = false;
+                                        }
                                         // rider assigned hub setting end
 
                                         if ($flag) {
