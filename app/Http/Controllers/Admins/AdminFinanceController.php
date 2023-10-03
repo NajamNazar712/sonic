@@ -4546,8 +4546,6 @@ class AdminFinanceController extends Controller
 
     public function make_payments_list(Request $request)
     {
-
-      
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 89);
         }
@@ -4561,13 +4559,13 @@ class AdminFinanceController extends Controller
             ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
             ->join('payment_cycles as pc', 'u.payment_cycle_id', '=', 'pc.id')
             ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+//            ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
             ->leftjoin('pending_payment_calculations as ppc', 'ppc.pending_payment_id', '=', 'pending_payments.id')
-            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
-            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+//            ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+//            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
             ->leftjoin('pending_shipments_for_payments as psfp', 'psfp.user_id', '=', 'pending_payments.user_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 's.booking_type_id', 'usi.poc', 's.packaging_charges', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),DB::raw('SUM(s.fintech_charges) AS fintech_charges'),'sts.status as star_status')
+            ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', 'ppc.amount as total_amount', 'ppc.charges as total_charges', 'ppc.gst as total_gst', 'ppc.wht as total_wht', 'ppc.payable as total_payable', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'pc.name as payment_cycle', 'u.documents_status', DB::raw('IFNULL(psfp.pending_shipments_count,0) as total_pending_shipments'),'sts.status as star_status')
             ->groupBy('pending_payments.id');
 
             // dd($pending_payments);
@@ -4626,16 +4624,13 @@ class AdminFinanceController extends Controller
 
             })
             ->filterColumn('u.name', function ($query, $keyword) {
-                $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('s.booking_type_id', '!=', 4)
-                        ->where('u.name', 'like', '%' . $keyword . '%');
-                })
-                    ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('s.booking_type_id', '=', 4)
-                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-                    });
+                if ($keyword != '') {
+                    $query->where('u.name', 'like', '%' . $keyword . '%');
+                } else {
+                    $query->whereRaw('false');
+                }
             })
-            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->orderColumn('u.name', 'u.name $1')
             ->editColumn('delivered_shipments', function ($pending_payment) {
                 if ($pending_payment->delivered_shipments != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
@@ -4775,7 +4770,8 @@ class AdminFinanceController extends Controller
         }
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+            $datatables->join('pending_payment_shipments as pps', 'pps.pending_payment_id', '=', 'pending_payments.id')
+            ->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
                 ->where('ss.tracking_number', '=', $tracking_number);
         }
 
@@ -4923,6 +4919,7 @@ class AdminFinanceController extends Controller
         
         return $details;
     }
+
 
     function calculate_fintech_charges($fn_charges)
     {
@@ -10857,14 +10854,14 @@ class AdminFinanceController extends Controller
             ->join('user_bank_infos as ubi', 'ubi.user_id', '=', 'u.id')
             ->join('invoicing_cycles as ic', 'ic.id', '=', 'ubi.invoicing_cycle_id')
             ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            ->leftJoin(DB::raw('(SELECT invoice_id, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
+            ->leftJoin(DB::raw('(SELECT invoice_id, MAX(deposit_date) as latest_deposit_date, SUM(amount) as total_received_amount FROM invoice_upload_slips GROUP BY invoice_id) ius_sub'), 'invoices.id', '=', 'ius_sub.invoice_id')
             ->select('u.id as shipper_account_id','sales_person.name as sales_person_name','invoices.id as id', 
             'invoices.invoice_number as invoice_number', 'invoices.invoice_number as invoice_number_btn', 'u.name as shipper', 
             'c.name as city', 'invoices.total_charges as total_charges', 'invoices.total_gst as total_gst', 
             'invoices.total_invoice_amount as total_invoice_amount', 'invoices.created_at as created_at', 
             'invoices.due_date as due_date', 'invoices.received_date as received_date', 'b.name as company_bank', 
             'ius_sub.total_received_amount as received_amount',
-            'invoices.tax_amount as tax_amount', 'invoices.deposit_date as deposit_date', 
+            'invoices.tax_amount as tax_amount', 'ius_sub.latest_deposit_date as deposit_date', 
             'is.name as status', 'invoices.status_id as status_id', 'invoices.invoicing_date as invoicing_date', 'ic.name as invoicing_cycle', 
             'invoices.invoice_type as invoice_type', DB::raw('NULL as payment_type'), DB::raw('2 as account_type'), 'is.id as is_id',
             'invoices.deposited_amount as deposited_amount','invoices.adjusted_amount as adjusted_amount','sts.status as star_status')
