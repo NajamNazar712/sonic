@@ -132,7 +132,7 @@ class ReturnController extends Controller
         $unresponsive_count = RvShipmentAssignAgent::where('unresponsive_count','>',0)->groupBy('shipment_id')->get();
         $percentage_unresponsive_count = (count($unresponsive_count)/($rv_tickets) * 100);
         $agents = Employee::where('trax_id','like','%Trax-C%')->get();
-        return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'percentage_total_of_shipment'=>$percentage_total_of_shipment,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
+        return view('admin.return.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type, 'return_confirm_reasons' => $return_confirm_reasons, 'agents' => $agents, 'blacklists' => $blacklists, 'consignee_refused_reasons' => $consignee_refused_reasons, 'sub_status_call_finding' => $sub_status_call_finding,'reason_validation_required'=>$reason_validation_required, 'percantage_reason_validation_required'=>$percentage_reason_validation_required, 'shipper_advised_requested'=>$shipper_advised_requested,'percentage_shipper_advised_requested'=>$percentage_shipper_advised_requested, 'total_of_shipments'=>$total_of_shipments,'unresponsive_count'=>$unresponsive_count, 'percentage_unresponsive_count'=>$percentage_unresponsive_count]);
     }
 
     public function return_marked_list(Request $request){ //status 12 shipments
@@ -5022,20 +5022,43 @@ class ReturnController extends Controller
         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
+        $count = count($shipment_ids);
+
+        $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
+        $included_shippers = [];
+        if ($included_shipper->exists()) {
+            $flag = true;
+            $included_shipper = $included_shipper->first();
+            $included_shippers = explode(',', $included_shipper['text']);
+            $included_shippers = array_filter($included_shippers, function($value){
+                return $value != "";
+            });
+        }
+
+        $only_shipper = GlobalSettings::where('type', 'rv_disable_shippers_only_shippers')->where('setting_value', 1);
+        $only_shippers = [];
+        if ($only_shipper->exists()) {
+            $flag = false;
+            $only_shipper = $only_shipper->first();
+            $only_shippers = explode(',', $only_shipper['text']);
+            $only_shippers = array_filter($only_shippers, function($value){
+                return $value != "";
+            });
+            $all_shippers = User::where('status', 3)->pluck('id')->toArray();
+            $all_shippers = array_filter($all_shippers, function($value)  use ($only_shippers) {
+                return !in_array($value, $only_shippers);
+            });
+        }
 
         $already_assigned =  RvShipmentAssignAgent::whereIn('shipment_id', $shipment_ids)->pluck('shipment_id')->toArray();
         $already_assigned =  Shipment::whereIn('id', $already_assigned)->pluck('tracking_number')->toArray();
 
-        
-        if(!empty($sorted_agents_zones))
-        {
-           foreach ($shipment_ids as $shipment_id)
-           {
-            $shipment = Shipment::where('id',$shipment_id)->first();
-            if($shipment->exists())
-            {
-                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones)){
-                    $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
+        if(!empty($sorted_agents_zones)){
+           for($i = 0;  $i < $count; $i++){
+            $shipment = Shipment::where('id', $shipment_ids[$i])->first();
+            if($shipment->exists()){
+                if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers )){
+                    $this->included_shippers($sorted_agents, $admin->id, $shipment_ids[$i]); 
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
                 }
