@@ -277,7 +277,7 @@ class ReturnV2Controller extends Controller
         else 
         {
             $current_time = Carbon::now();
-            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->where('rv_state_id', 1)->orWhere('rv_state_id', 3)->first();
+            $shipment_assign_agent = RvShipmentAssignAgent::where('shipment_id', $request->shipment_id)->whereIn('rv_state_id', [1, 3])->latest()->first();
             if($shipment_assign_agent){
                 $assign_agent = RvShipmentAgent::where('agent_id', $shipment_assign_agent->agent_id)->whereDate('created_at', date('Y-m-d'))->first();
                 $admin_agent = Admin::where('id', Auth::id())->first();
@@ -288,8 +288,8 @@ class ReturnV2Controller extends Controller
                 // Check Employee Shift Time
                 if ($current_time->between(Carbon::parse($employee_shift['start_time']), Carbon::parse($employee_shift['end_time']))) {
                         //if agent already exists on same date update row
-                        if ($assign_agent) {
-    
+                        if ($assign_agent) 
+                        {
                             //if shipment already exists update row
                             if ($shipment_assign_agent) {
                                 $this->update_shipment_status($request); //updating status of shipment
@@ -300,7 +300,8 @@ class ReturnV2Controller extends Controller
                             } else {
                                 return response()->json(['status' => 1, 'errors' => 'No Shipment Exist']);
                             }
-                        } else {
+                        } 
+                        else {
                             $this->update_shipment_status($request); //updating status of shipment
                             $this->add_shipment_agent($request, $shipment_assign_agent);
                             $this->rv_shipment_assign_agent_details($request, $shipment_assign_agent, $shipments_journey);
