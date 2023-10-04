@@ -144,10 +144,11 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
+        
         if ($request->get('excel') && $request->get('excel') == true) {
             ActivityTrailController::createActivityTrailLog(Auth::id(), 79);
         }
-        $status = array(2, 4, 6, 10, 13, 49, 55, 59); //for pending deliveries
+        $status = array(2, 4, 6, 10, 13, 15, 49, 55, 59); //for pending deliveries
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')

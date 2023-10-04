@@ -633,8 +633,8 @@ class AdminHumanResourseController extends Controller
 
                         }
                     }
-                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) {
-                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) {
+                    if ($result->request_status_id == 3 && $result->employee_type_id == 1) { // employee request status should be approved and should be staff not rider
+                        if ($result->status_id != 2 && (session('role_id') == 1 || in_array(652, session('permissions')))) { //employee should be active state and sould contain admin role
                             $dropdown .= '<button type="button" class="dropdown-item deactivate_staff" data-target-id=' . $result->employee_id . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Staff</div></button>';
                             
                             if ($result->staff_category_id == 1) {
@@ -5294,6 +5294,8 @@ class AdminHumanResourseController extends Controller
                     $admin->save();
 
                     $this->employee_log_save($employee->id,1,1,null,null,null,null,auth()->id());
+
+                    $this->assign_zones_to_user($request->employee_id);
 
                     return response()->json(['status' => 0, 'success' => 'Staff Converted To Contractual Successfully']);
                 }

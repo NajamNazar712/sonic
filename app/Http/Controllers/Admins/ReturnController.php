@@ -1841,7 +1841,7 @@ class ReturnController extends Controller
                     ->where(
                         'sjrider.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.consignee_status_id = 12 and shipments_journey.rider_id is not null)')
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (7,8,9,15,12) and shipments_journey.consignee_status_id in (7,8,9,15,12) and shipments_journey.rider_id is not null)')
                     );
             })
             ->leftjoin('riders as rider','rider.id','sjrider.rider_id')
@@ -5037,6 +5037,7 @@ class ReturnController extends Controller
         $included_shippers = [];
         $only_shippers = [];
         $assigned_to_new_user = [];
+        $assigned_to_now_new_user = [];
 
         $agent_id = $request->admin_id;
         $admin = Admin::where('employee_id', $agent_id)->first();
@@ -5090,8 +5091,10 @@ class ReturnController extends Controller
                 if(($already_assigned_state === null || $already_assigned_state->rv_state_id === 3) && in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
                     $assigned_shipment[] = $shipment->tracking_number;
-                    if($already_assigned_state->rv_state_id === 3){
+                    if($already_assigned_state != null){
                         $assigned_to_new_user[] = $shipment->tracking_number;
+                    }else{
+                        $assigned_to_now_new_user[] = 1;
                     }
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
@@ -5105,17 +5108,23 @@ class ReturnController extends Controller
             $assigned_shipment = implode(',', $assigned_shipment);
             $assigned_to_new_user = implode(',', $assigned_to_new_user);
 
-            if ($already_assigned == ''){
-                return response()->json(['status' => 1, 'error' => 'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' '.($assigned_shipment != null ? 'And Rest Has Been Assigned' : '')]);
-            }
-            else{
+            if ($already_assigned == '') {
+                return response()->json([
+                    'status' => 1,
+                    'error' => 'No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment . 
+                               ($assigned_shipment != null ? ' And Rest Has Been Assigned' : '')
+                ]);
+            } else {
                 return response()->json([
                     'status' => 1,
                     'error' => ($assigned_to_new_user != null)
-                        ? 'These Shipment Assign to this agent successfully: ' . $already_assigned . '. X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment . ' And Rest Has Been Assigned.'
-                        : 'These Shipment Are Already Assigned'
+                        ? 'These Shipments are assigned to this agent successfully: ' . $already_assigned . 
+                          (($no_zone_shipment != null) ? ' X No Shipment Of These Tracking Numbers Are Assigned ' . $no_zone_shipment : '') . 
+                          ' And Rest Has Been Assigned'
+                        : null 
                 ]);
-                            }
+            } 
+            
         }else{
             return response()->json(['status'=> 0, 'success'=>'Shipments Assigned Successfully']);
 
