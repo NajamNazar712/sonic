@@ -7328,6 +7328,20 @@ class DeliveryController extends Controller
                     return '-';
                 }     
             })
+            ->editColumn('hbl_konnect_amount_percent', function ($deliveries) {
+                $dncc_amount = $deliveries->amount;
+                $hbl_konnect_amount = $deliveries->transactions_amount;
+                if($hbl_konnect_amount > 0 && $dncc_amount > 0 )
+                {
+                    $hbl_konnect_amount_percent = $hbl_konnect_amount / $dncc_amount *100;
+                    return $hbl_konnect_amount_percent;
+                    // return number_format($fintech_amount_percent);
+                }
+                else
+                {
+                    return '-';
+                }     
+            })
             
             ->editColumn('delivery_note', function ($deliveries) {
                 $link = "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
