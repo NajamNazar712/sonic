@@ -167,8 +167,6 @@ class ReturnController extends Controller
         ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
         ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
 
-        // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
-        // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
         ->leftjoin('consolidation_shipments as consolidations', function ($join){
             $join->on('consolidations.shipment_id', '=', 'shipments.id')
                 ->where('consolidations.consolidation_id','=',
@@ -187,7 +185,7 @@ class ReturnController extends Controller
         'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
         'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
         'shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id',
-         'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 
+         'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), DB::raw('count(rvsaa.shipment_id) as rvsaa_count'),
          'shipments_journey.remarks as shipper_remarks',
          'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
          'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
@@ -198,7 +196,7 @@ class ReturnController extends Controller
          'tat_options.value as tat_value',
          'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
          'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-         'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
+         'rvsaa.unresponsive_count as rvsaa_unresponsive_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
         ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
         ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
         ->groupBy('shipments.id');
@@ -315,8 +313,8 @@ class ReturnController extends Controller
             ->editColumn('amount', function($shipment){
                 return number_format($shipment->amount);
             })
-            ->editColumn('shipper_phone',function ($shipper){
-                return "$shipper->shipper_phone1 | $shipper->shipper_phone2";
+            ->editColumn('shipper_phone',function ($shipment){
+                return "$shipment->shipper_phone1 | $shipment->shipper_phone2";
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -328,15 +326,32 @@ class ReturnController extends Controller
             })
             
             //Remarks Count Button in table column
-            ->addColumn('remarks',function ($shipper){
-                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->where('call_to_id',2)->count();
+            ->addColumn('remarks',function ($shipment){
+                // $status_count = RvShipmentAssignAgent::where('shipment_id',$shipment->shId)->count();
+                // $status_count = $this->call_status_history($shipment->shId)->count();
+                $status_count = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
+                ->leftJoin('rv_assign_agent_sub_statuses as rvass','rvass.id','rv_shipment_assign_agents.rv_assign_agent_sub_status_id')
+                ->leftJoin('admins','admins.id','rv_shipment_assign_agents.agent_id')
+                ->leftJoin('shipments','shipments.id','rv_shipment_assign_agents.shipment_id')
+                ->leftJoin('shipment_status','shipment_status.id','shipments.shipper_status_id')
+                ->where('rv_shipment_assign_agents.shipment_id',$shipment->shId)
+
+                ->select('rv_shipment_assign_agents.updated_at as updated_at','admins.name as updated_by',
+                'rv_shipment_assign_agents.call_to_id as call_to_id', 'rvas.shipment_status_name as call_finding_id', 
+                'rvass.name as call_finding_reason_id', 'rv_shipment_assign_agents.remarks as remarks',
+                'shipment_status.name as current_shipment_status')
+
+                ->orderBy('rv_shipment_assign_agents.updated_at','desc')
+                ->where('call_to_id',1) // 1 is for consignee and 0 is for shipper
+                ->get()->count();
+
                 $btn = '<button type="button" class="btn btn-sm btn-outline-info align-middle status_count"> <span class="align-middle">' . $status_count . '</span></button>';
                 return $btn;
             })
 
             //for shipment counts in excel
-            ->addColumn('remarks_excel',function ($shipper){
-                $status_count = StatusRemark::where('shipment_id',$shipper->shId)->where('call_to_id',2)->count();
+            ->addColumn('remarks_excel',function ($shipment){
+                $status_count = StatusRemark::where('shipment_id',$shipment->shId)->where('call_to_id',2)->count();
                 return $status_count;
 
             })

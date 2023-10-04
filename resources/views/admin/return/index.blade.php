@@ -1954,7 +1954,7 @@
                         {data: 'service_type',name: 'bt.id',class: 'align-middle service_type'},
                         {data: 'status',name: 'status',class: 'align-middle status' },
                         {data: 'reason',name: 'ssr.name',class: 'align-middle reason'},
-                        {data: 'remarks',name: 'sscf.remark',class: 'align-middle text-center remarks'},
+                        {data: 'remarks',name: '',class: 'align-middle text-center remarks'},
                         {data: 'shipment_remarks',name: 'admin_journey.remarks',class: 'align-middle shipment_remarks'},
                         {data: 'shipper_remarks',name: 'shipments_journey.remarks',class: 'align-middle shipper_remarks' },
                         {data: 'nsa_osa_estimated_charges',name: 'nsa_osa_estimated_charges',class: 'align-middle nsa_osa_estimated_charges'},
@@ -1970,7 +1970,7 @@
                         {data: 'assigned_by',name: 'asadby.name',class: 'align-middle assigned_by'},
                         {data: 'consolidation',name: 'consolidation',class: 'align-middle consolidation', orderable: false,searchable: false},
                         {data: 'consolidated_id',name: 'consolidations.consolidation_id',class: 'align-middle consolidated_id', orderable: false,searchable: false},
-                        {data: 'rvsaa_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
+                        {data: 'rvsaa_unresponsive_count',name: 'rvsaa.unresponsive_count',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'unresponsive_attempt_time',name: 'rvsaa.unresponsive_attempt_time',class: 'align-middle consolidated_id', orderable: false,searchable: false},
                         {data: 'action',name: 'action',class: 'text-center align-middle action p-1', orderable: false,searchable: false}
 

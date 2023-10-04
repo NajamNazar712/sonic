@@ -524,7 +524,7 @@
                             <input type="hidden" id="shipment_id" value="">
                             <select name="call_finding_dropdown" class="form-control select2" id="call_finding_dropdown"
                                 data-rule-required="true" data-msg-required="Call Finding is required">
-                                <option value="1">Unresponsive</option>
+                                <option value="6">Unresponsive</option>
                             </select>
                         </div>
                         <div class="form-group text-left sub_status_call_finding_container d-none">
@@ -558,12 +558,12 @@
                    
                         <div class="modal-dialog modal-lg d-none" role="document" id="call_history">
                             <div class="modal-content">
-                                <div class="modal-header">
+                                {{-- <div class="modal-header">
                                     <h4 class="modal-title">Call History</h4>
                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                         <span aria-hidden="true">×</span>
                                     </button>
-                                </div>
+                                </div> --}}
                                 <div class="modal-body">
                                     <table class="table table-bordered">
                                         <thead>
@@ -639,7 +639,7 @@
                 $.ajax({
                         url: '{!! route('admin.reports.rv_report.rv_call_history') !!}',
                         method: 'GET',
-                        data: {shipment_id: id},
+                        data: { shipment_id: id },
                         dataType: 'json',
                         success: function(response) {
                             var tableBody = $('#update_call_status_modal').find('tbody');
@@ -670,6 +670,7 @@
                         }
                     });
             });
+            
 
             $('#update_call_status_modal').on('shown.bs.modal', function() {
                 $('#call_to').val('').change();
@@ -679,58 +680,58 @@
             });
 
             $('#update_call_status_form').validate({
-                    errorClass: 'danger',
-                    successClass: 'success',
-                    errorPlacement: function(error, element) {
-                        error.addClass('w-100').appendTo(element.parent('.form-group'));
-                    },
-                    submitHandler: function(form) {
-                        var data = {
-                            shipment_id: $('#shipment_id').val(),
-                            call_finding_id: $('#call_finding_dropdown').val(),
-                            sub_status_call_finding_id: $('#sub_status_call_finding').val(),
-                            remarks: $('#custom_remark').val(),
-                            call_to_id: $('#call_to').val(),
-                            '_token': '{{ csrf_token() }}'
-                        };
-                        // AJAX request
-                        $.ajax({
-                            url: "{{ route('admin.return.update_call_status') }}",
-                            type: 'POST',
-                            data: data,
-                            success: function(response) {
-                                if (response.status == 1) {
-                                    swal({
-                                        text: 'Call History Updated Successfully',
-                                        icon: 'success',
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
-                                    $('#update_call_status_modal').modal('hide');
-                                    window.reaload();
-                                } else {
-                                    swal({
-                                        title: 'Something Went Wrong!',
-                                        text: 'Please Update Status Again',
-                                        icon: 'error',
-                                        closeOnClickOutside: false,
-                                        closeOnEsc: false
-                                    });
-                                }
-                            },
-                            error: function(jqXHR, textStatus, errorThrown) {
-                                console.error('Form submission failed:', textStatus,
-                                    errorThrown);
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    var data = {
+                        shipment_id: $('#shipment_id').val(),
+                        call_finding_id: $('#call_finding_dropdown').val(),
+                        sub_status_call_finding_id: $('#sub_status_call_finding').val(),
+                        remark: $('#custom_remark').val(),
+                        call_to_id: $('#call_to').val(),
+                        '_token': '{{ csrf_token() }}'
+                    };
+                    // AJAX request
+                    $.ajax({
+                        url: "{{ route('admin.return.update_call_status') }}",
+                        type: 'POST',
+                        data: data,
+                        success: function(response) {
+                            if (response.status == 1) {
+                                swal({
+                                    text: 'Call Status Updated Successfully',
+                                    icon: 'success',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
+                                $('#update_call_status_modal').modal('hide');
+                                window.reaload();
+                            } else {
+                                swal({
+                                    title: 'Something Went Wrong!',
+                                    text: 'Please Update Status Again',
+                                    icon: 'error',
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false
+                                });
                             }
-                        });
-                    }
-                });
+                        },
+                        error: function(jqXHR, textStatus, errorThrown) {
+                            console.error('Form submission failed:', textStatus,
+                                errorThrown);
+                        }
+                    });
+                }
+            });
 
 
             $("#call_finding_dropdown").change(function() {
                 var selectedValue = $(this).val();
 
-                if (selectedValue === '1') {
+                if (selectedValue === '6') {
                     $('.sub_status_call_finding_container').removeClass('d-none');
                     $('#sub_status_call_finding').attr('data-rule-required', true);
                     $('#sub_status_call_finding').attr('data-msg-required', 'Call Finding is required');
