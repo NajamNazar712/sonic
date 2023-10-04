@@ -1601,7 +1601,8 @@
                                                         table.button('.un-assign')
                                                             .disable();
 
-                                                        toastr.success(data.success,
+                                                            var msg = 'Agent Unassigned successfully'
+                                                        toastr.success(msg,
                                                             'Success!', {
                                                                 positionClass: 'toast-bottom-center',
                                                                 containerId: 'toast-bottom-center'

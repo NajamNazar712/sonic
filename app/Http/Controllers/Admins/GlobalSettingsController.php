@@ -1959,22 +1959,21 @@ class GlobalSettingsController extends Controller
         $values_array = array_map('trim', explode(',', $request->unsorted_zones));
         $unique_values_array = array_unique($values_array);
         $result_str = implode(',', $unique_values_array);
-        
+            
         if ($request->has('unsorted_zones')) {
-
+            
             if (count($unique_values_array) > 0) {
-
-                $settings = GlobalSettings::where('type', 'rv_shipper_priority');
-
+                $settings = GlobalSettings::where('type', 'rv_shipper_priority');                
                 if ($settings->exists()) {
                     $settings = $settings->first();
+                    $pre_setting_value = $settings->text;
                 } else {
                     $settings = new GlobalSettings();
 
                     $settings->type = 'rv_shipper_priority';
                     $settings->setting_value = 1;
                 }
-                $settings->text = $result_str;
+                $settings->text = $result_str != "" ?  $result_str : $pre_setting_value;
                 $settings->save();
             }
             return redirect()->back()->with('success', 'Settings Updated!');
