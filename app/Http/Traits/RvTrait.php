@@ -149,7 +149,10 @@ trait RvTrait
                         //new row in RvShipmentAssignAgentDetails table
                         $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                         $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment)->latest()->first();
-                        $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
+                        
+                        $request->request->add(['shipment_id' => $shipment, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks, 'call_to_id' => $rv_unassign_agent->call_to_id]);
+                        $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
+                        // $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
                     }
                 }
                 return true;
@@ -171,7 +174,9 @@ trait RvTrait
                 //new row in RvShipmentAssignAgentDetails table
                 $rv_unassign_agent = RvShipmentAssignAgent::find(RvShipmentAssignAgent::max('id'));
                 $shipments_journey = ShipmentsJourney::where('shipment_id', $shipment_id)->latest()->first();
-                $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
+                // $this->rv_shipment_assign_agent_details($rv_unassign_agent, $rv_unassign_agent, $shipments_journey);
+                $request->request->add(['shipment_id' => $shipment_id, 'is_fake_status' => $rv_unassign_agent->is_fake_status, 'remarks' => $rv_unassign_agent->remarks, 'call_to_id' => $rv_unassign_agent->call_to_id]);
+                $this->rv_shipment_assign_agent_details($request, $rv_unassign_agent, $shipments_journey);
 
                 return true;
             } 
