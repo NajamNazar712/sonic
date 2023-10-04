@@ -1001,12 +1001,6 @@
                                     } else {
                                         call_to_id = 'Shipper'
                                     }
-                                    // var call_finding_id = value.call_finding_id;
-                                    // if (call_finding_id == 1) {
-                                    //     call_finding_id = 'Un-responsive'
-                                    // } else {
-                                    //     call_finding_id = ''
-                                    // }
 
                                     tableHtml += '<tr><td class="p-1">' + trimmedDateTime +
                                         '</td><td>' + trimmedTime + '</td><td>' + call_finding_id + '</td><td>' + call_finding_reason_id +

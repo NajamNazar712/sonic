@@ -110,25 +110,117 @@ class ReturnController extends Controller
         $this->middleware('Permission');
     }
 
+    private function shipments(){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+        ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
+        ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+        ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+        ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+        ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+        ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+        ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
+        
+        ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+        ->leftjoin('consignee_address_areas as cas', 'cas.shipment_id','=','shipments.id')
+        ->leftjoin('city_areas as ca','ca.id','=','cas.city_area_id')
+        ->leftJoin('shipments_journey', function ($join) {
+            $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                ->where('shipments_journey.id','=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+        })
+        ->leftJoin('shipments_journey as admin_journey', function ($join) {
+            $join->on('admin_journey.shipment_id', '=', 'shipments.id')
+                ->where('admin_journey.id','=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
+        })
+        ->leftJoin('shipments_journey as sj', function ($join) {
+            $join->on('sj.shipment_id', '=', 'shipments.id')
+                ->where('sj.id','=',
+                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+        })
+        ->leftJoin('shipments_journey as sret', function ($join) {
+            $join->on('sret.shipment_id', '=', 'shipments.id')
+                ->where('sret.shipper_status_id','=',13)
+                ->where('sret.verification','=',1);
+//                    ->where('sret.id','=',
+//                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
+        })
+        ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+        ->leftjoin('crm_requests as crm', function ($join) {
+            $join->on('crm.shipment_id', '=', 'shipments.id')
+                ->where('crm.id','=',
+                    DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
+        })
+
+        ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
+            $join->on('new_ras.shipment_id', '=', 'shipments.id')
+                ->where('new_ras.id','=',
+                    DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
+                    and rv_shipment_assign_agents.rv_state_id = 1)'));
+                    
+        })
+        ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
+            $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
+                ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
+        })
+        ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
+        ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
+        ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
+
+        // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
+        // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
+        ->leftjoin('consolidation_shipments as consolidations', function ($join){
+            $join->on('consolidations.shipment_id', '=', 'shipments.id')
+                ->where('consolidations.consolidation_id','=',
+                    DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
+        })
+
+       ->leftJoin('rider_deliveries', function ($join) {
+           $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
+               ->where('rider_deliveries.id','=',
+                   DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
+       })
+        ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
+        
+        ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
+        'u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
+        'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
+        'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
+        'shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id',
+         'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 
+         'shipments_journey.remarks as shipper_remarks',
+         'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
+         'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
+         'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
+         'new_ras.created_at as assigned_at',
+         'asadby.name as assigned_by','consolidations.consolidation_id',
+         'assigned_agent.id as assigned_agent_id',
+         'tat_options.value as tat_value',
+         'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
+         'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
+         'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
+        ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
+        ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
+        ->groupBy('shipments.id');
+
+        return $shipments;
+    }
+
     public function return_view()
     {
-        
         ActivityTrailController::createActivityTrailLog(Auth::id(), 26);
         $blacklists = BlacklistSetting::select(['id', 'name'])->where('status', 1)->get();
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $shipping_mode = ShippingMode::all();
         $service_type = BookingType::all();
         $rv_tickets = count(RvShipmentAssignAgent::get()) > 0 ? count(RvShipmentAssignAgent::get()) : 1;
-        // $total_of_shipments = count(Shipment::whereIn('shipper_status_id', [7,8,9,15,12,65])->get());
-        $total_of_shipments = Shipment::whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->count();
-        // $total_shipments = count(Shipment::get()) > 0 ? count(Shipment::get()) : 1;
+        // $total_of_shipments = Shipment::whereIn('shipper_status_id', [7, 8, 9, 15, 12, 65])->count();
+        $total_of_shipments = $this->shipments()->get()->count();
         $return_confirm_reason_ids = DB::table('shipment_status_shipment_status_reason')->where('shipment_status_id', 20)->whereNotIn('shipment_status_reason_id', [2, 55])->pluck('shipment_status_reason_id')->toArray();
         $return_confirm_reasons = ShipmentStatusReason::whereIn('id', $return_confirm_reason_ids)->select('id', 'name')->get();
         $consignee_refused_reasons = ConsigneeRefusedReason::where('status', 1)->select('id', 'reasons')->where('status', 1)->get();
         $sub_status_call_finding = SubStatusCallFinding::all();
         $unresponsive_sub_status_call_finding = RvAssignAgentSubStatus::where('rv_assign_agent_status_id',6)->get();
-
-        // dd($unresponsive_sub_status_call_finding);
         $reason_validation_required = Shipment::where('shipper_status_id', 12)->get();
         $percentage_reason_validation_required = (count($reason_validation_required)/($total_of_shipments) * 100);
         $shipper_advised_requested = Shipment::where('shipper_status_id', 65)->get();
@@ -152,97 +244,8 @@ class ReturnController extends Controller
             ActivityTrailController::createActivityTrailLog(Auth::id(),86);
         }
 
-        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->leftjoin('rcp_tat_options as tat_options','tat_options.id','=','u.rcp_tat_option_id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-            ->leftJoin('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-            ->leftJoin('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->leftjoin('consignee_address_areas as cas', 'cas.shipment_id','=','shipments.id')
-            ->leftjoin('city_areas as ca','ca.id','=','cas.city_area_id')
-            ->leftJoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.id','=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
-            })
-            ->leftJoin('shipments_journey as admin_journey', function ($join) {
-                $join->on('admin_journey.shipment_id', '=', 'shipments.id')
-                    ->where('admin_journey.id','=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id != 52)'));
-            })
-            ->leftJoin('shipments_journey as sj', function ($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id','=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-            })
-            ->leftJoin('shipments_journey as sret', function ($join) {
-                $join->on('sret.shipment_id', '=', 'shipments.id')
-                    ->where('sret.shipper_status_id','=',13)
-                    ->where('sret.verification','=',1);
-//                    ->where('sret.id','=',
-//                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
-            })
-            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->leftjoin('crm_requests as crm', function ($join) {
-                $join->on('crm.shipment_id', '=', 'shipments.id')
-                    ->where('crm.id','=',
-                        DB::raw('(select max(id) from crm_requests where crm_requests.shipment_id = shipments.id)'));
-            })
+        $shipments = $this->shipments();
 
-            ->leftjoin('rv_shipment_assign_agents as new_ras', function ($join) {
-                $join->on('new_ras.shipment_id', '=', 'shipments.id')
-                    ->where('new_ras.id','=',
-                        DB::raw('(select max(id) from rv_shipment_assign_agents where rv_shipment_assign_agents.shipment_id = shipments.id 
-                        and rv_shipment_assign_agents.rv_state_id = 1)'));
-                        
-            })
-            ->leftJoin('rv_shipment_assign_agents as rvsaa_filtered', function ($join) {
-                $join->on('rvsaa_filtered.shipment_id', '=', 'shipments.id')
-                    ->where('rvsaa_filtered.rv_assign_agent_status_id', '=', 5);
-            })
-            ->leftjoin('admins as assigned_agent', 'assigned_agent.id', '=', 'new_ras.agent_id')
-            ->leftjoin('admins as asadby', 'asadby.id', '=', 'new_ras.updated_by_id')
-            ->leftjoin('rv_shipment_assign_agents as rvsaa', 'rvsaa.shipment_id', '=', 'shipments.id')
-
-            // ->leftjoin('admins as asad', 'asad.id', '=', 'ras.admin_id')
-            // ->leftjoin('admins as asadby', 'asadby.id', '=', 'ras.assigned_by')
-			->leftjoin('consolidation_shipments as consolidations', function ($join){
-                $join->on('consolidations.shipment_id', '=', 'shipments.id')
-                    ->where('consolidations.consolidation_id','=',
-                        DB::raw('(select consolidation_id from consolidation_shipments where consolidation_shipments.shipment_id = shipments.id)'));
-            })
-           /* ->leftjoin('return_confirmation_pending_sms_attempts as rcps','rcps.shipment_id','=','shipments.id')*/
-           ->leftJoin('rider_deliveries', function ($join) {
-               $join->on('rider_deliveries.shipment_id', '=', 'shipments.id')
-                   ->where('rider_deliveries.id','=',
-                       DB::raw('(select max(id) from rider_deliveries where rider_deliveries.shipment_id = shipments.id)'));
-           })
-            ->leftjoin('star_shippers as sts','sts.user_id','=','u.id')
-            
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1',
-            'u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name',
-            'shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address as consignee_address','shipments.amount',
-            'sm.mode','bt.booking_type as service_type','ss.name as status','ssr.id as reason_id','ssr.name as reason','admin_journey.remarks as remarks',
-            'shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', 'shipments.booking_type_id',
-             'usi.vendor as vendor_name', 'usi.poc', DB::raw('count(sret.shipment_id) as reattempts'), 
-             'shipments_journey.remarks as shipper_remarks',
-             'shipments.shipper_status_id as current_status_id','crm.id as complaint','shipments.nsa_osa_estimated_charges',
-             'shipments_journey.shipper_status_id as journey_shipper_status_id', 'dc.pickup as pickup', 'shipments.intercepted as intercepted',
-             'dc.id as consignee_city_id','shipments.shipping_mode_id', 'assigned_agent.name as assigned_agent', 
-             'new_ras.created_at as assigned_at',
-             'asadby.name as assigned_by','consolidations.consolidation_id',
-             'assigned_agent.id as assigned_agent_id',
-             'tat_options.value as tat_value',
-             'u.rcp_tat_option_id as tat_option_id'/*,'rcps.count as message_count'*/,'rider_deliveries.rider_status_id',
-             'rider_deliveries.otp_entered as rider_otp_entered','dc.id as destination_city_id','sts.status as star_status', 'ca.name as area_name',
-             'rvsaa.unresponsive_count as rvsaa_count','rvsaa.unresponsive_attempt_time as unresponsive_attempt_time')
-            ->whereIn('shipments.shipper_status_id', [7,8,9,15,12,65])
-            ->whereNull('rvsaa_filtered.shipment_id') // Exclude records where rvsaa.rv_assign_agent_status_id is 5
-            ->groupBy('shipments.id');
         if(session('department_id') == 7){
             if(!in_array(session('id'), session('sale_users_bypass'))){
                 $shipments = $shipments->where(function ($query) {
@@ -6918,7 +6921,7 @@ class ReturnController extends Controller
 
     // There is a hot fix to remove the shipper (id = 1) option from the dropdown call_to. 
     // Therefore, we are now only passing the consignee ID, which is 2, in the call_to_id.
-    //This function only update status to unresposinve
+    //This function only update status to unresponsive
     public function update_call_status(Request $request){
 
         $shipment_ids = explode(',',$request->shipment_id);
@@ -6980,6 +6983,8 @@ class ReturnController extends Controller
         }
         return response()->json(['status' => 1]);
     }
+
+    //returning call remarks in Remarks Log Modal on admin/return screen  
     public function call_status_history(Request $request)
     {
         $shipment = RvShipmentAssignAgent::leftJoin('rv_assign_agent_statuses as rvas','rvas.id','rv_shipment_assign_agents.rv_assign_agent_status_id')
