@@ -5032,6 +5032,9 @@ class ReturnController extends Controller
         $sorted_agents_zones = RvAgentAssignHub::where('agent_id', $admin->id)->pluck('zone_id')->toArray();
         $shipment_ids =  $request->shipment_ids;
         $no_zone_shipment = [];
+        $assigned_shipment = [];
+        $flag = null;
+        $all_shippers = [];
 
         $included_shipper =  GlobalSettings::where('type', 'rv_disable_shippers_excluded_shippers')->where('setting_value', 1);
         $included_shippers = [];
@@ -5075,6 +5078,8 @@ class ReturnController extends Controller
             if($shipment->exists()){
                 if(in_array($shipment->destination_city['zone_id'], $sorted_agents_zones) && in_array($shipment->user_id, $flag ? $included_shippers : $all_shippers ) && ($shipment_journey->status_reason_id != 12)){
                     $this->included_shippers($sorted_agents, $admin->id, $shipment_id); 
+                    $assigned_shipment[] = $shipment->tracking_number;
+
                 }else{
                     $no_zone_shipment[] = $shipment->tracking_number;
                 }
@@ -5084,11 +5089,12 @@ class ReturnController extends Controller
         if(!empty($no_zone_shipment) || !empty($already_assigned)){
             $no_zone_shipment = implode(',', $no_zone_shipment);
             $already_assigned = implode(',', $already_assigned);
+            $assigned_shipment = implode(',', $assigned_shipment);
 
             if ($already_assigned == ''){
-                return response()->json(['status'=> 1, 'error'=>'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
-
-            }else{
+                return response()->json(['status' => 1, 'error' => 'No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' '.($assigned_shipment != null ? 'And Rest Has Been Assigned' : '')]);
+            }
+            else{
                 return response()->json(['status'=> 1, 'error'=>'These Shipment Are Already Assigned '.$already_assigned.'.X No Shipment Of These Tracking Numbers Are Assigned '.$no_zone_shipment.' And Rest Has Been Assigned.']);
             }
         }else{
