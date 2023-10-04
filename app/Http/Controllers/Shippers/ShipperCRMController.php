@@ -326,6 +326,7 @@ class ShipperCRMController extends Controller
     }
 
     public function add_request(Request $request){
+
         $nature_id = $request->case_nature_id;
         $complaint_id = $request->complaint_id;
         $shipment_ids = $request->shipment_ids;
@@ -336,6 +337,13 @@ class ShipperCRMController extends Controller
                 $alternate_phone = $request->alternate_phone;
             }else{
                 $alternate_phone = null;
+            }
+        }
+        if($request->has('cod_new_amount')){
+            if($request->cod_new_amount){
+                $cod_new_amount = $request->cod_new_amount;
+            }else{
+                $cod_new_amount = null;
             }
         }
         // if($request->has('cod_amount')){
@@ -434,7 +442,6 @@ class ShipperCRMController extends Controller
                 }
             }
         }
-
         else{
             if ($request->hasFile('product_picture') && $request->hasFile('invoice_picture')) {
                 $shipment_ids = explode(',', $request->input('shipment_ids'));
@@ -510,6 +517,11 @@ class ShipperCRMController extends Controller
                         if($nature_id == 2){
                             if($complaint_id == 13){
                                 $shipment->consignee_phone_number_2 = $alternate_phone;
+                                $shipment->save();
+                            }
+                            else if($complaint_id == 12) // for cod change automation
+                            {
+                                $shipment->amount = $cod_new_amount;
                                 $shipment->save();
                             }
                             // else if($complaint_id == 12){
@@ -589,6 +601,11 @@ class ShipperCRMController extends Controller
                         
                         if($complaint_id == 13){
                             $shipment->consignee_phone_number_2 = $alternate_phone;
+                            $shipment->save();
+                        }
+                        else  if($complaint_id == 12) // for cod change automation
+                        {
+                            $shipment->amount = $cod_new_amount;
                             $shipment->save();
                         }
                         // else if($complaint_id == 12){

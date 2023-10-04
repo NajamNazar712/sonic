@@ -3578,9 +3578,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
 
-        Route::prefix('sms_notification_return_delivered_to_shipper')->name('sms_notification_return_delivered_to_shipper.')->group(function () {
-            Route::get('', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_index')->name('index');
-            Route::post('update', 'Admins\GlobalSettingsController@sms_notification_return_delivered_to_shipper_update')->name('update');
+        Route::prefix('sms_notifications_limit')->name('sms_notifications_limit.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@sms_notifications_limit_index')->name('index');
+            Route::post('update', 'Admins\GlobalSettingsController@sms_notifications_limit_update')->name('update');
         });
 
 

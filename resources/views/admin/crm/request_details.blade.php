@@ -450,13 +450,9 @@
                                                 <section class="chat-app-form pb-0">
                                                     <form class="chat-app-input row" id="chat_form">
                                                         <fieldset
-                                                                class="form-group position-relative has-icon-left col-9 m-0 text-capitalize">
+                                                                class="form-group position-relative has-icon-left col-9 m-0 ">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
-
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea  id="chat_input" class="form-control height-200 summernote" placeholder="Type your message" @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
@@ -560,9 +556,6 @@
                                                                 class="form-group position-relative has-icon-left col-9 m-0">
                                                             <input type="hidden" id="last_comment_id"
                                                                    value="{{$last_comment_id}}">
-                                                            <div class="form-control-position">
-                                                                <i class="la la-chevron-right"></i>
-                                                            </div>
                                                             {{--<input type="text" class="form-control" id="chat_input"--}}
                                                                    {{--placeholder="Type your message">--}}
                                                             <textarea id="chat_input" class="form-control height-200 summernote" placeholder="Type your message"   @if($crm_details->case_nature_id != 3) @if(($crm_details->shipment->shipment_type == 1 && session('department_id') == 8)) disabled @endif @endif></textarea>
@@ -1334,6 +1327,12 @@
 
 
     <style>
+        .note-editable {
+            text-transform: lowercase;
+        }
+        .note-editable:first-letter {
+            text-transform: capitalize;
+        }
         .half-margin {
             margin: 8px 0 0 0 !important;
         }
@@ -2026,15 +2025,15 @@
                             //     $('div.chat:last-child').find('.chat-body').append(html);
                             // }else{
                             if (internal_switch == 1) {
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }else if(internal_switch == 2){
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             }else if(internal_switch == 3){
-                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                var html = '<div class="chat admin ' + internal_class + '"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                             } else {
                                 var last_comment = data.last_comment_id;
 
-                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize">';
+                                var html ='<div id="chat_' + last_comment + '" class="chat admin"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left ">';
                                 @if(session('role_id') == 1 || in_array(310, session('permissions')))
                                     html += '<button type="button" class="border-0" id="edit_comment_' + last_comment + '" value="' + last_comment + '"><i class="ft-edit"></i></button>';
                                 @endif
@@ -2077,13 +2076,13 @@
                             var name = data.name;
                             if (user == 0) {
                                 if (data.comment.comment_type == 0) {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>You</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 1) {
-                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin internal"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else if(data.comment.comment_type == 3) {
-                                    var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin consignee"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 } else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                 }
                                 $('section.chat-app-window .chats').append(html);
 
@@ -2092,20 +2091,20 @@
                                     var html = '<div class="chat-content text-left"><p>' + data.comment.comment + '</p><small>just now  ({{Carbon\Carbon::now()}})</small></div>';
                                     $('div.chat:last-child').find('.chat-body').append(html);
                                 } else {
-                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat chat-left shipper"><div class="chat-avatar"><div class="badge block badge-info"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                     $('section.chat-app-window .chats').append(html);
                                 }
                             } else {
                                 if(data.comment.comment_type == 0){
                                     if ($('div.chat:last-child').hasClass('substitute-user')) {
-                                        var html = '<div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
+                                        var html = '<div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div>';
                                         $('div.chat:last-child').find('.chat-body').append(html);
                                     } else {
-                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                        var html = '<div class="chat chat-left substitute-user"><div class="chat-avatar"><div class="badge block badge-substitute-user"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
                                         $('section.chat-app-window .chats').append(html);
                                     }
                                 }else{
-                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left text-capitalize"><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
+                                    var html = '<div class="chat admin rider"><div class="chat-avatar"><div class="badge block badge-admin"><i class="la la-user font-medium-2"></i>' + name + '</div></div><div class="chat-body"><div class="chat-content text-left "><p>' + data.comment.comment + '</p><small>just now ({{Carbon\Carbon::now()}})</small></div></div></div>';
 
                                     $('section.chat-app-window .chats').append(html);
                                 }
