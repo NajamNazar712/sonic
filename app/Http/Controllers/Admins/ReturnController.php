@@ -1838,7 +1838,7 @@ class ReturnController extends Controller
                     ->where(
                         'sjrider.id',
                         '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 12 and shipments_journey.consignee_status_id = 12 and shipments_journey.rider_id is not null)')
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id in (7,8,9,15,12) and shipments_journey.consignee_status_id in (7,8,9,15,12) and shipments_journey.rider_id is not null)')
                     );
             })
             ->leftjoin('riders as rider','rider.id','sjrider.rider_id')
